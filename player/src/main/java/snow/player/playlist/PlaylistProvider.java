@@ -2,6 +2,7 @@ package snow.player.playlist;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -9,9 +10,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class PlaylistProvider extends ContentProvider {
+    private static String mAuthority = "";
+
     @Override
     public boolean onCreate() {
-        return false;
+        Context context = getContext();
+        if (context == null) {
+            return false;
+        }
+
+        mAuthority = context.getPackageName() + ".provider.PlaylistProvider";
+
+        return true;
     }
 
     @Nullable

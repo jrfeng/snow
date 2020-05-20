@@ -1,2 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="snow.player" />
+    package="snow.player" >
+
+    <application>
+
+        <provider
+            android:authorities="${applicationId}.playlist.PlaylistProvider"
+            android:name=".playlist.PlaylistProvider"
+            android:exported="false" />
+
+    </application>
+
+</manifest>
