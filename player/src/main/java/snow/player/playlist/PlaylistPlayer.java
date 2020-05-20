@@ -13,6 +13,8 @@ public interface PlaylistPlayer extends Player {
 
     void notifyPlaylistSwapped(int position, boolean playOnPrepared);
 
+    void notifyMusicItemMoved(int fromPosition, int toPosition);
+
     void notifyMusicInserted(int position);
 
     void notifyMusicInserted(int position, int count);
