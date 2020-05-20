@@ -11,7 +11,7 @@ public interface PlaylistPlayer extends Player {
 
     void setPlayMode(int playMode);
 
-    void notifyPlaylistSwapped();
+    void notifyPlaylistSwapped(int position, boolean playOnPrepared);
 
     void notifyMusicInserted(int position);
 
