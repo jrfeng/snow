@@ -12,6 +12,10 @@ import androidx.annotation.Nullable;
 public class PlaylistProvider extends ContentProvider {
     private static String mAuthority = "";
 
+    public static String getAuthority() {
+        return mAuthority;
+    }
+
     @Override
     public boolean onCreate() {
         Context context = getContext();
