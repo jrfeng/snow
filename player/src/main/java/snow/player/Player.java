@@ -31,7 +31,7 @@ public interface Player {
         public static final int STANDARD = 0;
         public static final int LOW = 1;
         public static final int HIGH = 2;
-        public static final int LOSSLESS = 3;
+        public static final int SUPER = 3;
     }
 
     class PlaybackState {
