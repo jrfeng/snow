@@ -66,6 +66,6 @@ public interface Player {
     }
 
     interface OnPlayingMusicItemChangeListener {
-        void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int position);
+        void onPlayingMusicItemChanged(@Nullable MusicItem musicItem);
     }
 }
