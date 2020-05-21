@@ -19,7 +19,7 @@ import snow.player.MusicItem;
 public final class Playlist implements Iterable<MusicItem>, Parcelable {
     private ArrayList<MusicItem> mMusicItems;
 
-    Playlist(@NonNull List<MusicItem> items) {
+    public Playlist(@NonNull List<MusicItem> items) {
         Preconditions.checkNotNull(items);
         mMusicItems = new ArrayList<>(items);
     }
