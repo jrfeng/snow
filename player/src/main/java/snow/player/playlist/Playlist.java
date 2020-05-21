@@ -2,6 +2,7 @@ package snow.player.playlist;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +18,7 @@ import java.util.ListIterator;
 import snow.player.MusicItem;
 
 public final class Playlist implements Iterable<MusicItem>, Parcelable {
+    private static final String TAG = "Playlist";
     private ArrayList<MusicItem> mMusicItems;
 
     public Playlist(@NonNull List<MusicItem> items) {
@@ -43,19 +45,28 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
     @NonNull
     @Override
     public Iterator<MusicItem> iterator() {
-        return mMusicItems.iterator();
+        return new Iterator<MusicItem>() {
+            private Iterator<MusicItem> iterator = mMusicItems.iterator();
+
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public MusicItem next() {
+                return iterator.next();
+            }
+
+            @Override
+            public void remove() {
+                Log.e(TAG, "unsupported operation");
+            }
+        };
     }
 
     public int lastIndexOf(MusicItem musicItem) {
         return mMusicItems.lastIndexOf(musicItem);
-    }
-
-    public ListIterator<MusicItem> listIterator() {
-        return mMusicItems.listIterator();
-    }
-
-    public ListIterator<MusicItem> listIterator(int index) {
-        return mMusicItems.listIterator(index);
     }
 
     public int size() {
