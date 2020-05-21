@@ -15,9 +15,9 @@ public interface PlaylistPlayer extends Player {
 
     void notifyMusicItemMoved(int fromPosition, int toPosition);
 
-    void notifyMusicInserted(int position, int count);
+    void notifyMusicItemInserted(int position, int count);
 
-    void notifyMusicRemoved(List<Integer> positions);
+    void notifyMusicItemRemoved(List<Integer> positions);
 
     class PlayMode {
         public static final int SEQUENTIAL = 0;
