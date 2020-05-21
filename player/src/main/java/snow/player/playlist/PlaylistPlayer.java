@@ -15,11 +15,7 @@ public interface PlaylistPlayer extends Player {
 
     void notifyMusicItemMoved(int fromPosition, int toPosition);
 
-    void notifyMusicInserted(int position);
-
     void notifyMusicInserted(int position, int count);
-
-    void notifyMusicRemoved(int position);
 
     void notifyMusicRemoved(List<Integer> positions);
 
