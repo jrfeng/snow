@@ -16,6 +16,9 @@ import java.util.List;
 
 import snow.player.MusicItem;
 
+/**
+ * 用于存储播放队列。
+ */
 public final class Playlist implements Iterable<MusicItem>, Parcelable {
     private static final String TAG = "Playlist";
     private ArrayList<MusicItem> mMusicItems;
