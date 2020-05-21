@@ -13,7 +13,6 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 import snow.player.MusicItem;
 
@@ -50,7 +49,8 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
      * @param musicItem 要搜索的元素（不能为 null）
      * @return 此当前播放队列中第一次出现的指定元素的索引，如果当前播放队列不包含该元素，则返回 -1
      */
-    public int indexOf(MusicItem musicItem) {
+    public int indexOf(@NonNull MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
         return mMusicItems.indexOf(musicItem);
     }
 
@@ -101,7 +101,8 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
      * @param musicItem 要搜索的元素（不能为 null）
      * @return 列表中最后出现的指定元素的索引；如果列表不包含此元素，则返回 -1。
      */
-    public int lastIndexOf(MusicItem musicItem) {
+    public int lastIndexOf(@NonNull MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
         return mMusicItems.lastIndexOf(musicItem);
     }
 
