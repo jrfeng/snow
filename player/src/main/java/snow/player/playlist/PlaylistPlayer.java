@@ -30,7 +30,7 @@ public interface PlaylistPlayer extends Player {
     }
 
     interface OnPlaylistChangeListener {
-        void onPlaylistChanged(PlaylistManager playlistManager);
+        void onPlaylistChanged(PlaylistManager playlistManager, int position);
     }
 
     interface OnPlayModeChangeListener {
