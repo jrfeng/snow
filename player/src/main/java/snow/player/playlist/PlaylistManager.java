@@ -30,7 +30,7 @@ public class PlaylistManager {
     private PlaylistManager(Context context, String playlistId) {
         MMKV.initialize(context);
         mMMKV = MMKV.mmkvWithID(playlistId, MMKV.MULTI_PROCESS_MODE);
-        mExecutor = Executors.newCachedThreadPool();
+        mExecutor = Executors.newSingleThreadExecutor();
     }
 
     /**
@@ -140,6 +140,48 @@ public class PlaylistManager {
 
                 save(new Playlist(items));
                 notifyMusicItemMoved(fromPosition, toPosition);
+            }
+        });
+    }
+
+    /**
+     * 将单个 MusicItem 对象添加到播放队列的末尾。
+     *
+     * @param musicItem 要添加的 MusicItem 对象
+     */
+    public void appendMusicItem(@NonNull final MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<MusicItem> items = getPlaylist().getAllMusicItem();
+                int position = items.size();
+
+                items.add(musicItem);
+
+                save(new Playlist(items));
+                notifyMusicItemInserted(position, 1);
+            }
+        });
+    }
+
+    /**
+     * 将多个 MusicItem 对象添加到播放队列的末尾。
+     *
+     * @param musicItems 要添加的多个 MusicItem 对象
+     */
+    public void appendAllMusicItem(@NonNull final List<MusicItem> musicItems) {
+        Preconditions.checkNotNull(musicItems);
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<MusicItem> items = getPlaylist().getAllMusicItem();
+                int position = items.size();
+
+                items.addAll(musicItems);
+
+                save(new Playlist(items));
+                notifyMusicItemInserted(position, musicItems.size());
             }
         });
     }
