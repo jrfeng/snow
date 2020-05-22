@@ -10,12 +10,24 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
+/**
+ * 用于存储 “电台” 的基本信息。
+ * <p>
+ * 如果需要存储一些额外的信息，可以使用 {@link #setExtra(Bundle)} 方法与 {@link #getExtra()} 方法。
+ */
 public class RadioStation implements Parcelable {
     private String mId;
     private String mName;
     private String mDescription;
     private Bundle mExtra;
 
+    /**
+     * 创建一个 RadioStation 对象。
+     *
+     * @param id          电台的 id（不能为 null）
+     * @param name        电台的名称（不能为 null）
+     * @param description 电台的描述信息（不能为 null）
+     */
     public RadioStation(@NonNull String id, @NonNull String name, @NonNull String description) {
         Preconditions.checkNotNull(id);
         Preconditions.checkNotNull(name);
@@ -26,6 +38,11 @@ public class RadioStation implements Parcelable {
         mDescription = description;
     }
 
+    /**
+     * 创建一个默认的 RadioStation 对象。
+     * <p>
+     * 相当于：RadioStation("", "unknown", "")
+     */
     public RadioStation() {
         mId = "";
         mName = "unknown";
@@ -101,7 +118,7 @@ public class RadioStation implements Parcelable {
     }
 
     /**
-     * ignore extra.
+     * 两个 RadioStation 对象相等的条件：两个对象的 id、name、description 都相等，忽略携带的 Extra.
      */
     @Override
     public boolean equals(@Nullable Object obj) {
@@ -121,6 +138,9 @@ public class RadioStation implements Parcelable {
         return Objects.hashCode(mId, mName, mDescription);
     }
 
+    /**
+     * @return 格式：[id, name, description]
+     */
     @NonNull
     @Override
     public String toString() {
