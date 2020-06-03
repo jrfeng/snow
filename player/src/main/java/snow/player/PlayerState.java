@@ -3,6 +3,8 @@ package snow.player;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.common.base.Objects;
+
 /**
  * 用于保存基本的播放器状态。
  */
@@ -131,6 +133,29 @@ class PlayerState implements Parcelable {
      */
     void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
         mIgnoreLossAudioFocus = ignoreLossAudioFocus;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PlayerState)) return false;
+
+        PlayerState other = (PlayerState) o;
+
+        return Objects.equal(mPlaybackState, other.mPlaybackState)
+                && Objects.equal(mSoundQuality, other.mSoundQuality)
+                && Objects.equal(mAudioEffectEnabled, other.mAudioEffectEnabled)
+                && Objects.equal(mOnlyWifiNetwork, other.mOnlyWifiNetwork)
+                && Objects.equal(mIgnoreLossAudioFocus, other.mIgnoreLossAudioFocus);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(mPlaybackState,
+                mSoundQuality,
+                mAudioEffectEnabled,
+                mOnlyWifiNetwork,
+                mIgnoreLossAudioFocus);
     }
 
     protected PlayerState(Parcel in) {
