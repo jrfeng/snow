@@ -2,6 +2,10 @@ package snow.player;
 
 import android.os.Parcel;
 
+import androidx.annotation.NonNull;
+
+import com.google.common.base.Objects;
+
 import snow.player.playlist.PlaylistPlayer;
 
 /**
@@ -14,6 +18,12 @@ class PlaylistState extends PlayerState {
     PlaylistState() {
         mPosition = 0;
         mPlayMode = PlaylistPlayer.PlayMode.SEQUENTIAL;
+    }
+
+    PlaylistState(PlaylistState source) {
+        super(source);
+        mPosition = source.mPosition;
+        mPlayMode = source.mPlayMode;
     }
 
     /**
@@ -59,6 +69,28 @@ class PlaylistState extends PlayerState {
      */
     void setPlayMode(int playMode) {
         mPlayMode = playMode;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        PlaylistState that = (PlaylistState) o;
+        return mPosition == that.mPosition &&
+                mPlayMode == that.mPlayMode;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(super.hashCode(), mPosition, mPlayMode);
+    }
+
+    @NonNull
+    @Override
+    protected PlaylistState clone() throws CloneNotSupportedException {
+        super.clone();
+        return new PlaylistState(this);
     }
 
     protected PlaylistState(Parcel in) {
