@@ -4,6 +4,7 @@ import android.os.Parcel;
 
 import androidx.annotation.NonNull;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import snow.player.radio.RadioStation;
@@ -25,6 +26,12 @@ class RadioStationState extends PlayerState {
         mRadioStation = radioStation;
     }
 
+    RadioStationState(RadioStationState source) {
+        mRadioStation = new RadioStation(source.mRadioStation.getId(),
+                source.mRadioStation.getName(),
+                source.mRadioStation.getDescription());
+    }
+
     /**
      * 获取 “电台”。
      */
@@ -40,6 +47,27 @@ class RadioStationState extends PlayerState {
     public void setRadioStation(@NonNull RadioStation radioStation) {
         Preconditions.checkNotNull(radioStation);
         mRadioStation = radioStation;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        RadioStationState that = (RadioStationState) o;
+        return Objects.equal(mRadioStation, that.mRadioStation);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(super.hashCode(), mRadioStation);
+    }
+
+    @NonNull
+    @Override
+    protected RadioStationState clone() throws CloneNotSupportedException {
+        super.clone();
+        return new RadioStationState(this);
     }
 
     protected RadioStationState(Parcel in) {
