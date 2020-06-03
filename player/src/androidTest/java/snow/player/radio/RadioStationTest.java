@@ -9,17 +9,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import snow.player.MusicItem;
-
 import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class RadioStationTest {
     private final String id = "id_1234";
-    private final String name = "test__hello";
+    private final String name = "test_hello";
     private final String description = "test_description";
 
     @Test
