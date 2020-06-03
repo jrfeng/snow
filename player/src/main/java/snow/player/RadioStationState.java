@@ -17,13 +17,9 @@ class RadioStationState extends PlayerState {
 
     /**
      * 创建一个 RadioStationState 对象。
-     *
-     * @param radioStation “电台”
      */
-    RadioStationState(@NonNull RadioStation radioStation) {
-        Preconditions.checkNotNull(radioStation);
-
-        mRadioStation = radioStation;
+    RadioStationState() {
+        mRadioStation = new RadioStation();
     }
 
     RadioStationState(RadioStationState source) {
