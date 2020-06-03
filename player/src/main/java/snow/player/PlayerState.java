@@ -21,6 +21,14 @@ class PlayerState implements Parcelable {
         mIgnoreLossAudioFocus = false;
     }
 
+    PlayerState(PlayerState source) {
+        mPlaybackState = source.mPlaybackState;
+        mSoundQuality = source.mSoundQuality;
+        mAudioEffectEnabled = source.mAudioEffectEnabled;
+        mOnlyWifiNetwork = source.mOnlyWifiNetwork;
+        mIgnoreLossAudioFocus = source.mIgnoreLossAudioFocus;
+    }
+
     /**
      * 获取播放状态。
      *
