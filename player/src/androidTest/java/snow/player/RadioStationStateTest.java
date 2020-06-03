@@ -16,17 +16,13 @@ import static org.junit.Assert.*;
 public class RadioStationStateTest {
     @Test
     public void constructor1Test() {
-        RadioStation radioStation = new RadioStation();
-
-        RadioStationState radioStationState = new RadioStationState(radioStation);
+        RadioStationState radioStationState = new RadioStationState();
         assertNotNull(radioStationState.getRadioStation());
     }
 
     @Test
     public void constructor2Test() {
-        RadioStation radioStation = new RadioStation();
-
-        RadioStationState source = new RadioStationState(radioStation);
+        RadioStationState source = new RadioStationState();
         RadioStationState other = new RadioStationState(source);
 
         assertEquals(source, other);
@@ -34,10 +30,13 @@ public class RadioStationStateTest {
 
     @Test
     public void equals_hashCode() {
-        RadioStation radioStation = new RadioStation();
+        final RadioStation radioStation = new RadioStation();
 
-        RadioStationState radioStationState1 = new RadioStationState(radioStation);
-        RadioStationState radioStationState2 = new RadioStationState(radioStation);
+        RadioStationState radioStationState1 = new RadioStationState();
+        radioStationState1.setRadioStation(radioStation);
+
+        RadioStationState radioStationState2 = new RadioStationState();
+        radioStationState2.setRadioStation(radioStation);
 
         assertEquals(radioStationState1, radioStationState2);
         assertEquals(radioStationState1.hashCode(), radioStationState2.hashCode());
@@ -47,7 +46,9 @@ public class RadioStationStateTest {
     public void cloneTest() throws CloneNotSupportedException {
         RadioStation radioStation = new RadioStation();
 
-        RadioStationState source = new RadioStationState(radioStation);
+        RadioStationState source = new RadioStationState();
+        source.setRadioStation(radioStation);
+
         RadioStationState other = source.clone();
 
         assertEquals(source, other);
@@ -59,7 +60,8 @@ public class RadioStationStateTest {
 
         RadioStation radioStation = new RadioStation();
 
-        RadioStationState source = new RadioStationState(radioStation);
+        RadioStationState source = new RadioStationState();
+        source.setRadioStation(radioStation);
         source.writeToParcel(parcel, 0);
 
         parcel.setDataPosition(0);
