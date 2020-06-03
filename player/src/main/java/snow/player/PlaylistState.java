@@ -1,14 +1,13 @@
 package snow.player;
 
 import android.os.Parcel;
-import android.os.Parcelable;
 
 import snow.player.playlist.PlaylistPlayer;
 
 /**
  * 用于存储播放队列的状态。
  */
-class PlaylistState extends PlayerState implements Parcelable {
+class PlaylistState extends PlayerState {
     private int mPosition;
     private int mPlayMode;
 
