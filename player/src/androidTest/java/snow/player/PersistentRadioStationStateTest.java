@@ -9,7 +9,6 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.runner.RunWith;
 
-import snow.player.playlist.PlaylistPlayer;
 import snow.player.radio.RadioStation;
 
 import static org.junit.Assert.*;
