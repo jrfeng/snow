@@ -9,6 +9,9 @@ import com.tencent.mmkv.MMKV;
 
 import snow.player.playlist.PlaylistPlayer;
 
+/**
+ * 用于对播放队列的状态进行持久化。
+ */
 class PersistentPlaylistState extends PlaylistState {
     static final String KEY_PLAY_PROGRESS = "play_progress";
     static final String KEY_SOUND_QUALITY = "sound_quality";

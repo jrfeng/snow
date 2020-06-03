@@ -15,6 +15,9 @@ import static snow.player.PersistentPlaylistState.KEY_ONLY_WIFI_NETWORK;
 import static snow.player.PersistentPlaylistState.KEY_PLAY_PROGRESS;
 import static snow.player.PersistentPlaylistState.KEY_SOUND_QUALITY;
 
+/**
+ * 用于对 “电台” 状态进行持久化。
+ */
 class PersistentRadioStationState extends RadioStationState {
     private static final String KEY_RADIO_STATION = "radio_station";
 
