@@ -82,4 +82,8 @@ class PersistentRadioStationState extends RadioStationState {
 
         mMMKV.encode(KEY_RADIO_STATION, radioStation);
     }
+
+    RadioStationState getRadioStationState() {
+        return new RadioStationState(this);
+    }
 }
