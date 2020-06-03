@@ -9,6 +9,7 @@ import com.google.common.base.Objects;
  * 用于保存基本的播放器状态。
  */
 class PlayerState implements Parcelable {
+    private long mPlayProgress;
     private int mPlaybackState;
     private int mSoundQuality;
     private boolean mAudioEffectEnabled;
@@ -16,6 +17,7 @@ class PlayerState implements Parcelable {
     private boolean mIgnoreLossAudioFocus;
 
     PlayerState() {
+        mPlayProgress = 0;
         mPlaybackState = Player.PlaybackState.UNKNOWN;
         mSoundQuality = Player.SoundQuality.STANDARD;
         mAudioEffectEnabled = false;
@@ -24,11 +26,35 @@ class PlayerState implements Parcelable {
     }
 
     PlayerState(PlayerState source) {
+        mPlayProgress = source.mPlayProgress;
         mPlaybackState = source.mPlaybackState;
         mSoundQuality = source.mSoundQuality;
         mAudioEffectEnabled = source.mAudioEffectEnabled;
         mOnlyWifiNetwork = source.mOnlyWifiNetwork;
         mIgnoreLossAudioFocus = source.mIgnoreLossAudioFocus;
+    }
+
+    /**
+     * 获取播放进度。
+     *
+     * @return 播放进度。
+     */
+    public long getPlayProgress() {
+        return mPlayProgress;
+    }
+
+    /**
+     * 设置播放进度。
+     *
+     * @param playProgress 播放进度（小于 0 时，相当于设置为 0）。
+     */
+    public void setPlayProgress(long playProgress) {
+        if (playProgress < 0) {
+            mPlayProgress = 0;
+            return;
+        }
+
+        mPlayProgress = playProgress;
     }
 
     /**
@@ -142,7 +168,8 @@ class PlayerState implements Parcelable {
 
         PlayerState other = (PlayerState) o;
 
-        return Objects.equal(mPlaybackState, other.mPlaybackState)
+        return Objects.equal(mPlayProgress, other.mPlayProgress)
+                && Objects.equal(mPlaybackState, other.mPlaybackState)
                 && Objects.equal(mSoundQuality, other.mSoundQuality)
                 && Objects.equal(mAudioEffectEnabled, other.mAudioEffectEnabled)
                 && Objects.equal(mOnlyWifiNetwork, other.mOnlyWifiNetwork)
@@ -151,7 +178,8 @@ class PlayerState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mPlaybackState,
+        return Objects.hashCode(mPlayProgress,
+                mPlaybackState,
                 mSoundQuality,
                 mAudioEffectEnabled,
                 mOnlyWifiNetwork,
@@ -159,6 +187,7 @@ class PlayerState implements Parcelable {
     }
 
     protected PlayerState(Parcel in) {
+        mPlayProgress = in.readLong();
         mPlaybackState = in.readInt();
         mSoundQuality = in.readInt();
         mAudioEffectEnabled = in.readByte() != 0;
@@ -168,6 +197,7 @@ class PlayerState implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(mPlayProgress);
         dest.writeInt(mPlaybackState);
         dest.writeInt(mSoundQuality);
         dest.writeByte((byte) (mAudioEffectEnabled ? 1 : 0));
