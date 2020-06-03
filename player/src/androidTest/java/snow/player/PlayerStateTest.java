@@ -25,6 +25,22 @@ public class PlayerStateTest {
     }
 
     @Test
+    public void equals_hashCode() {
+        PlayerState playerState = new PlayerState();
+
+        playerState.setPlaybackState(Player.PlaybackState.PLAYING);
+        playerState.setSoundQuality(Player.SoundQuality.SUPER);
+        playerState.setAudioEffectEnabled(false);
+        playerState.setOnlyWifiNetwork(true);
+        playerState.setIgnoreLossAudioFocus(false);
+
+        PlayerState other = new PlayerState(playerState);
+
+        assertEquals(playerState, other);
+        assertEquals(playerState.hashCode(), other.hashCode());
+    }
+
+    @Test
     public void parcelableTest() {
         PlayerState playerState = new PlayerState();
 
@@ -48,10 +64,6 @@ public class PlayerStateTest {
 
         PlayerState other = new PlayerState(parcel);
 
-        assertEquals(playbackState, other.getPlaybackState());
-        assertEquals(soundQuality, other.getSoundQuality());
-        assertEquals(audioEffectEnable, other.isAudioEffectEnabled());
-        assertEquals(onlyWifiNetwork, other.isOnlyWifiNetwork());
-        assertEquals(ignoreAudioFocus, other.isIgnoreLossAudioFocus());
+        assertEquals(playerState, other);
     }
 }
