@@ -31,6 +31,10 @@ dependencies {
     implementation "com.google.guava:guava:29.0-android"
     implementation "com.tencent:mmkv-static:1.1.1"
 
+    implementation 'com.github.jrfeng.channel-helper:helper:1.0.2'
+    implementation 'com.github.jrfeng.channel-helper:pipe:1.0.2'
+    annotationProcessor 'com.github.jrfeng.channel-helper:processor:1.0.2'
+
     implementation 'androidx.appcompat:appcompat:1.1.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
