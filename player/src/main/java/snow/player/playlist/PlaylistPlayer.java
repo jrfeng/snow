@@ -2,11 +2,13 @@ package snow.player.playlist;
 
 import java.util.List;
 
+import channel.helper.Channel;
 import snow.player.Player;
 
 /**
  * 该接口定义 Playlist 播放器的基本结构。
  */
+@Channel
 public interface PlaylistPlayer extends Player {
     /**
      * 上一曲。

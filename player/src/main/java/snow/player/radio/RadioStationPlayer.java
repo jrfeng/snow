@@ -1,10 +1,12 @@
 package snow.player.radio;
 
+import channel.helper.Channel;
 import snow.player.Player;
 
 /**
  * 该接口定义了 “电台” 播放器的基本功能。
  */
+@Channel
 public interface RadioStationPlayer extends Player {
     /**
      * 设置一个新的电台。
