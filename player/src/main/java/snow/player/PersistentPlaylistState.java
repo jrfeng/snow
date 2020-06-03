@@ -90,4 +90,8 @@ class PersistentPlaylistState extends PlaylistState {
 
         mMMKV.encode(KEY_PLAY_MODE, playMode);
     }
+
+    PlaylistState getPlaylistState() {
+        return new PlaylistState(this);
+    }
 }
