@@ -31,7 +31,7 @@ class RadioStationState extends PlayerState {
     /**
      * 获取 “电台”。
      */
-    public RadioStation getRadioStation() {
+    RadioStation getRadioStation() {
         return mRadioStation;
     }
 
@@ -40,7 +40,7 @@ class RadioStationState extends PlayerState {
      *
      * @param radioStation 不能为 null。
      */
-    public void setRadioStation(@NonNull RadioStation radioStation) {
+    void setRadioStation(@NonNull RadioStation radioStation) {
         Preconditions.checkNotNull(radioStation);
         mRadioStation = radioStation;
     }

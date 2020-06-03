@@ -76,7 +76,7 @@ class PersistentRadioStationState extends RadioStationState {
     }
 
     @Override
-    public void setRadioStation(@NonNull RadioStation radioStation) {
+    void setRadioStation(@NonNull RadioStation radioStation) {
         Preconditions.checkNotNull(radioStation);
         super.setRadioStation(radioStation);
 
