@@ -3,12 +3,14 @@ package snow.player;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 import com.google.common.base.Objects;
 
 /**
  * 用于保存基本的播放器状态。
  */
-class PlayerState implements Parcelable {
+class PlayerState implements Parcelable, Cloneable {
     private long mPlayProgress;
     private int mPlaybackState;
     private int mSoundQuality;
@@ -184,6 +186,13 @@ class PlayerState implements Parcelable {
                 mAudioEffectEnabled,
                 mOnlyWifiNetwork,
                 mIgnoreLossAudioFocus);
+    }
+
+    @NonNull
+    @Override
+    protected PlayerState clone() throws CloneNotSupportedException {
+        super.clone();
+        return new PlayerState(this);
     }
 
     protected PlayerState(Parcel in) {
