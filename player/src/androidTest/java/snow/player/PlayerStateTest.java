@@ -64,6 +64,28 @@ public class PlayerStateTest {
     }
 
     @Test
+    public void cloneTest() throws CloneNotSupportedException {
+        final long playProgress = 1000;
+        final int playbackState = Player.PlaybackState.PLAYING;
+        final int soundQuality = Player.SoundQuality.SUPER;
+        final boolean audioEffectEnable = false;
+        final boolean onlyWifiNetwork = true;
+        final boolean ignoreAudioFocus = false;
+
+        PlayerState playerState = new PlayerState();
+        playerState.setPlayProgress(playProgress);
+        playerState.setPlaybackState(playbackState);
+        playerState.setSoundQuality(soundQuality);
+        playerState.setAudioEffectEnabled(audioEffectEnable);
+        playerState.setOnlyWifiNetwork(onlyWifiNetwork);
+        playerState.setIgnoreLossAudioFocus(ignoreAudioFocus);
+
+        PlayerState other = playerState.clone();
+
+        assertEquals(playerState, other);
+    }
+
+    @Test
     public void parcelableTest() {
         PlayerState playerState = new PlayerState();
 
