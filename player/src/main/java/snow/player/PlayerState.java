@@ -41,7 +41,7 @@ class PlayerState implements Parcelable, Cloneable {
      *
      * @return 播放进度。
      */
-    public long getPlayProgress() {
+    long getPlayProgress() {
         return mPlayProgress;
     }
 
@@ -50,7 +50,7 @@ class PlayerState implements Parcelable, Cloneable {
      *
      * @param playProgress 播放进度（小于 0 时，相当于设置为 0）。
      */
-    public void setPlayProgress(long playProgress) {
+    void setPlayProgress(long playProgress) {
         if (playProgress < 0) {
             mPlayProgress = 0;
             return;
