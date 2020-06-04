@@ -25,9 +25,9 @@ public interface PlayerManager {
      * 注册一个播放器状态监听器。
      *
      * @param token    监听器的 token。注意！不能为 null，且应该保证唯一性。
-     * @param observer 监听器的 IBinder 对象。
+     * @param listener 监听器的 IBinder 对象。
      */
-    void registerPlayerStateListener(String token, IBinder observer);
+    void registerPlayerStateListener(String token, IBinder listener);
 
     /**
      * 取消已注册的播放器状态监听器。
