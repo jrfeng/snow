@@ -14,11 +14,11 @@ import snow.player.RadioStationState;
  * 用于对 “电台” 状态进行持久化。
  */
 public class PersistentRadioStationState extends RadioStationState {
-    static final String KEY_PLAY_PROGRESS = "play_progress";
-    static final String KEY_SOUND_QUALITY = "sound_quality";
-    static final String KEY_AUDIO_EFFECT_ENABLED = "audio_effect_enabled";
-    static final String KEY_ONLY_WIFI_NETWORK = "only_wifi_network";
-    static final String KEY_IGNORE_LOSS_AUDIO_FOCUS = "ignore_loss_audio_focus";
+    private static final String KEY_PLAY_PROGRESS = "play_progress";
+    private static final String KEY_SOUND_QUALITY = "sound_quality";
+    private static final String KEY_AUDIO_EFFECT_ENABLED = "audio_effect_enabled";
+    private static final String KEY_ONLY_WIFI_NETWORK = "only_wifi_network";
+    private static final String KEY_IGNORE_LOSS_AUDIO_FOCUS = "ignore_loss_audio_focus";
     private static final String KEY_RADIO_STATION = "radio_station";
 
     private MMKV mMMKV;
