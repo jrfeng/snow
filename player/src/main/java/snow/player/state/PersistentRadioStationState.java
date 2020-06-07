@@ -1,4 +1,4 @@
-package snow.player.playlist;
+package snow.player.state;
 
 import android.content.Context;
 
@@ -8,24 +8,22 @@ import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
 
 import snow.player.Player;
-import snow.player.PlaylistState;
+import snow.player.radio.RadioStation;
 
 /**
- * 用于对播放队列的状态进行持久化。
+ * 用于对 “电台” 状态进行持久化。
  */
-public class PersistentPlaylistState extends PlaylistState {
+public class PersistentRadioStationState extends RadioStationState {
     private static final String KEY_PLAY_PROGRESS = "play_progress";
     private static final String KEY_SOUND_QUALITY = "sound_quality";
     private static final String KEY_AUDIO_EFFECT_ENABLED = "audio_effect_enabled";
     private static final String KEY_ONLY_WIFI_NETWORK = "only_wifi_network";
     private static final String KEY_IGNORE_LOSS_AUDIO_FOCUS = "ignore_loss_audio_focus";
-
-    private static final String KEY_POSITION = "position";
-    private static final String KEY_PLAY_MODE = "play_mode";
+    private static final String KEY_RADIO_STATION = "radio_station";
 
     private MMKV mMMKV;
 
-    public PersistentPlaylistState(@NonNull Context context, @NonNull String id) {
+    public PersistentRadioStationState(@NonNull Context context, @NonNull String id) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(id);
 
@@ -39,8 +37,7 @@ public class PersistentPlaylistState extends PlaylistState {
         super.setOnlyWifiNetwork(mMMKV.decodeBool(KEY_ONLY_WIFI_NETWORK, true));
         super.setIgnoreLossAudioFocus(mMMKV.decodeBool(KEY_IGNORE_LOSS_AUDIO_FOCUS, false));
 
-        super.setPosition(mMMKV.decodeInt(KEY_POSITION, 0));
-        super.setPlayMode(mMMKV.decodeInt(KEY_PLAY_MODE, PlaylistPlayer.PlayMode.SEQUENTIAL));
+        super.setRadioStation(mMMKV.decodeParcelable(KEY_RADIO_STATION, RadioStation.class, new RadioStation()));
     }
 
     @Override
@@ -79,20 +76,14 @@ public class PersistentPlaylistState extends PlaylistState {
     }
 
     @Override
-    public void setPosition(int position) {
-        super.setPosition(position);
+    public void setRadioStation(@NonNull RadioStation radioStation) {
+        Preconditions.checkNotNull(radioStation);
+        super.setRadioStation(radioStation);
 
-        mMMKV.encode(KEY_POSITION, position);
+        mMMKV.encode(KEY_RADIO_STATION, radioStation);
     }
 
-    @Override
-    public void setPlayMode(int playMode) {
-        super.setPlayMode(playMode);
-
-        mMMKV.encode(KEY_PLAY_MODE, playMode);
-    }
-
-    public PlaylistState getPlaylistState() {
-        return new PlaylistState(this);
+    public RadioStationState getRadioStationState() {
+        return new RadioStationState(this);
     }
 }

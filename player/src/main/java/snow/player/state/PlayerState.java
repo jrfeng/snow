@@ -1,4 +1,4 @@
-package snow.player;
+package snow.player.state;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 import com.google.common.base.Objects;
+
+import snow.player.Player;
 
 /**
  * 用于保存基本的播放器状态。

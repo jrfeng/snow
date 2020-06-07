@@ -1,12 +1,15 @@
-package snow.player;
+package snow.player.state;
 
 import android.os.Parcel;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.runner.RunWith;
+
+import snow.player.Player;
 
 import static org.junit.Assert.*;
 
@@ -18,7 +21,7 @@ public class PlayerStateTest {
         PlayerState playerState = new PlayerState();
 
         assertEquals(0, playerState.getPlayProgress());
-        assertEquals(Player.PlaybackState.UNKNOWN, playerState.getPlaybackState());
+        Assert.assertEquals(Player.PlaybackState.UNKNOWN, playerState.getPlaybackState());
         assertEquals(Player.SoundQuality.STANDARD, playerState.getSoundQuality());
         assertFalse(playerState.isAudioEffectEnabled());
         assertTrue(playerState.isOnlyWifiNetwork());

@@ -1,4 +1,4 @@
-package snow.player;
+package snow.player.state;
 
 import android.os.Parcel;
 
