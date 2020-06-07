@@ -12,17 +12,17 @@ import snow.player.radio.RadioStation;
 /**
  * 用于保存 “电台” 的状态。
  */
-class RadioStationState extends PlayerState {
+public class RadioStationState extends PlayerState {
     private RadioStation mRadioStation;
 
     /**
      * 创建一个 RadioStationState 对象。
      */
-    RadioStationState() {
+    public RadioStationState() {
         mRadioStation = new RadioStation();
     }
 
-    RadioStationState(RadioStationState source) {
+    public RadioStationState(RadioStationState source) {
         mRadioStation = new RadioStation(source.mRadioStation.getId(),
                 source.mRadioStation.getName(),
                 source.mRadioStation.getDescription());
@@ -31,7 +31,7 @@ class RadioStationState extends PlayerState {
     /**
      * 获取 “电台”。
      */
-    RadioStation getRadioStation() {
+    public RadioStation getRadioStation() {
         return mRadioStation;
     }
 
@@ -40,7 +40,7 @@ class RadioStationState extends PlayerState {
      *
      * @param radioStation 不能为 null。
      */
-    void setRadioStation(@NonNull RadioStation radioStation) {
+    public void setRadioStation(@NonNull RadioStation radioStation) {
         Preconditions.checkNotNull(radioStation);
         mRadioStation = radioStation;
     }

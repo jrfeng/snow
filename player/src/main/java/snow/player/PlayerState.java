@@ -10,7 +10,7 @@ import com.google.common.base.Objects;
 /**
  * 用于保存基本的播放器状态。
  */
-class PlayerState implements Parcelable, Cloneable {
+public class PlayerState implements Parcelable, Cloneable {
     private long mPlayProgress;
     private int mPlaybackState;
     private int mSoundQuality;
@@ -18,7 +18,7 @@ class PlayerState implements Parcelable, Cloneable {
     private boolean mOnlyWifiNetwork;
     private boolean mIgnoreLossAudioFocus;
 
-    PlayerState() {
+    public PlayerState() {
         mPlayProgress = 0;
         mPlaybackState = Player.PlaybackState.UNKNOWN;
         mSoundQuality = Player.SoundQuality.STANDARD;
@@ -27,7 +27,7 @@ class PlayerState implements Parcelable, Cloneable {
         mIgnoreLossAudioFocus = false;
     }
 
-    PlayerState(PlayerState source) {
+    public PlayerState(PlayerState source) {
         mPlayProgress = source.mPlayProgress;
         mPlaybackState = source.mPlaybackState;
         mSoundQuality = source.mSoundQuality;
@@ -41,7 +41,7 @@ class PlayerState implements Parcelable, Cloneable {
      *
      * @return 播放进度。
      */
-    long getPlayProgress() {
+    public long getPlayProgress() {
         return mPlayProgress;
     }
 
@@ -50,7 +50,7 @@ class PlayerState implements Parcelable, Cloneable {
      *
      * @param playProgress 播放进度（小于 0 时，相当于设置为 0）。
      */
-    void setPlayProgress(long playProgress) {
+    public void setPlayProgress(long playProgress) {
         if (playProgress < 0) {
             mPlayProgress = 0;
             return;
@@ -65,7 +65,7 @@ class PlayerState implements Parcelable, Cloneable {
      * @return 返回当前播放状态。
      * @see Player.PlaybackState
      */
-    int getPlaybackState() {
+    public int getPlaybackState() {
         return mPlaybackState;
     }
 
@@ -82,7 +82,7 @@ class PlayerState implements Parcelable, Cloneable {
      *                      {@link Player.PlaybackState#ERROR}
      * @see Player.PlaybackState
      */
-    void setPlaybackState(int playbackState) {
+    public void setPlaybackState(int playbackState) {
         mPlaybackState = playbackState;
     }
 
@@ -92,7 +92,7 @@ class PlayerState implements Parcelable, Cloneable {
      * @return 当前的首选音质。
      * @see Player.SoundQuality
      */
-    int getSoundQuality() {
+    public int getSoundQuality() {
         return mSoundQuality;
     }
 
@@ -105,7 +105,7 @@ class PlayerState implements Parcelable, Cloneable {
      *                     {@link Player.SoundQuality#SUPER}
      * @see Player.SoundQuality
      */
-    void setSoundQuality(int soundQuality) {
+    public void setSoundQuality(int soundQuality) {
         mSoundQuality = soundQuality;
     }
 
@@ -114,7 +114,7 @@ class PlayerState implements Parcelable, Cloneable {
      *
      * @return 是否已启用音频特效。
      */
-    boolean isAudioEffectEnabled() {
+    public boolean isAudioEffectEnabled() {
         return mAudioEffectEnabled;
     }
 
@@ -123,7 +123,7 @@ class PlayerState implements Parcelable, Cloneable {
      *
      * @param audioEffectEnabled 是否启用音频特效。
      */
-    void setAudioEffectEnabled(boolean audioEffectEnabled) {
+    public void setAudioEffectEnabled(boolean audioEffectEnabled) {
         mAudioEffectEnabled = audioEffectEnabled;
     }
 
@@ -132,7 +132,7 @@ class PlayerState implements Parcelable, Cloneable {
      *
      * @return 如果返回 true，则表示只允许在 WiFi 网络下联网（默认为 true）。
      */
-    boolean isOnlyWifiNetwork() {
+    public boolean isOnlyWifiNetwork() {
         return mOnlyWifiNetwork;
     }
 
@@ -141,7 +141,7 @@ class PlayerState implements Parcelable, Cloneable {
      *
      * @param onlyWifiNetwork 是否只允许在 WiFi 网络下联网（默认为 true）。
      */
-    void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
+    public void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
         mOnlyWifiNetwork = onlyWifiNetwork;
     }
 
@@ -150,7 +150,7 @@ class PlayerState implements Parcelable, Cloneable {
      *
      * @return 是否忽略音频焦点丢失事件。
      */
-    boolean isIgnoreLossAudioFocus() {
+    public boolean isIgnoreLossAudioFocus() {
         return mIgnoreLossAudioFocus;
     }
 
@@ -159,7 +159,7 @@ class PlayerState implements Parcelable, Cloneable {
      *
      * @param ignoreLossAudioFocus 是否忽略音频焦点丢失事件。
      */
-    void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
+    public void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
         mIgnoreLossAudioFocus = ignoreLossAudioFocus;
     }
 

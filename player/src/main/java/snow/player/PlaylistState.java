@@ -11,16 +11,16 @@ import snow.player.playlist.PlaylistPlayer;
 /**
  * 用于存储播放队列的状态。
  */
-class PlaylistState extends PlayerState {
+public class PlaylistState extends PlayerState {
     private int mPosition;
     private int mPlayMode;
 
-    PlaylistState() {
+    public PlaylistState() {
         mPosition = 0;
         mPlayMode = PlaylistPlayer.PlayMode.SEQUENTIAL;
     }
 
-    PlaylistState(PlaylistState source) {
+    public PlaylistState(PlaylistState source) {
         super(source);
         mPosition = source.mPosition;
         mPlayMode = source.mPlayMode;
@@ -31,7 +31,7 @@ class PlaylistState extends PlayerState {
      *
      * @return 播放队列的播放位置。
      */
-    int getPosition() {
+    public int getPosition() {
         return mPosition;
     }
 
@@ -40,7 +40,7 @@ class PlaylistState extends PlayerState {
      *
      * @param position 播放队列的播放位置（小于 0 时相当于设置为 0）。
      */
-    void setPosition(int position) {
+    public void setPosition(int position) {
         if (position < 0) {
             mPosition = 0;
             return;
@@ -55,7 +55,7 @@ class PlaylistState extends PlayerState {
      * @return 播放队列的播放模式。
      * @see PlaylistPlayer.PlayMode
      */
-    int getPlayMode() {
+    public int getPlayMode() {
         return mPlayMode;
     }
 
@@ -67,7 +67,7 @@ class PlaylistState extends PlayerState {
      *                 {@link PlaylistPlayer.PlayMode#SHUFFLE}
      * @see PlaylistPlayer.PlayMode
      */
-    void setPlayMode(int playMode) {
+    public void setPlayMode(int playMode) {
         mPlayMode = playMode;
     }
 
