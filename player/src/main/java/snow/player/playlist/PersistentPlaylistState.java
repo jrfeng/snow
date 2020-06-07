@@ -1,4 +1,4 @@
-package snow.player;
+package snow.player.playlist;
 
 import android.content.Context;
 
@@ -7,12 +7,13 @@ import androidx.annotation.NonNull;
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
 
-import snow.player.playlist.PlaylistPlayer;
+import snow.player.Player;
+import snow.player.PlaylistState;
 
 /**
  * 用于对播放队列的状态进行持久化。
  */
-class PersistentPlaylistState extends PlaylistState {
+public class PersistentPlaylistState extends PlaylistState {
     static final String KEY_PLAY_PROGRESS = "play_progress";
     static final String KEY_SOUND_QUALITY = "sound_quality";
     static final String KEY_AUDIO_EFFECT_ENABLED = "audio_effect_enabled";
@@ -43,55 +44,55 @@ class PersistentPlaylistState extends PlaylistState {
     }
 
     @Override
-    void setPlayProgress(long playProgress) {
+    public void setPlayProgress(long playProgress) {
         super.setPlayProgress(playProgress);
 
         mMMKV.encode(KEY_PLAY_PROGRESS, playProgress);
     }
 
     @Override
-    void setSoundQuality(int soundQuality) {
+    public void setSoundQuality(int soundQuality) {
         super.setSoundQuality(soundQuality);
 
         mMMKV.encode(KEY_SOUND_QUALITY, soundQuality);
     }
 
     @Override
-    void setAudioEffectEnabled(boolean audioEffectEnabled) {
+    public void setAudioEffectEnabled(boolean audioEffectEnabled) {
         super.setAudioEffectEnabled(audioEffectEnabled);
 
         mMMKV.encode(KEY_AUDIO_EFFECT_ENABLED, audioEffectEnabled);
     }
 
     @Override
-    void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
+    public void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
         super.setOnlyWifiNetwork(onlyWifiNetwork);
 
         mMMKV.encode(KEY_ONLY_WIFI_NETWORK, onlyWifiNetwork);
     }
 
     @Override
-    void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
+    public void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
         super.setIgnoreLossAudioFocus(ignoreLossAudioFocus);
 
         mMMKV.encode(KEY_IGNORE_LOSS_AUDIO_FOCUS, ignoreLossAudioFocus);
     }
 
     @Override
-    void setPosition(int position) {
+    public void setPosition(int position) {
         super.setPosition(position);
 
         mMMKV.encode(KEY_POSITION, position);
     }
 
     @Override
-    void setPlayMode(int playMode) {
+    public void setPlayMode(int playMode) {
         super.setPlayMode(playMode);
 
         mMMKV.encode(KEY_PLAY_MODE, playMode);
     }
 
-    PlaylistState getPlaylistState() {
+    public PlaylistState getPlaylistState() {
         return new PlaylistState(this);
     }
 }
