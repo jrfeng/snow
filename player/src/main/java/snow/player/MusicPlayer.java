@@ -188,9 +188,9 @@ public abstract class MusicPlayer {
     }
 
     /**
-     * 获取音频会话 ID。如果失败，则返回 {@link android.media.AudioManager#AUDIO_SESSION_ID_GENERATE}。
+     * 获取音频会话 ID。如果失败，则返回 0。
      *
-     * @return 音频会话 ID。如果失败，则返回 {@link android.media.AudioManager#AUDIO_SESSION_ID_GENERATE}。
+     * @return 音频会话 ID。如果失败，则返回 0。
      */
     public abstract int getAudioSessionId();
 
