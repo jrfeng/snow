@@ -186,6 +186,16 @@ public interface Player {
     }
 
     /**
+     * 用于监听调整播放进度事件。
+     */
+    interface OnSeekCompleteListener {
+        /**
+         * 该方法会在播放进度调整完成时调用。
+         */
+        void onSeekComplete(long progress);
+    }
+
+    /**
      * 用于监听当前正在播放的音乐的缓冲进度。
      */
     interface OnBufferingPercentChangeListener {
