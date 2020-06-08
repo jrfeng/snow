@@ -9,6 +9,11 @@ import snow.player.Player;
 @Channel
 public interface RadioStationPlayer extends Player {
     /**
+     * 下一首音乐。
+     */
+    void skipToNext();
+
+    /**
      * 设置一个新的电台。
      *
      * @param radioStation 要播放的新电台

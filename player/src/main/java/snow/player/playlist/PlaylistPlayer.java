@@ -11,6 +11,11 @@ import snow.player.Player;
 @Channel
 public interface PlaylistPlayer extends Player {
     /**
+     * 下一首音乐。
+     */
+    void skipToNext();
+
+    /**
      * 上一曲。
      */
     void skipToPrevious();

@@ -27,11 +27,6 @@ public interface Player {
     void playOrPause();
 
     /**
-     * 下一首音乐。
-     */
-    void skipToNext();
-
-    /**
      * 调整音乐播放进度。
      *
      * @param progress 要调整到的播放进度
