@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="snow_error_unknown_error">未知错误</string>
+    <string name="snow_error_only_wifi_network">仅允许 WiFi 网络</string>
+    <string name="snow_error_player_error">播放器错误</string>
+    <string name="snow_error_network_unavailable">网络不可用</string>
+</resources>
