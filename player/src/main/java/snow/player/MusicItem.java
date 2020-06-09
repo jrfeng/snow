@@ -42,6 +42,20 @@ public class MusicItem implements Parcelable, Cloneable {
         this.mExtra = null;
     }
 
+    public MusicItem(MusicItem source) {
+        musicId = source.musicId;
+        title = source.title;
+        artist = source.artist;
+        album = source.album;
+        uri = source.uri;
+        iconUri = source.iconUri;
+        duration = source.duration;
+        token = source.token;
+        if (source.mExtra != null) {
+            mExtra = new Bundle(source.mExtra);
+        }
+    }
+
     @NonNull
     public String getMusicId() {
         return musicId;
