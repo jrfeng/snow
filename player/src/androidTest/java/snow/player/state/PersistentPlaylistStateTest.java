@@ -9,6 +9,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.runner.RunWith;
 
+import snow.player.MusicItem;
 import snow.player.Player;
 import snow.player.playlist.PlaylistPlayer;
 
@@ -33,6 +34,12 @@ public class PersistentPlaylistStateTest {
         pps.setIgnoreLossAudioFocus(false);
         pps.setPosition(50);
         pps.setPlayMode(PlaylistPlayer.PlayMode.SHUFFLE);
+
+        final MusicItem musicItem = new MusicItem();
+        musicItem.setTitle("test_title");
+        musicItem.setArtist("test_artist");
+
+        pps.setMusicItem(musicItem);
 
         PersistentPlaylistState pps2 = new PersistentPlaylistState(context, id);
 

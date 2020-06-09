@@ -9,6 +9,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.runner.RunWith;
 
+import snow.player.MusicItem;
 import snow.player.Player;
 import snow.player.radio.RadioStation;
 
@@ -34,6 +35,12 @@ public class PersistentRadioStationStateTest {
         prss.setOnlyWifiNetwork(false);
         prss.setIgnoreLossAudioFocus(false);
         prss.setRadioStation(radioStation);
+
+        final MusicItem musicItem = new MusicItem();
+        musicItem.setTitle("test_title");
+        musicItem.setArtist("test_artist");
+
+        prss.setMusicItem(musicItem);
 
         PersistentRadioStationState prss2 = new PersistentRadioStationState(context, id);
 

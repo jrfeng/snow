@@ -2,13 +2,13 @@ package snow.player.state;
 
 import android.os.Parcel;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.runner.RunWith;
 
+import snow.player.MusicItem;
 import snow.player.Player;
 
 import static org.junit.Assert.*;
@@ -48,6 +48,9 @@ public class PlayerStateTest {
         final boolean audioEffectEnable = false;
         final boolean onlyWifiNetwork = true;
         final boolean ignoreAudioFocus = false;
+        final MusicItem musicItem = new MusicItem();
+        musicItem.setTitle("test_title");
+        musicItem.setArtist("test_artist");
 
         PlayerState playerState = new PlayerState();
         playerState.setPlayProgress(playProgress);
@@ -58,6 +61,7 @@ public class PlayerStateTest {
         playerState.setAudioEffectEnabled(audioEffectEnable);
         playerState.setOnlyWifiNetwork(onlyWifiNetwork);
         playerState.setIgnoreLossAudioFocus(ignoreAudioFocus);
+        playerState.setMusicItem(musicItem);
 
         PlayerState other = new PlayerState();
         other.setPlayProgress(playProgress);
@@ -68,6 +72,7 @@ public class PlayerStateTest {
         other.setAudioEffectEnabled(audioEffectEnable);
         other.setOnlyWifiNetwork(onlyWifiNetwork);
         other.setIgnoreLossAudioFocus(ignoreAudioFocus);
+        other.setMusicItem(musicItem);
 
         assertEquals(playerState, other);
         assertEquals(playerState.hashCode(), other.hashCode());
@@ -83,6 +88,9 @@ public class PlayerStateTest {
         final boolean audioEffectEnable = false;
         final boolean onlyWifiNetwork = true;
         final boolean ignoreAudioFocus = false;
+        final MusicItem musicItem = new MusicItem();
+        musicItem.setTitle("test_title");
+        musicItem.setArtist("test_artist");
 
         PlayerState playerState = new PlayerState();
         playerState.setPlayProgress(playProgress);
@@ -93,6 +101,7 @@ public class PlayerStateTest {
         playerState.setAudioEffectEnabled(audioEffectEnable);
         playerState.setOnlyWifiNetwork(onlyWifiNetwork);
         playerState.setIgnoreLossAudioFocus(ignoreAudioFocus);
+        playerState.setMusicItem(musicItem);
 
         PlayerState other = playerState.clone();
 
@@ -111,6 +120,9 @@ public class PlayerStateTest {
         final boolean audioEffectEnable = true;
         final boolean onlyWifiNetwork = false;
         final boolean ignoreAudioFocus = true;
+        final MusicItem musicItem = new MusicItem();
+        musicItem.setTitle("test_title");
+        musicItem.setArtist("test_artist");
 
         playerState.setPlayProgress(playProgress);
         playerState.setPlayProgressUpdateTime(playProgressUpdateTime);
@@ -120,6 +132,7 @@ public class PlayerStateTest {
         playerState.setAudioEffectEnabled(audioEffectEnable);
         playerState.setOnlyWifiNetwork(onlyWifiNetwork);
         playerState.setIgnoreLossAudioFocus(ignoreAudioFocus);
+        playerState.setMusicItem(musicItem);
 
         Parcel parcel = Parcel.obtain();
 
