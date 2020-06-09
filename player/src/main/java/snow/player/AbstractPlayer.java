@@ -48,8 +48,6 @@ public abstract class AbstractPlayer implements Player {
 
     private int mBufferingPercent;
 
-    private MusicItem mMusicItem;
-
     public AbstractPlayer(@NonNull Context context, @NonNull PlayerState playerState) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerState);
@@ -79,10 +77,6 @@ public abstract class AbstractPlayer implements Player {
     protected abstract MusicPlayer onCreateMusicPlayer(Uri uri);
 
     // ********************************abstract end******************************
-
-    protected final void setPlayingMusicItem(MusicItem musicItem) {
-        mMusicItem = musicItem;
-    }
 
     protected void onPlayComplete() {
     }
@@ -122,11 +116,12 @@ public abstract class AbstractPlayer implements Player {
         releaseMusicPlayer();
         mBufferingPercent = 0;
 
-        if (mMusicItem == null) {
+        MusicItem musicItem = mPlayerState.getMusicItem();
+        if (musicItem == null) {
             return;
         }
 
-        Uri uri = getMusicItemUri(mMusicItem);
+        Uri uri = getMusicItemUri(musicItem);
 
         if (uri == null) {
             return;
@@ -506,7 +501,7 @@ public abstract class AbstractPlayer implements Player {
         releaseMusicPlayer();
         updatePlayProgress(0, System.currentTimeMillis());
 
-        mMusicItem = musicItem;
+        mPlayerState.setMusicItem(musicItem);
 
         prepareMusicPlayer(new Runnable() {
             @Override
