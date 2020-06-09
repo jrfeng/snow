@@ -24,7 +24,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private Context mApplicationContext;
     private PlayerState mPlayerState;
-    private HashMap<String, PlayerStateListener> mPlayerStateListenerMap;
+    private HashMap<String, T> mStateListenerMap;
 
     private MusicPlayer mMusicPlayer;
 
@@ -55,7 +55,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         mApplicationContext = context.getApplicationContext();
         mPlayerState = playerState;
 
-        mPlayerStateListenerMap = new HashMap<>();
+        mStateListenerMap = new HashMap<>();
 
         initAllListener();
         initAllHelper();
@@ -385,17 +385,21 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         mPlayerState.setPlayProgressUpdateTime(updateTime);
     }
 
-    public void addPlayerStateListener(@NonNull String token, @NonNull T listener) {
+    public void addStateListener(@NonNull String token, @NonNull T listener) {
         Preconditions.checkNotNull(token);
         Preconditions.checkNotNull(listener);
 
-        mPlayerStateListenerMap.put(token, listener);
+        mStateListenerMap.put(token, listener);
     }
 
-    public void removePlayerStateListener(@NonNull String token) {
+    public void removeStateListener(@NonNull String token) {
         Preconditions.checkNotNull(token);
 
-        mPlayerStateListenerMap.remove(token);
+        mStateListenerMap.remove(token);
+    }
+
+    protected HashMap<String, T> getAllStateListener() {
+        return mStateListenerMap;
     }
 
     private void notifyPreparing() {
@@ -406,8 +410,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
         onPreparing();
 
-        for (String key : mPlayerStateListenerMap.keySet()) {
-            PlayerStateListener listener = mPlayerStateListenerMap.get(key);
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
                 listener.onPreparing();
             }
@@ -422,8 +426,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
         onPrepared(audioSessionId);
 
-        for (String key : mPlayerStateListenerMap.keySet()) {
-            PlayerStateListener listener = mPlayerStateListenerMap.get(key);
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
                 listener.onPrepared(audioSessionId);
             }
@@ -441,8 +445,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
         onPlaying(progress, updateTime);
 
-        for (String key : mPlayerStateListenerMap.keySet()) {
-            PlayerStateListener listener = mPlayerStateListenerMap.get(key);
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
                 listener.onPlay(progress, updateTime);
             }
@@ -459,8 +463,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
         onPaused();
 
-        for (String key : mPlayerStateListenerMap.keySet()) {
-            PlayerStateListener listener = mPlayerStateListenerMap.get(key);
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
                 listener.onPause();
             }
@@ -477,8 +481,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
         onStopped();
 
-        for (String key : mPlayerStateListenerMap.keySet()) {
-            PlayerStateListener listener = mPlayerStateListenerMap.get(key);
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
                 listener.onStop();
             }
@@ -490,8 +494,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
         onStalled();
 
-        for (String key : mPlayerStateListenerMap.keySet()) {
-            PlayerStateListener listener = mPlayerStateListenerMap.get(key);
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
                 listener.onStalled();
             }
@@ -508,8 +512,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
         onError(errorCode, errorMessage);
 
-        for (String key : mPlayerStateListenerMap.keySet()) {
-            PlayerStateListener listener = mPlayerStateListenerMap.get(key);
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
                 listener.onError(errorCode, errorMessage);
             }
@@ -519,8 +523,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     private void notifyBufferingPercentChanged(int percent, long updateTime) {
         mBufferingPercent = percent;
 
-        for (String key : mPlayerStateListenerMap.keySet()) {
-            PlayerStateListener listener = mPlayerStateListenerMap.get(key);
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
                 listener.onBufferingPercentChanged(percent, updateTime);
             }
@@ -542,8 +546,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             }
         });
 
-        for (String key : mPlayerStateListenerMap.keySet()) {
-            PlayerStateListener listener = mPlayerStateListenerMap.get(key);
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
                 listener.onPlayingMusicItemChanged(musicItem);
             }
@@ -553,8 +557,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     private void notifySeekComplete(long position) {
         mPlayerState.setPlayProgress(position);
 
-        for (String key : mPlayerStateListenerMap.keySet()) {
-            PlayerStateListener listener = mPlayerStateListenerMap.get(key);
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
                 listener.onSeekComplete(position);
             }
