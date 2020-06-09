@@ -19,7 +19,7 @@ import snow.player.state.PlayerStateListener;
 import snow.player.util.ErrorUtil;
 import snow.player.util.NetworkUtil;
 
-public abstract class AbstractPlayer implements Player {
+public abstract class AbstractPlayer<T extends PlayerStateListener> implements Player {
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
 
     private Context mApplicationContext;
@@ -385,7 +385,7 @@ public abstract class AbstractPlayer implements Player {
         mPlayerState.setPlayProgressUpdateTime(updateTime);
     }
 
-    public void addPlayerStateListener(@NonNull String token, @NonNull PlayerStateListener listener) {
+    public void addPlayerStateListener(@NonNull String token, @NonNull T listener) {
         Preconditions.checkNotNull(token);
         Preconditions.checkNotNull(listener);
 
