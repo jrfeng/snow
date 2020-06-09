@@ -15,6 +15,7 @@ import snow.player.Player;
 public class PlayerState implements Parcelable, Cloneable {
     private long mPlayProgress;
     private long mPlayProgressUpdateTime;
+    private boolean mLooping;
     private int mPlaybackState;
     private int mSoundQuality;
     private boolean mAudioEffectEnabled;
@@ -24,6 +25,7 @@ public class PlayerState implements Parcelable, Cloneable {
     public PlayerState() {
         mPlayProgress = 0;
         mPlayProgressUpdateTime = System.currentTimeMillis();
+        mLooping = false;
         mPlaybackState = Player.PlaybackState.UNKNOWN;
         mSoundQuality = Player.SoundQuality.STANDARD;
         mAudioEffectEnabled = false;
@@ -34,6 +36,7 @@ public class PlayerState implements Parcelable, Cloneable {
     public PlayerState(PlayerState source) {
         mPlayProgress = source.mPlayProgress;
         mPlayProgressUpdateTime = source.mPlayProgressUpdateTime;
+        mLooping = source.mLooping;
         mPlaybackState = source.mPlaybackState;
         mSoundQuality = source.mSoundQuality;
         mAudioEffectEnabled = source.mAudioEffectEnabled;
@@ -74,8 +77,29 @@ public class PlayerState implements Parcelable, Cloneable {
         return mPlayProgressUpdateTime;
     }
 
+    /**
+     * 设置上次播放进度的更新时间。
+     *
+     * @param updateTime 上次播放进度的更新时间。
+     */
     public void setPlayProgressUpdateTime(long updateTime) {
         mPlayProgressUpdateTime = updateTime;
+    }
+
+    /**
+     * 是否循环播放。
+     */
+    public boolean isLooping() {
+        return mLooping;
+    }
+
+    /**
+     * 设置是否循环播放。
+     *
+     * @param looping 是否循环播放。
+     */
+    public void setLooping(boolean looping) {
+        mLooping = looping;
     }
 
     /**
@@ -191,6 +215,7 @@ public class PlayerState implements Parcelable, Cloneable {
 
         return Objects.equal(mPlayProgress, other.mPlayProgress)
                 && Objects.equal(mPlayProgressUpdateTime, other.mPlayProgressUpdateTime)
+                && Objects.equal(mLooping, other.mLooping)
                 && Objects.equal(mPlaybackState, other.mPlaybackState)
                 && Objects.equal(mSoundQuality, other.mSoundQuality)
                 && Objects.equal(mAudioEffectEnabled, other.mAudioEffectEnabled)
@@ -202,6 +227,7 @@ public class PlayerState implements Parcelable, Cloneable {
     public int hashCode() {
         return Objects.hashCode(mPlayProgress,
                 mPlayProgressUpdateTime,
+                mLooping,
                 mPlaybackState,
                 mSoundQuality,
                 mAudioEffectEnabled,
@@ -219,6 +245,7 @@ public class PlayerState implements Parcelable, Cloneable {
     protected PlayerState(Parcel in) {
         mPlayProgress = in.readLong();
         mPlayProgressUpdateTime = in.readLong();
+        mLooping = in.readByte() != 0;
         mPlaybackState = in.readInt();
         mSoundQuality = in.readInt();
         mAudioEffectEnabled = in.readByte() != 0;
@@ -230,6 +257,7 @@ public class PlayerState implements Parcelable, Cloneable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(mPlayProgress);
         dest.writeLong(mPlayProgressUpdateTime);
+        dest.writeByte((byte) (mLooping ? 1 : 0));
         dest.writeInt(mPlaybackState);
         dest.writeInt(mSoundQuality);
         dest.writeByte((byte) (mAudioEffectEnabled ? 1 : 0));

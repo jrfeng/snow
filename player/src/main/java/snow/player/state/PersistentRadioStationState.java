@@ -16,6 +16,7 @@ import snow.player.radio.RadioStation;
 public class PersistentRadioStationState extends RadioStationState {
     private static final String KEY_PLAY_PROGRESS = "play_progress";
     private static final String KEY_PLAY_PROGRESS_UPDATE_TIME = "play_progress_update_time";
+    private static final String KEY_LOOPING = "looping";
     private static final String KEY_SOUND_QUALITY = "sound_quality";
     private static final String KEY_AUDIO_EFFECT_ENABLED = "audio_effect_enabled";
     private static final String KEY_ONLY_WIFI_NETWORK = "only_wifi_network";
@@ -33,6 +34,8 @@ public class PersistentRadioStationState extends RadioStationState {
         mMMKV = MMKV.mmkvWithID(id);
 
         super.setPlayProgress(mMMKV.decodeLong(KEY_PLAY_PROGRESS, 0L));
+        super.setPlayProgressUpdateTime(mMMKV.decodeLong(KEY_PLAY_PROGRESS_UPDATE_TIME, System.currentTimeMillis()));
+        super.setLooping(mMMKV.decodeBool(KEY_LOOPING, false));
         super.setSoundQuality(mMMKV.decodeInt(KEY_SOUND_QUALITY, Player.SoundQuality.STANDARD));
         super.setAudioEffectEnabled(mMMKV.decodeBool(KEY_AUDIO_EFFECT_ENABLED, false));
         super.setOnlyWifiNetwork(mMMKV.decodeBool(KEY_ONLY_WIFI_NETWORK, true));
@@ -53,6 +56,13 @@ public class PersistentRadioStationState extends RadioStationState {
         super.setPlayProgressUpdateTime(updateTime);
 
         mMMKV.encode(KEY_PLAY_PROGRESS_UPDATE_TIME, updateTime);
+    }
+
+    @Override
+    public void setLooping(boolean looping) {
+        super.setLooping(looping);
+
+        mMMKV.encode(KEY_LOOPING, looping);
     }
 
     @Override
