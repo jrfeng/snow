@@ -4,9 +4,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.common.base.Objects;
 
+import snow.player.MusicItem;
 import snow.player.Player;
 
 /**
@@ -21,6 +23,8 @@ public class PlayerState implements Parcelable, Cloneable {
     private boolean mAudioEffectEnabled;
     private boolean mOnlyWifiNetwork;
     private boolean mIgnoreLossAudioFocus;
+    @Nullable
+    private MusicItem mMusicItem;
 
     public PlayerState() {
         mPlayProgress = 0;
@@ -42,6 +46,7 @@ public class PlayerState implements Parcelable, Cloneable {
         mAudioEffectEnabled = source.mAudioEffectEnabled;
         mOnlyWifiNetwork = source.mOnlyWifiNetwork;
         mIgnoreLossAudioFocus = source.mIgnoreLossAudioFocus;
+        mMusicItem = new MusicItem(source.mMusicItem);
     }
 
     /**
@@ -206,6 +211,21 @@ public class PlayerState implements Parcelable, Cloneable {
         mIgnoreLossAudioFocus = ignoreLossAudioFocus;
     }
 
+    /**
+     * 获取当前播放歌曲的 MusicItem 对象。
+     */
+    @Nullable
+    public MusicItem getMusicItem() {
+        return mMusicItem;
+    }
+
+    /**
+     * 设置当前播放歌曲的 MusicItem 对象。
+     */
+    public void setMusicItem(@Nullable MusicItem musicItem) {
+        mMusicItem = musicItem;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -220,7 +240,8 @@ public class PlayerState implements Parcelable, Cloneable {
                 && Objects.equal(mSoundQuality, other.mSoundQuality)
                 && Objects.equal(mAudioEffectEnabled, other.mAudioEffectEnabled)
                 && Objects.equal(mOnlyWifiNetwork, other.mOnlyWifiNetwork)
-                && Objects.equal(mIgnoreLossAudioFocus, other.mIgnoreLossAudioFocus);
+                && Objects.equal(mIgnoreLossAudioFocus, other.mIgnoreLossAudioFocus)
+                && Objects.equal(mMusicItem, other.mMusicItem);
     }
 
     @Override
@@ -232,7 +253,8 @@ public class PlayerState implements Parcelable, Cloneable {
                 mSoundQuality,
                 mAudioEffectEnabled,
                 mOnlyWifiNetwork,
-                mIgnoreLossAudioFocus);
+                mIgnoreLossAudioFocus,
+                mMusicItem);
     }
 
     @NonNull
@@ -251,6 +273,7 @@ public class PlayerState implements Parcelable, Cloneable {
         mAudioEffectEnabled = in.readByte() != 0;
         mOnlyWifiNetwork = in.readByte() != 0;
         mIgnoreLossAudioFocus = in.readByte() != 0;
+        mMusicItem = in.readParcelable(Thread.currentThread().getContextClassLoader());
     }
 
     @Override
@@ -263,6 +286,7 @@ public class PlayerState implements Parcelable, Cloneable {
         dest.writeByte((byte) (mAudioEffectEnabled ? 1 : 0));
         dest.writeByte((byte) (mOnlyWifiNetwork ? 1 : 0));
         dest.writeByte((byte) (mIgnoreLossAudioFocus ? 1 : 0));
+        dest.writeParcelable(mMusicItem, flags);
     }
 
     @Override
