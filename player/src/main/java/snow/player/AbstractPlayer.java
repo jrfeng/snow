@@ -50,13 +50,12 @@ public abstract class AbstractPlayer implements Player {
 
     private MusicItem mMusicItem;
 
-    public AbstractPlayer(@NonNull Context context, @NonNull PlayerState playerState, @Nullable MusicItem musicItem) {
+    public AbstractPlayer(@NonNull Context context, @NonNull PlayerState playerState) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerState);
 
         mApplicationContext = context.getApplicationContext();
         mPlayerState = playerState;
-        mMusicItem = musicItem;
 
         mPlayerStateListenerMap = new HashMap<>();
 
@@ -80,6 +79,10 @@ public abstract class AbstractPlayer implements Player {
     protected abstract MusicPlayer onCreateMusicPlayer(Uri uri);
 
     // ********************************abstract end******************************
+
+    protected final void setPlayingMusicItem(MusicItem musicItem) {
+        mMusicItem = musicItem;
+    }
 
     protected void onPlayComplete() {
     }
