@@ -15,6 +15,7 @@ import snow.player.radio.RadioStation;
  */
 public class PersistentRadioStationState extends RadioStationState {
     private static final String KEY_PLAY_PROGRESS = "play_progress";
+    private static final String KEY_PLAY_PROGRESS_UPDATE_TIME = "play_progress_update_time";
     private static final String KEY_SOUND_QUALITY = "sound_quality";
     private static final String KEY_AUDIO_EFFECT_ENABLED = "audio_effect_enabled";
     private static final String KEY_ONLY_WIFI_NETWORK = "only_wifi_network";
@@ -45,6 +46,13 @@ public class PersistentRadioStationState extends RadioStationState {
         super.setPlayProgress(playProgress);
 
         mMMKV.encode(KEY_PLAY_PROGRESS, playProgress);
+    }
+
+    @Override
+    public void setPlayProgressUpdateTime(long updateTime) {
+        super.setPlayProgressUpdateTime(updateTime);
+
+        mMMKV.encode(KEY_PLAY_PROGRESS_UPDATE_TIME, updateTime);
     }
 
     @Override
