@@ -540,6 +540,16 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
+        if (isPreparing()) {
+            mPreparedAction = new Runnable() {
+                @Override
+                public void run() {
+                    play();
+                }
+            };
+            return;
+        }
+
         if (isPrepared()) {
             mMusicPlayer.start();
             notifyPlaying(mMusicPlayer.getCurrentPosition(), System.currentTimeMillis());
@@ -555,6 +565,16 @@ public abstract class AbstractPlayer implements Player {
 
     @Override
     public void pause() {
+        if (isPreparing()) {
+            mPreparedAction = new Runnable() {
+                @Override
+                public void run() {
+                    pause();
+                }
+            };
+            return;
+        }
+
         if (isPlaying()) {
             mMusicPlayer.pause();
             notifyPaused();
@@ -563,6 +583,16 @@ public abstract class AbstractPlayer implements Player {
 
     @Override
     public void stop() {
+        if (isPreparing()) {
+            mPreparedAction = new Runnable() {
+                @Override
+                public void run() {
+                    stop();
+                }
+            };
+            return;
+        }
+
         if (isPrepared()) {
             mMusicPlayer.stop();
             notifyStopped();
@@ -588,13 +618,22 @@ public abstract class AbstractPlayer implements Player {
     }
 
     @Override
-    public void seekTo(long progress) {
+    public void seekTo(final long progress) {
+        if (isPreparing()) {
+            mPreparedAction = new Runnable() {
+                @Override
+                public void run() {
+                    seekTo(progress);
+                }
+            };
+            return;
+        }
+
         if (!isPrepared()) {
             return;
         }
 
         final boolean playing = isPlaying();
-
         mSeekCompleteAction = new Runnable() {
             @Override
             public void run() {
@@ -609,6 +648,16 @@ public abstract class AbstractPlayer implements Player {
 
     @Override
     public void fastForward() {
+        if (isPreparing()) {
+            mPreparedAction = new Runnable() {
+                @Override
+                public void run() {
+                    fastForward();
+                }
+            };
+            return;
+        }
+
         if (!isPrepared()) {
             return;
         }
@@ -621,6 +670,16 @@ public abstract class AbstractPlayer implements Player {
 
     @Override
     public void rewind() {
+        if (isPreparing()) {
+            mPreparedAction = new Runnable() {
+                @Override
+                public void run() {
+                    rewind();
+                }
+            };
+            return;
+        }
+
         if (!isPrepared()) {
             return;
         }
