@@ -76,10 +76,7 @@ public abstract class AbstractPlayer implements Player {
     @NonNull
     protected abstract MusicPlayer onCreateMusicPlayer(Uri uri);
 
-    // ********************************abstract end******************************
-
-    protected void onPlayComplete() {
-    }
+    // ********************************end******************************
 
     protected void attachAudioEffect(int audioSessionId) {
     }
@@ -87,17 +84,39 @@ public abstract class AbstractPlayer implements Player {
     protected void detachAudioEffect() {
     }
 
-    protected void onRequestAudioFocus(boolean success) {
+    // *****************************Callback****************************
+
+    protected void onPreparing() {
     }
 
-    protected void onError(int errorCode, String errorMessage) {
+    protected void onPrepared(int audioSessionId) {
+    }
+
+    protected void onPlaying(long progress, long updateTime) {
+    }
+
+    protected void onPaused() {
     }
 
     protected void onStalled() {
     }
 
+    protected void onStopped() {
+    }
+
+    protected void onError(int errorCode, String errorMessage) {
+    }
+
+    protected void onPlayComplete() {
+    }
+
+    protected void onRequestAudioFocus(boolean success) {
+    }
+
     protected void onRelease() {
     }
+
+    // ********************************end******************************
 
     protected final void release() {
         releaseMusicPlayer();
@@ -385,6 +404,8 @@ public abstract class AbstractPlayer implements Player {
         mPreparing = true;
         mPrepared = false;
 
+        onPreparing();
+
         for (String key : mPlayerStateListenerMap.keySet()) {
             PlayerStateListener listener = mPlayerStateListenerMap.get(key);
             if (listener != null) {
@@ -398,6 +419,8 @@ public abstract class AbstractPlayer implements Player {
 
         mPreparing = false;
         mPrepared = true;
+
+        onPrepared(audioSessionId);
 
         for (String key : mPlayerStateListenerMap.keySet()) {
             PlayerStateListener listener = mPlayerStateListenerMap.get(key);
@@ -416,6 +439,8 @@ public abstract class AbstractPlayer implements Player {
         onRequestAudioFocus(result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
         mBecomeNoiseHelper.registerBecomeNoiseReceiver();
 
+        onPlaying(progress, updateTime);
+
         for (String key : mPlayerStateListenerMap.keySet()) {
             PlayerStateListener listener = mPlayerStateListenerMap.get(key);
             if (listener != null) {
@@ -431,6 +456,8 @@ public abstract class AbstractPlayer implements Player {
 
         mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
+
+        onPaused();
 
         for (String key : mPlayerStateListenerMap.keySet()) {
             PlayerStateListener listener = mPlayerStateListenerMap.get(key);
@@ -448,6 +475,8 @@ public abstract class AbstractPlayer implements Player {
         mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
 
+        onStopped();
+
         for (String key : mPlayerStateListenerMap.keySet()) {
             PlayerStateListener listener = mPlayerStateListenerMap.get(key);
             if (listener != null) {
@@ -458,6 +487,7 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyStalled() {
         mPlayerState.setPlaybackState(PlaybackState.STALLED);
+
         onStalled();
 
         for (String key : mPlayerStateListenerMap.keySet()) {
