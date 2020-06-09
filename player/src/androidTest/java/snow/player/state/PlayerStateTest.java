@@ -21,7 +21,8 @@ public class PlayerStateTest {
         PlayerState playerState = new PlayerState();
 
         assertEquals(0, playerState.getPlayProgress());
-        Assert.assertEquals(Player.PlaybackState.UNKNOWN, playerState.getPlaybackState());
+        assertFalse(playerState.isLooping());
+        assertEquals(Player.PlaybackState.UNKNOWN, playerState.getPlaybackState());
         assertEquals(Player.SoundQuality.STANDARD, playerState.getSoundQuality());
         assertFalse(playerState.isAudioEffectEnabled());
         assertTrue(playerState.isOnlyWifiNetwork());
@@ -40,6 +41,8 @@ public class PlayerStateTest {
     @Test
     public void equals_hashCode() {
         final long playProgress = 1000;
+        final long playProgressUpdateTime = System.currentTimeMillis();
+        final boolean looping = true;
         final int playbackState = Player.PlaybackState.PLAYING;
         final int soundQuality = Player.SoundQuality.SUPER;
         final boolean audioEffectEnable = false;
@@ -48,6 +51,8 @@ public class PlayerStateTest {
 
         PlayerState playerState = new PlayerState();
         playerState.setPlayProgress(playProgress);
+        playerState.setPlayProgressUpdateTime(playProgressUpdateTime);
+        playerState.setLooping(looping);
         playerState.setPlaybackState(playbackState);
         playerState.setSoundQuality(soundQuality);
         playerState.setAudioEffectEnabled(audioEffectEnable);
@@ -56,6 +61,8 @@ public class PlayerStateTest {
 
         PlayerState other = new PlayerState();
         other.setPlayProgress(playProgress);
+        other.setPlayProgressUpdateTime(playProgressUpdateTime);
+        other.setLooping(looping);
         other.setPlaybackState(playbackState);
         other.setSoundQuality(soundQuality);
         other.setAudioEffectEnabled(audioEffectEnable);
@@ -69,6 +76,8 @@ public class PlayerStateTest {
     @Test
     public void cloneTest() throws CloneNotSupportedException {
         final long playProgress = 1000;
+        final long playProgressUpdateTime = System.currentTimeMillis();
+        final boolean looping = true;
         final int playbackState = Player.PlaybackState.PLAYING;
         final int soundQuality = Player.SoundQuality.SUPER;
         final boolean audioEffectEnable = false;
@@ -77,6 +86,8 @@ public class PlayerStateTest {
 
         PlayerState playerState = new PlayerState();
         playerState.setPlayProgress(playProgress);
+        playerState.setPlayProgressUpdateTime(playProgressUpdateTime);
+        playerState.setLooping(looping);
         playerState.setPlaybackState(playbackState);
         playerState.setSoundQuality(soundQuality);
         playerState.setAudioEffectEnabled(audioEffectEnable);
@@ -93,6 +104,8 @@ public class PlayerStateTest {
         PlayerState playerState = new PlayerState();
 
         final long playProgress = 2000;
+        final long playProgressUpdateTime = System.currentTimeMillis();
+        final boolean looping = true;
         final int playbackState = Player.PlaybackState.PAUSED;
         final int soundQuality = Player.SoundQuality.HIGH;
         final boolean audioEffectEnable = true;
@@ -100,6 +113,8 @@ public class PlayerStateTest {
         final boolean ignoreAudioFocus = true;
 
         playerState.setPlayProgress(playProgress);
+        playerState.setPlayProgressUpdateTime(playProgressUpdateTime);
+        playerState.setLooping(looping);
         playerState.setPlaybackState(playbackState);
         playerState.setSoundQuality(soundQuality);
         playerState.setAudioEffectEnabled(audioEffectEnable);
