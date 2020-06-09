@@ -185,8 +185,7 @@ public abstract class AbstractPlayer implements Player {
                 notifyPrepared(mp.getAudioSessionId());
 
                 if (mPlayerState.getPlayProgress() > 0) {
-                    mSeekCompleteAction = mPreparedAction;
-                    seekTo(mPlayerState.getPlayProgress());
+                    seekTo(mPlayerState.getPlayProgress(), mPreparedAction);
                     return;
                 }
 
@@ -617,8 +616,7 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    @Override
-    public void seekTo(final long progress) {
+    private void seekTo(final long progress, Runnable seekCompleteAction) {
         if (isPreparing()) {
             mPreparedAction = new Runnable() {
                 @Override
@@ -633,17 +631,21 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
+        mSeekCompleteAction = seekCompleteAction;
+        mMusicPlayer.seekTo(progress);
+    }
+
+    @Override
+    public void seekTo(final long progress) {
         final boolean playing = isPlaying();
-        mSeekCompleteAction = new Runnable() {
+        seekTo(progress, new Runnable() {
             @Override
             public void run() {
                 if (playing) {
                     mMusicPlayer.start();
                 }
             }
-        };
-
-        mMusicPlayer.seekTo(progress);
+        });
     }
 
     @Override
