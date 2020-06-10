@@ -35,8 +35,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     private MusicPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener;
     private MusicPlayer.OnErrorListener mOnErrorListener;
 
-    private boolean mPreparing;
-    private boolean mPrepared;
+    private volatile boolean mPreparing;
+    private volatile boolean mPrepared;
 
     private Runnable mPreparedAction;
     private Runnable mSeekCompleteAction;
