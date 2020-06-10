@@ -221,7 +221,15 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     }
 
     @Override
-    public void notifyMusicItemInserted(final int position, int count) {
+    public void notifyMusicItemInserted(final int position, final int count) {
+        if (position < 0) {
+            throw new IllegalArgumentException("'position' must >= 0, position=" + position);
+        }
+
+        if (count <= 0) {
+            throw new IllegalArgumentException("'count' must > 0, count=" + count);
+        }
+
         notifyPlaylistChanged(position);
 
         if (position > mPlaylistState.getPosition()) {
@@ -229,12 +237,10 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
             return;
         }
 
-        final boolean playing = isPlaying();
         mPlaylistAvailableAction = new Runnable() {
             @Override
             public void run() {
-                notifyPlayingMusicItemChanged(mPlaylist.get(position), playing);
-                notifyPlayingMusicItemPositionChanged(position);
+                notifyPlayingMusicItemPositionChanged(position + count);
             }
         };
 
@@ -243,12 +249,36 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
 
     @Override
     public void notifyMusicItemRemoved(List<Integer> positions) {
+        if (isPositionsIllegal(positions)) {
+            throw new IndexOutOfBoundsException("size: " + mPlaylist.size() + ", positions: " + toString(positions));
+        }
+
         if (positions.contains(mPlaylistState.getPosition())) {
             adjustPlayingPosition(positions);
             return;
         }
 
         adjustPlayingPosition2(positions);
+    }
+
+    private String toString(List<Integer> integers) {
+        StringBuilder buff = new StringBuilder();
+
+        buff.append("[");
+
+        for (int i = 0; i < integers.size() - 1; i++) {
+            buff.append(i)
+                    .append(", ");
+        }
+
+        buff.append(integers.get(integers.size() - 1))
+                .append("]");
+
+        return buff.toString();
+    }
+
+    private boolean isPositionsIllegal(List<Integer> positions) {
+        return Collections.max(positions) >= mPlaylist.size();
     }
 
     private void adjustPlayingPosition(final List<Integer> positions) {
