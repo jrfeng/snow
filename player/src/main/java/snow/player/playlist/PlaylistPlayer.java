@@ -83,13 +83,13 @@ public interface PlaylistPlayer extends Player {
     }
 
     /**
-     * 用于监听播放队列被替换事件。
+     * 用于监听播放队列被替换/修改事件。
      * <p>
-     * 当设置新的播放队列时，该监听器会被调用。
+     * 当设置新的播放队列或者修改已有的播放队列时，该监听器会被调用。
      */
     interface OnPlaylistChangeListener {
         /**
-         * 播放队列被替换时会调用该方法。
+         * 播放队列被替换或修改时会调用该方法。
          *
          * @param playlistManager 用于管理播放队列的 PlaylistManager 对象。可以通过该对象获取到最新的播放队列。
          * @param position        播放队列的播放位置。
