@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="snow_error_no_error">no error</string>
     <string name="snow_error_unknown_error">unknown error</string>
     <string name="snow_error_only_wifi_network">only WiFi network</string>
     <string name="snow_error_player_error">player error</string>
