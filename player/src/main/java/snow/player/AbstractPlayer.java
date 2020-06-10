@@ -116,6 +116,9 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     protected void onRelease() {
     }
 
+    protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem){
+    }
+
     // ********************************end******************************
 
     protected final void release() {
@@ -536,6 +539,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         updatePlayProgress(0, System.currentTimeMillis());
 
         mPlayerState.setMusicItem(musicItem);
+        onPlayingMusicItemChanged(musicItem);
 
         prepareMusicPlayer(new Runnable() {
             @Override
