@@ -23,7 +23,7 @@ public interface PlaylistPlayer extends Player {
     /**
      * 播放队列中 position 位置处的音乐。
      */
-    void skipToPosition(int position);
+    void playOrPause(int position);
 
     /**
      * 设置播放器的播放模式。
