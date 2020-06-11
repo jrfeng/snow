@@ -40,11 +40,15 @@ public class PlayerState implements Parcelable, Cloneable {
         mPlayProgress = 0;
         mPlayProgressUpdateTime = System.currentTimeMillis();
         mLooping = false;
-        mPlaybackState = Player.PlaybackState.UNKNOWN;
         mSoundQuality = Player.SoundQuality.STANDARD;
         mAudioEffectEnabled = false;
         mOnlyWifiNetwork = true;
         mIgnoreLossAudioFocus = false;
+
+        mPlaybackState = Player.PlaybackState.UNKNOWN;
+        mAudioSessionId = 0;
+        mBufferingPercent = 0;
+        mBufferingPercentUpdateTime = System.currentTimeMillis();
         mErrorCode = ErrorUtil.ERROR_NO_ERROR;
         mErrorMessage = "";
     }
@@ -249,7 +253,7 @@ public class PlayerState implements Parcelable, Cloneable {
     /**
      * 获取当前正在播放的音乐的 audio session id。
      * <p>
-     * 注意！可能会返回 {@link android.media.AudioManager#AUDIO_SESSION_ID_GENERATE}，表示当前音乐的
+     * 注意！可能会返回 0 （API 21: {@link android.media.AudioManager#AUDIO_SESSION_ID_GENERATE}），表示当前音乐的
      * audio session id 不可用。
      */
     public int getAudioSessionId() {
@@ -260,7 +264,7 @@ public class PlayerState implements Parcelable, Cloneable {
      * 设置当前音乐的 audio session id。
      *
      * @param audioSessionId 当前音乐的 audio session id。如果当前音乐的 audio session id 不可用，则可以
-     *                       设为 {@link android.media.AudioManager#AUDIO_SESSION_ID_GENERATE}。
+     *                       设为 0 （API 21: {@link android.media.AudioManager#AUDIO_SESSION_ID_GENERATE}）。
      */
     public void setAudioSessionId(int audioSessionId) {
         mAudioSessionId = audioSessionId;
