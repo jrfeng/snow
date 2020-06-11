@@ -44,6 +44,20 @@ public class PlayerStateTest {
     }
 
     @Test
+    public void setPlaybackState() {
+        PlayerState playerState = new PlayerState();
+
+        final int errorCode = ErrorUtil.ERROR_PLAYER_ERROR;
+
+        playerState.setErrorCode(errorCode);
+
+        assertEquals(errorCode, playerState.getErrorCode());
+
+        playerState.setPlaybackState(Player.PlaybackState.PLAYING);
+        assertEquals(ErrorUtil.ERROR_NO_ERROR, playerState.getErrorCode());
+    }
+
+    @Test
     public void equals_hashCode() {
         final long playProgress = 1000;
         final long playProgressUpdateTime = System.currentTimeMillis();
