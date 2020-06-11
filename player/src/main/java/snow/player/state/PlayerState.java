@@ -98,7 +98,7 @@ public class PlayerState implements Parcelable, Cloneable {
 
 
     /**
-     * 获取上次播放进度的更新时间。
+     * 获取上次播放进度的更新时间（单位：毫秒 ms）。
      *
      * @return 上次播放进度的更新时间。
      */
@@ -248,6 +248,11 @@ public class PlayerState implements Parcelable, Cloneable {
      */
     public void setPlaybackState(int playbackState) {
         mPlaybackState = playbackState;
+
+        if (playbackState != Player.PlaybackState.ERROR) {
+            mErrorCode = ErrorUtil.ERROR_NO_ERROR;
+            mErrorMessage = "";
+        }
     }
 
     /**
@@ -295,14 +300,14 @@ public class PlayerState implements Parcelable, Cloneable {
     }
 
     /**
-     * 获取上一次缓存进度的更新时间。
+     * 获取上一次缓存进度的更新时间（单位：毫秒 ms）。
      */
     public long getBufferingPercentUpdateTime() {
         return mBufferingPercentUpdateTime;
     }
 
     /**
-     * 设置上一次缓存进度的更新时间。
+     * 设置上一次缓存进度的更新时间（单位：毫秒 ms）。
      */
     public void setBufferingPercentUpdateTime(long bufferingPercentUpdateTime) {
         mBufferingPercentUpdateTime = bufferingPercentUpdateTime;
