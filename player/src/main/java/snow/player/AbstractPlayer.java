@@ -46,8 +46,6 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private NetworkUtil mNetworkUtil;
 
-    private int mBufferingPercent;
-
     public AbstractPlayer(@NonNull Context context, @NonNull PlayerState playerState) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerState);
@@ -136,7 +134,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     protected final void prepareMusicPlayer(@Nullable Runnable preparedAction) {
         releaseMusicPlayer();
-        mBufferingPercent = 0;
+        notifyBufferingPercentChanged(0, System.currentTimeMillis());
 
         MusicItem musicItem = mPlayerState.getMusicItem();
         if (musicItem == null) {
@@ -160,7 +158,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     @Nullable
     private Uri getMusicItemUri(@NonNull MusicItem musicItem) {
         if (isCached(musicItem, mPlayerState.getSoundQuality())) {
-            mBufferingPercent = 100;
+            notifyBufferingPercentChanged(100, System.currentTimeMillis());
             return getCachedUri(musicItem, mPlayerState.getSoundQuality());
         }
 
@@ -338,7 +336,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     }
 
     private boolean notBufferingEnd() {
-        return mBufferingPercent < 100;
+        return mPlayerState.getBufferingPercent() < 100;
     }
 
     private void attachListeners(MusicPlayer musicPlayer) {
@@ -423,6 +421,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private void notifyPrepared(int audioSessionId) {
         mPlayerState.setPlaybackState(PlaybackState.PREPARED);
+        mPlayerState.setAudioSessionId(audioSessionId);
 
         mPreparing = false;
         mPrepared = true;
@@ -439,7 +438,6 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private void notifyPlaying(long progress, long updateTime) {
         mPlayerState.setPlaybackState(PlaybackState.PLAYING);
-
         updatePlayProgress(progress, updateTime);
 
         int result = mAudioFocusHelper.requestAudioFocus(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
@@ -458,7 +456,6 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private void notifyPaused() {
         mPlayerState.setPlaybackState(PlaybackState.PAUSED);
-
         updatePlayProgress(mMusicPlayer.getCurrentPosition(), System.currentTimeMillis());
 
         mAudioFocusHelper.abandonAudioFocus();
@@ -476,7 +473,6 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private void notifyStopped() {
         mPlayerState.setPlaybackState(PlaybackState.STOPPED);
-
         updatePlayProgress(0, System.currentTimeMillis());
 
         mAudioFocusHelper.abandonAudioFocus();
@@ -507,7 +503,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private void notifyError(int errorCode, String errorMessage) {
         mPlayerState.setPlaybackState(PlaybackState.ERROR);
-
+        mPlayerState.setErrorCode(errorCode);
+        mPlayerState.setErrorMessage(errorMessage);
         updatePlayProgress(0, System.currentTimeMillis());
 
         mAudioFocusHelper.abandonAudioFocus();
@@ -524,7 +521,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     }
 
     private void notifyBufferingPercentChanged(int percent, long updateTime) {
-        mBufferingPercent = percent;
+        mPlayerState.setBufferingPercent(percent);
+        mPlayerState.setBufferingPercentUpdateTime(updateTime);
 
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
@@ -560,6 +558,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private void notifySeekComplete(long position) {
         mPlayerState.setPlayProgress(position);
+        mPlayerState.setPlayProgressUpdateTime(System.currentTimeMillis());
 
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
@@ -673,15 +672,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     @Override
     public void seekTo(final long progress) {
-        final boolean playing = isPlaying();
-        seekTo(progress, new Runnable() {
-            @Override
-            public void run() {
-                if (playing) {
-                    mMusicPlayer.start();
-                }
-            }
-        });
+        seekTo(progress, null);
     }
 
     @Override
