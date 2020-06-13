@@ -38,7 +38,7 @@ public class PlaylistManager {
      *
      * @param context    Context 对象
      * @param playlistId 播放队列的 ID。请保持该值的唯一性，通常使用的是当前 PlaylistService 的名称，建议使用
-     *                   Class&lt;? extends PlayerService&gt;.getCanonicalName()
+     *                   Class&lt;? extends PlayerService&gt;.getName()
      */
     public static PlaylistManager newInstance(Context context, String playlistId) {
         return new PlaylistManager(context, playlistId);
