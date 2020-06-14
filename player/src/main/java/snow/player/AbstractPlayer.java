@@ -147,7 +147,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     protected void onError(int errorCode, String errorMessage) {
     }
 
-    protected void onPlayComplete() {
+    protected void onPlayComplete(MusicItem musicItem) {
     }
 
     protected void onRequestAudioFocus(boolean success) {
@@ -328,7 +328,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         mOnCompletionListener = new MusicPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MusicPlayer mp) {
-                onPlayComplete();
+                onPlayComplete(mPlayerState.getMusicItem());
             }
         };
 
