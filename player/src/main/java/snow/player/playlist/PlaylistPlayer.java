@@ -115,7 +115,7 @@ public interface PlaylistPlayer extends Player {
     /**
      * 用于监听当前正在播放的音乐的位置（position）改变事件。
      */
-    interface OnPlayingMusicItemPositionChangeListener {
+    interface OnPositionChangeListener {
         /**
          * 当正在播放的音乐的位置（position）发生改变时会调用该方法。
          *
