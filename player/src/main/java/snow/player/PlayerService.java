@@ -70,7 +70,7 @@ public abstract class PlayerService extends Service implements PlayerManager {
 
         MMKV.initialize(this);
         mMMKV = MMKV.mmkvWithID(mPersistentId);
-        mPlayerType = mMMKV.decodeInt(KEY_PLAYER_TYPE);
+        mPlayerType = mMMKV.decodeInt(KEY_PLAYER_TYPE, TYPE_PLAYLIST);
 
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
