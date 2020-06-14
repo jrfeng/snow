@@ -33,6 +33,6 @@ public interface PlayerManager {
     interface OnConfigChangeListener {
         void onPlayerTypeChanged(int playerType);
 
-        void syncPlayerState(PlaylistState playlistState, RadioStationState radioStationState);
+        void syncPlayerState(int playerType, PlaylistState playlistState, RadioStationState radioStationState);
     }
 }
