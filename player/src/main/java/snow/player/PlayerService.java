@@ -22,9 +22,11 @@ import channel.helper.pipe.MessengerPipe;
 import media.helper.MediaButtonHelper;
 import snow.player.playlist.AbstractPlaylistPlayer;
 import snow.player.playlist.PlaylistManager;
+import snow.player.playlist.PlaylistPlayer;
 import snow.player.playlist.PlaylistPlayerChannel;
 import snow.player.radio.AbstractRadioStationPlayer;
 import snow.player.radio.RadioStation;
+import snow.player.radio.RadioStationPlayer;
 import snow.player.radio.RadioStationPlayerChannel;
 import snow.player.state.PersistentPlaylistState;
 import snow.player.state.PersistentRadioStationState;
@@ -281,6 +283,14 @@ public abstract class PlayerService extends Service implements PlayerManager {
 
     protected final int getPlayerType() {
         return mPlayerType;
+    }
+
+    protected final PlaylistPlayer getPlaylistPlayer() {
+        return mPlaylistPlayer;
+    }
+
+    protected final RadioStationPlayer getRadioStationPlayer() {
+        return mRadioStationPlayer;
     }
 
     protected final boolean isPlaying() {
