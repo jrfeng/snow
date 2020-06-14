@@ -29,10 +29,12 @@ public interface PlayerManager {
      */
     void unregisterPlayerStateListener(String token);
 
-    @Channel
-    interface OnConfigChangeListener {
+    interface OnPlayerTypeChangeListener {
         void onPlayerTypeChanged(int playerType);
+    }
 
+    @Channel
+    interface OnConfigChangeListener extends OnPlayerTypeChangeListener {
         void syncPlayerState(int playerType, PlaylistState playlistState, RadioStationState radioStationState);
     }
 }
