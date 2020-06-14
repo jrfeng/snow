@@ -121,6 +121,6 @@ public interface PlaylistPlayer extends Player {
          *
          * @param position 当前正在播放的音乐的新位置
          */
-        void onPlayingMusicItemPositionChanged(int position);
+        void onPositionChanged(int position);
     }
 }

@@ -75,7 +75,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         for (String key : listenerMap.keySet()) {
             PlaylistStateListener listener = listenerMap.get(key);
             if (listener != null) {
-                listener.onPlayingMusicItemPositionChanged(position);
+                listener.onPositionChanged(position);
             }
         }
     }
