@@ -167,6 +167,9 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     public final void release() {
         disposeLastGetMusicItemUri();
         releaseMusicPlayer();
+
+        mStateListenerMap.clear();
+
         mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
         mNetworkUtil.unsubscribeNetworkState();
