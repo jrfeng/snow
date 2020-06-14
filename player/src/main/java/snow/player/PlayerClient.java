@@ -68,7 +68,16 @@ public class PlayerClient {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerService);
 
+        if (serviceNotFound(context, playerService)) {
+            throw new IllegalArgumentException("PlayerService not found, Please check your 'AndroidManifest.xml'");
+        }
+
         return new PlayerClient(context, playerService);
+    }
+
+    private static boolean serviceNotFound(Context context, Class<? extends PlayerService> playerService) {
+        Intent intent = new Intent(context, playerService);
+        return intent.resolveActivity(context.getPackageManager()) == null;
     }
 
     private String getToken() {
