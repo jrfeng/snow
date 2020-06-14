@@ -1,5 +1,7 @@
 package snow.player;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
+import com.tencent.mmkv.MMKV;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,26 +31,44 @@ import snow.player.state.PlaylistState;
 import snow.player.state.PlaylistStateListenerChannel;
 import snow.player.state.RadioStationState;
 import snow.player.state.RadioStationStateListenerChannel;
+import snow.player.util.ErrorUtil;
 
 public abstract class PlayerService extends Service implements PlayerManager {
+    private static final String KEY_PLAYER_TYPE = "player_type";
+
+    private String mPersistentId;
+    private int mNotificationId;
+
     private PlaylistState mPlaylistState;
     private RadioStationState mRadioStationState;
 
     private PlaylistManager mPlaylistManager;
-
     private PlaylistPlayerImp mPlaylistPlayer;
     private RadioStationPlayerImp mRadioStationPlayer;
-
     private MessengerPipe mControllerPipe;
 
     private HashMap<String, OnConfigChangeListener> mConfigChangeListenerMap;
+
+    private MMKV mMMKV;
+    private int mPlayerType;
+    private boolean mForeground;
+
+    private NotificationManager mNotificationManager;
 
     @Override
     public void onCreate() {
         super.onCreate();
         startService(new Intent(this, this.getClass()));
 
+        mPersistentId = getPersistentId();
+        mNotificationId = getNotificationId();
         mConfigChangeListenerMap = new HashMap<>();
+
+        MMKV.initialize(this);
+        mMMKV = MMKV.mmkvWithID(mPersistentId);
+        mPlayerType = mMMKV.decodeInt(KEY_PLAYER_TYPE);
+
+        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         initPlayerState();
         initPlaylistManager();
@@ -55,11 +76,12 @@ public abstract class PlayerService extends Service implements PlayerManager {
         initControllerPipe();
     }
 
-    private void initPlayerState() {
-        String id = this.getClass().getName();
+    @NonNull
+    protected abstract Notification onCreateNotification(int playerType);
 
-        mPlaylistState = new PersistentPlaylistState(this, id);
-        mRadioStationState = new PersistentRadioStationState(this, id);
+    private void initPlayerState() {
+        mPlaylistState = new PersistentPlaylistState(this, mPersistentId);
+        mRadioStationState = new PersistentRadioStationState(this, mPersistentId);
     }
 
     private void initPlaylistManager() {
@@ -104,16 +126,23 @@ public abstract class PlayerService extends Service implements PlayerManager {
     }
 
     private void notifyPlayerTypeChanged(int playerType) {
+        if (playerType == mPlayerType) {
+            return;
+        }
+
+        mPlayerType = playerType;
+        mMMKV.encode(KEY_PLAYER_TYPE, mPlayerType);
+
         for (String key : mConfigChangeListenerMap.keySet()) {
             OnConfigChangeListener listener = mConfigChangeListenerMap.get(key);
             if (listener != null) {
-                listener.onPlayerTypeChanged(playerType);
+                listener.onPlayerTypeChanged(mPlayerType);
             }
         }
     }
 
     private void syncPlayerState(OnConfigChangeListener listener) {
-        listener.syncPlayerState(new PlaylistState(mPlaylistState), new RadioStationState(mRadioStationState));
+        listener.syncPlayerState(mPlayerType, new PlaylistState(mPlaylistState), new RadioStationState(mRadioStationState));
     }
 
     private void addOnConfigChangeListener(@NonNull String token, @NonNull OnConfigChangeListener listener) {
@@ -140,6 +169,8 @@ public abstract class PlayerService extends Service implements PlayerManager {
     public void onDestroy() {
         super.onDestroy();
 
+        stopForegroundEx(true);
+
         mPlaylistPlayer.release();
         mRadioStationPlayer.release();
 
@@ -161,6 +192,99 @@ public abstract class PlayerService extends Service implements PlayerManager {
         removeOnConfigChangeListener(token);
         mPlaylistPlayer.removeStateListener(token);
         mRadioStationPlayer.removeStateListener(token);
+    }
+
+    /**
+     * 返回一个字符串 ID。该 ID 将用于对播放器的状态进行持久化。请确保该 ID 的唯一性。
+     * <p>
+     * 默认的 ID 值为：this.getClass().getName()
+     */
+    @NonNull
+    protected String getPersistentId() {
+        return this.getClass().getName();
+    }
+
+    /**
+     * 获取 Notification 的 ID（默认返回 1）。
+     */
+    protected int getNotificationId() {
+        return 1;
+    }
+
+    protected final int getPlayerType() {
+        return mPlayerType;
+    }
+
+    protected final boolean isPlaying() {
+        switch (mPlayerType) {
+            case TYPE_PLAYLIST:
+                return mPlaylistPlayer.isPlaying();
+            case TYPE_RADIO_STATION:
+                return mRadioStationPlayer.isPlaying();
+            default:
+                return false;
+        }
+    }
+
+    protected final MusicItem getPlayingMusicItem() {
+        switch (mPlayerType) {
+            case TYPE_PLAYLIST:
+                return mPlaylistState.getMusicItem();
+            case TYPE_RADIO_STATION:
+                return mRadioStationState.getMusicItem();
+            default:
+                return null;
+        }
+    }
+
+    protected final boolean isError() {
+        return getErrorCode() != ErrorUtil.ERROR_NO_ERROR;
+    }
+
+    protected final int getErrorCode() {
+        switch (mPlayerType) {
+            case TYPE_PLAYLIST:
+                return mPlaylistState.getErrorCode();
+            case TYPE_RADIO_STATION:
+                return mRadioStationState.getErrorCode();
+            default:
+                return ErrorUtil.ERROR_NO_ERROR;
+        }
+    }
+
+    protected final String getErrorMessage() {
+        return ErrorUtil.getErrorMessage(this, getErrorCode());
+    }
+
+    protected final void invalidateNotification() {
+        if (isPlaying() && !isForeground()) {
+            startForeground();
+            return;
+        }
+
+        if (!isPlaying() && isForeground()) {
+            stopForegroundEx(false);
+        }
+
+        updateNotification();
+    }
+
+    private boolean isForeground() {
+        return mForeground;
+    }
+
+    private void startForeground() {
+        mForeground = true;
+        startForeground(mNotificationId, onCreateNotification(mPlayerType));
+    }
+
+    private void stopForegroundEx(boolean removeNotification) {
+        mForeground = false;
+        stopForeground(false);
+    }
+
+    private void updateNotification() {
+        mNotificationManager.notify(mNotificationId, onCreateNotification(mPlayerType));
     }
 
     /**
@@ -224,27 +348,32 @@ public abstract class PlayerService extends Service implements PlayerManager {
     }
 
     protected void onPlaying(long progress, long updateTime) {
+        invalidateNotification();
     }
 
     protected void onPaused() {
+        invalidateNotification();
     }
 
     protected void onStalled() {
     }
 
     protected void onStopped() {
+        invalidateNotification();
     }
 
     protected void onError(int errorCode, String errorMessage) {
+        invalidateNotification();
     }
 
-    protected void onPlayComplete() {
+    protected void onPlayComplete(MusicItem musicItem) {
     }
 
     protected void onRequestAudioFocus(boolean success) {
     }
 
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
+        invalidateNotification();
     }
 
     private class PlaylistPlayerImp extends AbstractPlaylistPlayer {
@@ -280,51 +409,61 @@ public abstract class PlayerService extends Service implements PlayerManager {
 
         @Override
         protected void onPreparing() {
+            super.onPreparing();
             PlayerService.this.onPreparing();
         }
 
         @Override
         protected void onPrepared(int audioSessionId) {
+            super.onPrepared(audioSessionId);
             PlayerService.this.onPrepared(audioSessionId);
         }
 
         @Override
         protected void onPlaying(long progress, long updateTime) {
+            super.onPlaying(progress, updateTime);
             PlayerService.this.onPlaying(progress, updateTime);
         }
 
         @Override
         protected void onPaused() {
+            super.onPaused();
             PlayerService.this.onPaused();
         }
 
         @Override
         protected void onStalled() {
+            super.onStalled();
             PlayerService.this.onStalled();
         }
 
         @Override
         protected void onStopped() {
+            super.onStopped();
             PlayerService.this.onStopped();
         }
 
         @Override
         protected void onError(int errorCode, String errorMessage) {
+            super.onError(errorCode, errorMessage);
             PlayerService.this.onError(errorCode, errorMessage);
         }
 
         @Override
-        protected void onPlayComplete() {
-            PlayerService.this.onPlayComplete();
+        protected void onPlayComplete(MusicItem musicItem) {
+            super.onPlayComplete(musicItem);
+            PlayerService.this.onPlayComplete(musicItem);
         }
 
         @Override
         protected void onRequestAudioFocus(boolean success) {
+            super.onRequestAudioFocus(success);
             PlayerService.this.onRequestAudioFocus(success);
         }
 
         @Override
         protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
+            super.onPlayingMusicItemChanged(musicItem);
             PlayerService.this.onPlayingMusicItemChanged(musicItem);
         }
     }
@@ -366,51 +505,61 @@ public abstract class PlayerService extends Service implements PlayerManager {
 
         @Override
         protected void onPreparing() {
+            super.onPreparing();
             PlayerService.this.onPreparing();
         }
 
         @Override
         protected void onPrepared(int audioSessionId) {
+            super.onPrepared(audioSessionId);
             PlayerService.this.onPrepared(audioSessionId);
         }
 
         @Override
         protected void onPlaying(long progress, long updateTime) {
+            super.onPlaying(progress, updateTime);
             PlayerService.this.onPlaying(progress, updateTime);
         }
 
         @Override
         protected void onPaused() {
+            super.onPaused();
             PlayerService.this.onPaused();
         }
 
         @Override
         protected void onStalled() {
+            super.onStalled();
             PlayerService.this.onStalled();
         }
 
         @Override
         protected void onStopped() {
+            super.onStopped();
             PlayerService.this.onStopped();
         }
 
         @Override
         protected void onError(int errorCode, String errorMessage) {
+            super.onError(errorCode, errorMessage);
             PlayerService.this.onError(errorCode, errorMessage);
         }
 
         @Override
-        protected void onPlayComplete() {
-            PlayerService.this.onPlayComplete();
+        protected void onPlayComplete(MusicItem musicItem) {
+            super.onPlayComplete(musicItem);
+            PlayerService.this.onPlayComplete(musicItem);
         }
 
         @Override
         protected void onRequestAudioFocus(boolean success) {
+            super.onRequestAudioFocus(success);
             PlayerService.this.onRequestAudioFocus(success);
         }
 
         @Override
         protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
+            super.onPlayingMusicItemChanged(musicItem);
             PlayerService.this.onPlayingMusicItemChanged(musicItem);
         }
     }
