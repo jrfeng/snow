@@ -113,6 +113,15 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     }
 
     @Override
+    protected void onPlayComplete(MusicItem musicItem) {
+        if (mPlaylistState.getPlayMode() == PlayMode.LOOP) {
+            return;
+        }
+
+        skipToNext();
+    }
+
+    @Override
     public void skipToNext() {
         if (!mPlaylistAvailable) {
             mPlaylistAvailableAction = new Runnable() {
