@@ -341,12 +341,12 @@ public abstract class PlayerService extends Service implements PlayerManager {
         return mForeground;
     }
 
-    private void startForeground() {
+    protected final void startForeground() {
         mForeground = true;
         startForeground(mNotificationId, onCreateNotification(mPlayerType));
     }
 
-    private void stopForegroundEx(boolean removeNotification) {
+    protected final void stopForegroundEx(boolean removeNotification) {
         mForeground = false;
         stopForeground(false);
     }
