@@ -11,7 +11,15 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Preconditions;
 
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import media.helper.AudioFocusHelper;
 import media.helper.BecomeNoiseHelper;
 import snow.player.state.PlayerState;
@@ -46,6 +54,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private NetworkUtil mNetworkUtil;
 
+    private Disposable mDisposable;
+
     public AbstractPlayer(@NonNull Context context, @NonNull PlayerState playerState) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerState);
@@ -63,14 +73,46 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     // ********************************abstract********************************
 
+    /**
+     * 查询具有 soundQuality 音质的 MusicItem 表示的的音乐是否已被缓存。
+     * <p>
+     * 该方法会在异步线程中被调用。
+     *
+     * @param musicItem    要查询的 MusicItem 对象
+     * @param soundQuality 音乐的音质
+     * @return 如果已被缓存，则返回 true，否则返回 false
+     */
     protected abstract boolean isCached(MusicItem musicItem, int soundQuality);
 
+    /**
+     * 获取已缓存的具有 soundQuality 音质的 MusicItem 表示的的音乐的 Uri。
+     *
+     * @param musicItem    MusicItem 对象
+     * @param soundQuality 音乐的音质
+     * @return 音乐的 Uri。可为 null，返回 null 时播放器会忽略本次播放。
+     */
     @Nullable
     protected abstract Uri getCachedUri(MusicItem musicItem, int soundQuality);
 
+    /**
+     * 从网络获取具有 soundQuality 音质的 MusicItem 表示的的音乐的 Uri。
+     * <p>
+     * 该方法会在异步线程中被调用。
+     *
+     * @param musicItem    MusicItem 对象
+     * @param soundQuality 音乐的音质
+     * @return 音乐的 Uri。可为 null，返回 null 时播放器会忽略本次播放。
+     */
     @Nullable
     protected abstract Uri getUri(MusicItem musicItem, int soundQuality);
 
+    /**
+     * 该方法会在创建 MusicPlayer 对象时调用。
+     * <p>
+     * 你可以重写该方法来返回你自己的 MusicPlayer 实现。
+     *
+     * @param uri 要播放的音乐的 uri
+     */
     @NonNull
     protected abstract MusicPlayer onCreateMusicPlayer(Uri uri);
 
@@ -114,12 +156,16 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     protected void onRelease() {
     }
 
-    protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem){
+    protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
     }
 
     // ********************************end******************************
 
-    protected final void release() {
+    /**
+     * 释放播放器所占用的资源。注意！调用该方法后，就不允许在使用当前 Player 对象了，否则会导致不可预见的错误。
+     */
+    public final void release() {
+        disposeLastGetMusicItemUri();
         releaseMusicPlayer();
         mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
@@ -141,28 +187,90 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             return;
         }
 
-        Uri uri = getMusicItemUri(musicItem);
-
-        if (uri == null) {
-            return;
+        if (mDisposable != null) {
+            mDisposable.dispose();
         }
 
-        mMusicPlayer = onCreateMusicPlayer(uri);
-        attachListeners(mMusicPlayer);
-
-        mPreparedAction = preparedAction;
-        notifyPreparing();
-        mMusicPlayer.prepareAsync();
+        disposeLastGetMusicItemUri();
+        mDisposable = getMusicItemUriAsync(musicItem)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(onGetMusicItemUriSuccess(preparedAction), ignoreError());
     }
 
+    private void disposeLastGetMusicItemUri() {
+        if (mDisposable != null) {
+            mDisposable.dispose();
+        }
+    }
+
+    private Consumer<Uri> onGetMusicItemUriSuccess(@Nullable final Runnable preparedAction) {
+        return new Consumer<Uri>() {
+            @Override
+            public void accept(Uri uri) throws Exception {
+                mMusicPlayer = onCreateMusicPlayer(uri);
+                attachListeners(mMusicPlayer);
+
+                mPreparedAction = preparedAction;
+                notifyPreparing();
+                mMusicPlayer.prepareAsync();
+            }
+        };
+    }
+
+    private Consumer<Throwable> ignoreError() {
+        return new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                // ignore
+            }
+        };
+    }
+
+    /**
+     * 获取 MusicItem 的播放链接。该方法会在异步线程中被调用。
+     *
+     * @return MusicItem 的播放链接。获取失败时返回 null。
+     */
     @Nullable
     private Uri getMusicItemUri(@NonNull MusicItem musicItem) {
         if (isCached(musicItem, mPlayerState.getSoundQuality())) {
             notifyBufferingPercentChanged(100, System.currentTimeMillis());
-            return getCachedUri(musicItem, mPlayerState.getSoundQuality());
+            return getCachedUriWrapper(musicItem, mPlayerState.getSoundQuality());
         }
 
         return getUriFromInternet(musicItem);
+    }
+
+    private Uri getCachedUriWrapper(@NonNull MusicItem musicItem, int soundQuality) {
+        Uri result = getCachedUri(musicItem, soundQuality);
+
+        if (result == null) {
+            notifyError(ErrorUtil.ERROR_FILE_NOT_FOUND,
+                    ErrorUtil.getErrorMessage(mApplicationContext, ErrorUtil.ERROR_FILE_NOT_FOUND));
+        }
+
+        return result;
+    }
+
+    private Single<Uri> getMusicItemUriAsync(@NonNull final MusicItem musicItem) {
+        return Single.create(new SingleOnSubscribe<Uri>() {
+            @Override
+            public void subscribe(SingleEmitter<Uri> emitter) throws Exception {
+                Uri uri = getMusicItemUri(musicItem);
+
+                if (emitter.isDisposed()) {
+                    return;
+                }
+
+                if (uri != null) {
+                    emitter.onSuccess(uri);
+                    return;
+                }
+
+                emitter.onError(new NoSuchElementException());
+            }
+        });
     }
 
     private Uri getUriFromInternet(MusicItem musicItem) {
