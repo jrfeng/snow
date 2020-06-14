@@ -88,7 +88,7 @@ public abstract class PlayerService extends Service implements PlayerManager {
     }
 
     private void initPlaylistManager() {
-        mPlaylistManager = PlaylistManager.newInstance(this, this.getClass().getName());
+        mPlaylistManager = PlaylistManager.newInstance(this, mPersistentId);
     }
 
     private void initPlayer() {
