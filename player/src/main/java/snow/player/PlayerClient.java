@@ -50,7 +50,7 @@ public class PlayerClient {
 
     private List<PlayerManager.OnPlayerTypeChangeListener> mAllPlayerTypeChangeListener;
 
-    PlayerClient(Context context, Class<? extends PlayerService> playerService) {
+    private PlayerClient(Context context, Class<? extends PlayerService> playerService) {
         mApplicationContext = context.getApplicationContext();
         mPlayerService = playerService;
         mToken = getToken();
