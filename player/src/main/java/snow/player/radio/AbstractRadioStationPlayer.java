@@ -54,6 +54,12 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
     @NonNull
     protected abstract MusicItem getNextMusicItem(RadioStation radioStation);
 
+    @Override
+    protected void onPlayComplete(MusicItem musicItem) {
+        super.onPlayComplete(musicItem);
+        skipToNext();
+    }
+
     private Single<MusicItem> getNextMusicItemAsync(final RadioStation radioStation) {
         return Single.create(new SingleOnSubscribe<MusicItem>() {
             @Override
