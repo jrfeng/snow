@@ -59,6 +59,7 @@ public class PlayerClient {
         mAllPlayerTypeChangeListener = new ArrayList<>();
 
         initServiceConnection();
+        initAllController();
         initConfigChangeListener();
     }
 
@@ -86,6 +87,11 @@ public class PlayerClient {
                 onDisconnected();
             }
         };
+    }
+
+    private void initAllController() {
+        mPlaylistController = new PlaylistController(mApplicationContext, mToken);
+        mRadioStationController = new RadioStationController();
     }
 
     private void initConfigChangeListener() {
@@ -119,8 +125,9 @@ public class PlayerClient {
         MessengerPipe controllerPipe = new MessengerPipe(service);
 
         mPlayerManager = new PlayerManagerChannel.Emitter(controllerPipe);
-        mPlaylistController = new PlaylistController(mApplicationContext, mToken, new PlaylistPlayerChannel.Emitter(controllerPipe));
-        mRadioStationController = new RadioStationController(new RadioStationPlayerChannel.Emitter(controllerPipe));
+
+        mPlaylistController.setDelegate(new PlaylistPlayerChannel.Emitter(controllerPipe));
+        mRadioStationController.setDelegate(new RadioStationPlayerChannel.Emitter(controllerPipe));
 
         mPlaylistController.setConnected(true);
         mRadioStationController.setConnected(true);
@@ -167,6 +174,14 @@ public class PlayerClient {
         return mPlayerType;
     }
 
+    public PlaylistController getPlaylistController() {
+        return mPlaylistController;
+    }
+
+    public RadioStationController getRadioStationController() {
+        return mRadioStationController;
+    }
+
     public void addOnPlayerTypeChangeListener(PlayerManager.OnPlayerTypeChangeListener listener) {
         if (mAllPlayerTypeChangeListener.contains(listener)) {
             return;
@@ -185,11 +200,14 @@ public class PlayerClient {
         private PlaylistStateHolder mPlaylistStateHolder;
         private boolean mConnected;
 
-        PlaylistController(Context context, String playlistId, PlaylistPlayerChannel.Emitter delegate) {
+        PlaylistController(Context context, String playlistId) {
             mPlaylistManager = PlaylistManager.newInstance(context, playlistId);
-            mDelegate = delegate;
             mPlaylistStateHolder = new PlaylistStateHolder(mPlaylistManager);
             mConnected = false;
+        }
+
+        void setDelegate(PlaylistPlayerChannel.Emitter delegate) {
+            mDelegate = delegate;
         }
 
         void setConnected(boolean connected) {
@@ -202,6 +220,10 @@ public class PlayerClient {
 
         PlaylistStateListener getPlaylistStateListener() {
             return mPlaylistStateHolder;
+        }
+
+        public boolean isConnected() {
+            return mConnected;
         }
 
         @Nullable
@@ -455,9 +477,12 @@ public class PlayerClient {
         private RadioStationStateHolder mRadioStationStateHolder;
         private boolean mConnected;
 
-        RadioStationController(RadioStationPlayerChannel.Emitter delegate) {
-            mDelegate = delegate;
+        RadioStationController() {
             mRadioStationStateHolder = new RadioStationStateHolder();
+        }
+
+        void setDelegate(RadioStationPlayerChannel.Emitter delegate) {
+            mDelegate = delegate;
         }
 
         void setRadioStationState(RadioStationState radioStationState) {
@@ -470,6 +495,10 @@ public class PlayerClient {
 
         void setConnected(boolean connected) {
             mConnected = connected;
+        }
+
+        public boolean isConnected() {
+            return mConnected;
         }
 
         @Override
