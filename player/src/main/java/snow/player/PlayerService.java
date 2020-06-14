@@ -352,6 +352,11 @@ public abstract class PlayerService extends Service implements PlayerManager {
     }
 
     protected final void startForeground() {
+        if (getPlayingMusicItem() == null) {
+            stopForegroundEx(true);
+            return;
+        }
+
         mForeground = true;
         startForeground(mNotificationId, onCreateNotification(mPlayerType));
     }
@@ -362,6 +367,11 @@ public abstract class PlayerService extends Service implements PlayerManager {
     }
 
     private void updateNotification() {
+        if (getPlayingMusicItem() == null) {
+            stopForegroundEx(true);
+            return;
+        }
+
         mNotificationManager.notify(mNotificationId, onCreateNotification(mPlayerType));
     }
 
