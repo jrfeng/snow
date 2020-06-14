@@ -153,6 +153,9 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     protected void onRequestAudioFocus(boolean success) {
     }
 
+    protected void onLossAudioFocus(){
+    }
+
     protected void onRelease() {
     }
 
@@ -382,6 +385,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
                 }
 
                 pause();
+                onLossAudioFocus();
             }
 
             @Override
@@ -392,6 +396,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
                 playing = isPlaying();
                 pause();
+                onLossAudioFocus();
             }
 
             @Override
