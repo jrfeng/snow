@@ -19,6 +19,7 @@ import java.util.Map;
 
 import channel.helper.Dispatcher;
 import channel.helper.pipe.MessengerPipe;
+import media.helper.MediaButtonHelper;
 import snow.player.playlist.AbstractPlaylistPlayer;
 import snow.player.playlist.PlaylistManager;
 import snow.player.playlist.PlaylistPlayerChannel;
@@ -53,6 +54,7 @@ public abstract class PlayerService extends Service implements PlayerManager {
     private int mPlayerType;
     private boolean mForeground;
 
+    private MediaButtonHelper mMediaButtonHelper;
     private NotificationManager mNotificationManager;
 
     @Override
@@ -74,6 +76,7 @@ public abstract class PlayerService extends Service implements PlayerManager {
         initPlaylistManager();
         initPlayer();
         initControllerPipe();
+        initMediaButtonHelper();
     }
 
     @NonNull
@@ -121,6 +124,71 @@ public abstract class PlayerService extends Service implements PlayerManager {
                 }
 
                 return false;
+            }
+        });
+    }
+
+    private void initMediaButtonHelper() {
+        mMediaButtonHelper = new MediaButtonHelper(this, new MediaButtonHelper.MediaListener() {
+            private Player getPlayer() {
+                if (mPlayerType == TYPE_RADIO_STATION) {
+                    return mRadioStationPlayer;
+                }
+
+                return mPlaylistPlayer;
+            }
+
+            @Override
+            public void onPlay() {
+                getPlayer().play();
+            }
+
+            @Override
+            public void onPause() {
+                getPlayer().pause();
+            }
+
+            @Override
+            public void onPlayPause() {
+                getPlayer().playOrPause();
+            }
+
+            @Override
+            public void onStop() {
+                getPlayer().stop();
+            }
+
+            @Override
+            public void onNext() {
+                if (mPlayerType == TYPE_RADIO_STATION) {
+                    mRadioStationPlayer.skipToNext();
+                }
+
+                mPlaylistPlayer.skipToNext();
+            }
+
+            @Override
+            public void onPrevious() {
+                if (mPlayerType == TYPE_RADIO_STATION) {
+                    return;
+                }
+
+                mPlaylistPlayer.skipToPrevious();
+            }
+
+            @Override
+            public void onHeadsetHookClicked(int clickCount) {
+                switch (clickCount) {
+                    case 1:
+                        onPlayPause();
+                        break;
+                    case 2:
+                        onNext();
+                        break;
+                    case 3:
+                        onPrevious();
+                        break;
+                }
             }
         });
     }
@@ -370,6 +438,13 @@ public abstract class PlayerService extends Service implements PlayerManager {
     }
 
     protected void onRequestAudioFocus(boolean success) {
+        if (success) {
+            mMediaButtonHelper.registerMediaButtonReceiver();
+        }
+    }
+
+    protected void onLossAudioFocus(){
+        mMediaButtonHelper.unregisterMediaButtonReceiver();
     }
 
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
@@ -459,6 +534,12 @@ public abstract class PlayerService extends Service implements PlayerManager {
         protected void onRequestAudioFocus(boolean success) {
             super.onRequestAudioFocus(success);
             PlayerService.this.onRequestAudioFocus(success);
+        }
+
+        @Override
+        protected void onLossAudioFocus() {
+            super.onLossAudioFocus();
+            PlayerService.this.onLossAudioFocus();
         }
 
         @Override
@@ -555,6 +636,12 @@ public abstract class PlayerService extends Service implements PlayerManager {
         protected void onRequestAudioFocus(boolean success) {
             super.onRequestAudioFocus(success);
             PlayerService.this.onRequestAudioFocus(success);
+        }
+
+        @Override
+        protected void onLossAudioFocus() {
+            super.onLossAudioFocus();
+            PlayerService.this.onLossAudioFocus();
         }
 
         @Override
