@@ -36,7 +36,7 @@ import snow.player.state.RadioStationState;
 import snow.player.state.RadioStationStateListenerChannel;
 import snow.player.util.ErrorUtil;
 
-public abstract class PlayerService extends Service implements PlayerManager {
+public class PlayerService extends Service implements PlayerManager {
     private static final String KEY_PLAYER_TYPE = "player_type";
 
     private String mPersistentId;
@@ -82,7 +82,10 @@ public abstract class PlayerService extends Service implements PlayerManager {
     }
 
     @NonNull
-    protected abstract Notification onCreateNotification(int playerType);
+    protected Notification onCreateNotification(int playerType) {
+        // TODO notification
+        return null;
+    }
 
     private void initPlayerState() {
         mPlaylistState = new PersistentPlaylistState(this, mPersistentId);
@@ -132,50 +135,34 @@ public abstract class PlayerService extends Service implements PlayerManager {
 
     private void initMediaButtonHelper() {
         mMediaButtonHelper = new MediaButtonHelper(this, new MediaButtonHelper.MediaListener() {
-            private Player getPlayer() {
-                if (mPlayerType == TYPE_RADIO_STATION) {
-                    return mRadioStationPlayer;
-                }
-
-                return mPlaylistPlayer;
-            }
-
             @Override
             public void onPlay() {
-                getPlayer().play();
+                play();
             }
 
             @Override
             public void onPause() {
-                getPlayer().pause();
+                pause();
             }
 
             @Override
             public void onPlayPause() {
-                getPlayer().playOrPause();
+                playOrPause();
             }
 
             @Override
             public void onStop() {
-                getPlayer().stop();
+               stop();
             }
 
             @Override
             public void onNext() {
-                if (mPlayerType == TYPE_RADIO_STATION) {
-                    mRadioStationPlayer.skipToNext();
-                }
-
-                mPlaylistPlayer.skipToNext();
+                skipToNext();
             }
 
             @Override
             public void onPrevious() {
-                if (mPlayerType == TYPE_RADIO_STATION) {
-                    return;
-                }
-
-                mPlaylistPlayer.skipToPrevious();
+                skipToPrevious();
             }
 
             @Override
@@ -384,7 +371,9 @@ public abstract class PlayerService extends Service implements PlayerManager {
      * @param soundQuality 音乐的音质
      * @return 如果已被缓存，则返回 true，否则返回 false
      */
-    protected abstract boolean isCached(MusicItem musicItem, int soundQuality);
+    protected boolean isCached(MusicItem musicItem, int soundQuality) {
+        return false;
+    }
 
     /**
      * 获取已缓存的具有 soundQuality 音质的 MusicItem 表示的的音乐的 Uri。
@@ -394,7 +383,9 @@ public abstract class PlayerService extends Service implements PlayerManager {
      * @return 音乐的 Uri。可为 null，返回 null 时播放器会忽略本次播放。
      */
     @Nullable
-    protected abstract Uri getCachedUri(MusicItem musicItem, int soundQuality);
+    protected Uri getCachedUri(MusicItem musicItem, int soundQuality) {
+        return null;
+    }
 
     /**
      * 从网络获取具有 soundQuality 音质的 MusicItem 表示的的音乐的 Uri。
@@ -406,7 +397,9 @@ public abstract class PlayerService extends Service implements PlayerManager {
      * @return 音乐的 Uri。可为 null，返回 null 时播放器会忽略本次播放。
      */
     @Nullable
-    protected abstract Uri getUri(MusicItem musicItem, int soundQuality);
+    protected Uri getUri(MusicItem musicItem, int soundQuality) {
+        return Uri.parse(musicItem.getUri());
+    }
 
     /**
      * 该方法会在创建 MusicPlayer 对象时调用。
@@ -416,7 +409,10 @@ public abstract class PlayerService extends Service implements PlayerManager {
      * @param uri 要播放的音乐的 uri
      */
     @NonNull
-    protected abstract MusicPlayer onCreateMusicPlayer(Uri uri);
+    protected MusicPlayer onCreateMusicPlayer(Uri uri) {
+        // TODO MediaMusicPlayer
+        return null;
+    }
 
     /**
      * 获取 “电台” 的下一首音乐。
@@ -427,7 +423,50 @@ public abstract class PlayerService extends Service implements PlayerManager {
      * @return “电台” 的下一首音乐（不能为 null）
      */
     @NonNull
-    protected abstract MusicItem getNextMusicItem(RadioStation radioStation);
+    protected MusicItem getNextMusicItem(RadioStation radioStation) {
+        // TODO
+        return null;
+    }
+
+    private Player getPlayer() {
+        if (mPlayerType == TYPE_RADIO_STATION) {
+            return mRadioStationPlayer;
+        }
+
+        return mPlaylistPlayer;
+    }
+
+    protected final void play() {
+        getPlayer().play();
+    }
+
+    protected final void pause() {
+        getPlayer().pause();
+    }
+
+    protected final void playOrPause() {
+        getPlayer().playOrPause();
+    }
+
+    protected final void stop() {
+        getPlayer().stop();
+    }
+
+    protected final void skipToNext() {
+        if (mPlayerType == TYPE_RADIO_STATION) {
+            mRadioStationPlayer.skipToNext();
+        }
+
+        mPlaylistPlayer.skipToNext();
+    }
+
+    protected final void skipToPrevious() {
+        if (mPlayerType == TYPE_RADIO_STATION) {
+            return;
+        }
+
+        mPlaylistPlayer.skipToPrevious();
+    }
 
     protected void onPreparing() {
     }
