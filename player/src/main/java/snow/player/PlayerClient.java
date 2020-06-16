@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.IBinder;
 
 import androidx.annotation.NonNull;
@@ -76,8 +77,9 @@ public class PlayerClient {
     }
 
     private static boolean serviceNotFound(Context context, Class<? extends PlayerService> playerService) {
+        PackageManager pm = context.getPackageManager();
         Intent intent = new Intent(context, playerService);
-        return intent.resolveActivity(context.getPackageManager()) == null;
+        return pm.resolveService(intent, 0) == null;
     }
 
     private String getToken() {
