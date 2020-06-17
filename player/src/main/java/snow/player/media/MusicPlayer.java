@@ -249,7 +249,7 @@ public abstract class MusicPlayer {
      * 用于监听事件：进入缓冲区的数据变慢或停止并且播放缓冲区没有足够的数据继续播放。
      */
     public interface OnStalledListener {
-        void onStalled();
+        void onStalled(boolean stalled);
     }
 
     /**

@@ -152,6 +152,30 @@ public class MediaMusicPlayer extends MusicPlayer {
     @Override
     public void setOnStalledListener(OnStalledListener listener) {
         mStalledListener = listener;
+        if (listener == null) {
+            mMediaPlayer.setOnInfoListener(null);
+            return;
+        }
+
+        mMediaPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+            @Override
+            public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                if (mStalledListener == null) {
+                    return false;
+                }
+
+                switch (what) {
+                    case MediaPlayer.MEDIA_INFO_BUFFERING_START:
+                        mStalledListener.onStalled(true);
+                        return true;
+                    case MediaPlayer.MEDIA_INFO_BUFFERING_END:
+                        mStalledListener.onStalled(false);
+                        return true;
+                }
+
+                return false;
+            }
+        });
     }
 
     @Override
