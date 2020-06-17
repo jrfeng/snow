@@ -84,12 +84,6 @@ public class PlayerService extends Service implements PlayerManager {
         initMediaButtonHelper();
     }
 
-    @NonNull
-    protected Notification onCreateNotification(int playerType) {
-        // TODO notification
-        return null;
-    }
-
     private void initPlayerState() {
         mPlaylistState = new PersistentPlaylistState(this, mPersistentId);
         mRadioStationState = new PersistentRadioStationState(this, mPersistentId);
@@ -185,6 +179,50 @@ public class PlayerService extends Service implements PlayerManager {
         });
     }
 
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mControllerPipe.getBinder();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        stopForegroundEx(true);
+
+        mPlaylistPlayer.release();
+        mRadioStationPlayer.release();
+
+        mPlaylistPlayer = null;
+        mRadioStationPlayer = null;
+    }
+
+    @Override
+    public final void shutdown() {
+        if (isPlaying()) {
+            pause();
+        }
+
+        notifyOnShutdown();
+    }
+
+    @Override
+    public void registerPlayerStateListener(String token, IBinder listener) {
+        MessengerPipe pipe = new MessengerPipe(listener);
+
+        addOnCommandCallback(token, new OnCommandCallbackChannel.Emitter(pipe));
+        mPlaylistPlayer.addStateListener(token, new PlaylistStateListenerChannel.Emitter(pipe));
+        mRadioStationPlayer.addStateListener(token, new RadioStationStateListenerChannel.Emitter(pipe));
+    }
+
+    @Override
+    public void unregisterPlayerStateListener(String token) {
+        removeOnConfigChangeListener(token);
+        mPlaylistPlayer.removeStateListener(token);
+        mRadioStationPlayer.removeStateListener(token);
+    }
+
     private void notifyPlayerTypeChanged(int playerType) {
         if (playerType == mPlayerType) {
             return;
@@ -219,34 +257,6 @@ public class PlayerService extends Service implements PlayerManager {
         mCommandCallbackMap.remove(token);
     }
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mControllerPipe.getBinder();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        stopForegroundEx(true);
-
-        mPlaylistPlayer.release();
-        mRadioStationPlayer.release();
-
-        mPlaylistPlayer = null;
-        mRadioStationPlayer = null;
-    }
-
-    @Override
-    public final void shutdown() {
-        if (isPlaying()) {
-            pause();
-        }
-
-        notifyOnShutdown();
-    }
-
     private void notifyOnShutdown() {
         for (String key : mCommandCallbackMap.keySet()) {
             OnCommandCallback callback = mCommandCallbackMap.get(key);
@@ -257,22 +267,6 @@ public class PlayerService extends Service implements PlayerManager {
 
         mCommandCallbackMap.clear();
         stopSelf();
-    }
-
-    @Override
-    public void registerPlayerStateListener(String token, IBinder listener) {
-        MessengerPipe pipe = new MessengerPipe(listener);
-
-        addOnCommandCallback(token, new OnCommandCallbackChannel.Emitter(pipe));
-        mPlaylistPlayer.addStateListener(token, new PlaylistStateListenerChannel.Emitter(pipe));
-        mRadioStationPlayer.addStateListener(token, new RadioStationStateListenerChannel.Emitter(pipe));
-    }
-
-    @Override
-    public void unregisterPlayerStateListener(String token) {
-        removeOnConfigChangeListener(token);
-        mPlaylistPlayer.removeStateListener(token);
-        mRadioStationPlayer.removeStateListener(token);
     }
 
     /**
@@ -389,6 +383,12 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         mNotificationManager.notify(mNotificationId, onCreateNotification(mPlayerType));
+    }
+
+    @NonNull
+    protected Notification onCreateNotification(int playerType) {
+        // TODO notification
+        return null;
     }
 
     /**
