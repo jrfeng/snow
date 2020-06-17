@@ -12,7 +12,6 @@ import com.google.common.base.Preconditions;
 
 import snow.player.media.MusicItem;
 import snow.player.Player;
-import snow.player.util.ErrorUtil;
 
 /**
  * 用于保存基本的播放器状态。
@@ -49,7 +48,7 @@ public class PlayerState implements Parcelable, Cloneable {
         mAudioSessionId = 0;
         mBufferingPercent = 0;
         mBufferingPercentUpdateTime = System.currentTimeMillis();
-        mErrorCode = ErrorUtil.ERROR_NO_ERROR;
+        mErrorCode = Player.Error.NO_ERROR;
         mErrorMessage = "";
     }
 
@@ -250,7 +249,7 @@ public class PlayerState implements Parcelable, Cloneable {
         mPlaybackState = playbackState;
 
         if (playbackState != Player.PlaybackState.ERROR) {
-            mErrorCode = ErrorUtil.ERROR_NO_ERROR;
+            mErrorCode = Player.Error.NO_ERROR;
             mErrorMessage = "";
         }
     }
@@ -314,9 +313,9 @@ public class PlayerState implements Parcelable, Cloneable {
     }
 
     /**
-     * 获取错误码。如果没有发生任何错误，则返回 {@link ErrorUtil#ERROR_NO_ERROR}。
+     * 获取错误码。如果没有发生任何错误，则返回 {@link Player.Error#NO_ERROR}。
      *
-     * @see ErrorUtil
+     * @see Player.Error
      */
     public int getErrorCode() {
         return mErrorCode;
@@ -325,11 +324,11 @@ public class PlayerState implements Parcelable, Cloneable {
     /**
      * 设置错误码。
      *
-     * @param errorCode 错误码。预定义的错误码：{@link ErrorUtil#ERROR_NO_ERROR},
-     *                  {@link ErrorUtil#ERROR_ONLY_WIFI_NETWORK},
-     *                  {@link ErrorUtil#ERROR_PLAYER_ERROR},
-     *                  {@link ErrorUtil#ERROR_NETWORK_UNAVAILABLE}
-     * @see ErrorUtil
+     * @param errorCode 错误码。预定义的错误码：{@link Player.Error#NO_ERROR},
+     *                  {@link Player.Error#ONLY_WIFI_NETWORK},
+     *                  {@link Player.Error#PLAYER_ERROR},
+     *                  {@link Player.Error#NETWORK_UNAVAILABLE}
+     * @see Player.Error
      */
     public void setErrorCode(int errorCode) {
         mErrorCode = errorCode;
@@ -346,7 +345,7 @@ public class PlayerState implements Parcelable, Cloneable {
      * 设置错误信息（不能为 null）。
      *
      * @param errorMessage 错误信息（不能为 null）。
-     * @see ErrorUtil#getErrorMessage(Context, int)
+     * @see Player.Error#getErrorMessage(Context, int)
      */
     public void setErrorMessage(@NonNull String errorMessage) {
         Preconditions.checkNotNull(errorMessage);

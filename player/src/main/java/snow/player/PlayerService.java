@@ -38,7 +38,6 @@ import snow.player.state.PlaylistState;
 import snow.player.state.PlaylistStateListenerChannel;
 import snow.player.state.RadioStationState;
 import snow.player.state.RadioStationStateListenerChannel;
-import snow.player.util.ErrorUtil;
 
 public class PlayerService extends Service implements PlayerManager {
     private static final String KEY_PLAYER_TYPE = "player_type";
@@ -328,7 +327,7 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     protected final boolean isError() {
-        return getErrorCode() != ErrorUtil.ERROR_NO_ERROR;
+        return getErrorCode() != Player.Error.NO_ERROR;
     }
 
     protected final int getErrorCode() {
@@ -338,12 +337,12 @@ public class PlayerService extends Service implements PlayerManager {
             case TYPE_RADIO_STATION:
                 return mRadioStationState.getErrorCode();
             default:
-                return ErrorUtil.ERROR_NO_ERROR;
+                return Player.Error.NO_ERROR;
         }
     }
 
     protected final String getErrorMessage() {
-        return ErrorUtil.getErrorMessage(this, getErrorCode());
+        return Player.Error.getErrorMessage(this, getErrorCode());
     }
 
     protected final void invalidateNotification() {

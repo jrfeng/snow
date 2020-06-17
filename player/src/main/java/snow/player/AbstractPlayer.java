@@ -27,7 +27,6 @@ import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.state.PlayerState;
 import snow.player.state.PlayerStateListener;
-import snow.player.util.ErrorUtil;
 import snow.player.util.NetworkUtil;
 
 public abstract class AbstractPlayer<T extends PlayerStateListener> implements Player {
@@ -221,8 +220,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
                     mMusicPlayer = onCreateMusicPlayer(uri);
                 } catch (IOException e) {
                     e.printStackTrace();
-                    notifyError(ErrorUtil.ERROR_DATA_LOAD_FAILED,
-                            ErrorUtil.getErrorMessage(mApplicationContext, ErrorUtil.ERROR_DATA_LOAD_FAILED));
+                    notifyError(Error.DATA_LOAD_FAILED,
+                            Error.getErrorMessage(mApplicationContext, Error.DATA_LOAD_FAILED));
                     return;
                 }
 
@@ -263,8 +262,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         Uri result = getCachedUri(musicItem, soundQuality);
 
         if (result == null) {
-            notifyError(ErrorUtil.ERROR_FILE_NOT_FOUND,
-                    ErrorUtil.getErrorMessage(mApplicationContext, ErrorUtil.ERROR_FILE_NOT_FOUND));
+            notifyError(Error.FILE_NOT_FOUND,
+                    Error.getErrorMessage(mApplicationContext, Error.FILE_NOT_FOUND));
         }
 
         return result;
@@ -292,8 +291,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private Uri getUriFromInternet(MusicItem musicItem) {
         if (!mNetworkUtil.networkAvailable()) {
-            notifyError(ErrorUtil.ERROR_NETWORK_UNAVAILABLE,
-                    ErrorUtil.getErrorMessage(mApplicationContext, ErrorUtil.ERROR_NETWORK_UNAVAILABLE));
+            notifyError(Error.NETWORK_UNAVAILABLE,
+                    Error.getErrorMessage(mApplicationContext, Error.NETWORK_UNAVAILABLE));
             return null;
         }
 
@@ -305,8 +304,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             return getUri(musicItem, mPlayerState.getSoundQuality());
         }
 
-        notifyError(ErrorUtil.ERROR_ONLY_WIFI_NETWORK,
-                ErrorUtil.getErrorMessage(mApplicationContext, ErrorUtil.ERROR_ONLY_WIFI_NETWORK));
+        notifyError(Error.ONLY_WIFI_NETWORK,
+                Error.getErrorMessage(mApplicationContext, Error.ONLY_WIFI_NETWORK));
 
         return null;
     }
@@ -379,8 +378,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
                 releaseMusicPlayer();
 
-                notifyError(ErrorUtil.ERROR_PLAYER_ERROR,
-                        ErrorUtil.getErrorMessage(mApplicationContext, ErrorUtil.ERROR_PLAYER_ERROR));
+                notifyError(Error.PLAYER_ERROR,
+                        Error.getErrorMessage(mApplicationContext, Error.PLAYER_ERROR));
             }
         };
     }
@@ -910,8 +909,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         if (onlyWifiNetwork && !isWifiNetwork && notBufferingEnd()) {
             pause();
             releaseMusicPlayer();
-            notifyError(ErrorUtil.ERROR_ONLY_WIFI_NETWORK,
-                    ErrorUtil.getErrorMessage(mApplicationContext, ErrorUtil.ERROR_ONLY_WIFI_NETWORK));
+            notifyError(Error.ONLY_WIFI_NETWORK,
+                    Error.getErrorMessage(mApplicationContext, Error.ONLY_WIFI_NETWORK));
         }
     }
 

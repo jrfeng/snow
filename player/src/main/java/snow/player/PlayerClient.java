@@ -10,7 +10,6 @@ import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.hash.Hashing;
 
@@ -35,7 +34,6 @@ import snow.player.state.PlaylistStateListenerChannel;
 import snow.player.state.RadioStationState;
 import snow.player.state.RadioStationStateListener;
 import snow.player.state.RadioStationStateListenerChannel;
-import snow.player.util.ErrorUtil;
 
 public class PlayerClient {
     private Context mApplicationContext;
@@ -346,7 +344,7 @@ public class PlayerClient {
         }
 
         public boolean isError() {
-            return getErrorCode() != ErrorUtil.ERROR_NO_ERROR;
+            return getErrorCode() != Error.NO_ERROR;
         }
 
         public int getErrorCode() {
@@ -692,7 +690,7 @@ public class PlayerClient {
         }
 
         public boolean isError() {
-            return getErrorCode() != ErrorUtil.ERROR_NO_ERROR;
+            return getErrorCode() != Error.NO_ERROR;
         }
 
         public int getErrorCode() {

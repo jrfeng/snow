@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 
 import java.io.IOException;
 
-import snow.player.util.ErrorUtil;
+import snow.player.Player;
 
 /**
  * 封装了一个 MediaPlayer。注意！不允许复用 MediaMusicPlayer 对象。一旦调用 {@link #release()}
@@ -173,7 +173,7 @@ public class MediaMusicPlayer extends MusicPlayer {
                 releaseWakeLock();
 
                 listener.onError(MediaMusicPlayer.this,
-                        ErrorUtil.ERROR_PLAYER_ERROR);
+                        Player.Error.PLAYER_ERROR);
                 return true;
             }
         });

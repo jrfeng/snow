@@ -10,7 +10,6 @@ import org.junit.runner.RunWith;
 
 import snow.player.media.MusicItem;
 import snow.player.Player;
-import snow.player.util.ErrorUtil;
 
 import static org.junit.Assert.*;
 
@@ -31,7 +30,7 @@ public class PlayerStateTest {
         assertEquals(Player.PlaybackState.UNKNOWN, playerState.getPlaybackState());
         assertEquals(0, playerState.getAudioSessionId());
         assertEquals(0, playerState.getBufferingPercent());
-        assertEquals(ErrorUtil.ERROR_NO_ERROR, playerState.getErrorCode());
+        assertEquals(Player.Error.NO_ERROR, playerState.getErrorCode());
     }
 
     public void constructor2Test() {
@@ -47,14 +46,14 @@ public class PlayerStateTest {
     public void setPlaybackState() {
         PlayerState playerState = new PlayerState();
 
-        final int errorCode = ErrorUtil.ERROR_PLAYER_ERROR;
+        final int errorCode = Player.Error.PLAYER_ERROR;
 
         playerState.setErrorCode(errorCode);
 
         assertEquals(errorCode, playerState.getErrorCode());
 
         playerState.setPlaybackState(Player.PlaybackState.PLAYING);
-        assertEquals(ErrorUtil.ERROR_NO_ERROR, playerState.getErrorCode());
+        assertEquals(Player.Error.NO_ERROR, playerState.getErrorCode());
     }
 
     @Test
@@ -74,7 +73,7 @@ public class PlayerStateTest {
         final int audioSessionId = 15;
         final int bufferingPercent = 100;
         final long bufferingPercentUpdateTime = System.currentTimeMillis();
-        final int errorCode = ErrorUtil.ERROR_PLAYER_ERROR;
+        final int errorCode = Player.Error.PLAYER_ERROR;
         final String errorMessage = "player error";
 
         PlayerState playerState = new PlayerState();
@@ -130,7 +129,7 @@ public class PlayerStateTest {
         final int audioSessionId = 8;
         final int bufferingPercent = 95;
         final long bufferingPercentUpdateTime = System.currentTimeMillis();
-        final int errorCode = ErrorUtil.ERROR_ONLY_WIFI_NETWORK;
+        final int errorCode = Player.Error.ONLY_WIFI_NETWORK;
         final String errorMessage = "only wifi network";
 
         PlayerState playerState = new PlayerState();
@@ -173,7 +172,7 @@ public class PlayerStateTest {
         final int audioSessionId = 4;
         final int bufferingPercent = 50;
         final long bufferingPercentUpdateTime = System.currentTimeMillis();
-        final int errorCode = ErrorUtil.ERROR_NETWORK_UNAVAILABLE;
+        final int errorCode = Player.Error.NETWORK_UNAVAILABLE;
         final String errorMessage = "network unavailable";
 
         playerState.setPlayProgress(playProgress);
