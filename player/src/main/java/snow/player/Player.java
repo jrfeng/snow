@@ -2,6 +2,8 @@ package snow.player;
 
 import androidx.annotation.Nullable;
 
+import snow.player.media.MusicItem;
+
 /**
  * 该接口定义了音乐播放器的基本功能。
  */

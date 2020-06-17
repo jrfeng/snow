@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import snow.player.MusicItem;
+import snow.player.media.MusicItem;
 
 /**
  * 用于管理音乐播放器的播放队列。

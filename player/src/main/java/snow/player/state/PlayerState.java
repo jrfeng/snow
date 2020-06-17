@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
-import snow.player.MusicItem;
+import snow.player.media.MusicItem;
 import snow.player.Player;
 import snow.player.util.ErrorUtil;
 

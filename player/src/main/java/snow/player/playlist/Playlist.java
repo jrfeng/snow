@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import snow.player.MusicItem;
+import snow.player.media.MusicItem;
 
 /**
  * 用于存储播放队列。

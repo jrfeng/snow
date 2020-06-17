@@ -1,4 +1,4 @@
-package snow.player;
+package snow.player.media;
 
 import android.content.Context;
 import android.net.Uri;

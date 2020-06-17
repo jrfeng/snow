@@ -9,7 +9,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.runner.RunWith;
 
-import snow.player.MusicItem;
+import snow.player.media.MusicItem;
 import snow.player.Player;
 import snow.player.radio.RadioStation;
 

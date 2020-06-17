@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import snow.player.MusicItem;
+import snow.player.media.MusicItem;
 
 import static org.junit.Assert.*;
 

@@ -20,6 +20,8 @@ import java.util.Map;
 import channel.helper.Dispatcher;
 import channel.helper.pipe.MessengerPipe;
 import media.helper.MediaButtonHelper;
+import snow.player.media.MusicItem;
+import snow.player.media.MusicPlayer;
 import snow.player.playlist.AbstractPlaylistPlayer;
 import snow.player.playlist.PlaylistManager;
 import snow.player.playlist.PlaylistPlayer;
@@ -420,11 +422,10 @@ public class PlayerService extends Service implements PlayerManager {
      * 该方法会在异步线程中调用。
      *
      * @param radioStation 用于表示电台的 RadioStation 对象
-     * @return “电台” 的下一首音乐（不能为 null）
+     * @return “电台” 的下一首音乐（返回 null 时会停止播放）
      */
-    @NonNull
+    @Nullable
     protected MusicItem getNextMusicItem(RadioStation radioStation) {
-        // TODO
         return null;
     }
 
@@ -614,7 +615,7 @@ public class PlayerService extends Service implements PlayerManager {
             super(context, radioStationState);
         }
 
-        @NonNull
+        @Nullable
         @Override
         protected MusicItem getNextMusicItem(RadioStation radioStation) {
             return PlayerService.this.getNextMusicItem(radioStation);

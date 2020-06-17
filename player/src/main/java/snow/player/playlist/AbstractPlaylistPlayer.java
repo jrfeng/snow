@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import snow.player.AbstractPlayer;
-import snow.player.MusicItem;
+import snow.player.media.MusicItem;
 import snow.player.state.PlaylistState;
 import snow.player.state.PlaylistStateListener;
 

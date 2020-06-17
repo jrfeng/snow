@@ -1,4 +1,4 @@
-package snow.player;
+package snow.player.media;
 
 import android.os.Bundle;
 import android.os.Parcel;

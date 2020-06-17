@@ -17,6 +17,7 @@ import java.util.List;
 
 import channel.helper.DispatcherUtil;
 import channel.helper.pipe.MessengerPipe;
+import snow.player.media.MusicItem;
 import snow.player.playlist.PlaylistManager;
 import snow.player.playlist.PlaylistPlayer;
 import snow.player.playlist.PlaylistPlayerChannel;

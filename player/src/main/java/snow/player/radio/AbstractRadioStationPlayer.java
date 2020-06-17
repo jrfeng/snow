@@ -15,7 +15,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import snow.player.AbstractPlayer;
-import snow.player.MusicItem;
+import snow.player.media.MusicItem;
 import snow.player.state.RadioStationState;
 import snow.player.state.RadioStationStateListener;
 
