@@ -140,10 +140,6 @@ public interface Player {
          */
         public static final int STOPPED = 5;
         /**
-         * 缓冲中（该状态下应该显示一个缓冲进度条）。
-         */
-        public static final int STALLED = 6;
-        /**
          * 发送错误。
          */
         public static final int ERROR = 7;
@@ -217,17 +213,16 @@ public interface Player {
         void onStop();
 
         /**
-         * 当播放器的状态变为 “缓冲中” 时会回调该方法。
-         */
-        void onStalled();
-
-        /**
          * 当播放器发生错误时会回调该方法。
          *
          * @param errorCode    错误码
          * @param errorMessage 错误信息
          */
         void onError(int errorCode, String errorMessage);
+    }
+
+    interface OnStalledChangeListener {
+        void onStalledChanged(boolean stalled);
     }
 
     /**

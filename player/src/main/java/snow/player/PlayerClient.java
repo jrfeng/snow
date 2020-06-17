@@ -343,6 +343,10 @@ public class PlayerClient {
             return mPlaylistStateHolder.mPlaylistState.getBufferingPercentUpdateTime();
         }
 
+        public boolean isStalled() {
+            return mPlaylistStateHolder.mPlaylistState.isStalled();
+        }
+
         public boolean isError() {
             return getErrorCode() != Error.NO_ERROR;
         }
@@ -551,6 +555,14 @@ public class PlayerClient {
             mPlaylistStateHolder.removeOnPlaybackStateChangeListener(listener);
         }
 
+        public void addOnStalledChangeListener(OnStalledChangeListener listener) {
+            mPlaylistStateHolder.addOnStalledChangeListener(listener);
+        }
+
+        public void removeOnStalledChangeListener(OnStalledChangeListener listener) {
+            mPlaylistStateHolder.removeOnStalledChangeListener(listener);
+        }
+
         public void addOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
             mPlaylistStateHolder.addOnBufferingPercentChangeListener(listener);
         }
@@ -687,6 +699,10 @@ public class PlayerClient {
 
         public long getBufferingPrecentUpdateTime() {
             return mRadioStationStateHolder.mRadioStationState.getBufferingPercentUpdateTime();
+        }
+
+        public boolean isStalled() {
+            return mRadioStationStateHolder.mRadioStationState.isStalled();
         }
 
         public boolean isError() {
@@ -839,6 +855,14 @@ public class PlayerClient {
             mRadioStationStateHolder.removeOnPlaybackStateChangeListener(listener);
         }
 
+        public void addOnStalledChangeListener(OnStalledChangeListener listener) {
+            mRadioStationStateHolder.addOnStalledChangeListener(listener);
+        }
+
+        public void removeOnStalledChangeListener(OnStalledChangeListener listener) {
+            mRadioStationStateHolder.removeOnStalledChangeListener(listener);
+        }
+
         public void addOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
             mRadioStationStateHolder.addOnBufferingPercentChangeListener(listener);
         }
@@ -877,12 +901,14 @@ public class PlayerClient {
         private boolean mConnected;
 
         private List<Player.OnPlaybackStateChangeListener> mAllPlaybackStateChangeListener;
+        private List<Player.OnStalledChangeListener> mAllStalledChangeListener;
         private List<Player.OnBufferingPercentChangeListener> mAllBufferingPercentChangeListener;
         private List<Player.OnPlayingMusicItemChangeListener> mAllPlayingMusicItemChangeListener;
         private List<Player.OnSeekCompleteListener> mAllSeekCompleteListener;
 
         PlayerStateHolder() {
             mAllPlaybackStateChangeListener = new ArrayList<>();
+            mAllStalledChangeListener = new ArrayList<>();
             mAllBufferingPercentChangeListener = new ArrayList<>();
             mAllPlayingMusicItemChangeListener = new ArrayList<>();
             mAllSeekCompleteListener = new ArrayList<>();
@@ -899,6 +925,19 @@ public class PlayerClient {
 
         void removeOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
             mAllPlaybackStateChangeListener.remove(listener);
+        }
+
+        void addOnStalledChangeListener(Player.OnStalledChangeListener listener) {
+            if (mAllStalledChangeListener.contains(listener)) {
+                return;
+            }
+
+            mAllStalledChangeListener.add(listener);
+            notifyStalledChanged(listener);
+        }
+
+        void removeOnStalledChangeListener(Player.OnStalledChangeListener listener) {
+            mAllStalledChangeListener.add(listener);
         }
 
         void addOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
@@ -981,9 +1020,6 @@ public class PlayerClient {
                 case Player.PlaybackState.STOPPED:
                     listener.onStop();
                     break;
-                case Player.PlaybackState.STALLED:
-                    listener.onStalled();
-                    break;
                 case Player.PlaybackState.ERROR:
                     listener.onError(mPlayerState.getErrorCode(), mPlayerState.getErrorMessage());
                     break;
@@ -999,6 +1035,24 @@ public class PlayerClient {
 
             for (Player.OnPlaybackStateChangeListener listener : mAllPlaybackStateChangeListener) {
                 notifyPlaybackStateChanged(listener);
+            }
+        }
+
+        private void notifyStalledChanged(Player.OnStalledChangeListener listener) {
+            if (notConnect()) {
+                return;
+            }
+
+            listener.onStalledChanged(mPlayerState.isStalled());
+        }
+
+        private void notifyStalledChanged() {
+            if (notConnect()) {
+                return;
+            }
+
+            for(Player.OnStalledChangeListener listener : mAllStalledChangeListener) {
+                notifyStalledChanged(listener);
             }
         }
 
@@ -1095,13 +1149,6 @@ public class PlayerClient {
         }
 
         @Override
-        public void onStalled() {
-            mPlayerState.setPlaybackState(Player.PlaybackState.STALLED);
-
-            notifyPlaybackStateChanged();
-        }
-
-        @Override
         public void onError(int errorCode, String errorMessage) {
             mPlayerState.setPlaybackState(Player.PlaybackState.ERROR);
             mPlayerState.setErrorCode(errorCode);
@@ -1130,6 +1177,13 @@ public class PlayerClient {
             mPlayerState.setMusicItem(musicItem);
 
             notifyPlayingMusicItemChanged();
+        }
+
+        @Override
+        public void onStalledChanged(boolean stalled) {
+            mPlayerState.setStalled(stalled);
+
+            notifyStalledChanged();
         }
     }
 

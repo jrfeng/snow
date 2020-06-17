@@ -359,8 +359,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
         mOnStalledListener = new MusicPlayer.OnStalledListener() {
             @Override
-            public void onStalled() {
-                notifyStalled();
+            public void onStalled(boolean stalled) {
+                notifyStalled(stalled);
             }
         };
 
@@ -614,15 +614,15 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
     }
 
-    private void notifyStalled() {
-        mPlayerState.setPlaybackState(PlaybackState.STALLED);
+    private void notifyStalled(boolean stalled) {
+        mPlayerState.setStalled(stalled);
 
         onStalled();
 
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
-                listener.onStalled();
+                listener.onStalledChanged(stalled);
             }
         }
     }
