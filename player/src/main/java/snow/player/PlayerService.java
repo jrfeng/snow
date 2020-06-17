@@ -54,7 +54,7 @@ public class PlayerService extends Service implements PlayerManager {
     private RadioStationPlayerImp mRadioStationPlayer;
     private MessengerPipe mControllerPipe;
 
-    private HashMap<String, OnConfigChangeListener> mConfigChangeListenerMap;
+    private HashMap<String, OnCommandCallback> mCommandCallbackMap;
 
     private MMKV mMMKV;
     private int mPlayerType;
@@ -70,7 +70,7 @@ public class PlayerService extends Service implements PlayerManager {
 
         mPersistentId = getPersistentId();
         mNotificationId = getNotificationId();
-        mConfigChangeListenerMap = new HashMap<>();
+        mCommandCallbackMap = new HashMap<>();
 
         MMKV.initialize(this);
         mMMKV = MMKV.mmkvWithID(mPersistentId);
@@ -156,7 +156,7 @@ public class PlayerService extends Service implements PlayerManager {
 
             @Override
             public void onStop() {
-               stop();
+                stop();
             }
 
             @Override
@@ -194,30 +194,30 @@ public class PlayerService extends Service implements PlayerManager {
         mPlayerType = playerType;
         mMMKV.encode(KEY_PLAYER_TYPE, mPlayerType);
 
-        for (String key : mConfigChangeListenerMap.keySet()) {
-            OnConfigChangeListener listener = mConfigChangeListenerMap.get(key);
+        for (String key : mCommandCallbackMap.keySet()) {
+            OnCommandCallback listener = mCommandCallbackMap.get(key);
             if (listener != null) {
                 listener.onPlayerTypeChanged(mPlayerType);
             }
         }
     }
 
-    private void syncPlayerState(OnConfigChangeListener listener) {
+    private void syncPlayerState(OnCommandCallback listener) {
         listener.syncPlayerState(mPlayerType, new PlaylistState(mPlaylistState), new RadioStationState(mRadioStationState));
     }
 
-    private void addOnConfigChangeListener(@NonNull String token, @NonNull OnConfigChangeListener listener) {
+    private void addOnCommandCallback(@NonNull String token, @NonNull OnCommandCallback listener) {
         Preconditions.checkNotNull(token);
         Preconditions.checkNotNull(listener);
 
-        mConfigChangeListenerMap.put(token, listener);
+        mCommandCallbackMap.put(token, listener);
         syncPlayerState(listener);
     }
 
     private void removeOnConfigChangeListener(@NonNull String token) {
         Preconditions.checkNotNull(token);
 
-        mConfigChangeListenerMap.remove(token);
+        mCommandCallbackMap.remove(token);
     }
 
     @Nullable
@@ -240,10 +240,31 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     @Override
+    public final void shutdown() {
+        if (isPlaying()) {
+            pause();
+        }
+
+        notifyOnShutdown();
+    }
+
+    private void notifyOnShutdown() {
+        for (String key : mCommandCallbackMap.keySet()) {
+            OnCommandCallback callback = mCommandCallbackMap.get(key);
+            if (callback != null) {
+                callback.onShutdown();
+            }
+        }
+
+        mCommandCallbackMap.clear();
+        stopSelf();
+    }
+
+    @Override
     public void registerPlayerStateListener(String token, IBinder listener) {
         MessengerPipe pipe = new MessengerPipe(listener);
 
-        addOnConfigChangeListener(token, new OnConfigChangeListenerChannel.Emitter(pipe));
+        addOnCommandCallback(token, new OnCommandCallbackChannel.Emitter(pipe));
         mPlaylistPlayer.addStateListener(token, new PlaylistStateListenerChannel.Emitter(pipe));
         mRadioStationPlayer.addStateListener(token, new RadioStationStateListenerChannel.Emitter(pipe));
     }
@@ -326,6 +347,11 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     protected final void invalidateNotification() {
+        if (getPlayingMusicItem() == null) {
+            stopForegroundEx(true);
+            return;
+        }
+
         if (isPlaying() && !isForeground()) {
             startForeground();
             return;
@@ -354,7 +380,7 @@ public class PlayerService extends Service implements PlayerManager {
 
     protected final void stopForegroundEx(boolean removeNotification) {
         mForeground = false;
-        stopForeground(false);
+        stopForeground(removeNotification);
     }
 
     private void updateNotification() {
@@ -507,7 +533,7 @@ public class PlayerService extends Service implements PlayerManager {
         }
     }
 
-    protected void onLossAudioFocus(){
+    protected void onLossAudioFocus() {
         mMediaButtonHelper.unregisterMediaButtonReceiver();
     }
 

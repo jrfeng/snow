@@ -48,7 +48,7 @@ public class PlayerClient {
     private PlaylistController mPlaylistController;
     private RadioStationController mRadioStationController;
 
-    private PlayerManager.OnConfigChangeListener mConfigChangeListener;
+    private PlayerManager.OnCommandCallback mCommandCallback;
 
     private List<PlayerManager.OnPlayerTypeChangeListener> mAllPlayerTypeChangeListener;
 
@@ -107,7 +107,12 @@ public class PlayerClient {
     }
 
     private void initConfigChangeListener() {
-        mConfigChangeListener = new PlayerManager.OnConfigChangeListener() {
+        mCommandCallback = new PlayerManager.OnCommandCallback() {
+            @Override
+            public void onShutdown() {
+                disconnect();
+            }
+
             @Override
             public void onPlayerTypeChanged(int playerType) {
                 mPlayerType = playerType;
@@ -145,7 +150,7 @@ public class PlayerClient {
         mRadioStationController.setConnected(true);
 
         MessengerPipe listenerPipe = new MessengerPipe(DispatcherUtil.merge(
-                new OnConfigChangeListenerChannel.Dispatcher(mConfigChangeListener),
+                new OnCommandCallbackChannel.Dispatcher(mCommandCallback),
                 new PlaylistStateListenerChannel.Dispatcher(mPlaylistController.getPlaylistStateListener()),
                 new RadioStationStateListenerChannel.Dispatcher(mRadioStationController.getRadioStationStateListener())
         ));
@@ -192,6 +197,12 @@ public class PlayerClient {
 
     public RadioStationController getRadioStationController() {
         return mRadioStationController;
+    }
+
+    public void shutdown() {
+        if (isConnected()) {
+            mPlayerManager.shutdown();
+        }
     }
 
     public void addOnPlayerTypeChangeListener(PlayerManager.OnPlayerTypeChangeListener listener) {
