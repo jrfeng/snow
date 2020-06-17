@@ -3,6 +3,7 @@ package snow.player.radio;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.HashMap;
 
@@ -49,9 +50,9 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
      * 该方法会在异步线程中调用。
      *
      * @param radioStation 用于表示电台的 RadioStation 对象
-     * @return “电台” 的下一首音乐（不能为 null）
+     * @return “电台” 的下一首音乐（返回 null 时会停止播放）
      */
-    @NonNull
+    @Nullable
     protected abstract MusicItem getNextMusicItem(RadioStation radioStation);
 
     @Override
@@ -67,6 +68,11 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
                 MusicItem musicItem = getNextMusicItem(radioStation);
 
                 if (emitter.isDisposed()) {
+                    return;
+                }
+
+                if (musicItem == null) {
+                    emitter.onError(new UnsupportedOperationException("Music Item is null."));
                     return;
                 }
 
@@ -97,6 +103,12 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
                     @Override
                     public void accept(MusicItem musicItem) throws Exception {
                         notifyPlayingMusicItemChanged(musicItem, true);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        throwable.printStackTrace();
+                        notifyPlayingMusicItemChanged(null, false);
                     }
                 });
     }
