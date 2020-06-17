@@ -61,11 +61,75 @@ public class PlaylistManagerTest {
     public static void initPlaylistManager() {
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
         mPlaylistManager = PlaylistManager.newInstance(context, ID_PLAYLIST);
+        mPlaylistManager.setAvailable(true);
     }
 
     @Before
     public void clearOnModifyPlaylistListener() {
         mPlaylistManager.setOnModifyPlaylistListener(null);
+    }
+
+    @Test(timeout = 3000)
+    public void getPlaylistSize() {
+        final CountDownLatch countDownLatch1 = new CountDownLatch(1);
+        final int size1 = mPlaylistManager.getPlaylistSize();
+
+        mPlaylistManager.setOnModifyPlaylistListener(new PlaylistManager.OnModifyPlaylistListener() {
+            @Override
+            public void onPlaylistSwapped(int position, boolean playOnPrepared) {
+
+            }
+
+            @Override
+            public void onMusicItemMoved(int fromPosition, int toPosition) {
+
+            }
+
+            @Override
+            public void onMusicItemInserted(int position, int count) {
+                assertEquals(size1 + count, mPlaylistManager.getPlaylistSize());
+                countDownLatch1.countDown();
+            }
+
+            @Override
+            public void onMusicItemRemoved(List<Integer> positions) {
+
+            }
+        });
+
+        mPlaylistManager.appendMusicItem(generateMusicItem(1));
+        await(countDownLatch1);
+
+        final CountDownLatch countDownLatch2 = new CountDownLatch(1);
+        final int size2 = mPlaylistManager.getPlaylistSize();
+
+        mPlaylistManager.setOnModifyPlaylistListener(new PlaylistManager.OnModifyPlaylistListener() {
+            @Override
+            public void onPlaylistSwapped(int position, boolean playOnPrepared) {
+
+            }
+
+            @Override
+            public void onMusicItemMoved(int fromPosition, int toPosition) {
+
+            }
+
+            @Override
+            public void onMusicItemInserted(int position, int count) {
+
+            }
+
+            @Override
+            public void onMusicItemRemoved(List<Integer> positions) {
+                assertEquals(size2 - positions.size(), mPlaylistManager.getPlaylistSize());
+                countDownLatch2.countDown();
+            }
+        });
+
+        List<Integer> positions = new ArrayList<>();
+        positions.add(0);
+        mPlaylistManager.removeMusicItem(positions);
+        await(countDownLatch2);
     }
 
     @Test
