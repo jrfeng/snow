@@ -90,7 +90,7 @@ public class PlayerClient {
     @SuppressWarnings("all")
     private String generateToken() {
         return Hashing.sha256().newHasher()
-                .putString(mPlayerService.getName(), Charsets.UTF_8)
+                .putLong(hashCode())
                 .putLong(System.nanoTime())
                 .putInt(new Random().nextInt())
                 .hash()
