@@ -32,6 +32,7 @@ public class PlayerState implements Parcelable, Cloneable {
     private int mAudioSessionId;
     private int mBufferingPercent;
     private long mBufferingPercentUpdateTime;
+    private boolean mStalled;
     private int mErrorCode;
     private String mErrorMessage;
 
@@ -48,6 +49,7 @@ public class PlayerState implements Parcelable, Cloneable {
         mAudioSessionId = 0;
         mBufferingPercent = 0;
         mBufferingPercentUpdateTime = System.currentTimeMillis();
+        mStalled = false;
         mErrorCode = Player.Error.NO_ERROR;
         mErrorMessage = "";
     }
@@ -68,6 +70,7 @@ public class PlayerState implements Parcelable, Cloneable {
         mAudioSessionId = source.mAudioSessionId;
         mBufferingPercent = source.mBufferingPercent;
         mBufferingPercentUpdateTime = source.mBufferingPercentUpdateTime;
+        mStalled = source.mStalled;
         mErrorCode = source.mErrorCode;
         mErrorMessage = source.mErrorMessage;
     }
@@ -241,7 +244,6 @@ public class PlayerState implements Parcelable, Cloneable {
      *                      {@link Player.PlaybackState#PLAYING},
      *                      {@link Player.PlaybackState#PAUSED},
      *                      {@link Player.PlaybackState#STOPPED},
-     *                      {@link Player.PlaybackState#STALLED},
      *                      {@link Player.PlaybackState#ERROR}
      * @see Player.PlaybackState
      */
@@ -312,6 +314,14 @@ public class PlayerState implements Parcelable, Cloneable {
         mBufferingPercentUpdateTime = bufferingPercentUpdateTime;
     }
 
+    public boolean isStalled() {
+        return mStalled;
+    }
+
+    public void setStalled(boolean stalled) {
+        mStalled = stalled;
+    }
+
     /**
      * 获取错误码。如果没有发生任何错误，则返回 {@link Player.Error#NO_ERROR}。
      *
@@ -371,6 +381,7 @@ public class PlayerState implements Parcelable, Cloneable {
                 && Objects.equal(mAudioSessionId, other.mAudioSessionId)
                 && Objects.equal(mBufferingPercent, other.mBufferingPercent)
                 && Objects.equal(mBufferingPercentUpdateTime, other.mBufferingPercentUpdateTime)
+                && Objects.equal(mStalled, other.mStalled)
                 && Objects.equal(mErrorCode, other.mErrorCode)
                 && Objects.equal(mErrorMessage, other.mErrorMessage);
     }
@@ -389,6 +400,7 @@ public class PlayerState implements Parcelable, Cloneable {
                 mAudioSessionId,
                 mBufferingPercent,
                 mBufferingPercentUpdateTime,
+                mStalled,
                 mErrorCode,
                 mErrorMessage);
     }
@@ -414,6 +426,7 @@ public class PlayerState implements Parcelable, Cloneable {
         mAudioSessionId = in.readInt();
         mBufferingPercent = in.readInt();
         mBufferingPercentUpdateTime = in.readLong();
+        mStalled = in.readByte() != 0;
         mErrorCode = in.readInt();
         mErrorMessage = in.readString();
     }
@@ -433,6 +446,7 @@ public class PlayerState implements Parcelable, Cloneable {
         dest.writeInt(mAudioSessionId);
         dest.writeInt(mBufferingPercent);
         dest.writeLong(mBufferingPercentUpdateTime);
+        dest.writeByte((byte) (mStalled ? 1 : 0));
         dest.writeInt(mErrorCode);
         dest.writeString(mErrorMessage);
     }

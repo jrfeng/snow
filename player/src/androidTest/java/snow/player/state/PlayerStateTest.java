@@ -30,12 +30,28 @@ public class PlayerStateTest {
         assertEquals(Player.PlaybackState.UNKNOWN, playerState.getPlaybackState());
         assertEquals(0, playerState.getAudioSessionId());
         assertEquals(0, playerState.getBufferingPercent());
+        assertFalse(playerState.isStalled());
         assertEquals(Player.Error.NO_ERROR, playerState.getErrorCode());
     }
 
     public void constructor2Test() {
         PlayerState playerState = new PlayerState();
+
         playerState.setPlayProgress(1000);
+        playerState.setPlayProgressUpdateTime(System.currentTimeMillis());
+        playerState.setLooping(true);
+        playerState.setSoundQuality(Player.SoundQuality.HIGH);
+        playerState.setAudioEffectEnabled(true);
+        playerState.setOnlyWifiNetwork(false);
+        playerState.setIgnoreLossAudioFocus(true);
+        playerState.setMusicItem(new MusicItem());
+        playerState.setPlaybackState(Player.PlaybackState.PAUSED);
+        playerState.setAudioSessionId(15);
+        playerState.setBufferingPercent(99);
+        playerState.setBufferingPercentUpdateTime(System.currentTimeMillis());
+        playerState.setStalled(true);
+        playerState.setErrorCode(Player.Error.ONLY_WIFI_NETWORK);
+        playerState.setErrorMessage("only wifi network");
 
         PlayerState other = new PlayerState(playerState);
 
@@ -73,6 +89,7 @@ public class PlayerStateTest {
         final int audioSessionId = 15;
         final int bufferingPercent = 100;
         final long bufferingPercentUpdateTime = System.currentTimeMillis();
+        final boolean stalled = true;
         final int errorCode = Player.Error.PLAYER_ERROR;
         final String errorMessage = "player error";
 
@@ -89,6 +106,7 @@ public class PlayerStateTest {
         playerState.setAudioSessionId(audioSessionId);
         playerState.setBufferingPercent(bufferingPercent);
         playerState.setBufferingPercentUpdateTime(bufferingPercentUpdateTime);
+        playerState.setStalled(stalled);
         playerState.setErrorCode(errorCode);
         playerState.setErrorMessage(errorMessage);
 
@@ -105,6 +123,7 @@ public class PlayerStateTest {
         other.setAudioSessionId(audioSessionId);
         other.setBufferingPercent(bufferingPercent);
         other.setBufferingPercentUpdateTime(bufferingPercentUpdateTime);
+        other.setStalled(stalled);
         other.setErrorCode(errorCode);
         other.setErrorMessage(errorMessage);
 
@@ -129,6 +148,7 @@ public class PlayerStateTest {
         final int audioSessionId = 8;
         final int bufferingPercent = 95;
         final long bufferingPercentUpdateTime = System.currentTimeMillis();
+        final boolean stalled = true;
         final int errorCode = Player.Error.ONLY_WIFI_NETWORK;
         final String errorMessage = "only wifi network";
 
@@ -145,6 +165,7 @@ public class PlayerStateTest {
         playerState.setAudioSessionId(audioSessionId);
         playerState.setBufferingPercent(bufferingPercent);
         playerState.setBufferingPercentUpdateTime(bufferingPercentUpdateTime);
+        playerState.setStalled(stalled);
         playerState.setErrorCode(errorCode);
         playerState.setErrorMessage(errorMessage);
 
@@ -172,6 +193,7 @@ public class PlayerStateTest {
         final int audioSessionId = 4;
         final int bufferingPercent = 50;
         final long bufferingPercentUpdateTime = System.currentTimeMillis();
+        final boolean stalled = true;
         final int errorCode = Player.Error.NETWORK_UNAVAILABLE;
         final String errorMessage = "network unavailable";
 
@@ -187,6 +209,7 @@ public class PlayerStateTest {
         playerState.setAudioSessionId(audioSessionId);
         playerState.setBufferingPercent(bufferingPercent);
         playerState.setBufferingPercentUpdateTime(bufferingPercentUpdateTime);
+        playerState.setStalled(stalled);
         playerState.setErrorCode(errorCode);
         playerState.setErrorMessage(errorMessage);
 
