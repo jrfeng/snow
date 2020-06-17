@@ -14,12 +14,14 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import channel.helper.Dispatcher;
 import channel.helper.pipe.MessengerPipe;
 import media.helper.MediaButtonHelper;
+import snow.player.media.MediaMusicPlayer;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.playlist.AbstractPlaylistPlayer;
@@ -409,11 +411,13 @@ public class PlayerService extends Service implements PlayerManager {
      * 你可以重写该方法来返回你自己的 MusicPlayer 实现。
      *
      * @param uri 要播放的音乐的 uri
+     * @return 音乐播放器（不能为 null）
      */
     @NonNull
-    protected MusicPlayer onCreateMusicPlayer(Uri uri) {
-        // TODO MediaMusicPlayer
-        return null;
+    protected MusicPlayer onCreateMusicPlayer(Uri uri) throws IOException {
+        MusicPlayer musicPlayer = new MediaMusicPlayer(this);
+        musicPlayer.setDataSource(this, uri);
+        return musicPlayer;
     }
 
     /**
@@ -538,7 +542,7 @@ public class PlayerService extends Service implements PlayerManager {
 
         @NonNull
         @Override
-        protected MusicPlayer onCreateMusicPlayer(Uri uri) {
+        protected MusicPlayer onCreateMusicPlayer(Uri uri) throws IOException {
             return PlayerService.this.onCreateMusicPlayer(uri);
         }
 
@@ -640,7 +644,7 @@ public class PlayerService extends Service implements PlayerManager {
 
         @NonNull
         @Override
-        protected MusicPlayer onCreateMusicPlayer(Uri uri) {
+        protected MusicPlayer onCreateMusicPlayer(Uri uri) throws IOException {
             return PlayerService.this.onCreateMusicPlayer(uri);
         }
 

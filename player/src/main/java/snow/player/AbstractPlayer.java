@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
 
@@ -116,7 +117,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      * @param uri 要播放的音乐的 uri
      */
     @NonNull
-    protected abstract MusicPlayer onCreateMusicPlayer(Uri uri);
+    protected abstract MusicPlayer onCreateMusicPlayer(Uri uri) throws IOException;
 
     // ********************************end******************************
 
@@ -155,7 +156,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     protected void onRequestAudioFocus(boolean success) {
     }
 
-    protected void onLossAudioFocus(){
+    protected void onLossAudioFocus() {
     }
 
     protected void onRelease() {
@@ -216,7 +217,15 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         return new Consumer<Uri>() {
             @Override
             public void accept(Uri uri) throws Exception {
-                mMusicPlayer = onCreateMusicPlayer(uri);
+                try {
+                    mMusicPlayer = onCreateMusicPlayer(uri);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    notifyError(ErrorUtil.ERROR_DATA_LOAD_FAILED,
+                            ErrorUtil.getErrorMessage(mApplicationContext, ErrorUtil.ERROR_DATA_LOAD_FAILED));
+                    return;
+                }
+
                 attachListeners(mMusicPlayer);
 
                 mPreparedAction = preparedAction;
