@@ -219,15 +219,37 @@ public class PlayerClient {
     }
 
     public static class PlaylistController implements PlaylistPlayer {
-        private PlaylistManager mPlaylistManager;
+        private PlaylistManagerImp mPlaylistManager;
         private PlaylistPlayerChannel.Emitter mDelegate;
         private PlaylistStateHolder mPlaylistStateHolder;
         private boolean mConnected;
 
         PlaylistController(Context context, String playlistId) {
-            mPlaylistManager = PlaylistManager.newInstance(context, playlistId);
+            mPlaylistManager = new PlaylistManagerImp(context, playlistId);
             mPlaylistStateHolder = new PlaylistStateHolder(mPlaylistManager);
             mConnected = false;
+
+            mPlaylistManager.setOnModifyPlaylistListener(new PlaylistManager.OnModifyPlaylistListener() {
+                @Override
+                public void onPlaylistSwapped(int position, boolean playOnPrepared) {
+                    notifyPlaylistSwapped(position, playOnPrepared);
+                }
+
+                @Override
+                public void onMusicItemMoved(int fromPosition, int toPosition) {
+                    notifyMusicItemMoved(fromPosition, toPosition);
+                }
+
+                @Override
+                public void onMusicItemInserted(int position, int count) {
+                    notifyMusicItemInserted(position, count);
+                }
+
+                @Override
+                public void onMusicItemRemoved(List<Integer> positions) {
+                    notifyMusicItemRemoved(positions);
+                }
+            });
         }
 
         void setDelegate(PlaylistPlayerChannel.Emitter delegate) {
@@ -236,6 +258,7 @@ public class PlayerClient {
 
         void setConnected(boolean connected) {
             mConnected = connected;
+            mPlaylistManager.setAvailable(connected);
         }
 
         void setPlaylistState(PlaylistState playlistState) {
@@ -567,6 +590,17 @@ public class PlayerClient {
 
         public void removeOnPositionChangeListener(PlaylistPlayer.OnPositionChangeListener listener) {
             mPlaylistStateHolder.removeOnPositionChangeListener(listener);
+        }
+
+        private static class PlaylistManagerImp extends PlaylistManager {
+            protected PlaylistManagerImp(Context context, String playlistId) {
+                super(context, playlistId);
+            }
+
+            @Override
+            public void setAvailable(boolean available) {
+                super.setAvailable(available);
+            }
         }
     }
 
