@@ -476,7 +476,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     }
 
     protected final void releaseMusicPlayer() {
-        if (isPrepared()) {
+        if (mMusicPlayer != null) {
             mMusicPlayer.release();
             mMusicPlayer = null;
         }
