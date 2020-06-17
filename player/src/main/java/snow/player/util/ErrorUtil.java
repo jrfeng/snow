@@ -11,6 +11,7 @@ public class ErrorUtil {
     public static final int ERROR_PLAYER_ERROR = 2;
     public static final int ERROR_NETWORK_UNAVAILABLE = 3;
     public static final int ERROR_FILE_NOT_FOUND = 4;
+    public static final int ERROR_DATA_LOAD_ERROR = 5;
 
     public static String getErrorMessage(Context context, int errorCode) {
         Resources res = context.getResources();
@@ -26,6 +27,8 @@ public class ErrorUtil {
                 return res.getString(R.string.snow_error_network_unavailable);
             case ERROR_FILE_NOT_FOUND:
                 return res.getString(R.string.snow_error_file_not_found);
+            case ERROR_DATA_LOAD_ERROR:
+                return res.getString(R.string.snow_error_data_load_failed);
             default:
                 return res.getString(R.string.snow_error_unknown_error);
         }

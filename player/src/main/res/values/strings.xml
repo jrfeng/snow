@@ -6,4 +6,5 @@
     <string name="snow_error_player_error">player error</string>
     <string name="snow_error_network_unavailable">network unavailable</string>
     <string name="snow_error_file_not_found">file not found</string>
+    <string name="snow_error_data_load_failed">data load failed</string>
 </resources>
