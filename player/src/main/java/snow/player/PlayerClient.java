@@ -10,10 +10,13 @@ import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.hash.Hashing;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import channel.helper.DispatcherUtil;
 import channel.helper.pipe.MessengerPipe;
@@ -56,7 +59,7 @@ public class PlayerClient {
     private PlayerClient(Context context, Class<? extends PlayerService> playerService) {
         mApplicationContext = context.getApplicationContext();
         mPlayerService = playerService;
-        mToken = getToken();
+        mToken = generateToken();
 
         mConnected = false;
         mAllPlayerTypeChangeListener = new ArrayList<>();
@@ -84,8 +87,13 @@ public class PlayerClient {
         return pm.resolveService(intent, 0) == null;
     }
 
-    private String getToken() {
-        return mPlayerService.getName();
+    private String generateToken() {
+        return Hashing.sha256().newHasher()
+                .putString(mPlayerService.getName(), Charsets.UTF_8)
+                .putLong(System.nanoTime())
+                .putInt(new Random().nextInt())
+                .hash()
+                .toString();
     }
 
     private void initServiceConnection() {
