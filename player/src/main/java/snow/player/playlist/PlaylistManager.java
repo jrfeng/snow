@@ -21,6 +21,7 @@ import snow.player.media.MusicItem;
  */
 public abstract class PlaylistManager {
     private static final String KEY_PLAYLIST = "playlist";
+    private static final String KEY_PLAYLIST_SIZE = "playlist_size";
 
     private MMKV mMMKV;
     private Executor mExecutor;
@@ -66,6 +67,17 @@ public abstract class PlaylistManager {
      */
     public void setOnModifyPlaylistListener(@Nullable OnModifyPlaylistListener listener) {
         mListenerWeakReference = new WeakReference<>(listener);
+    }
+
+    /**
+     * 获取当前播放队列的大小。
+     * <p>
+     * 这是个轻量级操作，可在 UI 线程上直接运行。
+     *
+     * @return 当前播放队列的大小。
+     */
+    public int getPlaylistSize() {
+        return mMMKV.decodeInt(KEY_PLAYLIST_SIZE, 0);
     }
 
     /**
@@ -349,6 +361,7 @@ public abstract class PlaylistManager {
     private void save(@NonNull Playlist playlist) {
         Preconditions.checkNotNull(playlist);
         mMMKV.encode(KEY_PLAYLIST, playlist);
+        mMMKV.encode(KEY_PLAYLIST_SIZE, playlist.size());
     }
 
     public interface Callback {
