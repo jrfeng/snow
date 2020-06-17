@@ -512,7 +512,7 @@ public class PlayerService extends Service implements PlayerManager {
         invalidateNotification();
     }
 
-    protected void onStalled() {
+    protected void onStalledChanged(boolean stalled) {
     }
 
     protected void onStopped() {
@@ -596,9 +596,9 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         @Override
-        protected void onStalled() {
-            super.onStalled();
-            PlayerService.this.onStalled();
+        protected void onStalledChanged(boolean stalled) {
+            super.onStalledChanged(stalled);
+            PlayerService.this.onStalledChanged(stalled);
         }
 
         @Override
@@ -698,9 +698,9 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         @Override
-        protected void onStalled() {
-            super.onStalled();
-            PlayerService.this.onStalled();
+        protected void onStalledChanged(boolean stalled) {
+            super.onStalledChanged(stalled);
+            PlayerService.this.onStalledChanged(stalled);
         }
 
         @Override

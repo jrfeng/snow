@@ -140,7 +140,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     protected void onPaused() {
     }
 
-    protected void onStalled() {
+    protected void onStalledChanged(boolean stalled) {
     }
 
     protected void onStopped() {
@@ -617,7 +617,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     private void notifyStalled(boolean stalled) {
         mPlayerState.setStalled(stalled);
 
-        onStalled();
+        onStalledChanged(stalled);
 
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
