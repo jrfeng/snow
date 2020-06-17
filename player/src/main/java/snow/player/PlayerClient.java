@@ -87,6 +87,7 @@ public class PlayerClient {
         return pm.resolveService(intent, 0) == null;
     }
 
+    @SuppressWarnings("all")
     private String generateToken() {
         return Hashing.sha256().newHasher()
                 .putString(mPlayerService.getName(), Charsets.UTF_8)
