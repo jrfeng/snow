@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -18,30 +19,35 @@ import snow.player.media.MusicItem;
 /**
  * 用于管理音乐播放器的播放队列。
  */
-public class PlaylistManager {
+public abstract class PlaylistManager {
     private static final String KEY_PLAYLIST = "playlist";
 
     private MMKV mMMKV;
     private Executor mExecutor;
+    private boolean mAvailable;
 
     @Nullable
-    private OnModifyPlaylistListener mListener;
+    private WeakReference<OnModifyPlaylistListener> mListenerWeakReference;
 
-    private PlaylistManager(Context context, String playlistId) {
+    protected PlaylistManager(Context context, String playlistId) {
         MMKV.initialize(context);
         mMMKV = MMKV.mmkvWithID(playlistId, MMKV.MULTI_PROCESS_MODE);
         mExecutor = Executors.newSingleThreadExecutor();
+        mAvailable = false;
     }
 
     /**
-     * 创建一个新的 PlaylistManager 对象。
+     * 判断当前 PlaylistManager 是否可用。
      *
-     * @param context    Context 对象
-     * @param playlistId 播放队列的 ID。请保持该值的唯一性，通常使用的是当前 PlaylistService 的名称，建议使用
-     *                   Class&lt;? extends PlayerService&gt;.getName()
+     * @return 如果当前 PlaylistManager 可用，则返回 true，否则返回 false。当返回 false 时，对 Playlist 的
+     * 一切操作都会被忽略。
      */
-    public static PlaylistManager newInstance(Context context, String playlistId) {
-        return new PlaylistManager(context, playlistId);
+    public final boolean isAvailable() {
+        return mAvailable;
+    }
+
+    protected void setAvailable(boolean available) {
+        mAvailable = available;
     }
 
     /**
@@ -51,7 +57,7 @@ public class PlaylistManager {
      * @param listener {@link OnModifyPlaylistListener} 监听器，为 null 时相当于青春已设置的监听器
      */
     public void setOnModifyPlaylistListener(@Nullable OnModifyPlaylistListener listener) {
-        mListener = listener;
+        mListenerWeakReference = new WeakReference<>(listener);
     }
 
     /**
@@ -113,6 +119,11 @@ public class PlaylistManager {
      */
     public void setPlaylist(@NonNull final Playlist playlist, final int position, final boolean playOnPrepared) {
         Preconditions.checkNotNull(playlist);
+
+        if (!isAvailable()) {
+            return;
+        }
+
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -126,6 +137,10 @@ public class PlaylistManager {
      * 将播放队列中 fromPosition 位置处的 MusicItem 对象移动到 toPosition 位置。
      */
     public void moveMusicItem(final int fromPosition, final int toPosition) {
+        if (!isAvailable()) {
+            return;
+        }
+
         if (fromPosition == toPosition) {
             return;
         }
@@ -151,6 +166,11 @@ public class PlaylistManager {
      */
     public void appendMusicItem(@NonNull final MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
+
+        if (!isAvailable()) {
+            return;
+        }
+
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -172,6 +192,11 @@ public class PlaylistManager {
      */
     public void appendAllMusicItem(@NonNull final List<MusicItem> musicItems) {
         Preconditions.checkNotNull(musicItems);
+
+        if (!isAvailable()) {
+            return;
+        }
+
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -192,6 +217,10 @@ public class PlaylistManager {
     public void insertMusicItem(final int position, @NonNull final MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
 
+        if (!isAvailable()) {
+            return;
+        }
+
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -211,6 +240,10 @@ public class PlaylistManager {
     public void insertAllMusicItem(final int position, @NonNull final List<MusicItem> musicItems) {
         Preconditions.checkNotNull(musicItems);
 
+        if (!isAvailable()) {
+            return;
+        }
+
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -229,6 +262,10 @@ public class PlaylistManager {
      */
     public void removeMusicItem(final List<Integer> positions) {
         if (positions.size() < 1) {
+            return;
+        }
+
+        if (!isAvailable()) {
             return;
         }
 
@@ -254,26 +291,50 @@ public class PlaylistManager {
     }
 
     private void notifyPlaylistSwapped(int position, boolean playOnPrepared) {
-        if (mListener != null) {
-            mListener.onPlaylistSwapped(position, playOnPrepared);
+        if (mListenerWeakReference == null) {
+            return;
+        }
+
+        OnModifyPlaylistListener listener = mListenerWeakReference.get();
+
+        if (listener != null) {
+            listener.onPlaylistSwapped(position, playOnPrepared);
         }
     }
 
     private void notifyMusicItemMoved(int fromPosition, int toPosition) {
-        if (mListener != null) {
-            mListener.onMusicItemMoved(fromPosition, toPosition);
+        if (mListenerWeakReference == null) {
+            return;
+        }
+
+        OnModifyPlaylistListener listener = mListenerWeakReference.get();
+
+        if (listener != null) {
+            listener.onMusicItemMoved(fromPosition, toPosition);
         }
     }
 
     private void notifyMusicItemInserted(int position, int count) {
-        if (mListener != null) {
-            mListener.onMusicItemInserted(position, count);
+        if (mListenerWeakReference == null) {
+            return;
+        }
+
+        OnModifyPlaylistListener listener = mListenerWeakReference.get();
+
+        if (listener != null) {
+            listener.onMusicItemInserted(position, count);
         }
     }
 
     private void notifyMusicItemRemoved(List<Integer> positions) {
-        if (mListener != null) {
-            mListener.onMusicItemRemoved(positions);
+        if (mListenerWeakReference == null) {
+            return;
+        }
+
+        OnModifyPlaylistListener listener = mListenerWeakReference.get();
+
+        if (listener != null) {
+            listener.onMusicItemRemoved(positions);
         }
     }
 
