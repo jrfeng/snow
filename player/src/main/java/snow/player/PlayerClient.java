@@ -292,6 +292,7 @@ public class PlayerClient {
             return mPlaylistStateHolder.mPlaylistState.isIgnoreLossAudioFocus();
         }
 
+        @Nullable
         public MusicItem getPlayingMusicItem() {
             return mPlaylistStateHolder.mPlaylistState.getMusicItem();
         }
@@ -626,6 +627,7 @@ public class PlayerClient {
             return mRadioStationStateHolder.mRadioStationState.isIgnoreLossAudioFocus();
         }
 
+        @Nullable
         public MusicItem getPlayingMusicItem() {
             return mRadioStationStateHolder.mRadioStationState.getMusicItem();
         }
