@@ -14,6 +14,8 @@ public interface PlayerManager {
     int TYPE_PLAYLIST = 0;
     int TYPE_RADIO_STATION = 1;
 
+    void shutdown();
+
     /**
      * 注册一个播放器状态监听器。
      *
@@ -34,7 +36,9 @@ public interface PlayerManager {
     }
 
     @Channel
-    interface OnConfigChangeListener extends OnPlayerTypeChangeListener {
+    interface OnCommandCallback extends OnPlayerTypeChangeListener {
+        void onShutdown();
+
         void syncPlayerState(int playerType, PlaylistState playlistState, RadioStationState radioStationState);
     }
 }
