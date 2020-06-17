@@ -36,6 +36,14 @@ public abstract class PlaylistManager {
         mAvailable = false;
     }
 
+    public static PlaylistManager newInstance(@NonNull Context context, @NonNull String playlistId) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(playlistId);
+
+        return new PlaylistManager(context, playlistId) {
+        };
+    }
+
     /**
      * 判断当前 PlaylistManager 是否可用。
      *
