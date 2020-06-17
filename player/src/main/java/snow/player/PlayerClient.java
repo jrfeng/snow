@@ -32,6 +32,7 @@ import snow.player.state.PlaylistStateListenerChannel;
 import snow.player.state.RadioStationState;
 import snow.player.state.RadioStationStateListener;
 import snow.player.state.RadioStationStateListenerChannel;
+import snow.player.util.ErrorUtil;
 
 public class PlayerClient {
     private Context mApplicationContext;
@@ -249,6 +250,11 @@ public class PlayerClient {
             return mConnected;
         }
 
+        /**
+         * 获取当前 PlayerController 的 PlaylistManager 对象。
+         *
+         * @return 当前 PlayerController 的 PlaylistManager 对象（如果没有连接或已断开连接，则会返回 null）。
+         */
         @Nullable
         public PlaylistManager getPlaylistManager() {
             if (!mConnected) {
@@ -256,6 +262,74 @@ public class PlayerClient {
             }
 
             return mPlaylistManager;
+        }
+
+        public long getPlayProgress() {
+            return mPlaylistStateHolder.mPlaylistState.getPlayProgress();
+        }
+
+        public long getPlayProgressUpdateTime() {
+            return mPlaylistStateHolder.mPlaylistState.getPlayProgressUpdateTime();
+        }
+
+        public boolean isLooping() {
+            return mPlaylistStateHolder.mPlaylistState.isLooping();
+        }
+
+        public int getSoundQuality() {
+            return mPlaylistStateHolder.mPlaylistState.getSoundQuality();
+        }
+
+        public boolean isAudioEffectEnabled() {
+            return mPlaylistStateHolder.mPlaylistState.isAudioEffectEnabled();
+        }
+
+        public boolean isOnlyWifiNetwork() {
+            return mPlaylistStateHolder.mPlaylistState.isOnlyWifiNetwork();
+        }
+
+        public boolean isIgnoreLossAudioFocus() {
+            return mPlaylistStateHolder.mPlaylistState.isIgnoreLossAudioFocus();
+        }
+
+        public MusicItem getPlayingMusicItem() {
+            return mPlaylistStateHolder.mPlaylistState.getMusicItem();
+        }
+
+        public int getPlaybackState() {
+            return mPlaylistStateHolder.mPlaylistState.getPlaybackState();
+        }
+
+        public int getAudioSessionId() {
+            return mPlaylistStateHolder.mPlaylistState.getAudioSessionId();
+        }
+
+        public int getBufferingPercent() {
+            return mPlaylistStateHolder.mPlaylistState.getBufferingPercent();
+        }
+
+        public long getBufferingPrecentUpdateTime() {
+            return mPlaylistStateHolder.mPlaylistState.getBufferingPercentUpdateTime();
+        }
+
+        public boolean isError() {
+            return getErrorCode() != ErrorUtil.ERROR_NO_ERROR;
+        }
+
+        public int getErrorCode() {
+            return mPlaylistStateHolder.mPlaylistState.getErrorCode();
+        }
+
+        public String getErrorMessage() {
+            return mPlaylistStateHolder.mPlaylistState.getErrorMessage();
+        }
+
+        public int getPlayMode() {
+            return mPlaylistStateHolder.mPlaylistState.getPlayMode();
+        }
+
+        public int getPlayPosition() {
+            return mPlaylistStateHolder.mPlaylistState.getPosition();
         }
 
         @Override
@@ -522,6 +596,70 @@ public class PlayerClient {
 
         public boolean isConnected() {
             return mConnected;
+        }
+
+        public long getPlayProgress() {
+            return mRadioStationStateHolder.mRadioStationState.getPlayProgress();
+        }
+
+        public long getPlayProgressUpdateTime() {
+            return mRadioStationStateHolder.mRadioStationState.getPlayProgressUpdateTime();
+        }
+
+        public boolean isLooping() {
+            return mRadioStationStateHolder.mRadioStationState.isLooping();
+        }
+
+        public int getSoundQuality() {
+            return mRadioStationStateHolder.mRadioStationState.getSoundQuality();
+        }
+
+        public boolean isAudioEffectEnabled() {
+            return mRadioStationStateHolder.mRadioStationState.isAudioEffectEnabled();
+        }
+
+        public boolean isOnlyWifiNetwork() {
+            return mRadioStationStateHolder.mRadioStationState.isOnlyWifiNetwork();
+        }
+
+        public boolean isIgnoreLossAudioFocus() {
+            return mRadioStationStateHolder.mRadioStationState.isIgnoreLossAudioFocus();
+        }
+
+        public MusicItem getPlayingMusicItem() {
+            return mRadioStationStateHolder.mRadioStationState.getMusicItem();
+        }
+
+        public int getPlaybackState() {
+            return mRadioStationStateHolder.mRadioStationState.getPlaybackState();
+        }
+
+        public int getAudioSessionId() {
+            return mRadioStationStateHolder.mRadioStationState.getAudioSessionId();
+        }
+
+        public int getBufferingPercent() {
+            return mRadioStationStateHolder.mRadioStationState.getBufferingPercent();
+        }
+
+        public long getBufferingPrecentUpdateTime() {
+            return mRadioStationStateHolder.mRadioStationState.getBufferingPercentUpdateTime();
+        }
+
+        public boolean isError() {
+            return getErrorCode() != ErrorUtil.ERROR_NO_ERROR;
+        }
+
+        public int getErrorCode() {
+            return mRadioStationStateHolder.mRadioStationState.getErrorCode();
+        }
+
+        public String getErrorMessage() {
+            return mRadioStationStateHolder.mRadioStationState.getErrorMessage();
+        }
+
+        public RadioStation getRadioStation() {
+            return mRadioStationStateHolder.mRadioStationState.getRadioStation();
         }
 
         @Override
@@ -966,6 +1104,8 @@ public class PlayerClient {
             mAllPlaylistChangeListener = new ArrayList<>();
             mAllPlayModeChangeListener = new ArrayList<>();
             mAllPositionChangeListener = new ArrayList<>();
+
+            mPlaylistState = new PlaylistState();
         }
 
         void setPlaylistState(PlaylistState playlistState) {
@@ -1098,6 +1238,7 @@ public class PlayerClient {
 
         RadioStationStateHolder() {
             mAllRadioStationChangeListener = new ArrayList<>();
+            mRadioStationState = new RadioStationState();
         }
 
         void setRadioStationState(RadioStationState radioStationState) {
