@@ -47,7 +47,7 @@ public class PlaylistStateTest {
     @Test
     public void equals_hashCode() {
         final int position = 50;
-        final int playMode = PlaylistPlayer.PlayMode.LOOP;
+        final PlaylistPlayer.PlayMode playMode = PlaylistPlayer.PlayMode.LOOP;
 
         PlaylistState ps1 = new PlaylistState();
         ps1.setPosition(position);
@@ -64,7 +64,7 @@ public class PlaylistStateTest {
     @Test
     public void cloneTest() throws CloneNotSupportedException {
         final int position = 50;
-        final int playMode = PlaylistPlayer.PlayMode.LOOP;
+        final PlaylistPlayer.PlayMode playMode = PlaylistPlayer.PlayMode.LOOP;
 
         PlaylistState ps1 = new PlaylistState();
         ps1.setPosition(position);
@@ -80,7 +80,7 @@ public class PlaylistStateTest {
         Parcel parcel = Parcel.obtain();
 
         final int position = 50;
-        final int playMode = PlaylistPlayer.PlayMode.LOOP;
+        final PlaylistPlayer.PlayMode playMode = PlaylistPlayer.PlayMode.LOOP;
 
         PlaylistState ps1 = new PlaylistState();
         ps1.setPosition(position);
