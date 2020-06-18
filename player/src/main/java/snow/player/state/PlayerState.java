@@ -28,7 +28,7 @@ public class PlayerState implements Parcelable, Cloneable {
     private MusicItem mMusicItem;
 
     // no persistent
-    private int mPlaybackState;
+    private Player.PlaybackState mPlaybackState;
     private int mAudioSessionId;
     private int mBufferingPercent;
     private long mBufferingPercentUpdateTime;
@@ -232,7 +232,7 @@ public class PlayerState implements Parcelable, Cloneable {
      * @return 返回当前播放状态。
      * @see Player.PlaybackState
      */
-    public int getPlaybackState() {
+    public Player.PlaybackState getPlaybackState() {
         return mPlaybackState;
     }
 
@@ -248,7 +248,8 @@ public class PlayerState implements Parcelable, Cloneable {
      *                      {@link Player.PlaybackState#ERROR}
      * @see Player.PlaybackState
      */
-    public void setPlaybackState(int playbackState) {
+    public void setPlaybackState(@NonNull Player.PlaybackState playbackState) {
+        Preconditions.checkNotNull(playbackState);
         mPlaybackState = playbackState;
 
         if (playbackState != Player.PlaybackState.ERROR) {
@@ -423,7 +424,7 @@ public class PlayerState implements Parcelable, Cloneable {
         mIgnoreLossAudioFocus = in.readByte() != 0;
         mMusicItem = in.readParcelable(Thread.currentThread().getContextClassLoader());
 
-        mPlaybackState = in.readInt();
+        mPlaybackState = Player.PlaybackState.values()[in.readInt()];
         mAudioSessionId = in.readInt();
         mBufferingPercent = in.readInt();
         mBufferingPercentUpdateTime = in.readLong();
@@ -443,7 +444,7 @@ public class PlayerState implements Parcelable, Cloneable {
         dest.writeByte((byte) (mIgnoreLossAudioFocus ? 1 : 0));
         dest.writeParcelable(mMusicItem, flags);
 
-        dest.writeInt(mPlaybackState);
+        dest.writeInt(mPlaybackState.ordinal());
         dest.writeInt(mAudioSessionId);
         dest.writeInt(mBufferingPercent);
         dest.writeLong(mBufferingPercentUpdateTime);

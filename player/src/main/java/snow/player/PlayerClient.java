@@ -327,7 +327,7 @@ public class PlayerClient {
             return mPlaylistStateHolder.mPlaylistState.getMusicItem();
         }
 
-        public int getPlaybackState() {
+        public PlaybackState getPlaybackState() {
             return mPlaylistStateHolder.mPlaylistState.getPlaybackState();
         }
 
@@ -685,7 +685,7 @@ public class PlayerClient {
             return mRadioStationStateHolder.mRadioStationState.getMusicItem();
         }
 
-        public int getPlaybackState() {
+        public PlaybackState getPlaybackState() {
             return mRadioStationStateHolder.mRadioStationState.getPlaybackState();
         }
 
@@ -1005,22 +1005,22 @@ public class PlayerClient {
             }
 
             switch (mPlayerState.getPlaybackState()) {
-                case Player.PlaybackState.PREPARING:
+                case PREPARING:
                     listener.onPreparing();
                     break;
-                case Player.PlaybackState.PREPARED:
+                case PREPARED:
                     listener.onPrepared(mPlayerState.getAudioSessionId());
                     break;
-                case Player.PlaybackState.PLAYING:
+                case PLAYING:
                     listener.onPlay(mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime());
                     break;
-                case Player.PlaybackState.PAUSED:
+                case PAUSED:
                     listener.onPause();
                     break;
-                case Player.PlaybackState.STOPPED:
+                case STOPPED:
                     listener.onStop();
                     break;
-                case Player.PlaybackState.ERROR:
+                case ERROR:
                     listener.onError(mPlayerState.getErrorCode(), mPlayerState.getErrorMessage());
                     break;
                 default:

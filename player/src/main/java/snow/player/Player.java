@@ -115,35 +115,35 @@ public interface Player {
     /**
      * 播放器的播放状态。
      */
-    class PlaybackState {
+    enum PlaybackState {
         /**
          * 未知状态。
          */
-        public static final int UNKNOWN = 0;
+        UNKNOWN,
         /**
          * 准备中。
          */
-        public static final int PREPARING = 1;
+        PREPARING,
         /**
          * 准备完毕。
          */
-        public static final int PREPARED = 2;
+       PREPARED,
         /**
          * 播放中。
          */
-        public static final int PLAYING = 3;
+        PLAYING,
         /**
          * 已暂停。
          */
-        public static final int PAUSED = 4;
+        PAUSED,
         /**
          * 已停止。
          */
-        public static final int STOPPED = 5;
+        STOPPED,
         /**
-         * 发送错误。
+         * 发生错误。
          */
-        public static final int ERROR = 7;
+        ERROR
     }
 
     /**
