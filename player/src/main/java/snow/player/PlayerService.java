@@ -17,7 +17,6 @@ import android.os.IBinder;
 import android.widget.RemoteViews;
 
 import androidx.annotation.DrawableRes;
-import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -397,23 +396,23 @@ public class PlayerService extends Service implements PlayerManager {
         updateNotification();
     }
 
-    private boolean isForeground() {
+    protected final boolean isForeground() {
         return mForeground;
     }
 
     protected final void startForeground() {
+        if (hideNotification()) {
+            stopForegroundEx(true);
+            return;
+        }
+
         if (getPlayingMusicItem() == null) {
             stopForegroundEx(true);
             return;
         }
 
-        Notification notification = onCreateNotification(mPlayerType);
-        if (notification == null) {
-            return;
-        }
-
         mForeground = true;
-        startForeground(mNotificationId, notification);
+        startForeground(mNotificationId, onCreateNotification(mPlayerType));
     }
 
     protected final void stopForegroundEx(boolean removeNotification) {
@@ -422,26 +421,21 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     private void updateNotification() {
+        if (hideNotification()) {
+            stopForegroundEx(true);
+            return;
+        }
+
         if (getPlayingMusicItem() == null) {
             stopForegroundEx(true);
             return;
         }
 
-        Notification notification = onCreateNotification(mPlayerType);
-        if (notification == null) {
-            return;
-        }
-
-        mNotificationManager.notify(mNotificationId, notification);
-    }
-
-    @Nullable
-    protected Notification onCreateNotification(int playerType) {
-        return null;
+        mNotificationManager.notify(mNotificationId, onCreateNotification(mPlayerType));
     }
 
     @NonNull
-    protected final Notification createDefaultNotification(int playerType, @Nullable PendingIntent contentIntent) {
+    protected Notification onCreateNotification(int playerType) {
         return new NotificationCompat.Builder(this, getNotificationChannelId())
                 .setSmallIcon(getSmallIconId())
                 .setContentTitle(getApplicationLabel())
@@ -449,8 +443,25 @@ public class PlayerService extends Service implements PlayerManager {
                 .setStyle(new androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
                 .setCustomContentView(createContentView(playerType))
                 .setCustomBigContentView(createBigContentView(playerType))
-                .setContentIntent(contentIntent)
+                .setContentIntent(getNotificationContentIntent())
                 .build();
+    }
+
+    protected boolean hideNotification() {
+        return false;
+    }
+
+    @DrawableRes
+    protected int getSmallIconId() {
+        return R.drawable.snow_ic_music;
+    }
+
+    protected String getNotificationChannelId() {
+        return "player";
+    }
+
+    protected PendingIntent getNotificationContentIntent() {
+        return null;
     }
 
     @Nullable
@@ -494,49 +505,40 @@ public class PlayerService extends Service implements PlayerManager {
 
     private RemoteViews createContentView(int playerType) {
         if (playerType == TYPE_RADIO_STATION) {
-            return createRadioStationContentView();
+            return onCreateRadioStationContentView();
         }
 
-        return createPlaylistContentView();
+        return onCreatePlaylistContentView();
     }
 
     private RemoteViews createBigContentView(int playerType) {
         if (playerType == TYPE_RADIO_STATION) {
-            return createRadioStationBigContentView();
+            return onCreateRadioStationBigContentView();
         }
 
-        return createPlaylistBigContentView();
-    }
-
-    @DrawableRes
-    protected int getSmallIconId() {
-        return R.drawable.snow_ic_music;
-    }
-
-    protected String getNotificationChannelId() {
-        return "player";
+        return onCreatePlaylistBigContentView();
     }
 
     @NonNull
-    protected RemoteViews createPlaylistContentView() {
+    protected RemoteViews onCreatePlaylistContentView() {
         // TODO
         return null;
     }
 
     @NonNull
-    protected RemoteViews createRadioStationContentView() {
+    protected RemoteViews onCreateRadioStationContentView() {
         // TODO
         return null;
     }
 
     @NonNull
-    protected RemoteViews createPlaylistBigContentView() {
+    protected RemoteViews onCreatePlaylistBigContentView() {
         // TODO
         return null;
     }
 
     @NonNull
-    protected RemoteViews createRadioStationBigContentView() {
+    protected RemoteViews onCreateRadioStationBigContentView() {
         // TODO
         return null;
     }
