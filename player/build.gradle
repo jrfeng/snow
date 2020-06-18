@@ -46,9 +46,9 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
 
     // channel-helper
-    implementation 'com.github.jrfeng.channel-helper:helper:1.0.2'
-    implementation 'com.github.jrfeng.channel-helper:pipe:1.0.2'
-    annotationProcessor 'com.github.jrfeng.channel-helper:processor:1.0.2'
+    implementation 'com.github.jrfeng.channel-helper:helper:1.0.3'
+    implementation 'com.github.jrfeng.channel-helper:pipe:1.0.3'
+    annotationProcessor 'com.github.jrfeng.channel-helper:processor:1.0.3'
 
     // media-helper
     implementation 'com.github.jrfeng:media-helper:1.0.2'
