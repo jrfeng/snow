@@ -84,7 +84,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      * @param soundQuality 音乐的音质
      * @return 如果已被缓存，则返回 true，否则返回 false
      */
-    protected abstract boolean isCached(MusicItem musicItem, int soundQuality);
+    protected abstract boolean isCached(MusicItem musicItem, SoundQuality soundQuality);
 
     /**
      * 获取已缓存的具有 soundQuality 音质的 MusicItem 表示的的音乐的 Uri。
@@ -94,7 +94,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      * @return 音乐的 Uri。可为 null，返回 null 时播放器会忽略本次播放。
      */
     @Nullable
-    protected abstract Uri getCachedUri(MusicItem musicItem, int soundQuality);
+    protected abstract Uri getCachedUri(MusicItem musicItem, SoundQuality soundQuality);
 
     /**
      * 从网络获取具有 soundQuality 音质的 MusicItem 表示的的音乐的 Uri。
@@ -106,7 +106,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      * @return 音乐的 Uri。可为 null，返回 null 时播放器会忽略本次播放。
      */
     @Nullable
-    protected abstract Uri getUri(MusicItem musicItem, int soundQuality);
+    protected abstract Uri getUri(MusicItem musicItem, SoundQuality soundQuality);
 
     /**
      * 该方法会在创建 MusicPlayer 对象时调用。
@@ -258,7 +258,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         return getUriFromInternet(musicItem);
     }
 
-    private Uri getCachedUriWrapper(@NonNull MusicItem musicItem, int soundQuality) {
+    private Uri getCachedUriWrapper(@NonNull MusicItem musicItem, SoundQuality soundQuality) {
         Uri result = getCachedUri(musicItem, soundQuality);
 
         if (result == null) {
@@ -845,7 +845,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     }
 
     @Override
-    public void setSoundQuality(int soundQuality) {
+    public void setSoundQuality(SoundQuality soundQuality) {
         if (soundQuality == mPlayerState.getSoundQuality()) {
             return;
         }
@@ -853,7 +853,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         swapSoundQuality(soundQuality);
     }
 
-    private void swapSoundQuality(int soundQuality) {
+    private void swapSoundQuality(SoundQuality soundQuality) {
         mPlayerState.setSoundQuality(soundQuality);
 
         if (!isPrepared()) {

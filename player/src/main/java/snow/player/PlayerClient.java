@@ -306,7 +306,7 @@ public class PlayerClient {
             return mPlaylistStateHolder.mPlaylistState.isLooping();
         }
 
-        public int getSoundQuality() {
+        public SoundQuality getSoundQuality() {
             return mPlaylistStateHolder.mPlaylistState.getSoundQuality();
         }
 
@@ -512,7 +512,7 @@ public class PlayerClient {
         }
 
         @Override
-        public void setSoundQuality(int soundQuality) {
+        public void setSoundQuality(SoundQuality soundQuality) {
             if (!mConnected) {
                 return;
             }
@@ -664,7 +664,7 @@ public class PlayerClient {
             return mRadioStationStateHolder.mRadioStationState.isLooping();
         }
 
-        public int getSoundQuality() {
+        public SoundQuality getSoundQuality() {
             return mRadioStationStateHolder.mRadioStationState.getSoundQuality();
         }
 
@@ -812,7 +812,7 @@ public class PlayerClient {
         }
 
         @Override
-        public void setSoundQuality(int soundQuality) {
+        public void setSoundQuality(SoundQuality soundQuality) {
             if (!mConnected) {
                 return;
             }

@@ -20,7 +20,7 @@ public class PlayerState implements Parcelable, Cloneable {
     private long mPlayProgress;
     private long mPlayProgressUpdateTime;
     private boolean mLooping;
-    private int mSoundQuality;
+    private Player.SoundQuality mSoundQuality;
     private boolean mAudioEffectEnabled;
     private boolean mOnlyWifiNetwork;
     private boolean mIgnoreLossAudioFocus;
@@ -139,7 +139,7 @@ public class PlayerState implements Parcelable, Cloneable {
      * @return 当前的首选音质。
      * @see Player.SoundQuality
      */
-    public int getSoundQuality() {
+    public Player.SoundQuality getSoundQuality() {
         return mSoundQuality;
     }
 
@@ -152,7 +152,8 @@ public class PlayerState implements Parcelable, Cloneable {
      *                     {@link Player.SoundQuality#SUPER}
      * @see Player.SoundQuality
      */
-    public void setSoundQuality(int soundQuality) {
+    public void setSoundQuality(@NonNull Player.SoundQuality soundQuality) {
+        Preconditions.checkNotNull(soundQuality);
         mSoundQuality = soundQuality;
     }
 
@@ -416,7 +417,7 @@ public class PlayerState implements Parcelable, Cloneable {
         mPlayProgress = in.readLong();
         mPlayProgressUpdateTime = in.readLong();
         mLooping = in.readByte() != 0;
-        mSoundQuality = in.readInt();
+        mSoundQuality = Player.SoundQuality.values()[in.readInt()];
         mAudioEffectEnabled = in.readByte() != 0;
         mOnlyWifiNetwork = in.readByte() != 0;
         mIgnoreLossAudioFocus = in.readByte() != 0;
@@ -436,7 +437,7 @@ public class PlayerState implements Parcelable, Cloneable {
         dest.writeLong(mPlayProgress);
         dest.writeLong(mPlayProgressUpdateTime);
         dest.writeByte((byte) (mLooping ? 1 : 0));
-        dest.writeInt(mSoundQuality);
+        dest.writeInt(mSoundQuality.ordinal());
         dest.writeByte((byte) (mAudioEffectEnabled ? 1 : 0));
         dest.writeByte((byte) (mOnlyWifiNetwork ? 1 : 0));
         dest.writeByte((byte) (mIgnoreLossAudioFocus ? 1 : 0));

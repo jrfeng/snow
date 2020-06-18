@@ -5,6 +5,7 @@ import android.content.res.Resources;
 
 import androidx.annotation.Nullable;
 
+import channel.helper.UseOrdinal;
 import snow.player.media.MusicItem;
 
 /**
@@ -64,7 +65,7 @@ public interface Player {
      * @see SoundQuality#HIGH
      * @see SoundQuality#SUPER
      */
-    void setSoundQuality(int soundQuality);
+    void setSoundQuality(@UseOrdinal SoundQuality soundQuality);
 
     /**
      * 设置是否启用音频特效（如：均衡器）（默认为 false）。
@@ -92,23 +93,23 @@ public interface Player {
     /**
      * 播放器的首选音质。
      */
-    class SoundQuality {
+    enum SoundQuality {
         /**
          * 标准音质。
          */
-        public static final int STANDARD = 0;
+        STANDARD,
         /**
          * 低音质。
          */
-        public static final int LOW = 1;
+        LOW,
         /**
          * 高音质。
          */
-        public static final int HIGH = 2;
+        HIGH,
         /**
          * 超高音质（无损）。
          */
-        public static final int SUPER = 3;
+       SUPER
     }
 
     /**

@@ -520,7 +520,7 @@ public class PlayerService extends Service implements PlayerManager {
      * @param soundQuality 音乐的音质
      * @return 如果已被缓存，则返回 true，否则返回 false
      */
-    protected boolean isCached(MusicItem musicItem, int soundQuality) {
+    protected boolean isCached(MusicItem musicItem, Player.SoundQuality soundQuality) {
         return false;
     }
 
@@ -532,7 +532,7 @@ public class PlayerService extends Service implements PlayerManager {
      * @return 音乐的 Uri。可为 null，返回 null 时播放器会忽略本次播放。
      */
     @Nullable
-    protected Uri getCachedUri(MusicItem musicItem, int soundQuality) {
+    protected Uri getCachedUri(MusicItem musicItem, Player.SoundQuality soundQuality) {
         return null;
     }
 
@@ -546,7 +546,7 @@ public class PlayerService extends Service implements PlayerManager {
      * @return 音乐的 Uri。可为 null，返回 null 时播放器会忽略本次播放。
      */
     @Nullable
-    protected Uri getUri(MusicItem musicItem, int soundQuality) {
+    protected Uri getUri(MusicItem musicItem, Player.SoundQuality soundQuality) {
         return Uri.parse(musicItem.getUri());
     }
 
@@ -669,19 +669,19 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         @Override
-        protected boolean isCached(MusicItem musicItem, int soundQuality) {
+        protected boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
             return PlayerService.this.isCached(musicItem, soundQuality);
         }
 
         @Nullable
         @Override
-        protected Uri getCachedUri(MusicItem musicItem, int soundQuality) {
+        protected Uri getCachedUri(MusicItem musicItem, SoundQuality soundQuality) {
             return PlayerService.this.getCachedUri(musicItem, soundQuality);
         }
 
         @Nullable
         @Override
-        protected Uri getUri(MusicItem musicItem, int soundQuality) {
+        protected Uri getUri(MusicItem musicItem, SoundQuality soundQuality) {
             return PlayerService.this.getUri(musicItem, soundQuality);
         }
 
@@ -771,19 +771,19 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         @Override
-        protected boolean isCached(MusicItem musicItem, int soundQuality) {
+        protected boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
             return PlayerService.this.isCached(musicItem, soundQuality);
         }
 
         @Nullable
         @Override
-        protected Uri getCachedUri(MusicItem musicItem, int soundQuality) {
+        protected Uri getCachedUri(MusicItem musicItem, SoundQuality soundQuality) {
             return PlayerService.this.getCachedUri(musicItem, soundQuality);
         }
 
         @Nullable
         @Override
-        protected Uri getUri(MusicItem musicItem, int soundQuality) {
+        protected Uri getUri(MusicItem musicItem, SoundQuality soundQuality) {
             return PlayerService.this.getUri(musicItem, soundQuality);
         }
 

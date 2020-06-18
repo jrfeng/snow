@@ -41,7 +41,7 @@ public class PersistentPlaylistState extends PlaylistState {
         super.setPlayProgress(mMMKV.decodeLong(KEY_PLAY_PROGRESS, 0L));
         super.setPlayProgressUpdateTime(mMMKV.decodeLong(KEY_PLAY_PROGRESS_UPDATE_TIME, System.currentTimeMillis()));
         super.setLooping(mMMKV.decodeBool(KEY_LOOPING, false));
-        super.setSoundQuality(mMMKV.decodeInt(KEY_SOUND_QUALITY, Player.SoundQuality.STANDARD));
+        super.setSoundQuality(Player.SoundQuality.values()[mMMKV.decodeInt(KEY_SOUND_QUALITY, 0)]);
         super.setAudioEffectEnabled(mMMKV.decodeBool(KEY_AUDIO_EFFECT_ENABLED, false));
         super.setOnlyWifiNetwork(mMMKV.decodeBool(KEY_ONLY_WIFI_NETWORK, true));
         super.setIgnoreLossAudioFocus(mMMKV.decodeBool(KEY_IGNORE_LOSS_AUDIO_FOCUS, false));
@@ -73,10 +73,10 @@ public class PersistentPlaylistState extends PlaylistState {
     }
 
     @Override
-    public void setSoundQuality(int soundQuality) {
+    public void setSoundQuality(@NonNull Player.SoundQuality soundQuality) {
         super.setSoundQuality(soundQuality);
 
-        mMMKV.encode(KEY_SOUND_QUALITY, soundQuality);
+        mMMKV.encode(KEY_SOUND_QUALITY, soundQuality.ordinal());
     }
 
     @Override
