@@ -149,13 +149,17 @@ public interface Player {
     /**
      * 预定义错误码。
      */
-    class Error {
+    final class Error {
         public static final int NO_ERROR = 0;
         public static final int ONLY_WIFI_NETWORK = 1;
         public static final int PLAYER_ERROR = 2;
         public static final int NETWORK_UNAVAILABLE = 3;
         public static final int FILE_NOT_FOUND = 4;
         public static final int DATA_LOAD_FAILED = 5;
+
+        private Error(){
+            throw new AssertionError();
+        }
 
         public static String getErrorMessage(Context context, int errorCode) {
             Resources res = context.getResources();
