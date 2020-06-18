@@ -32,6 +32,9 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
+    // media
+    implementation 'androidx.media:media:1.1.0'
+
     // Guava
     implementation "com.google.guava:guava:29.0-android"
 
