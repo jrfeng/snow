@@ -77,7 +77,7 @@ public class PlayerStateTest {
         final long playProgress = 1000;
         final long playProgressUpdateTime = System.currentTimeMillis();
         final boolean looping = true;
-        final int soundQuality = Player.SoundQuality.SUPER;
+        final Player.SoundQuality soundQuality = Player.SoundQuality.SUPER;
         final boolean audioEffectEnable = false;
         final boolean onlyWifiNetwork = true;
         final boolean ignoreAudioFocus = false;
@@ -136,7 +136,7 @@ public class PlayerStateTest {
         final long playProgress = 1000;
         final long playProgressUpdateTime = System.currentTimeMillis();
         final boolean looping = true;
-        final int soundQuality = Player.SoundQuality.SUPER;
+        final Player.SoundQuality soundQuality = Player.SoundQuality.SUPER;
         final boolean audioEffectEnable = false;
         final boolean onlyWifiNetwork = true;
         final boolean ignoreAudioFocus = false;
@@ -181,7 +181,7 @@ public class PlayerStateTest {
         final long playProgress = 2000;
         final long playProgressUpdateTime = System.currentTimeMillis();
         final boolean looping = true;
-        final int soundQuality = Player.SoundQuality.HIGH;
+        final Player.SoundQuality soundQuality = Player.SoundQuality.HIGH;
         final boolean audioEffectEnable = true;
         final boolean onlyWifiNetwork = false;
         final boolean ignoreAudioFocus = true;
