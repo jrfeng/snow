@@ -221,7 +221,18 @@ public interface Player {
         void onError(int errorCode, String errorMessage);
     }
 
+    /**
+     * 用于监听播放器的 stalled 状态。
+     * <p>
+     * 当没有足够的缓存数据支撑播放器继续播放时，播放器会进入 stalled 状态。
+     */
     interface OnStalledChangeListener {
+        /**
+         * 当播放器的 stalled 状态发生改变时会回调该方法。
+         *
+         * @param stalled 没有足够的缓存数据支撑播放器继续播放时，该参数为 true；当播放器缓存了足够的数据可
+         *                以继续播放时，该参数为 false。
+         */
         void onStalledChanged(boolean stalled);
     }
 
