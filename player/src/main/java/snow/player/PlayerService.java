@@ -2,6 +2,7 @@ package snow.player;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -62,6 +63,8 @@ public class PlayerService extends Service implements PlayerManager {
     private MediaButtonHelper mMediaButtonHelper;
     private NotificationManager mNotificationManager;
 
+    private Map<String, Runnable> mStartCommandActionMap;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -70,6 +73,7 @@ public class PlayerService extends Service implements PlayerManager {
         mPersistentId = getPersistentId();
         mNotificationId = getNotificationId();
         mCommandCallbackMap = new HashMap<>();
+        mStartCommandActionMap = new HashMap<>();
 
         MMKV.initialize(this);
         mMMKV = MMKV.mmkvWithID(mPersistentId);
@@ -186,6 +190,15 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Runnable task = mStartCommandActionMap.get(intent.getAction());
+        if (task != null) {
+            task.run();
+        }
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
 
@@ -221,6 +234,23 @@ public class PlayerService extends Service implements PlayerManager {
         removeOnConfigChangeListener(token);
         mPlaylistPlayer.removeStateListener(token);
         mRadioStationPlayer.removeStateListener(token);
+    }
+
+    protected final PendingIntent addOnStartCommandAction(@NonNull String action, @NonNull Runnable task) {
+        Preconditions.checkNotNull(action);
+        Preconditions.checkNotNull(task);
+
+        mStartCommandActionMap.put(action, task);
+
+        Context context = getApplicationContext();
+        Intent intent = new Intent(context, this.getClass());
+        intent.setAction(action);
+        return PendingIntent.getService(context, 0, intent, 0);
+    }
+
+    protected final void removeOnStartCommandAction(@NonNull String action) {
+        Preconditions.checkNotNull(action);
+        mStartCommandActionMap.remove(action);
     }
 
     private void notifyPlayerTypeChanged(int playerType) {
