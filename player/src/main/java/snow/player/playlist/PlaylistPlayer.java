@@ -3,6 +3,7 @@ package snow.player.playlist;
 import java.util.List;
 
 import channel.helper.Channel;
+import channel.helper.UseOrdinal;
 import snow.player.Player;
 
 /**
@@ -31,7 +32,7 @@ public interface PlaylistPlayer extends Player {
      * @param playMode 播放模式
      * @see PlayMode
      */
-    void setPlayMode(int playMode);
+    void setPlayMode(@UseOrdinal PlayMode playMode);
 
     /**
      * 发送通知：歌单已被切换。
@@ -67,19 +68,19 @@ public interface PlaylistPlayer extends Player {
     /**
      * 播放器的播放模式。
      */
-    class PlayMode {
+    enum PlayMode {
         /**
          * 顺序播放。
          */
-        public static final int SEQUENTIAL = 0;
+        SEQUENTIAL,
         /**
          * 单曲循环。
          */
-        public static final int LOOP = 1;
+        LOOP,
         /**
          * 随机播放。
          */
-        public static final int SHUFFLE = 2;
+        SHUFFLE
     }
 
     /**
@@ -109,7 +110,7 @@ public interface PlaylistPlayer extends Player {
          * @see PlayMode#LOOP
          * @see PlayMode#SHUFFLE
          */
-        void onPlayModeChanged(int playMode);
+        void onPlayModeChanged(@UseOrdinal PlayMode playMode);
     }
 
     /**

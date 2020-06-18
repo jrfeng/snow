@@ -48,7 +48,7 @@ public class PersistentPlaylistState extends PlaylistState {
         super.setMusicItem(mMMKV.decodeParcelable(KEY_MUSIC_ITEM, MusicItem.class));
 
         super.setPosition(mMMKV.decodeInt(KEY_POSITION, 0));
-        super.setPlayMode(mMMKV.decodeInt(KEY_PLAY_MODE, PlaylistPlayer.PlayMode.SEQUENTIAL));
+        super.setPlayMode(PlaylistPlayer.PlayMode.values()[mMMKV.decodeInt(KEY_PLAY_MODE, 0)]);
     }
 
     @Override
@@ -108,10 +108,10 @@ public class PersistentPlaylistState extends PlaylistState {
     }
 
     @Override
-    public void setPlayMode(int playMode) {
+    public void setPlayMode(@NonNull PlaylistPlayer.PlayMode playMode) {
         super.setPlayMode(playMode);
 
-        mMMKV.encode(KEY_PLAY_MODE, playMode);
+        mMMKV.encode(KEY_PLAY_MODE, playMode.ordinal());
     }
 
     @Override

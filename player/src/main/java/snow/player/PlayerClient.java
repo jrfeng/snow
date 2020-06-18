@@ -359,7 +359,7 @@ public class PlayerClient {
             return mPlaylistStateHolder.mPlaylistState.getErrorMessage();
         }
 
-        public int getPlayMode() {
+        public PlayMode getPlayMode() {
             return mPlaylistStateHolder.mPlaylistState.getPlayMode();
         }
 
@@ -395,7 +395,8 @@ public class PlayerClient {
         }
 
         @Override
-        public void setPlayMode(int playMode) {
+        public void setPlayMode(@NonNull PlayMode playMode) {
+            Preconditions.checkNotNull(playMode);
             if (!mConnected) {
                 return;
             }
@@ -1314,7 +1315,7 @@ public class PlayerClient {
         }
 
         @Override
-        public void onPlayModeChanged(int playMode) {
+        public void onPlayModeChanged(PlaylistPlayer.PlayMode playMode) {
             mPlaylistState.setPlayMode(playMode);
 
             notifyPlayModeChanged();

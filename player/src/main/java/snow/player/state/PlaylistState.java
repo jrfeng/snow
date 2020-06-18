@@ -13,7 +13,7 @@ import snow.player.playlist.PlaylistPlayer;
  */
 public class PlaylistState extends PlayerState {
     private int mPosition;
-    private int mPlayMode;
+    private PlaylistPlayer.PlayMode mPlayMode;
 
     public PlaylistState() {
         mPosition = 0;
@@ -55,7 +55,7 @@ public class PlaylistState extends PlayerState {
      * @return 播放队列的播放模式。
      * @see PlaylistPlayer.PlayMode
      */
-    public int getPlayMode() {
+    public PlaylistPlayer.PlayMode getPlayMode() {
         return mPlayMode;
     }
 
@@ -67,7 +67,7 @@ public class PlaylistState extends PlayerState {
      *                 {@link PlaylistPlayer.PlayMode#SHUFFLE}
      * @see PlaylistPlayer.PlayMode
      */
-    public void setPlayMode(int playMode) {
+    public void setPlayMode(@NonNull PlaylistPlayer.PlayMode playMode) {
         mPlayMode = playMode;
     }
 
@@ -96,14 +96,14 @@ public class PlaylistState extends PlayerState {
     protected PlaylistState(Parcel in) {
         super(in);
         mPosition = in.readInt();
-        mPlayMode = in.readInt();
+        mPlayMode = PlaylistPlayer.PlayMode.values()[in.readInt()];
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(mPosition);
-        dest.writeInt(mPlayMode);
+        dest.writeInt(mPlayMode.ordinal());
     }
 
     public static final Creator<PlaylistState> CREATOR = new Creator<PlaylistState>() {

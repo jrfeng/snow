@@ -4,6 +4,8 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import com.google.common.base.Preconditions;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +82,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         }
     }
 
-    private void notifyPlayModeChanged(int playMode) {
+    private void notifyPlayModeChanged(PlayMode playMode) {
         mPlaylistState.setPlayMode(playMode);
         HashMap<String, PlaylistStateListener> listenerMap = getAllStateListener();
 
@@ -136,11 +138,11 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         int position = mPlaylistState.getPosition();
 
         switch (mPlaylistState.getPlayMode()) {
-            case PlayMode.SEQUENTIAL:   // 注意！case 穿透
-            case PlayMode.LOOP:
+            case SEQUENTIAL:   // 注意！case 穿透
+            case LOOP:
                 position = Math.min(position + 1, mPlaylist.size());
                 break;
-            case PlayMode.SHUFFLE:
+            case SHUFFLE:
                 position = getRandomPosition();
                 break;
         }
@@ -164,11 +166,11 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         int position = mPlaylistState.getPosition();
 
         switch (mPlaylistState.getPlayMode()) {
-            case PlayMode.SEQUENTIAL:   // 注意！case 穿透
-            case PlayMode.LOOP:
+            case SEQUENTIAL:   // 注意！case 穿透
+            case LOOP:
                 position = Math.max(position - 1, 0);
                 break;
-            case PlayMode.SHUFFLE:
+            case SHUFFLE:
                 position = getRandomPosition();
                 break;
         }
@@ -199,7 +201,8 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     }
 
     @Override
-    public void setPlayMode(int playMode) {
+    public void setPlayMode(@NonNull PlayMode playMode) {
+        Preconditions.checkNotNull(playMode);
         if (playMode == mPlaylistState.getPlayMode()) {
             return;
         }
