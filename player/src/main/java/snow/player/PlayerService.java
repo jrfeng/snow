@@ -8,10 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.IBinder;
 import android.widget.RemoteViews;
@@ -441,8 +437,8 @@ public class PlayerService extends Service implements PlayerManager {
                 .setContentTitle(getApplicationLabel())
                 .setContentText(getApplicationLabel())
                 .setStyle(new androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
-                .setCustomContentView(createContentView(playerType))
-                .setCustomBigContentView(createBigContentView(playerType))
+                .setCustomContentView(onCreateContentView(playerType))
+                .setCustomBigContentView(onCreateBigContentView(playerType))
                 .setContentIntent(getNotificationContentIntent())
                 .build();
     }
@@ -464,37 +460,9 @@ public class PlayerService extends Service implements PlayerManager {
         return null;
     }
 
-    @Nullable
-    private ApplicationInfo getApplicationInfo(PackageManager pm) {
-        try {
-            return pm.getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    private Bitmap getApplicationIcon() {
-        PackageManager pm = getPackageManager();
-        ApplicationInfo info = getApplicationInfo(pm);
-
-        if (info == null) {
-            return BitmapFactory.decodeResource(getResources(), R.drawable.snow_ic_music);
-        }
-
-        Drawable drawable = pm.getApplicationLogo(info);
-
-        if (drawable == null) {
-            return BitmapFactory.decodeResource(getResources(), R.drawable.snow_ic_music);
-        }
-
-        return ((BitmapDrawable) drawable).getBitmap();
-    }
-
     private CharSequence getApplicationLabel() {
         PackageManager pm = getPackageManager();
-        ApplicationInfo info = getApplicationInfo(pm);
+        ApplicationInfo info = getApplicationInfo();
 
         if (info == null) {
             return "unknown";
@@ -503,7 +471,7 @@ public class PlayerService extends Service implements PlayerManager {
         return pm.getApplicationLabel(info);
     }
 
-    private RemoteViews createContentView(int playerType) {
+    private RemoteViews onCreateContentView(int playerType) {
         if (playerType == TYPE_RADIO_STATION) {
             return onCreateRadioStationContentView();
         }
@@ -511,7 +479,7 @@ public class PlayerService extends Service implements PlayerManager {
         return onCreatePlaylistContentView();
     }
 
-    private RemoteViews createBigContentView(int playerType) {
+    private RemoteViews onCreateBigContentView(int playerType) {
         if (playerType == TYPE_RADIO_STATION) {
             return onCreateRadioStationBigContentView();
         }
