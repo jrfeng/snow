@@ -367,8 +367,13 @@ public class PlayerService extends Service implements PlayerManager {
             return;
         }
 
+        Notification notification = onCreateNotification(mPlayerType);
+        if (notification == null) {
+            return;
+        }
+
         mForeground = true;
-        startForeground(mNotificationId, onCreateNotification(mPlayerType));
+        startForeground(mNotificationId, notification);
     }
 
     protected final void stopForegroundEx(boolean removeNotification) {
@@ -382,12 +387,16 @@ public class PlayerService extends Service implements PlayerManager {
             return;
         }
 
-        mNotificationManager.notify(mNotificationId, onCreateNotification(mPlayerType));
+        Notification notification = onCreateNotification(mPlayerType);
+        if (notification == null) {
+            return;
+        }
+
+        mNotificationManager.notify(mNotificationId, notification);
     }
 
-    @NonNull
+    @Nullable
     protected Notification onCreateNotification(int playerType) {
-        // TODO notification
         return null;
     }
 
