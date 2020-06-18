@@ -6,11 +6,21 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.IBinder;
+import android.widget.RemoteViews;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
@@ -427,6 +437,107 @@ public class PlayerService extends Service implements PlayerManager {
 
     @Nullable
     protected Notification onCreateNotification(int playerType) {
+        return null;
+    }
+
+    @NonNull
+    protected final Notification createDefaultNotification(int playerType, @Nullable PendingIntent contentIntent) {
+        return new NotificationCompat.Builder(this, getNotificationChannelId())
+                .setSmallIcon(getSmallIconId())
+                .setContentTitle(getApplicationLabel())
+                .setContentText(getApplicationLabel())
+                .setStyle(new androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
+                .setCustomContentView(createContentView(playerType))
+                .setCustomBigContentView(createBigContentView(playerType))
+                .setContentIntent(contentIntent)
+                .build();
+    }
+
+    @Nullable
+    private ApplicationInfo getApplicationInfo(PackageManager pm) {
+        try {
+            return pm.getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private Bitmap getApplicationIcon() {
+        PackageManager pm = getPackageManager();
+        ApplicationInfo info = getApplicationInfo(pm);
+
+        if (info == null) {
+            return BitmapFactory.decodeResource(getResources(), R.drawable.snow_ic_music);
+        }
+
+        Drawable drawable = pm.getApplicationLogo(info);
+
+        if (drawable == null) {
+            return BitmapFactory.decodeResource(getResources(), R.drawable.snow_ic_music);
+        }
+
+        return ((BitmapDrawable) drawable).getBitmap();
+    }
+
+    private CharSequence getApplicationLabel() {
+        PackageManager pm = getPackageManager();
+        ApplicationInfo info = getApplicationInfo(pm);
+
+        if (info == null) {
+            return "unknown";
+        }
+
+        return pm.getApplicationLabel(info);
+    }
+
+    private RemoteViews createContentView(int playerType) {
+        if (playerType == TYPE_RADIO_STATION) {
+            return createRadioStationContentView();
+        }
+
+        return createPlaylistContentView();
+    }
+
+    private RemoteViews createBigContentView(int playerType) {
+        if (playerType == TYPE_RADIO_STATION) {
+            return createRadioStationBigContentView();
+        }
+
+        return createPlaylistBigContentView();
+    }
+
+    @DrawableRes
+    protected int getSmallIconId() {
+        return R.drawable.snow_ic_music;
+    }
+
+    protected String getNotificationChannelId() {
+        return "player";
+    }
+
+    @NonNull
+    protected RemoteViews createPlaylistContentView() {
+        // TODO
+        return null;
+    }
+
+    @NonNull
+    protected RemoteViews createRadioStationContentView() {
+        // TODO
+        return null;
+    }
+
+    @NonNull
+    protected RemoteViews createPlaylistBigContentView() {
+        // TODO
+        return null;
+    }
+
+    @NonNull
+    protected RemoteViews createRadioStationBigContentView() {
+        // TODO
         return null;
     }
 
