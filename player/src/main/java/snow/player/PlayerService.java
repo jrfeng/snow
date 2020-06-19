@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.IBinder;
 import android.widget.RemoteViews;
@@ -849,6 +850,8 @@ public class PlayerService extends Service implements PlayerManager {
         private boolean mError;
         private String mErrorMessage;
 
+        private Bitmap mIcon;
+
         private PendingIntent mSkipPrevious;
         private PendingIntent mPlayOrPause;
         private PendingIntent mSkipNext;
@@ -901,6 +904,15 @@ public class PlayerService extends Service implements PlayerManager {
         @NonNull
         public final String getErrorMessage() {
             return mErrorMessage;
+        }
+
+        public Bitmap getIcon() {
+            return mIcon;
+        }
+
+        public void setIcon(@NonNull Bitmap icon) {
+            mIcon = icon;
+            invalidate();
         }
 
         public final void invalidate() {
