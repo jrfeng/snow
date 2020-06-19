@@ -867,6 +867,8 @@ public class PlayerService extends Service implements PlayerManager {
             mSkipPrevious = skipPrevious;
             mPlayOrPause = playOrPause;
             mSkipNext = skipNext;
+
+            onInit(mPlayerService.getApplicationContext());
         }
 
         @NonNull
@@ -906,17 +908,30 @@ public class PlayerService extends Service implements PlayerManager {
             return mErrorMessage;
         }
 
-        public Bitmap getIcon() {
+        @NonNull
+        public final Bitmap getIcon() {
             return mIcon;
         }
 
-        public void setIcon(@NonNull Bitmap icon) {
+        public final void setIcon(@NonNull Bitmap icon) {
+            setIcon(icon, false);
+        }
+
+        public final void setIcon(@NonNull Bitmap icon, boolean invalidate) {
+            Preconditions.checkNotNull(icon);
+
             mIcon = icon;
-            invalidate();
+
+            if (invalidate) {
+                invalidate();
+            }
         }
 
         public final void invalidate() {
             mPlayerService.invalidateNotificationView();
+        }
+
+        protected void onInit(Context applicationContext) {
         }
 
         void setPlaying(boolean playing) {
