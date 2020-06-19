@@ -6,13 +6,10 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.IBinder;
 import android.widget.RemoteViews;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -70,6 +67,8 @@ public class PlayerService extends Service implements PlayerManager {
 
     private Map<String, Runnable> mStartCommandActionMap;
 
+    private NotificationView mNotificationView;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -91,6 +90,7 @@ public class PlayerService extends Service implements PlayerManager {
         initPlayer();
         initControllerPipe();
         initMediaButtonHelper();
+        initNotificationView();
     }
 
     private void initPlayerState() {
@@ -186,6 +186,50 @@ public class PlayerService extends Service implements PlayerManager {
                 }
             }
         });
+    }
+
+    private void initNotificationView() {
+        mNotificationView = onCreateNotificationView();
+
+        if (noNotificationView()) {
+            return;
+        }
+
+        mNotificationView.init(this,
+                addOnStartCommandAction("skip_to_previous", new Runnable() {
+                    @Override
+                    public void run() {
+                        skipToPrevious();
+                    }
+                }),
+                addOnStartCommandAction("play_pause", new Runnable() {
+                    @Override
+                    public void run() {
+                        playOrPause();
+                    }
+                }),
+                addOnStartCommandAction("skip_to_next", new Runnable() {
+                    @Override
+                    public void run() {
+                        skipToNext();
+                    }
+                }));
+
+        mNotificationView.setPlaying(isPlaying());
+
+        MusicItem musicItem = getPlayingMusicItem();
+        if (musicItem != null) {
+            mNotificationView.setPlayingMusicItem(musicItem);
+        }
+    }
+
+    private boolean noNotificationView() {
+        return mNotificationView == null;
+    }
+
+    @Nullable
+    protected NotificationView onCreateNotificationView() {
+        return new DefaultNotificationView();
     }
 
     @Nullable
@@ -374,10 +418,22 @@ public class PlayerService extends Service implements PlayerManager {
         return Player.Error.getErrorMessage(this, getErrorCode());
     }
 
-    protected final void invalidateNotification() {
-        if (getPlayingMusicItem() == null) {
+    protected final void invalidateNotificationView() {
+        if (noNotificationView()) {
+            return;
+        }
+
+        MusicItem musicItem = getPlayingMusicItem();
+        if (musicItem == null) {
             stopForegroundEx(true);
             return;
+        }
+
+        mNotificationView.setPlaying(isPlaying());
+        mNotificationView.setPlayingMusicItem(musicItem);
+        mNotificationView.setError(isError());
+        if (mNotificationView.isError()) {
+            mNotificationView.setErrorMessage(getErrorMessage());
         }
 
         if (isPlaying() && !isForeground()) {
@@ -397,8 +453,7 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     protected final void startForeground() {
-        if (hideNotification()) {
-            stopForegroundEx(true);
+        if (noNotificationView()) {
             return;
         }
 
@@ -417,8 +472,7 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     private void updateNotification() {
-        if (hideNotification()) {
-            stopForegroundEx(true);
+        if (noNotificationView()) {
             return;
         }
 
@@ -431,84 +485,8 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     @NonNull
-    protected Notification onCreateNotification(int playerType) {
-        return new NotificationCompat.Builder(this, getNotificationChannelId())
-                .setSmallIcon(getSmallIconId())
-                .setContentTitle(getApplicationLabel())
-                .setContentText(getApplicationLabel())
-                .setStyle(new androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
-                .setCustomContentView(onCreateContentView(playerType))
-                .setCustomBigContentView(onCreateBigContentView(playerType))
-                .setContentIntent(getNotificationContentIntent())
-                .build();
-    }
-
-    protected boolean hideNotification() {
-        return false;
-    }
-
-    @DrawableRes
-    protected int getSmallIconId() {
-        return R.drawable.snow_ic_music;
-    }
-
-    protected String getNotificationChannelId() {
-        return "player";
-    }
-
-    protected PendingIntent getNotificationContentIntent() {
-        return null;
-    }
-
-    private CharSequence getApplicationLabel() {
-        PackageManager pm = getPackageManager();
-        ApplicationInfo info = getApplicationInfo();
-
-        if (info == null) {
-            return "unknown";
-        }
-
-        return pm.getApplicationLabel(info);
-    }
-
-    private RemoteViews onCreateContentView(int playerType) {
-        if (playerType == TYPE_RADIO_STATION) {
-            return onCreateRadioStationContentView();
-        }
-
-        return onCreatePlaylistContentView();
-    }
-
-    private RemoteViews onCreateBigContentView(int playerType) {
-        if (playerType == TYPE_RADIO_STATION) {
-            return onCreateRadioStationBigContentView();
-        }
-
-        return onCreatePlaylistBigContentView();
-    }
-
-    @NonNull
-    protected RemoteViews onCreatePlaylistContentView() {
-        // TODO
-        return null;
-    }
-
-    @NonNull
-    protected RemoteViews onCreateRadioStationContentView() {
-        // TODO
-        return null;
-    }
-
-    @NonNull
-    protected RemoteViews onCreatePlaylistBigContentView() {
-        // TODO
-        return null;
-    }
-
-    @NonNull
-    protected RemoteViews onCreateRadioStationBigContentView() {
-        // TODO
-        return null;
+    private Notification onCreateNotification(int playerType) {
+        return mNotificationView.onCreateNotification(playerType);
     }
 
     /**
@@ -625,25 +603,26 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     protected void onPlaying(long progress, long updateTime) {
-        invalidateNotification();
+        invalidateNotificationView();
     }
 
     protected void onPaused() {
-        invalidateNotification();
+        invalidateNotificationView();
     }
 
     protected void onStalledChanged(boolean stalled) {
     }
 
     protected void onStopped() {
-        invalidateNotification();
+        invalidateNotificationView();
     }
 
     protected void onError(int errorCode, String errorMessage) {
-        invalidateNotification();
+        invalidateNotificationView();
     }
 
     protected void onPlayComplete(MusicItem musicItem) {
+        invalidateNotificationView();
     }
 
     protected void onRequestAudioFocus(boolean success) {
@@ -657,7 +636,7 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
-        invalidateNotification();
+        invalidateNotificationView();
     }
 
     private class PlaylistPlayerImp extends AbstractPlaylistPlayer {
@@ -857,6 +836,142 @@ public class PlayerService extends Service implements PlayerManager {
         protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
             super.onPlayingMusicItemChanged(musicItem);
             PlayerService.this.onPlayingMusicItemChanged(musicItem);
+        }
+    }
+
+    public static abstract class NotificationView {
+        private PlayerService mPlayerService;
+
+        private MusicItem mMusicItem;
+        private boolean mPlaying;
+
+        private boolean mError;
+        private String mErrorMessage;
+
+        private PendingIntent mSkipPrevious;
+        private PendingIntent mPlayOrPause;
+        private PendingIntent mSkipNext;
+
+        void init(PlayerService playerService, PendingIntent skipPrevious, PendingIntent playOrPause, PendingIntent skipNext) {
+            mMusicItem = new MusicItem();
+            mPlaying = false;
+
+            mError = false;
+            mErrorMessage = "";
+
+            mPlayerService = playerService;
+            mSkipPrevious = skipPrevious;
+            mPlayOrPause = playOrPause;
+            mSkipNext = skipNext;
+        }
+
+        @NonNull
+        public abstract Notification onCreateNotification(int playerType);
+
+        protected final Context getApplicationContext() {
+            return mPlayerService.getApplicationContext();
+        }
+
+        protected final PendingIntent getSkipPreviousPendingIntent() {
+            return mSkipPrevious;
+        }
+
+        protected final PendingIntent getPlayOrPausePendingIntent() {
+            return mPlayOrPause;
+        }
+
+        protected final PendingIntent getSkipNextPendingIntent() {
+            return mSkipNext;
+        }
+
+        public final boolean isPlaying() {
+            return mPlaying;
+        }
+
+        @NonNull
+        public final MusicItem getPlayingMusicItem() {
+            return mMusicItem;
+        }
+
+        public final boolean isError() {
+            return mError;
+        }
+
+        @NonNull
+        public final String getErrorMessage() {
+            return mErrorMessage;
+        }
+
+        public final void invalidate() {
+            mPlayerService.invalidateNotificationView();
+        }
+
+        void setPlaying(boolean playing) {
+            mPlaying = playing;
+        }
+
+        void setPlayingMusicItem(@NonNull MusicItem musicItem) {
+            Preconditions.checkNotNull(musicItem);
+            mMusicItem = musicItem;
+        }
+
+        void setError(boolean error) {
+            mError = error;
+        }
+
+        void setErrorMessage(@NonNull String errorMessage) {
+            Preconditions.checkNotNull(errorMessage);
+            mErrorMessage = errorMessage;
+        }
+    }
+
+    public static class DefaultNotificationView extends NotificationView {
+
+        @NonNull
+        @Override
+        public Notification onCreateNotification(int playerType) {
+            return new NotificationCompat.Builder(getApplicationContext(), "player")
+                    .setSmallIcon(R.drawable.snow_ic_music)
+                    .setStyle(new androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
+                    .setCustomContentView(createContentView(playerType))
+                    .setCustomBigContentView(createBigContentView(playerType))
+                    .build();
+        }
+
+        private RemoteViews createContentView(int playerType) {
+            if (playerType == TYPE_RADIO_STATION) {
+                return createRadioStationContentView();
+            }
+
+            return createPlaylistContentView();
+        }
+
+        private RemoteViews createBigContentView(int playerType) {
+            if (playerType == TYPE_RADIO_STATION) {
+                return createRadioStationBigContentView();
+            }
+
+            return createPlaylistBigContentView();
+        }
+
+        private RemoteViews createPlaylistContentView() {
+            // TODO
+            return null;
+        }
+
+        private RemoteViews createRadioStationContentView() {
+            // TODO
+            return null;
+        }
+
+        private RemoteViews createPlaylistBigContentView() {
+            // TODO
+            return null;
+        }
+
+        private RemoteViews createRadioStationBigContentView() {
+            // TODO
+            return null;
         }
     }
 }
