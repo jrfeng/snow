@@ -60,8 +60,9 @@ public class PlaylistManagerTest {
     @BeforeClass
     public static void initPlaylistManager() {
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        mPlaylistManager = PlaylistManager.newInstance(context, ID_PLAYLIST);
-        mPlaylistManager.setAvailable(true);
+        mPlaylistManager = new PlaylistManager(context, ID_PLAYLIST) {
+        };
+        mPlaylistManager.setEditable(true);
     }
 
     @Before

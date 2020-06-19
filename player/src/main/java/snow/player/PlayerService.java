@@ -99,7 +99,8 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     private void initPlaylistManager() {
-        mPlaylistManager = PlaylistManager.newInstance(this, mPersistentId);
+        mPlaylistManager = new PlaylistManager(this, mPersistentId) {
+        };
     }
 
     private void initPlayer() {

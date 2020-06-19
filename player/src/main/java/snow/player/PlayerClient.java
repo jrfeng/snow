@@ -265,7 +265,7 @@ public class PlayerClient {
 
         void setConnected(boolean connected) {
             mConnected = connected;
-            mPlaylistManager.setAvailable(connected);
+            mPlaylistManager.setEditable(connected);
         }
 
         void setPlaylistState(PlaylistState playlistState) {
@@ -618,8 +618,8 @@ public class PlayerClient {
             }
 
             @Override
-            public void setAvailable(boolean available) {
-                super.setAvailable(available);
+            protected void setEditable(boolean editable) {
+                super.setEditable(editable);
             }
         }
     }

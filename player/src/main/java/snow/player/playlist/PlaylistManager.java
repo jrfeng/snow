@@ -1,6 +1,7 @@
 package snow.player.playlist;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,43 +21,39 @@ import snow.player.media.MusicItem;
  * 用于管理音乐播放器的播放队列。
  */
 public abstract class PlaylistManager {
+    private static final String TAG = "PlaylistManager";
     private static final String KEY_PLAYLIST = "playlist";
     private static final String KEY_PLAYLIST_SIZE = "playlist_size";
 
     private MMKV mMMKV;
     private Executor mExecutor;
-    private boolean mAvailable;
+    private boolean mEditable;
 
     @Nullable
     private WeakReference<OnModifyPlaylistListener> mListenerWeakReference;
 
-    protected PlaylistManager(Context context, String playlistId) {
-        MMKV.initialize(context);
-        mMMKV = MMKV.mmkvWithID(playlistId, MMKV.MULTI_PROCESS_MODE);
-        mExecutor = Executors.newSingleThreadExecutor();
-        mAvailable = false;
-    }
-
-    public static PlaylistManager newInstance(@NonNull Context context, @NonNull String playlistId) {
+    public PlaylistManager(@NonNull Context context, @NonNull String playlistId) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playlistId);
 
-        return new PlaylistManager(context, playlistId) {
-        };
+        MMKV.initialize(context);
+        mMMKV = MMKV.mmkvWithID(playlistId, MMKV.MULTI_PROCESS_MODE);
+        mExecutor = Executors.newSingleThreadExecutor();
+        mEditable = false;
     }
 
     /**
-     * 判断当前 PlaylistManager 是否可用。
+     * 判断当前 PlaylistManager 是否是可编辑的。
      *
-     * @return 如果当前 PlaylistManager 可用，则返回 true，否则返回 false。当返回 false 时，对 Playlist 的
-     * 一切操作都会被忽略。
+     * @return 如果当前 PlaylistManager 是可编辑的，则返回 true，否则返回 false。当返回 false 时，
+     * 对 Playlist 的一切修改操作都会被忽略（可以正常访问）。
      */
-    public final boolean isAvailable() {
-        return mAvailable;
+    public final boolean isEditable() {
+        return mEditable;
     }
 
-    protected void setAvailable(boolean available) {
-        mAvailable = available;
+    protected void setEditable(boolean editable) {
+        mEditable = editable;
     }
 
     /**
@@ -137,10 +134,13 @@ public abstract class PlaylistManager {
      * @param position       要设置的播放位置值（小于 0 时，相当于设为 0）
      * @param playOnPrepared 否在 prepare 完成后自动播放音乐
      */
-    public void setPlaylist(@NonNull final Playlist playlist, final int position, final boolean playOnPrepared) {
+    public void setPlaylist(@NonNull final Playlist playlist,
+                            final int position,
+                            final boolean playOnPrepared) {
         Preconditions.checkNotNull(playlist);
 
-        if (!isAvailable()) {
+        if (!isEditable()) {
+            Log.e(TAG, "playlist is not editable.");
             return;
         }
 
@@ -157,7 +157,8 @@ public abstract class PlaylistManager {
      * 将播放队列中 fromPosition 位置处的 MusicItem 对象移动到 toPosition 位置。
      */
     public void moveMusicItem(final int fromPosition, final int toPosition) {
-        if (!isAvailable()) {
+        if (!isEditable()) {
+            Log.e(TAG, "playlist is not editable.");
             return;
         }
 
@@ -187,7 +188,8 @@ public abstract class PlaylistManager {
     public void appendMusicItem(@NonNull final MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
 
-        if (!isAvailable()) {
+        if (!isEditable()) {
+            Log.e(TAG, "playlist is not editable.");
             return;
         }
 
@@ -213,7 +215,8 @@ public abstract class PlaylistManager {
     public void appendAllMusicItem(@NonNull final List<MusicItem> musicItems) {
         Preconditions.checkNotNull(musicItems);
 
-        if (!isAvailable()) {
+        if (!isEditable()) {
+            Log.e(TAG, "playlist is not editable.");
             return;
         }
 
@@ -237,7 +240,8 @@ public abstract class PlaylistManager {
     public void insertMusicItem(final int position, @NonNull final MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
 
-        if (!isAvailable()) {
+        if (!isEditable()) {
+            Log.e(TAG, "playlist is not editable.");
             return;
         }
 
@@ -260,7 +264,8 @@ public abstract class PlaylistManager {
     public void insertAllMusicItem(final int position, @NonNull final List<MusicItem> musicItems) {
         Preconditions.checkNotNull(musicItems);
 
-        if (!isAvailable()) {
+        if (!isEditable()) {
+            Log.e(TAG, "playlist is not editable.");
             return;
         }
 
@@ -285,7 +290,8 @@ public abstract class PlaylistManager {
             return;
         }
 
-        if (!isAvailable()) {
+        if (!isEditable()) {
+            Log.e(TAG, "playlist is not editable.");
             return;
         }
 
