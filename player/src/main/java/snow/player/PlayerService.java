@@ -201,25 +201,25 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         mNotificationView.init(this,
-                addOnStartCommandAction("skip_to_previous", new Runnable() {
+                addOnStartCommandAction("snow.player.action.skip_to_previous", new Runnable() {
                     @Override
                     public void run() {
                         skipToPrevious();
                     }
                 }),
-                addOnStartCommandAction("play_pause", new Runnable() {
+                addOnStartCommandAction("snow.player.action.play_pause", new Runnable() {
                     @Override
                     public void run() {
                         playOrPause();
                     }
                 }),
-                addOnStartCommandAction("skip_to_next", new Runnable() {
+                addOnStartCommandAction("snow.player.action.skip_to_next", new Runnable() {
                     @Override
                     public void run() {
                         skipToNext();
                     }
                 }),
-                addOnStartCommandAction("cancel", new Runnable() {
+                addOnStartCommandAction("snow.player.action.cancel", new Runnable() {
                     @Override
                     public void run() {
                         shutdown();
@@ -497,6 +497,7 @@ public class PlayerService extends Service implements PlayerManager {
 
     @NonNull
     private Notification createNotification(int playerType) {
+        assert mNotificationView != null;
         return mNotificationView.createNotification(playerType);
     }
 
