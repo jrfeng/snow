@@ -497,7 +497,9 @@ public class PlayerService extends Service implements PlayerManager {
 
     @NonNull
     private Notification createNotification(int playerType) {
-        assert mNotificationView != null;
+        if (mNotificationView == null) {
+            throw new IllegalStateException("NotificationView is null");
+        }
         return mNotificationView.createNotification(playerType);
     }
 
