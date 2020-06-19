@@ -7,6 +7,8 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.IBinder;
 import android.widget.RemoteViews;
@@ -68,6 +70,7 @@ public class PlayerService extends Service implements PlayerManager {
 
     private Map<String, Runnable> mStartCommandActionMap;
 
+    @Nullable
     private NotificationView mNotificationView;
 
     @Override
@@ -215,6 +218,12 @@ public class PlayerService extends Service implements PlayerManager {
                     public void run() {
                         skipToNext();
                     }
+                }),
+                addOnStartCommandAction("cancel", new Runnable() {
+                    @Override
+                    public void run() {
+                        shutdown();
+                    }
                 }));
 
         mNotificationView.setPlaying(isPlaying());
@@ -231,7 +240,7 @@ public class PlayerService extends Service implements PlayerManager {
 
     @Nullable
     protected NotificationView onCreateNotificationView() {
-        return new DefaultNotificationView();
+        return new SimpleNotificationView();
     }
 
     @Nullable
@@ -465,7 +474,7 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         mForeground = true;
-        startForeground(mNotificationId, onCreateNotification(mPlayerType));
+        startForeground(mNotificationId, createNotification(mPlayerType));
     }
 
     protected final void stopForegroundEx(boolean removeNotification) {
@@ -483,12 +492,12 @@ public class PlayerService extends Service implements PlayerManager {
             return;
         }
 
-        mNotificationManager.notify(mNotificationId, onCreateNotification(mPlayerType));
+        mNotificationManager.notify(mNotificationId, createNotification(mPlayerType));
     }
 
     @NonNull
-    private Notification onCreateNotification(int playerType) {
-        return mNotificationView.onCreateNotification(playerType);
+    private Notification createNotification(int playerType) {
+        return mNotificationView.createNotification(playerType);
     }
 
     /**
@@ -850,44 +859,64 @@ public class PlayerService extends Service implements PlayerManager {
         private boolean mError;
         private String mErrorMessage;
 
-        private Bitmap mIcon;
+        private boolean mMusicItemChanged;
 
-        private PendingIntent mSkipPrevious;
+        private PendingIntent mSkipToPrevious;
         private PendingIntent mPlayOrPause;
-        private PendingIntent mSkipNext;
+        private PendingIntent mSkipToNext;
+        private PendingIntent mCancel;
 
-        void init(PlayerService playerService, PendingIntent skipPrevious, PendingIntent playOrPause, PendingIntent skipNext) {
+        void init(PlayerService playerService,
+                  PendingIntent skipPrevious,
+                  PendingIntent playOrPause,
+                  PendingIntent skipNext,
+                  PendingIntent cancel) {
             mMusicItem = new MusicItem();
             mPlaying = false;
 
             mError = false;
             mErrorMessage = "";
+            mMusicItemChanged = false;
 
             mPlayerService = playerService;
-            mSkipPrevious = skipPrevious;
+            mSkipToPrevious = skipPrevious;
             mPlayOrPause = playOrPause;
-            mSkipNext = skipNext;
+            mSkipToNext = skipNext;
+            mCancel = cancel;
 
-            onInit(mPlayerService.getApplicationContext());
+            onInit(mPlayerService);
         }
 
         @NonNull
         public abstract Notification onCreateNotification(int playerType);
 
-        protected final Context getApplicationContext() {
-            return mPlayerService.getApplicationContext();
+        /**
+         * 该方法会在初次创建 NotificationView 对象时调用，你可以重写该方法来进行一些初始化操作。
+         */
+        protected void onInit(Context context) {
         }
 
-        protected final PendingIntent getSkipPreviousPendingIntent() {
-            return mSkipPrevious;
+        protected void onMusicItemChanged() {
+        }
+
+        protected final Context getContext() {
+            return mPlayerService;
+        }
+
+        protected final PendingIntent getSkipToPreviousPendingIntent() {
+            return mSkipToPrevious;
         }
 
         protected final PendingIntent getPlayOrPausePendingIntent() {
             return mPlayOrPause;
         }
 
-        protected final PendingIntent getSkipNextPendingIntent() {
-            return mSkipNext;
+        protected final PendingIntent getSkipToNextPendingIntent() {
+            return mSkipToNext;
+        }
+
+        public PendingIntent getCancelPendingIntent() {
+            return mCancel;
         }
 
         public final boolean isPlaying() {
@@ -908,30 +937,32 @@ public class PlayerService extends Service implements PlayerManager {
             return mErrorMessage;
         }
 
-        @NonNull
-        public final Bitmap getIcon() {
-            return mIcon;
-        }
-
-        public final void setIcon(@NonNull Bitmap icon) {
-            setIcon(icon, false);
-        }
-
-        public final void setIcon(@NonNull Bitmap icon, boolean invalidate) {
-            Preconditions.checkNotNull(icon);
-
-            mIcon = icon;
-
-            if (invalidate) {
-                invalidate();
-            }
-        }
-
         public final void invalidate() {
             mPlayerService.invalidateNotificationView();
         }
 
-        protected void onInit(Context applicationContext) {
+        @Nullable
+        protected final Bitmap getMusicItemEmbeddedIcon() {
+            MusicItem musicItem = getPlayingMusicItem();
+
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(musicItem.getUri());
+
+            byte[] data = retriever.getEmbeddedPicture();
+            if (data != null && data.length > 0) {
+                return BitmapFactory.decodeByteArray(data, 0, data.length);
+            }
+
+            return null;
+        }
+
+        protected final boolean isMusicItemChanged() {
+            return mMusicItemChanged;
+        }
+
+        @NonNull
+        Notification createNotification(int playerType) {
+            return onCreateNotification(playerType);
         }
 
         void setPlaying(boolean playing) {
@@ -940,6 +971,8 @@ public class PlayerService extends Service implements PlayerManager {
 
         void setPlayingMusicItem(@NonNull MusicItem musicItem) {
             Preconditions.checkNotNull(musicItem);
+
+            mMusicItemChanged = !(mMusicItem.equals(musicItem));
             mMusicItem = musicItem;
         }
 
@@ -953,51 +986,33 @@ public class PlayerService extends Service implements PlayerManager {
         }
     }
 
-    public static class DefaultNotificationView extends NotificationView {
+    public static class SimpleNotificationView extends NotificationView {
 
         @NonNull
         @Override
         public Notification onCreateNotification(int playerType) {
-            return new NotificationCompat.Builder(getApplicationContext(), "player")
+            if (isMusicItemChanged()) {
+                reloadIcon();
+            }
+
+            return new NotificationCompat.Builder(getContext(), "player")
                     .setSmallIcon(R.drawable.snow_ic_music)
                     .setStyle(new androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
-                    .setCustomContentView(createContentView(playerType))
-                    .setCustomBigContentView(createBigContentView(playerType))
+                    .setCustomContentView(onCreateContentView(playerType))
+                    .setCustomBigContentView(onCreateBigContentView(playerType))
                     .build();
         }
 
-        private RemoteViews createContentView(int playerType) {
-            if (playerType == TYPE_RADIO_STATION) {
-                return createRadioStationContentView();
-            }
-
-            return createPlaylistContentView();
+        protected void reloadIcon() {
+            // TODO
         }
 
-        private RemoteViews createBigContentView(int playerType) {
-            if (playerType == TYPE_RADIO_STATION) {
-                return createRadioStationBigContentView();
-            }
-
-            return createPlaylistBigContentView();
-        }
-
-        private RemoteViews createPlaylistContentView() {
+        protected RemoteViews onCreateContentView(int playerType) {
             // TODO
             return null;
         }
 
-        private RemoteViews createRadioStationContentView() {
-            // TODO
-            return null;
-        }
-
-        private RemoteViews createPlaylistBigContentView() {
-            // TODO
-            return null;
-        }
-
-        private RemoteViews createRadioStationBigContentView() {
+        protected RemoteViews onCreateBigContentView(int playerType) {
             // TODO
             return null;
         }
