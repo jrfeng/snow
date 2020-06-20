@@ -85,7 +85,7 @@ public class PlayerStateTest {
         musicItem.setTitle("test_title");
         musicItem.setArtist("test_artist");
 
-        final int playbackState = Player.PlaybackState.PLAYING;
+        final Player.PlaybackState playbackState = Player.PlaybackState.PLAYING;
         final int audioSessionId = 15;
         final int bufferingPercent = 100;
         final long bufferingPercentUpdateTime = System.currentTimeMillis();
@@ -144,7 +144,7 @@ public class PlayerStateTest {
         musicItem.setTitle("test_title");
         musicItem.setArtist("test_artist");
 
-        final int playbackState = Player.PlaybackState.PLAYING;
+        final Player.PlaybackState playbackState = Player.PlaybackState.PLAYING;
         final int audioSessionId = 8;
         final int bufferingPercent = 95;
         final long bufferingPercentUpdateTime = System.currentTimeMillis();
@@ -189,7 +189,7 @@ public class PlayerStateTest {
         musicItem.setTitle("test_title");
         musicItem.setArtist("test_artist");
 
-        final int playbackState = Player.PlaybackState.PAUSED;
+        final Player.PlaybackState playbackState = Player.PlaybackState.PAUSED;
         final int audioSessionId = 4;
         final int bufferingPercent = 50;
         final long bufferingPercentUpdateTime = System.currentTimeMillis();
