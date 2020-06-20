@@ -35,6 +35,16 @@ public class RadioStationTest {
         assertEquals(description, rs.getDescription());
     }
 
+    public void copyConstructorTest() {
+        RadioStation source = new RadioStation("id", "name", "description");
+        source.setExtra(new Bundle());
+
+        RadioStation other = new RadioStation(source);
+
+        assertEquals(source, other);
+        assertNotNull(other.getExtra());
+    }
+
     @Test
     public void equalsTest() {
         RadioStation rs1 = new RadioStation(id, name, description);
