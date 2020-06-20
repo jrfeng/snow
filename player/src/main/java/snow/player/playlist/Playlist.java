@@ -139,7 +139,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
     }
 
     public Bundle getExtra() {
-        return mExtra;
+        return new Bundle(mExtra);
     }
 
     @Override
