@@ -24,9 +24,7 @@ public class RadioStationState extends PlayerState {
 
     public RadioStationState(RadioStationState source) {
         super(source);
-        mRadioStation = new RadioStation(source.mRadioStation.getId(),
-                source.mRadioStation.getName(),
-                source.mRadioStation.getDescription());
+        mRadioStation = new RadioStation(source.mRadioStation);
     }
 
     /**

@@ -39,6 +39,18 @@ public class RadioStation implements Parcelable {
     }
 
     /**
+     * 拷贝构造器。
+     */
+    public RadioStation(@NonNull RadioStation source) {
+        Preconditions.checkNotNull(source);
+
+        mId = source.mId;
+        mName = source.mName;
+        mDescription = source.mDescription;
+        mExtra = source.mExtra;
+    }
+
+    /**
      * 创建一个默认的 RadioStation 对象。
      * <p>
      * 相当于：RadioStation("", "unknown", "")
