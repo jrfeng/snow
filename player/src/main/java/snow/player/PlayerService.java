@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.widget.RemoteViews;
 
@@ -376,6 +377,20 @@ public class PlayerService extends Service implements PlayerManager {
 
     protected final int getPlayerType() {
         return mPlayerType;
+    }
+
+    protected final PlaylistPlayer.PlayMode getPlaylistPlayMode() {
+        return mPlaylistState.getPlayMode();
+    }
+
+    @Nullable
+    protected final Bundle getPlaylistExtra() {
+        return mPlaylistPlayer.getPlaylistExtra();
+    }
+
+    @Nullable
+    protected final Bundle getRadioStationExtra() {
+        return mRadioStationPlayer.getRadioStationExtra();
     }
 
     protected final PlaylistPlayer getPlaylistPlayer() {
@@ -894,12 +909,18 @@ public class PlayerService extends Service implements PlayerManager {
             return mPlayerService.getPlayerType();
         }
 
-        protected final PlaylistPlayer getPlaylistPlayer() {
-            return mPlayerService.getPlaylistPlayer();
+        protected final PlaylistPlayer.PlayMode getPlaylistPlayMode() {
+            return mPlayerService.getPlaylistPlayMode();
         }
 
-        protected final RadioStationPlayer getRadioStationPlayer() {
-            return mPlayerService.getRadioStationPlayer();
+        @Nullable
+        protected final Bundle getPlaylistExtra() {
+            return mPlayerService.getPlaylistExtra();
+        }
+
+        @Nullable
+        protected final Bundle getRadioStationExtra() {
+            return mPlayerService.getRadioStationExtra();
         }
 
         protected final PendingIntent addPlayerServiceAction(@NonNull String action,
@@ -1004,6 +1025,7 @@ public class PlayerService extends Service implements PlayerManager {
 
         protected RemoteViews onCreateContentView(int playerType) {
             // TODO
+
             return null;
         }
 
