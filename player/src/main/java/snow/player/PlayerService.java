@@ -226,8 +226,6 @@ public class PlayerService extends Service implements PlayerManager {
                     }
                 }));
 
-        mNotificationView.setPlaying(isPlaying());
-
         MusicItem musicItem = getPlayingMusicItem();
         if (musicItem != null) {
             mNotificationView.setPlayingMusicItem(musicItem);
@@ -440,12 +438,7 @@ public class PlayerService extends Service implements PlayerManager {
             return;
         }
 
-        mNotificationView.setPlaying(isPlaying());
         mNotificationView.setPlayingMusicItem(musicItem);
-        mNotificationView.setError(isError());
-        if (mNotificationView.isError()) {
-            mNotificationView.setErrorMessage(getErrorMessage());
-        }
 
         if (isPlaying() && !isForeground()) {
             startForeground();
@@ -857,11 +850,6 @@ public class PlayerService extends Service implements PlayerManager {
         private PlayerService mPlayerService;
 
         private MusicItem mMusicItem;
-        private boolean mPlaying;
-
-        private boolean mError;
-        private String mErrorMessage;
-
         private boolean mMusicItemChanged;
 
         private PendingIntent mSkipToPrevious;
@@ -875,10 +863,6 @@ public class PlayerService extends Service implements PlayerManager {
                   PendingIntent skipNext,
                   PendingIntent cancel) {
             mMusicItem = new MusicItem();
-            mPlaying = false;
-
-            mError = false;
-            mErrorMessage = "";
             mMusicItemChanged = false;
 
             mPlayerService = playerService;
@@ -906,6 +890,27 @@ public class PlayerService extends Service implements PlayerManager {
             return mPlayerService;
         }
 
+        protected final int getPlayerType() {
+            return mPlayerService.getPlayerType();
+        }
+
+        protected final PlaylistPlayer getPlaylistPlayer() {
+            return mPlayerService.getPlaylistPlayer();
+        }
+
+        protected final RadioStationPlayer getRadioStationPlayer() {
+            return mPlayerService.getRadioStationPlayer();
+        }
+
+        protected final PendingIntent addPlayerServiceAction(@NonNull String action,
+                                                                    @NonNull Runnable task) {
+            return mPlayerService.addOnStartCommandAction(action, task);
+        }
+
+        protected final void removePlayerServiceAction(@NonNull String action) {
+            mPlayerService.removeOnStartCommandAction(action);
+        }
+
         protected final PendingIntent getSkipToPreviousPendingIntent() {
             return mSkipToPrevious;
         }
@@ -918,12 +923,12 @@ public class PlayerService extends Service implements PlayerManager {
             return mSkipToNext;
         }
 
-        public PendingIntent getCancelPendingIntent() {
+        protected final PendingIntent getCancelPendingIntent() {
             return mCancel;
         }
 
         public final boolean isPlaying() {
-            return mPlaying;
+            return mPlayerService.isPlaying();
         }
 
         @NonNull
@@ -932,12 +937,12 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         public final boolean isError() {
-            return mError;
+            return mPlayerService.isError();
         }
 
         @NonNull
         public final String getErrorMessage() {
-            return mErrorMessage;
+            return mPlayerService.getErrorMessage();
         }
 
         public final void invalidate() {
@@ -968,24 +973,11 @@ public class PlayerService extends Service implements PlayerManager {
             return onCreateNotification(playerType);
         }
 
-        void setPlaying(boolean playing) {
-            mPlaying = playing;
-        }
-
         void setPlayingMusicItem(@NonNull MusicItem musicItem) {
             Preconditions.checkNotNull(musicItem);
 
             mMusicItemChanged = !(mMusicItem.equals(musicItem));
             mMusicItem = musicItem;
-        }
-
-        void setError(boolean error) {
-            mError = error;
-        }
-
-        void setErrorMessage(@NonNull String errorMessage) {
-            Preconditions.checkNotNull(errorMessage);
-            mErrorMessage = errorMessage;
         }
     }
 
