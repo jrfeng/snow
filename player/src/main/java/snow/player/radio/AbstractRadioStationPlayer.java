@@ -1,6 +1,7 @@
 package snow.player.radio;
 
 import android.content.Context;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -55,6 +56,11 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
     @Nullable
     protected abstract MusicItem getNextMusicItem(RadioStation radioStation);
 
+    @Nullable
+    public final Bundle getRadioStationExtra() {
+        return mRadioStationState.getRadioStation().getExtra();
+    }
+
     @Override
     protected void onPlayComplete(MusicItem musicItem) {
         super.onPlayComplete(musicItem);
@@ -64,7 +70,7 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
     private Single<MusicItem> getNextMusicItemAsync(final RadioStation radioStation) {
         return Single.create(new SingleOnSubscribe<MusicItem>() {
             @Override
-            public void subscribe(SingleEmitter<MusicItem> emitter) throws Exception {
+            public void subscribe(SingleEmitter<MusicItem> emitter) {
                 MusicItem musicItem = getNextMusicItem(radioStation);
 
                 if (emitter.isDisposed()) {
@@ -101,12 +107,12 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<MusicItem>() {
                     @Override
-                    public void accept(MusicItem musicItem) throws Exception {
+                    public void accept(MusicItem musicItem) {
                         notifyPlayingMusicItemChanged(musicItem, true);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
-                    public void accept(Throwable throwable) throws Exception {
+                    public void accept(Throwable throwable) {
                         throwable.printStackTrace();
                         notifyPlayingMusicItemChanged(null, false);
                     }
