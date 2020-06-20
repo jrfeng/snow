@@ -16,7 +16,7 @@ import snow.player.Player;
 /**
  * 用于保存基本的播放器状态。
  */
-public class PlayerState implements Parcelable, Cloneable {
+public class PlayerState implements Parcelable {
     private long mPlayProgress;
     private long mPlayProgressUpdateTime;
     private boolean mLooping;
@@ -38,7 +38,7 @@ public class PlayerState implements Parcelable, Cloneable {
 
     public PlayerState() {
         mPlayProgress = 0;
-        mPlayProgressUpdateTime = System.currentTimeMillis();
+        mPlayProgressUpdateTime = 0;
         mLooping = false;
         mSoundQuality = Player.SoundQuality.STANDARD;
         mAudioEffectEnabled = false;
@@ -48,7 +48,7 @@ public class PlayerState implements Parcelable, Cloneable {
         mPlaybackState = Player.PlaybackState.UNKNOWN;
         mAudioSessionId = 0;
         mBufferingPercent = 0;
-        mBufferingPercentUpdateTime = System.currentTimeMillis();
+        mBufferingPercentUpdateTime = 0;
         mStalled = false;
         mErrorCode = Player.Error.NO_ERROR;
         mErrorMessage = "";
@@ -405,13 +405,6 @@ public class PlayerState implements Parcelable, Cloneable {
                 mStalled,
                 mErrorCode,
                 mErrorMessage);
-    }
-
-    @NonNull
-    @Override
-    protected PlayerState clone() throws CloneNotSupportedException {
-        super.clone();
-        return new PlayerState(this);
     }
 
     protected PlayerState(Parcel in) {

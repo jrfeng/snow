@@ -132,7 +132,7 @@ public class PlayerStateTest {
     }
 
     @Test
-    public void cloneTest() throws CloneNotSupportedException {
+    public void copyConstructorTest() {
         final long playProgress = 1000;
         final long playProgressUpdateTime = System.currentTimeMillis();
         final boolean looping = true;
@@ -169,7 +169,7 @@ public class PlayerStateTest {
         playerState.setErrorCode(errorCode);
         playerState.setErrorMessage(errorMessage);
 
-        PlayerState other = playerState.clone();
+        PlayerState other = new PlayerState(playerState);
 
         assertEquals(playerState, other);
     }
