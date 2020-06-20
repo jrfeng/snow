@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.runner.RunWith;
 
+import snow.player.Player;
 import snow.player.radio.RadioStation;
 
 import static org.junit.Assert.*;
@@ -21,8 +22,14 @@ public class RadioStationStateTest {
     }
 
     @Test
-    public void constructor2Test() {
+    public void copyConstructorTest() {
+        final Player.PlaybackState playbackState = Player.PlaybackState.PLAYING;
+        final RadioStation radioStation = new RadioStation();
+
         RadioStationState source = new RadioStationState();
+        source.setPlaybackState(playbackState);
+        source.setRadioStation(radioStation);
+
         RadioStationState other = new RadioStationState(source);
 
         assertEquals(source, other);
@@ -40,18 +47,6 @@ public class RadioStationStateTest {
 
         assertEquals(radioStationState1, radioStationState2);
         assertEquals(radioStationState1.hashCode(), radioStationState2.hashCode());
-    }
-
-    @Test
-    public void cloneTest() throws CloneNotSupportedException {
-        RadioStation radioStation = new RadioStation();
-
-        RadioStationState source = new RadioStationState();
-        source.setRadioStation(radioStation);
-
-        RadioStationState other = source.clone();
-
-        assertEquals(source, other);
     }
 
     @Test

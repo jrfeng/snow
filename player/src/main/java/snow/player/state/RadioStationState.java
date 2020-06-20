@@ -23,6 +23,7 @@ public class RadioStationState extends PlayerState {
     }
 
     public RadioStationState(RadioStationState source) {
+        super(source);
         mRadioStation = new RadioStation(source.mRadioStation.getId(),
                 source.mRadioStation.getName(),
                 source.mRadioStation.getDescription());
@@ -57,13 +58,6 @@ public class RadioStationState extends PlayerState {
     @Override
     public int hashCode() {
         return Objects.hashCode(super.hashCode(), mRadioStation);
-    }
-
-    @NonNull
-    @Override
-    protected RadioStationState clone() throws CloneNotSupportedException {
-        super.clone();
-        return new RadioStationState(this);
     }
 
     protected RadioStationState(Parcel in) {
