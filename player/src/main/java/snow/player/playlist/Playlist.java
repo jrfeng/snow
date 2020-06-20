@@ -1,5 +1,6 @@
 package snow.player.playlist;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -22,10 +23,16 @@ import snow.player.media.MusicItem;
 public final class Playlist implements Iterable<MusicItem>, Parcelable {
     private static final String TAG = "Playlist";
     private ArrayList<MusicItem> mMusicItems;
+    private Bundle mExtra;
 
     public Playlist(@NonNull List<MusicItem> items) {
+        this(items, null);
+    }
+
+    public Playlist(@NonNull List<MusicItem> items, Bundle extra) {
         Preconditions.checkNotNull(items);
         mMusicItems = new ArrayList<>(items);
+        mExtra = extra;
     }
 
     /**
@@ -131,6 +138,10 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
         return new ArrayList<>(mMusicItems);
     }
 
+    public Bundle getExtra() {
+        return mExtra;
+    }
+
     @Override
     public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof Playlist)) {
@@ -148,11 +159,13 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
     // Parcelable
     protected Playlist(Parcel in) {
         mMusicItems = in.createTypedArrayList(MusicItem.CREATOR);
+        mExtra = in.readBundle(Thread.currentThread().getContextClassLoader());
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedList(mMusicItems);
+        dest.writeBundle(mExtra);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package snow.player.playlist;
 
+import android.os.Bundle;
 import android.os.Parcel;
 
 import org.junit.BeforeClass;
@@ -160,13 +161,28 @@ public class PlaylistTest {
     public void parcelableTest() {
         Parcel parcel = Parcel.obtain();
 
-        mPlaylist.writeToParcel(parcel, 0);
+        List<MusicItem> items = new ArrayList<>();
+        items.add(generateMusicItem(1));
+        items.add(generateMusicItem(2));
+        items.add(generateMusicItem(3));
+
+        Bundle extra = new Bundle();
+
+        final String key = "name";
+        final String value = "tom";
+        extra.putString(key, value);
+
+        Playlist playlist = new Playlist(items, extra);
+
+        playlist.writeToParcel(parcel, 0);
 
         parcel.setDataPosition(0);
 
         Playlist other = new Playlist(parcel);
 
-        assertEquals(mPlaylist, other);
+        assertEquals(playlist, other);
+        assertNotNull(other.getExtra());
+        assertEquals(value, other.getExtra().getString(key));
         parcel.recycle();
     }
 }
