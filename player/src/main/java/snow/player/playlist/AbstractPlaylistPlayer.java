@@ -1,8 +1,10 @@
 package snow.player.playlist;
 
 import android.content.Context;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 
@@ -106,6 +108,15 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
                 listener.onPlaylistChanged(null, position);
             }
         }
+    }
+
+    @Nullable
+    public final Bundle getPlaylistExtra() {
+        if (mPlaylist == null) {
+            return null;
+        }
+
+        return mPlaylist.getExtra();
     }
 
     @Override
