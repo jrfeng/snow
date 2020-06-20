@@ -86,13 +86,6 @@ public class PlaylistState extends PlayerState {
         return Objects.hashCode(super.hashCode(), mPosition, mPlayMode);
     }
 
-    @NonNull
-    @Override
-    protected PlaylistState clone() throws CloneNotSupportedException {
-        super.clone();
-        return new PlaylistState(this);
-    }
-
     protected PlaylistState(Parcel in) {
         super(in);
         mPosition = in.readInt();

@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.runner.RunWith;
 
+import snow.player.Player;
 import snow.player.playlist.PlaylistPlayer;
 
 import static org.junit.Assert.*;
@@ -62,15 +63,18 @@ public class PlaylistStateTest {
     }
 
     @Test
-    public void cloneTest() throws CloneNotSupportedException {
+    public void copyConstructorTest() {
+        final Player.PlaybackState playbackState = Player.PlaybackState.PLAYING;
         final int position = 50;
         final PlaylistPlayer.PlayMode playMode = PlaylistPlayer.PlayMode.LOOP;
 
         PlaylistState ps1 = new PlaylistState();
+
+        ps1.setPlaybackState(playbackState);
         ps1.setPosition(position);
         ps1.setPlayMode(playMode);
 
-        PlaylistState ps2 = ps1.clone();
+        PlaylistState ps2 = new PlaylistState(ps1);
 
         assertEquals(ps1, ps2);
     }
