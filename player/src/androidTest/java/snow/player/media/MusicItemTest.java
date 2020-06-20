@@ -54,7 +54,7 @@ public class MusicItemTest {
     }
 
     @Test
-    public void cloneTest() throws CloneNotSupportedException {
+    public void copyConstructorTest() {
         MusicItem musicItem = new MusicItem();
 
         musicItem.setMusicId("1024");
@@ -66,7 +66,7 @@ public class MusicItemTest {
         musicItem.setUri("https://www.test.com/icon_test.png");
         musicItem.setDuration(1000);
 
-        MusicItem other = musicItem.clone();
+        MusicItem other = new MusicItem(musicItem);
 
         // assert
         assertEquals(musicItem, other);
@@ -77,7 +77,7 @@ public class MusicItemTest {
 
         musicItem.setExtra(extra);
 
-        other = musicItem.clone();
+        other = new MusicItem(musicItem);
 
         // assert
         assertEquals(musicItem, other);

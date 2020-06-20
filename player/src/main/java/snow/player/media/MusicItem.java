@@ -15,7 +15,7 @@ import com.google.common.base.Preconditions;
  * <p>
  * 如果需要存储额外的数据，可以使用 {@link #setExtra(Bundle)} 方法与 {@link #getExtra()} 方法。
  */
-public class MusicItem implements Parcelable, Cloneable {
+public final class MusicItem implements Parcelable {
     private String musicId;
     private String title;
     private String artist;
@@ -173,28 +173,6 @@ public class MusicItem implements Parcelable, Cloneable {
     @Override
     public int hashCode() {
         return Objects.hashCode(this.token);
-    }
-
-    @NonNull
-    @Override
-    public MusicItem clone() throws CloneNotSupportedException {
-        super.clone();
-
-        MusicItem other = new MusicItem();
-
-        other.setMusicId(musicId);
-        other.setTitle(title);
-        other.setArtist(artist);
-        other.setAlbum(album);
-        other.setUri(uri);
-        other.setIconUri(iconUri);
-        other.setDuration(duration);
-        other.setToken(token);
-        if (mExtra != null) {
-            other.setExtra(new Bundle(mExtra));
-        }
-
-        return other;
     }
 
     /**
