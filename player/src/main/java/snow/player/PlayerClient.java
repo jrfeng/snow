@@ -17,23 +17,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import channel.helper.ChannelFactory;
 import channel.helper.DispatcherUtil;
 import channel.helper.pipe.MessengerPipe;
 import snow.player.media.MusicItem;
 import snow.player.playlist.PlaylistManager;
 import snow.player.playlist.PlaylistPlayer;
-import snow.player.playlist.PlaylistPlayerChannel;
 import snow.player.radio.RadioStation;
 import snow.player.radio.RadioStationPlayer;
-import snow.player.radio.RadioStationPlayerChannel;
 import snow.player.state.PlayerState;
 import snow.player.state.PlayerStateListener;
 import snow.player.state.PlaylistState;
 import snow.player.state.PlaylistStateListener;
-import snow.player.state.PlaylistStateListenerChannel;
 import snow.player.state.RadioStationState;
 import snow.player.state.RadioStationStateListener;
-import snow.player.state.RadioStationStateListenerChannel;
 
 public class PlayerClient {
     private Context mApplicationContext;
@@ -149,18 +146,18 @@ public class PlayerClient {
 
         MessengerPipe controllerPipe = new MessengerPipe(service);
 
-        mPlayerManager = new PlayerManagerChannel.Emitter(controllerPipe);
+        mPlayerManager = ChannelFactory.newEmitter(PlayerManager.class, controllerPipe);
 
-        mPlaylistController.setDelegate(new PlaylistPlayerChannel.Emitter(controllerPipe));
-        mRadioStationController.setDelegate(new RadioStationPlayerChannel.Emitter(controllerPipe));
+        mPlaylistController.setDelegate(ChannelFactory.newEmitter(PlaylistPlayer.class, controllerPipe));
+        mRadioStationController.setDelegate(ChannelFactory.newEmitter(RadioStationPlayer.class, controllerPipe));
 
         mPlaylistController.setConnected(true);
         mRadioStationController.setConnected(true);
 
         MessengerPipe listenerPipe = new MessengerPipe(DispatcherUtil.merge(
-                new OnCommandCallbackChannel.Dispatcher(mCommandCallback),
-                new PlaylistStateListenerChannel.Dispatcher(mPlaylistController.getPlaylistStateListener()),
-                new RadioStationStateListenerChannel.Dispatcher(mRadioStationController.getRadioStationStateListener())
+                ChannelFactory.newDispatcher(PlayerManager.OnCommandCallback.class, mCommandCallback),
+                ChannelFactory.newDispatcher(PlaylistStateListener.class, mPlaylistController.getPlaylistStateListener()),
+                ChannelFactory.newDispatcher(RadioStationStateListener.class, mRadioStationController.getRadioStationStateListener())
         ));
 
         mPlayerManager.registerPlayerStateListener(mToken, listenerPipe.getBinder());
@@ -227,7 +224,7 @@ public class PlayerClient {
 
     public static class PlaylistController implements PlaylistPlayer {
         private PlaylistManagerImp mPlaylistManager;
-        private PlaylistPlayerChannel.Emitter mDelegate;
+        private PlaylistPlayer mDelegate;
         private PlaylistStateHolder mPlaylistStateHolder;
         private boolean mConnected;
 
@@ -259,7 +256,7 @@ public class PlayerClient {
             });
         }
 
-        void setDelegate(PlaylistPlayerChannel.Emitter delegate) {
+        void setDelegate(PlaylistPlayer delegate) {
             mDelegate = delegate;
         }
 
@@ -625,7 +622,7 @@ public class PlayerClient {
     }
 
     public static class RadioStationController implements RadioStationPlayer {
-        private RadioStationPlayerChannel.Emitter mDelegate;
+        private RadioStationPlayer mDelegate;
         private RadioStationStateHolder mRadioStationStateHolder;
         private boolean mConnected;
 
@@ -633,7 +630,7 @@ public class PlayerClient {
             mRadioStationStateHolder = new RadioStationStateHolder();
         }
 
-        void setDelegate(RadioStationPlayerChannel.Emitter delegate) {
+        void setDelegate(RadioStationPlayer delegate) {
             mDelegate = delegate;
         }
 

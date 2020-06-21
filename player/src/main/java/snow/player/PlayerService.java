@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import channel.helper.ChannelFactory;
 import channel.helper.Dispatcher;
 import channel.helper.pipe.MessengerPipe;
 import media.helper.MediaButtonHelper;
@@ -34,17 +35,15 @@ import snow.player.media.MusicPlayer;
 import snow.player.playlist.AbstractPlaylistPlayer;
 import snow.player.playlist.PlaylistManager;
 import snow.player.playlist.PlaylistPlayer;
-import snow.player.playlist.PlaylistPlayerChannel;
 import snow.player.radio.AbstractRadioStationPlayer;
 import snow.player.radio.RadioStation;
 import snow.player.radio.RadioStationPlayer;
-import snow.player.radio.RadioStationPlayerChannel;
 import snow.player.state.PersistentPlaylistState;
 import snow.player.state.PersistentRadioStationState;
 import snow.player.state.PlaylistState;
-import snow.player.state.PlaylistStateListenerChannel;
+import snow.player.state.PlaylistStateListener;
 import snow.player.state.RadioStationState;
-import snow.player.state.RadioStationStateListenerChannel;
+import snow.player.state.RadioStationStateListener;
 
 public class PlayerService extends Service implements PlayerManager {
     private static final String KEY_PLAYER_TYPE = "player_type";
@@ -114,14 +113,14 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     private void initControllerPipe() {
-        final PlayerManagerChannel.Dispatcher playerManagerDispatcher
-                = new PlayerManagerChannel.Dispatcher(this);
+        final Dispatcher playerManagerDispatcher
+                = ChannelFactory.newDispatcher(PlayerManager.class, this);
 
-        final PlaylistPlayerChannel.Dispatcher playlistDispatcher =
-                new PlaylistPlayerChannel.Dispatcher(mPlaylistPlayer);
+        final Dispatcher playlistDispatcher =
+                ChannelFactory.newDispatcher(PlaylistPlayer.class, mPlaylistPlayer);
 
-        final RadioStationPlayerChannel.Dispatcher radioStationDispatcher =
-                new RadioStationPlayerChannel.Dispatcher(mRadioStationPlayer);
+        final Dispatcher radioStationDispatcher =
+                ChannelFactory.newDispatcher(RadioStationPlayer.class, mRadioStationPlayer);
 
         mControllerPipe = new MessengerPipe(new Dispatcher() {
             @Override
@@ -283,9 +282,9 @@ public class PlayerService extends Service implements PlayerManager {
     public void registerPlayerStateListener(String token, IBinder listener) {
         MessengerPipe pipe = new MessengerPipe(listener);
 
-        addOnCommandCallback(token, new OnCommandCallbackChannel.Emitter(pipe));
-        mPlaylistPlayer.addStateListener(token, new PlaylistStateListenerChannel.Emitter(pipe));
-        mRadioStationPlayer.addStateListener(token, new RadioStationStateListenerChannel.Emitter(pipe));
+        addOnCommandCallback(token, ChannelFactory.newEmitter(OnCommandCallback.class, pipe));
+        mPlaylistPlayer.addStateListener(token, ChannelFactory.newEmitter(PlaylistStateListener.class, pipe));
+        mRadioStationPlayer.addStateListener(token, ChannelFactory.newEmitter(RadioStationStateListener.class, pipe));
     }
 
     @Override
@@ -924,7 +923,7 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         protected final PendingIntent addPlayerServiceAction(@NonNull String action,
-                                                                    @NonNull Runnable task) {
+                                                             @NonNull Runnable task) {
             return mPlayerService.addOnStartCommandAction(action, task);
         }
 
