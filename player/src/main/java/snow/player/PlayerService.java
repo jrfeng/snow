@@ -922,12 +922,11 @@ public class PlayerService extends Service implements PlayerManager {
             return mPlayerService.getRadioStationExtra();
         }
 
-        protected final PendingIntent addPlayerServiceAction(@NonNull String action,
-                                                             @NonNull Runnable task) {
+        protected final PendingIntent addCustomAction(@NonNull String action, @NonNull Runnable task) {
             return mPlayerService.addOnStartCommandAction(action, task);
         }
 
-        protected final void removePlayerServiceAction(@NonNull String action) {
+        protected final void removeCustomAction(@NonNull String action) {
             mPlayerService.removeOnStartCommandAction(action);
         }
 
