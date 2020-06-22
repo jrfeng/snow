@@ -45,6 +45,9 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
 
+    // Glide
+    implementation "com.github.bumptech.glide:glide:4.11.0"
+
     // channel-helper
     implementation 'com.github.jrfeng.channel-helper:helper:1.1.2'
     implementation 'com.github.jrfeng.channel-helper:pipe:1.1.2'
