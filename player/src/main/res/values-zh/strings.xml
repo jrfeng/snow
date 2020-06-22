@@ -8,4 +8,10 @@
     <string name="snow_error_file_not_found">文件未找到</string>
     <string name="snow_error_data_load_failed">数据加载失败</string>
     <string name="snow_radio">电台</string>
+    <string name="snow_des_music_icon">歌曲图标</string>
+    <string name="snow_text_unknown">未知</string>
+    <string name="snow_des_skip_to_previous">上一曲</string>
+    <string name="snow_des_play_pause">播放/暂停</string>
+    <string name="snow_des_skip_to_next">下一曲</string>
+    <string name="snow_des_shutdown">关闭</string>
 </resources>

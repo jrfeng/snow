@@ -6,28 +6,47 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import channel.helper.ChannelFactory;
 import channel.helper.Dispatcher;
 import channel.helper.pipe.MessengerPipe;
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import media.helper.MediaButtonHelper;
 import snow.player.media.MediaMusicPlayer;
 import snow.player.media.MusicItem;
@@ -261,6 +280,10 @@ public class PlayerService extends Service implements PlayerManager {
         super.onDestroy();
 
         stopForegroundEx(true);
+
+        if (mNotificationView != null) {
+            mNotificationView.onRelease();
+        }
 
         mPlaylistPlayer.release();
         mRadioStationPlayer.release();
@@ -897,11 +920,15 @@ public class PlayerService extends Service implements PlayerManager {
         protected void onInit(Context context) {
         }
 
-        protected void onMusicItemChanged() {
+        protected void onRelease() {
         }
 
         protected final Context getContext() {
             return mPlayerService;
+        }
+
+        protected final String getPackageName() {
+            return getContext().getPackageName();
         }
 
         protected final int getPlayerType() {
@@ -968,21 +995,6 @@ public class PlayerService extends Service implements PlayerManager {
             mPlayerService.invalidateNotificationView();
         }
 
-        @Nullable
-        protected final Bitmap getMusicItemEmbeddedIcon() {
-            MusicItem musicItem = getPlayingMusicItem();
-
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-            retriever.setDataSource(musicItem.getUri());
-
-            byte[] data = retriever.getEmbeddedPicture();
-            if (data != null && data.length > 0) {
-                return BitmapFactory.decodeByteArray(data, 0, data.length);
-            }
-
-            return null;
-        }
-
         protected final boolean isMusicItemChanged() {
             return mMusicItemChanged;
         }
@@ -1001,12 +1013,25 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     public static class SimpleNotificationView extends NotificationView {
+        private Bitmap mDefaultIcon;
+        private Bitmap mIcon;
+
+        private Disposable mLoadIconDisposable;
+        private Canvas mCanvas;
+
+        @Override
+        protected void onInit(Context context) {
+            super.onInit(context);
+
+            mCanvas = new Canvas();
+            setDefaultIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.snow_notif_default_icon));
+        }
 
         @NonNull
         @Override
         public Notification onCreateNotification(int playerType) {
             if (isMusicItemChanged()) {
-                reloadIcon();
+                reloadAllIcon();
             }
 
             return new NotificationCompat.Builder(getContext(), "player")
@@ -1014,22 +1039,220 @@ public class PlayerService extends Service implements PlayerManager {
                     .setStyle(new androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
                     .setCustomContentView(onCreateContentView(playerType))
                     .setCustomBigContentView(onCreateBigContentView(playerType))
+                    .setContentIntent(getContentIntent())
                     .build();
         }
 
-        protected void reloadIcon() {
-            // TODO
+        @Override
+        protected void onRelease() {
+            super.onRelease();
+
+            disposeLastLoadIcon();
+        }
+
+        protected void disposeLastLoadIcon() {
+            if (mLoadIconDisposable != null) {
+                mLoadIconDisposable.dispose();
+            }
+        }
+
+        protected PendingIntent getContentIntent() {
+            return null;
+        }
+
+        protected final void setDefaultIcon(@NonNull Bitmap defaultIcon) {
+            Preconditions.checkNotNull(defaultIcon);
+            mDefaultIcon = defaultIcon;
+        }
+
+        public final Bitmap getDefaultIcon() {
+            return mDefaultIcon;
+        }
+
+        public final Bitmap getIcon() {
+            if (mIcon == null) {
+                return mDefaultIcon;
+            }
+
+            return mIcon;
+        }
+
+        public final void setIcon(@NonNull Bitmap icon) {
+            mIcon = icon;
+            invalidate();
+        }
+
+        protected CharSequence getContentTitle() {
+            return getPlayingMusicItem().getTitle();
+        }
+
+        protected CharSequence getContentText() {
+            if (isError()) {
+                String errorMessage = getErrorMessage();
+                SpannableString text = new SpannableString(errorMessage);
+                text.setSpan(new ForegroundColorSpan(Color.RED), 0, errorMessage.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                return text;
+            }
+
+            return getPlayingMusicItem().getArtist();
+        }
+
+        protected void reloadAllIcon() {
+            disposeLastLoadIcon();
+
+            mLoadIconDisposable = loadIconAsync()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .map(asRoundRect())
+                    .subscribe(new Consumer<Bitmap>() {
+                        @Override
+                        public void accept(Bitmap bitmap) {
+                            setIcon(bitmap);
+                        }
+                    });
+        }
+
+        private Single<Bitmap> loadIconAsync() {
+            return Single.create(new SingleOnSubscribe<Bitmap>() {
+                @Override
+                public void subscribe(SingleEmitter<Bitmap> emitter) {
+                    String iconUri = getPlayingMusicItem().getIconUri();
+                    Bitmap icon = null;
+
+                    int bigIconSize = getContext().getResources()
+                            .getDimensionPixelSize(R.dimen.snow_notif_icon_size_big);
+
+                    if (isAvailable(iconUri)) {
+                        icon = loadIconFromInternet(iconUri, bigIconSize);
+                    }
+
+                    if (emitter.isDisposed()) {
+                        return;
+                    }
+
+                    if (icon == null) {
+                        icon = getMusicItemEmbeddedIcon(bigIconSize);
+                    }
+
+                    if (emitter.isDisposed()) {
+                        return;
+                    }
+
+                    if (icon == null) {
+                        icon = getDefaultIcon();
+                    }
+
+                    emitter.onSuccess(icon);
+                }
+            }).subscribeOn(Schedulers.io());
+        }
+
+        @Nullable
+        protected final Bitmap getMusicItemEmbeddedIcon(int size) {
+            MusicItem musicItem = getPlayingMusicItem();
+
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(musicItem.getUri());
+
+            try {
+                return Glide.with(getContext())
+                        .asBitmap()
+                        .load(retriever.getEmbeddedPicture())
+                        .submit(size, size)
+                        .get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                retriever.release();
+            }
+
+            return null;
+        }
+
+        private Function<Bitmap, Bitmap> asRoundRect() {
+            return new Function<Bitmap, Bitmap>() {
+                @Override
+                public Bitmap apply(Bitmap bitmap) throws ExecutionException, InterruptedException {
+                    Resources res = getContext().getResources();
+
+                    int size = res.getDimensionPixelSize(R.dimen.snow_notif_icon_size_big);
+                    int cornerRadius = res.getDimensionPixelSize(R.dimen.snow_notif_icon_corner_radius);
+
+                    Bitmap icon = Bitmap.createBitmap(size, size, bitmap.getConfig());
+
+                    mCanvas.setBitmap(icon);
+                    Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                    paint.setStyle(Paint.Style.FILL);
+
+                    float left = (float) ((size - bitmap.getWidth()) / 2.0);
+                    float top = (float) ((size - bitmap.getHeight()) / 2.0);
+
+                    mCanvas.drawBitmap(bitmap, left, top, paint);
+
+                    return Glide.with(getContext())
+                            .asBitmap()
+                            .load(icon)
+                            .transform(new RoundedCorners(cornerRadius))
+                            .submit()
+                            .get();
+                }
+            };
+        }
+
+        private Bitmap loadIconFromInternet(String iconUri, int iconSize) {
+            try {
+                return Glide.with(getContext())
+                        .asBitmap()
+                        .load(iconUri)
+                        .submit(iconSize, iconSize)
+                        .get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        protected final boolean isAvailable(String stringUri) {
+            return stringUri != null && (!stringUri.isEmpty());
         }
 
         protected RemoteViews onCreateContentView(int playerType) {
-            // TODO
+            RemoteViews contentView = new RemoteViews(getPackageName(),
+                    R.layout.snow_simple_notification_view);
 
-            return null;
+            contentView.setImageViewBitmap(R.id.snow_notif_icon, getIcon());
+            contentView.setTextViewText(R.id.snow_notif_title, getContentTitle());
+            contentView.setTextViewText(R.id.snow_notif_text, getContentText());
+
+            if (playerType == TYPE_RADIO_STATION) {
+                contentView.setViewVisibility(R.id.snow_notif_radio_tip, View.VISIBLE);
+            }
+
+            contentView.setOnClickPendingIntent(R.id.snow_notif_play_pause, getPlayOrPausePendingIntent());
+            contentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_next, getSkipToNextPendingIntent());
+            contentView.setOnClickPendingIntent(R.id.snow_notif_shutdown, getCancelPendingIntent());
+
+            return contentView;
         }
 
         protected RemoteViews onCreateBigContentView(int playerType) {
-            // TODO
-            return null;
+            RemoteViews bigContentView = new RemoteViews(getPackageName(),
+                    R.layout.snow_simple_notification_view_big);
+
+            bigContentView.setImageViewBitmap(R.id.snow_notif_icon, getIcon());
+            bigContentView.setTextViewText(R.id.snow_notif_title, getContentTitle());
+            bigContentView.setTextViewText(R.id.snow_notif_text, getContentText());
+
+            if (playerType == TYPE_RADIO_STATION) {
+                bigContentView.setViewVisibility(R.id.snow_notif_radio_tip, View.VISIBLE);
+            }
+
+            bigContentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_previous, getSkipToPreviousPendingIntent());
+            bigContentView.setOnClickPendingIntent(R.id.snow_notif_play_pause, getPlayOrPausePendingIntent());
+            bigContentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_next, getSkipToNextPendingIntent());
+            bigContentView.setOnClickPendingIntent(R.id.snow_notif_shutdown, getCancelPendingIntent());
+
+            return bigContentView;
         }
     }
 }
