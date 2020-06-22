@@ -1224,13 +1224,17 @@ public class PlayerService extends Service implements PlayerManager {
             contentView.setTextViewText(R.id.snow_notif_title, getContentTitle());
             contentView.setTextViewText(R.id.snow_notif_text, getContentText());
 
-            if (playerType == TYPE_RADIO_STATION) {
-                contentView.setViewVisibility(R.id.snow_notif_radio_tip, View.VISIBLE);
-            }
-
             contentView.setOnClickPendingIntent(R.id.snow_notif_play_pause, getPlayOrPausePendingIntent());
             contentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_next, getSkipToNextPendingIntent());
             contentView.setOnClickPendingIntent(R.id.snow_notif_shutdown, getCancelPendingIntent());
+
+            if (isPlaying()) {
+                contentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
+            }
+
+            if (playerType == TYPE_RADIO_STATION) {
+                contentView.setViewVisibility(R.id.snow_notif_radio_tip, View.VISIBLE);
+            }
 
             return contentView;
         }
@@ -1243,14 +1247,20 @@ public class PlayerService extends Service implements PlayerManager {
             bigContentView.setTextViewText(R.id.snow_notif_title, getContentTitle());
             bigContentView.setTextViewText(R.id.snow_notif_text, getContentText());
 
-            if (playerType == TYPE_RADIO_STATION) {
-                bigContentView.setViewVisibility(R.id.snow_notif_radio_tip, View.VISIBLE);
-            }
-
-            bigContentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_previous, getSkipToPreviousPendingIntent());
             bigContentView.setOnClickPendingIntent(R.id.snow_notif_play_pause, getPlayOrPausePendingIntent());
             bigContentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_next, getSkipToNextPendingIntent());
             bigContentView.setOnClickPendingIntent(R.id.snow_notif_shutdown, getCancelPendingIntent());
+
+            if (isPlaying()) {
+                bigContentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
+            }
+
+            if (playerType == TYPE_RADIO_STATION) {
+                bigContentView.setViewVisibility(R.id.snow_notif_radio_tip, View.VISIBLE);
+                bigContentView.setImageViewResource(R.id.snow_notif_skip_to_previous, R.drawable.snow_ic_skip_previous_disabled);
+            } else {
+                bigContentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_previous, getSkipToPreviousPendingIntent());
+            }
 
             return bigContentView;
         }
