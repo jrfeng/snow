@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import channel.helper.ChannelFactory;
+import channel.helper.ChannelHelper;
 import channel.helper.Dispatcher;
 import channel.helper.pipe.MessengerPipe;
 import io.reactivex.Single;
@@ -133,13 +133,13 @@ public class PlayerService extends Service implements PlayerManager {
 
     private void initControllerPipe() {
         final Dispatcher playerManagerDispatcher
-                = ChannelFactory.newDispatcher(PlayerManager.class, this);
+                = ChannelHelper.newDispatcher(PlayerManager.class, this);
 
         final Dispatcher playlistDispatcher =
-                ChannelFactory.newDispatcher(PlaylistPlayer.class, mPlaylistPlayer);
+                ChannelHelper.newDispatcher(PlaylistPlayer.class, mPlaylistPlayer);
 
         final Dispatcher radioStationDispatcher =
-                ChannelFactory.newDispatcher(RadioStationPlayer.class, mRadioStationPlayer);
+                ChannelHelper.newDispatcher(RadioStationPlayer.class, mRadioStationPlayer);
 
         mControllerPipe = new MessengerPipe(new Dispatcher() {
             @Override
@@ -305,9 +305,9 @@ public class PlayerService extends Service implements PlayerManager {
     public void registerPlayerStateListener(String token, IBinder listener) {
         MessengerPipe pipe = new MessengerPipe(listener);
 
-        addOnCommandCallback(token, ChannelFactory.newEmitter(OnCommandCallback.class, pipe));
-        mPlaylistPlayer.addStateListener(token, ChannelFactory.newEmitter(PlaylistStateListener.class, pipe));
-        mRadioStationPlayer.addStateListener(token, ChannelFactory.newEmitter(RadioStationStateListener.class, pipe));
+        addOnCommandCallback(token, ChannelHelper.newEmitter(OnCommandCallback.class, pipe));
+        mPlaylistPlayer.addStateListener(token, ChannelHelper.newEmitter(PlaylistStateListener.class, pipe));
+        mRadioStationPlayer.addStateListener(token, ChannelHelper.newEmitter(RadioStationStateListener.class, pipe));
     }
 
     @Override
