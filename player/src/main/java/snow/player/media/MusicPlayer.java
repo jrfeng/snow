@@ -75,7 +75,7 @@ public abstract class MusicPlayer {
      *
      * @return Application Context
      */
-    protected Context getContext() {
+    protected final Context getContext() {
         return mApplicationContext;
     }
 
@@ -136,6 +136,8 @@ public abstract class MusicPlayer {
 
     /**
      * 开始播放。
+     * <p>
+     * 该方法对 WakeLock 和 WifiLock 进行了处理，你的音乐播放器实现应该重写该方法以实现开始播放功能。
      */
     public void start() {
         requireWakeLock();
@@ -143,6 +145,8 @@ public abstract class MusicPlayer {
 
     /**
      * 暂停播放。
+     * <p>
+     * 该方法对 WakeLock 和 WifiLock 进行了处理，你的音乐播放器实现应该重写该方法以实现暂停播放功能。
      */
     public void pause() {
         releaseWakeLock();
@@ -150,6 +154,8 @@ public abstract class MusicPlayer {
 
     /**
      * 停止播放。
+     * <p>
+     * 该方法对 WakeLock 和 WifiLock 进行了处理，你的音乐播放器实现应该重写该方法以实现停止播放功能。
      */
     public void stop() {
         releaseWakeLock();
@@ -182,6 +188,8 @@ public abstract class MusicPlayer {
 
     /**
      * 释放音乐播放器。注意！一旦调用该方法，就不能再调用 MusicPlayer 对象的任何方法，否则会发生不可预见的错误。
+     * <p>
+     * 该方法对 WakeLock 和 WifiLock 进行了处理，你的音乐播放器实现应该重写该方法以释放占用的资源。
      */
     public void release() {
         releaseWakeLock();
@@ -228,6 +236,11 @@ public abstract class MusicPlayer {
      * 用于监听音乐播放器是否准备完毕。
      */
     public interface OnPreparedListener {
+        /**
+         * 该方法会在音乐播放器准备完毕时被调用。
+         *
+         * @param mp 当前音乐播放器。
+         */
         void onPrepared(MusicPlayer mp);
     }
 
@@ -235,6 +248,11 @@ public abstract class MusicPlayer {
      * 用于监听音乐播放器是否播放完毕。
      */
     public interface OnCompletionListener {
+        /**
+         * 该方法会在音乐播放完毕时被调用。
+         *
+         * @param mp 当前音乐播放器。
+         */
         void onCompletion(MusicPlayer mp);
     }
 
@@ -242,6 +260,11 @@ public abstract class MusicPlayer {
      * 用于监听音乐播放器的播放进度是的调整完毕。
      */
     public interface OnSeekCompleteListener {
+        /**
+         * 该方法会在 seek 完成时被调用。
+         *
+         * @param mp 当前音乐播放器。
+         */
         void onSeekComplete(MusicPlayer mp);
     }
 
@@ -249,6 +272,12 @@ public abstract class MusicPlayer {
      * 用于监听事件：进入缓冲区的数据变慢或停止并且播放缓冲区没有足够的数据继续播放。
      */
     public interface OnStalledListener {
+        /**
+         * 该方法会在播放的 stalled 状态改变时调用。
+         *
+         * @param stalled 如果缓冲区没有足够的数据继续播放，则该参数为 true，当缓冲区缓存了足够的数据可以继续
+         *                播放时，该参数为 false。
+         */
         void onStalled(boolean stalled);
     }
 
@@ -256,6 +285,12 @@ public abstract class MusicPlayer {
      * 用于监听音乐播放器的缓冲进度。
      */
     public interface OnBufferingUpdateListener {
+        /**
+         * 该方法会在缓存进度更新时调用。
+         *
+         * @param mp      当前音乐播放器。
+         * @param percent 缓存进度，百分比值，范围为 [0, 100]
+         */
         void onBufferingUpdate(MusicPlayer mp, int percent);
     }
 
@@ -263,6 +298,15 @@ public abstract class MusicPlayer {
      * 用于监听器音乐播放的错误状态。
      */
     public interface OnErrorListener {
+        /**
+         * 该方法会在错误发生时被调用。
+         * <p>
+         * 注意！当发生错误后，不允许再继续使用当前 MusicPlayer 对象，必须将其释放掉。如果需要继续播放，则
+         * 需要创建一个新的 MusicPlayer 对象。
+         *
+         * @param mp        当前播放器。
+         * @param errorCode 错误码。
+         */
         void onError(MusicPlayer mp, int errorCode);
     }
 }
