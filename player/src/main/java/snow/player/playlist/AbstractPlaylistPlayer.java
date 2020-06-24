@@ -151,6 +151,10 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
             return;
         }
 
+        if (mPlaylist.size() < 1) {
+            return;
+        }
+
         int position = mPlaylistState.getPosition();
 
         switch (mPlaylistState.getPlayMode()) {
@@ -176,6 +180,10 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
                     skipToPrevious();
                 }
             };
+            return;
+        }
+
+        if (mPlaylist.size() < 1) {
             return;
         }
 
@@ -232,7 +240,12 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         mPlaylistAvailableAction = new Runnable() {
             @Override
             public void run() {
-                notifyPlayingMusicItemChanged(mPlaylist.get(position), playOnPrepared);
+                MusicItem musicItem = null;
+                if (mPlaylist.size() > 0) {
+                    musicItem = mPlaylist.get(position);
+                }
+
+                notifyPlayingMusicItemChanged(musicItem, playOnPrepared);
             }
         };
         loadPlaylistAsync();

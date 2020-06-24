@@ -95,14 +95,8 @@ public class PlayerClient {
         return pm.resolveService(intent, 0) == null;
     }
 
-    @SuppressWarnings("all")
     private String generateToken() {
-        return Hashing.sha256().newHasher()
-                .putLong(hashCode())
-                .putLong(System.nanoTime())
-                .putInt(new Random().nextInt())
-                .hash()
-                .toString();
+        return mPlayerService.getName();
     }
 
     private void initServiceConnection() {
