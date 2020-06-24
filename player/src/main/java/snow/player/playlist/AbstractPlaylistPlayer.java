@@ -120,6 +120,11 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     }
 
     @Override
+    public boolean isLooping() {
+        return mPlaylistState.getPlayMode() == PlayMode.LOOP;
+    }
+
+    @Override
     protected void onRelease() {
         mPlaylistAvailableAction = null;
         mExecutor.shutdown();

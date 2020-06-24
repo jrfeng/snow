@@ -62,6 +62,11 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
     }
 
     @Override
+    public boolean isLooping() {
+        return false;
+    }
+
+    @Override
     protected void onPlayComplete(MusicItem musicItem) {
         super.onPlayComplete(musicItem);
         skipToNext();

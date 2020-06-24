@@ -377,7 +377,7 @@ public class PlayerClient {
          * 是否单曲循环播放。
          */
         public boolean isLooping() {
-            return mPlaylistStateHolder.mPlaylistState.isLooping();
+            return getPlayMode() == PlayMode.LOOP;
         }
 
         /**
@@ -1008,13 +1008,6 @@ public class PlayerClient {
          */
         public long getPlayProgressUpdateTime() {
             return mRadioStationStateHolder.mRadioStationState.getPlayProgressUpdateTime();
-        }
-
-        /**
-         * 是否单曲循环播放。
-         */
-        public boolean isLooping() {
-            return mRadioStationStateHolder.mRadioStationState.isLooping();
         }
 
         /**

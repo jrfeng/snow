@@ -83,6 +83,11 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     }
 
     /**
+     * 是否循环播放。
+     */
+    public abstract boolean isLooping();
+
+    /**
      * 查询具有 soundQuality 音质的 MusicItem 表示的的音乐是否已被缓存。
      * <p>
      * 该方法会在异步线程中被调用。
@@ -389,7 +394,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         mOnPreparedListener = new MusicPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MusicPlayer mp) {
-                mp.setLooping(mPlayerState.isLooping());
+                mp.setLooping(isLooping());
 
                 if (mPlayerState.isAudioEffectEnabled()) {
                     attachAudioEffect(mp.getAudioSessionId());

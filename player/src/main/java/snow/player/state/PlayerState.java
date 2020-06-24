@@ -19,7 +19,6 @@ import snow.player.Player;
 public class PlayerState implements Parcelable {
     private long mPlayProgress;
     private long mPlayProgressUpdateTime;
-    private boolean mLooping;
     private Player.SoundQuality mSoundQuality;
     private boolean mAudioEffectEnabled;
     private boolean mOnlyWifiNetwork;
@@ -39,7 +38,6 @@ public class PlayerState implements Parcelable {
     public PlayerState() {
         mPlayProgress = 0;
         mPlayProgressUpdateTime = 0;
-        mLooping = false;
         mSoundQuality = Player.SoundQuality.STANDARD;
         mAudioEffectEnabled = false;
         mOnlyWifiNetwork = true;
@@ -57,7 +55,6 @@ public class PlayerState implements Parcelable {
     public PlayerState(PlayerState source) {
         mPlayProgress = source.mPlayProgress;
         mPlayProgressUpdateTime = source.mPlayProgressUpdateTime;
-        mLooping = source.mLooping;
         mSoundQuality = source.mSoundQuality;
         mAudioEffectEnabled = source.mAudioEffectEnabled;
         mOnlyWifiNetwork = source.mOnlyWifiNetwork;
@@ -115,22 +112,6 @@ public class PlayerState implements Parcelable {
      */
     public void setPlayProgressUpdateTime(long updateTime) {
         mPlayProgressUpdateTime = updateTime;
-    }
-
-    /**
-     * 是否循环播放。
-     */
-    public boolean isLooping() {
-        return mLooping;
-    }
-
-    /**
-     * 设置是否循环播放。
-     *
-     * @param looping 是否循环播放。
-     */
-    public void setLooping(boolean looping) {
-        mLooping = looping;
     }
 
     /**
@@ -373,7 +354,6 @@ public class PlayerState implements Parcelable {
 
         return Objects.equal(mPlayProgress, other.mPlayProgress)
                 && Objects.equal(mPlayProgressUpdateTime, other.mPlayProgressUpdateTime)
-                && Objects.equal(mLooping, other.mLooping)
                 && Objects.equal(mSoundQuality, other.mSoundQuality)
                 && Objects.equal(mAudioEffectEnabled, other.mAudioEffectEnabled)
                 && Objects.equal(mOnlyWifiNetwork, other.mOnlyWifiNetwork)
@@ -392,7 +372,6 @@ public class PlayerState implements Parcelable {
     public int hashCode() {
         return Objects.hashCode(mPlayProgress,
                 mPlayProgressUpdateTime,
-                mLooping,
                 mSoundQuality,
                 mAudioEffectEnabled,
                 mOnlyWifiNetwork,
@@ -410,7 +389,6 @@ public class PlayerState implements Parcelable {
     protected PlayerState(Parcel in) {
         mPlayProgress = in.readLong();
         mPlayProgressUpdateTime = in.readLong();
-        mLooping = in.readByte() != 0;
         mSoundQuality = Player.SoundQuality.values()[in.readInt()];
         mAudioEffectEnabled = in.readByte() != 0;
         mOnlyWifiNetwork = in.readByte() != 0;
@@ -430,7 +408,6 @@ public class PlayerState implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(mPlayProgress);
         dest.writeLong(mPlayProgressUpdateTime);
-        dest.writeByte((byte) (mLooping ? 1 : 0));
         dest.writeInt(mSoundQuality.ordinal());
         dest.writeByte((byte) (mAudioEffectEnabled ? 1 : 0));
         dest.writeByte((byte) (mOnlyWifiNetwork ? 1 : 0));

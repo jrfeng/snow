@@ -40,7 +40,6 @@ public class PersistentPlaylistState extends PlaylistState {
 
         super.setPlayProgress(mMMKV.decodeLong(KEY_PLAY_PROGRESS, 0L));
         super.setPlayProgressUpdateTime(mMMKV.decodeLong(KEY_PLAY_PROGRESS_UPDATE_TIME, System.currentTimeMillis()));
-        super.setLooping(mMMKV.decodeBool(KEY_LOOPING, false));
         super.setSoundQuality(Player.SoundQuality.values()[mMMKV.decodeInt(KEY_SOUND_QUALITY, 0)]);
         super.setAudioEffectEnabled(mMMKV.decodeBool(KEY_AUDIO_EFFECT_ENABLED, false));
         super.setOnlyWifiNetwork(mMMKV.decodeBool(KEY_ONLY_WIFI_NETWORK, true));
@@ -63,13 +62,6 @@ public class PersistentPlaylistState extends PlaylistState {
         super.setPlayProgressUpdateTime(updateTime);
 
         mMMKV.encode(KEY_PLAY_PROGRESS_UPDATE_TIME, updateTime);
-    }
-
-    @Override
-    public void setLooping(boolean looping) {
-        super.setLooping(looping);
-
-        mMMKV.encode(KEY_LOOPING, looping);
     }
 
     @Override
