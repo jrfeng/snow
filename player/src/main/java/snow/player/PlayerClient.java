@@ -664,15 +664,6 @@ public class PlayerClient {
             mDelegate.playOrPause();
         }
 
-        @Override
-        public void setLooping(boolean looping) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.setLooping(looping);
-        }
-
         /**
          * 调整音乐播放进度。
          * <p>
@@ -1230,15 +1221,6 @@ public class PlayerClient {
             }
 
             mDelegate.playOrPause();
-        }
-
-        @Override
-        public void setLooping(boolean looping) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.setLooping(looping);
         }
 
         /**

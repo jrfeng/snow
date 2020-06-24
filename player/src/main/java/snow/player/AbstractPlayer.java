@@ -893,15 +893,6 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
     }
 
-    @Override
-    public void setLooping(boolean looping) {
-        mPlayerState.setLooping(looping);
-
-        if (isPrepared()) {
-            mMusicPlayer.setLooping(looping);
-        }
-    }
-
     private void seekTo(final long progress, Runnable seekCompleteAction) {
         if (isPreparing()) {
             mPreparedAction = new Runnable() {

@@ -33,13 +33,6 @@ public interface Player {
     void playOrPause();
 
     /**
-     * 设置是否循环播放。
-     *
-     * @param looping 是否循环播放。
-     */
-    void setLooping(boolean looping);
-
-    /**
      * 调整音乐播放进度。
      *
      * @param progress 要调整到的播放进度
