@@ -393,6 +393,13 @@ public class PlayerClient {
         }
 
         /**
+         * 获取播放列表的尺寸大小。
+         */
+        public int getPlaylistSize() {
+            return mPlaylistManager.getPlaylistSize();
+        }
+
+        /**
          * 获取播放进度。
          *
          * @return 播放进度
