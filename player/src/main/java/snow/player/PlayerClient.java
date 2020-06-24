@@ -54,6 +54,8 @@ public class PlayerClient {
 
     private List<PlayerManager.OnPlayerTypeChangeListener> mAllPlayerTypeChangeListener;
 
+    private OnConnectCallback mConnectCallback;
+
     private PlayerClient(Context context, Class<? extends PlayerService> playerService) {
         mApplicationContext = context.getApplicationContext();
         mPlayerService = playerService;
@@ -107,11 +109,21 @@ public class PlayerClient {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 onConnected(service);
+
+                if (mConnectCallback != null) {
+                    mConnectCallback.onConnected(true);
+                    mConnectCallback = null;
+                }
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 onDisconnected();
+
+                if (mConnectCallback != null) {
+                    mConnectCallback.onConnected(false);
+                    mConnectCallback = null;
+                }
             }
         };
     }
@@ -174,10 +186,12 @@ public class PlayerClient {
     }
 
     private void onDisconnected() {
-        mConnected = false;
-        mPlaylistController.setConnected(false);
-        mRadioStationController.setConnected(false);
-        mPlayerManager.unregisterPlayerStateListener(mToken);
+        if (mConnected) {
+            mConnected = false;
+            mPlaylistController.setConnected(false);
+            mRadioStationController.setConnected(false);
+            mPlayerManager.unregisterPlayerStateListener(mToken);
+        }
     }
 
     /**
@@ -190,6 +204,19 @@ public class PlayerClient {
 
         Intent intent = new Intent(mApplicationContext, mPlayerService);
         mApplicationContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    /**
+     * 连接播放器
+     */
+    public void connect(OnConnectCallback callback) {
+        if (isConnected()) {
+            callback.onConnected(true);
+            return;
+        }
+
+        mConnectCallback = callback;
+        connect();
     }
 
     /**
@@ -1454,6 +1481,10 @@ public class PlayerClient {
         public void removeOnRadioStationChangeListener(RadioStationPlayer.OnRadioStationChangeListener listener) {
             mRadioStationStateHolder.removeOnRadioStationChangeListener(listener);
         }
+    }
+
+    public interface OnConnectCallback {
+        void onConnected(boolean success);
     }
 
     private static class PlayerStateHolder implements PlayerStateListener {
