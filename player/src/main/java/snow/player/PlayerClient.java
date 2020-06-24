@@ -21,6 +21,7 @@ import channel.helper.ChannelHelper;
 import channel.helper.DispatcherUtil;
 import channel.helper.pipe.MessengerPipe;
 import snow.player.media.MusicItem;
+import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
 import snow.player.playlist.PlaylistPlayer;
 import snow.player.radio.RadioStation;
@@ -375,6 +376,20 @@ public class PlayerClient {
          */
         public PlaylistManager getPlaylistManager() {
             return mPlaylistManager;
+        }
+
+        /**
+         * 设置一个新的播放列表。
+         *
+         * @param playlist 播放列表（不能为 null）。
+         */
+        public void setPlaylist(@NonNull Playlist playlist) {
+            Preconditions.checkNotNull(playlist);
+            if (!isConnected()) {
+                return;
+            }
+
+            mPlaylistManager.setPlaylist(playlist);
         }
 
         /**
