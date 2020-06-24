@@ -384,12 +384,20 @@ public class PlayerClient {
          * @param playlist 播放列表（不能为 null）。
          */
         public void setPlaylist(@NonNull Playlist playlist) {
+            setPlaylist(playlist, 0, false);
+        }
+
+        public void setPlaylist(@NonNull Playlist playlist, int position) {
+            setPlaylist(playlist, position, false);
+        }
+
+        public void setPlaylist(@NonNull Playlist playlist, int position, boolean playOnPrepared) {
             Preconditions.checkNotNull(playlist);
             if (!isConnected()) {
                 return;
             }
 
-            mPlaylistManager.setPlaylist(playlist);
+            mPlaylistManager.setPlaylist(playlist, position, playOnPrepared);
         }
 
         /**
