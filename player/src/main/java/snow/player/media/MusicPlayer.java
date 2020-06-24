@@ -82,10 +82,9 @@ public abstract class MusicPlayer {
     /**
      * 即可播放本地文件，也可以播放网络文件。
      *
-     * @param context Context 对象
      * @param uri     要播放的音乐的 mUri。
      */
-    public abstract void setDataSource(Context context, Uri uri) throws IOException;
+    public abstract void setDataSource(Uri uri) throws IOException;
 
     /**
      * 准备当前音乐播放器。

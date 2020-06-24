@@ -29,8 +29,8 @@ public class MediaMusicPlayer extends MusicPlayer {
     }
 
     @Override
-    public void setDataSource(Context context, Uri uri) throws IOException {
-        mMediaPlayer.setDataSource(context, uri);
+    public void setDataSource(Uri uri) throws IOException {
+        mMediaPlayer.setDataSource(uri.toString());
     }
 
     @Override
