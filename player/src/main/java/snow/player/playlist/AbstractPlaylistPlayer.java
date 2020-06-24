@@ -60,8 +60,8 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         });
     }
 
-    private int getRandomPosition() {
-        if (mPlaylist == null) {
+    private int getRandomPosition(int exclude) {
+        if (mPlaylist == null || mPlaylist.size() < 2) {
             return 0;
         }
 
@@ -69,7 +69,13 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
             mRandom = new Random();
         }
 
-        return mRandom.nextInt(mPlaylist.size());
+        int position = mRandom.nextInt(mPlaylist.size());
+
+        if (position != exclude) {
+            return position;
+        }
+
+        return getRandomPosition(exclude);
     }
 
     private void notifyPlayingMusicItemPositionChanged(int position) {
@@ -160,15 +166,25 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         switch (mPlaylistState.getPlayMode()) {
             case SEQUENTIAL:   // 注意！case 穿透
             case LOOP:
-                position = Math.min(position + 1, mPlaylist.size());
+                position = getNextPosition(position);
                 break;
             case SHUFFLE:
-                position = getRandomPosition();
+                position = getRandomPosition(position);
                 break;
         }
 
         notifyPlayingMusicItemChanged(mPlaylist.get(position), true);
         notifyPlayingMusicItemPositionChanged(position);
+    }
+
+    protected int getNextPosition(int currentPosition) {
+        int position = currentPosition + 1;
+
+        if (position >= mPlaylist.size()) {
+            return 0;
+        }
+
+        return position;
     }
 
     @Override
@@ -192,15 +208,25 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         switch (mPlaylistState.getPlayMode()) {
             case SEQUENTIAL:   // 注意！case 穿透
             case LOOP:
-                position = Math.max(position - 1, 0);
+                position = getPreviousPosition(position);
                 break;
             case SHUFFLE:
-                position = getRandomPosition();
+                position = getRandomPosition(position);
                 break;
         }
 
         notifyPlayingMusicItemChanged(mPlaylist.get(position), true);
         notifyPlayingMusicItemPositionChanged(position);
+    }
+
+    protected int getPreviousPosition(int currentPosition) {
+        int position = currentPosition - 1;
+
+        if (position < 0) {
+            return mPlaylist.size() - 1;
+        }
+
+        return position;
     }
 
     @Override
