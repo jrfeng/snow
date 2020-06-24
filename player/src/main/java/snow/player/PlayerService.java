@@ -255,6 +255,14 @@ public class PlayerService extends Service implements PlayerManager {
         return mNotificationView == null;
     }
 
+    /***
+     * 该方法用来创建 {@link NotificationView}，你可以通过覆盖该方法来实现自定义的 {@link NotificationView}。
+     *
+     * 该方法默认返回 {@link SimpleNotificationView}，如果你不需要 NotificationView，可以覆盖该方法并返
+     * 回 null。
+     *
+     * @return {@link NotificationView} 对象，返回 null 时将隐藏 NotificationView
+     */
     @Nullable
     protected NotificationView onCreateNotificationView() {
         return new SimpleNotificationView();
@@ -292,6 +300,11 @@ public class PlayerService extends Service implements PlayerManager {
         mRadioStationPlayer = null;
     }
 
+    /**
+     * 关闭播放器。
+     * <p>
+     * 调用该方法后 Service 会要求所有已绑定的客户端断开连接，然后终止自己。
+     */
     @Override
     public final void shutdown() {
         if (isPlaying()) {
@@ -317,6 +330,12 @@ public class PlayerService extends Service implements PlayerManager {
         mRadioStationPlayer.removeStateListener(token);
     }
 
+    /**
+     * 添加一个自定义动作。
+     * <p>
+     * 该方法会返回一个 PendingIntent 对象，该 PendingIntent 对象会使用指定的 action 启动当前 Service。当
+     * Service 在 {@link #onStartCommand(Intent, int, int)} 方法中检测到该 action 时，会执行其对应的 task。
+     */
     protected final PendingIntent addOnStartCommandAction(@NonNull String action, @NonNull Runnable task) {
         Preconditions.checkNotNull(action);
         Preconditions.checkNotNull(task);
@@ -329,6 +348,13 @@ public class PlayerService extends Service implements PlayerManager {
         return PendingIntent.getService(context, 0, intent, 0);
     }
 
+    /**
+     * 移除一个已添加的自定义动作。
+     * <p>
+     * 需要指出的时，当一个自定义动作被移除后，其对应的 PendingIntent 仍然可以用来启动当前 Service，只不过
+     * {@link #onStartCommand(Intent, int, int)} 不会在响应对应的 action。建议在调用该方法后同时取消注册
+     * 时返回的那个 PendingIntent 对象（调用 PendingIntent 的 cancel() 方法进行取消）。
+     */
     protected final void removeOnStartCommandAction(@NonNull String action) {
         Preconditions.checkNotNull(action);
         mStartCommandActionMap.remove(action);
@@ -397,32 +423,53 @@ public class PlayerService extends Service implements PlayerManager {
         return 1;
     }
 
+    /**
+     * 获取播放器类型。
+     */
     protected final int getPlayerType() {
         return mPlayerType;
     }
 
+    /**
+     * 获取列表播放器的播放模式。
+     */
     protected final PlaylistPlayer.PlayMode getPlaylistPlayMode() {
         return mPlaylistState.getPlayMode();
     }
 
+    /**
+     * 获取播放队列携带的额外参数（可为 null）。
+     */
     @Nullable
     protected final Bundle getPlaylistExtra() {
         return mPlaylistPlayer.getPlaylistExtra();
     }
 
+    /**
+     * 获取电台携带的额外参数（可为 null）。
+     */
     @Nullable
     protected final Bundle getRadioStationExtra() {
         return mRadioStationPlayer.getRadioStationExtra();
     }
 
+    /**
+     * 获取列表播放器。
+     */
     protected final PlaylistPlayer getPlaylistPlayer() {
         return mPlaylistPlayer;
     }
 
+    /**
+     * 获取电台播放器。
+     */
     protected final RadioStationPlayer getRadioStationPlayer() {
         return mRadioStationPlayer;
     }
 
+    /**
+     * 当前是否正在播放音乐。
+     */
     protected final boolean isPlaying() {
         switch (mPlayerType) {
             case TYPE_PLAYLIST:
@@ -434,6 +481,9 @@ public class PlayerService extends Service implements PlayerManager {
         }
     }
 
+    /**
+     * 获取当前正在播放的音乐的 MusicItem 对象。
+     */
     protected final MusicItem getPlayingMusicItem() {
         switch (mPlayerType) {
             case TYPE_PLAYLIST:
@@ -445,10 +495,18 @@ public class PlayerService extends Service implements PlayerManager {
         }
     }
 
+    /**
+     * 播放器是否发生了错误。
+     */
     protected final boolean isError() {
         return getErrorCode() != Player.Error.NO_ERROR;
     }
 
+    /**
+     * 获取错误码。
+     * <p>
+     * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
+     */
     protected final int getErrorCode() {
         switch (mPlayerType) {
             case TYPE_PLAYLIST:
@@ -460,10 +518,18 @@ public class PlayerService extends Service implements PlayerManager {
         }
     }
 
+    /**
+     * 获取错误信息。
+     * <p>
+     * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
+     */
     protected final String getErrorMessage() {
         return Player.Error.getErrorMessage(this, getErrorCode());
     }
 
+    /**
+     * 要求 Service 更新 NotificationView，如果没有设置 NotificationView，则忽略本次操作。
+     */
     protected final void invalidateNotificationView() {
         if (noNotificationView()) {
             return;
@@ -489,10 +555,16 @@ public class PlayerService extends Service implements PlayerManager {
         updateNotification();
     }
 
+    /**
+     * 当前 Service 是否处于前台。
+     */
     protected final boolean isForeground() {
         return mForeground;
     }
 
+    /**
+     * 启动前台 Service。
+     */
     protected final void startForeground() {
         if (noNotificationView()) {
             return;
@@ -507,6 +579,11 @@ public class PlayerService extends Service implements PlayerManager {
         startForeground(mNotificationId, createNotification(mPlayerType));
     }
 
+    /**
+     * 停止前台 Service。
+     *
+     * @param removeNotification 是否清除 NotificationView
+     */
     protected final void stopForegroundEx(boolean removeNotification) {
         mForeground = false;
         stopForeground(removeNotification);
@@ -608,22 +685,37 @@ public class PlayerService extends Service implements PlayerManager {
         return mPlaylistPlayer;
     }
 
+    /**
+     * 播放。
+     */
     protected final void play() {
         getPlayer().play();
     }
 
+    /**
+     * 暂停。
+     */
     protected final void pause() {
         getPlayer().pause();
     }
 
+    /**
+     * 播放/暂停。
+     */
     protected final void playOrPause() {
         getPlayer().playOrPause();
     }
 
+    /**
+     * 停止。
+     */
     protected final void stop() {
         getPlayer().stop();
     }
 
+    /**
+     * 下一曲。
+     */
     protected final void skipToNext() {
         if (mPlayerType == TYPE_RADIO_STATION) {
             mRadioStationPlayer.skipToNext();
@@ -632,6 +724,11 @@ public class PlayerService extends Service implements PlayerManager {
         mPlaylistPlayer.skipToNext();
     }
 
+    /**
+     * 上一曲。
+     * <p>
+     * 但播放器类型为 {@link PlayerManager#TYPE_RADIO_STATION}（电台模式）时，该方法无效。
+     */
     protected final void skipToPrevious() {
         if (mPlayerType == TYPE_RADIO_STATION) {
             return;
@@ -883,6 +980,9 @@ public class PlayerService extends Service implements PlayerManager {
         }
     }
 
+    /**
+     * 用于显示通知栏控制器。
+     */
     public static abstract class NotificationView {
         private PlayerService mPlayerService;
 
@@ -911,6 +1011,12 @@ public class PlayerService extends Service implements PlayerManager {
             onInit(mPlayerService);
         }
 
+        /**
+         * 重写该方法创建一个新的 Notification 对象。
+         *
+         * @param playerType 播放器类型
+         * @return Notification 对象，不能为 null。
+         */
         @NonNull
         public abstract Notification onCreateNotification(int playerType);
 
@@ -920,6 +1026,9 @@ public class PlayerService extends Service implements PlayerManager {
         protected void onInit(Context context) {
         }
 
+        /**
+         * 该方法会在 Service 销毁时调用，可以在该方法中是否占用的资源。
+         */
         protected void onRelease() {
         }
 
@@ -931,70 +1040,127 @@ public class PlayerService extends Service implements PlayerManager {
             return getContext().getPackageName();
         }
 
+        /**
+         * 获取播放器类型。
+         */
         protected final int getPlayerType() {
             return mPlayerService.getPlayerType();
         }
 
+        /**
+         * 获取列表播放器的播放模式。
+         */
         protected final PlaylistPlayer.PlayMode getPlaylistPlayMode() {
             return mPlayerService.getPlaylistPlayMode();
         }
 
+        /**
+         * 获取播放队列携带的额外参数（可为 null）。
+         */
         @Nullable
         protected final Bundle getPlaylistExtra() {
             return mPlayerService.getPlaylistExtra();
         }
 
+        /**
+         * 获取电台携带的额外参数（可为 null）。
+         */
         @Nullable
         protected final Bundle getRadioStationExtra() {
             return mPlayerService.getRadioStationExtra();
         }
 
+        /**
+         * 添加一个自定义动作。
+         * <p>
+         * 该方法会返回一个 PendingIntent 对象，该 PendingIntent 对象会使用指定的 action 启动当前 Service。当
+         * Service 在 {@link #onStartCommand(Intent, int, int)} 方法中检测到该 action 时，会执行其对应的 task。
+         */
         protected final PendingIntent addCustomAction(@NonNull String action, @NonNull Runnable task) {
             return mPlayerService.addOnStartCommandAction(action, task);
         }
 
+        /**
+         * 移除一个已添加的自定义动作。
+         * <p>
+         * 需要指出的时，当一个自定义动作被移除后，其对应的 PendingIntent 仍然可以用来启动当前 Service，只不过
+         * {@link #onStartCommand(Intent, int, int)} 不会在响应对应的 action。建议在调用该方法后同时取消注册
+         * 时返回的那个 PendingIntent 对象（调用 PendingIntent 的 cancel() 方法进行取消）。
+         */
         protected final void removeCustomAction(@NonNull String action) {
             mPlayerService.removeOnStartCommandAction(action);
         }
 
+        /**
+         * 获取用来触发 “上一曲” 的 PendingIntent 对象。
+         */
         protected final PendingIntent getSkipToPreviousPendingIntent() {
             return mSkipToPrevious;
         }
 
+        /**
+         * 获取用来触发 “播放/暂停” 的 PendingIntent 对象。
+         */
         protected final PendingIntent getPlayOrPausePendingIntent() {
             return mPlayOrPause;
         }
 
+        /**
+         * 获取用来触发 “下一曲” 的 PendingIntent 对象。
+         */
         protected final PendingIntent getSkipToNextPendingIntent() {
             return mSkipToNext;
         }
 
+        /**
+         * 获取用来触发 “shutdown” 的 PendingIntent 对象。
+         */
         protected final PendingIntent getCancelPendingIntent() {
             return mCancel;
         }
 
+        /**
+         * 当前是否正在播放音乐。
+         */
         public final boolean isPlaying() {
             return mPlayerService.isPlaying();
         }
 
+        /**
+         * 获取当前正在播放的音乐的 MusicItem 对象。
+         */
         @NonNull
         public final MusicItem getPlayingMusicItem() {
             return mMusicItem;
         }
 
+        /**
+         * 播放器是否发生了错误。
+         */
         public final boolean isError() {
             return mPlayerService.isError();
         }
 
+        /**
+         * 获取错误信息。
+         * <p>
+         * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
+         */
         @NonNull
         public final String getErrorMessage() {
             return mPlayerService.getErrorMessage();
         }
 
+        /**
+         * 要求 Service 更新 NotificationView，如果没有设置 NotificationView，则忽略本次操作。
+         */
         public final void invalidate() {
             mPlayerService.invalidateNotificationView();
         }
 
+        /**
+         * 正在播放的音乐是否已改变。
+         */
         protected final boolean isMusicItemChanged() {
             return mMusicItemChanged;
         }
@@ -1012,6 +1178,9 @@ public class PlayerService extends Service implements PlayerManager {
         }
     }
 
+    /**
+     * 默认的 NotificationView 实现。
+     */
     public static class SimpleNotificationView extends NotificationView {
         private Bitmap mDefaultIcon;
         private Bitmap mIcon;
