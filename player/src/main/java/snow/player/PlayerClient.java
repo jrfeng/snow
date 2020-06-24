@@ -371,14 +371,9 @@ public class PlayerClient {
          * 注意！只允许在播放器已连接（{@link #isConnected()} 返回 true）时，才允许使用 PlaylistManager
          * 修改播放队列。当然，即使未连接，使用 PlaylistManager 访问播放队列还是允许的。
          *
-         * @return 当前 PlayerController 的 PlaylistManager 对象（如果没有连接或已断开连接，则会返回 null）。
+         * @return 当前 PlayerController 的 PlaylistManager 对象。
          */
-        @Nullable
         public PlaylistManager getPlaylistManager() {
-            if (!mConnected) {
-                return null;
-            }
-
             return mPlaylistManager;
         }
 
