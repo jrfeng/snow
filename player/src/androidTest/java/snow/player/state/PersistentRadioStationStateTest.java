@@ -29,7 +29,6 @@ public class PersistentRadioStationStateTest {
 
         prss.setPlayProgress(100);
         prss.setPlayProgressUpdateTime(System.currentTimeMillis());
-        prss.setLooping(true);
         prss.setSoundQuality(Player.SoundQuality.HIGH);
         prss.setAudioEffectEnabled(true);
         prss.setOnlyWifiNetwork(false);

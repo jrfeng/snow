@@ -21,7 +21,6 @@ public class PlayerStateTest {
         PlayerState playerState = new PlayerState();
 
         assertEquals(0, playerState.getPlayProgress());
-        assertFalse(playerState.isLooping());
         assertEquals(Player.SoundQuality.STANDARD, playerState.getSoundQuality());
         assertFalse(playerState.isAudioEffectEnabled());
         assertTrue(playerState.isOnlyWifiNetwork());
@@ -39,7 +38,6 @@ public class PlayerStateTest {
 
         playerState.setPlayProgress(1000);
         playerState.setPlayProgressUpdateTime(System.currentTimeMillis());
-        playerState.setLooping(true);
         playerState.setSoundQuality(Player.SoundQuality.HIGH);
         playerState.setAudioEffectEnabled(true);
         playerState.setOnlyWifiNetwork(false);
@@ -96,7 +94,6 @@ public class PlayerStateTest {
         PlayerState playerState = new PlayerState();
         playerState.setPlayProgress(playProgress);
         playerState.setPlayProgressUpdateTime(playProgressUpdateTime);
-        playerState.setLooping(looping);
         playerState.setSoundQuality(soundQuality);
         playerState.setAudioEffectEnabled(audioEffectEnable);
         playerState.setOnlyWifiNetwork(onlyWifiNetwork);
@@ -113,7 +110,6 @@ public class PlayerStateTest {
         PlayerState other = new PlayerState();
         other.setPlayProgress(playProgress);
         other.setPlayProgressUpdateTime(playProgressUpdateTime);
-        other.setLooping(looping);
         other.setSoundQuality(soundQuality);
         other.setAudioEffectEnabled(audioEffectEnable);
         other.setOnlyWifiNetwork(onlyWifiNetwork);
@@ -155,7 +151,6 @@ public class PlayerStateTest {
         PlayerState playerState = new PlayerState();
         playerState.setPlayProgress(playProgress);
         playerState.setPlayProgressUpdateTime(playProgressUpdateTime);
-        playerState.setLooping(looping);
         playerState.setSoundQuality(soundQuality);
         playerState.setAudioEffectEnabled(audioEffectEnable);
         playerState.setOnlyWifiNetwork(onlyWifiNetwork);
@@ -199,7 +194,6 @@ public class PlayerStateTest {
 
         playerState.setPlayProgress(playProgress);
         playerState.setPlayProgressUpdateTime(playProgressUpdateTime);
-        playerState.setLooping(looping);
         playerState.setSoundQuality(soundQuality);
         playerState.setAudioEffectEnabled(audioEffectEnable);
         playerState.setOnlyWifiNetwork(onlyWifiNetwork);

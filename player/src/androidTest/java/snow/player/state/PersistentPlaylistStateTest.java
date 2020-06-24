@@ -27,7 +27,6 @@ public class PersistentPlaylistStateTest {
 
         pps.setPlayProgress(100);
         pps.setPlayProgressUpdateTime(System.currentTimeMillis());
-        pps.setLooping(true);
         pps.setSoundQuality(Player.SoundQuality.HIGH);
         pps.setAudioEffectEnabled(true);
         pps.setOnlyWifiNetwork(false);
