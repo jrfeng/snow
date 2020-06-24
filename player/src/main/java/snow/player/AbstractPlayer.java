@@ -843,6 +843,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         if (isPrepared()) {
             mMusicPlayer.start();
             notifyPlaying(mMusicPlayer.getCurrentPosition(), System.currentTimeMillis());
+            return;
         }
 
         prepareMusicPlayer(new Runnable() {
