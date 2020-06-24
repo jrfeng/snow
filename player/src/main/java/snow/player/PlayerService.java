@@ -719,6 +719,7 @@ public class PlayerService extends Service implements PlayerManager {
     protected final void skipToNext() {
         if (mPlayerType == TYPE_RADIO_STATION) {
             mRadioStationPlayer.skipToNext();
+            return;
         }
 
         mPlaylistPlayer.skipToNext();
