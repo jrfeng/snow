@@ -29,6 +29,11 @@ import snow.player.state.PlayerState;
 import snow.player.state.PlayerStateListener;
 import snow.player.util.NetworkUtil;
 
+/**
+ * 该类实现了 {@link Player} 接口，并实现了其大部分功能。
+ *
+ * @param <T> {@link PlayerStateListener} 播放器状态监听器。
+ */
 public abstract class AbstractPlayer<T extends PlayerStateListener> implements Player {
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
 
@@ -58,6 +63,10 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private Disposable mDisposable;
 
+    /**
+     * @param context     Context 对象，不能为 null。
+     * @param playerState PlayerState 对象，不能为 null。
+     */
     public AbstractPlayer(@NonNull Context context, @NonNull PlayerState playerState) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerState);
@@ -72,8 +81,6 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
         mNetworkUtil.subscribeNetworkState();
     }
-
-    // ********************************abstract********************************
 
     /**
      * 查询具有 soundQuality 音质的 MusicItem 表示的的音乐是否已被缓存。
@@ -118,53 +125,112 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     @NonNull
     protected abstract MusicPlayer onCreateMusicPlayer(Uri uri) throws IOException;
 
-    // ********************************end******************************
-
+    /**
+     * 对象指定的 audio session id 应用音频特效。
+     *
+     * @param audioSessionId 当前正在播放的音乐的 audio session id。如果为 0，则可以忽略。
+     */
     protected void attachAudioEffect(int audioSessionId) {
     }
 
+    /**
+     * 取消当前的音频特效。
+     */
     protected void detachAudioEffect() {
     }
 
-    // *****************************Callback****************************
-
+    /**
+     * 该方法会在开始准备音乐播放器时调用。
+     */
     protected void onPreparing() {
     }
 
+    /**
+     * 该方法会在音乐播放器准备完毕后调用。
+     *
+     * @param audioSessionId 当前正准备播放的音乐的 audio session id。
+     */
     protected void onPrepared(int audioSessionId) {
     }
 
+    /**
+     * 该方法会在开始播放时调用。
+     *
+     * @param progress   当前的播放进度。
+     * @param updateTime 播放进度的更新时间。
+     */
     protected void onPlaying(long progress, long updateTime) {
     }
 
+    /**
+     * 该方法会在暂停播放时调用。
+     */
     protected void onPaused() {
     }
 
+    /**
+     * 该方法会在 stalled 暂停改变时调用。
+     * <p>
+     * 你可以根据该 stalled 参数的值来显示或隐藏缓冲进度条。如果缓冲区没有足够的数据支撑继续播放时，则该参数为
+     * true，当缓冲区缓存了足够的数据可以继续播放时，该参数为 false。
+     *
+     * @param stalled 如果缓冲区没有足够的数据继续播放时，则该参数为 true，当缓冲区缓存了足够的数据可以继续
+     *                播放时，该参数为 false。
+     */
     protected void onStalledChanged(boolean stalled) {
     }
 
+    /**
+     * 该方法会在停止播放时调用。
+     */
     protected void onStopped() {
     }
 
+    /**
+     * 该方法会在错误发生时调用。
+     *
+     * @param errorCode    错误码
+     * @param errorMessage 错误信息
+     * @see Player.Error
+     */
     protected void onError(int errorCode, String errorMessage) {
     }
 
+    /**
+     * 该方法会在播放完毕时调用。
+     *
+     * @param musicItem 本次播放的 MusicItem 对象。
+     */
     protected void onPlayComplete(MusicItem musicItem) {
     }
 
+    /**
+     * 该方法会在申请音频焦点时调用。
+     *
+     * @param success 音频焦点申请成功时为 true，否则为 false。
+     */
     protected void onRequestAudioFocus(boolean success) {
     }
 
+    /**
+     * 该方法会在丢失音频焦点时调用。
+     */
     protected void onLossAudioFocus() {
     }
 
+    /**
+     * 该方法会在播放器释放时调用。
+     */
     protected void onRelease() {
     }
 
+    /**
+     * 该方法会在当前播放的 MusicItem 对象改变时调用。
+     *
+     * @param musicItem 本次要播放的 MusicItem 对象（可能为 null）。
+     */
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
     }
-
-    // ********************************end******************************
 
     /**
      * 释放播放器所占用的资源。注意！调用该方法后，就不允许在使用当前 Player 对象了，否则会导致不可预见的错误。
@@ -186,6 +252,11 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         onRelease();
     }
 
+    /**
+     * 准备当前播放器所持有的 {@link MusicItem} 对象。
+     *
+     * @param preparedAction 在音乐播放器准备完成后要执行的操作
+     */
     protected final void prepareMusicPlayer(@Nullable Runnable preparedAction) {
         releaseMusicPlayer();
         notifyBufferingPercentChanged(0, System.currentTimeMillis());
@@ -215,7 +286,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     private Consumer<Uri> onGetMusicItemUriSuccess(@Nullable final Runnable preparedAction) {
         return new Consumer<Uri>() {
             @Override
-            public void accept(Uri uri) throws Exception {
+            public void accept(Uri uri) {
                 try {
                     mMusicPlayer = onCreateMusicPlayer(uri);
                 } catch (IOException e) {
@@ -237,7 +308,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     private Consumer<Throwable> ignoreError() {
         return new Consumer<Throwable>() {
             @Override
-            public void accept(Throwable throwable) throws Exception {
+            public void accept(Throwable throwable) {
                 // ignore
             }
         };
@@ -272,7 +343,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     private Single<Uri> getMusicItemUriAsync(@NonNull final MusicItem musicItem) {
         return Single.create(new SingleOnSubscribe<Uri>() {
             @Override
-            public void subscribe(SingleEmitter<Uri> emitter) throws Exception {
+            public void subscribe(SingleEmitter<Uri> emitter) {
                 Uri uri = getMusicItemUri(musicItem);
 
                 if (emitter.isDisposed()) {
@@ -474,6 +545,9 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         musicPlayer.setOnErrorListener(mOnErrorListener);
     }
 
+    /**
+     * 释放当前播放器所持有的 {@link MusicPlayer} 对象。
+     */
     protected final void releaseMusicPlayer() {
         if (mMusicPlayer != null) {
             mMusicPlayer.release();
@@ -487,18 +561,41 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         mSeekCompleteAction = null;
     }
 
+    /**
+     * 播放器释放处于准备中状态。
+     *
+     * @return 当播放器处于准备中状态时返回 true，否则返回false。
+     */
     protected final boolean isPreparing() {
         return mPreparing;
     }
 
+    /**
+     * 播放器释放已经准备完毕。
+     *
+     * @return 当播放器已经准备完毕时返回 true，否则返回 false。
+     */
     protected final boolean isPrepared() {
         return mPrepared;
     }
 
+    /**
+     * 是否正在播放。
+     *
+     * @return 当正在播放时返回 true，否则返回 false。
+     */
     protected final boolean isPlaying() {
         return isPrepared() && mMusicPlayer.isPlaying();
     }
 
+    /**
+     * 获取当前正在播放的应用的 audio session id。
+     * <p>
+     * 如果当前没有播放任何音乐，或者播放器还没有准备完毕（{@link #isPrepared()} 返回了 false），则该方法会
+     * 返回 0。
+     *
+     * @return 当前正在播放的应用的 audio session id。
+     */
     protected final int getAudioSessionId() {
         if (isPrepared()) {
             return mMusicPlayer.getAudioSessionId();
@@ -507,25 +604,47 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         return 0;
     }
 
+    /**
+     * 更新播放进度。
+     *
+     * @param progress   播放进度
+     * @param updateTime 播放进度更新时间
+     */
     protected final void updatePlayProgress(long progress, long updateTime) {
         mPlayerState.setPlayProgress(progress);
         mPlayerState.setPlayProgressUpdateTime(updateTime);
     }
 
-    public void addStateListener(@NonNull String token, @NonNull T listener) {
+    /**
+     * 添加播放器状态监听器。
+     *
+     * @param token    监听器的 token（不能为 null），请务必保证该参数的唯一性。
+     * @param listener 监听器（不能为 null）。
+     */
+    public final void addStateListener(@NonNull String token, @NonNull T listener) {
         Preconditions.checkNotNull(token);
         Preconditions.checkNotNull(listener);
 
         mStateListenerMap.put(token, listener);
     }
 
-    public void removeStateListener(@NonNull String token) {
+    /**
+     * 移除播放器状态监听器。
+     *
+     * @param token 监听器的 token（不能为 null）
+     */
+    public final void removeStateListener(@NonNull String token) {
         Preconditions.checkNotNull(token);
 
         mStateListenerMap.remove(token);
     }
 
-    protected HashMap<String, T> getAllStateListener() {
+    /**
+     * 获取所有已注册的播放器状态监听器。
+     *
+     * @return 所有已注册的播放器状态监听器
+     */
+    protected final HashMap<String, T> getAllStateListener() {
         return mStateListenerMap;
     }
 
@@ -658,6 +777,12 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
     }
 
+    /**
+     * 通知当前正在播放的音乐以改变。
+     *
+     * @param musicItem         本次要播放的音乐
+     * @param playingOnPrepared 是否在播放器准备完毕后开始播放
+     */
     protected final void notifyPlayingMusicItemChanged(@Nullable MusicItem musicItem, final boolean playingOnPrepared) {
         releaseMusicPlayer();
         updatePlayProgress(0, System.currentTimeMillis());
