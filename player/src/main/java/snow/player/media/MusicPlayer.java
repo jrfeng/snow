@@ -174,7 +174,7 @@ public abstract class MusicPlayer {
      *
      * @param pos 要调整到的播放位置。
      */
-    public abstract void seekTo(long pos);
+    public abstract void seekTo(int pos);
 
     /**
      * 设置音量为当前音量的百分比，范围：0.0 ~ 1.0

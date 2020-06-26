@@ -80,7 +80,7 @@ public class MediaMusicPlayer extends MusicPlayer {
     }
 
     @Override
-    public void seekTo(long pos) {
+    public void seekTo(int pos) {
         mMediaPlayer.seekTo((int) pos);
     }
 
