@@ -258,6 +258,16 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     }
 
     /**
+     * 当前正在播放的音乐。
+     *
+     * @return 如果没有正在播放的音乐，则返回 null
+     */
+    @Nullable
+    protected MusicItem getMusicItem() {
+        return mPlayerState.getMusicItem();
+    }
+
+    /**
      * 准备当前播放器所持有的 {@link MusicItem} 对象。
      *
      * @param preparedAction 在音乐播放器准备完成后要执行的操作
@@ -611,7 +621,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     /**
      * 更新播放进度。
-     *  @param progress   播放进度
+     *
+     * @param progress   播放进度
      * @param updateTime 播放进度更新时间
      */
     protected final void updatePlayProgress(int progress, long updateTime) {
