@@ -1,11 +1,15 @@
 package snow.player.media;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.PowerManager;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import com.google.common.base.Preconditions;
 
@@ -15,6 +19,8 @@ import java.io.IOException;
  * 该类定义了音乐播放器的基本功能。可以通过继承该类来实现一个音乐播放器。
  */
 public abstract class MusicPlayer {
+    private static final String TAG = "MusicPlayer";
+
     private Context mApplicationContext;
 
     private PowerManager.WakeLock mWakeLock;
@@ -48,6 +54,11 @@ public abstract class MusicPlayer {
      * 申请 WakeLock 与 WifiLock
      */
     protected final void requireWakeLock() {
+        if (wakeLockPermissionDenied()) {
+            Log.w(TAG, "Forget to request 'android.permission.WAKE_LOCK' permission?");
+            return;
+        }
+
         if (mWakeLock != null && !mWakeLock.isHeld()) {
             mWakeLock.acquire(getDuration() + 5_000);
         }
@@ -55,6 +66,11 @@ public abstract class MusicPlayer {
         if (mWifiLock != null && !mWifiLock.isHeld()) {
             mWifiLock.acquire();
         }
+    }
+
+    private boolean wakeLockPermissionDenied() {
+        return PackageManager.PERMISSION_DENIED ==
+                ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WAKE_LOCK);
     }
 
     /**
@@ -82,7 +98,7 @@ public abstract class MusicPlayer {
     /**
      * 即可播放本地文件，也可以播放网络文件。
      *
-     * @param uri     要播放的音乐的 mUri。
+     * @param uri 要播放的音乐的 mUri。
      */
     public abstract void setDataSource(Uri uri) throws IOException;
 

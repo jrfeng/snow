@@ -25,7 +25,6 @@ public class MediaMusicPlayer extends MusicPlayer {
     public MediaMusicPlayer(@NonNull Context context) {
         super(context);
         mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
     }
 
     @Override
