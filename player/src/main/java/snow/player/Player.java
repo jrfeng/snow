@@ -37,7 +37,7 @@ public interface Player {
      *
      * @param progress 要调整到的播放进度
      */
-    void seekTo(long progress);
+    void seekTo(int progress);
 
     /**
      * 快进。
@@ -194,11 +194,10 @@ public interface Player {
 
         /**
          * 当播放器的状态变为 “播放中” 时会回调该方法。
-         *
-         * @param playProgress           当前的播放进度
+         *  @param playProgress           当前的播放进度
          * @param playProgressUpdateTime 播放进度的更新时间
          */
-        void onPlay(long playProgress, long playProgressUpdateTime);
+        void onPlay(int playProgress, long playProgressUpdateTime);
 
         /**
          * 当播放器的状态变为 “暂停” 时会回调该方法。
@@ -241,7 +240,7 @@ public interface Player {
         /**
          * 该方法会在播放进度调整完成时调用。
          */
-        void onSeekComplete(long progress);
+        void onSeekComplete(int progress);
     }
 
     /**

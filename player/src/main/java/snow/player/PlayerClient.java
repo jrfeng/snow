@@ -11,11 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
-import com.google.common.hash.Hashing;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import channel.helper.ChannelHelper;
 import channel.helper.DispatcherUtil;
@@ -718,7 +716,7 @@ public class PlayerClient {
          * @param progress 要调整到的播放进度
          */
         @Override
-        public void seekTo(long progress) {
+        public void seekTo(int progress) {
             if (!mConnected) {
                 return;
             }
@@ -1270,7 +1268,7 @@ public class PlayerClient {
          * @param progress 要调整到的播放进度
          */
         @Override
-        public void seekTo(long progress) {
+        public void seekTo(int progress) {
             if (!mConnected) {
                 return;
             }
@@ -1736,7 +1734,7 @@ public class PlayerClient {
         }
 
         @Override
-        public void onPlay(long playProgress, long playProgressUpdateTime) {
+        public void onPlay(int playProgress, long playProgressUpdateTime) {
             mPlayerState.setPlaybackState(Player.PlaybackState.PLAYING);
             mPlayerState.setPlayProgress(playProgress);
             mPlayerState.setPlayProgressUpdateTime(playProgressUpdateTime);
@@ -1768,7 +1766,7 @@ public class PlayerClient {
         }
 
         @Override
-        public void onSeekComplete(long progress) {
+        public void onSeekComplete(int progress) {
             mPlayerState.setPlayProgress(progress);
 
             notifySeekComplete();

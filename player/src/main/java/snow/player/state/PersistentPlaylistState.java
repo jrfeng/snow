@@ -38,7 +38,7 @@ public class PersistentPlaylistState extends PlaylistState {
 
         mMMKV = MMKV.mmkvWithID(id);
 
-        super.setPlayProgress(mMMKV.decodeLong(KEY_PLAY_PROGRESS, 0L));
+        super.setPlayProgress(mMMKV.decodeInt(KEY_PLAY_PROGRESS, 0));
         super.setPlayProgressUpdateTime(mMMKV.decodeLong(KEY_PLAY_PROGRESS_UPDATE_TIME, System.currentTimeMillis()));
         super.setSoundQuality(Player.SoundQuality.values()[mMMKV.decodeInt(KEY_SOUND_QUALITY, 0)]);
         super.setAudioEffectEnabled(mMMKV.decodeBool(KEY_AUDIO_EFFECT_ENABLED, false));
@@ -51,7 +51,7 @@ public class PersistentPlaylistState extends PlaylistState {
     }
 
     @Override
-    public void setPlayProgress(long playProgress) {
+    public void setPlayProgress(int playProgress) {
         super.setPlayProgress(playProgress);
 
         mMMKV.encode(KEY_PLAY_PROGRESS, playProgress);

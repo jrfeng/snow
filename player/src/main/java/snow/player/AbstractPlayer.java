@@ -65,7 +65,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     /**
      * @param context     Context 对象，不能为 null。
-     * @param playerState PlayerState 对象，不能为 null。
+     * @param playerState PlayerState 对象，用于初始化和保存播放器状态，不能为 null。
      */
     public AbstractPlayer(@NonNull Context context, @NonNull PlayerState playerState) {
         Preconditions.checkNotNull(context);
@@ -611,11 +611,10 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     /**
      * 更新播放进度。
-     *
-     * @param progress   播放进度
+     *  @param progress   播放进度
      * @param updateTime 播放进度更新时间
      */
-    protected final void updatePlayProgress(long progress, long updateTime) {
+    protected final void updatePlayProgress(int progress, long updateTime) {
         mPlayerState.setPlayProgress(progress);
         mPlayerState.setPlayProgressUpdateTime(updateTime);
     }
@@ -686,7 +685,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
     }
 
-    private void notifyPlaying(long progress, long updateTime) {
+    private void notifyPlaying(int progress, long updateTime) {
         mPlayerState.setPlaybackState(PlaybackState.PLAYING);
         updatePlayProgress(progress, updateTime);
 
@@ -812,7 +811,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
     }
 
-    private void notifySeekComplete(long position) {
+    private void notifySeekComplete(int position) {
         mPlayerState.setPlayProgress(position);
         mPlayerState.setPlayProgressUpdateTime(System.currentTimeMillis());
 
@@ -899,7 +898,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
     }
 
-    private void seekTo(final long progress, Runnable seekCompleteAction) {
+    private void seekTo(final int progress, Runnable seekCompleteAction) {
         if (isPreparing()) {
             mPreparedAction = new Runnable() {
                 @Override
@@ -919,7 +918,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     }
 
     @Override
-    public void seekTo(final long progress) {
+    public void seekTo(final int progress) {
         seekTo(progress, null);
     }
 
@@ -939,7 +938,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             return;
         }
 
-        long progress = Math.min(mMusicPlayer.getDuration(),
+        int progress = Math.min(mMusicPlayer.getDuration(),
                 mMusicPlayer.getCurrentPosition() + FORWARD_STEP);
 
         seekTo(progress);
@@ -961,7 +960,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             return;
         }
 
-        long progress = Math.max(0, mMusicPlayer.getCurrentPosition() - FORWARD_STEP);
+        int progress = Math.max(0, mMusicPlayer.getCurrentPosition() - FORWARD_STEP);
 
         seekTo(progress);
     }
@@ -983,7 +982,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
 
         final boolean playing = mMusicPlayer.isPlaying();
-        final long position = mMusicPlayer.getCurrentPosition();
+        final int position = mMusicPlayer.getCurrentPosition();
 
         releaseMusicPlayer();
         prepareMusicPlayer(new Runnable() {
