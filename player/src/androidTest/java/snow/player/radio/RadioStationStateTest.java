@@ -1,4 +1,4 @@
-package snow.player.state;
+package snow.player.radio;
 
 import android.os.Parcel;
 
@@ -9,7 +9,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.runner.RunWith;
 
 import snow.player.Player;
-import snow.player.radio.RadioStation;
 
 import static org.junit.Assert.*;
 

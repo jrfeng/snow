@@ -1,4 +1,4 @@
-package snow.player.state;
+package snow.player.radio;
 
 import android.os.Parcel;
 
@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
-import snow.player.radio.RadioStation;
+import snow.player.PlayerState;
 
 /**
  * 用于保存 “电台” 的状态。

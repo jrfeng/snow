@@ -11,8 +11,8 @@ import java.io.IOException;
 import snow.player.AbstractPlayer;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
-import snow.player.state.PlayerState;
-import snow.player.state.PlayerStateListener;
+import snow.player.PlayerState;
+import snow.player.PlayerStateListener;
 
 public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
     private Tester mTester;

@@ -17,8 +17,6 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import snow.player.AbstractPlayer;
 import snow.player.media.MusicItem;
-import snow.player.state.RadioStationState;
-import snow.player.state.RadioStationStateListener;
 
 public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioStationStateListener>
         implements RadioStationPlayer {

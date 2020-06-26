@@ -24,12 +24,10 @@ import snow.player.playlist.PlaylistManager;
 import snow.player.playlist.PlaylistPlayer;
 import snow.player.radio.RadioStation;
 import snow.player.radio.RadioStationPlayer;
-import snow.player.state.PlayerState;
-import snow.player.state.PlayerStateListener;
-import snow.player.state.PlaylistState;
-import snow.player.state.PlaylistStateListener;
-import snow.player.state.RadioStationState;
-import snow.player.state.RadioStationStateListener;
+import snow.player.playlist.PlaylistState;
+import snow.player.playlist.PlaylistStateListener;
+import snow.player.radio.RadioStationState;
+import snow.player.radio.RadioStationStateListener;
 
 /**
  * 播放器客户端，用于向播放器发生各种控制命令。

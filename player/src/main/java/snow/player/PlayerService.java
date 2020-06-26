@@ -57,12 +57,12 @@ import snow.player.playlist.PlaylistPlayer;
 import snow.player.radio.AbstractRadioStationPlayer;
 import snow.player.radio.RadioStation;
 import snow.player.radio.RadioStationPlayer;
-import snow.player.state.PersistentPlaylistState;
-import snow.player.state.PersistentRadioStationState;
-import snow.player.state.PlaylistState;
-import snow.player.state.PlaylistStateListener;
-import snow.player.state.RadioStationState;
-import snow.player.state.RadioStationStateListener;
+import snow.player.playlist.PersistentPlaylistState;
+import snow.player.radio.PersistentRadioStationState;
+import snow.player.playlist.PlaylistState;
+import snow.player.playlist.PlaylistStateListener;
+import snow.player.radio.RadioStationState;
+import snow.player.radio.RadioStationStateListener;
 
 public class PlayerService extends Service implements PlayerManager {
     private static final String KEY_PLAYER_TYPE = "player_type";

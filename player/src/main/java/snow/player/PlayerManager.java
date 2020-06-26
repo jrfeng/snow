@@ -3,8 +3,8 @@ package snow.player;
 import android.os.IBinder;
 
 import channel.helper.Channel;
-import snow.player.state.PlaylistState;
-import snow.player.state.RadioStationState;
+import snow.player.playlist.PlaylistState;
+import snow.player.radio.RadioStationState;
 
 /**
  * 该接口定义了用于管理播放器的基本功能。

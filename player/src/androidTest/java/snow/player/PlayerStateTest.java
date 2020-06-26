@@ -1,4 +1,4 @@
-package snow.player.state;
+package snow.player;
 
 import android.os.Parcel;
 
@@ -9,7 +9,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.runner.RunWith;
 
 import snow.player.media.MusicItem;
-import snow.player.Player;
 
 import static org.junit.Assert.*;
 
@@ -72,9 +71,8 @@ public class PlayerStateTest {
 
     @Test
     public void equals_hashCode() {
-        final long playProgress = 1000;
+        final int playProgress = 1000;
         final long playProgressUpdateTime = System.currentTimeMillis();
-        final boolean looping = true;
         final Player.SoundQuality soundQuality = Player.SoundQuality.SUPER;
         final boolean audioEffectEnable = false;
         final boolean onlyWifiNetwork = true;
@@ -129,9 +127,8 @@ public class PlayerStateTest {
 
     @Test
     public void copyConstructorTest() {
-        final long playProgress = 1000;
+        final int playProgress = 1000;
         final long playProgressUpdateTime = System.currentTimeMillis();
-        final boolean looping = true;
         final Player.SoundQuality soundQuality = Player.SoundQuality.SUPER;
         final boolean audioEffectEnable = false;
         final boolean onlyWifiNetwork = true;
@@ -173,9 +170,8 @@ public class PlayerStateTest {
     public void parcelableTest() {
         PlayerState playerState = new PlayerState();
 
-        final long playProgress = 2000;
+        final int playProgress = 2000;
         final long playProgressUpdateTime = System.currentTimeMillis();
-        final boolean looping = true;
         final Player.SoundQuality soundQuality = Player.SoundQuality.HIGH;
         final boolean audioEffectEnable = true;
         final boolean onlyWifiNetwork = false;

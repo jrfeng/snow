@@ -1,4 +1,4 @@
-package snow.player.state;
+package snow.player;
 
 import android.content.Context;
 import android.os.Parcel;
@@ -11,7 +11,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import snow.player.media.MusicItem;
-import snow.player.Player;
 
 /**
  * 用于保存基本的播放器状态。

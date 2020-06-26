@@ -1,7 +1,7 @@
-package snow.player.state;
+package snow.player.radio;
 
 import channel.helper.Channel;
-import snow.player.radio.RadioStationPlayer;
+import snow.player.PlayerStateListener;
 
 @Channel
 public interface RadioStationStateListener extends PlayerStateListener,

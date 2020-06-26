@@ -1,6 +1,4 @@
-package snow.player.state;
-
-import snow.player.Player;
+package snow.player;
 
 public interface PlayerStateListener extends Player.OnPlaybackStateChangeListener,
         Player.OnStalledChangeListener,

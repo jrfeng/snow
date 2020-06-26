@@ -1,4 +1,4 @@
-package snow.player.state;
+package snow.player.playlist;
 
 import android.os.Parcel;
 
@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.google.common.base.Objects;
 
-import snow.player.playlist.PlaylistPlayer;
+import snow.player.PlayerState;
 
 /**
  * 用于存储播放队列的状态。
