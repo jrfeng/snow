@@ -103,13 +103,6 @@ public abstract class MusicPlayer {
     public abstract void setDataSource(Uri uri) throws IOException;
 
     /**
-     * 准备当前音乐播放器。
-     *
-     * @throws IOException 当准备失败（如：无法读取文件）时会抛出该异常。
-     */
-    public abstract void prepare() throws IOException;
-
-    /**
      * 以异步的方式准备当前音乐播放器。
      */
     public abstract void prepareAsync();

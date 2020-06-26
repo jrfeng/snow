@@ -3,7 +3,6 @@ package snow.player.media;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.PowerManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -30,11 +29,6 @@ public class MediaMusicPlayer extends MusicPlayer {
     @Override
     public void setDataSource(Uri uri) throws IOException {
         mMediaPlayer.setDataSource(uri.toString());
-    }
-
-    @Override
-    public void prepare() throws IOException {
-        mMediaPlayer.prepare();
     }
 
     @Override
