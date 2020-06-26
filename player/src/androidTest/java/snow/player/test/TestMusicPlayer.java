@@ -19,10 +19,10 @@ public class TestMusicPlayer extends MusicPlayer {
     private OnErrorListener mErrorListener;
 
     private int mAudioSessionId;
-    private boolean mLooping;
-    private boolean mPlaying;
     private int mDuration;
 
+    private boolean mLooping;
+    private boolean mPlaying;
     private int mCurrentPosition;
 
     private Tester mTester;
@@ -40,6 +40,12 @@ public class TestMusicPlayer extends MusicPlayer {
 
     public Tester tester() {
         return mTester;
+    }
+
+    public void reset() {
+        mLooping = false;
+        mPlaying = false;
+        mCurrentPosition = 0;
     }
 
     public static class Tester {
