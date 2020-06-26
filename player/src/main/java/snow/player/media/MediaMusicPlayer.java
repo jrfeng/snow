@@ -81,7 +81,7 @@ public class MediaMusicPlayer extends MusicPlayer {
 
     @Override
     public void seekTo(int pos) {
-        mMediaPlayer.seekTo((int) pos);
+        mMediaPlayer.seekTo(pos);
     }
 
     @Override
