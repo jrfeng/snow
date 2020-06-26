@@ -312,6 +312,7 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         notifyOnShutdown();
+        stopSelf();
     }
 
     @Override
@@ -403,7 +404,6 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         mCommandCallbackMap.clear();
-        stopSelf();
     }
 
     /**
