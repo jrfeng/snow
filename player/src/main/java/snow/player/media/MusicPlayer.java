@@ -129,9 +129,9 @@ public abstract class MusicPlayer {
     public abstract boolean isPlaying();
 
     /**
-     * 获取当前音频文件的持续时间。
+     * 获取当前音频文件的持续时间（单位：毫秒）。
      *
-     * @return 当前音频文件的持续时间。
+     * @return 当前音频文件的持续时间（单位：毫秒），如果持续时间未知，则返回 -1。
      */
     public abstract int getDuration();
 
