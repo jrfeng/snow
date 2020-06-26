@@ -23,7 +23,7 @@ public class TestMusicPlayer extends MusicPlayer {
     private boolean mPlaying;
     private int mDuration;
 
-    private int mPlayPosition;
+    private int mCurrentPosition;
 
     private Tester mTester;
 
@@ -48,6 +48,8 @@ public class TestMusicPlayer extends MusicPlayer {
         private boolean badDataSource;
         private boolean error;
 
+        private int seekToPosition;
+
         Tester(TestMusicPlayer testMusicPlayer) {
             musicPlayer = testMusicPlayer;
         }
@@ -61,7 +63,7 @@ public class TestMusicPlayer extends MusicPlayer {
         }
 
         public void setPlayPosition(int currentPosition) {
-            musicPlayer.mPlayPosition = currentPosition;
+            musicPlayer.mCurrentPosition = currentPosition;
         }
 
         public void prepareSuccess() {
@@ -73,6 +75,7 @@ public class TestMusicPlayer extends MusicPlayer {
         }
 
         public void seekComplete() {
+            musicPlayer.mCurrentPosition = seekToPosition;
             musicPlayer.mSeekCompleteListener.onSeekComplete(musicPlayer);
         }
 
@@ -126,7 +129,7 @@ public class TestMusicPlayer extends MusicPlayer {
 
     @Override
     public int getCurrentPosition() {
-        return mPlayPosition;
+        return mCurrentPosition;
     }
 
     @Override
@@ -170,23 +173,27 @@ public class TestMusicPlayer extends MusicPlayer {
     }
 
     @Override
-    public void seekTo(long pos) {
-        mPlayPosition = (int) pos;
+    public void seekTo(int pos) {
+        if (mTester.error) {
+            return;
+        }
+
+        mTester.seekToPosition = pos;
     }
 
     @Override
     public void setVolume(float leftVolume, float rightVolume) {
-
+        // ignore
     }
 
     @Override
     public void volumeDuck() {
-
+        // ignore
     }
 
     @Override
     public void volumeRestore() {
-
+        // ignore
     }
 
     @Override
