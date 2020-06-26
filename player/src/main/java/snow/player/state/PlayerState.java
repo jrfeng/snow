@@ -17,7 +17,7 @@ import snow.player.Player;
  * 用于保存基本的播放器状态。
  */
 public class PlayerState implements Parcelable {
-    private long mPlayProgress;
+    private int mPlayProgress;
     private long mPlayProgressUpdateTime;
     private Player.SoundQuality mSoundQuality;
     private boolean mAudioEffectEnabled;
@@ -77,7 +77,7 @@ public class PlayerState implements Parcelable {
      *
      * @return 播放进度。
      */
-    public long getPlayProgress() {
+    public int getPlayProgress() {
         return mPlayProgress;
     }
 
@@ -86,7 +86,7 @@ public class PlayerState implements Parcelable {
      *
      * @param playProgress 播放进度（小于 0 时，相当于设置为 0）。
      */
-    public void setPlayProgress(long playProgress) {
+    public void setPlayProgress(int playProgress) {
         if (playProgress < 0) {
             mPlayProgress = 0;
             return;
@@ -387,7 +387,7 @@ public class PlayerState implements Parcelable {
     }
 
     protected PlayerState(Parcel in) {
-        mPlayProgress = in.readLong();
+        mPlayProgress = in.readInt();
         mPlayProgressUpdateTime = in.readLong();
         mSoundQuality = Player.SoundQuality.values()[in.readInt()];
         mAudioEffectEnabled = in.readByte() != 0;
@@ -406,7 +406,7 @@ public class PlayerState implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(mPlayProgress);
+        dest.writeInt(mPlayProgress);
         dest.writeLong(mPlayProgressUpdateTime);
         dest.writeInt(mSoundQuality.ordinal());
         dest.writeByte((byte) (mAudioEffectEnabled ? 1 : 0));
