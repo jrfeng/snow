@@ -23,11 +23,6 @@ public class TestMusicPlayer implements MusicPlayer {
     private Tester mTester;
 
     public TestMusicPlayer() {
-        Random random = new Random();
-
-        mAudioSessionId = random.nextInt(100);
-        mDuration = 60_000 + random.nextInt(300_000);
-
         mTester = new Tester(this);
     }
 
@@ -39,18 +34,20 @@ public class TestMusicPlayer implements MusicPlayer {
         mLooping = false;
         mPlaying = false;
         mCurrentPosition = 0;
+
+        mTester.reset();
     }
 
     public static class Tester {
-        private TestMusicPlayer musicPlayer;
+        private TestMusicPlayer mMusicPlayer;
 
-        private boolean badDataSource;
-        private boolean error;
+        private boolean mBadDataSource;
+        private boolean mError;
 
-        private int seekToPosition;
+        private long mPreparedTime;
 
         Tester(TestMusicPlayer testMusicPlayer) {
-            musicPlayer = testMusicPlayer;
+            mMusicPlayer = testMusicPlayer;
         }
 
         /**
@@ -58,52 +55,74 @@ public class TestMusicPlayer implements MusicPlayer {
          * {@link MusicPlayer#setDataSource(String)} 方法前调用该方法。
          */
         public void badDataSource() {
-            badDataSource = true;
+            mBadDataSource = true;
+        }
+
+        public void setPreparedTime(long ms) {
+            mPreparedTime = ms;
         }
 
         public void setPlayPosition(int currentPosition) {
-            musicPlayer.mCurrentPosition = currentPosition;
-        }
-
-        public void prepareSuccess() {
-            musicPlayer.mPreparedListener.onPrepared(musicPlayer);
+            mMusicPlayer.mCurrentPosition = currentPosition;
         }
 
         public void completion() {
-            musicPlayer.mCompletionListener.onCompletion(musicPlayer);
-        }
-
-        public void seekComplete() {
-            musicPlayer.mCurrentPosition = seekToPosition;
-            musicPlayer.mSeekCompleteListener.onSeekComplete(musicPlayer);
+            mMusicPlayer.mCompletionListener.onCompletion(mMusicPlayer);
         }
 
         public void stalled(boolean stalled) {
-            musicPlayer.mStalledListener.onStalled(stalled);
+            mMusicPlayer.mStalledListener.onStalled(stalled);
         }
 
         public void bufferingUpdate(int percent) {
-            musicPlayer.mBufferingUpdateListener.onBufferingUpdate(musicPlayer, percent);
+            mMusicPlayer.mBufferingUpdateListener.onBufferingUpdate(mMusicPlayer, percent);
         }
 
-        public void error(int errorCode) {
-            error = true;
+        public void setError(boolean error, int errorCode) {
+            mError = error;
 
-            musicPlayer.mPlaying = false;
-            musicPlayer.mErrorListener.onError(musicPlayer, errorCode);
+            if (mError) {
+                mMusicPlayer.mPlaying = false;
+                mMusicPlayer.mErrorListener.onError(mMusicPlayer, errorCode);
+            }
+        }
+
+        public void setDuration(int duration) {
+            mMusicPlayer.mDuration = duration;
+        }
+
+        private void reset() {
+            mBadDataSource = false;
+            mError = false;
         }
     }
 
     @Override
     public void setDataSource(String path) throws IOException {
-        if (mTester.badDataSource) {
+        if (mTester.mBadDataSource) {
             throw new IOException("Test: bad data source");
         }
+
+        Random random = new Random();
+        mAudioSessionId = random.nextInt(100);
     }
 
     @Override
     public void prepareAsync() {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(mTester.mPreparedTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
+                if (mPreparedListener != null) {
+                    mPreparedListener.onPrepared(TestMusicPlayer.this);
+                }
+            }
+        }.start();
     }
 
     @Override
@@ -133,7 +152,7 @@ public class TestMusicPlayer implements MusicPlayer {
 
     @Override
     public void start() {
-        if (mTester.error) {
+        if (mTester.mError) {
             return;
         }
 
@@ -142,7 +161,7 @@ public class TestMusicPlayer implements MusicPlayer {
 
     @Override
     public void pause() {
-        if (mTester.error) {
+        if (mTester.mError) {
             return;
         }
 
@@ -151,7 +170,7 @@ public class TestMusicPlayer implements MusicPlayer {
 
     @Override
     public void stop() {
-        if (mTester.error) {
+        if (mTester.mError) {
             return;
         }
 
@@ -165,11 +184,15 @@ public class TestMusicPlayer implements MusicPlayer {
 
     @Override
     public void seekTo(int pos) {
-        if (mTester.error) {
+        if (mTester.mError) {
             return;
         }
 
-        mTester.seekToPosition = pos;
+        mCurrentPosition = pos;
+
+        if (mSeekCompleteListener != null) {
+            mSeekCompleteListener.onSeekComplete(this);
+        }
     }
 
     @Override

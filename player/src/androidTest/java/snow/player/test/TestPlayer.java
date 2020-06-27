@@ -28,20 +28,21 @@ public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
     }
 
     public class Tester {
-        private boolean looping;
-        private boolean cached;
-        private TestMusicPlayer musicPlayer;
+        private boolean mLooping;
+        private boolean mCached;
+        private TestMusicPlayer mTestMusicPlayer;
+        private int mEffectAudioSessionId;
 
         public void setTestMusicPlayer(TestMusicPlayer musicPlayer) {
-            this.musicPlayer = musicPlayer;
+            mTestMusicPlayer = musicPlayer;
         }
 
         public void setLooping(boolean looping) {
-            this.looping = looping;
+            this.mLooping = looping;
         }
 
         public void setCached(boolean cached) {
-            this.cached = cached;
+            this.mCached = cached;
         }
 
         public Uri getCachedUri() {
@@ -59,16 +60,32 @@ public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
 
             return Uri.parse(getMusicItem().getUri());
         }
+
+        public int getEffectAudioSessionId() {
+            return mEffectAudioSessionId;
+        }
+    }
+
+    @Override
+    protected void attachAudioEffect(int audioSessionId) {
+        super.attachAudioEffect(audioSessionId);
+        mTester.mEffectAudioSessionId = audioSessionId;
+    }
+
+    @Override
+    protected void detachAudioEffect() {
+        super.detachAudioEffect();
+        mTester.mEffectAudioSessionId = 0;
     }
 
     @Override
     public boolean isLooping() {
-        return mTester.looping;
+        return mTester.mLooping;
     }
 
     @Override
     protected boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
-        return mTester.cached;
+        return mTester.mCached;
     }
 
     @Nullable
@@ -86,8 +103,8 @@ public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
     @NonNull
     @Override
     protected MusicPlayer onCreateMusicPlayer(Uri uri) throws IOException {
-        mTester.musicPlayer.reset();
-        mTester.musicPlayer.setDataSource(uri.toString());
-        return mTester.musicPlayer;
+        mTester.mTestMusicPlayer.reset();
+        mTester.mTestMusicPlayer.setDataSource(uri.toString());
+        return mTester.mTestMusicPlayer;
     }
 }
