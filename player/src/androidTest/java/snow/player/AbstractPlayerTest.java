@@ -160,6 +160,8 @@ public class AbstractPlayerTest {
         mTestPlayer.tester().doOnError(new Runnable() {
             @Override
             public void run() {
+                assertFalse(mTestPlayer.isPreparing());
+                assertFalse(mTestPlayer.isPrepared());
                 assertEquals(Player.Error.PLAYER_ERROR, mPlayerState.getErrorCode());
                 assertEquals(Player.PlaybackState.ERROR, mPlayerState.getPlaybackState());
             }
