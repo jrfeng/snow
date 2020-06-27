@@ -12,8 +12,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import snow.player.AbstractPlayer;
 import snow.player.media.MusicItem;
@@ -23,10 +21,9 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     private PlaylistManager mPlaylistManager;
 
     private Playlist mPlaylist;
-    private volatile boolean mPlaylistAvailable;
+    private volatile boolean mLoadingPlaylist;
 
-    private ExecutorService mExecutor;
-    private Runnable mPlaylistAvailableAction;
+    private Runnable mPlaylistLoadedAction;
 
     private Random mRandom;
 
@@ -38,21 +35,20 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         mPlaylistState = playlistState;
         mPlaylistManager = playlistManager;
 
-        mExecutor = Executors.newSingleThreadExecutor();
         loadPlaylistAsync();
     }
 
     private void loadPlaylistAsync() {
-        mPlaylistAvailable = false;
-        mExecutor.execute(new Runnable() {
+        mLoadingPlaylist = true;
+        mPlaylistManager.getPlaylistAsync(new PlaylistManager.Callback() {
             @Override
-            public void run() {
-                mPlaylist = mPlaylistManager.getPlaylist();
-                mPlaylistAvailable = true;
+            public void onFinished(@NonNull Playlist playlist) {
+                mPlaylist = playlist;
+                mLoadingPlaylist = false;
 
-                if (mPlaylistAvailableAction != null) {
-                    mPlaylistAvailableAction.run();
-                    mPlaylistAvailableAction = null;
+                if (mPlaylistLoadedAction != null) {
+                    mPlaylistLoadedAction.run();
+                    mPlaylistLoadedAction = null;
                 }
             }
         });
@@ -130,8 +126,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
 
     @Override
     protected void onRelease() {
-        mPlaylistAvailableAction = null;
-        mExecutor.shutdown();
+        mPlaylistLoadedAction = null;
     }
 
     @Override
@@ -145,8 +140,8 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
 
     @Override
     public void skipToNext() {
-        if (!mPlaylistAvailable) {
-            mPlaylistAvailableAction = new Runnable() {
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
                 @Override
                 public void run() {
                     skipToNext();
@@ -187,8 +182,8 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
 
     @Override
     public void skipToPrevious() {
-        if (!mPlaylistAvailable) {
-            mPlaylistAvailableAction = new Runnable() {
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
                 @Override
                 public void run() {
                     skipToPrevious();
@@ -229,8 +224,8 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
 
     @Override
     public void playOrPause(final int position) {
-        if (!mPlaylistAvailable) {
-            mPlaylistAvailableAction = new Runnable() {
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
                 @Override
                 public void run() {
                     playOrPause(position);
@@ -261,7 +256,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     @Override
     public void notifyPlaylistSwapped(final int position, final boolean playOnPrepared) {
         notifyPlaylistChanged(position);
-        mPlaylistAvailableAction = new Runnable() {
+        mPlaylistLoadedAction = new Runnable() {
             @Override
             public void run() {
                 MusicItem musicItem = null;
@@ -302,7 +297,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
             return;
         }
 
-        mPlaylistAvailableAction = new Runnable() {
+        mPlaylistLoadedAction = new Runnable() {
             @Override
             public void run() {
                 notifyPlayingMusicItemPositionChanged(position + count);
@@ -348,7 +343,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
 
     private void adjustPlayingPosition(final List<Integer> positions) {
         final boolean playing = isPlaying();
-        mPlaylistAvailableAction = new Runnable() {
+        mPlaylistLoadedAction = new Runnable() {
             @Override
             public void run() {
                 int p = Collections.min(positions);
@@ -379,7 +374,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         if (count > 0) {
             final int i = Math.max(0, position - count);
             final boolean playing = isPlaying();
-            mPlaylistAvailableAction = new Runnable() {
+            mPlaylistLoadedAction = new Runnable() {
                 @Override
                 public void run() {
                     MusicItem musicItem = null;
