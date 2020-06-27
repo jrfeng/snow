@@ -33,6 +33,7 @@ public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
         private TestMusicPlayer mTestMusicPlayer;
         private int mEffectAudioSessionId;
         private Runnable mDoOnPlaying;
+        private Runnable mDoOnError;
 
         public void setTestMusicPlayer(TestMusicPlayer musicPlayer) {
             mTestMusicPlayer = musicPlayer;
@@ -69,6 +70,10 @@ public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
         public void doOnPlaying(Runnable action) {
             mDoOnPlaying = action;
         }
+
+        public void doOnError(Runnable action) {
+            mDoOnError = action;
+        }
     }
 
     @Override
@@ -78,6 +83,16 @@ public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
         if (mTester.mDoOnPlaying != null) {
             mTester.mDoOnPlaying.run();
             mTester.mDoOnPlaying = null;
+        }
+    }
+
+    @Override
+    protected void onError(int errorCode, String errorMessage) {
+        super.onError(errorCode, errorMessage);
+
+        if (mTester.mDoOnError != null) {
+            mTester.mDoOnError.run();
+            mTester.mDoOnError = null;
         }
     }
 

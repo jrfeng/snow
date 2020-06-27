@@ -144,6 +144,31 @@ public class AbstractPlayerTest {
     }
 
     @Test(timeout = 3000)
+    public void errorTest() throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        mTestPlayer.tester().doOnPlaying(new Runnable() {
+            @Override
+            public void run() {
+                latch.countDown();
+            }
+        });
+
+        mTestPlayer.play();
+        latch.await();
+
+        mTestPlayer.tester().doOnError(new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(Player.Error.PLAYER_ERROR, mPlayerState.getErrorCode());
+                assertEquals(Player.PlaybackState.ERROR, mPlayerState.getPlaybackState());
+            }
+        });
+
+        mTestMusicPlayer.tester().setError(true, 1);
+    }
+
+    @Test(timeout = 3000)
     public void playOrPause() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         mTestPlayer.tester().doOnPlaying(new Runnable() {
