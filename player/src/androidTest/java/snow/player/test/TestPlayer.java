@@ -32,6 +32,7 @@ public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
         private boolean mCached;
         private TestMusicPlayer mTestMusicPlayer;
         private int mEffectAudioSessionId;
+        private Runnable mDoOnPlaying;
 
         public void setTestMusicPlayer(TestMusicPlayer musicPlayer) {
             mTestMusicPlayer = musicPlayer;
@@ -63,6 +64,20 @@ public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
 
         public int getEffectAudioSessionId() {
             return mEffectAudioSessionId;
+        }
+
+        public void doOnPlaying(Runnable action) {
+            mDoOnPlaying = action;
+        }
+    }
+
+    @Override
+    protected void onPlaying(long progress, long updateTime) {
+        super.onPlaying(progress, updateTime);
+
+        if (mTester.mDoOnPlaying != null) {
+            mTester.mDoOnPlaying.run();
+            mTester.mDoOnPlaying = null;
         }
     }
 
