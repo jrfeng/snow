@@ -183,6 +183,29 @@ public class AbstractPlayerTest {
         latch.await();
     }
 
+    @Test(timeout = 3000)
+    public void notifyPlayingMusicItemChanged() throws InterruptedException {
+        final MusicItem musicItem = new MusicItem();
+
+        musicItem.setTitle("Title2");
+        musicItem.setArtist("Artist2");
+        musicItem.setDuration(480_000);
+        musicItem.setUri("http://www.test.com/test2.mp3");
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        mTestPlayer.tester().doOnPlaying(new Runnable() {
+            @Override
+            public void run() {
+                assertTrue(musicItem.same(mPlayerState.getMusicItem()));
+                assertEquals(Player.PlaybackState.PLAYING, mPlayerState.getPlaybackState());
+                latch.countDown();
+            }
+        });
+
+        mTestPlayer.notifyPlayingMusicItemChanged(musicItem, true);
+        latch.await();
+    }
+
     @Test
     public void setSoundQuality() {
         final Player.SoundQuality soundQuality = Player.SoundQuality.SUPER;
