@@ -733,7 +733,10 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private void notifyPaused() {
         mPlayerState.setPlaybackState(PlaybackState.PAUSED);
-        updatePlayProgress(mMusicPlayer.getCurrentPosition(), System.currentTimeMillis());
+
+        if (mMusicPlayer != null) {
+            updatePlayProgress(mMusicPlayer.getCurrentPosition(), System.currentTimeMillis());
+        }
 
         mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
@@ -899,8 +902,9 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
         if (isPlaying()) {
             mMusicPlayer.pause();
-            notifyPaused();
         }
+
+        notifyPaused();
     }
 
     @Override
