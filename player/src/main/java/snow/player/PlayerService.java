@@ -659,8 +659,8 @@ public class PlayerService extends Service implements PlayerManager {
      */
     @NonNull
     protected MusicPlayer onCreateMusicPlayer(Uri uri) throws IOException {
-        MusicPlayer musicPlayer = new MediaMusicPlayer(this);
-        musicPlayer.setDataSource(uri);
+        MusicPlayer musicPlayer = new MediaMusicPlayer();
+        musicPlayer.setDataSource(uri.toString());
         return musicPlayer;
     }
 

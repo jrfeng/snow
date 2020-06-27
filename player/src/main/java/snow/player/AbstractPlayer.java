@@ -1,12 +1,17 @@
 package snow.player;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
+import android.os.PowerManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.google.common.base.Preconditions;
 
@@ -301,7 +306,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             @Override
             public void accept(Uri uri) {
                 try {
-                    mMusicPlayer = onCreateMusicPlayer(uri);
+                    mMusicPlayer = new MusicPlayerWrapper(mApplicationContext, onCreateMusicPlayer(uri));
                 } catch (IOException e) {
                     e.printStackTrace();
                     notifyError(Error.DATA_LOAD_FAILED,
@@ -501,7 +506,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
                 playing = isPlaying();
                 if (playing) {
-                    mMusicPlayer.volumeDuck();
+                    mMusicPlayer.quiet();
                 }
             }
 
@@ -521,7 +526,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
                 }
 
                 if (lossTransientCanDuck && isPlaying()) {
-                    mMusicPlayer.volumeRestore();
+                    mMusicPlayer.dismissQuiet();
                 }
             }
         });
@@ -1047,5 +1052,209 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     @Override
     public void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
         mPlayerState.setIgnoreLossAudioFocus(ignoreLossAudioFocus);
+    }
+
+    private static class MusicPlayerWrapper implements MusicPlayer {
+        private static final String TAG = "MusicPlayer";
+
+        private Context mApplicationContext;
+        private MusicPlayer mMusicPlayer;
+        private PowerManager.WakeLock mWakeLock;
+        private WifiManager.WifiLock mWifiLock;
+
+        private OnCompletionListener mCompletionListener;
+        private OnErrorListener mErrorListener;
+
+        MusicPlayerWrapper(Context context, MusicPlayer musicPlayer) {
+            mApplicationContext = context.getApplicationContext();
+            mMusicPlayer = musicPlayer;
+
+            initWakeLock(context);
+            initDelegateMusicPlayer();
+        }
+
+        private void initWakeLock(Context context) {
+            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            WifiManager wm = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+            String tag = "player:MusicPlayer";
+
+            if (pm != null) {
+                mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, tag);
+                mWakeLock.setReferenceCounted(false);
+            }
+
+            if (wm != null) {
+                mWifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL, tag);
+                mWifiLock.setReferenceCounted(false);
+            }
+        }
+
+        private void initDelegateMusicPlayer() {
+            mMusicPlayer.setOnCompletionListener(new OnCompletionListener() {
+                @Override
+                public void onCompletion(MusicPlayer mp) {
+                    releaseWakeLock();
+
+                    if (mCompletionListener != null) {
+                        mCompletionListener.onCompletion(mp);
+                    }
+                }
+            });
+
+            mMusicPlayer.setOnErrorListener(new OnErrorListener() {
+                @Override
+                public void onError(MusicPlayer mp, int errorCode) {
+                    releaseWakeLock();
+
+                    if (mErrorListener != null) {
+                        mErrorListener.onError(mp, errorCode);
+                    }
+                }
+            });
+        }
+
+        private void requireWakeLock() {
+            if (wakeLockPermissionDenied()) {
+                Log.w(TAG, "Forget to request 'android.permission.WAKE_LOCK' permission?");
+                return;
+            }
+
+            if (mWakeLock != null && !mWakeLock.isHeld()) {
+                mWakeLock.acquire(getDuration() + 5_000);
+            }
+
+            if (mWifiLock != null && !mWifiLock.isHeld()) {
+                mWifiLock.acquire();
+            }
+        }
+
+        private boolean wakeLockPermissionDenied() {
+            return PackageManager.PERMISSION_DENIED ==
+                    ContextCompat.checkSelfPermission(mApplicationContext, Manifest.permission.WAKE_LOCK);
+        }
+
+        private void releaseWakeLock() {
+            if (mWakeLock != null && mWakeLock.isHeld()) {
+                mWakeLock.release();
+            }
+
+            if (mWifiLock != null && mWifiLock.isHeld()) {
+                mWifiLock.release();
+            }
+        }
+
+        @Override
+        public void setDataSource(String path) throws IOException {
+            mMusicPlayer.setDataSource(path);
+        }
+
+        @Override
+        public void prepareAsync() {
+            mMusicPlayer.prepareAsync();
+        }
+
+        @Override
+        public void setLooping(boolean looping) {
+            mMusicPlayer.setLooping(looping);
+        }
+
+        @Override
+        public boolean isLooping() {
+            return mMusicPlayer.isLooping();
+        }
+
+        @Override
+        public boolean isPlaying() {
+            return mMusicPlayer.isPlaying();
+        }
+
+        @Override
+        public int getDuration() {
+            return mMusicPlayer.getDuration();
+        }
+
+        @Override
+        public int getCurrentPosition() {
+            return mMusicPlayer.getCurrentPosition();
+        }
+
+        @Override
+        public void start() {
+            requireWakeLock();
+            mMusicPlayer.start();
+        }
+
+        @Override
+        public void pause() {
+            releaseWakeLock();
+            mMusicPlayer.pause();
+        }
+
+        @Override
+        public void stop() {
+            releaseWakeLock();
+            mMusicPlayer.stop();
+        }
+
+        @Override
+        public void seekTo(int pos) {
+            mMusicPlayer.seekTo(pos);
+        }
+
+        @Override
+        public void setVolume(float leftVolume, float rightVolume) {
+            mMusicPlayer.setVolume(leftVolume, rightVolume);
+        }
+
+        @Override
+        public void quiet() {
+            mMusicPlayer.quiet();
+        }
+
+        @Override
+        public void dismissQuiet() {
+            mMusicPlayer.dismissQuiet();
+        }
+
+        @Override
+        public void release() {
+            mMusicPlayer.release();
+        }
+
+        @Override
+        public int getAudioSessionId() {
+            return mMusicPlayer.getAudioSessionId();
+        }
+
+        @Override
+        public void setOnPreparedListener(OnPreparedListener listener) {
+            mMusicPlayer.setOnPreparedListener(listener);
+        }
+
+        @Override
+        public void setOnCompletionListener(OnCompletionListener listener) {
+            mCompletionListener = listener;
+        }
+
+        @Override
+        public void setOnSeekCompleteListener(OnSeekCompleteListener listener) {
+            mMusicPlayer.setOnSeekCompleteListener(listener);
+        }
+
+        @Override
+        public void setOnStalledListener(OnStalledListener listener) {
+            mMusicPlayer.setOnStalledListener(listener);
+        }
+
+        @Override
+        public void setOnBufferingUpdateListener(OnBufferingUpdateListener listener) {
+            mMusicPlayer.setOnBufferingUpdateListener(listener);
+        }
+
+        @Override
+        public void setOnErrorListener(OnErrorListener listener) {
+            mErrorListener = listener;
+        }
     }
 }

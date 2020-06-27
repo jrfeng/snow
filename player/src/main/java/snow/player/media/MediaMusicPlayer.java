@@ -1,11 +1,7 @@
 package snow.player.media;
 
-import android.content.Context;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.util.Log;
-
-import androidx.annotation.NonNull;
 
 import java.io.IOException;
 
@@ -15,20 +11,19 @@ import snow.player.Player;
  * 封装了一个 MediaPlayer。注意！不允许复用 MediaMusicPlayer 对象。一旦调用 {@link #release()}
  * 或者 {@link #stop()} 方法后就不要再调用 MediaMusicPlayer 对象的任何方法。
  */
-public class MediaMusicPlayer extends MusicPlayer {
+public class MediaMusicPlayer implements MusicPlayer {
     private static final String TAG = "MediaMusicPlayer";
 
     private MediaPlayer mMediaPlayer;
     private OnStalledListener mStalledListener;
 
-    public MediaMusicPlayer(@NonNull Context context) {
-        super(context);
+    public MediaMusicPlayer() {
         mMediaPlayer = new MediaPlayer();
     }
 
     @Override
-    public void setDataSource(Uri uri) throws IOException {
-        mMediaPlayer.setDataSource(uri.toString());
+    public void setDataSource(String path) throws IOException {
+        mMediaPlayer.setDataSource(path);
     }
 
     @Override
@@ -63,19 +58,16 @@ public class MediaMusicPlayer extends MusicPlayer {
 
     @Override
     public void start() {
-        super.start();
         mMediaPlayer.start();
     }
 
     @Override
     public void pause() {
-        super.pause();
         mMediaPlayer.pause();
     }
 
     @Override
     public void stop() {
-        super.stop();
         mMediaPlayer.stop();
     }
 
@@ -90,18 +82,17 @@ public class MediaMusicPlayer extends MusicPlayer {
     }
 
     @Override
-    public void volumeDuck() {
+    public void quiet() {
         setVolume(0.4F, 0.4F);
     }
 
     @Override
-    public void volumeRestore() {
+    public void dismissQuiet() {
         setVolume(1.0F, 1.0F);
     }
 
     @Override
     public void release() {
-        super.release();
         mMediaPlayer.release();
         mMediaPlayer = null;
         mStalledListener = null;
@@ -187,7 +178,6 @@ public class MediaMusicPlayer extends MusicPlayer {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
                 Log.e(TAG, "MediaPlayer Error[what: " + what + ", extra: " + extra + "]");
-                releaseWakeLock();
 
                 listener.onError(MediaMusicPlayer.this,
                         Player.Error.PLAYER_ERROR);
