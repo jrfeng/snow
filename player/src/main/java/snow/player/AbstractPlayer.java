@@ -465,8 +465,6 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             public void onError(MusicPlayer mp, int errorCode) {
                 Log.e("MusicPlayer", "errorCode:" + errorCode);
 
-                releaseMusicPlayer();
-
                 notifyError(Error.PLAYER_ERROR,
                         Error.getErrorMessage(mApplicationContext, Error.PLAYER_ERROR));
             }
@@ -782,6 +780,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     }
 
     private void notifyError(int errorCode, String errorMessage) {
+        releaseMusicPlayer();
+
         mPlayerState.setPlaybackState(PlaybackState.ERROR);
         mPlayerState.setErrorCode(errorCode);
         mPlayerState.setErrorMessage(errorMessage);
