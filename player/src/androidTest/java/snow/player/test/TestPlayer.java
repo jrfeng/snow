@@ -87,7 +87,7 @@ public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
     @Override
     protected MusicPlayer onCreateMusicPlayer(Uri uri) throws IOException {
         mTester.musicPlayer.reset();
-        mTester.musicPlayer.setDataSource(uri);
+        mTester.musicPlayer.setDataSource(uri.toString());
         return mTester.musicPlayer;
     }
 }
