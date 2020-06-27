@@ -1,16 +1,11 @@
 package snow.player.test;
 
-import android.content.Context;
-import android.net.Uri;
-
-import androidx.annotation.NonNull;
-
 import java.io.IOException;
 import java.util.Random;
 
 import snow.player.media.MusicPlayer;
 
-public class TestMusicPlayer extends MusicPlayer {
+public class TestMusicPlayer implements MusicPlayer {
     private OnPreparedListener mPreparedListener;
     private OnCompletionListener mCompletionListener;
     private OnSeekCompleteListener mSeekCompleteListener;
@@ -27,9 +22,7 @@ public class TestMusicPlayer extends MusicPlayer {
 
     private Tester mTester;
 
-    public TestMusicPlayer(@NonNull Context context) {
-        super(context);
-
+    public TestMusicPlayer() {
         Random random = new Random();
 
         mAudioSessionId = random.nextInt(100);
@@ -61,8 +54,8 @@ public class TestMusicPlayer extends MusicPlayer {
         }
 
         /**
-         * 调用该方法后，会在调用 {@link #setDataSource(Uri)} 方法时抛出 IOException 异常。请在调用
-         * {@link #setDataSource(Uri)} 方法前调用该方法。
+         * 调用该方法后，会在调用 {@link MusicPlayer#setDataSource(String)} 方法时抛出 IOException 异常。请在调用
+         * {@link MusicPlayer#setDataSource(String)} 方法前调用该方法。
          */
         public void badDataSource() {
             badDataSource = true;
@@ -102,7 +95,7 @@ public class TestMusicPlayer extends MusicPlayer {
     }
 
     @Override
-    public void setDataSource(Uri uri) throws IOException {
+    public void setDataSource(String path) throws IOException {
         if (mTester.badDataSource) {
             throw new IOException("Test: bad data source");
         }
@@ -140,8 +133,6 @@ public class TestMusicPlayer extends MusicPlayer {
 
     @Override
     public void start() {
-        super.start();
-
         if (mTester.error) {
             return;
         }
@@ -151,8 +142,6 @@ public class TestMusicPlayer extends MusicPlayer {
 
     @Override
     public void pause() {
-        super.pause();
-
         if (mTester.error) {
             return;
         }
@@ -162,8 +151,6 @@ public class TestMusicPlayer extends MusicPlayer {
 
     @Override
     public void stop() {
-        super.stop();
-
         if (mTester.error) {
             return;
         }
@@ -173,8 +160,6 @@ public class TestMusicPlayer extends MusicPlayer {
 
     @Override
     public void release() {
-        super.release();
-
         mPlaying = false;
     }
 
@@ -193,12 +178,12 @@ public class TestMusicPlayer extends MusicPlayer {
     }
 
     @Override
-    public void volumeDuck() {
+    public void quiet() {
         // ignore
     }
 
     @Override
-    public void volumeRestore() {
+    public void dismissQuiet() {
         // ignore
     }
 
