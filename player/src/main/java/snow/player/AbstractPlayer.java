@@ -607,6 +607,20 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     }
 
     /**
+     * 是否已暂停。
+     */
+    protected final boolean isPaused() {
+        return mPlayerState.getPlaybackState() == PlaybackState.PAUSED;
+    }
+
+    /**
+     * 是否已停止。
+     */
+    protected final boolean isStopped() {
+        return mPlayerState.getPlaybackState() == PlaybackState.STOPPED;
+    }
+
+    /**
      * 获取当前正在播放的应用的 audio session id。
      * <p>
      * 如果当前没有播放任何音乐，或者播放器还没有准备完毕（{@link #isPrepared()} 返回了 false），则该方法会
@@ -869,6 +883,10 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     @Override
     public void pause() {
+        if (isPaused()) {
+            return;
+        }
+
         if (isPreparing()) {
             mPreparedAction = new Runnable() {
                 @Override
@@ -887,20 +905,19 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     @Override
     public void stop() {
-        if (isPreparing()) {
-            mPreparedAction = new Runnable() {
-                @Override
-                public void run() {
-                    stop();
-                }
-            };
+        if (isStopped()) {
             return;
+        }
+
+        if (isPreparing()) {
+            releaseMusicPlayer();
         }
 
         if (isPrepared()) {
             mMusicPlayer.stop();
-            notifyStopped();
         }
+
+        notifyStopped();
     }
 
     @Override
