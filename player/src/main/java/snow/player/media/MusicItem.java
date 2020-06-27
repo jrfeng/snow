@@ -22,7 +22,7 @@ public final class MusicItem implements Parcelable {
     private String album;
     private String uri;
     private String iconUri;
-    private long duration;
+    private int duration;
     private String token;
     @Nullable
     private Bundle mExtra;
@@ -116,14 +116,16 @@ public final class MusicItem implements Parcelable {
         this.iconUri = iconUri;
     }
 
-    public long getDuration() {
+    public int getDuration() {
         return duration;
     }
 
     /**
-     * 设置 duration 属性。小于 0 时，duration 的值将被设置为 0。
+     * 设置歌曲的持续时间（播放时长）。
+     *
+     * @param duration 歌曲的持续时间，小于 0 时，duration 的值将被设置为 0
      */
-    public void setDuration(long duration) {
+    public void setDuration(int duration) {
         if (duration < 0) {
             this.duration = 0;
             return;
@@ -205,7 +207,7 @@ public final class MusicItem implements Parcelable {
         dest.writeString(this.album);
         dest.writeString(this.uri);
         dest.writeString(this.iconUri);
-        dest.writeLong(this.duration);
+        dest.writeInt(this.duration);
         dest.writeString(this.token);
         dest.writeParcelable(mExtra, 0);
     }
@@ -217,7 +219,7 @@ public final class MusicItem implements Parcelable {
         this.album = in.readString();
         this.uri = in.readString();
         this.iconUri = in.readString();
-        this.duration = in.readLong();
+        this.duration = in.readInt();
         this.token = in.readString();
         this.mExtra = in.readParcelable(Thread.currentThread().getContextClassLoader());
     }
