@@ -22,7 +22,7 @@ public class TestPlaylistManager extends PlaylistManager {
     }
 
     public class Tester {
-        private long mLoadPlaylistDelay;
+        private long mLoadPlaylistDelay = 100;
 
         public void setLoadPlaylistDelay(long loadPlaylistDelay) {
             mLoadPlaylistDelay = loadPlaylistDelay;

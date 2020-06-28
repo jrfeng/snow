@@ -33,7 +33,10 @@ public class AbstractPlaylistPlayerTest {
         mPlaylist = createPlaylist(10);
         mTestPlaylistManager = new TestPlaylistManager(getContext(), mPlaylist);
         mPlaylistState = createPlaylistState();
-        mTestPlaylistPlayer = new TestPlaylistPlayer(getContext(), mPlaylistState, mTestPlaylistManager);
+        mTestPlaylistPlayer = new TestPlaylistPlayer(getContext(),
+                mPlaylistState,
+                mTestPlaylistManager,
+                mPlaylist);
     }
 
     private Context getContext() {

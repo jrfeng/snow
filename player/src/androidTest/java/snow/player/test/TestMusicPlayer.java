@@ -44,7 +44,7 @@ public class TestMusicPlayer implements MusicPlayer {
         private boolean mBadDataSource;
         private boolean mError;
 
-        private long mPreparedTime;
+        private long mPreparedTime = 100;
 
         Tester(TestMusicPlayer testMusicPlayer) {
             mMusicPlayer = testMusicPlayer;

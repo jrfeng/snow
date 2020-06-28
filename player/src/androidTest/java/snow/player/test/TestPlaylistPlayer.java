@@ -20,8 +20,9 @@ public class TestPlaylistPlayer extends AbstractPlaylistPlayer {
 
     public TestPlaylistPlayer(@NonNull Context context,
                               @NonNull PlaylistState playlistState,
-                              @NonNull PlaylistManager playlistManager) {
-        super(context, playlistState, playlistManager);
+                              @NonNull PlaylistManager playlistManager,
+                              @NonNull Playlist playlist) {
+        super(context, playlistState, playlistManager, playlist);
 
         mTester = new Tester();
     }
