@@ -56,8 +56,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     private volatile boolean mPreparing;
     private volatile boolean mPrepared;
 
-    private Runnable mPreparedAction;
-    private Runnable mSeekCompleteAction;
+    private volatile Runnable mPreparedAction;
+    private volatile Runnable mSeekCompleteAction;
 
     private AudioFocusHelper mAudioFocusHelper;
     private BecomeNoiseHelper mBecomeNoiseHelper;
