@@ -1086,7 +1086,10 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         private OnCompletionListener mCompletionListener;
         private OnErrorListener mErrorListener;
 
-        MusicPlayerWrapper(Context context, MusicPlayer musicPlayer) {
+        MusicPlayerWrapper(@NonNull Context context, @NonNull MusicPlayer musicPlayer) {
+            Preconditions.checkNotNull(context);
+            Preconditions.checkNotNull(musicPlayer);
+
             mApplicationContext = context.getApplicationContext();
             mMusicPlayer = musicPlayer;
 
