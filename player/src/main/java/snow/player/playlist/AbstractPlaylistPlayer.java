@@ -50,6 +50,8 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
                     mPlaylistLoadedAction.run();
                     mPlaylistLoadedAction = null;
                 }
+
+                onPlaylistAvailable(mPlaylist);
             }
         });
     }
@@ -110,12 +112,11 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         }
     }
 
-    protected final boolean isLoadingPlaylist() {
-        return mLoadingPlaylist;
+    protected final boolean isPlaylistAvailable() {
+        return !mLoadingPlaylist;
     }
 
-    protected final void setPlaylistLoadedAction(Runnable action) {
-        mPlaylistLoadedAction = action;
+    protected void onPlaylistAvailable(Playlist playlist) {
     }
 
     protected final Playlist getPlaylist() {
