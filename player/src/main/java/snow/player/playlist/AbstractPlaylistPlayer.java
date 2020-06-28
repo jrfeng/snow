@@ -110,6 +110,14 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         }
     }
 
+    protected final boolean isLoadingPlaylist() {
+        return mLoadingPlaylist;
+    }
+
+    protected final void setPlaylistLoadedAction(Runnable action) {
+        mPlaylistLoadedAction = action;
+    }
+
     @Nullable
     public final Bundle getPlaylistExtra() {
         if (mPlaylist == null) {
