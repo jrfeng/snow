@@ -38,6 +38,17 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         loadPlaylistAsync();
     }
 
+    public AbstractPlaylistPlayer(@NonNull Context context,
+                                  @NonNull PlaylistState playlistState,
+                                  @NonNull PlaylistManager playlistManager,
+                                  @NonNull Playlist playlist) {
+        super(context, playlistState);
+
+        mPlaylistState = playlistState;
+        mPlaylistManager = playlistManager;
+        mPlaylist = playlist;
+    }
+
     private void loadPlaylistAsync() {
         mLoadingPlaylist = true;
         mPlaylistManager.getPlaylistAsync(new PlaylistManager.Callback() {
