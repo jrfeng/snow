@@ -54,5 +54,5 @@ dependencies {
     annotationProcessor 'com.github.jrfeng.channel-helper:processor:1.2.4'
 
     // media-helper
-    implementation 'com.github.jrfeng:media-helper:1.0.2'
+    implementation 'com.github.jrfeng:media-helper:1.0.3'
 }
