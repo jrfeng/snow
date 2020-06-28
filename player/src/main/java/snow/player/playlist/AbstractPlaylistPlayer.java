@@ -284,13 +284,19 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     }
 
     @Override
-    public void notifyMusicItemMoved(int fromPosition, int toPosition) {
+    public void notifyMusicItemMoved(int fromPosition, final int toPosition) {
         if (fromPosition == toPosition) {
             return;
         }
 
+        mPlaylistLoadedAction = new Runnable() {
+            @Override
+            public void run() {
+                notifyPlayingMusicItemPositionChanged(toPosition);
+            }
+        };
+
         loadPlaylistAsync();
-        notifyPlayingMusicItemPositionChanged(toPosition);
     }
 
     @Override
@@ -386,16 +392,9 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
 
         if (count > 0) {
             final int i = Math.max(0, position - count);
-            final boolean playing = isPlaying();
             mPlaylistLoadedAction = new Runnable() {
                 @Override
                 public void run() {
-                    MusicItem musicItem = null;
-                    if (!mPlaylist.isEmpty()) {
-                        musicItem = mPlaylist.get(i);
-                    }
-
-                    notifyPlayingMusicItemChanged(musicItem, playing);
                     notifyPlayingMusicItemPositionChanged(mPlaylist.isEmpty() ? -1 : i);
                 }
             };
