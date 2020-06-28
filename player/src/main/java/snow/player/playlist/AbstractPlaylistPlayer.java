@@ -23,7 +23,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     private Playlist mPlaylist;
     private volatile boolean mLoadingPlaylist;
 
-    private Runnable mPlaylistLoadedAction;
+    private volatile Runnable mPlaylistLoadedAction;
 
     private Random mRandom;
 
@@ -116,6 +116,10 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
 
     protected final void setPlaylistLoadedAction(Runnable action) {
         mPlaylistLoadedAction = action;
+    }
+
+    protected final Playlist getPlaylist() {
+        return mPlaylist;
     }
 
     @Nullable
