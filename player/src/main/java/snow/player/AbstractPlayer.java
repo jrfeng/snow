@@ -292,7 +292,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         mDisposable = getMusicItemUriAsync(musicItem)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(onGetMusicItemUriSuccess(preparedAction), ignoreError());
+                .subscribe(onSuccessPrepareMusicPlayer(preparedAction), onErrorReleaseMusicPlayer());
     }
 
     private void disposeLastGetMusicItemUri() {
@@ -301,33 +301,31 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
     }
 
-    private Consumer<Uri> onGetMusicItemUriSuccess(@Nullable final Runnable preparedAction) {
+    private Consumer<Uri> onSuccessPrepareMusicPlayer(@Nullable final Runnable preparedAction) {
         return new Consumer<Uri>() {
             @Override
             public void accept(Uri uri) {
                 try {
                     mMusicPlayer = new MusicPlayerWrapper(mApplicationContext, onCreateMusicPlayer(uri));
+                    attachListeners(mMusicPlayer);
+
+                    mPreparedAction = preparedAction;
+                    notifyPreparing();
+                    mMusicPlayer.prepareAsync();
                 } catch (IOException e) {
                     e.printStackTrace();
                     notifyError(Error.DATA_LOAD_FAILED,
                             Error.getErrorMessage(mApplicationContext, Error.DATA_LOAD_FAILED));
-                    return;
                 }
-
-                attachListeners(mMusicPlayer);
-
-                mPreparedAction = preparedAction;
-                notifyPreparing();
-                mMusicPlayer.prepareAsync();
             }
         };
     }
 
-    private Consumer<Throwable> ignoreError() {
+    private Consumer<Throwable> onErrorReleaseMusicPlayer() {
         return new Consumer<Throwable>() {
             @Override
             public void accept(Throwable throwable) {
-                // ignore
+                releaseMusicPlayer();
             }
         };
     }
@@ -565,6 +563,9 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      * 释放当前播放器所持有的 {@link MusicPlayer} 对象。
      */
     protected final void releaseMusicPlayer() {
+        // DEBUG
+        Log.d("App", "releaseMusicPLayer");
+
         if (mMusicPlayer != null) {
             mMusicPlayer.release();
             mMusicPlayer = null;
