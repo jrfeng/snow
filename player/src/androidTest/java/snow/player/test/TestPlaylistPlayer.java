@@ -17,16 +17,13 @@ import snow.player.playlist.PlaylistState;
 
 public class TestPlaylistPlayer extends AbstractPlaylistPlayer {
     private Tester mTester;
-    private TestMusicPlayer mTestMusicPlayer;
 
     public TestPlaylistPlayer(@NonNull Context context,
                               @NonNull PlaylistState playlistState,
-                              @NonNull PlaylistManager playlistManager,
-                              TestMusicPlayer testMusicPlayer) {
+                              @NonNull PlaylistManager playlistManager) {
         super(context, playlistState, playlistManager);
 
         mTester = new Tester();
-        mTestMusicPlayer = testMusicPlayer;
     }
 
     public Tester tester() {
@@ -86,8 +83,8 @@ public class TestPlaylistPlayer extends AbstractPlaylistPlayer {
     @NonNull
     @Override
     protected MusicPlayer onCreateMusicPlayer(Uri uri) throws IOException {
-        mTestMusicPlayer.reset();
-        mTestMusicPlayer.setDataSource(uri.toString());
-        return mTestMusicPlayer;
+        MusicPlayer musicPlayer = new TestMusicPlayer();
+        musicPlayer.setDataSource(uri.toString());
+        return musicPlayer;
     }
 }

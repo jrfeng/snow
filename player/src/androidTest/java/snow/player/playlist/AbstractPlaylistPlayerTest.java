@@ -16,7 +16,6 @@ import java.util.concurrent.CountDownLatch;
 
 import snow.player.Player;
 import snow.player.media.MusicItem;
-import snow.player.test.TestMusicPlayer;
 import snow.player.test.TestPlaylistManager;
 import snow.player.test.TestPlaylistPlayer;
 
@@ -28,15 +27,13 @@ public class AbstractPlaylistPlayerTest {
     private TestPlaylistManager mTestPlaylistManager;
     private PlaylistState mPlaylistState;
     private TestPlaylistPlayer mTestPlaylistPlayer;
-    private TestMusicPlayer mTestMusicPlayer;
 
     @Before
     public void initFields() {
         mPlaylist = createPlaylist(10);
         mTestPlaylistManager = new TestPlaylistManager(getContext(), mPlaylist);
         mPlaylistState = createPlaylistState();
-        mTestMusicPlayer = new TestMusicPlayer();
-        mTestPlaylistPlayer = new TestPlaylistPlayer(getContext(), mPlaylistState, mTestPlaylistManager, mTestMusicPlayer);
+        mTestPlaylistPlayer = new TestPlaylistPlayer(getContext(), mPlaylistState, mTestPlaylistManager);
     }
 
     private Context getContext() {
