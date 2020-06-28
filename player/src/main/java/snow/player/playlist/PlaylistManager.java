@@ -9,7 +9,6 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -30,7 +29,7 @@ public abstract class PlaylistManager {
     private boolean mEditable;
 
     @Nullable
-    private WeakReference<OnModifyPlaylistListener> mListenerWeakReference;
+    private OnModifyPlaylistListener mModifyPlaylistListener;
 
     public PlaylistManager(@NonNull Context context, @NonNull String playlistId) {
         Preconditions.checkNotNull(context);
@@ -63,7 +62,7 @@ public abstract class PlaylistManager {
      * @param listener {@link OnModifyPlaylistListener} 监听器，为 null 时相当于青春已设置的监听器
      */
     public void setOnModifyPlaylistListener(@Nullable OnModifyPlaylistListener listener) {
-        mListenerWeakReference = new WeakReference<>(listener);
+        mModifyPlaylistListener = listener;
     }
 
     /**
@@ -317,51 +316,35 @@ public abstract class PlaylistManager {
     }
 
     private void notifyPlaylistSwapped(int position, boolean playOnPrepared) {
-        if (mListenerWeakReference == null) {
+        if (mModifyPlaylistListener == null) {
             return;
         }
 
-        OnModifyPlaylistListener listener = mListenerWeakReference.get();
-
-        if (listener != null) {
-            listener.onPlaylistSwapped(position, playOnPrepared);
-        }
+        mModifyPlaylistListener.onPlaylistSwapped(position, playOnPrepared);
     }
 
     private void notifyMusicItemMoved(int fromPosition, int toPosition) {
-        if (mListenerWeakReference == null) {
+        if (mModifyPlaylistListener == null) {
             return;
         }
 
-        OnModifyPlaylistListener listener = mListenerWeakReference.get();
-
-        if (listener != null) {
-            listener.onMusicItemMoved(fromPosition, toPosition);
-        }
+        mModifyPlaylistListener.onMusicItemMoved(fromPosition, toPosition);
     }
 
     private void notifyMusicItemInserted(int position, int count) {
-        if (mListenerWeakReference == null) {
+        if (mModifyPlaylistListener == null) {
             return;
         }
 
-        OnModifyPlaylistListener listener = mListenerWeakReference.get();
-
-        if (listener != null) {
-            listener.onMusicItemInserted(position, count);
-        }
+        mModifyPlaylistListener.onMusicItemInserted(position, count);
     }
 
     private void notifyMusicItemRemoved(List<Integer> positions) {
-        if (mListenerWeakReference == null) {
+        if (mModifyPlaylistListener == null) {
             return;
         }
 
-        OnModifyPlaylistListener listener = mListenerWeakReference.get();
-
-        if (listener != null) {
-            listener.onMusicItemRemoved(positions);
-        }
+        mModifyPlaylistListener.onMusicItemRemoved(positions);
     }
 
     private void save(@NonNull Playlist playlist) {
