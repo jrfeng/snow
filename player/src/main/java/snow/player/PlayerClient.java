@@ -298,6 +298,7 @@ public class PlayerClient {
 
     public static class PlaylistController implements PlaylistPlayer {
         private PlaylistManagerImp mPlaylistManager;
+        private PlaylistManager.OnModifyPlaylistListener mModifyPlaylistListener;
         private PlaylistPlayer mDelegate;
         private PlaylistStateHolder mPlaylistStateHolder;
         private boolean mConnected;
@@ -307,7 +308,12 @@ public class PlayerClient {
             mPlaylistStateHolder = new PlaylistStateHolder(mPlaylistManager);
             mConnected = false;
 
-            mPlaylistManager.setOnModifyPlaylistListener(new PlaylistManager.OnModifyPlaylistListener() {
+            initModifyPlaylistListener();
+            mPlaylistManager.setOnModifyPlaylistListener(mModifyPlaylistListener);
+        }
+
+        private void initModifyPlaylistListener() {
+            mModifyPlaylistListener = new PlaylistManager.OnModifyPlaylistListener() {
                 @Override
                 public void onPlaylistSwapped(int position, boolean playOnPrepared) {
                     notifyPlaylistSwapped(position, playOnPrepared);
@@ -327,7 +333,7 @@ public class PlayerClient {
                 public void onMusicItemRemoved(List<Integer> positions) {
                     notifyMusicItemRemoved(positions);
                 }
-            });
+            };
         }
 
         void setDelegate(PlaylistPlayer delegate) {
