@@ -68,7 +68,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     }
 
     private int getRandomPosition(int exclude) {
-        if (mPlaylist == null || mPlaylist.size() < 2) {
+        if (mPlaylist == null || getPlaylistSize() < 2) {
             return 0;
         }
 
@@ -76,7 +76,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
             mRandom = new Random();
         }
 
-        int position = mRandom.nextInt(mPlaylist.size());
+        int position = mRandom.nextInt(getPlaylistSize());
 
         if (position != exclude) {
             return position;
@@ -134,6 +134,10 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         return mPlaylist;
     }
 
+    protected final int getPlaylistSize() {
+        return mPlaylistManager.getPlaylistSize();
+    }
+
     @Nullable
     public final Bundle getPlaylistExtra() {
         if (mPlaylist == null) {
@@ -174,7 +178,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
             return;
         }
 
-        if (mPlaylist.size() < 1) {
+        if (getPlaylistSize() < 1) {
             return;
         }
 
@@ -197,7 +201,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     protected int getNextPosition(int currentPosition) {
         int position = currentPosition + 1;
 
-        if (position >= mPlaylist.size()) {
+        if (position >= getPlaylistSize()) {
             return 0;
         }
 
@@ -216,7 +220,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
             return;
         }
 
-        if (mPlaylist.size() < 1) {
+        if (getPlaylistSize() < 1) {
             return;
         }
 
@@ -240,7 +244,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         int position = currentPosition - 1;
 
         if (position < 0) {
-            return mPlaylist.size() - 1;
+            return getPlaylistSize() - 1;
         }
 
         return position;
@@ -284,7 +288,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
             @Override
             public void run() {
                 MusicItem musicItem = null;
-                if (mPlaylist.size() > 0) {
+                if (getPlaylistSize() > 0) {
                     musicItem = mPlaylist.get(position);
                 }
 
@@ -340,7 +344,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     @Override
     public void notifyMusicItemRemoved(List<Integer> positions) {
         if (isPositionsIllegal(positions)) {
-            throw new IndexOutOfBoundsException("size: " + mPlaylist.size() + ", positions: " + toString(positions));
+            throw new IndexOutOfBoundsException("size: " + getPlaylistSize() + ", positions: " + toString(positions));
         }
 
         if (positions.contains(mPlaylistState.getPosition())) {
@@ -368,7 +372,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     }
 
     private boolean isPositionsIllegal(List<Integer> positions) {
-        return Collections.max(positions) >= mPlaylist.size();
+        return Collections.max(positions) >= getPlaylistSize();
     }
 
     private void adjustPlayingPosition(final List<Integer> positions) {
