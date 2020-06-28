@@ -914,14 +914,11 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             return;
         }
 
-        if (isPreparing()) {
-            releaseMusicPlayer();
-        }
-
         if (isPrepared()) {
             mMusicPlayer.stop();
         }
 
+        releaseMusicPlayer();
         notifyStopped();
     }
 
