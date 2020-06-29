@@ -47,7 +47,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
-import media.helper.MediaButtonHelper;
 import snow.player.media.MediaMusicPlayer;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
@@ -84,7 +83,6 @@ public class PlayerService extends Service implements PlayerManager {
     private int mPlayerType;
     private boolean mForeground;
 
-    private MediaButtonHelper mMediaButtonHelper;
     private NotificationManager mNotificationManager;
 
     private Map<String, Runnable> mStartCommandActionMap;
@@ -112,7 +110,6 @@ public class PlayerService extends Service implements PlayerManager {
         initPlaylistManager();
         initPlayer();
         initControllerPipe();
-        initMediaButtonHelper();
         initNotificationView();
     }
 
@@ -159,55 +156,6 @@ public class PlayerService extends Service implements PlayerManager {
                 }
 
                 return false;
-            }
-        });
-    }
-
-    private void initMediaButtonHelper() {
-        mMediaButtonHelper = new MediaButtonHelper(this, new MediaButtonHelper.MediaListener() {
-            @Override
-            public void onPlay() {
-                play();
-            }
-
-            @Override
-            public void onPause() {
-                pause();
-            }
-
-            @Override
-            public void onPlayPause() {
-                playOrPause();
-            }
-
-            @Override
-            public void onStop() {
-                stop();
-            }
-
-            @Override
-            public void onNext() {
-                skipToNext();
-            }
-
-            @Override
-            public void onPrevious() {
-                skipToPrevious();
-            }
-
-            @Override
-            public void onHeadsetHookClicked(int clickCount) {
-                switch (clickCount) {
-                    case 1:
-                        onPlayPause();
-                        break;
-                    case 2:
-                        onNext();
-                        break;
-                    case 3:
-                        onPrevious();
-                        break;
-                }
             }
         });
     }
@@ -768,13 +716,9 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     protected void onRequestAudioFocus(boolean success) {
-        if (success) {
-            mMediaButtonHelper.registerMediaButtonReceiver();
-        }
     }
 
     protected void onLossAudioFocus() {
-        mMediaButtonHelper.unregisterMediaButtonReceiver();
     }
 
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
