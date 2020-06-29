@@ -442,12 +442,36 @@ public class PlayerService extends Service implements PlayerManager {
         return getPlayerState().getPlaybackState() == Player.PlaybackState.PLAYING;
     }
 
-    protected PlayerState getPlayerState() {
+    /**
+     * 获取播放器状态。
+     * <p>
+     * 当播放器类型为 {@link #TYPE_PLAYLIST} 时，返回是实际上是 {@link PlaylistState}；当播放器类型为
+     * {@link #TYPE_RADIO_STATION} 时，返回是实际上是 {@link RadioStationState}。
+     *
+     * @see #getPlayerType()
+     * @see #getPlaylistState()
+     * @see #getRadioStationState()
+     */
+    protected final PlayerState getPlayerState() {
         if (mPlayerType == TYPE_RADIO_STATION) {
             return mRadioStationState;
         }
 
         return mPlaylistState;
+    }
+
+    /**
+     * 获取列表播放器的状态。
+     */
+    protected final PlaylistState getPlaylistState() {
+        return mPlaylistState;
+    }
+
+    /**
+     * 获取电台播放的状态。
+     */
+    protected final RadioStationState getRadioStationState() {
+        return mRadioStationState;
     }
 
     public final boolean isPreparing() {
