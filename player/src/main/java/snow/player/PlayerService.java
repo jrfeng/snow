@@ -783,10 +783,6 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
-        if (noNotificationView()) {
-            return;
-        }
-
         updateNotificationView();
     }
 
