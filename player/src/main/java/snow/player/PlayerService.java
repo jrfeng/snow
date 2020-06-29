@@ -672,6 +672,9 @@ public class PlayerService extends Service implements PlayerManager {
     /**
      * 获取 “电台” 的下一首音乐。
      * <p>
+     * “电台” 播放器专用。如果你需要实现 “电台” 功能，那么需要覆盖该方法，并返回 {@code radioStation} 参数
+     * 表示的 “电台” 的下一首歌曲。
+     * <p>
      * 该方法会在异步线程中调用。
      *
      * @param radioStation 用于表示电台的 RadioStation 对象
