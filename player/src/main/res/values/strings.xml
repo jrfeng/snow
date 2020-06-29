@@ -10,6 +10,8 @@
 
     <string name="snow_text_unknown">Unknown</string>
     <string name="snow_radio">Radio</string>
+    <string name="snow_preparing">preparing…</string>
+    <string name="snow_buffering">buffering…</string>
 
     <string name="snow_des_music_icon">music icon</string>
     <string name="snow_des_skip_to_previous">skip to previous</string>

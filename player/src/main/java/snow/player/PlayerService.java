@@ -111,6 +111,8 @@ public class PlayerService extends Service implements PlayerManager {
         initPlayer();
         initControllerPipe();
         initNotificationView();
+
+        invalidateNotificationView();
     }
 
     private void initPlayerState() {
@@ -430,6 +432,34 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     /**
+     * 当前是否处于 {@link snow.player.Player.PlaybackState#PLAYING} 状态。
+     * <p>
+     * 该方法与 {@link #isPlaying()} 方法的区别是，{@link #isPlaying()} 方法判断是当前播放器是否正在
+     * 播放音乐，而当前方法判断是当前是否处于 {@link snow.player.Player.PlaybackState#PLAYING} 状态。在
+     * 切换歌曲时，当前会处于 {@link snow.player.Player.PlaybackState#PLAYING} 状态，但此时播放器却没有正
+     * 在播放，因为旧的播放器被释放掉了，而新的播放器还没有准备好播放。
+     */
+    private boolean isPlayingState() {
+        return getPlayerState().getPlaybackState() == Player.PlaybackState.PLAYING;
+    }
+
+    protected PlayerState getPlayerState() {
+        if (mPlayerType == TYPE_RADIO_STATION) {
+            return mRadioStationState;
+        }
+
+        return mPlaylistState;
+    }
+
+    public final boolean isPreparing() {
+        return getPlayerState().getPlaybackState() == Player.PlaybackState.PREPARING;
+    }
+
+    public final boolean isStalled() {
+        return getPlayerState().isStalled();
+    }
+
+    /**
      * 获取当前正在播放的音乐的 MusicItem 对象。
      */
     protected final MusicItem getPlayingMusicItem() {
@@ -491,16 +521,20 @@ public class PlayerService extends Service implements PlayerManager {
 
         mNotificationView.setPlayingMusicItem(musicItem);
 
-        if (isPlaying() && !isForeground()) {
+        if (isPreparingOrPlayingState() && !isForeground()) {
             startForeground();
             return;
         }
 
-        if (!isPlaying() && isForeground()) {
+        if (!isPreparingOrPlayingState() && isForeground()) {
             stopForegroundEx(false);
         }
 
         updateNotification();
+    }
+
+    private boolean isPreparingOrPlayingState() {
+        return isPreparing() | isPlayingState();
     }
 
     /**
@@ -687,32 +721,57 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     protected void onPreparing() {
+        if (noNotificationView()) {
+            return;
+        }
+
+        invalidateNotificationView();
     }
 
     protected void onPrepared(int audioSessionId) {
     }
 
     protected void onPlaying(long progress, long updateTime) {
+        if (noNotificationView()) {
+            return;
+        }
+
         invalidateNotificationView();
     }
 
     protected void onPaused() {
+        if (noNotificationView()) {
+            return;
+        }
+
         invalidateNotificationView();
     }
 
     protected void onStalledChanged(boolean stalled) {
+        if (noNotificationView()) {
+            return;
+        }
+
+        invalidateNotificationView();
     }
 
     protected void onStopped() {
+        if (noNotificationView()) {
+            return;
+        }
+
         invalidateNotificationView();
     }
 
     protected void onError(int errorCode, String errorMessage) {
+        if (noNotificationView()) {
+            return;
+        }
+
         invalidateNotificationView();
     }
 
     protected void onPlayComplete(MusicItem musicItem) {
-        invalidateNotificationView();
     }
 
     protected void onRequestAudioFocus(boolean success) {
@@ -722,6 +781,10 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
+        if (noNotificationView()) {
+            return;
+        }
+
         invalidateNotificationView();
     }
 
@@ -1067,8 +1130,16 @@ public class PlayerService extends Service implements PlayerManager {
         /**
          * 当前是否正在播放音乐。
          */
-        public final boolean isPlaying() {
-            return mPlayerService.isPlaying();
+        public final boolean isPreparingOrPlayingState() {
+            return mPlayerService.isPreparingOrPlayingState();
+        }
+
+        public final boolean isPreparing() {
+            return mPlayerService.isPreparing();
+        }
+
+        public final boolean isStalled() {
+            return mPlayerService.isStalled();
         }
 
         /**
@@ -1342,8 +1413,16 @@ public class PlayerService extends Service implements PlayerManager {
             contentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_next, getSkipToNextPendingIntent());
             contentView.setOnClickPendingIntent(R.id.snow_notif_shutdown, getCancelPendingIntent());
 
-            if (isPlaying()) {
+            if (isPreparingOrPlayingState()) {
                 contentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
+            }
+
+            if (isPreparing()) {
+                contentView.setTextViewText(R.id.snow_notif_text, getContext().getString(R.string.snow_preparing));
+            }
+
+            if (isStalled()) {
+                contentView.setTextViewText(R.id.snow_notif_text, getContext().getString(R.string.snow_buffering));
             }
 
             if (playerType == TYPE_RADIO_STATION) {
@@ -1365,8 +1444,16 @@ public class PlayerService extends Service implements PlayerManager {
             bigContentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_next, getSkipToNextPendingIntent());
             bigContentView.setOnClickPendingIntent(R.id.snow_notif_shutdown, getCancelPendingIntent());
 
-            if (isPlaying()) {
+            if (isPreparingOrPlayingState()) {
                 bigContentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
+            }
+
+            if (isPreparing()) {
+                bigContentView.setTextViewText(R.id.snow_notif_text, getContext().getString(R.string.snow_preparing));
+            }
+
+            if (isStalled()) {
+                bigContentView.setTextViewText(R.id.snow_notif_text, getContext().getString(R.string.snow_buffering));
             }
 
             if (playerType == TYPE_RADIO_STATION) {
