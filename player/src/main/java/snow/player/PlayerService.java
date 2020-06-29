@@ -10,7 +10,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -112,7 +111,7 @@ public class PlayerService extends Service implements PlayerManager {
         initControllerPipe();
         initNotificationView();
 
-        invalidateNotificationView();
+        updateNotificationView();
     }
 
     private void initPlayerState() {
@@ -508,7 +507,7 @@ public class PlayerService extends Service implements PlayerManager {
     /**
      * 要求 Service 更新 NotificationView，如果没有设置 NotificationView，则忽略本次操作。
      */
-    protected final void invalidateNotificationView() {
+    protected final void updateNotificationView() {
         if (noNotificationView()) {
             return;
         }
@@ -721,54 +720,30 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     protected void onPreparing() {
-        if (noNotificationView()) {
-            return;
-        }
-
-        invalidateNotificationView();
+        updateNotificationView();
     }
 
     protected void onPrepared(int audioSessionId) {
     }
 
     protected void onPlaying(long progress, long updateTime) {
-        if (noNotificationView()) {
-            return;
-        }
-
-        invalidateNotificationView();
+        updateNotificationView();
     }
 
     protected void onPaused() {
-        if (noNotificationView()) {
-            return;
-        }
-
-        invalidateNotificationView();
+        updateNotificationView();
     }
 
     protected void onStalledChanged(boolean stalled) {
-        if (noNotificationView()) {
-            return;
-        }
-
-        invalidateNotificationView();
+        updateNotificationView();
     }
 
     protected void onStopped() {
-        if (noNotificationView()) {
-            return;
-        }
-
-        invalidateNotificationView();
+        updateNotificationView();
     }
 
     protected void onError(int errorCode, String errorMessage) {
-        if (noNotificationView()) {
-            return;
-        }
-
-        invalidateNotificationView();
+        updateNotificationView();
     }
 
     protected void onPlayComplete(MusicItem musicItem) {
@@ -785,7 +760,7 @@ public class PlayerService extends Service implements PlayerManager {
             return;
         }
 
-        invalidateNotificationView();
+        updateNotificationView();
     }
 
     private class PlaylistPlayerImp extends AbstractPlaylistPlayer {
@@ -1171,7 +1146,7 @@ public class PlayerService extends Service implements PlayerManager {
          * 要求 Service 更新 NotificationView，如果没有设置 NotificationView，则忽略本次操作。
          */
         public final void invalidate() {
-            mPlayerService.invalidateNotificationView();
+            mPlayerService.updateNotificationView();
         }
 
         /**
