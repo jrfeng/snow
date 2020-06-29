@@ -1272,14 +1272,36 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         protected CharSequence getContentText() {
+            String text = getPlayingMusicItem().getArtist();
+            int textColor = 0;
+
+            Resources res = getContext().getResources();
+
             if (isError()) {
-                String errorMessage = getErrorMessage();
-                SpannableString text = new SpannableString(errorMessage);
-                text.setSpan(new ForegroundColorSpan(Color.RED), 0, errorMessage.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-                return text;
+                text = getErrorMessage();
+                textColor = res.getColor(android.R.color.holo_red_dark);
             }
 
-            return getPlayingMusicItem().getArtist();
+            if (isPreparing()) {
+                text = getContext().getString(R.string.snow_preparing);
+                textColor = res.getColor(android.R.color.holo_green_dark);
+            }
+
+            if (isStalled()) {
+                text = res.getString(R.string.snow_buffering);
+                textColor = res.getColor(android.R.color.holo_orange_dark);
+            }
+
+            CharSequence contentText = text;
+
+            if (textColor != 0) {
+                SpannableString colorText = new SpannableString(text);
+                colorText.setSpan(new ForegroundColorSpan(textColor), 0, text.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+
+                contentText = colorText;
+            }
+
+            return contentText;
         }
 
         protected void reloadAllIcon() {
@@ -1417,14 +1439,6 @@ public class PlayerService extends Service implements PlayerManager {
                 contentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
             }
 
-            if (isPreparing()) {
-                contentView.setTextViewText(R.id.snow_notif_text, getContext().getString(R.string.snow_preparing));
-            }
-
-            if (isStalled()) {
-                contentView.setTextViewText(R.id.snow_notif_text, getContext().getString(R.string.snow_buffering));
-            }
-
             if (playerType == TYPE_RADIO_STATION) {
                 contentView.setViewVisibility(R.id.snow_notif_radio_tip, View.VISIBLE);
             }
@@ -1446,14 +1460,6 @@ public class PlayerService extends Service implements PlayerManager {
 
             if (isPreparingOrPlayingState()) {
                 bigContentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
-            }
-
-            if (isPreparing()) {
-                bigContentView.setTextViewText(R.id.snow_notif_text, getContext().getString(R.string.snow_preparing));
-            }
-
-            if (isStalled()) {
-                bigContentView.setTextViewText(R.id.snow_notif_text, getContext().getString(R.string.snow_buffering));
             }
 
             if (playerType == TYPE_RADIO_STATION) {
