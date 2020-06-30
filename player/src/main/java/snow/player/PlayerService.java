@@ -19,6 +19,7 @@ import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -1192,9 +1193,13 @@ public class PlayerService extends Service implements PlayerManager {
         private CustomTarget<Bitmap> mTarget;
         private int mIconCornerRadius;
 
+        private int mDefaultIconId;
+
         @Override
         protected void onInit(Context context) {
             super.onInit(context);
+            mDefaultIconId = R.mipmap.snow_notif_default_icon;
+
             Resources res = context.getResources();
 
             mIconCornerRadius = res.getDimensionPixelSize(R.dimen.snow_notif_icon_corner_radius);
@@ -1242,6 +1247,15 @@ public class PlayerService extends Service implements PlayerManager {
         public final void setIcon(@NonNull Bitmap icon) {
             mIcon = icon;
             invalidate();
+        }
+
+        public final void setDefaultIconId(@DrawableRes int resId) {
+            mDefaultIconId = resId;
+        }
+
+        @DrawableRes
+        public final int getDefaultIconId() {
+            return mDefaultIconId;
         }
 
         protected CharSequence getContentTitle() {
@@ -1314,7 +1328,7 @@ public class PlayerService extends Service implements PlayerManager {
         private RequestBuilder<Bitmap> loadDefaultIcon() {
             return Glide.with(getContext())
                     .asBitmap()
-                    .load(R.mipmap.snow_notif_default_icon)
+                    .load(getDefaultIconId())
                     .transform(new RoundedCorners(mIconCornerRadius));
         }
 
