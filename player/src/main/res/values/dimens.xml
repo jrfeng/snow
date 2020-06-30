@@ -5,9 +5,9 @@
     <dimen name="snow_notif_icon_size_big_half">48dp</dimen>
     <dimen name="snow_notif_icon_corner_radius">8dp</dimen>
 
-    <dimen name="snow_notif_radio_tip_text_size">8dp</dimen>
-    <dimen name="snow_notif_radio_tip_height">12dp</dimen>
-    <dimen name="snow_notif_radio_tip_corner_radius">6dp</dimen>
+    <dimen name="snow_notif_radio_tip_text_size">10dp</dimen>
+    <dimen name="snow_notif_radio_tip_height">14dp</dimen>
+    <dimen name="snow_notif_radio_tip_corner_radius">7dp</dimen>
     <dimen name="snow_notif_button_size">24dp</dimen>
     <dimen name="snow_notif_button_size_32dp">32dp</dimen>
     <dimen name="snow_notif_button_size_40dp">40dp</dimen>
