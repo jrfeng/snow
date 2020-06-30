@@ -1304,19 +1304,11 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         private RequestBuilder<Bitmap> loadEmbeddedIcon() {
-            if (notLocaleMusic()) {
-                return loadDefaultIcon();
-            }
-
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-            retriever.setDataSource(getPlayingMusicItem().getUri());
-            byte[] data = retriever.getEmbeddedPicture();
-            retriever.release();
-
             return Glide.with(getContext())
                     .asBitmap()
-                    .load(data)
-                    .error(loadDefaultIcon());
+                    .load(getEmbeddedIcon())
+                    .error(loadDefaultIcon())
+                    .transform(new RoundedCorners(mIconCornerRadius));
         }
 
         private RequestBuilder<Bitmap> loadDefaultIcon() {
@@ -1324,6 +1316,24 @@ public class PlayerService extends Service implements PlayerManager {
                     .asBitmap()
                     .load(R.mipmap.snow_notif_default_icon)
                     .transform(new RoundedCorners(mIconCornerRadius));
+        }
+
+        private byte[] getEmbeddedIcon() {
+            if (notLocaleMusic()) {
+                return null;
+            }
+
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+
+            try {
+                retriever.setDataSource(getPlayingMusicItem().getUri());
+                return retriever.getEmbeddedPicture();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                return null;
+            } finally {
+                retriever.release();
+            }
         }
 
         protected RemoteViews onCreateContentView(int playerType) {
