@@ -1186,12 +1186,14 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     /**
-     * 默认的 NotificationView 实现。
+     * 该类提供了 NotificationView 的默认实现。
      */
     public static class SimpleNotificationView extends NotificationView {
         private static final String CUSTOM_ACTION_1 = "snow.player.custom_action_1";
         private static final String CUSTOM_ACTION_2 = "snow.player.custom_action_2";
         private static final String COMPAT_CUSTOM_ACTION = "snow.player.compat_custom_action";
+
+        private PendingIntent mContentIntent;
 
         private Bitmap mIcon;
         private CustomTarget<Bitmap> mTarget;
@@ -1244,46 +1246,125 @@ public class PlayerService extends Service implements PlayerManager {
             Glide.with(getContext()).clear(mTarget);
         }
 
-        protected PendingIntent getContentIntent() {
-            return null;
+        /**
+         * 获取 NotificationView 的 content intent。
+         *
+         * @return 当前 NotificationView 的 content intent，默认为 null
+         */
+        protected final PendingIntent getContentIntent() {
+            return mContentIntent;
         }
 
-        public final Bitmap getIcon() {
+        /**
+         * 设置当前 NotificationView 的 content intent，该 PendingIntent 对象会在通知栏控制器被点击时触发。
+         * <p>
+         * 对该方法的调用会在下次更新通知栏控制器时生效。
+         *
+         * @param pendingIntent 要设置的 content intent，可为 null
+         */
+        protected final void setContentIntent(PendingIntent pendingIntent) {
+            mContentIntent = pendingIntent;
+        }
+
+        /**
+         * 获取当前通知栏控制器的图标。
+         */
+        protected final Bitmap getIcon() {
             return mIcon;
         }
 
-        public final void setIcon(@NonNull Bitmap icon) {
+        /**
+         * 设置当前通知栏控制器的图标。
+         * <p>
+         * 调用该方法后会自动更新通知栏控制器，以应用最新设置的图标。
+         */
+        protected final void setIcon(@NonNull Bitmap icon) {
             mIcon = icon;
             invalidate();
         }
 
-        public final void setDefaultIconId(@DrawableRes int resId) {
+        /**
+         * 设置默认的通知栏图标资源。
+         * <p>
+         * 如果你需要修改默认的通知栏图标，建议在 {@link #onInit(Context)} 调用该方法进行设置。
+         */
+        protected final void setDefaultIconId(@DrawableRes int resId) {
             mDefaultIconId = resId;
         }
 
+        /**
+         * 获取默认的通知栏图标资源。
+         */
         @DrawableRes
-        public final int getDefaultIconId() {
+        protected final int getDefaultIconId() {
             return mDefaultIconId;
         }
 
+        /**
+         * 设置第 1 号自定义动作。
+         *
+         * @param customAction 第 1 号自定义动作，可为 null。为 null 时相当于清除已设置的自定义动作。
+         */
         public final void setCustomAction1(CustomAction customAction) {
             mCustomAction1 = customAction;
         }
 
+        /**
+         * 获取第 1 号自定义动作。
+         */
+        public final CustomAction getCustomAction1() {
+            return mCustomAction1;
+        }
+
+        /**
+         * 设置第 2 号自定义动作。
+         *
+         * @param customAction 第 2 号自定义动作，可为 null。为 null 时相当于清除已设置的自定义动作。
+         */
         public final void setCustomAction2(CustomAction customAction) {
             mCustomAction2 = customAction;
         }
 
+        /**
+         * 获取第 2 号自定义动作。
+         */
+        public final CustomAction getCustomAction2() {
+            return mCustomAction2;
+        }
+
+        /**
+         * 设置 compat 自定义动作。
+         * <p>
+         * 该自定义动作主要用于兼容低版本的通知栏控制器。默认情况下，使用的是第 2 号自定义动作，如果没有设置
+         * 第 2 号自定义动作，则使用第 1 号自定义动作。
+         * <p>
+         * 通过不需要调用该方法，除非你需要修改上述默认的行为。
+         *
+         * @param compatCustomAction 通常将其指定为第 1 号或第 2 号自定义动作。
+         */
         public final void setCompatCustomAction(CustomAction compatCustomAction) {
             mCompatCustomAction = compatCustomAction;
         }
 
-        protected CharSequence getContentTitle() {
+        /**
+         * 获取通知栏控制器的 content title
+         */
+        protected final CharSequence getContentTitle() {
             return getPlayingMusicItem().getTitle();
         }
 
-        protected CharSequence getContentText() {
-            String text = getPlayingMusicItem().getArtist();
+        /**
+         * 获取通知栏控制器用于显示的 content text，该方法会根据播放器状态的不同而返回不同的值。
+         * <p>
+         * 例如，在 {@link snow.player.Player.PlaybackState#ERROR} 状态时，会返回一个
+         * {@code android.R.color.holo_red_dark} 颜色的描述错误信息的 CharSequence 对象；而在
+         * {@link snow.player.Player.PlaybackState#PREPARING} 状态时，会返回一个
+         * {@code android.R.color.holo_green_dark} 颜色的值为 “准备中…” 的 CharSequence 对象；而在
+         * {@link #isStalled()} 返回 true 时，会返回一个 {@code android.R.color.holo_orange_dark} 颜色
+         * 的值为 “缓冲中…” 的 CharSequence 对象。其它状态下会将 {@code defaultValue} 原值返回。
+         */
+        protected final CharSequence getContentText(String defaultValue) {
+            String text = defaultValue;
             int textColor = 0;
 
             Resources res = getContext().getResources();
@@ -1315,6 +1396,11 @@ public class PlayerService extends Service implements PlayerManager {
             return contentText;
         }
 
+        /**
+         * 加载图标。
+         * <p>
+         * 你可以覆盖该方法来实现你自己的图标加载逻辑。
+         */
         @Override
         protected void reloadIcon() {
             super.reloadIcon();
@@ -1370,13 +1456,21 @@ public class PlayerService extends Service implements PlayerManager {
             }
         }
 
+        /**
+         * 根据 {@code playerType} 参数创建对应的 content view 对象。
+         * <p>
+         * 你可以覆盖该方法来自定义通知栏控制器的外观（折叠后）。注意！覆盖该方法时，请同时覆盖
+         * {@link #onCreateBigContentView(int)} 方法。
+         *
+         * @see #onCreateBigContentView(int)
+         */
         protected RemoteViews onCreateContentView(int playerType) {
             RemoteViews contentView = new RemoteViews(getPackageName(),
                     R.layout.snow_simple_notification_view);
 
             contentView.setImageViewBitmap(R.id.snow_notif_icon, getIcon());
             contentView.setTextViewText(R.id.snow_notif_title, getContentTitle());
-            contentView.setTextViewText(R.id.snow_notif_text, getContentText());
+            contentView.setTextViewText(R.id.snow_notif_text, getContentText(getPlayingMusicItem().getArtist()));
 
             contentView.setOnClickPendingIntent(R.id.snow_notif_play_pause, getPlayOrPausePendingIntent());
             contentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_next, getSkipToNextPendingIntent());
@@ -1401,13 +1495,21 @@ public class PlayerService extends Service implements PlayerManager {
             return contentView;
         }
 
+        /**
+         * 根据 {@code playerType} 参数创建对应的 big content view 对象。
+         * <p>
+         * 你可以覆盖该方法来自定义通知栏控制器的外观（大）。注意！覆盖该方法时，请同时覆盖
+         * {@link #onCreateContentView(int)} 方法。
+         *
+         * @see #onCreateContentView(int)
+         */
         protected RemoteViews onCreateBigContentView(int playerType) {
             RemoteViews bigContentView = new RemoteViews(getPackageName(),
                     R.layout.snow_simple_notification_view_big);
 
             bigContentView.setImageViewBitmap(R.id.snow_notif_icon, getIcon());
             bigContentView.setTextViewText(R.id.snow_notif_title, getContentTitle());
-            bigContentView.setTextViewText(R.id.snow_notif_text, getContentText());
+            bigContentView.setTextViewText(R.id.snow_notif_text, getContentText(getPlayingMusicItem().getArtist()));
 
             bigContentView.setOnClickPendingIntent(R.id.snow_notif_play_pause, getPlayOrPausePendingIntent());
             bigContentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_next, getSkipToNextPendingIntent());
@@ -1464,46 +1566,88 @@ public class PlayerService extends Service implements PlayerManager {
             return addCustomAction(customActionName, customAction.getAction());
         }
 
+        /**
+         * 用于创建一个可添加到 {@link SimpleNotificationView} 中的自定义动作。
+         */
         public static class CustomAction {
             private int mIconId;
             private boolean mDisabledInRadioStationType;
             private int mDisabledIconId;
             private Runnable mAction;
 
+            /**
+             * 创建一个自定义动作，该自定义动作没有要执行的操作。
+             *
+             * @param iconId 自定义动作的图标。
+             */
             public CustomAction(@DrawableRes int iconId) {
                 this(iconId, null);
             }
 
+            /**
+             * 创建一个自定义动作。
+             *
+             * @param iconId 自定义动作的图标的资源 ID。
+             * @param action 自定义动作要执行的操作。
+             */
             public CustomAction(@DrawableRes int iconId, Runnable action) {
                 mIconId = iconId;
                 mAction = action;
             }
 
-            public void setIconId(int drawableId) {
-                mIconId = drawableId;
+            /**
+             * 设置自定义动作的图标的资源 ID。
+             * <p>
+             * 对该方法的调用会在下次更新通知栏控制器时生效。
+             *
+             * @param iconId 自定义动作的新图标的资源 ID
+             */
+            public void setIconId(int iconId) {
+                mIconId = iconId;
             }
 
             public int getIconId() {
                 return mIconId;
             }
 
+            /**
+             * 设置在 “电台” 模式下 disable 当前自定义动作。
+             *
+             * @param disabledDrawableId 当前自定义动作在 disable 状态下的图标的资源 ID
+             */
             public void setDisabledInRadioStationType(int disabledDrawableId) {
                 mDisabledInRadioStationType = true;
                 mDisabledIconId = disabledDrawableId;
             }
 
+            /**
+             * 判断是否在 “电台” 模式下 disable 当前自定义动作。
+             *
+             * @return 默认返回 false
+             */
             public boolean isDisabledInRadioStationType() {
                 return mDisabledInRadioStationType;
             }
 
+            /**
+             * 获取当前自定义动作在 disable 状态下的图标的资源 ID。
+             */
             public int getDisabledIconId() {
                 return mDisabledIconId;
             }
 
+            /**
+             * 设置当前自定义动作要执行的操作。
+             * <p>
+             * 对该方法的调用会在下次更新通知栏控制器时生效。
+             */
             public void setAction(Runnable action) {
                 mAction = action;
             }
 
+            /**
+             * 获取当前自定义动作要执行的操作。
+             */
             public Runnable getAction() {
                 return mAction;
             }
