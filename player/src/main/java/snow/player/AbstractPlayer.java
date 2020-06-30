@@ -938,7 +938,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     @Override
     public void playOrPause() {
-        if (isPlaying() | isPreparing() | isStalled()) {
+        if (isPlaying() | isPreparing()) {
             pause();
         } else {
             play();
