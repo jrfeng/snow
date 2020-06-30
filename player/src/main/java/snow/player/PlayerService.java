@@ -461,7 +461,7 @@ public class PlayerService extends Service implements PlayerManager {
         return mRadioStationState;
     }
 
-    public final boolean isPreparing() {
+    public final boolean isPreparingState() {
         return getPlayerState().getPlaybackState() == Player.PlaybackState.PREPARING;
     }
 
@@ -544,7 +544,7 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     private boolean isPreparingOrPlayingState() {
-        return isPreparing() | isPlayingState();
+        return isPreparingState() | isPlayingState();
     }
 
     /**
@@ -1122,8 +1122,8 @@ public class PlayerService extends Service implements PlayerManager {
             return mPlayerService.isPreparingOrPlayingState();
         }
 
-        public final boolean isPreparing() {
-            return mPlayerService.isPreparing();
+        public final boolean isPreparingState() {
+            return mPlayerService.isPreparingState();
         }
 
         public final boolean isStalled() {
@@ -1374,7 +1374,7 @@ public class PlayerService extends Service implements PlayerManager {
                 textColor = res.getColor(android.R.color.holo_red_dark);
             }
 
-            if (isPreparing()) {
+            if (isPreparingState()) {
                 text = getContext().getString(R.string.snow_preparing);
                 textColor = res.getColor(android.R.color.holo_green_dark);
             }
