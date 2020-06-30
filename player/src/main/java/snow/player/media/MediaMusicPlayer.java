@@ -105,6 +105,11 @@ public class MediaMusicPlayer implements MusicPlayer {
 
     @Override
     public void setOnPreparedListener(final OnPreparedListener listener) {
+        if (listener == null) {
+            mMediaPlayer.setOnPreparedListener(null);
+            return;
+        }
+
         mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
@@ -115,6 +120,11 @@ public class MediaMusicPlayer implements MusicPlayer {
 
     @Override
     public void setOnCompletionListener(final OnCompletionListener listener) {
+        if (listener == null) {
+            mMediaPlayer.setOnCompletionListener(null);
+            return;
+        }
+
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -125,6 +135,11 @@ public class MediaMusicPlayer implements MusicPlayer {
 
     @Override
     public void setOnSeekCompleteListener(final OnSeekCompleteListener listener) {
+        if (listener == null) {
+            mMediaPlayer.setOnSeekCompleteListener(null);
+            return;
+        }
+
         mMediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
             @Override
             public void onSeekComplete(MediaPlayer mp) {
@@ -164,6 +179,11 @@ public class MediaMusicPlayer implements MusicPlayer {
 
     @Override
     public void setOnBufferingUpdateListener(final OnBufferingUpdateListener listener) {
+        if (listener == null) {
+            mMediaPlayer.setOnBufferingUpdateListener(null);
+            return;
+        }
+
         mMediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
             @Override
             public void onBufferingUpdate(MediaPlayer mp, int percent) {
@@ -174,6 +194,11 @@ public class MediaMusicPlayer implements MusicPlayer {
 
     @Override
     public void setOnErrorListener(final OnErrorListener listener) {
+        if (listener == null) {
+            mMediaPlayer.setOnErrorListener(null);
+            return;
+        }
+
         mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
