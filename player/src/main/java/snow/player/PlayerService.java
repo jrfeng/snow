@@ -178,12 +178,6 @@ public class PlayerService extends Service implements PlayerManager {
                     public void run() {
                         skipToNext();
                     }
-                }),
-                addOnStartCommandAction("snow.player.action.cancel", new Runnable() {
-                    @Override
-                    public void run() {
-                        shutdown();
-                    }
                 }));
 
         MusicItem musicItem = getPlayingMusicItem();
@@ -996,13 +990,11 @@ public class PlayerService extends Service implements PlayerManager {
         private PendingIntent mSkipToPrevious;
         private PendingIntent mPlayOrPause;
         private PendingIntent mSkipToNext;
-        private PendingIntent mCancel;
 
         void init(PlayerService playerService,
                   PendingIntent skipPrevious,
                   PendingIntent playOrPause,
-                  PendingIntent skipNext,
-                  PendingIntent cancel) {
+                  PendingIntent skipNext) {
             mMusicItem = new MusicItem();
             mNeedReloadIcon = true;
 
@@ -1010,7 +1002,6 @@ public class PlayerService extends Service implements PlayerManager {
             mSkipToPrevious = skipPrevious;
             mPlayOrPause = playOrPause;
             mSkipToNext = skipNext;
-            mCancel = cancel;
 
             onInit(mPlayerService);
         }
@@ -1121,13 +1112,6 @@ public class PlayerService extends Service implements PlayerManager {
          */
         protected final PendingIntent getSkipToNextPendingIntent() {
             return mSkipToNext;
-        }
-
-        /**
-         * 获取用来触发 “shutdown” 的 PendingIntent 对象。
-         */
-        protected final PendingIntent getCancelPendingIntent() {
-            return mCancel;
         }
 
         /**
@@ -1352,7 +1336,6 @@ public class PlayerService extends Service implements PlayerManager {
 
             contentView.setOnClickPendingIntent(R.id.snow_notif_play_pause, getPlayOrPausePendingIntent());
             contentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_next, getSkipToNextPendingIntent());
-            contentView.setOnClickPendingIntent(R.id.snow_notif_shutdown, getCancelPendingIntent());
 
             if (isPreparingOrPlayingState()) {
                 contentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
@@ -1375,7 +1358,6 @@ public class PlayerService extends Service implements PlayerManager {
 
             bigContentView.setOnClickPendingIntent(R.id.snow_notif_play_pause, getPlayOrPausePendingIntent());
             bigContentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_next, getSkipToNextPendingIntent());
-            bigContentView.setOnClickPendingIntent(R.id.snow_notif_shutdown, getCancelPendingIntent());
 
             if (isPreparingOrPlayingState()) {
                 bigContentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
