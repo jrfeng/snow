@@ -563,9 +563,6 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      * 释放当前播放器所持有的 {@link MusicPlayer} 对象。
      */
     protected final void releaseMusicPlayer() {
-        // DEBUG
-        Log.d("App", "releaseMusicPLayer");
-
         if (mMusicPlayer != null) {
             mMusicPlayer.release();
             mMusicPlayer = null;
@@ -764,7 +761,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
     }
 
-    private void notifyStopped() {
+    protected final void notifyStopped() {
         mPlayerState.setPlaybackState(PlaybackState.STOPPED);
         updatePlayProgress(0, System.currentTimeMillis());
 
@@ -830,24 +827,19 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     /**
      * 通知当前正在播放的音乐以改变。
      *
-     * @param musicItem         本次要播放的音乐
-     * @param playingOnPrepared 是否在播放器准备完毕后开始播放
+     * @param musicItem 本次要播放的音乐
+     * @param play      是否播放歌曲
      */
-    protected final void notifyPlayingMusicItemChanged(@Nullable MusicItem musicItem, final boolean playingOnPrepared) {
+    protected final void notifyPlayingMusicItemChanged(@Nullable MusicItem musicItem, boolean play) {
         releaseMusicPlayer();
         updatePlayProgress(0, System.currentTimeMillis());
 
         mPlayerState.setMusicItem(musicItem);
         onPlayingMusicItemChanged(musicItem);
 
-        prepareMusicPlayer(new Runnable() {
-            @Override
-            public void run() {
-                if (playingOnPrepared) {
-                    play();
-                }
-            }
-        });
+        if (play) {
+            play();
+        }
 
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
