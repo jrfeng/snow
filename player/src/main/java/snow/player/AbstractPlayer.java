@@ -588,6 +588,13 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     }
 
     /**
+     * 缓存是否没有足够的数据继续播放。
+     */
+    protected final boolean isStalled() {
+        return mPlayerState.isStalled();
+    }
+
+    /**
      * 播放器释放已经准备完毕。
      *
      * @return 当播放器已经准备完毕时返回 true，否则返回 false。
@@ -617,6 +624,13 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      */
     protected final boolean isStopped() {
         return mPlayerState.getPlaybackState() == PlaybackState.STOPPED;
+    }
+
+    /**
+     * 是否发生了错误。
+     */
+    protected final boolean isError() {
+        return mPlayerState.getPlaybackState() == PlaybackState.ERROR;
     }
 
     /**
@@ -887,7 +901,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     @Override
     public void pause() {
-        if (isPaused()) {
+        if (isPaused() | isStopped() | isError()) {
             return;
         }
 
@@ -924,7 +938,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     @Override
     public void playOrPause() {
-        if (isPlaying()) {
+        if (isPlaying() | isPreparing() | isStalled()) {
             pause();
         } else {
             play();
