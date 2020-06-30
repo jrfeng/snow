@@ -283,6 +283,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
 
     @Override
     public void notifyPlaylistSwapped(final int position, final boolean playOnPrepared) {
+        notifyStopped();
         notifyPlaylistChanged(position);
         mPlaylistLoadedAction = new Runnable() {
             @Override
