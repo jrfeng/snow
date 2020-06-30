@@ -1393,6 +1393,9 @@ public class PlayerService extends Service implements PlayerManager {
             if (customAction == null) {
                 customAction = mCustomAction2;
             }
+            if (customAction == null) {
+                customAction = mCustomAction1;
+            }
             initCustomAction(COMPAT_CUSTOM_ACTION, customAction, contentView, playerType, R.id.snow_notif_compat_custom_action);
 
             return contentView;
