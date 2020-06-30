@@ -8,9 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,26 +24,20 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import channel.helper.ChannelHelper;
 import channel.helper.Dispatcher;
 import channel.helper.pipe.MessengerPipe;
-import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
-import io.reactivex.SingleOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
 import snow.player.media.MediaMusicPlayer;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
@@ -783,6 +775,11 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
+        if (noNotificationView()) {
+            return;
+        }
+
+        mNotificationView.setNeedReloadIcon(true);
         updateNotificationView();
     }
 
@@ -993,7 +990,8 @@ public class PlayerService extends Service implements PlayerManager {
         private PlayerService mPlayerService;
 
         private MusicItem mMusicItem;
-        private boolean mMusicItemChanged;
+
+        private boolean mNeedReloadIcon;
 
         private PendingIntent mSkipToPrevious;
         private PendingIntent mPlayOrPause;
@@ -1006,7 +1004,7 @@ public class PlayerService extends Service implements PlayerManager {
                   PendingIntent skipNext,
                   PendingIntent cancel) {
             mMusicItem = new MusicItem();
-            mMusicItemChanged = false;
+            mNeedReloadIcon = true;
 
             mPlayerService = playerService;
             mSkipToPrevious = skipPrevious;
@@ -1025,6 +1023,13 @@ public class PlayerService extends Service implements PlayerManager {
          */
         @NonNull
         public abstract Notification onCreateNotification(int playerType);
+
+        /**
+         * 重写该方法以重新加载当前正在播放的音乐的图标。
+         */
+        protected void reloadIcon() {
+            setNeedReloadIcon(false);
+        }
 
         /**
          * 该方法会在初次创建 NotificationView 对象时调用，你可以重写该方法来进行一些初始化操作。
@@ -1172,23 +1177,26 @@ public class PlayerService extends Service implements PlayerManager {
             mPlayerService.updateNotificationView();
         }
 
-        /**
-         * 正在播放的音乐是否已改变。
-         */
-        protected final boolean isMusicItemChanged() {
-            return mMusicItemChanged;
-        }
-
         @NonNull
         Notification createNotification(int playerType) {
+            if (isNeedReloadIcon()) {
+                reloadIcon();
+            }
             return onCreateNotification(playerType);
         }
 
         void setPlayingMusicItem(@NonNull MusicItem musicItem) {
             Preconditions.checkNotNull(musicItem);
 
-            mMusicItemChanged = !(mMusicItem.equals(musicItem));
             mMusicItem = musicItem;
+        }
+
+        boolean isNeedReloadIcon() {
+            return mNeedReloadIcon;
+        }
+
+        void setNeedReloadIcon(boolean needReloadIcon) {
+            mNeedReloadIcon = needReloadIcon;
         }
     }
 
@@ -1196,27 +1204,34 @@ public class PlayerService extends Service implements PlayerManager {
      * 默认的 NotificationView 实现。
      */
     public static class SimpleNotificationView extends NotificationView {
-        private Bitmap mDefaultIcon;
         private Bitmap mIcon;
-
-        private Disposable mLoadIconDisposable;
-        private Canvas mCanvas;
+        private CustomTarget<Bitmap> mTarget;
+        private int mIconCornerRadius;
 
         @Override
         protected void onInit(Context context) {
             super.onInit(context);
+            Resources res = context.getResources();
 
-            mCanvas = new Canvas();
-            setDefaultIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.snow_notif_default_icon));
+            mIconCornerRadius = res.getDimensionPixelSize(R.dimen.snow_notif_icon_corner_radius);
+            int iconSize = res.getDimensionPixelSize(R.dimen.snow_notif_icon_size_big);
+
+            mTarget = new CustomTarget<Bitmap>(iconSize, iconSize) {
+                @Override
+                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                    setIcon(resource);
+                }
+
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {
+                    // ignore
+                }
+            };
         }
 
         @NonNull
         @Override
         public Notification onCreateNotification(int playerType) {
-            if (isMusicItemChanged()) {
-                reloadAllIcon();
-            }
-
             return new NotificationCompat.Builder(getContext(), "player")
                     .setSmallIcon(R.drawable.snow_ic_music)
                     .setStyle(new androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
@@ -1229,34 +1244,14 @@ public class PlayerService extends Service implements PlayerManager {
         @Override
         protected void onRelease() {
             super.onRelease();
-
-            disposeLastLoadIcon();
-        }
-
-        protected void disposeLastLoadIcon() {
-            if (mLoadIconDisposable != null) {
-                mLoadIconDisposable.dispose();
-            }
+            Glide.with(getContext()).clear(mTarget);
         }
 
         protected PendingIntent getContentIntent() {
             return null;
         }
 
-        protected final void setDefaultIcon(@NonNull Bitmap defaultIcon) {
-            Preconditions.checkNotNull(defaultIcon);
-            mDefaultIcon = defaultIcon;
-        }
-
-        public final Bitmap getDefaultIcon() {
-            return mDefaultIcon;
-        }
-
         public final Bitmap getIcon() {
-            if (mIcon == null) {
-                return mDefaultIcon;
-            }
-
             return mIcon;
         }
 
@@ -1302,123 +1297,49 @@ public class PlayerService extends Service implements PlayerManager {
             return contentText;
         }
 
-        protected void reloadAllIcon() {
-            disposeLastLoadIcon();
+        @Override
+        protected void reloadIcon() {
+            super.reloadIcon();
 
-            mLoadIconDisposable = loadIconAsync()
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .map(asRoundRect())
-                    .subscribe(new Consumer<Bitmap>() {
-                        @Override
-                        public void accept(Bitmap bitmap) {
-                            setIcon(bitmap);
-                        }
-                    });
+            Glide.with(getContext())
+                    .clear(mTarget);
+
+            Glide.with(getContext())
+                    .asBitmap()
+                    .load(getPlayingMusicItem().getIconUri())
+                    .error(loadEmbeddedIcon())
+                    .transform(new RoundedCorners(mIconCornerRadius))
+                    .into(mTarget);
         }
 
-        private Single<Bitmap> loadIconAsync() {
-            return Single.create(new SingleOnSubscribe<Bitmap>() {
-                @Override
-                public void subscribe(SingleEmitter<Bitmap> emitter) {
-                    String iconUri = getPlayingMusicItem().getIconUri();
-                    Bitmap icon = null;
+        private boolean notLocaleMusic() {
+            String stringUri = getPlayingMusicItem().getUri();
+            String scheme = Uri.parse(stringUri).getScheme();
 
-                    int bigIconSize = getContext().getResources()
-                            .getDimensionPixelSize(R.dimen.snow_notif_icon_size_big);
-
-                    if (isAvailable(iconUri)) {
-                        icon = loadIconFromInternet(iconUri, bigIconSize);
-                    }
-
-                    if (emitter.isDisposed()) {
-                        return;
-                    }
-
-                    if (icon == null) {
-                        icon = getMusicItemEmbeddedIcon(bigIconSize);
-                    }
-
-                    if (emitter.isDisposed()) {
-                        return;
-                    }
-
-                    if (icon == null) {
-                        icon = getDefaultIcon();
-                    }
-
-                    emitter.onSuccess(icon);
-                }
-            }).subscribeOn(Schedulers.io());
+            return "http".equalsIgnoreCase(scheme) | "https".equalsIgnoreCase(scheme);
         }
 
-        @Nullable
-        protected final Bitmap getMusicItemEmbeddedIcon(int size) {
-            MusicItem musicItem = getPlayingMusicItem();
+        private RequestBuilder<Bitmap> loadEmbeddedIcon() {
+            if (notLocaleMusic()) {
+                return loadDefaultIcon();
+            }
 
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-            retriever.setDataSource(musicItem.getUri());
+            retriever.setDataSource(getPlayingMusicItem().getUri());
+            byte[] data = retriever.getEmbeddedPicture();
+            retriever.release();
 
-            try {
-                return Glide.with(getContext())
-                        .asBitmap()
-                        .load(retriever.getEmbeddedPicture())
-                        .submit(size, size)
-                        .get();
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                retriever.release();
-            }
-
-            return null;
+            return Glide.with(getContext())
+                    .asBitmap()
+                    .load(data)
+                    .error(loadDefaultIcon());
         }
 
-        private Function<Bitmap, Bitmap> asRoundRect() {
-            return new Function<Bitmap, Bitmap>() {
-                @Override
-                public Bitmap apply(Bitmap bitmap) throws ExecutionException, InterruptedException {
-                    Resources res = getContext().getResources();
-
-                    int size = res.getDimensionPixelSize(R.dimen.snow_notif_icon_size_big);
-                    int cornerRadius = res.getDimensionPixelSize(R.dimen.snow_notif_icon_corner_radius);
-
-                    Bitmap icon = Bitmap.createBitmap(size, size, bitmap.getConfig());
-
-                    mCanvas.setBitmap(icon);
-                    Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                    paint.setStyle(Paint.Style.FILL);
-
-                    float left = (float) ((size - bitmap.getWidth()) / 2.0);
-                    float top = (float) ((size - bitmap.getHeight()) / 2.0);
-
-                    mCanvas.drawBitmap(bitmap, left, top, paint);
-
-                    return Glide.with(getContext())
-                            .asBitmap()
-                            .load(icon)
-                            .transform(new RoundedCorners(cornerRadius))
-                            .submit()
-                            .get();
-                }
-            };
-        }
-
-        private Bitmap loadIconFromInternet(String iconUri, int iconSize) {
-            try {
-                return Glide.with(getContext())
-                        .asBitmap()
-                        .load(iconUri)
-                        .submit(iconSize, iconSize)
-                        .get();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        protected final boolean isAvailable(String stringUri) {
-            return stringUri != null && (!stringUri.isEmpty());
+        private RequestBuilder<Bitmap> loadDefaultIcon() {
+            return Glide.with(getContext())
+                    .asBitmap()
+                    .load(R.mipmap.snow_notif_default_icon)
+                    .transform(new RoundedCorners(mIconCornerRadius));
         }
 
         protected RemoteViews onCreateContentView(int playerType) {
