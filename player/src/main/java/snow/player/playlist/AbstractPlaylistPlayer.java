@@ -2,6 +2,8 @@ package snow.player.playlist;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +25,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     private Playlist mPlaylist;
     private volatile boolean mLoadingPlaylist;
 
+    private Handler mMainHandler;
     private volatile Runnable mPlaylistLoadedAction;
 
     private Random mRandom;
@@ -34,6 +37,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
 
         mPlaylistState = playlistState;
         mPlaylistManager = playlistManager;
+        mMainHandler = new Handler(Looper.getMainLooper());
 
         loadPlaylistAsync();
     }
@@ -53,16 +57,21 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         mLoadingPlaylist = true;
         mPlaylistManager.getPlaylistAsync(new PlaylistManager.Callback() {
             @Override
-            public void onFinished(@NonNull Playlist playlist) {
-                mPlaylist = playlist;
-                mLoadingPlaylist = false;
+            public void onFinished(@NonNull final Playlist playlist) {
+                mMainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPlaylist = playlist;
+                        mLoadingPlaylist = false;
 
-                if (mPlaylistLoadedAction != null) {
-                    mPlaylistLoadedAction.run();
-                    mPlaylistLoadedAction = null;
-                }
+                        if (mPlaylistLoadedAction != null) {
+                            mPlaylistLoadedAction.run();
+                            mPlaylistLoadedAction = null;
+                        }
 
-                onPlaylistAvailable(mPlaylist);
+                        onPlaylistAvailable(mPlaylist);
+                    }
+                });
             }
         });
     }
