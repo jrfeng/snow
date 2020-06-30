@@ -25,62 +25,44 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/snow_notif_icon_size_big_half"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/snow_notif_title"
+                style="@style/TextAppearance.Compat.Notification.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/snow_text_unknown" />
 
             <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/snow_notif_title"
-                    style="@style/TextAppearance.Compat.Notification.Title"
+                    android:id="@+id/snow_notif_radio_tip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/snow_notif_radio_tip_height"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/snow_bg_notification_radio_tip"
+                    android:gravity="center"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:text="@string/snow_radio"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/snow_notif_radio_tip_text_size"
+                    android:visibility="gone"
+                    tools:ignore="RtlCompat,SpUsage"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/snow_notif_text"
+                    style="@style/TextAppearance.Compat.Notification"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/snow_text_unknown" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/snow_notif_radio_tip"
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/snow_notif_radio_tip_height"
-                        android:layout_marginEnd="6dp"
-                        android:background="@drawable/snow_bg_notification_radio_tip"
-                        android:gravity="center"
-                        android:paddingStart="6dp"
-                        android:paddingEnd="6dp"
-                        android:text="@string/snow_radio"
-                        android:textColor="@android:color/white"
-                        android:textSize="@dimen/snow_notif_radio_tip_text_size"
-                        android:visibility="gone"
-                        tools:ignore="RtlCompat,SpUsage"
-                        tools:visibility="visible" />
-
-                    <TextView
-                        android:id="@+id/snow_notif_text"
-                        style="@style/TextAppearance.Compat.Notification"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/snow_text_unknown" />
-                </LinearLayout>
-
             </LinearLayout>
-
-            <ImageButton
-                android:id="@+id/snow_notif_shutdown"
-                android:layout_width="@dimen/snow_notif_button_size"
-                android:layout_height="@dimen/snow_notif_button_size"
-                android:background="@drawable/snow_bg_notif_button"
-                android:contentDescription="@string/snow_des_shutdown"
-                android:scaleType="centerInside"
-                android:src="@drawable/snow_ic_cancel" />
 
         </LinearLayout>
 
@@ -92,8 +74,8 @@
 
             <ImageButton
                 android:id="@+id/snow_notif_skip_to_previous"
-                android:layout_width="@dimen/snow_notif_button_size_32dp"
-                android:layout_height="@dimen/snow_notif_button_size_32dp"
+                android:layout_width="@dimen/snow_notif_button_size_40dp"
+                android:layout_height="@dimen/snow_notif_button_size_40dp"
                 android:background="@drawable/snow_bg_notif_button"
                 android:contentDescription="@string/snow_des_skip_to_previous"
                 android:scaleType="centerInside"
@@ -103,8 +85,6 @@
                 android:id="@+id/snow_notif_play_pause"
                 android:layout_width="@dimen/snow_notif_button_size_40dp"
                 android:layout_height="@dimen/snow_notif_button_size_40dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
                 android:background="@drawable/snow_bg_notif_button"
                 android:contentDescription="@string/snow_des_play_pause"
                 android:scaleType="centerInside"
@@ -112,8 +92,8 @@
 
             <ImageButton
                 android:id="@+id/snow_notif_skip_to_next"
-                android:layout_width="@dimen/snow_notif_button_size_32dp"
-                android:layout_height="@dimen/snow_notif_button_size_32dp"
+                android:layout_width="@dimen/snow_notif_button_size_40dp"
+                android:layout_height="@dimen/snow_notif_button_size_40dp"
                 android:background="@drawable/snow_bg_notif_button"
                 android:contentDescription="@string/snow_des_skip_to_next"
                 android:scaleType="centerInside"

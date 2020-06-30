@@ -68,8 +68,8 @@
 
     <ImageButton
         android:id="@+id/snow_notif_play_pause"
-        android:layout_width="@dimen/snow_notif_button_size"
-        android:layout_height="@dimen/snow_notif_button_size"
+        android:layout_width="@dimen/snow_notif_button_size_40dp"
+        android:layout_height="@dimen/snow_notif_button_size_40dp"
         android:layout_marginStart="8dp"
         android:background="@drawable/snow_bg_notif_button"
         android:contentDescription="@string/snow_des_play_pause"
@@ -79,24 +79,13 @@
 
     <ImageButton
         android:id="@+id/snow_notif_skip_to_next"
-        android:layout_width="@dimen/snow_notif_button_size"
-        android:layout_height="@dimen/snow_notif_button_size"
-        android:layout_marginStart="8dp"
+        android:layout_width="@dimen/snow_notif_button_size_40dp"
+        android:layout_height="@dimen/snow_notif_button_size_40dp"
         android:layout_marginEnd="8dp"
         android:background="@drawable/snow_bg_notif_button"
         android:contentDescription="@string/snow_des_skip_to_next"
         android:scaleType="centerInside"
-        android:src="@drawable/snow_ic_skip_next" />
-
-    <ImageButton
-        android:id="@+id/snow_notif_shutdown"
-        android:layout_width="@dimen/snow_notif_button_size"
-        android:layout_height="@dimen/snow_notif_button_size"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/snow_bg_notif_button"
-        android:contentDescription="@string/snow_des_shutdown"
-        android:scaleType="centerInside"
-        android:src="@drawable/snow_ic_cancel"
+        android:src="@drawable/snow_ic_skip_next"
         tools:ignore="RtlCompat" />
 
 </LinearLayout>
