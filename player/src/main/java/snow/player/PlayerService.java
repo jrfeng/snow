@@ -1189,11 +1189,19 @@ public class PlayerService extends Service implements PlayerManager {
      * 默认的 NotificationView 实现。
      */
     public static class SimpleNotificationView extends NotificationView {
+        private static final String CUSTOM_ACTION_1 = "snow.player.custom_action_1";
+        private static final String CUSTOM_ACTION_2 = "snow.player.custom_action_2";
+        private static final String COMPAT_CUSTOM_ACTION = "snow.player.compat_custom_action";
+
         private Bitmap mIcon;
         private CustomTarget<Bitmap> mTarget;
         private int mIconCornerRadius;
 
         private int mDefaultIconId;
+
+        private CustomAction mCustomAction1;
+        private CustomAction mCustomAction2;
+        private CustomAction mCompatCustomAction;
 
         @Override
         protected void onInit(Context context) {
@@ -1256,6 +1264,18 @@ public class PlayerService extends Service implements PlayerManager {
         @DrawableRes
         public final int getDefaultIconId() {
             return mDefaultIconId;
+        }
+
+        public final void setCustomAction1(CustomAction customAction) {
+            mCustomAction1 = customAction;
+        }
+
+        public final void setCustomAction2(CustomAction customAction) {
+            mCustomAction2 = customAction;
+        }
+
+        public final void setCompatCustomAction(CustomAction compatCustomAction) {
+            mCompatCustomAction = compatCustomAction;
         }
 
         protected CharSequence getContentTitle() {
@@ -1369,6 +1389,12 @@ public class PlayerService extends Service implements PlayerManager {
                 contentView.setViewVisibility(R.id.snow_notif_radio_tip, View.VISIBLE);
             }
 
+            CustomAction customAction = mCompatCustomAction;
+            if (customAction == null) {
+                customAction = mCustomAction2;
+            }
+            initCustomAction(COMPAT_CUSTOM_ACTION, customAction, contentView, playerType, R.id.snow_notif_compat_custom_action);
+
             return contentView;
         }
 
@@ -1394,7 +1420,90 @@ public class PlayerService extends Service implements PlayerManager {
                 bigContentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_previous, getSkipToPreviousPendingIntent());
             }
 
+            initCustomAction(CUSTOM_ACTION_1, mCustomAction1, bigContentView, playerType, R.id.snow_notif_custom_action1);
+            initCustomAction(CUSTOM_ACTION_2, mCustomAction2, bigContentView, playerType, R.id.snow_notif_custom_action2);
+
             return bigContentView;
+        }
+
+        private void initCustomAction(String customActionKey,
+                                      CustomAction customAction,
+                                      RemoteViews bigContentView,
+                                      int playerType,
+                                      int viewId) {
+            if (customAction == null) {
+                return;
+            }
+
+            int iconId = customAction.getIconId();
+            PendingIntent pendingIntent =
+                    getCustomActionPendingIntent(playerType, customActionKey, customAction);
+
+            bigContentView.setViewVisibility(viewId, View.VISIBLE);
+            bigContentView.setImageViewResource(viewId, iconId);
+
+            if (pendingIntent != null) {
+                bigContentView.setOnClickPendingIntent(viewId, pendingIntent);
+            }
+        }
+
+        private PendingIntent getCustomActionPendingIntent(int playerType,
+                                                           String customActionName,
+                                                           CustomAction customAction) {
+            if (customAction.getAction() == null) {
+                return null;
+            }
+
+            if (playerType == TYPE_RADIO_STATION && customAction.isDisabledInRadioStationType()) {
+                return null;
+            }
+
+            return addCustomAction(customActionName, customAction.getAction());
+        }
+
+        public static class CustomAction {
+            private int mIconId;
+            private boolean mDisabledInRadioStationType;
+            private int mDisabledIconId;
+            private Runnable mAction;
+
+            public CustomAction(@DrawableRes int iconId) {
+                this(iconId, null);
+            }
+
+            public CustomAction(@DrawableRes int iconId, Runnable action) {
+                mIconId = iconId;
+                mAction = action;
+            }
+
+            public void setIconId(int drawableId) {
+                mIconId = drawableId;
+            }
+
+            public int getIconId() {
+                return mIconId;
+            }
+
+            public void setDisabledInRadioStationType(int disabledDrawableId) {
+                mDisabledInRadioStationType = true;
+                mDisabledIconId = disabledDrawableId;
+            }
+
+            public boolean isDisabledInRadioStationType() {
+                return mDisabledInRadioStationType;
+            }
+
+            public int getDisabledIconId() {
+                return mDisabledIconId;
+            }
+
+            public void setAction(Runnable action) {
+                mAction = action;
+            }
+
+            public Runnable getAction() {
+                return mAction;
+            }
         }
     }
 }
