@@ -51,6 +51,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         mPlaylistState = playlistState;
         mPlaylistManager = playlistManager;
         mPlaylist = playlist;
+        mMainHandler = new Handler(Looper.getMainLooper());
     }
 
     private void loadPlaylistAsync() {
