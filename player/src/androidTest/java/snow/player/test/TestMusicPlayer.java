@@ -1,5 +1,7 @@
 package snow.player.test;
 
+import android.net.Uri;
+
 import java.util.Random;
 
 import snow.player.media.MusicPlayer;
@@ -92,7 +94,7 @@ public class TestMusicPlayer implements MusicPlayer {
     }
 
     @Override
-    public void prepare(Object source) {
+    public void prepare(Uri uri) {
         new Thread() {
             @Override
             public void run() {

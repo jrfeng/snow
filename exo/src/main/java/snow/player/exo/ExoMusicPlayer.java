@@ -1,6 +1,7 @@
 package snow.player.exo;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Looper;
 
 import androidx.annotation.NonNull;
@@ -9,6 +10,11 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.MediaSourceFactory;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 
 import snow.player.media.MusicPlayer;
 
@@ -16,6 +22,7 @@ import snow.player.media.MusicPlayer;
  * 封装了一个 SimpleExoPlayer
  */
 public class ExoMusicPlayer implements MusicPlayer {
+    private MediaSourceFactory mMediaSourceFactory;
     private SimpleExoPlayer mSimpleExoPlayer;
     private Player.EventListener mEventListener;
 
@@ -29,7 +36,8 @@ public class ExoMusicPlayer implements MusicPlayer {
     private boolean mStalled;
     private boolean mInvalid;
 
-    public ExoMusicPlayer(@NonNull Context context) {
+    public ExoMusicPlayer(@NonNull Context context, @NonNull MediaSourceFactory mediaSourceFactory) {
+        mMediaSourceFactory = mediaSourceFactory;
         initEventListener();
         initExoPlayer(context);
     }
@@ -111,13 +119,9 @@ public class ExoMusicPlayer implements MusicPlayer {
     }
 
     @Override
-    public void prepare(Object source) {
+    public void prepare(Uri uri) {
         try {
-            if (!(source instanceof MediaSource)) {
-                throw new IllegalArgumentException("need MediaSource");
-            }
-
-            MediaSource mediaSource = (MediaSource) source;
+            MediaSource mediaSource = mMediaSourceFactory.createMediaSource(uri);
             mSimpleExoPlayer.prepare(mediaSource);
         } catch (Exception e) {
             setInvalid();

@@ -1,6 +1,7 @@
 package snow.player.media;
 
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.util.Log;
 
 import snow.player.Player;
@@ -36,9 +37,9 @@ public class MediaMusicPlayer implements MusicPlayer {
     }
 
     @Override
-    public void prepare(Object source) throws Exception {
+    public void prepare(Uri uri) throws Exception {
         try {
-            mMediaPlayer.setDataSource((String) source);
+            mMediaPlayer.setDataSource(uri.toString());
             mMediaPlayer.prepareAsync();
         } catch (Exception e) {
             setInvalid();
