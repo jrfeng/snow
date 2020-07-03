@@ -1,3 +1,4 @@
+include ':exo'
 rootProject.name='snow'
 include ':app'
 include ':player'
