@@ -1,6 +1,7 @@
 package snow.player.test;
 
-import java.io.IOException;
+import android.net.Uri;
+
 import java.util.Random;
 
 import snow.player.media.MusicPlayer;
@@ -20,9 +21,14 @@ public class TestMusicPlayer implements MusicPlayer {
     private boolean mPlaying;
     private int mCurrentPosition;
 
+    private boolean mInvalid;
+
     private Tester mTester;
 
     public TestMusicPlayer() {
+        mInvalid = false;
+        mAudioSessionId = new Random().nextInt(100);
+
         mTester = new Tester(this);
     }
 
@@ -31,6 +37,7 @@ public class TestMusicPlayer implements MusicPlayer {
     }
 
     public void reset() {
+        mInvalid = false;
         mLooping = false;
         mPlaying = false;
         mCurrentPosition = 0;
@@ -40,22 +47,11 @@ public class TestMusicPlayer implements MusicPlayer {
 
     public static class Tester {
         private TestMusicPlayer mMusicPlayer;
-
-        private boolean mBadDataSource;
         private boolean mError;
-
         private long mPreparedTime = 100;
 
         Tester(TestMusicPlayer testMusicPlayer) {
             mMusicPlayer = testMusicPlayer;
-        }
-
-        /**
-         * 调用该方法后，会在调用 {@link MusicPlayer#setDataSource(String)} 方法时抛出 IOException 异常。请在调用
-         * {@link MusicPlayer#setDataSource(String)} 方法前调用该方法。
-         */
-        public void badDataSource() {
-            mBadDataSource = true;
         }
 
         public void setPreparedTime(long ms) {
@@ -82,6 +78,7 @@ public class TestMusicPlayer implements MusicPlayer {
             mError = error;
 
             if (mError) {
+                mMusicPlayer.setInvalid();
                 mMusicPlayer.mPlaying = false;
                 mMusicPlayer.mErrorListener.onError(mMusicPlayer, errorCode);
             }
@@ -92,23 +89,12 @@ public class TestMusicPlayer implements MusicPlayer {
         }
 
         private void reset() {
-            mBadDataSource = false;
             mError = false;
         }
     }
 
     @Override
-    public void setDataSource(String path) throws IOException {
-        if (mTester.mBadDataSource) {
-            throw new IOException("Test: bad data source");
-        }
-
-        Random random = new Random();
-        mAudioSessionId = random.nextInt(100);
-    }
-
-    @Override
-    public void prepareAsync() {
+    public void prepare(Uri uri) {
         new Thread() {
             @Override
             public void run() {
@@ -179,7 +165,17 @@ public class TestMusicPlayer implements MusicPlayer {
 
     @Override
     public void release() {
+        setInvalid();
         mPlaying = false;
+    }
+
+    @Override
+    public synchronized boolean isInvalid() {
+        return mInvalid;
+    }
+
+    private synchronized void setInvalid() {
+        mInvalid = true;
     }
 
     @Override

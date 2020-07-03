@@ -4,9 +4,6 @@ import android.content.Context;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import java.io.IOException;
 
 import snow.player.AbstractPlayer;
 import snow.player.media.MusicItem;
@@ -118,23 +115,21 @@ public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
         return mTester.mCached;
     }
 
-    @Nullable
-    @Override
-    protected Uri getCachedUri(MusicItem musicItem, SoundQuality soundQuality) {
-        return mTester.getCachedUri();
-    }
-
-    @Nullable
-    @Override
-    protected Uri getUri(MusicItem musicItem, SoundQuality soundQuality) {
-        return mTester.getUri();
-    }
-
     @NonNull
     @Override
-    protected MusicPlayer onCreateMusicPlayer(Uri uri) throws IOException {
+    protected MusicPlayer onCreateMusicPlayer(Context context) {
         mTester.mTestMusicPlayer.reset();
-        mTester.mTestMusicPlayer.setDataSource(uri.toString());
         return mTester.mTestMusicPlayer;
+    }
+
+    @Override
+    protected void onPrepareMusicPlayer(MusicPlayer musicPlayer,
+                                        MusicItem musicItem,
+                                        SoundQuality soundQuality) throws Exception {
+        if (musicPlayer.isInvalid()) {
+            return;
+        }
+
+        musicPlayer.prepare(Uri.parse(musicItem.getUri()));
     }
 }

@@ -646,14 +646,20 @@ public class PlayerService extends Service implements PlayerManager {
      * <p>
      * 你可以重写该方法来返回你自己的 MusicPlayer 实现。
      *
-     * @param uri 要播放的音乐的 uri
+     * @param context Application Context
      * @return 音乐播放器（不能为 null）
      */
     @NonNull
-    protected MusicPlayer onCreateMusicPlayer(Uri uri) throws IOException {
-        MusicPlayer musicPlayer = new MediaMusicPlayer();
-        musicPlayer.setDataSource(uri.toString());
-        return musicPlayer;
+    protected MusicPlayer onCreateMusicPlayer(Context context) {
+        return new MediaMusicPlayer();
+    }
+
+    protected void onPrepareMusicPlayer(MusicPlayer musicPlayer,
+                                        MusicItem musicItem,
+                                        Player.SoundQuality soundQuality) throws Exception {
+        if (!musicPlayer.isInvalid()) {
+            musicPlayer.prepare(Uri.parse(musicItem.getUri()));
+        }
     }
 
     /**
@@ -791,22 +797,17 @@ public class PlayerService extends Service implements PlayerManager {
             return PlayerService.this.isCached(musicItem, soundQuality);
         }
 
-        @Nullable
-        @Override
-        protected Uri getCachedUri(MusicItem musicItem, SoundQuality soundQuality) {
-            return PlayerService.this.getCachedUri(musicItem, soundQuality);
-        }
-
-        @Nullable
-        @Override
-        protected Uri getUri(MusicItem musicItem, SoundQuality soundQuality) {
-            return PlayerService.this.getUri(musicItem, soundQuality);
-        }
-
         @NonNull
         @Override
-        protected MusicPlayer onCreateMusicPlayer(Uri uri) throws IOException {
-            return PlayerService.this.onCreateMusicPlayer(uri);
+        protected MusicPlayer onCreateMusicPlayer(Context context) {
+            return PlayerService.this.onCreateMusicPlayer(context);
+        }
+
+        @Override
+        protected void onPrepareMusicPlayer(MusicPlayer musicPlayer,
+                                            MusicItem musicItem,
+                                            SoundQuality soundQuality) throws Exception {
+            PlayerService.this.onPrepareMusicPlayer(musicPlayer, musicItem, soundQuality);
         }
 
         @Override
@@ -893,22 +894,17 @@ public class PlayerService extends Service implements PlayerManager {
             return PlayerService.this.isCached(musicItem, soundQuality);
         }
 
-        @Nullable
-        @Override
-        protected Uri getCachedUri(MusicItem musicItem, SoundQuality soundQuality) {
-            return PlayerService.this.getCachedUri(musicItem, soundQuality);
-        }
-
-        @Nullable
-        @Override
-        protected Uri getUri(MusicItem musicItem, SoundQuality soundQuality) {
-            return PlayerService.this.getUri(musicItem, soundQuality);
-        }
-
         @NonNull
         @Override
-        protected MusicPlayer onCreateMusicPlayer(Uri uri) throws IOException {
-            return PlayerService.this.onCreateMusicPlayer(uri);
+        protected MusicPlayer onCreateMusicPlayer(Context context) {
+            return PlayerService.this.onCreateMusicPlayer(context);
+        }
+
+        @Override
+        protected void onPrepareMusicPlayer(MusicPlayer musicPlayer,
+                                            MusicItem musicItem,
+                                            SoundQuality soundQuality) throws Exception {
+            PlayerService.this.onPrepareMusicPlayer(musicPlayer, musicItem, soundQuality);
         }
 
         @Override

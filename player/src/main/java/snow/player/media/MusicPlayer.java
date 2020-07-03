@@ -1,6 +1,6 @@
 package snow.player.media;
 
-import java.io.IOException;
+import android.net.Uri;
 
 /**
  * 该类定义了音乐播放器的基本功能。可以通过继承该类来实现一个音乐播放器。
@@ -8,16 +8,11 @@ import java.io.IOException;
 public interface MusicPlayer {
 
     /**
-     * 即可播放本地文件，也可以播放网络文件。
+     * 准备当前音乐播放器。
      *
-     * @param path 要播放的音乐的本地路径或者 URL。
+     * @param uri 要播放的音乐的 URI
      */
-    void setDataSource(String path) throws IOException;
-
-    /**
-     * 以异步的方式准备当前音乐播放器。
-     */
-    void prepareAsync();
+    void prepare(Uri uri) throws Exception;
 
     /**
      * 设置是否循环播放。
@@ -108,6 +103,16 @@ public interface MusicPlayer {
      * 该方法对 WakeLock 和 WifiLock 进行了处理，你的音乐播放器实现应该重写该方法以释放占用的资源。
      */
     void release();
+
+    /**
+     * 当前音乐播放器是否已失效（对于新创建的对象，该方法默认返回 false）。
+     * <p>
+     * 当播放器发生错误，或者调用 {@link #release()} 方法后，该方法应该返回 true。如果该方法返回 true，则不
+     * 应再调用除 {@link #release()} 方法以外的任何其他方法。
+     *
+     * @return 返回 true 表示当前音乐播放器已失效，此时不应再调用除 {@link #release()} 方法以外的任何其他方法
+     */
+    boolean isInvalid();
 
     /**
      * 获取音频会话 ID。如果失败，则返回 0。

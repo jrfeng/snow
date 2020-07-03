@@ -1,15 +1,13 @@
 package snow.player.media;
 
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.util.Log;
-
-import java.io.IOException;
 
 import snow.player.Player;
 
 /**
- * 封装了一个 MediaPlayer。注意！不允许复用 MediaMusicPlayer 对象。一旦调用 {@link #release()}
- * 或者 {@link #stop()} 方法后就不要再调用 MediaMusicPlayer 对象的任何方法。
+ * 封装了一个 MediaPlayer。
  */
 public class MediaMusicPlayer implements MusicPlayer {
     private static final String TAG = "MediaMusicPlayer";
@@ -17,18 +15,22 @@ public class MediaMusicPlayer implements MusicPlayer {
     private MediaPlayer mMediaPlayer;
     private OnStalledListener mStalledListener;
 
+    private boolean mInvalid;
+
     public MediaMusicPlayer() {
         mMediaPlayer = new MediaPlayer();
+        mInvalid = false;
     }
 
     @Override
-    public void setDataSource(String path) throws IOException {
-        mMediaPlayer.setDataSource(path);
-    }
-
-    @Override
-    public void prepareAsync() throws IllegalStateException {
-        mMediaPlayer.prepareAsync();
+    public void prepare(Uri uri) throws Exception {
+        try {
+            mMediaPlayer.setDataSource(uri.toString());
+            mMediaPlayer.prepareAsync();
+        } catch (Exception e) {
+            setInvalid();
+            throw e;
+        }
     }
 
     @Override
@@ -92,10 +94,20 @@ public class MediaMusicPlayer implements MusicPlayer {
     }
 
     @Override
-    public void release() {
+    public synchronized void release() {
+        setInvalid();
         mMediaPlayer.release();
         mMediaPlayer = null;
         mStalledListener = null;
+    }
+
+    @Override
+    public synchronized boolean isInvalid() {
+        return mInvalid;
+    }
+
+    private synchronized void setInvalid() {
+        mInvalid = true;
     }
 
     @Override
@@ -204,6 +216,7 @@ public class MediaMusicPlayer implements MusicPlayer {
             public boolean onError(MediaPlayer mp, int what, int extra) {
                 Log.e(TAG, "MediaPlayer Error[what: " + what + ", extra: " + extra + "]");
 
+                setInvalid();
                 listener.onError(MediaMusicPlayer.this,
                         Player.Error.PLAYER_ERROR);
                 return true;
