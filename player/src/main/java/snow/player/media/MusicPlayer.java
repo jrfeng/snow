@@ -1,7 +1,5 @@
 package snow.player.media;
 
-import android.net.Uri;
-
 /**
  * 该类定义了音乐播放器的基本功能。可以通过继承该类来实现一个音乐播放器。
  */
@@ -12,9 +10,9 @@ public interface MusicPlayer {
      * <p>
      * 该方法会在主线程上执行，如果准备操作是个耗时操作，你应该在异步线程中执行它。
      *
-     * @param uri 要播放的音乐的 URI
+     * @param source 要播放的音频源
      */
-    void prepare(Uri uri) throws Exception;
+    void prepare(Object source) throws Exception;
 
     /**
      * 设置是否循环播放。

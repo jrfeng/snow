@@ -658,7 +658,7 @@ public class PlayerService extends Service implements PlayerManager {
                                         MusicItem musicItem,
                                         Player.SoundQuality soundQuality) throws Exception {
         if (!musicPlayer.isInvalid()) {
-            musicPlayer.prepare(Uri.parse(musicItem.getUri()));
+            musicPlayer.prepare(musicItem.getUri());
         }
     }
 
