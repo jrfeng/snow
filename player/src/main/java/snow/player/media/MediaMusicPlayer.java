@@ -13,13 +13,27 @@ public class MediaMusicPlayer implements MusicPlayer {
     private static final String TAG = "MediaMusicPlayer";
 
     private MediaPlayer mMediaPlayer;
-    private OnStalledListener mStalledListener;
+    private OnErrorListener mErrorListener;
 
     private boolean mInvalid;
 
     public MediaMusicPlayer() {
         mMediaPlayer = new MediaPlayer();
         mInvalid = false;
+
+        mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                Log.e(TAG, "MediaPlayer Error[what: " + what + ", extra: " + extra + "]");
+
+                setInvalid();
+
+                if (mErrorListener != null) {
+                    mErrorListener.onError(MediaMusicPlayer.this, Player.Error.PLAYER_ERROR);
+                }
+                return true;
+            }
+        });
     }
 
     @Override
@@ -96,9 +110,10 @@ public class MediaMusicPlayer implements MusicPlayer {
     @Override
     public synchronized void release() {
         setInvalid();
-        mMediaPlayer.release();
-        mMediaPlayer = null;
-        mStalledListener = null;
+        if (mMediaPlayer != null) {
+            mMediaPlayer.release();
+            mMediaPlayer = null;
+        }
     }
 
     @Override
@@ -161,8 +176,7 @@ public class MediaMusicPlayer implements MusicPlayer {
     }
 
     @Override
-    public void setOnStalledListener(OnStalledListener listener) {
-        mStalledListener = listener;
+    public void setOnStalledListener(final OnStalledListener listener) {
         if (listener == null) {
             mMediaPlayer.setOnInfoListener(null);
             return;
@@ -171,16 +185,12 @@ public class MediaMusicPlayer implements MusicPlayer {
         mMediaPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
             @Override
             public boolean onInfo(MediaPlayer mp, int what, int extra) {
-                if (mStalledListener == null) {
-                    return false;
-                }
-
                 switch (what) {
                     case MediaPlayer.MEDIA_INFO_BUFFERING_START:
-                        mStalledListener.onStalled(true);
+                        listener.onStalled(true);
                         return true;
                     case MediaPlayer.MEDIA_INFO_BUFFERING_END:
-                        mStalledListener.onStalled(false);
+                        listener.onStalled(false);
                         return true;
                 }
 
@@ -205,22 +215,7 @@ public class MediaMusicPlayer implements MusicPlayer {
     }
 
     @Override
-    public void setOnErrorListener(final OnErrorListener listener) {
-        if (listener == null) {
-            mMediaPlayer.setOnErrorListener(null);
-            return;
-        }
-
-        mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-            @Override
-            public boolean onError(MediaPlayer mp, int what, int extra) {
-                Log.e(TAG, "MediaPlayer Error[what: " + what + ", extra: " + extra + "]");
-
-                setInvalid();
-                listener.onError(MediaMusicPlayer.this,
-                        Player.Error.PLAYER_ERROR);
-                return true;
-            }
-        });
+    public void setOnErrorListener(OnErrorListener listener) {
+        mErrorListener = listener;
     }
 }
