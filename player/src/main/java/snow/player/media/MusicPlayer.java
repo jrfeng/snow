@@ -9,6 +9,8 @@ public interface MusicPlayer {
 
     /**
      * 准备当前音乐播放器。
+     * <p>
+     * 该方法会在主线程上执行，如果准备操作是个耗时操作，你应该在异步线程中执行它。
      *
      * @param uri 要播放的音乐的 URI
      */

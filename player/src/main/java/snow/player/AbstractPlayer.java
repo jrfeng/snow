@@ -100,6 +100,11 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     /**
      * 该方法会在准备播放器时调用。
+     * <p>
+     * 该方法会在主线程上执行，如果准备操作是个耗时操作，你应该再异步线程中执行它。如果你还需要在异步线程中执行
+     * 其他操作（如：获取音乐的 URI），那么应该在调用 {@link MusicPlayer#prepare(Uri)} 方法之前使用
+     * {@link MusicPlayer#isInvalid()} 方法检查播放器是否已失效，如果 {@link MusicPlayer#isInvalid()}
+     * 方法返回 true，则此时不应该再调用 {@link MusicPlayer} 的任何方法。
      *
      * @param musicPlayer  当前播放器对象
      * @param musicItem    要播放的音乐
