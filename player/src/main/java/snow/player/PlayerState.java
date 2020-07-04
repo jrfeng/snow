@@ -39,7 +39,7 @@ public class PlayerState implements Parcelable {
         mPlayProgressUpdateTime = 0;
         mSoundQuality = Player.SoundQuality.STANDARD;
         mAudioEffectEnabled = false;
-        mOnlyWifiNetwork = true;
+        mOnlyWifiNetwork = false;
         mIgnoreLossAudioFocus = false;
 
         mPlaybackState = Player.PlaybackState.UNKNOWN;
@@ -156,9 +156,9 @@ public class PlayerState implements Parcelable {
     }
 
     /**
-     * 是否只允许在 WiFi 网络下联网（默认为 true）。
+     * 是否只允许在 WiFi 网络下联网（默认为 false）。
      *
-     * @return 如果返回 true，则表示只允许在 WiFi 网络下联网（默认为 true）。
+     * @return 如果返回 true，则表示只允许在 WiFi 网络下联网（默认为 false）。
      */
     public boolean isOnlyWifiNetwork() {
         return mOnlyWifiNetwork;
