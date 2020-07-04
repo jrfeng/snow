@@ -460,7 +460,7 @@ public class PlayerClient {
         }
 
         /**
-         * 是否只允许使用 Wifi 网络。
+         * 是否只允许使用 Wifi 网络（默认为 false）。
          */
         public boolean isOnlyWifiNetwork() {
             return mPlaylistStateHolder.mPlaylistState.isOnlyWifiNetwork();
@@ -810,7 +810,7 @@ public class PlayerClient {
         }
 
         /**
-         * 设置是否只允许在 WiFi 网络下播放音乐（默认为 true）。
+         * 设置是否只允许在 WiFi 网络下播放音乐（默认为 false）。
          * <p>
          * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
          *
