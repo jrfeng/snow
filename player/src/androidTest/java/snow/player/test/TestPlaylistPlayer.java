@@ -42,7 +42,7 @@ public class TestPlaylistPlayer extends AbstractPlaylistPlayer {
     }
 
     @Override
-    protected void onPlaying(long progress, long updateTime) {
+    protected void onPlaying(int progress, long updateTime) {
         super.onPlaying(progress, updateTime);
 
         if (mTester.mPlayingAction != null) {

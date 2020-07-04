@@ -74,7 +74,7 @@ public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
     }
 
     @Override
-    protected void onPlaying(long progress, long updateTime) {
+    protected void onPlaying(int progress, long updateTime) {
         super.onPlaying(progress, updateTime);
 
         if (mTester.mDoOnPlaying != null) {

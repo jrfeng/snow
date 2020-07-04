@@ -145,11 +145,10 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     /**
      * 该方法会在开始播放时调用。
-     *
-     * @param progress   当前的播放进度。
+     *  @param progress   当前的播放进度。
      * @param updateTime 播放进度的更新时间。
      */
-    protected void onPlaying(long progress, long updateTime) {
+    protected void onPlaying(int progress, long updateTime) {
     }
 
     /**

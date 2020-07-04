@@ -3,7 +3,6 @@ package snow.player;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -13,6 +12,10 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -23,6 +26,8 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.media.MediaBrowserServiceCompat;
+import androidx.media.session.MediaButtonReceiver;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
@@ -32,13 +37,17 @@ import com.bumptech.glide.request.transition.Transition;
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
 
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import channel.helper.ChannelHelper;
 import channel.helper.Dispatcher;
+import channel.helper.pipe.CustomActionPipe;
+
 import channel.helper.pipe.MessengerPipe;
+import media.helper.HeadsetHookHelper;
+
 import snow.player.media.MediaMusicPlayer;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
@@ -55,7 +64,9 @@ import snow.player.playlist.PlaylistStateListener;
 import snow.player.radio.RadioStationState;
 import snow.player.radio.RadioStationStateListener;
 
-public class PlayerService extends Service implements PlayerManager {
+public class PlayerService extends MediaBrowserServiceCompat implements PlayerManager {
+    public static final String DEFAULT_MEDIA_ROOT_ID = "root";
+
     private static final String KEY_PLAYER_TYPE = "player_type";
 
     private String mPersistentId;
@@ -67,7 +78,7 @@ public class PlayerService extends Service implements PlayerManager {
     private PlaylistManager mPlaylistManager;
     private PlaylistPlayerImp mPlaylistPlayer;
     private RadioStationPlayerImp mRadioStationPlayer;
-    private MessengerPipe mControllerPipe;
+    private CustomActionPipe mControllerPipe;
 
     private HashMap<String, OnCommandCallback> mCommandCallbackMap;
 
@@ -78,6 +89,12 @@ public class PlayerService extends Service implements PlayerManager {
     private NotificationManager mNotificationManager;
 
     private Map<String, Runnable> mStartCommandActionMap;
+
+    private MediaSessionCompat mMediaSession;
+    private PlaybackStateCompat.Builder mPlaybackStateBuilder;
+    private MediaMetadataCompat.Builder mMediaMetadataBuilder;
+
+    private HeadsetHookHelper mHeadsetHookHelper;
 
     @Nullable
     private NotificationView mNotificationView;
@@ -103,6 +120,8 @@ public class PlayerService extends Service implements PlayerManager {
         initPlayer();
         initControllerPipe();
         initNotificationView();
+        initHeadsetHookHelper();
+        initMediaSession();
 
         updateNotificationView();
     }
@@ -132,7 +151,7 @@ public class PlayerService extends Service implements PlayerManager {
         final Dispatcher radioStationDispatcher =
                 ChannelHelper.newDispatcher(RadioStationPlayer.class, mRadioStationPlayer);
 
-        mControllerPipe = new MessengerPipe(new Dispatcher() {
+        mControllerPipe = new CustomActionPipe(new Dispatcher() {
             @Override
             public boolean dispatch(Map<String, Object> data) {
                 if (playerManagerDispatcher.dispatch(data)) {
@@ -187,6 +206,84 @@ public class PlayerService extends Service implements PlayerManager {
         }
     }
 
+    private void initHeadsetHookHelper() {
+        mHeadsetHookHelper = new HeadsetHookHelper(new HeadsetHookHelper.OnHeadsetHookClickListener() {
+            @Override
+            public void onHeadsetHookClicked(int clickCount) {
+                switch (clickCount) {
+                    case 1:
+                        playOrPause();
+                        break;
+                    case 2:
+                        skipToNext();
+                        break;
+                    case 3:
+                        skipToPrevious();
+                        break;
+                }
+            }
+        });
+    }
+
+    private void initMediaSession() {
+        mPlaybackStateBuilder = new PlaybackStateCompat.Builder();
+        mMediaMetadataBuilder = new MediaMetadataCompat.Builder();
+
+        mMediaSession = new MediaSessionCompat(this, this.getClass().getName());
+
+        mMediaSession.setPlaybackState(
+                buildPlaybackState(
+                        PlaybackStateCompat.STATE_NONE,
+                        getPlayerState().getPlayProgress(),
+                        System.currentTimeMillis(),
+                        PlaybackStateCompat.ACTION_PLAY |
+                                PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                                PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM |
+                                PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
+                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                                PlaybackStateCompat.ACTION_STOP)
+        );
+
+        mMediaSession.setMetadata(getFreshMediaMetadata());
+        mMediaSession.setCallback(new MediaSessionCallbackImp());
+
+        setSessionToken(mMediaSession.getSessionToken());
+    }
+
+    private PlaybackStateCompat buildPlaybackState(int state,
+                                                   int position,
+                                                   long updateTime,
+                                                   long actions) {
+        return buildPlaybackState(state, position, updateTime, actions, 0, "");
+    }
+
+    private PlaybackStateCompat buildPlaybackState(int state,
+                                                   int position,
+                                                   long updateTime,
+                                                   long actions,
+                                                   int errorCode,
+                                                   String errorMessage) {
+        return mPlaybackStateBuilder.setState(state, position, 1.0F, updateTime)
+                .setErrorMessage(errorCode, errorMessage)
+                .setActions(actions)
+                .build();
+    }
+
+    private MediaMetadataCompat getFreshMediaMetadata() {
+        MusicItem musicItem = getPlayerState().getMusicItem();
+
+        if (musicItem != null) {
+            return mMediaMetadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, musicItem.getTitle())
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicItem.getArtist())
+                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, musicItem.getAlbum())
+                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, musicItem.getIconUri())
+                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, musicItem.getDuration())
+                    .build();
+        }
+
+        return null;
+    }
+
     private boolean noNotificationView() {
         return mNotificationView == null;
     }
@@ -206,12 +303,19 @@ public class PlayerService extends Service implements PlayerManager {
 
     @Nullable
     @Override
-    public IBinder onBind(Intent intent) {
-        return mControllerPipe.getBinder();
+    public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, @Nullable Bundle rootHints) {
+        return new BrowserRoot(DEFAULT_MEDIA_ROOT_ID, null);
+    }
+
+    @Override
+    public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
+        result.sendResult(null);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        MediaButtonReceiver.handleIntent(mMediaSession, intent);
+
         Runnable task = mStartCommandActionMap.get(intent.getAction());
         if (task != null) {
             task.run();
@@ -268,6 +372,15 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     /**
+     * 获取当前 Service 中的 {@link MediaSessionCompat} 对象。
+     *
+     * @return {@link MediaSessionCompat} 对象
+     */
+    protected final MediaSessionCompat getMediaSession() {
+        return mMediaSession;
+    }
+
+    /**
      * 添加一个自定义动作。
      * <p>
      * 该方法会返回一个 PendingIntent 对象，该 PendingIntent 对象会使用指定的 action 启动当前 Service。当
@@ -297,7 +410,7 @@ public class PlayerService extends Service implements PlayerManager {
         mStartCommandActionMap.remove(action);
     }
 
-    private void notifyPlayerTypeChanged(int playerType) {
+    protected final void notifyPlayerTypeChanged(int playerType) {
         if (playerType == mPlayerType) {
             return;
         }
@@ -387,20 +500,6 @@ public class PlayerService extends Service implements PlayerManager {
     @Nullable
     protected final Bundle getRadioStationExtra() {
         return mRadioStationPlayer.getRadioStationExtra();
-    }
-
-    /**
-     * 获取列表播放器。
-     */
-    protected final PlaylistPlayer getPlaylistPlayer() {
-        return mPlaylistPlayer;
-    }
-
-    /**
-     * 获取电台播放器。
-     */
-    protected final RadioStationPlayer getRadioStationPlayer() {
-        return mRadioStationPlayer;
     }
 
     /**
@@ -616,32 +715,6 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     /**
-     * 获取已缓存的具有 soundQuality 音质的 MusicItem 表示的的音乐的 Uri。
-     *
-     * @param musicItem    MusicItem 对象
-     * @param soundQuality 音乐的音质
-     * @return 音乐的 Uri。可为 null，返回 null 时播放器会忽略本次播放。
-     */
-    @Nullable
-    protected Uri getCachedUri(MusicItem musicItem, Player.SoundQuality soundQuality) {
-        return null;
-    }
-
-    /**
-     * 从网络获取具有 soundQuality 音质的 MusicItem 表示的的音乐的 Uri。
-     * <p>
-     * 该方法会在异步线程中被调用。
-     *
-     * @param musicItem    MusicItem 对象
-     * @param soundQuality 音乐的音质
-     * @return 音乐的 Uri。可为 null，返回 null 时播放器会忽略本次播放。
-     */
-    @Nullable
-    protected Uri getUri(MusicItem musicItem, Player.SoundQuality soundQuality) {
-        return Uri.parse(musicItem.getUri());
-    }
-
-    /**
      * 该方法会在创建 MusicPlayer 对象时调用。
      * <p>
      * 你可以重写该方法来返回你自己的 MusicPlayer 实现。
@@ -715,6 +788,29 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     /**
+     * 快进。
+     */
+    protected final void fastForward() {
+        getPlayer().fastForward();
+    }
+
+    /**
+     * 快退。
+     */
+    protected final void rewind() {
+        getPlayer().rewind();
+    }
+
+    /**
+     * 调整音乐播放进度。
+     *
+     * @param progress 要调整到的播放进度
+     */
+    protected final void seekTo(int progress) {
+        getPlayer().seekTo(progress);
+    }
+
+    /**
      * 下一曲。
      */
     protected final void skipToNext() {
@@ -746,11 +842,45 @@ public class PlayerService extends Service implements PlayerManager {
     protected void onPrepared(int audioSessionId) {
     }
 
-    protected void onPlaying(long progress, long updateTime) {
+    protected void onPlaying(int progress, long updateTime) {
+        mMediaSession.setActive(true);
+
+        PlaybackStateCompat playbackState = buildPlaybackState(
+                PlaybackStateCompat.STATE_PLAYING,
+                progress,
+                updateTime,
+                PlaybackStateCompat.ACTION_PAUSE |
+                        PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                        PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM |
+                        PlaybackStateCompat.ACTION_STOP |
+                        PlaybackStateCompat.ACTION_SEEK_TO |
+                        PlaybackStateCompat.ACTION_FAST_FORWARD |
+                        PlaybackStateCompat.ACTION_REWIND);
+
+        mMediaSession.setPlaybackState(playbackState);
+
         updateNotificationView();
     }
 
     protected void onPaused() {
+        PlaybackStateCompat playbackState = buildPlaybackState(
+                PlaybackStateCompat.STATE_PAUSED,
+                getPlayerState().getPlayProgress(),
+                getPlayerState().getPlayProgressUpdateTime(),
+                PlaybackStateCompat.ACTION_PLAY |
+                        PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                        PlaybackStateCompat.ACTION_STOP |
+                        PlaybackStateCompat.ACTION_SEEK_TO |
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                        PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM |
+                        PlaybackStateCompat.ACTION_FAST_FORWARD |
+                        PlaybackStateCompat.ACTION_REWIND);
+
+        mMediaSession.setPlaybackState(playbackState);
+
         updateNotificationView();
     }
 
@@ -759,10 +889,37 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     protected void onStopped() {
+        mMediaSession.setActive(false);
+
+        PlaybackStateCompat playbackState = buildPlaybackState(
+                PlaybackStateCompat.STATE_STOPPED,
+                0,
+                getPlayerState().getPlayProgressUpdateTime(),
+                PlaybackStateCompat.ACTION_PLAY |
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                        PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM);
+
+        mMediaSession.setPlaybackState(playbackState);
+
         updateNotificationView();
     }
 
     protected void onError(int errorCode, String errorMessage) {
+        PlaybackStateCompat playbackState = buildPlaybackState(
+                PlaybackStateCompat.STATE_ERROR,
+                0,
+                getPlayerState().getPlayProgressUpdateTime(),
+                PlaybackStateCompat.ACTION_PLAY |
+                        PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                        PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM,
+                PlaybackStateCompat.ERROR_CODE_APP_ERROR,
+                errorMessage);
+
+        mMediaSession.setPlaybackState(playbackState);
+
         updateNotificationView();
     }
 
@@ -776,12 +933,22 @@ public class PlayerService extends Service implements PlayerManager {
     }
 
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
+        mMediaSession.setMetadata(getFreshMediaMetadata());
+
         if (noNotificationView()) {
             return;
         }
 
         mNotificationView.setNeedReloadIcon(true);
         updateNotificationView();
+    }
+
+    protected boolean onMediaButtonEvent(Intent mediaButtonEvent) {
+        return mHeadsetHookHelper.handleMediaButton(mediaButtonEvent);
+    }
+
+    protected void onCustomAction(String action, Bundle extras) {
+        mControllerPipe.dispatch(action, extras);
     }
 
     private class PlaylistPlayerImp extends AbstractPlaylistPlayer {
@@ -823,7 +990,7 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         @Override
-        protected void onPlaying(long progress, long updateTime) {
+        protected void onPlaying(int progress, long updateTime) {
             super.onPlaying(progress, updateTime);
             PlayerService.this.onPlaying(progress, updateTime);
         }
@@ -920,7 +1087,7 @@ public class PlayerService extends Service implements PlayerManager {
         }
 
         @Override
-        protected void onPlaying(long progress, long updateTime) {
+        protected void onPlaying(int progress, long updateTime) {
             super.onPlaying(progress, updateTime);
             PlayerService.this.onPlaying(progress, updateTime);
         }
@@ -971,6 +1138,100 @@ public class PlayerService extends Service implements PlayerManager {
         protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
             super.onPlayingMusicItemChanged(musicItem);
             PlayerService.this.onPlayingMusicItemChanged(musicItem);
+        }
+    }
+
+    private class MediaSessionCallbackImp extends MediaSessionCompat.Callback {
+        @Override
+        public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
+            if (PlayerService.this.onMediaButtonEvent(mediaButtonEvent)) {
+                return true;
+            }
+
+            return super.onMediaButtonEvent(mediaButtonEvent);
+        }
+
+        @Override
+        public void onCustomAction(String action, Bundle extras) {
+            PlayerService.this.onCustomAction(action, extras);
+        }
+
+        @Override
+        public void onPlay() {
+            PlayerService.this.play();
+        }
+
+        @Override
+        public void onSkipToQueueItem(long id) {
+            if (getPlayerType() == TYPE_RADIO_STATION) {
+                return;
+            }
+
+            mPlaylistPlayer.playOrPause((int) id);
+        }
+
+        @Override
+        public void onPause() {
+            PlayerService.this.pause();
+        }
+
+        @Override
+        public void onSkipToNext() {
+            PlayerService.this.skipToNext();
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            PlayerService.this.skipToPrevious();
+        }
+
+        @Override
+        public void onFastForward() {
+            PlayerService.this.fastForward();
+        }
+
+        @Override
+        public void onRewind() {
+            PlayerService.this.rewind();
+        }
+
+        @Override
+        public void onStop() {
+            PlayerService.this.stop();
+        }
+
+        @Override
+        public void onSeekTo(long pos) {
+            PlayerService.this.seekTo((int) pos);
+        }
+
+        @Override
+        public void onSetRepeatMode(int repeatMode) {
+            if (getPlayerType() == TYPE_RADIO_STATION) {
+                return;
+            }
+
+            if (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE) {
+                mPlaylistPlayer.setPlayMode(PlaylistPlayer.PlayMode.LOOP);
+                return;
+            }
+
+            mPlaylistPlayer.setPlayMode(PlaylistPlayer.PlayMode.SEQUENTIAL);
+        }
+
+        @Override
+        public void onSetShuffleMode(int shuffleMode) {
+            if (getPlayerType() == TYPE_RADIO_STATION) {
+                return;
+            }
+
+            if (shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_NONE ||
+                    shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_INVALID) {
+                mPlaylistPlayer.setPlayMode(PlaylistPlayer.PlayMode.SEQUENTIAL);
+                return;
+            }
+
+            mPlaylistPlayer.setPlayMode(PlaylistPlayer.PlayMode.SHUFFLE);
         }
     }
 
@@ -1132,6 +1393,15 @@ public class PlayerService extends Service implements PlayerManager {
         @NonNull
         public final MusicItem getPlayingMusicItem() {
             return mMusicItem;
+        }
+
+        /**
+         * 获取当前播放器的 {@link MediaSessionCompat} 对象。
+         *
+         * @return {@link MediaSessionCompat} 对象
+         */
+        public MediaSessionCompat getMediaSession() {
+            return mPlayerService.getMediaSession();
         }
 
         /**

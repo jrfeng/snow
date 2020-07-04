@@ -3,9 +3,10 @@ package snow.player;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.os.IBinder;
+import android.os.RemoteException;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.session.MediaControllerCompat;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +18,7 @@ import java.util.List;
 
 import channel.helper.ChannelHelper;
 import channel.helper.DispatcherUtil;
+import channel.helper.pipe.CustomActionPipe;
 import channel.helper.pipe.MessengerPipe;
 import snow.player.media.MusicItem;
 import snow.player.playlist.Playlist;
@@ -37,9 +39,9 @@ public class PlayerClient {
     private Class<? extends PlayerService> mPlayerService;
     private String mToken;
 
-    private ServiceConnection mServiceConnection;
+    private MediaBrowserCompat mMediaBrowser;
+    private MediaControllerCompat mMediaController;
 
-    private boolean mConnected;
     private int mPlayerType;
 
     private PlayerManager mPlayerManager;
@@ -58,10 +60,9 @@ public class PlayerClient {
         mPlayerService = playerService;
         mToken = generateToken();
 
-        mConnected = false;
         mAllPlayerTypeChangeListener = new ArrayList<>();
 
-        initServiceConnection();
+        initMediaBrowser();
         initAllController();
         initConfigChangeListener();
     }
@@ -95,28 +96,36 @@ public class PlayerClient {
         return mPlayerService.getName();
     }
 
-    private void initServiceConnection() {
-        mServiceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                onConnected(service);
+    private void initMediaBrowser() {
+        mMediaBrowser = new MediaBrowserCompat(mApplicationContext,
+                new ComponentName(mApplicationContext, mPlayerService),
+                new MediaBrowserCompat.ConnectionCallback() {
+                    @Override
+                    public void onConnected() {
+                        try {
+                            mMediaController = new MediaControllerCompat(mApplicationContext, mMediaBrowser.getSessionToken());
 
-                if (mConnectCallback != null) {
-                    mConnectCallback.onConnected(true);
-                    mConnectCallback = null;
-                }
-            }
+                            PlayerClient.this.onConnected(mMediaController);
 
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                onDisconnected();
+                            if (mConnectCallback != null) {
+                                mConnectCallback.onConnected(true);
+                                mConnectCallback = null;
+                            }
+                        } catch (RemoteException e) {
+                            onConnectionFailed();
+                        }
+                    }
 
-                if (mConnectCallback != null) {
-                    mConnectCallback.onConnected(false);
-                    mConnectCallback = null;
-                }
-            }
-        };
+                    @Override
+                    public void onConnectionFailed() {
+                        onDisconnected();
+
+                        if (mConnectCallback != null) {
+                            mConnectCallback.onConnected(false);
+                            mConnectCallback = null;
+                        }
+                    }
+                }, null);
     }
 
     private void initAllController() {
@@ -154,10 +163,8 @@ public class PlayerClient {
         }
     }
 
-    private void onConnected(IBinder service) {
-        mConnected = true;
-
-        MessengerPipe controllerPipe = new MessengerPipe(service);
+    private void onConnected(MediaControllerCompat mediaController) {
+        CustomActionPipe controllerPipe = new CustomActionPipe(mediaController.getTransportControls());
 
         mPlayerManager = ChannelHelper.newEmitter(PlayerManager.class, controllerPipe);
 
@@ -177,10 +184,10 @@ public class PlayerClient {
     }
 
     private void onDisconnected() {
-        if (mConnected) {
-            mConnected = false;
-            mPlaylistController.setConnected(false);
-            mRadioStationController.setConnected(false);
+        mPlaylistController.setConnected(false);
+        mRadioStationController.setConnected(false);
+
+        if (isConnected()) {
             mPlayerManager.unregisterPlayerStateListener(mToken);
         }
     }
@@ -193,8 +200,7 @@ public class PlayerClient {
             return;
         }
 
-        Intent intent = new Intent(mApplicationContext, mPlayerService);
-        mApplicationContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        mMediaBrowser.connect();
     }
 
     /**
@@ -219,7 +225,7 @@ public class PlayerClient {
         }
 
         onDisconnected();
-        mApplicationContext.unbindService(mServiceConnection);
+        mMediaBrowser.disconnect();
     }
 
     /**
@@ -228,7 +234,18 @@ public class PlayerClient {
      * @return 如果播放器已连接则返回 true，否则返回 false
      */
     public boolean isConnected() {
-        return mConnected;
+        return mMediaBrowser.isConnected();
+    }
+
+    /**
+     * 获取 {@link MediaControllerCompat} 对象。
+     *
+     * @return {@link MediaControllerCompat} 对象，如果还没有建立连接（{@link #isConnected()} 返回
+     * {@code false}），那么该方法可能会返回 null
+     */
+    @Nullable
+    public MediaControllerCompat getMediaController() {
+        return mMediaController;
     }
 
     /**
