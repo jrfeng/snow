@@ -463,10 +463,6 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         });
     }
 
-    private boolean notBufferingEnd() {
-        return mPlayerState.getBufferingPercent() < 100;
-    }
-
     private void attachListeners(MusicPlayer musicPlayer) {
         musicPlayer.setOnPreparedListener(mOnPreparedListener);
         musicPlayer.setOnCompletionListener(mOnCompletionListener);
@@ -966,7 +962,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     }
 
     private void checkNetworkType(boolean onlyWifiNetwork, boolean isWifiNetwork) {
-        if (onlyWifiNetwork && !isWifiNetwork && notBufferingEnd()) {
+        if (onlyWifiNetwork && !isWifiNetwork && !isCached(getMusicItem(), mPlayerConfig.getSoundQuality())) {
             pause();
             releaseMusicPlayer();
             notifyError(Error.ONLY_WIFI_NETWORK,
