@@ -47,6 +47,7 @@ public abstract class PlaylistManager {
      * @return 如果当前 PlaylistManager 是可编辑的，则返回 true，否则返回 false。当返回 false 时，
      * 对 Playlist 的一切修改操作都会被忽略（可以正常访问）。
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public final boolean isEditable() {
         return mEditable;
     }

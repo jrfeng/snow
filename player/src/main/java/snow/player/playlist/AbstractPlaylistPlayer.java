@@ -138,6 +138,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         }
     }
 
+    @SuppressWarnings("unused")
     protected final boolean isPlaylistAvailable() {
         return !mLoadingPlaylist;
     }

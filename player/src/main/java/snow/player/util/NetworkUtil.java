@@ -18,6 +18,7 @@ import com.google.common.base.Preconditions;
 
 import java.lang.ref.WeakReference;
 
+@SuppressWarnings("deprecation")
 public class NetworkUtil {
     private Context mApplicationContext;
     private WeakReference<OnNetworkStateChangeListener> mListenerWeakReference;
