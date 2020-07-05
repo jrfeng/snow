@@ -341,6 +341,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             mNotificationView.onRelease();
         }
 
+        mMediaSession.release();
         mPlaylistPlayer.release();
         mRadioStationPlayer.release();
 
