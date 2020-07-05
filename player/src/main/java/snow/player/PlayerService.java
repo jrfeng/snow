@@ -35,7 +35,6 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.common.base.Preconditions;
-import com.tencent.mmkv.MMKV;
 
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +63,7 @@ import snow.player.playlist.PlaylistStateListener;
 import snow.player.radio.RadioStationState;
 import snow.player.radio.RadioStationStateListener;
 
+@SuppressWarnings("EmptyMethod")
 public class PlayerService extends MediaBrowserServiceCompat implements PlayerManager {
     public static final String DEFAULT_MEDIA_ROOT_ID = "root";
 
@@ -539,6 +539,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * 获取 Notification 的 ID（默认返回 1）。
      */
+    @SuppressWarnings("SameReturnValue")
     protected int getNotificationId() {
         return 1;
     }
@@ -781,6 +782,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @param soundQuality 音乐的音质
      * @return 如果已被缓存，则返回 true，否则返回 false
      */
+    @SuppressWarnings("SameReturnValue")
     protected boolean isCached(MusicItem musicItem, Player.SoundQuality soundQuality) {
         return false;
     }
@@ -817,6 +819,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @param radioStation 用于表示电台的 RadioStation 对象
      * @return “电台” 的下一首音乐（返回 null 时会停止播放）
      */
+    @SuppressWarnings("SameReturnValue")
     @Nullable
     protected MusicItem getNextMusicItem(RadioStation radioStation) {
         return null;

@@ -9,7 +9,6 @@ import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
 
 import snow.player.media.MusicItem;
-import snow.player.Player;
 
 /**
  * 用于对 “电台” 状态进行持久化。

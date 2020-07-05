@@ -10,7 +10,6 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import org.junit.runner.RunWith;
 
 import snow.player.media.MusicItem;
-import snow.player.Player;
 
 import static org.junit.Assert.*;
 
