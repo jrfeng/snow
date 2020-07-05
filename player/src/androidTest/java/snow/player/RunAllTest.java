@@ -14,17 +14,20 @@ import snow.player.radio.RadioStationStateTest;
 import snow.player.radio.RadioStationTest;
 
 @Suite.SuiteClasses({
+        // snow.player
         AbstractPlayerTest.class,
         PlayerStateTest.class,
-        // media
+        PlayerConfigTest.class,
+        PersistentPlayerConfigTest.class,
+        // snow.player.media
         MusicItemTest.class,
-        // playlist
+        // snow.player.playlist
         AbstractPlaylistPlayerTest.class,
         PersistentPlaylistStateTest.class,
         PlaylistManagerTest.class,
         PlaylistStateTest.class,
         PlaylistTest.class,
-        // radio
+        // snow.player.radio
         PersistentRadioStationStateTest.class,
         RadioStationStateTest.class,
         RadioStationTest.class

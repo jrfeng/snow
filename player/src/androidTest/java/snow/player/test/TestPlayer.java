@@ -6,6 +6,7 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 
 import snow.player.AbstractPlayer;
+import snow.player.PlayerConfig;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.PlayerState;
@@ -14,8 +15,10 @@ import snow.player.PlayerStateListener;
 public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
     private Tester mTester;
 
-    public TestPlayer(@NonNull Context context, @NonNull PlayerState playerState) {
-        super(context, playerState);
+    public TestPlayer(@NonNull Context context,
+                      @NonNull PlayerConfig playerConfig,
+                      @NonNull PlayerState playerState) {
+        super(context, playerConfig, playerState, true);
 
         mTester = new Tester();
     }

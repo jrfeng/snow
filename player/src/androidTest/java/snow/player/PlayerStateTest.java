@@ -16,14 +16,10 @@ import static org.junit.Assert.*;
 public class PlayerStateTest {
 
     @Test
-    public void constructorTest() {
+    public void defaultConstructorTest() {
         PlayerState playerState = new PlayerState();
 
         assertEquals(0, playerState.getPlayProgress());
-        assertEquals(Player.SoundQuality.STANDARD, playerState.getSoundQuality());
-        assertFalse(playerState.isAudioEffectEnabled());
-        assertTrue(playerState.isOnlyWifiNetwork());
-        assertFalse(playerState.isIgnoreLossAudioFocus());
 
         assertEquals(Player.PlaybackState.UNKNOWN, playerState.getPlaybackState());
         assertEquals(0, playerState.getAudioSessionId());
@@ -32,27 +28,24 @@ public class PlayerStateTest {
         assertEquals(Player.Error.NO_ERROR, playerState.getErrorCode());
     }
 
-    public void constructor2Test() {
-        PlayerState playerState = new PlayerState();
+    @Test
+    public void copyConstructorTest() {
+        PlayerState source = new PlayerState();
 
-        playerState.setPlayProgress(1000);
-        playerState.setPlayProgressUpdateTime(System.currentTimeMillis());
-        playerState.setSoundQuality(Player.SoundQuality.HIGH);
-        playerState.setAudioEffectEnabled(true);
-        playerState.setOnlyWifiNetwork(false);
-        playerState.setIgnoreLossAudioFocus(true);
-        playerState.setMusicItem(new MusicItem());
-        playerState.setPlaybackState(Player.PlaybackState.PAUSED);
-        playerState.setAudioSessionId(15);
-        playerState.setBufferingPercent(99);
-        playerState.setBufferingPercentUpdateTime(System.currentTimeMillis());
-        playerState.setStalled(true);
-        playerState.setErrorCode(Player.Error.ONLY_WIFI_NETWORK);
-        playerState.setErrorMessage("only wifi network");
+        source.setPlayProgress(1000);
+        source.setPlayProgressUpdateTime(System.currentTimeMillis());
+        source.setMusicItem(new MusicItem());
+        source.setPlaybackState(Player.PlaybackState.PAUSED);
+        source.setAudioSessionId(15);
+        source.setBufferingPercent(99);
+        source.setBufferingPercentUpdateTime(System.currentTimeMillis());
+        source.setStalled(true);
+        source.setErrorCode(Player.Error.ONLY_WIFI_NETWORK);
+        source.setErrorMessage("only wifi network");
 
-        PlayerState other = new PlayerState(playerState);
+        PlayerState copy = new PlayerState(source);
 
-        assertEquals(playerState, other);
+        assertEquals(source, copy);
     }
 
     @Test
@@ -73,10 +66,7 @@ public class PlayerStateTest {
     public void equals_hashCode() {
         final int playProgress = 1000;
         final long playProgressUpdateTime = System.currentTimeMillis();
-        final Player.SoundQuality soundQuality = Player.SoundQuality.SUPER;
-        final boolean audioEffectEnable = false;
-        final boolean onlyWifiNetwork = true;
-        final boolean ignoreAudioFocus = false;
+
         final MusicItem musicItem = new MusicItem();
         musicItem.setTitle("test_title");
         musicItem.setArtist("test_artist");
@@ -92,10 +82,6 @@ public class PlayerStateTest {
         PlayerState playerState = new PlayerState();
         playerState.setPlayProgress(playProgress);
         playerState.setPlayProgressUpdateTime(playProgressUpdateTime);
-        playerState.setSoundQuality(soundQuality);
-        playerState.setAudioEffectEnabled(audioEffectEnable);
-        playerState.setOnlyWifiNetwork(onlyWifiNetwork);
-        playerState.setIgnoreLossAudioFocus(ignoreAudioFocus);
         playerState.setMusicItem(musicItem);
         playerState.setPlaybackState(playbackState);
         playerState.setAudioSessionId(audioSessionId);
@@ -108,10 +94,6 @@ public class PlayerStateTest {
         PlayerState other = new PlayerState();
         other.setPlayProgress(playProgress);
         other.setPlayProgressUpdateTime(playProgressUpdateTime);
-        other.setSoundQuality(soundQuality);
-        other.setAudioEffectEnabled(audioEffectEnable);
-        other.setOnlyWifiNetwork(onlyWifiNetwork);
-        other.setIgnoreLossAudioFocus(ignoreAudioFocus);
         other.setMusicItem(musicItem);
         other.setPlaybackState(playbackState);
         other.setAudioSessionId(audioSessionId);
@@ -126,56 +108,11 @@ public class PlayerStateTest {
     }
 
     @Test
-    public void copyConstructorTest() {
-        final int playProgress = 1000;
-        final long playProgressUpdateTime = System.currentTimeMillis();
-        final Player.SoundQuality soundQuality = Player.SoundQuality.SUPER;
-        final boolean audioEffectEnable = false;
-        final boolean onlyWifiNetwork = true;
-        final boolean ignoreAudioFocus = false;
-        final MusicItem musicItem = new MusicItem();
-        musicItem.setTitle("test_title");
-        musicItem.setArtist("test_artist");
-
-        final Player.PlaybackState playbackState = Player.PlaybackState.PLAYING;
-        final int audioSessionId = 8;
-        final int bufferingPercent = 95;
-        final long bufferingPercentUpdateTime = System.currentTimeMillis();
-        final boolean stalled = true;
-        final int errorCode = Player.Error.ONLY_WIFI_NETWORK;
-        final String errorMessage = "only wifi network";
-
-        PlayerState playerState = new PlayerState();
-        playerState.setPlayProgress(playProgress);
-        playerState.setPlayProgressUpdateTime(playProgressUpdateTime);
-        playerState.setSoundQuality(soundQuality);
-        playerState.setAudioEffectEnabled(audioEffectEnable);
-        playerState.setOnlyWifiNetwork(onlyWifiNetwork);
-        playerState.setIgnoreLossAudioFocus(ignoreAudioFocus);
-        playerState.setMusicItem(musicItem);
-        playerState.setPlaybackState(playbackState);
-        playerState.setAudioSessionId(audioSessionId);
-        playerState.setBufferingPercent(bufferingPercent);
-        playerState.setBufferingPercentUpdateTime(bufferingPercentUpdateTime);
-        playerState.setStalled(stalled);
-        playerState.setErrorCode(errorCode);
-        playerState.setErrorMessage(errorMessage);
-
-        PlayerState other = new PlayerState(playerState);
-
-        assertEquals(playerState, other);
-    }
-
-    @Test
     public void parcelableTest() {
         PlayerState playerState = new PlayerState();
 
         final int playProgress = 2000;
         final long playProgressUpdateTime = System.currentTimeMillis();
-        final Player.SoundQuality soundQuality = Player.SoundQuality.HIGH;
-        final boolean audioEffectEnable = true;
-        final boolean onlyWifiNetwork = false;
-        final boolean ignoreAudioFocus = true;
         final MusicItem musicItem = new MusicItem();
         musicItem.setTitle("test_title");
         musicItem.setArtist("test_artist");
@@ -190,10 +127,6 @@ public class PlayerStateTest {
 
         playerState.setPlayProgress(playProgress);
         playerState.setPlayProgressUpdateTime(playProgressUpdateTime);
-        playerState.setSoundQuality(soundQuality);
-        playerState.setAudioEffectEnabled(audioEffectEnable);
-        playerState.setOnlyWifiNetwork(onlyWifiNetwork);
-        playerState.setIgnoreLossAudioFocus(ignoreAudioFocus);
         playerState.setMusicItem(musicItem);
         playerState.setPlaybackState(playbackState);
         playerState.setAudioSessionId(audioSessionId);

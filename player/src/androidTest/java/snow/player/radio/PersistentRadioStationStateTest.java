@@ -28,10 +28,6 @@ public class PersistentRadioStationStateTest {
 
         prss.setPlayProgress(100);
         prss.setPlayProgressUpdateTime(System.currentTimeMillis());
-        prss.setSoundQuality(Player.SoundQuality.HIGH);
-        prss.setAudioEffectEnabled(true);
-        prss.setOnlyWifiNetwork(false);
-        prss.setIgnoreLossAudioFocus(false);
         prss.setRadioStation(radioStation);
 
         final MusicItem musicItem = new MusicItem();

@@ -19,6 +19,7 @@ import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class AbstractPlayerTest {
+    private PlayerConfig mPlayerConfig;
     private PlayerState mPlayerState;
     private TestMusicPlayer mTestMusicPlayer;
     private TestPlayer mTestPlayer;
@@ -35,6 +36,7 @@ public class AbstractPlayerTest {
         musicItem.setDuration(duration);
         musicItem.setUri("http://www.test.com/test.mp3");
 
+        mPlayerConfig = new PlayerConfig();
         mPlayerState = new PlayerState();
 
         mPlayerState.setPlayProgress(mProgress);
@@ -42,15 +44,15 @@ public class AbstractPlayerTest {
         mPlayerState.setMusicItem(musicItem);
 
         mTestMusicPlayer = new TestMusicPlayer();
-        mTestPlayer = createTestPlayer(mPlayerState, mTestMusicPlayer);
+        mTestPlayer = createTestPlayer(mPlayerConfig, mPlayerState, mTestMusicPlayer);
     }
 
     private Context getContext() {
         return InstrumentationRegistry.getInstrumentation().getTargetContext();
     }
 
-    protected TestPlayer createTestPlayer(PlayerState playerState, TestMusicPlayer musicPlayer) {
-        TestPlayer player = new TestPlayer(getContext(), playerState);
+    protected TestPlayer createTestPlayer(PlayerConfig playerConfig, PlayerState playerState, TestMusicPlayer musicPlayer) {
+        TestPlayer player = new TestPlayer(getContext(), playerConfig, playerState);
         player.tester().setTestMusicPlayer(musicPlayer);
 
         MusicItem musicItem = playerState.getMusicItem();
@@ -65,7 +67,7 @@ public class AbstractPlayerTest {
     public void prepareMusicPlayer() throws InterruptedException {
         final boolean looping = true;
 
-        mPlayerState.setAudioEffectEnabled(true);
+        mPlayerConfig.setAudioEffectEnabled(true);
         mTestPlayer.tester().setLooping(looping);
 
         final CountDownLatch latch = new CountDownLatch(1);
@@ -231,37 +233,5 @@ public class AbstractPlayerTest {
 
         mTestPlayer.notifyPlayingMusicItemChanged(musicItem, true);
         latch.await();
-    }
-
-    @Test
-    public void setSoundQuality() {
-        final Player.SoundQuality soundQuality = Player.SoundQuality.SUPER;
-
-        mTestPlayer.setSoundQuality(soundQuality);
-        assertEquals(soundQuality, mPlayerState.getSoundQuality());
-    }
-
-    @Test
-    public void setAudioEffectEnabled() {
-        final boolean enabled = true;
-
-        mTestPlayer.setAudioEffectEnabled(enabled);
-        assertEquals(enabled, mPlayerState.isAudioEffectEnabled());
-    }
-
-    @Test
-    public void setOnlyWifiNetwork() {
-        final boolean onlyWifiNetwork = false;
-
-        mTestPlayer.setOnlyWifiNetwork(onlyWifiNetwork);
-        assertEquals(onlyWifiNetwork, mPlayerState.isOnlyWifiNetwork());
-    }
-
-    @Test
-    public void setIgnoreLossAudioFocus() {
-        final boolean ignoreLossAudioFocus = true;
-
-        mTestPlayer.setIgnoreLossAudioFocus(ignoreLossAudioFocus);
-        assertEquals(ignoreLossAudioFocus, mPlayerState.isIgnoreLossAudioFocus());
     }
 }

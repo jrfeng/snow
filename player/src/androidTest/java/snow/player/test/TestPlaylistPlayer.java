@@ -5,6 +5,7 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
+import snow.player.PlayerConfig;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.playlist.AbstractPlaylistPlayer;
@@ -16,10 +17,11 @@ public class TestPlaylistPlayer extends AbstractPlaylistPlayer {
     private Tester mTester;
 
     public TestPlaylistPlayer(@NonNull Context context,
+                              @NonNull PlayerConfig playerConfig,
                               @NonNull PlaylistState playlistState,
                               @NonNull PlaylistManager playlistManager,
                               @NonNull Playlist playlist) {
-        super(context, playlistState, playlistManager, playlist);
+        super(context,playerConfig, playlistState, true, playlistManager, playlist);
 
         mTester = new Tester();
     }
