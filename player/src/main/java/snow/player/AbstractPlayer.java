@@ -283,11 +283,12 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      * @param preparedAction 在音乐播放器准备完成后要执行的操作
      */
     protected final void prepareMusicPlayer(@Nullable Runnable preparedAction) {
+        releaseMusicPlayer();
+
         if (!isEnabled()) {
             return;
         }
 
-        releaseMusicPlayer();
         notifyBufferingPercentChanged(0, System.currentTimeMillis());
 
         MusicItem musicItem = mPlayerState.getMusicItem();
