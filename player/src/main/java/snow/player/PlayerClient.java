@@ -593,7 +593,7 @@ public class PlayerClient {
          *
          * @return 缓存进度更新时间
          */
-        public long getBufferingPrecentUpdateTime() {
+        public long getBufferingPercentUpdateTime() {
             return mPlaylistStateHolder.mPlaylistState.getBufferingPercentUpdateTime();
         }
 
@@ -1125,7 +1125,7 @@ public class PlayerClient {
          *
          * @return 缓存进度更新时间
          */
-        public long getBufferingPrecentUpdateTime() {
+        public long getBufferingPercentUpdateTime() {
             return mRadioStationStateHolder.mRadioStationState.getBufferingPercentUpdateTime();
         }
 

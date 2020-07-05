@@ -17,6 +17,7 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class PersistentRadioStationStateTest {
 
+    @SuppressWarnings("SpellCheckingInspection")
     @Test
     public void constructorTest() {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
