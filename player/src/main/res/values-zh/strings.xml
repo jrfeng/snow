@@ -13,7 +13,6 @@
     <string name="snow_des_skip_to_previous">上一曲</string>
     <string name="snow_des_play_pause">播放/暂停</string>
     <string name="snow_des_skip_to_next">下一曲</string>
-    <string name="snow_des_shutdown">关闭</string>
     <string name="snow_preparing">准备中…</string>
     <string name="snow_buffering">缓冲中…</string>
     <string name="snow_des_custom_action">自定义按钮</string>

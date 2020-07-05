@@ -17,6 +17,5 @@
     <string name="snow_des_skip_to_previous">skip to previous</string>
     <string name="snow_des_play_pause">play/pause</string>
     <string name="snow_des_skip_to_next">skip to next</string>
-    <string name="snow_des_shutdown">shutdown</string>
     <string name="snow_des_custom_action">custom action</string>
 </resources>
