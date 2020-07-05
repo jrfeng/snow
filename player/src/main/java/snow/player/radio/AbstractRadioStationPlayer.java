@@ -16,6 +16,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import snow.player.AbstractPlayer;
+import snow.player.PlayerConfig;
 import snow.player.media.MusicItem;
 
 public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioStationStateListener>
@@ -24,8 +25,11 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
 
     private Disposable mDisposable;
 
-    public AbstractRadioStationPlayer(@NonNull Context context, @NonNull RadioStationState radioStationState) {
-        super(context, radioStationState);
+    public AbstractRadioStationPlayer(@NonNull Context context,
+                                      @NonNull PlayerConfig playerConfig,
+                                      @NonNull RadioStationState radioStationState,
+                                      boolean enabled) {
+        super(context, playerConfig, radioStationState, enabled);
 
         mRadioStationState = radioStationState;
     }

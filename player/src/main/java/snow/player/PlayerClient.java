@@ -42,7 +42,7 @@ public class PlayerClient {
     private MediaBrowserCompat mMediaBrowser;
     private MediaControllerCompat mMediaController;
 
-    private int mPlayerType;
+    private PlayerConfig mPlayerConfig;
 
     private PlayerManager mPlayerManager;
 
@@ -60,6 +60,7 @@ public class PlayerClient {
         mPlayerService = playerService;
         mToken = generateToken();
 
+        mPlayerConfig = new PersistentPlayerConfig(context, mToken);
         mAllPlayerTypeChangeListener = new ArrayList<>();
 
         initMediaBrowser();
@@ -142,14 +143,12 @@ public class PlayerClient {
 
             @Override
             public void onPlayerTypeChanged(int playerType) {
-                mPlayerType = playerType;
-                notifyPlayerTypeChanged();
+                notifyPlayerTypeChanged(playerType);
             }
 
             @Override
             public void syncPlayerState(int playerType, PlaylistState playlistState, RadioStationState radioStationState) {
-                mPlayerType = playerType;
-                notifyPlayerTypeChanged();
+                notifyPlayerTypeChanged(playerType);
 
                 mPlaylistController.setPlaylistState(playlistState);
                 mRadioStationController.setRadioStationState(radioStationState);
@@ -157,9 +156,9 @@ public class PlayerClient {
         };
     }
 
-    private void notifyPlayerTypeChanged() {
+    private void notifyPlayerTypeChanged(int playerType) {
         for (PlayerManager.OnPlayerTypeChangeListener listener : mAllPlayerTypeChangeListener) {
-            listener.onPlayerTypeChanged(mPlayerType);
+            listener.onPlayerTypeChanged(playerType);
         }
     }
 
@@ -249,6 +248,76 @@ public class PlayerClient {
     }
 
     /**
+     * 设置播放器的首选音质（默认为 {@link Player.SoundQuality#STANDARD}）。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     *
+     * @param soundQuality 要设置的音质
+     * @see Player.SoundQuality#STANDARD
+     * @see Player.SoundQuality#LOW
+     * @see Player.SoundQuality#HIGH
+     * @see Player.SoundQuality#SUPER
+     * @see #getSoundQuality()
+     */
+    public void setSoundQuality(Player.SoundQuality soundQuality) {
+        if (!isConnected()) {
+            return;
+        }
+
+        mPlayerManager.setSoundQuality(soundQuality);
+    }
+
+    /**
+     * 设置是否启用音频特效（如：均衡器）（默认为 false）。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     *
+     * @param enabled 是否启用音频特效
+     * @see #isAudioEffectEnabled()
+     */
+    public void setAudioEffectEnabled(boolean enabled) {
+        if (!isConnected()) {
+            return;
+        }
+
+        mPlayerManager.setAudioEffectEnabled(enabled);
+    }
+
+    /**
+     * 设置是否只允许在 WiFi 网络下播放音乐（默认为 false）。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     *
+     * @param onlyWifiNetwork 是否只允许在 WiFi 网络下播放音乐
+     * @see #isOnlyWifiNetwork()
+     */
+    public void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
+        if (!isConnected()) {
+            return;
+        }
+
+        mPlayerManager.setOnlyWifiNetwork(onlyWifiNetwork);
+    }
+
+    /**
+     * 设置是否忽略音频焦点的丢失（默认为 false）。
+     * <p>
+     * 如果设为 true，即使音频焦点丢失，当前播放器依然会继续播放。简单的说，就是是否可以和其他应用同时播放音频。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     *
+     * @param ignoreLossAudioFocus 是否忽略音频焦点的丢失
+     * @see #isIgnoreLossAudioFocus()
+     */
+    public void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
+        if (!isConnected()) {
+            return;
+        }
+
+        mPlayerManager.setIgnoreLossAudioFocus(ignoreLossAudioFocus);
+    }
+
+    /**
      * 获取当前播放器类型。
      * <p>
      * 共有两种播放器类型：
@@ -268,7 +337,43 @@ public class PlayerClient {
      * @return 当前播放器类型
      */
     public int getPlayerType() {
-        return mPlayerType;
+        return mPlayerConfig.getPlayerType();
+    }
+
+    /**
+     * 获取当前播放器的首选音质。
+     *
+     * @see #setSoundQuality(Player.SoundQuality)
+     */
+    public Player.SoundQuality getSoundQuality() {
+        return mPlayerConfig.getSoundQuality();
+    }
+
+    /**
+     * 是否已启用音频特效。
+     *
+     * @see #setAudioEffectEnabled(boolean)
+     */
+    public boolean isAudioEffectEnabled() {
+        return mPlayerConfig.isAudioEffectEnabled();
+    }
+
+    /**
+     * 是否只允许使用 Wifi 网络（默认为 false）。
+     *
+     * @see #setOnlyWifiNetwork(boolean)
+     */
+    public boolean isOnlyWifiNetwork() {
+        return mPlayerConfig.isOnlyWifiNetwork();
+    }
+
+    /**
+     * 是否忽略音频焦点的丢失。
+     *
+     * @see #setIgnoreLossAudioFocus(boolean)
+     */
+    public boolean isIgnoreLossAudioFocus() {
+        return mPlayerConfig.isIgnoreLossAudioFocus();
     }
 
     public PlaylistController getPlaylistController() {
@@ -443,34 +548,6 @@ public class PlayerClient {
          */
         public boolean isLooping() {
             return getPlayMode() == PlayMode.LOOP;
-        }
-
-        /**
-         * 获取当前播放器的首选音质。
-         */
-        public SoundQuality getSoundQuality() {
-            return mPlaylistStateHolder.mPlaylistState.getSoundQuality();
-        }
-
-        /**
-         * 是否已启用音频特效。
-         */
-        public boolean isAudioEffectEnabled() {
-            return mPlaylistStateHolder.mPlaylistState.isAudioEffectEnabled();
-        }
-
-        /**
-         * 是否只允许使用 Wifi 网络（默认为 false）。
-         */
-        public boolean isOnlyWifiNetwork() {
-            return mPlaylistStateHolder.mPlaylistState.isOnlyWifiNetwork();
-        }
-
-        /**
-         * 是否忽略音频焦点的丢失。
-         */
-        public boolean isIgnoreLossAudioFocus() {
-            return mPlaylistStateHolder.mPlaylistState.isIgnoreLossAudioFocus();
         }
 
         /**
@@ -774,76 +851,6 @@ public class PlayerClient {
         }
 
         /**
-         * 设置播放器的首选音质（默认为 {@link SoundQuality#STANDARD}）。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         *
-         * @param soundQuality 要设置的音质
-         * @see SoundQuality#STANDARD
-         * @see SoundQuality#LOW
-         * @see SoundQuality#HIGH
-         * @see SoundQuality#SUPER
-         */
-        @Override
-        public void setSoundQuality(SoundQuality soundQuality) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.setSoundQuality(soundQuality);
-        }
-
-        /**
-         * 设置是否启用音频特效（如：均衡器）（默认为 false）。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         *
-         * @param enabled 是否启用音频特效
-         */
-        @Override
-        public void setAudioEffectEnabled(boolean enabled) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.setAudioEffectEnabled(enabled);
-        }
-
-        /**
-         * 设置是否只允许在 WiFi 网络下播放音乐（默认为 false）。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         *
-         * @param onlyWifiNetwork 是否只允许在 WiFi 网络下播放音乐
-         */
-        @Override
-        public void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.setOnlyWifiNetwork(onlyWifiNetwork);
-        }
-
-        /**
-         * 设置是否忽略音频焦点的丢失（默认为 false）。
-         * <p>
-         * 如果设为 true，即使音频焦点丢失，当前播放器依然会继续播放。简单的说，就是是否可以和其他应用同时播放音频。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         *
-         * @param ignoreLossAudioFocus 是否忽略音频焦点的丢失
-         */
-        @Override
-        public void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.setIgnoreLossAudioFocus(ignoreLossAudioFocus);
-        }
-
-        /**
          * 添加一个播放器播放状态监听器。
          * <p>
          * 如果监听器已添加，则忽略本次调用。
@@ -1076,34 +1083,6 @@ public class PlayerClient {
         }
 
         /**
-         * 获取当前播放器的首选音质。
-         */
-        public SoundQuality getSoundQuality() {
-            return mRadioStationStateHolder.mRadioStationState.getSoundQuality();
-        }
-
-        /**
-         * 是否已启用音频特效。
-         */
-        public boolean isAudioEffectEnabled() {
-            return mRadioStationStateHolder.mRadioStationState.isAudioEffectEnabled();
-        }
-
-        /**
-         * 是否只允许使用 Wifi 网络。
-         */
-        public boolean isOnlyWifiNetwork() {
-            return mRadioStationStateHolder.mRadioStationState.isOnlyWifiNetwork();
-        }
-
-        /**
-         * 是否忽略音频焦点的丢失。
-         */
-        public boolean isIgnoreLossAudioFocus() {
-            return mRadioStationStateHolder.mRadioStationState.isIgnoreLossAudioFocus();
-        }
-
-        /**
          * 获取当前正在播放的音乐。
          *
          * @return 当前正在播放的音乐，如果当前没有任何播放的音乐，则返回 null
@@ -1323,76 +1302,6 @@ public class PlayerClient {
             }
 
             mDelegate.rewind();
-        }
-
-        /**
-         * 设置播放器的首选音质（默认为 {@link SoundQuality#STANDARD}）。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         *
-         * @param soundQuality 要设置的音质
-         * @see SoundQuality#STANDARD
-         * @see SoundQuality#LOW
-         * @see SoundQuality#HIGH
-         * @see SoundQuality#SUPER
-         */
-        @Override
-        public void setSoundQuality(SoundQuality soundQuality) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.setSoundQuality(soundQuality);
-        }
-
-        /**
-         * 设置是否启用音频特效（如：均衡器）（默认为 false）。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         *
-         * @param enabled 是否启用音频特效
-         */
-        @Override
-        public void setAudioEffectEnabled(boolean enabled) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.setAudioEffectEnabled(enabled);
-        }
-
-        /**
-         * 设置是否只允许在 WiFi 网络下播放音乐（默认为 true）。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         *
-         * @param onlyWifiNetwork 是否只允许在 WiFi 网络下播放音乐
-         */
-        @Override
-        public void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.setOnlyWifiNetwork(onlyWifiNetwork);
-        }
-
-        /**
-         * 设置是否忽略音频焦点的丢失（默认为 false）。
-         * <p>
-         * 如果设为 true，即使音频焦点丢失，当前播放器依然会继续播放。简单的说，就是是否可以和其他应用同时播放音频。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         *
-         * @param ignoreLossAudioFocus 是否忽略音频焦点的丢失
-         */
-        @Override
-        public void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.setIgnoreLossAudioFocus(ignoreLossAudioFocus);
         }
 
         /**

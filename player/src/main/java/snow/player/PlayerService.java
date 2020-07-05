@@ -67,11 +67,10 @@ import snow.player.radio.RadioStationStateListener;
 public class PlayerService extends MediaBrowserServiceCompat implements PlayerManager {
     public static final String DEFAULT_MEDIA_ROOT_ID = "root";
 
-    private static final String KEY_PLAYER_TYPE = "player_type";
-
     private String mPersistentId;
     private int mNotificationId;
 
+    private PlayerConfig mPlayerConfig;
     private PlaylistState mPlaylistState;
     private RadioStationState mRadioStationState;
 
@@ -82,8 +81,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private HashMap<String, OnCommandCallback> mCommandCallbackMap;
 
-    private MMKV mMMKV;
-    private int mPlayerType;
     private boolean mForeground;
 
     private NotificationManager mNotificationManager;
@@ -109,12 +106,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mCommandCallbackMap = new HashMap<>();
         mStartCommandActionMap = new HashMap<>();
 
-        MMKV.initialize(this);
-        mMMKV = MMKV.mmkvWithID(mPersistentId);
-        mPlayerType = mMMKV.decodeInt(KEY_PLAYER_TYPE, TYPE_PLAYLIST);
-
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
+        initPlayerConfig();
         initPlayerState();
         initPlaylistManager();
         initPlayer();
@@ -124,6 +118,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         initMediaSession();
 
         updateNotificationView();
+    }
+
+    private void initPlayerConfig() {
+        mPlayerConfig = new PersistentPlayerConfig(this, mPersistentId);
     }
 
     private void initPlayerState() {
@@ -137,8 +135,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initPlayer() {
-        mPlaylistPlayer = new PlaylistPlayerImp(this, mPlaylistState, mPlaylistManager);
-        mRadioStationPlayer = new RadioStationPlayerImp(this, mRadioStationState);
+        boolean enableRadioStationPlayer = (getPlayerType() == TYPE_RADIO_STATION);
+
+        mPlaylistPlayer = new PlaylistPlayerImp(this, mPlayerConfig, mPlaylistState, !enableRadioStationPlayer, mPlaylistManager);
+        mRadioStationPlayer = new RadioStationPlayerImp(this, mPlayerConfig, mRadioStationState, enableRadioStationPlayer);
     }
 
     private void initControllerPipe() {
@@ -158,16 +158,24 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                     return true;
                 }
 
-                if (playlistDispatcher.dispatch(data)) {
+                if (playlistDispatcher.match(data)) {
                     notifyPlayerTypeChanged(PlayerManager.TYPE_PLAYLIST);
+                    playlistDispatcher.dispatch(data);
                     return true;
                 }
 
-                if (radioStationDispatcher.dispatch(data)) {
+                if (radioStationDispatcher.match(data)) {
                     notifyPlayerTypeChanged(PlayerManager.TYPE_RADIO_STATION);
+                    radioStationDispatcher.dispatch(data);
                     return true;
                 }
 
+                return false;
+            }
+
+            @Override
+            public boolean match(Map<String, Object> data) {
+                // ignore
                 return false;
             }
         });
@@ -340,6 +348,68 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mRadioStationPlayer = null;
     }
 
+    @Override
+    public void setSoundQuality(Player.SoundQuality soundQuality) {
+        if (soundQuality == mPlayerConfig.getSoundQuality()) {
+            return;
+        }
+
+        mPlayerConfig.setSoundQuality(soundQuality);
+        notifySoundQualityChanged();
+    }
+
+    private void notifySoundQualityChanged() {
+        if (getPlayerType() == TYPE_RADIO_STATION) {
+            mRadioStationPlayer.notifySoundQualityChanged();
+            return;
+        }
+
+        mPlaylistPlayer.notifySoundQualityChanged();
+    }
+
+    @Override
+    public void setAudioEffectEnabled(boolean enabled) {
+        if (mPlayerConfig.isAudioEffectEnabled() == enabled) {
+            return;
+        }
+
+        mPlayerConfig.setAudioEffectEnabled(enabled);
+        notifyAudioEffectEnableChanged();
+    }
+
+    private void notifyAudioEffectEnableChanged() {
+        if (getPlayerType() == TYPE_RADIO_STATION) {
+            mRadioStationPlayer.notifyAudioEffectEnableChanged();
+            return;
+        }
+
+        mPlaylistPlayer.notifyAudioEffectEnableChanged();
+    }
+
+    @Override
+    public void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
+        if (mPlayerConfig.isOnlyWifiNetwork() == onlyWifiNetwork) {
+            return;
+        }
+
+        mPlayerConfig.setOnlyWifiNetwork(onlyWifiNetwork);
+        notifyOnlyWifiNetworkChanged();
+    }
+
+    private void notifyOnlyWifiNetworkChanged() {
+        if (getPlayerType() == TYPE_RADIO_STATION) {
+            mRadioStationPlayer.notifyOnlyWifiNetworkChanged();
+            return;
+        }
+
+        mPlaylistPlayer.notifyOnlyWifiNetworkChanged();
+    }
+
+    @Override
+    public void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
+        mPlayerConfig.setIgnoreLossAudioFocus(ignoreLossAudioFocus);
+    }
+
     /**
      * 关闭播放器。
      * <p>
@@ -411,23 +481,24 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     protected final void notifyPlayerTypeChanged(int playerType) {
-        if (playerType == mPlayerType) {
+        if (playerType == getPlayerType()) {
             return;
         }
 
-        mPlayerType = playerType;
-        mMMKV.encode(KEY_PLAYER_TYPE, mPlayerType);
+        mPlayerConfig.setPlayerType(playerType);
+        mPlaylistPlayer.setEnabled(playerType == PlayerManager.TYPE_PLAYLIST);
+        mRadioStationPlayer.setEnabled(playerType == PlayerManager.TYPE_RADIO_STATION);
 
         for (String key : mCommandCallbackMap.keySet()) {
             OnCommandCallback listener = mCommandCallbackMap.get(key);
             if (listener != null) {
-                listener.onPlayerTypeChanged(mPlayerType);
+                listener.onPlayerTypeChanged(playerType);
             }
         }
     }
 
     private void syncPlayerState(OnCommandCallback listener) {
-        listener.syncPlayerState(mPlayerType, new PlaylistState(mPlaylistState), new RadioStationState(mRadioStationState));
+        listener.syncPlayerState(getPlayerType(), new PlaylistState(mPlaylistState), new RadioStationState(mRadioStationState));
     }
 
     private void addOnCommandCallback(@NonNull String token, @NonNull OnCommandCallback listener) {
@@ -476,7 +547,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 获取播放器类型。
      */
     protected final int getPlayerType() {
-        return mPlayerType;
+        return mPlayerConfig.getPlayerType();
     }
 
     /**
@@ -506,7 +577,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 当前是否正在播放音乐。
      */
     protected final boolean isPlaying() {
-        switch (mPlayerType) {
+        switch (getPlayerType()) {
             case TYPE_PLAYLIST:
                 return mPlaylistPlayer.isPlaying();
             case TYPE_RADIO_STATION:
@@ -539,7 +610,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @see #getRadioStationState()
      */
     protected final PlayerState getPlayerState() {
-        if (mPlayerType == TYPE_RADIO_STATION) {
+        if (getPlayerType() == TYPE_RADIO_STATION) {
             return mRadioStationState;
         }
 
@@ -572,7 +643,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 获取当前正在播放的音乐的 MusicItem 对象。
      */
     protected final MusicItem getPlayingMusicItem() {
-        switch (mPlayerType) {
+        switch (getPlayerType()) {
             case TYPE_PLAYLIST:
                 return mPlaylistState.getMusicItem();
             case TYPE_RADIO_STATION:
@@ -595,7 +666,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
      */
     protected final int getErrorCode() {
-        switch (mPlayerType) {
+        switch (getPlayerType()) {
             case TYPE_PLAYLIST:
                 return mPlaylistState.getErrorCode();
             case TYPE_RADIO_STATION:
@@ -667,7 +738,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         mForeground = true;
-        startForeground(mNotificationId, createNotification(mPlayerType));
+        startForeground(mNotificationId, createNotification(getPlayerType()));
     }
 
     /**
@@ -690,7 +761,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return;
         }
 
-        mNotificationManager.notify(mNotificationId, createNotification(mPlayerType));
+        mNotificationManager.notify(mNotificationId, createNotification(getPlayerType()));
     }
 
     @NonNull
@@ -752,7 +823,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private Player getPlayer() {
-        if (mPlayerType == TYPE_RADIO_STATION) {
+        if (getPlayerType() == TYPE_RADIO_STATION) {
             return mRadioStationPlayer;
         }
 
@@ -814,7 +885,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 下一曲。
      */
     protected final void skipToNext() {
-        if (mPlayerType == TYPE_RADIO_STATION) {
+        if (getPlayerType() == TYPE_RADIO_STATION) {
             mRadioStationPlayer.skipToNext();
             return;
         }
@@ -828,7 +899,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 但播放器类型为 {@link PlayerManager#TYPE_RADIO_STATION}（电台模式）时，该方法无效。
      */
     protected final void skipToPrevious() {
-        if (mPlayerType == TYPE_RADIO_STATION) {
+        if (getPlayerType() == TYPE_RADIO_STATION) {
             return;
         }
 
@@ -954,9 +1025,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     private class PlaylistPlayerImp extends AbstractPlaylistPlayer {
 
         public PlaylistPlayerImp(@NonNull Context context,
+                                 @NonNull PlayerConfig playerConfig,
                                  @NonNull PlaylistState playlistState,
+                                 boolean enable,
                                  @NonNull PlaylistManager playlistManager) {
-            super(context, playlistState, playlistManager);
+            super(context, playerConfig, playlistState, enable, playlistManager);
         }
 
         @Override
@@ -1046,8 +1119,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private class RadioStationPlayerImp extends AbstractRadioStationPlayer {
 
-        public RadioStationPlayerImp(@NonNull Context context, @NonNull RadioStationState radioStationState) {
-            super(context, radioStationState);
+        public RadioStationPlayerImp(@NonNull Context context,
+                                     @NonNull PlayerConfig playerConfig,
+                                     @NonNull RadioStationState radioStationState,
+                                     boolean enabled) {
+            super(context, playerConfig, radioStationState, enabled);
         }
 
         @Nullable

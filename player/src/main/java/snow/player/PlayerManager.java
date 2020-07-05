@@ -3,6 +3,7 @@ package snow.player;
 import android.os.IBinder;
 
 import channel.helper.Channel;
+import channel.helper.UseOrdinal;
 import snow.player.playlist.PlaylistState;
 import snow.player.radio.RadioStationState;
 
@@ -14,6 +15,43 @@ public interface PlayerManager {
     int TYPE_PLAYLIST = 0;
     int TYPE_RADIO_STATION = 1;
 
+    /**
+     * 设置播放器的首选音质（默认为 {@link Player.SoundQuality#STANDARD}）。
+     *
+     * @param soundQuality 要设置的音质
+     * @see Player.SoundQuality#STANDARD
+     * @see Player.SoundQuality#LOW
+     * @see Player.SoundQuality#HIGH
+     * @see Player.SoundQuality#SUPER
+     */
+    void setSoundQuality(@UseOrdinal Player.SoundQuality soundQuality);
+
+    /**
+     * 设置是否启用音频特效（如：均衡器）（默认为 false）。
+     *
+     * @param enabled 是否启用音频特效
+     */
+    void setAudioEffectEnabled(boolean enabled);
+
+    /**
+     * 设置是否只允许在 WiFi 网络下播放音乐（默认为 true）。
+     *
+     * @param onlyWifiNetwork 是否只允许在 WiFi 网络下播放音乐
+     */
+    void setOnlyWifiNetwork(boolean onlyWifiNetwork);
+
+    /**
+     * 设置是否忽略音频焦点的丢失（默认为 false）。
+     * <p>
+     * 如果设为 true，即使音频焦点丢失，当前播放器依然会继续播放。简单的说，就是是否可以和其他应用同时播放音频。
+     *
+     * @param ignoreLossAudioFocus 是否忽略音频焦点的丢失
+     */
+    void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus);
+
+    /**
+     * 关闭播放器并终止 Service。
+     */
     void shutdown();
 
     /**

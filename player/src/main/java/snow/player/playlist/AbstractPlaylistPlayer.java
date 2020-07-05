@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Random;
 
 import snow.player.AbstractPlayer;
+import snow.player.PlayerConfig;
 import snow.player.media.MusicItem;
 
 public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStateListener> implements PlaylistPlayer {
@@ -31,9 +32,11 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     private Random mRandom;
 
     public AbstractPlaylistPlayer(@NonNull Context context,
+                                  @NonNull PlayerConfig playerConfig,
                                   @NonNull PlaylistState playlistState,
+                                  boolean enable,
                                   @NonNull PlaylistManager playlistManager) {
-        super(context, playlistState);
+        super(context, playerConfig, playlistState, enable);
 
         mPlaylistState = playlistState;
         mPlaylistManager = playlistManager;
@@ -43,10 +46,12 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     }
 
     public AbstractPlaylistPlayer(@NonNull Context context,
+                                  @NonNull PlayerConfig playerConfig,
                                   @NonNull PlaylistState playlistState,
+                                  boolean enable,
                                   @NonNull PlaylistManager playlistManager,
                                   @NonNull Playlist playlist) {
-        super(context, playlistState);
+        super(context, playerConfig, playlistState, enable);
 
         mPlaylistState = playlistState;
         mPlaylistManager = playlistManager;

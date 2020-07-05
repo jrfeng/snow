@@ -18,10 +18,6 @@ import snow.player.media.MusicItem;
 public class PlayerState implements Parcelable {
     private int mPlayProgress;
     private long mPlayProgressUpdateTime;
-    private Player.SoundQuality mSoundQuality;
-    private boolean mAudioEffectEnabled;
-    private boolean mOnlyWifiNetwork;
-    private boolean mIgnoreLossAudioFocus;
     @Nullable
     private MusicItem mMusicItem;
 
@@ -37,10 +33,6 @@ public class PlayerState implements Parcelable {
     public PlayerState() {
         mPlayProgress = 0;
         mPlayProgressUpdateTime = 0;
-        mSoundQuality = Player.SoundQuality.STANDARD;
-        mAudioEffectEnabled = false;
-        mOnlyWifiNetwork = false;
-        mIgnoreLossAudioFocus = false;
 
         mPlaybackState = Player.PlaybackState.UNKNOWN;
         mAudioSessionId = 0;
@@ -54,10 +46,6 @@ public class PlayerState implements Parcelable {
     public PlayerState(PlayerState source) {
         mPlayProgress = source.mPlayProgress;
         mPlayProgressUpdateTime = source.mPlayProgressUpdateTime;
-        mSoundQuality = source.mSoundQuality;
-        mAudioEffectEnabled = source.mAudioEffectEnabled;
-        mOnlyWifiNetwork = source.mOnlyWifiNetwork;
-        mIgnoreLossAudioFocus = source.mIgnoreLossAudioFocus;
         if (source.mMusicItem != null) {
             mMusicItem = new MusicItem(source.mMusicItem);
         }
@@ -111,84 +99,6 @@ public class PlayerState implements Parcelable {
      */
     public void setPlayProgressUpdateTime(long updateTime) {
         mPlayProgressUpdateTime = updateTime;
-    }
-
-    /**
-     * 获取首选音质。
-     *
-     * @return 当前的首选音质。
-     * @see Player.SoundQuality
-     */
-    public Player.SoundQuality getSoundQuality() {
-        return mSoundQuality;
-    }
-
-    /**
-     * 设置首选音质。
-     *
-     * @param soundQuality 要设置的首选音质。只能是这些值之一：{@link Player.SoundQuality#STANDARD},
-     *                     {@link Player.SoundQuality#LOW},
-     *                     {@link Player.SoundQuality#HIGH},
-     *                     {@link Player.SoundQuality#SUPER}
-     * @see Player.SoundQuality
-     */
-    public void setSoundQuality(@NonNull Player.SoundQuality soundQuality) {
-        Preconditions.checkNotNull(soundQuality);
-        mSoundQuality = soundQuality;
-    }
-
-    /**
-     * 判断是否已启用音频特效。
-     *
-     * @return 是否已启用音频特效。
-     */
-    public boolean isAudioEffectEnabled() {
-        return mAudioEffectEnabled;
-    }
-
-    /**
-     * 设置是否启用音频特效。
-     *
-     * @param audioEffectEnabled 是否启用音频特效。
-     */
-    public void setAudioEffectEnabled(boolean audioEffectEnabled) {
-        mAudioEffectEnabled = audioEffectEnabled;
-    }
-
-    /**
-     * 是否只允许在 WiFi 网络下联网（默认为 false）。
-     *
-     * @return 如果返回 true，则表示只允许在 WiFi 网络下联网（默认为 false）。
-     */
-    public boolean isOnlyWifiNetwork() {
-        return mOnlyWifiNetwork;
-    }
-
-    /**
-     * 设置是否只允许在 WiFi 网络下联网（默认为 true）。
-     *
-     * @param onlyWifiNetwork 是否只允许在 WiFi 网络下联网（默认为 true）。
-     */
-    public void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
-        mOnlyWifiNetwork = onlyWifiNetwork;
-    }
-
-    /**
-     * 判断是否忽略音频焦点丢失事件。
-     *
-     * @return 是否忽略音频焦点丢失事件。
-     */
-    public boolean isIgnoreLossAudioFocus() {
-        return mIgnoreLossAudioFocus;
-    }
-
-    /**
-     * 设置是否忽略音频焦点丢失事件。
-     *
-     * @param ignoreLossAudioFocus 是否忽略音频焦点丢失事件。
-     */
-    public void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
-        mIgnoreLossAudioFocus = ignoreLossAudioFocus;
     }
 
     /**
@@ -353,10 +263,6 @@ public class PlayerState implements Parcelable {
 
         return Objects.equal(mPlayProgress, other.mPlayProgress)
                 && Objects.equal(mPlayProgressUpdateTime, other.mPlayProgressUpdateTime)
-                && Objects.equal(mSoundQuality, other.mSoundQuality)
-                && Objects.equal(mAudioEffectEnabled, other.mAudioEffectEnabled)
-                && Objects.equal(mOnlyWifiNetwork, other.mOnlyWifiNetwork)
-                && Objects.equal(mIgnoreLossAudioFocus, other.mIgnoreLossAudioFocus)
                 && Objects.equal(mMusicItem, other.mMusicItem)
                 && Objects.equal(mPlaybackState, other.mPlaybackState)
                 && Objects.equal(mAudioSessionId, other.mAudioSessionId)
@@ -371,10 +277,6 @@ public class PlayerState implements Parcelable {
     public int hashCode() {
         return Objects.hashCode(mPlayProgress,
                 mPlayProgressUpdateTime,
-                mSoundQuality,
-                mAudioEffectEnabled,
-                mOnlyWifiNetwork,
-                mIgnoreLossAudioFocus,
                 mMusicItem,
                 mPlaybackState,
                 mAudioSessionId,
@@ -388,10 +290,6 @@ public class PlayerState implements Parcelable {
     protected PlayerState(Parcel in) {
         mPlayProgress = in.readInt();
         mPlayProgressUpdateTime = in.readLong();
-        mSoundQuality = Player.SoundQuality.values()[in.readInt()];
-        mAudioEffectEnabled = in.readByte() != 0;
-        mOnlyWifiNetwork = in.readByte() != 0;
-        mIgnoreLossAudioFocus = in.readByte() != 0;
         mMusicItem = in.readParcelable(Thread.currentThread().getContextClassLoader());
 
         mPlaybackState = Player.PlaybackState.values()[in.readInt()];
@@ -407,10 +305,6 @@ public class PlayerState implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mPlayProgress);
         dest.writeLong(mPlayProgressUpdateTime);
-        dest.writeInt(mSoundQuality.ordinal());
-        dest.writeByte((byte) (mAudioEffectEnabled ? 1 : 0));
-        dest.writeByte((byte) (mOnlyWifiNetwork ? 1 : 0));
-        dest.writeByte((byte) (mIgnoreLossAudioFocus ? 1 : 0));
         dest.writeParcelable(mMusicItem, flags);
 
         dest.writeInt(mPlaybackState.ordinal());

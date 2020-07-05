@@ -32,6 +32,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
 
     private Context mApplicationContext;
+    private PlayerConfig mPlayerConfig;
     private PlayerState mPlayerState;
     private HashMap<String, T> mStateListenerMap;
 
@@ -55,16 +56,24 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private NetworkUtil mNetworkUtil;
 
+    private boolean mEnabled;
+
     /**
      * @param context     Context 对象，不能为 null。
      * @param playerState PlayerState 对象，用于初始化和保存播放器状态，不能为 null。
      */
-    public AbstractPlayer(@NonNull Context context, @NonNull PlayerState playerState) {
+    public AbstractPlayer(@NonNull Context context,
+                          @NonNull PlayerConfig playerConfig,
+                          @NonNull PlayerState playerState,
+                          boolean enabled) {
         Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(playerConfig);
         Preconditions.checkNotNull(playerState);
 
         mApplicationContext = context.getApplicationContext();
+        mPlayerConfig = playerConfig;
         mPlayerState = playerState;
+        mEnabled = enabled;
 
         mStateListenerMap = new HashMap<>();
 
@@ -145,7 +154,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     /**
      * 该方法会在开始播放时调用。
-     *  @param progress   当前的播放进度。
+     *
+     * @param progress   当前的播放进度。
      * @param updateTime 播放进度的更新时间。
      */
     protected void onPlaying(int progress, long updateTime) {
@@ -221,6 +231,23 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
     }
 
+    public final void setEnabled(boolean enabled) {
+        if (mEnabled == enabled) {
+            return;
+        }
+
+        mEnabled = enabled;
+
+        if (!mEnabled) {
+            pause();
+            releaseMusicPlayer();
+        }
+    }
+
+    protected final boolean isEnabled() {
+        return mEnabled;
+    }
+
     /**
      * 释放播放器所占用的资源。注意！调用该方法后，就不允许在使用当前 Player 对象了，否则会导致不可预见的错误。
      */
@@ -256,6 +283,10 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      * @param preparedAction 在音乐播放器准备完成后要执行的操作
      */
     protected final void prepareMusicPlayer(@Nullable Runnable preparedAction) {
+        if (!isEnabled()) {
+            return;
+        }
+
         releaseMusicPlayer();
         notifyBufferingPercentChanged(0, System.currentTimeMillis());
 
@@ -264,7 +295,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             return;
         }
 
-        if (mPlayerState.isOnlyWifiNetwork() && !isWiFiNetwork()) {
+        if (mPlayerConfig.isOnlyWifiNetwork() && !isWiFiNetwork()) {
             onError(Error.ONLY_WIFI_NETWORK, Error.getErrorMessage(mApplicationContext, Error.ONLY_WIFI_NETWORK));
             return;
         }
@@ -275,7 +306,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
             mPreparedAction = preparedAction;
             notifyPreparing();
-            onPrepareMusicPlayer(mMusicPlayer, getMusicItem(), mPlayerState.getSoundQuality());
+            onPrepareMusicPlayer(mMusicPlayer, getMusicItem(), mPlayerConfig.getSoundQuality());
         } catch (Exception e) {
             e.printStackTrace();
             notifyError(Error.DATA_LOAD_FAILED, Error.getErrorMessage(mApplicationContext, Error.DATA_LOAD_FAILED));
@@ -292,7 +323,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             public void onPrepared(MusicPlayer mp) {
                 mp.setLooping(isLooping());
 
-                if (mPlayerState.isAudioEffectEnabled()) {
+                if (mPlayerConfig.isAudioEffectEnabled()) {
                     attachAudioEffect(mp.getAudioSessionId());
                 }
 
@@ -360,7 +391,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
             @Override
             public void onLoss() {
-                if (mPlayerState.isIgnoreLossAudioFocus()) {
+                if (mPlayerConfig.isIgnoreLossAudioFocus()) {
                     return;
                 }
 
@@ -370,7 +401,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
             @Override
             public void onLossTransient() {
-                if (mPlayerState.isIgnoreLossAudioFocus()) {
+                if (mPlayerConfig.isIgnoreLossAudioFocus()) {
                     return;
                 }
 
@@ -381,7 +412,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
             @Override
             public void onLossTransientCanDuck() {
-                if (mPlayerState.isIgnoreLossAudioFocus()) {
+                if (mPlayerConfig.isIgnoreLossAudioFocus()) {
                     return;
                 }
 
@@ -393,7 +424,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
             @Override
             public void onGain(boolean lossTransient, boolean lossTransientCanDuck) {
-                if (mPlayerState.isIgnoreLossAudioFocus()) {
+                if (mPlayerConfig.isIgnoreLossAudioFocus()) {
                     return;
                 }
 
@@ -426,7 +457,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
                     return;
                 }
 
-                checkNetworkType(mPlayerState.isOnlyWifiNetwork(), wifiNetwork);
+                checkNetworkType(mPlayerConfig.isOnlyWifiNetwork(), wifiNetwork);
             }
         });
     }
@@ -889,18 +920,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         seekTo(progress);
     }
 
-    @Override
-    public void setSoundQuality(SoundQuality soundQuality) {
-        if (soundQuality == mPlayerState.getSoundQuality()) {
-            return;
-        }
-
-        swapSoundQuality(soundQuality);
-    }
-
-    private void swapSoundQuality(SoundQuality soundQuality) {
-        mPlayerState.setSoundQuality(soundQuality);
-
+    public final void notifySoundQualityChanged() {
         if (!isPrepared()) {
             return;
         }
@@ -923,15 +943,12 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         });
     }
 
-    @Override
-    public void setAudioEffectEnabled(boolean enabled) {
-        mPlayerState.setAudioEffectEnabled(enabled);
-
+    public final void notifyAudioEffectEnableChanged() {
         if (!isPrepared()) {
             return;
         }
 
-        if (enabled) {
+        if (mPlayerConfig.isAudioEffectEnabled()) {
             attachAudioEffect(getAudioSessionId());
             return;
         }
@@ -939,15 +956,12 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         detachAudioEffect();
     }
 
-    @Override
-    public void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
-        mPlayerState.setOnlyWifiNetwork(onlyWifiNetwork);
-
+    public final void notifyOnlyWifiNetworkChanged() {
         if (!isPrepared()) {
             return;
         }
 
-        checkNetworkType(onlyWifiNetwork, mNetworkUtil.isWifiNetwork());
+        checkNetworkType(mPlayerConfig.isOnlyWifiNetwork(), mNetworkUtil.isWifiNetwork());
     }
 
     private void checkNetworkType(boolean onlyWifiNetwork, boolean isWifiNetwork) {
@@ -957,11 +971,6 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             notifyError(Error.ONLY_WIFI_NETWORK,
                     Error.getErrorMessage(mApplicationContext, Error.ONLY_WIFI_NETWORK));
         }
-    }
-
-    @Override
-    public void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
-        mPlayerState.setIgnoreLossAudioFocus(ignoreLossAudioFocus);
     }
 
     private static class MusicPlayerWrapper implements MusicPlayer {
