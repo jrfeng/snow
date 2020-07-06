@@ -36,7 +36,7 @@ dependencies {
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 ```
 
-**注意！在高于 `Android 6.0(API Level 23)` 的 `Android` 版本中，`"android.permission.READ_EXTERNAL_STORAGE"` 权限需要动态申请。**
+**注意！在高于 `Android 6.0(API Level 23)` 的 `Android` 版本中，存储器访问权限 `"android.permission.READ_EXTERNAL_STORAGE"` 需要动态申请。**
 
 4. 配置播放器
 
@@ -57,7 +57,7 @@ dependencies {
 </receiver>
 ```
 
-对于上面配置中的可选部分，如果你的应用不打算支持低于 `Android 5.0(API Level 21)` 的 `Android` 版本，那么这部分是可以省略的。
+对于上面的可选部分，如果你的应用程序不打算支持低于 `Android 5.0(API Level 21)` 的 `Android` 版本，可以省略这部分代码。
 
 ## 开始使用
 
@@ -65,7 +65,7 @@ dependencies {
 
 ```java
 // 创建一个 PlayerClient 对象
-PlayerClient playerClient = PlayerClient.newInstance(this, PlayerService.class);
+PlayerClient playerClient = PlayerClient.newInstance(context, PlayerService.class);
 
 // 连接到 PlayerService
 playerClient.connect(new PlayerClient.OnConnectCallback() {
@@ -80,10 +80,7 @@ playerClient.connect(new PlayerClient.OnConnectCallback() {
 2. 获取 `PlaylistController`
 
 ```java
-// 创建播放列表
-Playlist playlist = createPlaylist();
-
-// 获取 PlaylistController
+// 当 PlayerClient 连接成功后，可以调用其 getPlaylistController() 方法获取到一个 PlaylistController 对象
 PlayerClient.PlaylistController playlistController =  playerClient.getPlaylistController();
 ```
 
@@ -99,10 +96,14 @@ PlayerClient.PlaylistController playlistController =  playerClient.getPlaylistCo
 * `fastForward()`：快进
 * `rewind()`：快退
 * `setPlayMode(PlayMode)`：设置播放模式（共 `3` 种模式：顺序播放、单曲循环、随机播放）
+* `setPlaylist(Playlist playlist, int position, boolean play)`：设置播放列表
 
 3. 设置播放列表并播放音乐
 
 ```java
+// 创建播放列表
+Playlist playlist = createPlaylist();
+
 // 设备播放列表，并播放指定索引处的音乐
 playlistController.setPlaylist(playlist, 0, true);
 
