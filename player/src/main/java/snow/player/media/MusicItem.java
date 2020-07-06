@@ -23,7 +23,6 @@ public final class MusicItem implements Parcelable {
     private String uri;
     private String iconUri;
     private int duration;
-    private String token;
     @Nullable
     private Bundle mExtra;
 
@@ -38,7 +37,6 @@ public final class MusicItem implements Parcelable {
         this.uri = "";
         this.iconUri = "";
         this.duration = 0;
-        this.token = "";
         this.mExtra = null;
     }
 
@@ -50,7 +48,6 @@ public final class MusicItem implements Parcelable {
         uri = source.uri;
         iconUri = source.iconUri;
         duration = source.duration;
-        token = source.token;
         if (source.mExtra != null) {
             mExtra = new Bundle(source.mExtra);
         }
@@ -134,16 +131,6 @@ public final class MusicItem implements Parcelable {
         this.duration = duration;
     }
 
-    @NonNull
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(@NonNull String token) {
-        Preconditions.checkNotNull(token);
-        this.token = token;
-    }
-
     @Nullable
     public Bundle getExtra() {
         return mExtra;
@@ -157,41 +144,28 @@ public final class MusicItem implements Parcelable {
     }
 
     /**
-     * 只要 token 相同就会返回 true, 否则返回 false。如果你要判断两个 MusicItem 对象的内容是否相同（忽略
-     * token 字段），请使用 {@link #same(MusicItem)} 方法。
+     * 忽略携带的 {@code extra} 数据。
      */
     @Override
-    public boolean equals(@Nullable Object obj) {
-        if (obj instanceof MusicItem) {
-            MusicItem other = (MusicItem) obj;
-            return Objects.equal(this.getToken(), other.getToken());
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MusicItem musicItem = (MusicItem) o;
+        return duration == musicItem.duration &&
+                Objects.equal(musicId, musicItem.musicId) &&
+                Objects.equal(title, musicItem.title) &&
+                Objects.equal(artist, musicItem.artist) &&
+                Objects.equal(album, musicItem.album) &&
+                Objects.equal(uri, musicItem.uri) &&
+                Objects.equal(iconUri, musicItem.iconUri);
     }
 
     /**
-     * hashCode 的值只和 token 属性相关。
+     * 忽略携带的 {@code extra} 数据。
      */
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.token);
-    }
-
-    /**
-     * 判断两个 MusicItem 对象的内容是否相同（忽略 token 字段与携带的 extra）。
-     */
-    public boolean same(MusicItem other) {
-        if (other == null) {
-            return false;
-        }
-
-        return Objects.equal(this.musicId, other.musicId)
-                && Objects.equal(this.title, other.title)
-                && Objects.equal(this.artist, other.artist)
-                && Objects.equal(this.album, other.album)
-                && Objects.equal(this.uri, other.uri)
-                && Objects.equal(this.iconUri, other.iconUri)
-                && Objects.equal(this.duration, other.duration);
+        return Objects.hashCode(musicId, title, artist, album, uri, iconUri, duration);
     }
 
     @Override
@@ -208,7 +182,6 @@ public final class MusicItem implements Parcelable {
         dest.writeString(this.uri);
         dest.writeString(this.iconUri);
         dest.writeInt(this.duration);
-        dest.writeString(this.token);
         dest.writeParcelable(mExtra, 0);
     }
 
@@ -220,7 +193,6 @@ public final class MusicItem implements Parcelable {
         this.uri = in.readString();
         this.iconUri = in.readString();
         this.duration = in.readInt();
-        this.token = in.readString();
         this.mExtra = in.readParcelable(Thread.currentThread().getContextClassLoader());
     }
 
