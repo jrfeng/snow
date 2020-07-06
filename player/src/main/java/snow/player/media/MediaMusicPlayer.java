@@ -38,6 +38,10 @@ public class MediaMusicPlayer implements MusicPlayer {
 
     @Override
     public void prepare(Uri uri) throws Exception {
+        if (isInvalid()) {
+            return;
+        }
+
         try {
             mMediaPlayer.setDataSource(uri.toString());
             mMediaPlayer.prepareAsync();
