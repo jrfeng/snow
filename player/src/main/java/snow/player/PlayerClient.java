@@ -110,9 +110,9 @@ public class PlayerClient {
 
                             if (mConnectCallback != null) {
                                 mConnectCallback.onConnected(true);
-                                mConnectCallback = null;
                             }
                         } catch (RemoteException e) {
+                            mMediaBrowser.disconnect();
                             onConnectionFailed();
                         }
                     }
@@ -123,7 +123,6 @@ public class PlayerClient {
 
                         if (mConnectCallback != null) {
                             mConnectCallback.onConnected(false);
-                            mConnectCallback = null;
                         }
                     }
                 }, null);
@@ -499,23 +498,36 @@ public class PlayerClient {
         /**
          * 设置一个新的播放列表。
          *
-         * @param playlist 播放列表（不能为 null）。
+         * @param playlist 播放列表（不能为 null）
          */
         public void setPlaylist(@NonNull Playlist playlist) {
             setPlaylist(playlist, 0, false);
         }
 
+        /**
+         * 设置一个新的播放列表。
+         *
+         * @param playlist 播放列表（不能为 null）
+         * @param position 播放列表中要播放的歌曲的位置
+         */
         public void setPlaylist(@NonNull Playlist playlist, int position) {
             setPlaylist(playlist, position, false);
         }
 
-        public void setPlaylist(@NonNull Playlist playlist, int position, boolean playOnPrepared) {
+        /**
+         * 设置一个新的播放列表。
+         *
+         * @param playlist 播放列表（不能为 null）
+         * @param position 播放列表中要播放的歌曲的位置
+         * @param play     是否立即播放 {@code position} 参数指定处的音乐
+         */
+        public void setPlaylist(@NonNull Playlist playlist, int position, boolean play) {
             Preconditions.checkNotNull(playlist);
             if (!isConnected()) {
                 return;
             }
 
-            mPlaylistManager.setPlaylist(playlist, position, playOnPrepared);
+            mPlaylistManager.setPlaylist(playlist, position, play);
         }
 
         /**
@@ -1430,7 +1442,15 @@ public class PlayerClient {
         }
     }
 
+    /**
+     * 用于监听播放器连接状态的回调接口。
+     */
     public interface OnConnectCallback {
+        /**
+         * 该方法会在连接成功或失败时调用。
+         *
+         * @param success 是否连接成功，如果为 true，则表示连接成功，否则为 false
+         */
         void onConnected(boolean success);
     }
 
