@@ -120,6 +120,10 @@ public class ExoMusicPlayer implements MusicPlayer {
 
     @Override
     public void prepare(Uri uri) {
+        if (isInvalid()) {
+            return;
+        }
+
         try {
             MediaSource mediaSource = mMediaSourceFactory.createMediaSource(uri);
             mSimpleExoPlayer.prepare(mediaSource);
