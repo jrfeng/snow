@@ -21,7 +21,6 @@ import media.helper.AudioFocusHelper;
 import media.helper.BecomeNoiseHelper;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
-import snow.player.playlist.PlaylistState;
 import snow.player.util.NetworkUtil;
 
 /**
