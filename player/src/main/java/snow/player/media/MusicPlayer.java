@@ -11,6 +11,10 @@ public interface MusicPlayer {
      * 准备当前音乐播放器。
      * <p>
      * 该方法会在主线程上执行，如果准备操作是个耗时操作，你应该在异步线程中执行它。
+     * <p>
+     * 在实现该方法时，建议先检查 {@link #isInvalid()} 状态，如果返回 {@code true}，说明当前
+     * MusicPlayer 已失效，此时因立即从该方法中返回，不应该再调用任何方法。具体做法请参照
+     * {@link MediaMusicPlayer} 的源码。
      *
      * @param uri 要播放的音乐的 URI
      */
@@ -190,11 +194,11 @@ public interface MusicPlayer {
     }
 
     /**
-     * 用于监听事件：进入缓冲区的数据变慢或停止并且播放缓冲区没有足够的数据继续播放。
+     * 用于监听事件：进入缓冲区的数据变慢或停止并且缓冲区没有足够的数据继续播放。
      */
     interface OnStalledListener {
         /**
-         * 该方法会在播放的 stalled 状态改变时调用。
+         * 该方法会在播放器的 stalled 状态改变时调用。
          *
          * @param stalled 如果缓冲区没有足够的数据继续播放，则该参数为 true，当缓冲区缓存了足够的数据可以继续
          *                播放时，该参数为 false。
