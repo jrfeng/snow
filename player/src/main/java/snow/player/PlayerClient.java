@@ -508,6 +508,16 @@ public class PlayerClient {
          * 设置一个新的播放列表。
          *
          * @param playlist 播放列表（不能为 null）
+         * @param play     是否立即播放列表中的音乐
+         */
+        public void setPlaylist(@NonNull Playlist playlist, boolean play) {
+            setPlaylist(playlist, 0, play);
+        }
+
+        /**
+         * 设置一个新的播放列表。
+         *
+         * @param playlist 播放列表（不能为 null）
          * @param position 播放列表中要播放的歌曲的位置
          */
         public void setPlaylist(@NonNull Playlist playlist, int position) {
