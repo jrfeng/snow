@@ -79,6 +79,9 @@ public class PersistentPlaylistState extends PlaylistState {
         mMMKV.encode(KEY_MUSIC_ITEM, musicItem);
     }
 
+    /**
+     * 创建一个拷贝了当前对象的所有属性的 {@link PlaylistState} 对象。
+     */
     public PlaylistState getPlaylistState() {
         return new PlaylistState(this);
     }

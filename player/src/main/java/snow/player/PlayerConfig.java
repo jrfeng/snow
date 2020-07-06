@@ -8,6 +8,9 @@ import androidx.annotation.NonNull;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
+/**
+ * 用于保存播放器的通用配置信息。
+ */
 public class PlayerConfig implements Parcelable {
     private int mPlayerType;
     private Player.SoundQuality mSoundQuality;
@@ -31,10 +34,22 @@ public class PlayerConfig implements Parcelable {
         mIgnoreLossAudioFocus = source.mIgnoreLossAudioFocus;
     }
 
+    /**
+     * 获取播放器类型。
+     *
+     * @see PlayerManager#TYPE_PLAYLIST
+     * @see PlayerManager#TYPE_RADIO_STATION
+     */
     public int getPlayerType() {
         return mPlayerType;
     }
 
+    /**
+     * 设置播放器类型。
+     *
+     * @see PlayerManager#TYPE_PLAYLIST
+     * @see PlayerManager#TYPE_RADIO_STATION
+     */
     public void setPlayerType(int playerType) {
         mPlayerType = playerType;
     }

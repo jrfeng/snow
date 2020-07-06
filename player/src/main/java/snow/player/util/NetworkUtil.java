@@ -18,6 +18,11 @@ import com.google.common.base.Preconditions;
 
 import java.lang.ref.WeakReference;
 
+/**
+ * 用于帮助获取和监听当前的网络状态。
+ * <p>
+ * 功能有限，主要用于辅助实现 “仅 Wifi 播放” 功能。
+ */
 @SuppressWarnings("deprecation")
 public class NetworkUtil {
     private Context mApplicationContext;
@@ -70,6 +75,13 @@ public class NetworkUtil {
         }
     }
 
+    /**
+     * 创建一个新的 {@link NetworkUtil} 对象。
+     *
+     * @param context  {@link Context} 对象，不能为 null
+     * @param listener 网络状态监听器，不能为 null
+     * @return {@link NetworkUtil} 对象
+     */
     public static NetworkUtil newInstance(@NonNull Context context, @NonNull OnNetworkStateChangeListener listener) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(listener);
@@ -77,6 +89,9 @@ public class NetworkUtil {
         return new NetworkUtil(context, listener);
     }
 
+    /**
+     * 当前网络是否可用。
+     */
     public boolean networkAvailable() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             return hasNetworkApi28();
@@ -90,6 +105,9 @@ public class NetworkUtil {
         return mConnectivityManager.getActiveNetwork() != null;
     }
 
+    /**
+     * 当前网络是否是 Wifi 网络。
+     */
     public boolean isWifiNetwork() {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
             return isWifiNetworkApi28();
@@ -132,6 +150,11 @@ public class NetworkUtil {
         mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
     }
 
+    /**
+     * 订阅当前网络状态。
+     * <p>
+     * 调用该方法后，当网络状态发生改变时，{@link OnNetworkStateChangeListener} 监听器会被调用。
+     */
     public void subscribeNetworkState() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             subscribeNetworkStateApi28();
@@ -143,6 +166,9 @@ public class NetworkUtil {
         mApplicationContext.registerReceiver(mNetworkStateReceiver, intentFilter);
     }
 
+    /**
+     * 取消订阅当前网络状态。
+     */
     public void unsubscribeNetworkState() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             unsubscribeNetworkStateApi28();
@@ -152,7 +178,17 @@ public class NetworkUtil {
         mApplicationContext.unregisterReceiver(mNetworkStateReceiver);
     }
 
+    /**
+     * 网络状态监听器。
+     */
     public interface OnNetworkStateChangeListener {
+
+        /**
+         * 该方法会在网络状态改变时调用。
+         *
+         * @param connected   当前网络是否已连接
+         * @param wifiNetwork 当前网络是否是 Wifi 网络
+         */
         void onNetworkStateChanged(boolean connected, boolean wifiNetwork);
     }
 }

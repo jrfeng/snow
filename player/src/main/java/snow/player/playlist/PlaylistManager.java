@@ -31,6 +31,14 @@ public abstract class PlaylistManager {
     @Nullable
     private OnModifyPlaylistListener mModifyPlaylistListener;
 
+    /**
+     * 创建一个 {@link PlaylistManager} 对象。
+     *
+     * @param context    {@link Context} 对象，不能为 null
+     * @param playlistId 播放列表的 ID，不能为 null。该 ID 会用于持久化保存播放列表，请保证该 ID 的唯一性。
+     *                   通常使用 {@link snow.player.PlayerService} 的 {@link Class} 对象的
+     *                   {@link Class#getName()} 作为 ID
+     */
     public PlaylistManager(@NonNull Context context, @NonNull String playlistId) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playlistId);
@@ -52,6 +60,11 @@ public abstract class PlaylistManager {
         return mEditable;
     }
 
+    /**
+     * 设置当前播放列表是否是可编辑的。
+     * <p>
+     * 这是一个 {@code protected} 方法，不可直接访问，需要继承 {@link PlaylistManager} 类才能访问到该方法。
+     */
     protected void setEditable(boolean editable) {
         mEditable = editable;
     }

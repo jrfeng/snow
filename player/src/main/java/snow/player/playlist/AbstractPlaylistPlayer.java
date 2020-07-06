@@ -19,6 +19,9 @@ import snow.player.AbstractPlayer;
 import snow.player.PlayerConfig;
 import snow.player.media.MusicItem;
 
+/**
+ * 该类提供了基本的 “列表” 播放器实现。
+ */
 public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStateListener> implements PlaylistPlayer {
     private PlaylistState mPlaylistState;
     private PlaylistManager mPlaylistManager;
@@ -31,6 +34,15 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
 
     private Random mRandom;
 
+    /**
+     * 构造方法。
+     *
+     * @param context         {@link Context} 对象，不能为 null
+     * @param playerConfig    {@link PlayerConfig} 对象，保存了播放器的初始配置信息，不能为 null
+     * @param playlistState   {@link PlaylistState} 对象，保存了列表播放器的初始状态，不能为 null
+     * @param enable          是否启用当前播放器，如果为 {@code false}，则当前播放器不会响应任何操作
+     * @param playlistManager {@link PlaylistManager} 对象，用于管理当前播放队列，不能为 null
+     */
     public AbstractPlaylistPlayer(@NonNull Context context,
                                   @NonNull PlayerConfig playerConfig,
                                   @NonNull PlaylistState playlistState,
@@ -45,6 +57,16 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         loadPlaylistAsync();
     }
 
+    /**
+     * 构造方法。
+     *
+     * @param context         {@link Context} 对象，不能为 null
+     * @param playerConfig    {@link PlayerConfig} 对象，保存了播放器的初始配置信息，不能为 null
+     * @param playlistState   {@link PlaylistState} 对象，保存了列表播放器的初始状态，不能为 null
+     * @param enable          是否启用当前播放器，如果为 {@code false}，则当前播放器不会响应任何操作
+     * @param playlistManager {@link PlaylistManager} 对象，用于管理当前播放队列，不能为 null
+     * @param playlist        当前的播放列表，不能为 null
+     */
     public AbstractPlaylistPlayer(@NonNull Context context,
                                   @NonNull PlayerConfig playerConfig,
                                   @NonNull PlaylistState playlistState,
@@ -138,22 +160,53 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         }
     }
 
+    /**
+     * 查询播放列表当前是否可用。
+     * <p>
+     * 当播放列表被修改时，播放器会重新加载播放列表，在加载完成前，该方法会返回 {@code false}，加
+     * 载完成后，该方法会返回 {@code true}。在播放列表加载完成前，不应访问播放列表。
+     * <p>
+     * 如果你需要在播放列表加载完成后访问它，可以重写 {@link #onPlaylistAvailable(Playlist)} 方法。
+     *
+     * @return 播放队列当前是否可用
+     * @see #onPlaylistAvailable(Playlist)
+     */
     @SuppressWarnings("unused")
     protected final boolean isPlaylistAvailable() {
         return !mLoadingPlaylist;
     }
 
+    /**
+     * 该方法会在播放列表变得可用时调用。
+     *
+     * @param playlist 当前的播放列表
+     */
     protected void onPlaylistAvailable(Playlist playlist) {
     }
 
+    /**
+     * 获取当前的播放列表。
+     *
+     * @return 当前播放列表
+     */
     protected final Playlist getPlaylist() {
         return mPlaylist;
     }
 
+    /**
+     * 获取播放列表的大小。
+     *
+     * @return 播放列表的大小
+     */
     protected final int getPlaylistSize() {
         return mPlaylistManager.getPlaylistSize();
     }
 
+    /**
+     * 获取播放列表携带的额外参数。
+     *
+     * @return 播放列表携带的额外参数，可能为 null
+     */
     @Nullable
     public final Bundle getPlaylistExtra() {
         if (mPlaylist == null) {
@@ -299,7 +352,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
 
     @Override
     public void notifyPlaylistSwapped(final int position, final boolean playOnPrepared) {
-        notifyStopped();
+        stop();
         notifyPlaylistChanged(position);
         mPlaylistLoadedAction = new Runnable() {
             @Override

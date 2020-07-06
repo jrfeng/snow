@@ -19,12 +19,21 @@ import snow.player.AbstractPlayer;
 import snow.player.PlayerConfig;
 import snow.player.media.MusicItem;
 
+/**
+ * 该类实现了 “电台” 播放器的基本功能。
+ */
 public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioStationStateListener>
         implements RadioStationPlayer {
     private RadioStationState mRadioStationState;
 
     private Disposable mDisposable;
 
+    /**
+     * @param context           {@link Context} 对象，不能为 null
+     * @param playerConfig      {@link PlayerConfig} 对象，保存了播放器的初始配置信息，不能为 null
+     * @param radioStationState {@link RadioStationState} 对象，保存了 “电台” 播放器初始状态，不能为 null
+     * @param enabled           是否启用当前播放器，如果为 {@code false}，则当前播放器不会响应任何操作
+     */
     public AbstractRadioStationPlayer(@NonNull Context context,
                                       @NonNull PlayerConfig playerConfig,
                                       @NonNull RadioStationState radioStationState,
@@ -58,6 +67,11 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
     @Nullable
     protected abstract MusicItem getNextMusicItem(RadioStation radioStation);
 
+    /**
+     * 获取当前电台携带的额外参数。
+     *
+     * @return 当前电台携带的额外参数，可能为 null
+     */
     @Nullable
     public final Bundle getRadioStationExtra() {
         return mRadioStationState.getRadioStation().getExtra();

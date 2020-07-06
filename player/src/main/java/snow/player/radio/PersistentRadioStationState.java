@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
 
 import snow.player.media.MusicItem;
+import snow.player.playlist.PlaylistState;
 
 /**
  * 用于对 “电台” 状态进行持久化。
@@ -71,6 +72,9 @@ public class PersistentRadioStationState extends RadioStationState {
         mMMKV.encode(KEY_MUSIC_ITEM, musicItem);
     }
 
+    /**
+     * 创建一个拷贝了当前对象的所有属性的 {@link RadioStationState} 对象。
+     */
     public RadioStationState getRadioStationState() {
         return new RadioStationState(this);
     }

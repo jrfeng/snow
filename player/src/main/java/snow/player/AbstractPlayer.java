@@ -21,6 +21,7 @@ import media.helper.AudioFocusHelper;
 import media.helper.BecomeNoiseHelper;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
+import snow.player.playlist.PlaylistState;
 import snow.player.util.NetworkUtil;
 
 /**
@@ -59,8 +60,10 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     private boolean mEnabled;
 
     /**
-     * @param context     Context 对象，不能为 null。
-     * @param playerState PlayerState 对象，用于初始化和保存播放器状态，不能为 null。
+     * @param context      {@link Context} 对象，不能为 null
+     * @param playerConfig {@link PlayerConfig} 对象，保存了播放器的初始配置信息，不能为 null
+     * @param playerState  {@link PlayerState} 对象，保存了播放器的初始状态，不能为 null
+     * @param enabled      是否启用当前播放器，如果为 {@code false}，则当前播放器不会响应任何操作
      */
     public AbstractPlayer(@NonNull Context context,
                           @NonNull PlayerConfig playerConfig,
@@ -84,7 +87,9 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     }
 
     /**
-     * 是否循环播放。
+     * 当前的播放模式是否是单曲循环。
+     *
+     * @see snow.player.playlist.PlaylistPlayer.PlayMode
      */
     public abstract boolean isLooping();
 
@@ -219,6 +224,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     /**
      * 该方法会在播放器释放时调用。
+     * <p>
+     * 你可以重写该方法来释放占用的资源。
      */
     protected void onRelease() {
     }
@@ -231,6 +238,12 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
     }
 
+    /**
+     * 设置是否启用当前播放器。
+     *
+     * @param enabled 是否启用当前播放器，为 {@code true} 时启用当前播放器，为 {@code false} 时不启用
+     *                当前播放器，此时如果播放器正在播放，会立即暂停并释放掉内部的 {@link MusicPlayer}
+     */
     public final void setEnabled(boolean enabled) {
         if (mEnabled == enabled) {
             return;
@@ -244,6 +257,9 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
     }
 
+    /**
+     * 当前播放器释放已启用。
+     */
     protected final boolean isEnabled() {
         return mEnabled;
     }
@@ -498,7 +514,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     }
 
     /**
-     * 缓存是否没有足够的数据继续播放。
+     * 缓存区是否没有足够的数据继续播放。
      */
     protected final boolean isStalled() {
         return mPlayerState.isStalled();
@@ -674,7 +690,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
     }
 
-    protected final void notifyStopped() {
+    private void notifyStopped() {
         mPlayerState.setPlaybackState(PlaybackState.STOPPED);
         updatePlayProgress(0, System.currentTimeMillis());
 
@@ -917,6 +933,12 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         seekTo(progress);
     }
 
+    /**
+     * 通知播放器，当前的 {@link snow.player.Player.SoundQuality} 已改变。
+     * <p>
+     * 该方法应该在调用与当前播放器管理的 {@link PlayerConfig} 对象的
+     * {@link PlayerConfig#setSoundQuality(SoundQuality)} 方法后调用。
+     */
     public final void notifySoundQualityChanged() {
         if (!isPrepared()) {
             return;
@@ -940,6 +962,12 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         });
     }
 
+    /**
+     * 通知播放器，当前的 {@code audioEffectEnabled} 状态已改变。
+     * <p>
+     * 该方法应该在调用与当前播放器管理的 {@link PlayerConfig} 对象的
+     * {@link PlayerConfig#setAudioEffectEnabled(boolean)} 方法后调用。
+     */
     public final void notifyAudioEffectEnableChanged() {
         if (!isPrepared()) {
             return;
@@ -953,6 +981,12 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         detachAudioEffect();
     }
 
+    /**
+     * 通知播放器，当前的 {@code onlyWifiNetwork} 状态已改变。
+     * <p>
+     * 该方法应该在调用与当前播放器管理的 {@link PlayerConfig} 对象的
+     * {@link PlayerConfig#setOnlyWifiNetwork(boolean)} 方法后调用。
+     */
     public final void notifyOnlyWifiNetworkChanged() {
         if (!isPrepared()) {
             return;
@@ -970,6 +1004,12 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
     }
 
+    /**
+     * MusicPlayer 包装器，额外添加了申请 WakeLock 唤醒锁功能。且只会在当前应用程序具有
+     * android.permission.WAKE_LOCK 权限时才会申请 WakeLock 唤醒锁。
+     * <p>
+     * 唤醒锁会在播放时申请，在暂停、停止或者出错时释放。
+     */
     private static class MusicPlayerWrapper implements MusicPlayer {
         private static final String TAG = "MusicPlayer";
 
