@@ -583,6 +583,18 @@ public class PlayerClient {
         }
 
         /**
+         * 获取当前正在播放的音乐的持续时间。
+         */
+        public int getPlayingMusicItemDuration() {
+            MusicItem musicItem = getPlayingMusicItem();
+            if (musicItem == null) {
+                return 0;
+            }
+
+            return musicItem.getDuration();
+        }
+
+        /**
          * 获取当前播放状态。
          *
          * @return 当前播放状态
