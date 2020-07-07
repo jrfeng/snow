@@ -369,7 +369,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     }
 
     @Override
-    public void notifyMusicItemMoved(int fromPosition, final int toPosition) {
+    public void notifyMusicItemMoved(final int fromPosition, final int toPosition) {
         if (fromPosition == toPosition) {
             return;
         }
@@ -377,11 +377,31 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
         mPlaylistLoadedAction = new Runnable() {
             @Override
             public void run() {
-                notifyPlayingMusicItemPositionChanged(toPosition);
+                adjustPlayingMusicPosition(fromPosition, toPosition);
             }
         };
 
         loadPlaylistAsync();
+    }
+
+    private void adjustPlayingMusicPosition(int fromPosition, int toPosition) {
+        int position = mPlaylistState.getPosition();
+
+        if (notInRegion(position, fromPosition, toPosition)) {
+            return;
+        }
+
+        if (fromPosition < position) {
+            notifyPlayingMusicItemPositionChanged(position - 1);
+        } else if (fromPosition == position) {
+            notifyPlayingMusicItemPositionChanged(toPosition);
+        } else {
+            notifyPlayingMusicItemPositionChanged(position + 1);
+        }
+    }
+
+    private boolean notInRegion(int position, int fromPosition, final int toPosition) {
+        return position > Math.max(fromPosition, toPosition) || position < Math.min(fromPosition, toPosition);
     }
 
     @Override
