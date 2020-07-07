@@ -225,7 +225,7 @@ public class AbstractPlayerTest {
         mTestPlayer.tester().doOnPlaying(new Runnable() {
             @Override
             public void run() {
-                assertTrue(musicItem.same(mPlayerState.getMusicItem()));
+                assertEquals(musicItem,mPlayerState.getMusicItem());
                 assertEquals(Player.PlaybackState.PLAYING, mPlayerState.getPlaybackState());
                 latch.countDown();
             }

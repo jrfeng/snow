@@ -13,12 +13,83 @@ import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class MusicItemTest {
+
+    @Test
+    public void defaultConstructorTest() {
+        MusicItem musicItem = new MusicItem();
+
+        assertNotNull(musicItem.getMusicId());
+        assertNotNull(musicItem.getTitle());
+        assertNotNull(musicItem.getArtist());
+        assertNotNull(musicItem.getAlbum());
+        assertNotNull(musicItem.getUri());
+        assertNotNull(musicItem.getIconUri());
+        assertEquals(0, musicItem.getDuration());
+    }
+
+    @Test
+    public void copyConstructorTest() {
+        MusicItem source = new MusicItem();
+
+        source.setMusicId("1024");
+        source.setTitle("test");
+        source.setArtist("test");
+        source.setAlbum("test");
+        source.setUri("https://www.test.com/test.mp3");
+        source.setIconUri("https://www.test.com/icon_test.png");
+        source.setDuration(1000);
+
+        MusicItem copy = new MusicItem(source);
+
+        // assert
+        assertEquals(source, copy);
+
+        Bundle extra = new Bundle();
+        extra.putString("key_test", "value_test");
+
+        source.setExtra(extra);
+
+        // assert
+        assertEquals(source, copy);
+    }
+
+    @Test
+    public void equals_hashCodeTest() {
+        final String musicId = "1234";
+        final String title = "test_title";
+        final String artist = "test_artist";
+        final String album = "test_album";
+        final String uri = "http://www.text.com/test.mp3";
+        final String iconUri = "http://www.text.com/test.png";
+        final int duration = 10000;
+
+        MusicItem musicItemA = new MusicItem();
+        musicItemA.setMusicId(musicId);
+        musicItemA.setTitle(title);
+        musicItemA.setArtist(artist);
+        musicItemA.setAlbum(album);
+        musicItemA.setUri(uri);
+        musicItemA.setIconUri(iconUri);
+        musicItemA.setDuration(duration);
+
+        MusicItem musicItemB = new MusicItem();
+        musicItemB.setMusicId(musicId);
+        musicItemB.setTitle(title);
+        musicItemB.setArtist(artist);
+        musicItemB.setAlbum(album);
+        musicItemB.setUri(uri);
+        musicItemB.setIconUri(iconUri);
+        musicItemB.setDuration(duration);
+
+        assertEquals(musicItemA, musicItemB);
+        assertEquals(musicItemA.hashCode(), musicItemB.hashCode());
+    }
+
     @Test
     public void parcelableTest() {
         MusicItem musicItem = new MusicItem();
 
         musicItem.setMusicId("1024");
-        musicItem.setToken("token_test");
         musicItem.setTitle("test");
         musicItem.setArtist("test");
         musicItem.setAlbum("test");
@@ -34,8 +105,6 @@ public class MusicItemTest {
 
         // assert
         assertEquals(musicItem, other);
-        assertTrue(other.same(musicItem));
-
 
         Bundle extra = new Bundle();
         extra.putString("key_test", "value_test");
@@ -50,37 +119,5 @@ public class MusicItemTest {
 
         // assert
         assertEquals(musicItem, other);
-        assertTrue(other.same(musicItem));
-    }
-
-    @Test
-    public void copyConstructorTest() {
-        MusicItem musicItem = new MusicItem();
-
-        musicItem.setMusicId("1024");
-        musicItem.setToken("token_test");
-        musicItem.setTitle("test");
-        musicItem.setArtist("test");
-        musicItem.setAlbum("test");
-        musicItem.setUri("https://www.test.com/test.mp3");
-        musicItem.setUri("https://www.test.com/icon_test.png");
-        musicItem.setDuration(1000);
-
-        MusicItem other = new MusicItem(musicItem);
-
-        // assert
-        assertEquals(musicItem, other);
-        assertTrue(other.same(musicItem));
-
-        Bundle extra = new Bundle();
-        extra.putString("key_test", "value_test");
-
-        musicItem.setExtra(extra);
-
-        other = new MusicItem(musicItem);
-
-        // assert
-        assertEquals(musicItem, other);
-        assertTrue(other.same(musicItem));
     }
 }

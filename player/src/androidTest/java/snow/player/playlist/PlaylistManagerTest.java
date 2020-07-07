@@ -28,7 +28,6 @@ public class PlaylistManagerTest {
         MusicItem musicItem = new MusicItem();
 
         musicItem.setMusicId("au" + id);
-        musicItem.setToken("token_test_" + id);
         musicItem.setTitle("test_" + id);
         musicItem.setArtist("artist_" + id);
         musicItem.setAlbum("album_" + id);

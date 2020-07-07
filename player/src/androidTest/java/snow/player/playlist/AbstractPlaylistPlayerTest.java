@@ -58,7 +58,6 @@ public class AbstractPlaylistPlayerTest {
     private MusicItem createMusicItem(int id) {
         MusicItem musicItem = new MusicItem();
 
-        musicItem.setToken("token_" + id);
         musicItem.setTitle("title_" + id);
         musicItem.setArtist("artist_" + id);
         musicItem.setUri("http://www.test.com/test" + id + ".mp3");
@@ -229,7 +228,7 @@ public class AbstractPlaylistPlayerTest {
 
                 Playlist playlist = mTestPlaylistPlayer.getPlaylist();
                 for(int i = 0; i < count; i++) {
-                    assertTrue(addItems.get(i).same(playlist.get(position + i)));
+                    assertEquals(addItems.get(i), playlist.get(position + i));
                 }
 
                 latch.countDown();
