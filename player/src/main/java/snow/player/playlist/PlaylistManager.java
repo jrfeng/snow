@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
+import com.google.common.hash.Hashing;
 import com.tencent.mmkv.MMKV;
 
 import java.util.ArrayList;
@@ -23,12 +24,16 @@ import snow.player.media.MusicItem;
 public abstract class PlaylistManager {
     private static final String KEY_PLAYLIST = "playlist";
     private static final String KEY_PLAYLIST_SIZE = "playlist_size";
+    private static final String KEY_PLAYLIST_TAG = "playlist_tag";
 
     private MMKV mMMKV;
     private Executor mExecutor;
     private boolean mEditable;
 
     private Handler mMainHandler;
+
+    private String mPlaylistTag;
+    private Playlist mPlaylist;
 
     @Nullable
     private OnModifyPlaylistListener mModifyPlaylistListener;
@@ -50,6 +55,8 @@ public abstract class PlaylistManager {
         mExecutor = Executors.newSingleThreadExecutor();
         mEditable = false;
         mMainHandler = new Handler(Looper.getMainLooper());
+
+        mPlaylistTag = "";
     }
 
     /**
@@ -102,12 +109,27 @@ public abstract class PlaylistManager {
      */
     @NonNull
     public Playlist getPlaylist() {
-        Playlist playlist = mMMKV.decodeParcelable(KEY_PLAYLIST, Playlist.class);
-        if (playlist == null) {
-            return new Playlist(new ArrayList<MusicItem>());
+        if (tagNotChanged()) {
+            return mPlaylist;
         }
 
+        Playlist playlist = mMMKV.decodeParcelable(KEY_PLAYLIST, Playlist.class);
+        if (playlist == null) {
+            playlist = new Playlist(new ArrayList<MusicItem>());
+        }
+
+        mPlaylistTag = mMMKV.decodeString(KEY_PLAYLIST_TAG, "");
+        mPlaylist = playlist;
+
         return playlist;
+    }
+
+    private boolean tagNotChanged() {
+        if (mPlaylistTag.isEmpty()) {
+            return false;
+        }
+
+        return mPlaylistTag.equals(mMMKV.decodeString(KEY_PLAYLIST_TAG, ""));
     }
 
     /**
@@ -217,10 +239,20 @@ public abstract class PlaylistManager {
         });
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private void save(@NonNull Playlist playlist) {
         Preconditions.checkNotNull(playlist);
+
+        mPlaylist = playlist;
+        mPlaylistTag = Hashing.sha256()
+                .newHasher()
+                .putLong(System.currentTimeMillis())
+                .putLong(playlist.hashCode())
+                .toString();
+
         mMMKV.encode(KEY_PLAYLIST, playlist);
         mMMKV.encode(KEY_PLAYLIST_SIZE, playlist.size());
+        mMMKV.encode(KEY_PLAYLIST_TAG, mPlaylistTag);
     }
 
     private void notifyOnSetNewPlaylist(final int position, final boolean play) {
