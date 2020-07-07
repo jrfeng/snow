@@ -22,7 +22,7 @@ public class PlaylistManagerTest {
 
     private PlaylistManager createPlaylistManager() {
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        PlaylistManager playlistManager = new PlaylistManager(context, "test" + persistentId) {
+        PlaylistManager playlistManager = new PlaylistManager(context, "playlist_manager_test" + persistentId) {
             @Override
             protected void setEditable(boolean editable) {
                 super.setEditable(editable);
