@@ -129,19 +129,6 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
     }
 
     /**
-     * 返回当前播放队列中最后出现的指定元素的索引；如果当前播放队列不包含此元素，则返回 -1。
-     * <p>
-     * 更确切地讲，返回满足 (o==null ? get(i)==null : o.equals(get(i))) 的最高索引 i；如果没有这样的索引，则返回 -1。
-     *
-     * @param musicItem 要搜索的元素（不能为 null）
-     * @return 列表中最后出现的指定元素的索引；如果列表不包含此元素，则返回 -1。
-     */
-    public int lastIndexOf(@NonNull MusicItem musicItem) {
-        Preconditions.checkNotNull(musicItem);
-        return mMusicItems.lastIndexOf(musicItem);
-    }
-
-    /**
      * 返回当前播放队列中的元素数。
      * <p>
      * 如果当前播放队列包含多于 Integer.MAX_VALUE 个元素，则返回 Integer.MAX_VALUE。
