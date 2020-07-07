@@ -25,14 +25,39 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
     private ArrayList<MusicItem> mMusicItems;
     private Bundle mExtra;
 
+    /**
+     * 创建一个 {@link Playlist} 对象。
+     *
+     * @param items 要添加到播放队列中的 {@link MusicItem} 对象，重复的 {@link MusicItem} 对象会被排除
+     */
     public Playlist(@NonNull List<MusicItem> items) {
         this(items, null);
     }
 
+    /**
+     * 创建一个 {@link Playlist} 对象。
+     *
+     * @param items 要添加到播放队列中的 {@link MusicItem} 对象，重复的 {@link MusicItem} 对象会被排除
+     * @param extra 要携带的额外参数
+     */
     public Playlist(@NonNull List<MusicItem> items, Bundle extra) {
         Preconditions.checkNotNull(items);
-        mMusicItems = new ArrayList<>(items);
+        mMusicItems = excludeDuplicate(items);
         mExtra = extra;
+    }
+
+    private ArrayList<MusicItem> excludeDuplicate(List<MusicItem> items) {
+        ArrayList<MusicItem> musicItems = new ArrayList<>();
+
+        for (MusicItem item : items) {
+            if (musicItems.contains(item)) {
+                continue;
+            }
+
+            musicItems.add(item);
+        }
+
+        return musicItems;
     }
 
     /**
@@ -142,8 +167,15 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
         return new Bundle(mExtra);
     }
 
+    /**
+     * 不包含携带的 {@code extra} 数据
+     */
     @Override
     public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
         if (!(obj instanceof Playlist)) {
             return false;
         }
@@ -151,6 +183,9 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
         return Objects.equal(mMusicItems, ((Playlist) obj).mMusicItems);
     }
 
+    /**
+     * 不包含携带的 {@code extra} 数据
+     */
     @Override
     public int hashCode() {
         return Objects.hashCode(mMusicItems);
