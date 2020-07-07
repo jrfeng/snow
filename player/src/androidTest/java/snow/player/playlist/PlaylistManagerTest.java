@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -19,6 +20,10 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class PlaylistManagerTest {
     private static int persistentId = 0;
+
+    private final int mSize = 10;
+    private Playlist mPlaylist;
+    private PlaylistManager mPlaylistManager;
 
     private PlaylistManager createPlaylistManager() {
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
@@ -79,120 +84,89 @@ public class PlaylistManagerTest {
         latch.await();
     }
 
-    @Test(timeout = 3_000)
-    public void insertMusicItem() throws InterruptedException {
-        final PlaylistManager playlistManager = createPlaylistManager();
+    @Before
+    public void initPlaylistManager() throws InterruptedException {
+        mPlaylistManager = createPlaylistManager();
 
-        // init playlist
-        final int size = 10;
-        final Playlist playlist = createPlaylist(size);
+        mPlaylist = createPlaylist(mSize);
         final CountDownLatch latch1 = new CountDownLatch(1);
-        playlistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter() {
+        mPlaylistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter() {
             @Override
             public void onNewPlaylist(int position, boolean play) {
                 latch1.countDown();
             }
         });
-        playlistManager.setPlaylist(playlist, 0, false);
+        mPlaylistManager.setPlaylist(mPlaylist, 0, false);
         latch1.await();
+    }
 
+    @Test(timeout = 3_000)
+    public void insertMusicItem() throws InterruptedException {
         // insert musicItem: not exist
-        final int insertPosition = size / 2;
-        final MusicItem notExistMusicItem = createMusicItem(size + 5);
+        final int insertPosition = mSize / 2;
+        final MusicItem notExistMusicItem = createMusicItem(mSize + 5);
         final CountDownLatch latch2 = new CountDownLatch(1);
-        playlistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter() {
+        mPlaylistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter() {
             @Override
             public void onMusicItemInserted(int position, MusicItem musicItem) {
-                assertEquals(size + 1, playlistManager.getPlaylistSize());
-                assertEquals(musicItem, playlistManager.getPlaylist().get(insertPosition));
+                assertEquals(mSize + 1, mPlaylistManager.getPlaylistSize());
+                assertEquals(musicItem, mPlaylistManager.getPlaylist().get(insertPosition));
                 latch2.countDown();
             }
         });
-        playlistManager.insertMusicItem(insertPosition, notExistMusicItem);
+        mPlaylistManager.insertMusicItem(insertPosition, notExistMusicItem);
         latch2.await();
 
         // insert musicItem: exist
         final int existMusicItemIndex = 0;
-        final MusicItem existMusicItem = playlist.get(existMusicItemIndex);
+        final MusicItem existMusicItem = mPlaylist.get(existMusicItemIndex);
         final CountDownLatch latch3 = new CountDownLatch(1);
-        playlistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter() {
+        mPlaylistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter() {
             @Override
             public void onMusicItemMoved(int fromPosition, int toPosition) {
                 assertEquals(existMusicItemIndex, fromPosition);
                 assertEquals(insertPosition, toPosition);
-                assertEquals(existMusicItem, playlistManager.getPlaylist().get(insertPosition));
+                assertEquals(existMusicItem, mPlaylistManager.getPlaylist().get(insertPosition));
                 latch3.countDown();
             }
         });
-        playlistManager.insertMusicItem(insertPosition, existMusicItem);
+        mPlaylistManager.insertMusicItem(insertPosition, existMusicItem);
         latch3.await();
     }
 
     @Test(timeout = 3_000)
     public void moveMusicItem() throws InterruptedException {
-        final PlaylistManager playlistManager = createPlaylistManager();
-
-        // init playlist
-        final int size = 10;
-        final Playlist playlist = createPlaylist(size);
-        final CountDownLatch latch1 = new CountDownLatch(1);
-        playlistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter() {
-            @Override
-            public void onNewPlaylist(int position, boolean play) {
-                latch1.countDown();
-            }
-        });
-        playlistManager.setPlaylist(playlist, 0, false);
-        latch1.await();
-
-        // move music item
         final int from = 2;
         final int to = 8;
-        final MusicItem fromMusicItem = playlist.get(from);
+        final MusicItem fromMusicItem = mPlaylist.get(from);
         final CountDownLatch latch2 = new CountDownLatch(1);
-        playlistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter() {
+        mPlaylistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter() {
             @Override
             public void onMusicItemMoved(int fromPosition, int toPosition) {
                 assertEquals(from, fromPosition);
                 assertEquals(to, toPosition);
-                assertEquals(fromMusicItem, playlistManager.getPlaylist().get(toPosition));
+                assertEquals(fromMusicItem, mPlaylistManager.getPlaylist().get(toPosition));
                 latch2.countDown();
             }
         });
-        playlistManager.moveMusicItem(from, to);
+        mPlaylistManager.moveMusicItem(from, to);
         latch2.await();
     }
 
     @Test(timeout = 3_000)
     public void removeMusicItem() throws InterruptedException {
-        final PlaylistManager playlistManager = createPlaylistManager();
-
-        // init playlist
-        final int size = 10;
-        final Playlist playlist = createPlaylist(size);
-        final CountDownLatch latch1 = new CountDownLatch(1);
-        playlistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter() {
-            @Override
-            public void onNewPlaylist(int position, boolean play) {
-                latch1.countDown();
-            }
-        });
-        playlistManager.setPlaylist(playlist, 0, false);
-        latch1.await();
-
-        // remove music item
         final int removePosition = 0;
-        final MusicItem removeMusicItem = playlist.get(removePosition);
+        final MusicItem removeMusicItem = mPlaylist.get(removePosition);
         final CountDownLatch latch2 = new CountDownLatch(1);
-        playlistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter(){
+        mPlaylistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter() {
             @Override
             public void onMusicItemRemoved(MusicItem musicItem) {
                 assertEquals(removeMusicItem, musicItem);
-                assertNotEquals(removeMusicItem, playlistManager.getPlaylist().get(removePosition));
+                assertNotEquals(removeMusicItem, mPlaylistManager.getPlaylist().get(removePosition));
                 latch2.countDown();
             }
         });
-        playlistManager.removeMusicItem(removeMusicItem);
+        mPlaylistManager.removeMusicItem(removeMusicItem);
         latch2.await();
     }
 
