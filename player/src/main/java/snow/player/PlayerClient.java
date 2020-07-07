@@ -419,7 +419,6 @@ public class PlayerClient {
 
     public static class PlaylistController implements PlaylistPlayer {
         private PlaylistManagerImp mPlaylistManager;
-        private PlaylistManager.OnModifyPlaylistListener mModifyPlaylistListener;
         private PlaylistPlayer mDelegate;
         private PlaylistStateHolder mPlaylistStateHolder;
         private boolean mConnected;
@@ -429,32 +428,7 @@ public class PlayerClient {
             mPlaylistStateHolder = new PlaylistStateHolder(mPlaylistManager);
             mConnected = false;
 
-            initModifyPlaylistListener();
-            mPlaylistManager.setOnModifyPlaylistListener(mModifyPlaylistListener);
-        }
-
-        private void initModifyPlaylistListener() {
-            mModifyPlaylistListener = new PlaylistManager.OnModifyPlaylistListener() {
-                @Override
-                public void onPlaylistSwapped(int position, boolean playOnPrepared) {
-                    notifyPlaylistSwapped(position, playOnPrepared);
-                }
-
-                @Override
-                public void onMusicItemMoved(int fromPosition, int toPosition) {
-                    notifyMusicItemMoved(fromPosition, toPosition);
-                }
-
-                @Override
-                public void onMusicItemInserted(int position, int count) {
-                    notifyMusicItemInserted(position, count);
-                }
-
-                @Override
-                public void onMusicItemRemoved(List<Integer> positions) {
-                    notifyMusicItemRemoved(positions);
-                }
-            };
+            mPlaylistManager.setOnModifyPlaylistListener(this);
         }
 
         void setDelegate(PlaylistPlayer delegate) {
@@ -519,16 +493,6 @@ public class PlayerClient {
          *
          * @param playlist 播放列表（不能为 null）
          * @param position 播放列表中要播放的歌曲的位置
-         */
-        public void setPlaylist(@NonNull Playlist playlist, int position) {
-            setPlaylist(playlist, position, false);
-        }
-
-        /**
-         * 设置一个新的播放列表。
-         *
-         * @param playlist 播放列表（不能为 null）
-         * @param position 播放列表中要播放的歌曲的位置
          * @param play     是否立即播放 {@code position} 参数指定处的音乐
          */
         public void setPlaylist(@NonNull Playlist playlist, int position, boolean play) {
@@ -538,6 +502,37 @@ public class PlayerClient {
             }
 
             mPlaylistManager.setPlaylist(playlist, position, play);
+        }
+
+        public void getPlaylistAsync(@NonNull PlaylistManager.Callback callback) {
+            Preconditions.checkNotNull(callback);
+            mPlaylistManager.getPlaylistAsync(callback);
+        }
+
+        public void setNextPlay(@NonNull MusicItem musicItem) {
+            Preconditions.checkNotNull(musicItem);
+            if (!isConnected()) {
+                return;
+            }
+
+            mPlaylistManager.insertMusicItem(getPlayingMusicItemPosition() + 1, musicItem);
+        }
+
+        public void moveMusicItem(int fromPosition, int toPosition) {
+            if (!isConnected()) {
+                return;
+            }
+
+            mPlaylistManager.moveMusicItem(fromPosition, toPosition);
+        }
+
+        public void removeMusicItem(@NonNull MusicItem musicItem) {
+            Preconditions.checkNotNull(musicItem);
+            if (!isConnected()) {
+                return;
+            }
+
+            mPlaylistManager.removeMusicItem(musicItem);
         }
 
         /**
@@ -683,7 +678,7 @@ public class PlayerClient {
          *
          * @return 当前播放列表的播放位置
          */
-        public int getPlayPosition() {
+        public int getPlayingMusicItemPosition() {
             return mPlaylistStateHolder.mPlaylistState.getPosition();
         }
 
@@ -746,42 +741,6 @@ public class PlayerClient {
             }
 
             mDelegate.setPlayMode(playMode);
-        }
-
-        @Override
-        public void notifyPlaylistSwapped(int position, boolean playOnPrepared) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.notifyPlaylistSwapped(position, playOnPrepared);
-        }
-
-        @Override
-        public void notifyMusicItemMoved(int fromPosition, int toPosition) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.notifyMusicItemMoved(fromPosition, toPosition);
-        }
-
-        @Override
-        public void notifyMusicItemInserted(int position, int count) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.notifyMusicItemInserted(position, count);
-        }
-
-        @Override
-        public void notifyMusicItemRemoved(List<Integer> positions) {
-            if (!mConnected) {
-                return;
-            }
-
-            mDelegate.notifyMusicItemRemoved(positions);
         }
 
         /**
@@ -882,6 +841,34 @@ public class PlayerClient {
             }
 
             mDelegate.rewind();
+        }
+
+        @Override
+        public void onNewPlaylist(int position, boolean play) {
+            if (mConnected) {
+                mDelegate.onNewPlaylist(position, play);
+            }
+        }
+
+        @Override
+        public void onMusicItemMoved(int fromPosition, int toPosition) {
+            if (mConnected) {
+                mDelegate.onMusicItemMoved(fromPosition, toPosition);
+            }
+        }
+
+        @Override
+        public void onMusicItemInserted(int position, MusicItem musicItem) {
+            if (mConnected) {
+                mDelegate.onMusicItemInserted(position, musicItem);
+            }
+        }
+
+        @Override
+        public void onMusicItemRemoved(MusicItem musicItem) {
+            if (mConnected) {
+                mDelegate.onMusicItemRemoved(musicItem);
+            }
         }
 
         /**

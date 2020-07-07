@@ -10,9 +10,7 @@ import androidx.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 
 import snow.player.AbstractPlayer;
@@ -351,7 +349,7 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
     }
 
     @Override
-    public void notifyPlaylistSwapped(final int position, final boolean playOnPrepared) {
+    public void onNewPlaylist(final int position, final boolean play) {
         stop();
         notifyPlaylistChanged(position);
         mPlaylistLoadedAction = new Runnable() {
@@ -362,149 +360,85 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
                     musicItem = mPlaylist.get(position);
                 }
 
-                notifyPlayingMusicItemChanged(musicItem, playOnPrepared);
+                notifyPlayingMusicItemChanged(musicItem, play);
             }
         };
         loadPlaylistAsync();
     }
 
     @Override
-    public void notifyMusicItemMoved(final int fromPosition, final int toPosition) {
-        if (fromPosition == toPosition) {
-            return;
-        }
-
-        mPlaylistLoadedAction = new Runnable() {
-            @Override
-            public void run() {
-                adjustPlayingMusicPosition(fromPosition, toPosition);
-            }
-        };
-
-        loadPlaylistAsync();
-    }
-
-    private void adjustPlayingMusicPosition(int fromPosition, int toPosition) {
+    public void onMusicItemMoved(int fromPosition, int toPosition) {
         int position = mPlaylistState.getPosition();
-
         if (notInRegion(position, fromPosition, toPosition)) {
-            return;
-        }
-
-        if (fromPosition < position) {
-            notifyPlayingMusicItemPositionChanged(position - 1);
-        } else if (fromPosition == position) {
-            notifyPlayingMusicItemPositionChanged(toPosition);
-        } else {
-            notifyPlayingMusicItemPositionChanged(position + 1);
-        }
-    }
-
-    private boolean notInRegion(int position, int fromPosition, final int toPosition) {
-        return position > Math.max(fromPosition, toPosition) || position < Math.min(fromPosition, toPosition);
-    }
-
-    @Override
-    public void notifyMusicItemInserted(final int position, final int count) {
-        if (position < 0) {
-            throw new IllegalArgumentException("'position' must >= 0, position=" + position);
-        }
-
-        if (count <= 0) {
-            throw new IllegalArgumentException("'count' must > 0, count=" + count);
-        }
-
-        notifyPlaylistChanged(position);
-
-        if (position > mPlaylistState.getPosition()) {
+            notifyPlaylistChanged(position);
             loadPlaylistAsync();
             return;
         }
 
-        mPlaylistLoadedAction = new Runnable() {
-            @Override
-            public void run() {
-                notifyPlayingMusicItemPositionChanged(position + count);
-            }
-        };
+        if (fromPosition < position) {
+            position -= 1;
+        } else if (fromPosition == position) {
+            position = toPosition;
+        } else {
+            position += 1;
+        }
 
+        notifyPlaylistChanged(position);
         loadPlaylistAsync();
     }
 
     @Override
-    public void notifyMusicItemRemoved(List<Integer> positions) {
-        if (isPositionsIllegal(positions)) {
-            throw new IndexOutOfBoundsException("size: " + getPlaylistSize() + ", positions: " + toString(positions));
+    public void onMusicItemInserted(int position, MusicItem musicItem) {
+        int playingPosition = mPlaylistState.getPosition();
+
+        if (position <= playingPosition) {
+            playingPosition += 1;
         }
 
-        if (positions.contains(mPlaylistState.getPosition())) {
-            adjustPlayingPosition(positions);
+        notifyPlaylistChanged(playingPosition);
+        loadPlaylistAsync();
+    }
+
+    @Override
+    public void onMusicItemRemoved(final MusicItem musicItem) {
+        int playlistSize = getPlaylistSize();
+        if (playlistSize < 1) {
+            notifyPlaylistChanged(-1);
+            notifyPlayingMusicItemChanged(null, false);
+            loadPlaylistAsync();
             return;
         }
 
-        adjustPlayingPosition2(positions);
-    }
-
-    private String toString(List<Integer> integers) {
-        StringBuilder buff = new StringBuilder();
-
-        buff.append("[");
-
-        for (int i = 0; i < integers.size() - 1; i++) {
-            buff.append(i)
-                    .append(", ");
+        int removePosition = mPlaylist.indexOf(musicItem);
+        if (removePosition < 0) {
+            return;
         }
 
-        buff.append(integers.get(integers.size() - 1))
-                .append("]");
+        int position = mPlaylistState.getPosition();
+        if (removePosition > position) {
+            notifyPlaylistChanged(position);
+            loadPlaylistAsync();
+            return;
+        }
 
-        return buff.toString();
-    }
+        if (removePosition < position) {
+            notifyPlaylistChanged(position - 1);
+            loadPlaylistAsync();
+            return;
+        }
 
-    private boolean isPositionsIllegal(List<Integer> positions) {
-        return Collections.max(positions) >= getPlaylistSize();
-    }
-
-    private void adjustPlayingPosition(final List<Integer> positions) {
-        final boolean playing = isPlaying();
+        notifyPlaylistChanged(getNextPosition(position - 1));
+        final boolean play = isPlaying();
         mPlaylistLoadedAction = new Runnable() {
             @Override
             public void run() {
-                int p = Collections.min(positions);
-
-                MusicItem musicItem = null;
-                if (!mPlaylist.isEmpty()) {
-                    musicItem = mPlaylist.get(p);
-                }
-
-                notifyPlayingMusicItemChanged(musicItem, playing);
-                notifyPlayingMusicItemPositionChanged(mPlaylist.isEmpty() ? -1 : p);
+                notifyPlayingMusicItemChanged(mPlaylist.get(mPlaylistState.getPosition()), play);
             }
         };
-
         loadPlaylistAsync();
     }
 
-    private void adjustPlayingPosition2(List<Integer> positions) {
-        final int position = mPlaylistState.getPosition();
-
-        int count = 0;
-        for (int p : positions) {
-            if (p < position) {
-                count += 1;
-            }
-        }
-
-        if (count > 0) {
-            final int i = Math.max(0, position - count);
-            mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    notifyPlayingMusicItemPositionChanged(mPlaylist.isEmpty() ? -1 : i);
-                }
-            };
-        }
-
-        loadPlaylistAsync();
+    private boolean notInRegion(int position, int fromPosition, int toPosition) {
+        return position > Math.max(fromPosition, toPosition) || position < Math.min(fromPosition, toPosition);
     }
 }

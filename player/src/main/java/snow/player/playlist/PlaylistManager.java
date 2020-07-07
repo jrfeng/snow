@@ -1,7 +1,8 @@
 package snow.player.playlist;
 
 import android.content.Context;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,13 +21,14 @@ import snow.player.media.MusicItem;
  * 用于管理音乐播放器的播放队列。
  */
 public abstract class PlaylistManager {
-    private static final String TAG = "PlaylistManager";
     private static final String KEY_PLAYLIST = "playlist";
     private static final String KEY_PLAYLIST_SIZE = "playlist_size";
 
     private MMKV mMMKV;
     private Executor mExecutor;
     private boolean mEditable;
+
+    private Handler mMainHandler;
 
     @Nullable
     private OnModifyPlaylistListener mModifyPlaylistListener;
@@ -47,6 +49,7 @@ public abstract class PlaylistManager {
         mMMKV = MMKV.mmkvWithID(playlistId, MMKV.MULTI_PROCESS_MODE);
         mExecutor = Executors.newSingleThreadExecutor();
         mEditable = false;
+        mMainHandler = new Handler(Looper.getMainLooper());
     }
 
     /**
@@ -120,40 +123,18 @@ public abstract class PlaylistManager {
     }
 
     /**
-     * 设置新的播放列表。
-     *
-     * @param playlist 新的播放列表（不能为 null）
-     */
-    public void setPlaylist(@NonNull Playlist playlist) {
-        Preconditions.checkNotNull(playlist);
-        setPlaylist(playlist, 0, false);
-    }
-
-    /**
-     * 设置新的播放列表，并将播放队列的播放位置设为 position 值。
+     * 设置新的播放列表，并将播放队列的播放位置设为 position 值，同时设置是否在 prepare 完成后自动播放音乐。
      *
      * @param playlist 新的播放列表（不能为 null）
      * @param position 要设置的播放位置值（小于 0 时，相当于设为 0）
-     */
-    public void setPlaylist(@NonNull Playlist playlist, int position) {
-        Preconditions.checkNotNull(playlist);
-        setPlaylist(playlist, position, false);
-    }
-
-    /**
-     * 设置新的播放列表，并将播放队列的播放位置设为 position 值，同时设置是否在 prepare 完成后自动播放音乐。
-     *
-     * @param playlist       新的播放列表（不能为 null）
-     * @param position       要设置的播放位置值（小于 0 时，相当于设为 0）
-     * @param playOnPrepared 否在 prepare 完成后自动播放音乐
+     * @param play     否在自动播放 position 位置处的音乐
      */
     public void setPlaylist(@NonNull final Playlist playlist,
                             final int position,
-                            final boolean playOnPrepared) {
+                            final boolean play) {
         Preconditions.checkNotNull(playlist);
 
         if (!isEditable()) {
-            Log.e(TAG, "playlist is not editable.");
             return;
         }
 
@@ -161,204 +142,79 @@ public abstract class PlaylistManager {
             @Override
             public void run() {
                 save(playlist);
-                notifyPlaylistSwapped(Math.max(position, 0), playOnPrepared);
+                notifyOnSetNewPlaylist(Math.max(position, 0), play);
             }
         });
     }
 
-    /**
-     * 将播放队列中 fromPosition 位置处的 MusicItem 对象移动到 toPosition 位置。
-     */
-    public void moveMusicItem(final int fromPosition, final int toPosition) {
-        if (!isEditable()) {
-            Log.e(TAG, "playlist is not editable.");
-            return;
-        }
+    public void insertMusicItem(final int position, @NonNull final MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
 
-        if (fromPosition == toPosition) {
+        if (!isEditable()) {
             return;
         }
 
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                List<MusicItem> items = getPlaylist().getAllMusicItem();
+                List<MusicItem> musicItems = getPlaylist().getAllMusicItem();
+                if (musicItems.contains(musicItem)) {
+                    moveMusicItem(musicItems.indexOf(musicItem), position);
+                    return;
+                }
 
-                MusicItem from = items.remove(fromPosition);
-                items.add(toPosition, from);
+                musicItems.add(position, musicItem);
 
-                save(new Playlist(items));
+                save(new Playlist(musicItems));
+                notifyMusicItemInserted(position, musicItem);
+            }
+        });
+    }
+
+    public void moveMusicItem(final int fromPosition, final int toPosition) {
+        if (fromPosition == toPosition) {
+            return;
+        }
+
+        if (!isEditable()) {
+            return;
+        }
+
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<MusicItem> musicItems = getPlaylist().getAllMusicItem();
+
+                MusicItem from = musicItems.remove(fromPosition);
+                musicItems.add(toPosition, from);
+
+                save(new Playlist(musicItems));
                 notifyMusicItemMoved(fromPosition, toPosition);
             }
         });
     }
 
-    /**
-     * 将单个 MusicItem 对象添加到播放队列的末尾。
-     *
-     * @param musicItem 要添加的 MusicItem 对象
-     */
-    public void appendMusicItem(@NonNull final MusicItem musicItem) {
+    public void removeMusicItem(@NonNull final MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
 
         if (!isEditable()) {
-            Log.e(TAG, "playlist is not editable.");
             return;
         }
 
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                List<MusicItem> items = getPlaylist().getAllMusicItem();
-                int position = items.size();
+                List<MusicItem> musicItems = getPlaylist().getAllMusicItem();
+                if (!musicItems.contains(musicItem)) {
+                    return;
+                }
 
-                items.add(musicItem);
+                musicItems.remove(musicItem);
 
-                save(new Playlist(items));
-                notifyMusicItemInserted(position, 1);
+                save(new Playlist(musicItems));
+                notifyMusicItemRemoved(musicItem);
             }
         });
-    }
-
-    /**
-     * 将多个 MusicItem 对象添加到播放队列的末尾。
-     *
-     * @param musicItems 要添加的多个 MusicItem 对象
-     */
-    public void appendAllMusicItem(@NonNull final List<MusicItem> musicItems) {
-        Preconditions.checkNotNull(musicItems);
-
-        if (!isEditable()) {
-            Log.e(TAG, "playlist is not editable.");
-            return;
-        }
-
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                List<MusicItem> items = getPlaylist().getAllMusicItem();
-                int position = items.size();
-
-                items.addAll(musicItems);
-
-                save(new Playlist(items));
-                notifyMusicItemInserted(position, musicItems.size());
-            }
-        });
-    }
-
-    /**
-     * 将单个 MusicItem 对象（不能为 null）插入到播放队列的 position 位置处。
-     */
-    public void insertMusicItem(final int position, @NonNull final MusicItem musicItem) {
-        Preconditions.checkNotNull(musicItem);
-
-        if (!isEditable()) {
-            Log.e(TAG, "playlist is not editable.");
-            return;
-        }
-
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                List<MusicItem> items = getPlaylist().getAllMusicItem();
-
-                items.add(position, musicItem);
-
-                save(new Playlist(items));
-                notifyMusicItemInserted(position, 1);
-            }
-        });
-    }
-
-    /**
-     * 将多个 MusicItem 对象（不能为 null）插入到播放队列的 position 位置处。
-     */
-    public void insertAllMusicItem(final int position, @NonNull final List<MusicItem> musicItems) {
-        Preconditions.checkNotNull(musicItems);
-
-        if (!isEditable()) {
-            Log.e(TAG, "playlist is not editable.");
-            return;
-        }
-
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                List<MusicItem> items = getPlaylist().getAllMusicItem();
-
-                items.addAll(position, musicItems);
-
-                save(new Playlist(items));
-                notifyMusicItemInserted(position, musicItems.size());
-            }
-        });
-    }
-
-    /**
-     * 移除播放队列中指定位置处的音乐。
-     */
-    public void removeMusicItem(final List<Integer> positions) {
-        if (positions.size() < 1) {
-            return;
-        }
-
-        if (!isEditable()) {
-            Log.e(TAG, "playlist is not editable.");
-            return;
-        }
-
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                List<MusicItem> items = getPlaylist().getAllMusicItem();
-
-                items.removeAll(getSubList(items, positions));
-
-                save(new Playlist(items));
-                notifyMusicItemRemoved(positions);
-            }
-        });
-    }
-
-    private List<MusicItem> getSubList(List<MusicItem> items, List<Integer> positions) {
-        List<MusicItem> subList = new ArrayList<>(positions.size());
-        for (int position : positions) {
-            subList.add(items.get(position));
-        }
-        return subList;
-    }
-
-    private void notifyPlaylistSwapped(int position, boolean playOnPrepared) {
-        if (mModifyPlaylistListener == null) {
-            return;
-        }
-
-        mModifyPlaylistListener.onPlaylistSwapped(position, playOnPrepared);
-    }
-
-    private void notifyMusicItemMoved(int fromPosition, int toPosition) {
-        if (mModifyPlaylistListener == null) {
-            return;
-        }
-
-        mModifyPlaylistListener.onMusicItemMoved(fromPosition, toPosition);
-    }
-
-    private void notifyMusicItemInserted(int position, int count) {
-        if (mModifyPlaylistListener == null) {
-            return;
-        }
-
-        mModifyPlaylistListener.onMusicItemInserted(position, count);
-    }
-
-    private void notifyMusicItemRemoved(List<Integer> positions) {
-        if (mModifyPlaylistListener == null) {
-            return;
-        }
-
-        mModifyPlaylistListener.onMusicItemRemoved(positions);
     }
 
     private void save(@NonNull Playlist playlist) {
@@ -367,17 +223,61 @@ public abstract class PlaylistManager {
         mMMKV.encode(KEY_PLAYLIST_SIZE, playlist.size());
     }
 
+    private void notifyOnSetNewPlaylist(final int position, final boolean play) {
+        mMainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mModifyPlaylistListener != null) {
+                    mModifyPlaylistListener.onNewPlaylist(position, play);
+                }
+            }
+        });
+    }
+
+    private void notifyMusicItemMoved(final int fromPosition, final int toPosition) {
+        mMainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mModifyPlaylistListener != null) {
+                    mModifyPlaylistListener.onMusicItemMoved(fromPosition, toPosition);
+                }
+            }
+        });
+    }
+
+    private void notifyMusicItemInserted(final int position, final MusicItem musicItem) {
+        mMainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mModifyPlaylistListener != null) {
+                    mModifyPlaylistListener.onMusicItemInserted(position, musicItem);
+                }
+            }
+        });
+    }
+
+    private void notifyMusicItemRemoved(final MusicItem musicItem) {
+        mMainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mModifyPlaylistListener != null) {
+                    mModifyPlaylistListener.onMusicItemRemoved(musicItem);
+                }
+            }
+        });
+    }
+
     public interface Callback {
         void onFinished(@NonNull Playlist playlist);
     }
 
     public interface OnModifyPlaylistListener {
-        void onPlaylistSwapped(int position, boolean playOnPrepared);
+        void onNewPlaylist(int position, boolean play);
 
         void onMusicItemMoved(int fromPosition, int toPosition);
 
-        void onMusicItemInserted(int position, int count);
+        void onMusicItemInserted(int position, MusicItem musicItem);
 
-        void onMusicItemRemoved(List<Integer> positions);
+        void onMusicItemRemoved(MusicItem musicItem);
     }
 }
