@@ -22,12 +22,6 @@ public class TestPlaylistManager extends PlaylistManager {
     }
 
     public class Tester {
-        private long mLoadPlaylistDelay = 100;
-
-        public void setLoadPlaylistDelay(long loadPlaylistDelay) {
-            mLoadPlaylistDelay = loadPlaylistDelay;
-        }
-
         public void setPlaylist(Playlist playlist) {
             mPlaylist = playlist;
         }
@@ -50,7 +44,7 @@ public class TestPlaylistManager extends PlaylistManager {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(mTester.mLoadPlaylistDelay);
+                    Thread.sleep(300);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

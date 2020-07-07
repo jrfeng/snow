@@ -154,118 +154,167 @@ public class AbstractPlaylistPlayerTest {
     }
 
     @Test(timeout = 3000)
-    public void notifyPlaylistSwapped() throws InterruptedException {
-        final Playlist playlist = createPlaylist(8);
+    public void onNewPlaylist() throws InterruptedException {
+        final Playlist playlist = createPlaylist(28);
 
         mTestPlaylistManager.tester().setPlaylist(playlist);
 
-        final int position = 3;
         final CountDownLatch latch = new CountDownLatch(1);
-        mTestPlaylistPlayer.tester().setPlayingAction(new Runnable() {
+        mTestPlaylistPlayer.tester().setOnPlaylistAvailableAction(new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(playlist, mTestPlaylistPlayer.getPlaylist());
+                latch.countDown();
+            }
+        });
+        mTestPlaylistPlayer.onNewPlaylist(0, true);
+        latch.await();
+    }
+
+    @Test(timeout = 3000)
+    public void onMusicItemMoved() throws InterruptedException {
+        final int position = 5;
+
+        // position not in region
+        mPlaylistState.setPosition(position);
+        final int from1 = position - 4;
+        final int to1 = position - 2;
+        final CountDownLatch latch1 = new CountDownLatch(1);
+        mTestPlaylistPlayer.tester().setOnPlaylistAvailableAction(new Runnable() {
             @Override
             public void run() {
                 assertEquals(position, mPlaylistState.getPosition());
-                assertEquals(playlist, mTestPlaylistPlayer.getPlaylist());
-                assertEquals(Player.PlaybackState.PLAYING, mPlaylistState.getPlaybackState());
-
-                latch.countDown();
+                latch1.countDown();
             }
         });
-        mTestPlaylistPlayer.notifyPlaylistSwapped(position, true);
-        latch.await();
-    }
+        mTestPlaylistPlayer.onMusicItemMoved(from1, to1);
+        latch1.await();
 
-    @Test(timeout = 3000)
-    public void notifyMusicItemMoved() throws InterruptedException {
-        final int from = mPlaylistState.getPosition();
-        final int to = from + 2;
-
-        List<MusicItem> musicItems = mPlaylist.getAllMusicItem();
-        MusicItem buff = musicItems.get(from);
-        musicItems.set(from, musicItems.get(to));
-        musicItems.set(to, buff);
-
-        mTestPlaylistManager.tester().setPlaylist(new Playlist(musicItems));
-
-        final CountDownLatch latch = new CountDownLatch(1);
-        mTestPlaylistPlayer.tester().setOnPlaylistAvailableAction(new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(mPlaylist.get(from), mTestPlaylistPlayer.getPlaylist().get(to));
-                assertEquals(mPlaylist.get(to), mTestPlaylistPlayer.getPlaylist().get(from));
-                assertEquals(to, mPlaylistState.getPosition());
-
-                latch.countDown();
-            }
-        });
-        mTestPlaylistPlayer.notifyMusicItemMoved(from, to);
-        latch.await();
-    }
-
-    @Test(timeout = 3000)
-    public void notifyMusicItemInserted() {
-        final int position = mPlaylistState.getPosition();
-
-        List<MusicItem> musicItems = mPlaylist.getAllMusicItem();
-
-        MusicItem musicItem1 = createMusicItem(20);
-        MusicItem musicItem2 = createMusicItem(21);
-
-        final List<MusicItem> addItems = new ArrayList<>();
-        addItems.add(musicItem1);
-        addItems.add(musicItem2);
-
-        final int count = addItems.size();
-        musicItems.addAll(position, addItems);
-
-        mTestPlaylistManager.tester().setPlaylist(new Playlist(musicItems));
-
-        final CountDownLatch latch = new CountDownLatch(1);
-        mTestPlaylistPlayer.tester().setOnPlaylistAvailableAction(new Runnable() {
-            @Override
-            public void run() {
-                assertEquals(position + count, mPlaylistState.getPosition());
-
-                Playlist playlist = mTestPlaylistPlayer.getPlaylist();
-                for(int i = 0; i < count; i++) {
-                    assertEquals(addItems.get(i), playlist.get(position + i));
-                }
-
-                latch.countDown();
-            }
-        });
-
-        mTestPlaylistPlayer.notifyMusicItemInserted(position, count);
-    }
-
-    @Test(timeout = 3000)
-    public void notifyMusicItemRemoved() throws InterruptedException {
-        final int position = 4;
+        // from < playingPosition
         mPlaylistState.setPosition(position);
-
-        List<MusicItem> musicItems = mPlaylist.getAllMusicItem();
-
-        List<Integer> removePositions = new ArrayList<>();
-        removePositions.add(6);
-        removePositions.add(2);
-        removePositions.add(0);
-
-        musicItems.remove(6);
-        musicItems.remove(2);
-        musicItems.remove(0);
-
-        mTestPlaylistManager.tester().setPlaylist(new Playlist(musicItems));
-
-        final CountDownLatch latch = new CountDownLatch(1);
+        final int from2 = position - 1;
+        final int to2 = position + 2;
+        final CountDownLatch latch2 = new CountDownLatch(1);
         mTestPlaylistPlayer.tester().setOnPlaylistAvailableAction(new Runnable() {
             @Override
             public void run() {
-                assertEquals(position - 2, mPlaylistState.getPosition());
-
-                latch.countDown();
+                assertEquals(position - 1, mPlaylistState.getPosition());
+                latch2.countDown();
             }
         });
-        mTestPlaylistPlayer.notifyMusicItemRemoved(removePositions);
-        latch.await();
+        mTestPlaylistPlayer.onMusicItemMoved(from2, to2);
+        latch2.await();
+
+        // from == playingPosition
+        mPlaylistState.setPosition(position);
+        final int to3 = position + 2;
+        final CountDownLatch latch3 = new CountDownLatch(1);
+        mTestPlaylistPlayer.tester().setOnPlaylistAvailableAction(new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(to3, mPlaylistState.getPosition());
+                latch3.countDown();
+            }
+        });
+        mTestPlaylistPlayer.onMusicItemMoved(position, to3);
+        latch3.await();
+
+        // from > playingPosition
+        mPlaylistState.setPosition(position);
+        final int from4 = position + 1;
+        final int to4 = position - 2;
+        final CountDownLatch latch4 = new CountDownLatch(1);
+        mTestPlaylistPlayer.tester().setOnPlaylistAvailableAction(new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(position + 1, mPlaylistState.getPosition());
+                latch4.countDown();
+            }
+        });
+        mTestPlaylistPlayer.onMusicItemMoved(from4, to4);
+        latch4.await();
+    }
+
+    @Test(timeout = 3000)
+    public void onMusicItemInserted() throws InterruptedException {
+        final int position = 5;
+
+        // insertPosition <= playingPosition
+        mPlaylistState.setPosition(position);
+        final int insertPosition1 = position - 1;
+        final CountDownLatch latch1 = new CountDownLatch(1);
+        mTestPlaylistPlayer.tester().setOnPlaylistAvailableAction(new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(position + 1, mPlaylistState.getPosition());
+                latch1.countDown();
+            }
+        });
+        mTestPlaylistPlayer.onMusicItemInserted(insertPosition1, new MusicItem());
+        latch1.await();
+
+        // insertPosition > playingPosition
+        mPlaylistState.setPosition(position);
+        final int insertPosition2 = position + 1;
+        final CountDownLatch latch2 = new CountDownLatch(1);
+        mTestPlaylistPlayer.tester().setOnPlaylistAvailableAction(new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(position, mPlaylistState.getPosition());
+                latch2.countDown();
+            }
+        });
+        mTestPlaylistPlayer.onMusicItemInserted(insertPosition2, new MusicItem());
+        latch2.await();
+    }
+
+    @Test(timeout = 3000)
+    public void onMusicItemRemoved() throws InterruptedException {
+        final int position = 5;
+
+        // removePosition < position
+        mPlaylistState.setPosition(position);
+        final int removePosition1 = position - 1;
+        final MusicItem musicItem1 = mPlaylist.get(removePosition1);
+        final CountDownLatch latch1 = new CountDownLatch(1);
+        mTestPlaylistPlayer.tester().setOnPlaylistAvailableAction(new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(position - 1, mPlaylistState.getPosition());
+                latch1.countDown();
+            }
+        });
+        mTestPlaylistPlayer.onMusicItemRemoved(musicItem1);
+        latch1.await();
+
+        // removePosition == position
+        mPlaylistState.setPosition(position);
+        final MusicItem musicItem2 = mPlaylist.get(position);
+        final CountDownLatch latch2 = new CountDownLatch(1);
+        final int nextPosition = mTestPlaylistPlayer.getNextPosition(position - 1);
+        mTestPlaylistPlayer.tester().setOnPlaylistAvailableAction(new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(nextPosition, mPlaylistState.getPosition());
+                latch2.countDown();
+            }
+        });
+        mTestPlaylistPlayer.onMusicItemRemoved(musicItem2);
+        latch2.await();
+
+        // removePosition > position
+        mPlaylistState.setPosition(position);
+        final int removePosition3 = position + 1;
+        final MusicItem musicItem3 = mPlaylist.get(removePosition3);
+        final CountDownLatch latch3 = new CountDownLatch(1);
+        mTestPlaylistPlayer.tester().setOnPlaylistAvailableAction(new Runnable() {
+            @Override
+            public void run() {
+                assertEquals(position, mPlaylistState.getPosition());
+                latch3.countDown();
+            }
+        });
+        mTestPlaylistPlayer.onMusicItemRemoved(musicItem3);
+        latch3.await();
     }
 }
