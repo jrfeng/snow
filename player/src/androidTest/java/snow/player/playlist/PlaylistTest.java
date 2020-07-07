@@ -3,7 +3,7 @@ package snow.player.playlist;
 import android.os.Bundle;
 import android.os.Parcel;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -19,12 +19,12 @@ import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class PlaylistTest {
-    private static List<MusicItem> mItems;
-    private static Playlist mPlaylist;
-    private static final int mSize = 100;
+    private List<MusicItem> mItems;
+    private Playlist mPlaylist;
+    private final int mSize = 100;
 
-    @BeforeClass
-    public static void initPlaylist() {
+    @Before
+    public void initPlaylist() {
         mItems = new ArrayList<>(mSize);
         for (int i = 0; i < mSize; i++) {
             mItems.add(generateMusicItem(i));
@@ -49,11 +49,26 @@ public class PlaylistTest {
 
     @Test
     public void constructorTest() {
-        mItems.remove(0);
-        assertEquals(mSize, mPlaylist.size());
+        List<MusicItem> items = new ArrayList<>();
 
-        mItems.add(generateMusicItem(mSize));
-        assertEquals(mSize, mPlaylist.size());
+        MusicItem item0 = generateMusicItem(0);
+        MusicItem item1 = generateMusicItem(1);
+        MusicItem item2 = generateMusicItem(2);
+        MusicItem item3 = generateMusicItem(3);
+
+        items.add(item0);
+        items.add(item0);
+        items.add(item1);
+        items.add(item2);
+        items.add(item2);
+        items.add(item3);
+        items.add(item3);
+        items.add(item0);
+        items.add(item0);
+
+        Playlist playlist = new Playlist(items);
+
+        assertEquals(4, playlist.size());
     }
 
     @Test
@@ -95,24 +110,6 @@ public class PlaylistTest {
     @Test
     public void iterator() {
         assertNotNull(mPlaylist.iterator());
-    }
-
-    @Test
-    public void lastIndexOf() {
-        MusicItem musicItem1 = generateMusicItem(1);
-        MusicItem musicItem2 = generateMusicItem(2);
-        MusicItem musicItem3 = generateMusicItem(3);
-
-        List<MusicItem> items = new ArrayList<>();
-
-        items.add(musicItem1);
-        items.add(musicItem2);
-        items.add(musicItem1);
-        items.add(musicItem3);
-
-        Playlist playlist = new Playlist(items);
-
-        assertEquals(2, playlist.lastIndexOf(musicItem1));
     }
 
     @Test
