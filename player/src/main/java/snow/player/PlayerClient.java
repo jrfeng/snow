@@ -515,6 +515,10 @@ public class PlayerClient {
                 return;
             }
 
+            if (musicItem.equals(getPlayingMusicItem())) {
+                return;
+            }
+
             mPlaylistManager.insertMusicItem(getPlayingMusicItemPosition() + 1, musicItem);
         }
 
