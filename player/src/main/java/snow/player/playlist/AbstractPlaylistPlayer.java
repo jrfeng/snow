@@ -401,16 +401,15 @@ public abstract class AbstractPlaylistPlayer extends AbstractPlayer<PlaylistStat
 
     @Override
     public void onMusicItemRemoved(final MusicItem musicItem) {
-        int playlistSize = getPlaylistSize();
-        if (playlistSize < 1) {
-            notifyPlaylistChanged(-1);
-            notifyPlayingMusicItemChanged(null, false);
-            loadPlaylistAsync();
+        int removePosition = mPlaylist.indexOf(musicItem);
+        if (removePosition < 0) {
             return;
         }
 
-        int removePosition = mPlaylist.indexOf(musicItem);
-        if (removePosition < 0) {
+        if (getPlaylistSize() < 1) {
+            notifyPlaylistChanged(-1);
+            notifyPlayingMusicItemChanged(null, false);
+            loadPlaylistAsync();
             return;
         }
 
