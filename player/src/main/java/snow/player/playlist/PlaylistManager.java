@@ -248,6 +248,7 @@ public abstract class PlaylistManager {
                 .newHasher()
                 .putLong(System.currentTimeMillis())
                 .putLong(playlist.hashCode())
+                .hash()
                 .toString();
 
         mMMKV.encode(KEY_PLAYLIST, playlist);
