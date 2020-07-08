@@ -1,6 +1,9 @@
 package snow.player;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
@@ -1020,6 +1023,9 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         private OnCompletionListener mCompletionListener;
         private OnErrorListener mErrorListener;
 
+        private ObjectAnimator mStartVolumeAnimator;
+        private ObjectAnimator mPauseVolumeAnimator;
+
         MusicPlayerWrapper(@NonNull Context context, @NonNull MusicPlayer musicPlayer) {
             Preconditions.checkNotNull(context);
             Preconditions.checkNotNull(musicPlayer);
@@ -1029,6 +1035,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
             initWakeLock(context);
             initDelegateMusicPlayer();
+            initVolumeAnimator();
         }
 
         private void initWakeLock(Context context) {
@@ -1068,6 +1075,33 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
                     if (mErrorListener != null) {
                         mErrorListener.onError(mp, errorCode);
                     }
+                }
+            });
+        }
+
+        private void initVolumeAnimator() {
+            long volumeAnimDuration = 400L;
+
+            mStartVolumeAnimator = ObjectAnimator.ofFloat(this, "volume", 0.0F, 1.0F);
+            mStartVolumeAnimator.setDuration(volumeAnimDuration);
+            mStartVolumeAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    setVolume(1.0F);
+                }
+            });
+
+            mPauseVolumeAnimator = ObjectAnimator.ofFloat(this, "volume", 1.0F, 0.0F);
+            mPauseVolumeAnimator.setDuration(volumeAnimDuration);
+            mPauseVolumeAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    mMusicPlayer.pause();
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mMusicPlayer.pause();
                 }
             });
         }
@@ -1135,18 +1169,33 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         @Override
         public void start() {
             requireWakeLock();
+            cancelVolumeAnim();
+            setVolume(0.0F);
             mMusicPlayer.start();
+            mStartVolumeAnimator.start();
         }
 
         @Override
         public void pause() {
             releaseWakeLock();
-            mMusicPlayer.pause();
+            cancelVolumeAnim();
+            mPauseVolumeAnimator.start();
+        }
+
+        private void cancelVolumeAnim() {
+            if (mStartVolumeAnimator.isStarted()) {
+                mStartVolumeAnimator.cancel();
+            }
+
+            if (mPauseVolumeAnimator.isStarted()) {
+                mPauseVolumeAnimator.cancel();
+            }
         }
 
         @Override
         public void stop() {
             releaseWakeLock();
+            cancelVolumeAnim();
             mMusicPlayer.stop();
         }
 
@@ -1158,6 +1207,10 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         @Override
         public void setVolume(float leftVolume, float rightVolume) {
             mMusicPlayer.setVolume(leftVolume, rightVolume);
+        }
+
+        public void setVolume(float volume) {
+            setVolume(volume, volume);
         }
 
         @Override
@@ -1172,6 +1225,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
         @Override
         public void release() {
+            cancelVolumeAnim();
             mMusicPlayer.release();
         }
 
