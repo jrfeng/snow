@@ -178,6 +178,10 @@ public class PlayProgressViewModel extends ViewModel {
         return mTextProgress;
     }
 
+    public void stopProgressClock() {
+        stopTimer();
+    }
+
     private void registerAllListener() {
         PlayerClient.PlaylistController playlistController = mPlayerClient.getPlaylistController();
         PlayerClient.RadioStationController radioStationController = mPlayerClient.getRadioStationController();
