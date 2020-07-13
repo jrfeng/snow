@@ -167,6 +167,13 @@ public class PlayProgressViewModel extends ViewModel {
         };
     }
 
+    /**
+     * 初始化当前的 {@link PlayProgressViewModel} 对象。
+     *
+     * @param owner        一个 {@link LifecycleOwner} 对象，不能为 null。通常是当前 ViewModel 关联到的
+     *                     那个 Activity 对象
+     * @param playerClient 一个 {@link PlayerClient} 对象，不能为 null
+     */
     public void init(@NonNull LifecycleOwner owner, @NonNull final PlayerClient playerClient) {
         Preconditions.checkNotNull(playerClient);
 
