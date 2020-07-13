@@ -35,6 +35,9 @@ dependencies {
     // media
     api 'androidx.media:media:1.1.0'
 
+    // ViewModel and LiveData
+    api "androidx.lifecycle:lifecycle-extensions:2.2.0"
+
     // Guava
     implementation "com.google.guava:guava:29.0-android"
 
