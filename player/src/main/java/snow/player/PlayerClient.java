@@ -1669,7 +1669,7 @@ public class PlayerClient {
                 return;
             }
 
-            listener.onSeekComplete(mPlayerState.getPlayProgress());
+            listener.onSeekComplete(mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime());
         }
 
         private void notifySeekComplete() {
@@ -1729,8 +1729,9 @@ public class PlayerClient {
         }
 
         @Override
-        public void onSeekComplete(int progress) {
+        public void onSeekComplete(int progress, long updateTime) {
             mPlayerState.setPlayProgress(progress);
+            mPlayerState.setPlayProgressUpdateTime(updateTime);
 
             notifySeekComplete();
         }

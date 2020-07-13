@@ -67,7 +67,7 @@ public interface Player {
         /**
          * 超高音质（无损）。
          */
-       SUPER
+        SUPER
     }
 
     /**
@@ -85,7 +85,7 @@ public interface Player {
         /**
          * 准备完毕。
          */
-       PREPARED,
+        PREPARED,
         /**
          * 播放中。
          */
@@ -115,7 +115,7 @@ public interface Player {
         public static final int FILE_NOT_FOUND = 4;
         public static final int DATA_LOAD_FAILED = 5;
 
-        private Error(){
+        private Error() {
             throw new AssertionError();
         }
 
@@ -159,7 +159,8 @@ public interface Player {
 
         /**
          * 当播放器的状态变为 “播放中” 时会回调该方法。
-         *  @param playProgress           当前的播放进度
+         *
+         * @param playProgress           当前的播放进度
          * @param playProgressUpdateTime 播放进度的更新时间
          */
         void onPlay(int playProgress, long playProgressUpdateTime);
@@ -204,8 +205,11 @@ public interface Player {
     interface OnSeekCompleteListener {
         /**
          * 该方法会在播放进度调整完成时调用。
+         *
+         * @param progress   当前的播放进度
+         * @param updateTime 当前播放进度的更新时间
          */
-        void onSeekComplete(int progress);
+        void onSeekComplete(int progress, long updateTime);
     }
 
     /**

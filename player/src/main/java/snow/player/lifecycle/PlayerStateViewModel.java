@@ -110,10 +110,11 @@ public class PlayerStateViewModel extends ViewModel {
             }
         };
 
-        mSeekCompleteListener = new Player.OnSeekCompleteListener() {
+        mSeekCompleteListener = new Player.OnSeekCompleteListener()  {
             @Override
-            public void onSeekComplete(int progress) {
+            public void onSeekComplete(int progress, long updateTime) {
                 mPlayProgress.setValue(progress);
+                mPlayProgressUpdateTime.setValue(updateTime);
             }
         };
 

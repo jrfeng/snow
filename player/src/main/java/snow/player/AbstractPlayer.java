@@ -787,7 +787,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
-                listener.onSeekComplete(position);
+                listener.onSeekComplete(position, mPlayerState.getPlayProgressUpdateTime());
             }
         }
     }
