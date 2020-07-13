@@ -34,22 +34,23 @@ public class PlayProgressViewModel extends ViewModel {
     private MutableLiveData<String> mTextDuration;
     private MutableLiveData<String> mTextProgress;
 
-    private int mDurationSec;    // 单位：秒
-    private boolean mLoop;
-    private Player.PlaybackState mPlaybackState;
-
     private Player.OnPlaybackStateChangeListener mPlaybackStateChangeListener;
     private Player.OnStalledChangeListener mStalledChangeListener;
     private Player.OnSeekListener mSeekCompleteListener;
     private Player.OnPlayingMusicItemChangeListener mPlayingMusicItemChangeListener;
-
     private PlaylistPlayer.OnPlayModeChangeListener mPlayModeChangeListener;
+
+    private boolean mLoop;
+    private int mDurationSec; // 单位：秒
+    private Player.PlaybackState mPlaybackState;
+    private Disposable mDisposable;
 
     public PlayProgressViewModel() {
         mDuration = new MutableLiveData<>(0);
         mProgress = new MutableLiveData<>(0);
-        mTextDuration = new MutableLiveData<>("00:00");
-        mTextProgress = new MutableLiveData<>("00:00");
+        mTextDuration = new MutableLiveData<>(formatSeconds(0));
+        mTextProgress = new MutableLiveData<>(formatSeconds(0));
+        mPlaybackState = Player.PlaybackState.UNKNOWN;
     }
 
     private void initAllListener() {
@@ -125,12 +126,20 @@ public class PlayProgressViewModel extends ViewModel {
             @Override
             public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
                 if (musicItem == null) {
+                    stopTimer();
                     updateDuration(0);
                     updateProgress(0, System.currentTimeMillis());
                     return;
                 }
 
                 updateDuration(musicItem.getDuration());
+            }
+        };
+
+        mPlayModeChangeListener = new PlaylistPlayer.OnPlayModeChangeListener() {
+            @Override
+            public void onPlayModeChanged(PlaylistPlayer.PlayMode playMode) {
+                mLoop = playMode == PlaylistPlayer.PlayMode.LOOP;
             }
         };
     }
@@ -184,6 +193,8 @@ public class PlayProgressViewModel extends ViewModel {
 
         playlistController.addOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
         radioStationController.addOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
+
+        playlistController.addOnPlayModeChangeListener(mPlayModeChangeListener);
     }
 
     private void unregisterAllListener() {
@@ -201,13 +212,8 @@ public class PlayProgressViewModel extends ViewModel {
 
         playlistController.removeOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
         radioStationController.removeOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
-    }
 
-    private void stopTimer() {
-        if (mDisposable != null && !mDisposable.isDisposed()) {
-            mDisposable.dispose();
-            mDisposable = null;
-        }
+        playlistController.removeOnPlayModeChangeListener(mPlayModeChangeListener);
     }
 
     private void updateDuration(int durationMS/*单位：毫秒*/) {
@@ -224,9 +230,9 @@ public class PlayProgressViewModel extends ViewModel {
         updateProgress(progressSec);
     }
 
-    private Disposable mDisposable;
-
     private void startTimer() {
+        stopTimer();
+
         mLoop = (mPlayerClient.getPlayerType() == PlayerManager.PlayerType.PLAYLIST) &&
                 mPlayerClient.getPlaylistController().isLooping();
 
@@ -237,6 +243,13 @@ public class PlayProgressViewModel extends ViewModel {
                         updateProgress();
                     }
                 });
+    }
+
+    private void stopTimer() {
+        if (mDisposable != null && !mDisposable.isDisposed()) {
+            mDisposable.dispose();
+            mDisposable = null;
+        }
     }
 
     private void updateProgress() {
