@@ -12,14 +12,14 @@ import com.google.common.base.Preconditions;
  * 用于保存播放器的通用配置信息。
  */
 public class PlayerConfig implements Parcelable {
-    private int mPlayerType;
+    private PlayerManager.PlayerType mPlayerType;
     private Player.SoundQuality mSoundQuality;
     private boolean mAudioEffectEnabled;
     private boolean mOnlyWifiNetwork;
     private boolean mIgnoreLossAudioFocus;
 
     public PlayerConfig() {
-        mPlayerType = PlayerManager.TYPE_PLAYLIST;
+        mPlayerType = PlayerManager.PlayerType.PLAYLIST;
         mSoundQuality = Player.SoundQuality.STANDARD;
         mAudioEffectEnabled = false;
         mOnlyWifiNetwork = false;
@@ -37,20 +37,19 @@ public class PlayerConfig implements Parcelable {
     /**
      * 获取播放器类型。
      *
-     * @see PlayerManager#TYPE_PLAYLIST
-     * @see PlayerManager#TYPE_RADIO_STATION
+     * @see PlayerManager.PlayerType#PLAYLIST
+     * @see PlayerManager.PlayerType#RADIO_STATION
      */
-    public int getPlayerType() {
+    public PlayerManager.PlayerType getPlayerType() {
         return mPlayerType;
     }
 
     /**
      * 设置播放器类型。
      *
-     * @see PlayerManager#TYPE_PLAYLIST
-     * @see PlayerManager#TYPE_RADIO_STATION
+     * @see PlayerManager.PlayerType
      */
-    public void setPlayerType(int playerType) {
+    public void setPlayerType(PlayerManager.PlayerType playerType) {
         mPlayerType = playerType;
     }
 
@@ -135,9 +134,10 @@ public class PlayerConfig implements Parcelable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PlayerConfig)) return false;
         PlayerConfig that = (PlayerConfig) o;
-        return mAudioEffectEnabled == that.mAudioEffectEnabled &&
+        return mPlayerType == that.mPlayerType &&
+                mAudioEffectEnabled == that.mAudioEffectEnabled &&
                 mOnlyWifiNetwork == that.mOnlyWifiNetwork &&
                 mIgnoreLossAudioFocus == that.mIgnoreLossAudioFocus &&
                 mSoundQuality == that.mSoundQuality;
@@ -152,6 +152,7 @@ public class PlayerConfig implements Parcelable {
     }
 
     protected PlayerConfig(Parcel in) {
+        mPlayerType = PlayerManager.PlayerType.values()[in.readInt()];
         mSoundQuality = Player.SoundQuality.values()[in.readInt()];
         mAudioEffectEnabled = in.readByte() != 0;
         mOnlyWifiNetwork = in.readByte() != 0;
@@ -160,6 +161,7 @@ public class PlayerConfig implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mPlayerType.ordinal());
         dest.writeInt(mSoundQuality.ordinal());
         dest.writeByte((byte) (mAudioEffectEnabled ? 1 : 0));
         dest.writeByte((byte) (mOnlyWifiNetwork ? 1 : 0));

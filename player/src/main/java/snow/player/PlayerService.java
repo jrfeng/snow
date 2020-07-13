@@ -135,7 +135,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initPlayer() {
-        boolean enableRadioStationPlayer = (getPlayerType() == TYPE_RADIO_STATION);
+        boolean enableRadioStationPlayer = (getPlayerType() == PlayerType.RADIO_STATION);
 
         mPlaylistPlayer = new PlaylistPlayerImp(this, mPlayerConfig, mPlaylistState, !enableRadioStationPlayer, mPlaylistManager);
         mRadioStationPlayer = new RadioStationPlayerImp(this, mPlayerConfig, mRadioStationState, enableRadioStationPlayer);
@@ -159,13 +159,13 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                 }
 
                 if (playlistDispatcher.match(data)) {
-                    notifyPlayerTypeChanged(PlayerManager.TYPE_PLAYLIST);
+                    notifyPlayerTypeChanged(PlayerType.PLAYLIST);
                     playlistDispatcher.dispatch(data);
                     return true;
                 }
 
                 if (radioStationDispatcher.match(data)) {
-                    notifyPlayerTypeChanged(PlayerManager.TYPE_RADIO_STATION);
+                    notifyPlayerTypeChanged(PlayerType.RADIO_STATION);
                     radioStationDispatcher.dispatch(data);
                     return true;
                 }
@@ -360,7 +360,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void notifySoundQualityChanged() {
-        if (getPlayerType() == TYPE_RADIO_STATION) {
+        if (getPlayerType() == PlayerType.RADIO_STATION) {
             mRadioStationPlayer.notifySoundQualityChanged();
             return;
         }
@@ -379,7 +379,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void notifyAudioEffectEnableChanged() {
-        if (getPlayerType() == TYPE_RADIO_STATION) {
+        if (getPlayerType() == PlayerType.RADIO_STATION) {
             mRadioStationPlayer.notifyAudioEffectEnableChanged();
             return;
         }
@@ -398,7 +398,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void notifyOnlyWifiNetworkChanged() {
-        if (getPlayerType() == TYPE_RADIO_STATION) {
+        if (getPlayerType() == PlayerType.RADIO_STATION) {
             mRadioStationPlayer.notifyOnlyWifiNetworkChanged();
             return;
         }
@@ -481,14 +481,14 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mStartCommandActionMap.remove(action);
     }
 
-    protected final void notifyPlayerTypeChanged(int playerType) {
+    protected final void notifyPlayerTypeChanged(PlayerType playerType) {
         if (playerType == getPlayerType()) {
             return;
         }
 
         mPlayerConfig.setPlayerType(playerType);
-        mPlaylistPlayer.setEnabled(playerType == PlayerManager.TYPE_PLAYLIST);
-        mRadioStationPlayer.setEnabled(playerType == PlayerManager.TYPE_RADIO_STATION);
+        mPlaylistPlayer.setEnabled(playerType == PlayerType.PLAYLIST);
+        mRadioStationPlayer.setEnabled(playerType == PlayerType.RADIO_STATION);
 
         for (String key : mCommandCallbackMap.keySet()) {
             OnCommandCallback listener = mCommandCallbackMap.get(key);
@@ -548,7 +548,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * 获取播放器类型。
      */
-    protected final int getPlayerType() {
+    protected final PlayerType getPlayerType() {
         return mPlayerConfig.getPlayerType();
     }
 
@@ -580,9 +580,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      */
     protected final boolean isPlaying() {
         switch (getPlayerType()) {
-            case TYPE_PLAYLIST:
+            case PLAYLIST:
                 return mPlaylistPlayer.isPlaying();
-            case TYPE_RADIO_STATION:
+            case RADIO_STATION:
                 return mRadioStationPlayer.isPlaying();
             default:
                 return false;
@@ -604,15 +604,15 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * 获取播放器状态。
      * <p>
-     * 当播放器类型为 {@link #TYPE_PLAYLIST} 时，返回是实际上是 {@link PlaylistState}；当播放器类型为
-     * {@link #TYPE_RADIO_STATION} 时，返回是实际上是 {@link RadioStationState}。
+     * 当播放器类型为 {@link PlayerType#PLAYLIST} 时，返回是实际上是 {@link PlaylistState}；当播放器类型为
+     * {@link PlayerType#RADIO_STATION} 时，返回是实际上是 {@link RadioStationState}。
      *
      * @see #getPlayerType()
      * @see #getPlaylistState()
      * @see #getRadioStationState()
      */
     protected final PlayerState getPlayerState() {
-        if (getPlayerType() == TYPE_RADIO_STATION) {
+        if (getPlayerType() == PlayerType.RADIO_STATION) {
             return mRadioStationState;
         }
 
@@ -646,9 +646,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      */
     protected final MusicItem getPlayingMusicItem() {
         switch (getPlayerType()) {
-            case TYPE_PLAYLIST:
+            case PLAYLIST:
                 return mPlaylistState.getMusicItem();
-            case TYPE_RADIO_STATION:
+            case RADIO_STATION:
                 return mRadioStationState.getMusicItem();
             default:
                 return null;
@@ -669,9 +669,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      */
     protected final int getErrorCode() {
         switch (getPlayerType()) {
-            case TYPE_PLAYLIST:
+            case PLAYLIST:
                 return mPlaylistState.getErrorCode();
-            case TYPE_RADIO_STATION:
+            case RADIO_STATION:
                 return mRadioStationState.getErrorCode();
             default:
                 return Player.Error.NO_ERROR;
@@ -767,7 +767,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     @NonNull
-    private Notification createNotification(int playerType) {
+    private Notification createNotification(PlayerType playerType) {
         if (mNotificationView == null) {
             throw new IllegalStateException("NotificationView is null");
         }
@@ -827,7 +827,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private Player getPlayer() {
-        if (getPlayerType() == TYPE_RADIO_STATION) {
+        if (getPlayerType() == PlayerType.RADIO_STATION) {
             return mRadioStationPlayer;
         }
 
@@ -889,7 +889,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 下一曲。
      */
     protected final void skipToNext() {
-        if (getPlayerType() == TYPE_RADIO_STATION) {
+        if (getPlayerType() == PlayerType.RADIO_STATION) {
             mRadioStationPlayer.skipToNext();
             return;
         }
@@ -900,10 +900,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * 上一曲。
      * <p>
-     * 但播放器类型为 {@link PlayerManager#TYPE_RADIO_STATION}（电台模式）时，该方法无效。
+     * 但播放器类型为 {@link PlayerType#RADIO_STATION}（电台模式）时，该方法无效。
      */
     protected final void skipToPrevious() {
-        if (getPlayerType() == TYPE_RADIO_STATION) {
+        if (getPlayerType() == PlayerType.RADIO_STATION) {
             return;
         }
 
@@ -1243,7 +1243,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         public void onSkipToQueueItem(long id) {
-            if (getPlayerType() == TYPE_RADIO_STATION) {
+            if (getPlayerType() == PlayerType.RADIO_STATION) {
                 return;
             }
 
@@ -1287,7 +1287,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         public void onSetRepeatMode(int repeatMode) {
-            if (getPlayerType() == TYPE_RADIO_STATION) {
+            if (getPlayerType() == PlayerType.RADIO_STATION) {
                 return;
             }
 
@@ -1301,7 +1301,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         public void onSetShuffleMode(int shuffleMode) {
-            if (getPlayerType() == TYPE_RADIO_STATION) {
+            if (getPlayerType() == PlayerType.RADIO_STATION) {
                 return;
             }
 
@@ -1351,7 +1351,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @return Notification 对象，不能为 null。
          */
         @NonNull
-        public abstract Notification onCreateNotification(int playerType);
+        public abstract Notification onCreateNotification(PlayerType playerType);
 
         /**
          * 重写该方法以重新加载当前正在播放的音乐的图标。
@@ -1383,7 +1383,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 获取播放器类型。
          */
-        protected final int getPlayerType() {
+        protected final PlayerType getPlayerType() {
             return mPlayerService.getPlayerType();
         }
 
@@ -1509,7 +1509,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         @NonNull
-        Notification createNotification(int playerType) {
+        Notification createNotification(PlayerType playerType) {
             if (isNeedReloadIcon()) {
                 reloadIcon();
             }
@@ -1576,7 +1576,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @NonNull
         @Override
-        public Notification onCreateNotification(int playerType) {
+        public Notification onCreateNotification(PlayerType playerType) {
             return new NotificationCompat.Builder(getContext(), "player")
                     .setSmallIcon(R.drawable.snow_ic_music)
                     .setStyle(new androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
@@ -1806,11 +1806,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 根据 {@code playerType} 参数创建对应的 content view 对象。
          * <p>
          * 你可以覆盖该方法来自定义通知栏控制器的外观（折叠后）。注意！覆盖该方法时，请同时覆盖
-         * {@link #onCreateBigContentView(int)} 方法。
+         * {@link #onCreateBigContentView(PlayerType)} 方法。
          *
-         * @see #onCreateBigContentView(int)
+         * @see #onCreateBigContentView(PlayerType)
          */
-        protected RemoteViews onCreateContentView(int playerType) {
+        protected RemoteViews onCreateContentView(PlayerType playerType) {
             RemoteViews contentView = new RemoteViews(getPackageName(),
                     R.layout.snow_simple_notification_view);
 
@@ -1825,7 +1825,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                 contentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
             }
 
-            if (playerType == TYPE_RADIO_STATION) {
+            if (playerType == PlayerType.RADIO_STATION) {
                 contentView.setViewVisibility(R.id.snow_notif_radio_tip, View.VISIBLE);
             }
 
@@ -1845,11 +1845,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 根据 {@code playerType} 参数创建对应的 big content view 对象。
          * <p>
          * 你可以覆盖该方法来自定义通知栏控制器的外观（大）。注意！覆盖该方法时，请同时覆盖
-         * {@link #onCreateContentView(int)} 方法。
+         * {@link #onCreateContentView(PlayerType)} 方法。
          *
-         * @see #onCreateContentView(int)
+         * @see #onCreateContentView(PlayerType)
          */
-        protected RemoteViews onCreateBigContentView(int playerType) {
+        protected RemoteViews onCreateBigContentView(PlayerType playerType) {
             RemoteViews bigContentView = new RemoteViews(getPackageName(),
                     R.layout.snow_simple_notification_view_big);
 
@@ -1864,7 +1864,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                 bigContentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
             }
 
-            if (playerType == TYPE_RADIO_STATION) {
+            if (playerType == PlayerType.RADIO_STATION) {
                 bigContentView.setViewVisibility(R.id.snow_notif_radio_tip, View.VISIBLE);
                 bigContentView.setImageViewResource(R.id.snow_notif_skip_to_previous, R.drawable.snow_ic_skip_previous_disabled);
             } else {
@@ -1880,7 +1880,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         private void initCustomAction(String customActionKey,
                                       CustomAction customAction,
                                       RemoteViews bigContentView,
-                                      int playerType,
+                                      PlayerType playerType,
                                       int viewId) {
             if (customAction == null) {
                 return;
@@ -1898,14 +1898,14 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             }
         }
 
-        private PendingIntent getCustomActionPendingIntent(int playerType,
+        private PendingIntent getCustomActionPendingIntent(PlayerType playerType,
                                                            String customActionName,
                                                            CustomAction customAction) {
             if (customAction.getAction() == null) {
                 return null;
             }
 
-            if (playerType == TYPE_RADIO_STATION && customAction.isDisabledInRadioStationType()) {
+            if (playerType == PlayerType.RADIO_STATION && customAction.isDisabledInRadioStationType()) {
                 return null;
             }
 

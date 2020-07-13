@@ -141,12 +141,12 @@ public class PlayerClient {
             }
 
             @Override
-            public void onPlayerTypeChanged(int playerType) {
+            public void onPlayerTypeChanged(PlayerManager.PlayerType playerType) {
                 notifyPlayerTypeChanged(playerType);
             }
 
             @Override
-            public void syncPlayerState(int playerType, PlaylistState playlistState, RadioStationState radioStationState) {
+            public void syncPlayerState(PlayerManager.PlayerType playerType, PlaylistState playlistState, RadioStationState radioStationState) {
                 notifyPlayerTypeChanged(playerType);
 
                 mPlaylistController.setPlaylistState(playlistState);
@@ -155,7 +155,7 @@ public class PlayerClient {
         };
     }
 
-    private void notifyPlayerTypeChanged(int playerType) {
+    private void notifyPlayerTypeChanged(PlayerManager.PlayerType playerType) {
         for (PlayerManager.OnPlayerTypeChangeListener listener : mAllPlayerTypeChangeListener) {
             listener.onPlayerTypeChanged(playerType);
         }
@@ -321,21 +321,21 @@ public class PlayerClient {
      * <p>
      * 共有两种播放器类型：
      * <ol>
-     *     <li>{@link PlayerManager#TYPE_PLAYLIST}：列表播放器</li>
-     *     <li>{@link PlayerManager#TYPE_RADIO_STATION}：电台播放器</li>
+     *     <li>{@link PlayerManager.PlayerType#PLAYLIST}：列表播放器</li>
+     *     <li>{@link PlayerManager.PlayerType#RADIO_STATION}：电台播放器</li>
      * </ol>
      * <p>
      * 使用 {@link PlaylistController} 控制播放器时，播放器类型为自动切换为
-     * {@link PlayerManager#TYPE_PLAYLIST}；使用 {@link RadioStationController} 控制播放器时，播放器类
-     * 型会自动切换为 {@link PlayerManager#TYPE_RADIO_STATION}。
+     * {@link PlayerManager.PlayerType#PLAYLIST}；使用 {@link RadioStationController} 控制播放器时，
+     * 播放器类型会自动切换为 {@link PlayerManager.PlayerType#RADIO_STATION}。
      * <p>
-     * 默认的播放器类型为 {@link PlayerManager#TYPE_PLAYLIST} 列表播放器。你可以注册一个
+     * 默认的播放器类型为 {@link PlayerManager.PlayerType#PLAYLIST} 列表播放器。你可以注册一个
      * {@link PlayerManager.OnPlayerTypeChangeListener} 来监听播放器类型的改变，并根据不同的播放器类型调
      * 整 UI 外观。
      *
      * @return 当前播放器类型
      */
-    public int getPlayerType() {
+    public PlayerManager.PlayerType getPlayerType() {
         return mPlayerConfig.getPlayerType();
     }
 

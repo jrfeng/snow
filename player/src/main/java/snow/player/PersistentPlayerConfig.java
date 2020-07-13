@@ -27,7 +27,7 @@ public class PersistentPlayerConfig extends PlayerConfig {
 
         mMMKV = MMKV.mmkvWithID(id, MMKV.MULTI_PROCESS_MODE);
 
-        super.setPlayerType(mMMKV.decodeInt(KEY_PLAYER_TYPE, PlayerManager.TYPE_PLAYLIST));
+        super.setPlayerType(PlayerManager.PlayerType.values()[mMMKV.decodeInt(KEY_PLAYER_TYPE, 0)]);
         super.setSoundQuality(Player.SoundQuality.values()[mMMKV.decodeInt(KEY_SOUND_QUALITY, 0)]);
         super.setAudioEffectEnabled(mMMKV.decodeBool(KEY_AUDIO_EFFECT_ENABLED, false));
         super.setOnlyWifiNetwork(mMMKV.decodeBool(KEY_ONLY_WIFI_NETWORK, false));
@@ -35,10 +35,10 @@ public class PersistentPlayerConfig extends PlayerConfig {
     }
 
     @Override
-    public void setPlayerType(int playerType) {
+    public void setPlayerType(PlayerManager.PlayerType playerType) {
         super.setPlayerType(playerType);
 
-        mMMKV.encode(KEY_PLAYER_TYPE, playerType);
+        mMMKV.encode(KEY_PLAYER_TYPE, playerType.ordinal());
     }
 
     @Override

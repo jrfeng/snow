@@ -19,7 +19,7 @@ public class PersistentPlayerConfigTest {
 
         PersistentPlayerConfig playerConfigA = new PersistentPlayerConfig(context, persistentId);
 
-        playerConfigA.setPlayerType(PlayerManager.TYPE_RADIO_STATION);
+        playerConfigA.setPlayerType(PlayerManager.PlayerType.RADIO_STATION);
         playerConfigA.setSoundQuality(Player.SoundQuality.SUPER);
         playerConfigA.setAudioEffectEnabled(true);
         playerConfigA.setOnlyWifiNetwork(true);

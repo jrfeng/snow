@@ -12,8 +12,19 @@ import snow.player.radio.RadioStationState;
  */
 @Channel
 public interface PlayerManager {
-    int TYPE_PLAYLIST = 0;
-    int TYPE_RADIO_STATION = 1;
+    /**
+     * 播放器类型
+     */
+    enum PlayerType {
+        /**
+         * 列表播放器
+         */
+        PLAYLIST,
+        /**
+         * 电台播放器
+         */
+        RADIO_STATION
+    }
 
     /**
      * 设置播放器的首选音质（默认为 {@link Player.SoundQuality#STANDARD}）。
@@ -76,10 +87,10 @@ public interface PlayerManager {
         /**
          * 当播放器类型发生改变时会回调该方法。
          *
-         * @param playerType 播放器类型。共有两个值：{@link #TYPE_PLAYLIST}：列表播放器；
-         *                   {@link #TYPE_RADIO_STATION}：电台播放器。
+         * @param playerType 播放器类型。共有两个值：{@link PlayerType#PLAYLIST}：列表播放器；
+         *                   {@link PlayerType#RADIO_STATION}：电台播放器。
          */
-        void onPlayerTypeChanged(int playerType);
+        void onPlayerTypeChanged(@UseOrdinal PlayerType playerType);
     }
 
     /**
@@ -99,6 +110,6 @@ public interface PlayerManager {
          * @param playlistState     列表播放器的状态
          * @param radioStationState 电台播放器的状态
          */
-        void syncPlayerState(int playerType, PlaylistState playlistState, RadioStationState radioStationState);
+        void syncPlayerState(@UseOrdinal PlayerType playerType, PlaylistState playlistState, RadioStationState radioStationState);
     }
 }
