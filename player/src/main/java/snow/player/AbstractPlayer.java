@@ -893,8 +893,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
 
         mSeekCompleteAction = seekCompleteAction;
-        mMusicPlayer.seekTo(progress);
         notifySeeking();
+        mMusicPlayer.seekTo(progress);
     }
 
     @Override
