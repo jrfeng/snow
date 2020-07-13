@@ -49,11 +49,11 @@ public interface MusicPlayer {
     int getDuration();
 
     /**
-     * 获取音频文件的当前播放位置。
+     * 获取音频文件的当前播放进度。
      *
-     * @return 音频文件的当前播放位置。
+     * @return 音频文件的当前播放进度
      */
-    int getCurrentPosition();
+    int getProgress();
 
     /**
      * 开始播放。

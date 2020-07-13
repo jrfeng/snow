@@ -72,7 +72,7 @@ public class MediaMusicPlayer implements MusicPlayer {
     }
 
     @Override
-    public int getCurrentPosition() {
+    public int getProgress() {
         return mMediaPlayer.getCurrentPosition();
     }
 

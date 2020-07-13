@@ -77,7 +77,7 @@ public class AbstractPlayerTest {
                 assertEquals(looping, mTestMusicPlayer.isLooping());
                 assertEquals(mTestMusicPlayer.getAudioSessionId(), mTestPlayer.tester().getEffectAudioSessionId());
                 assertEquals(Player.PlaybackState.PREPARED, mPlayerState.getPlaybackState());
-                assertEquals(mProgress, mTestMusicPlayer.getCurrentPosition());
+                assertEquals(mProgress, mTestMusicPlayer.getProgress());
 
                 latch.countDown();
             }
@@ -192,18 +192,18 @@ public class AbstractPlayerTest {
 
     @Test(timeout = 3000)
     public void seekTo() throws InterruptedException {
-        final int progress = mTestMusicPlayer.getCurrentPosition();
+        final int progress = mTestMusicPlayer.getProgress();
         final int seekToProgress = 80_000;
 
         mTestPlayer.seekTo(seekToProgress);
-        assertEquals(progress, mTestMusicPlayer.getCurrentPosition());
+        assertEquals(progress, mTestMusicPlayer.getProgress());
 
         final CountDownLatch latch = new CountDownLatch(1);
         mTestPlayer.prepareMusicPlayer(new Runnable() {
             @Override
             public void run() {
                 mTestPlayer.seekTo(seekToProgress);
-                assertEquals(seekToProgress, mTestMusicPlayer.getCurrentPosition());
+                assertEquals(seekToProgress, mTestMusicPlayer.getProgress());
 
                 latch.countDown();
             }

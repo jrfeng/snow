@@ -159,7 +159,7 @@ public class ExoMusicPlayer implements MusicPlayer {
     }
 
     @Override
-    public int getCurrentPosition() {
+    public int getProgress() {
         return (int) mSimpleExoPlayer.getCurrentPosition();
     }
 

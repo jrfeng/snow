@@ -370,7 +370,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         mOnSeekCompleteListener = new MusicPlayer.OnSeekCompleteListener() {
             @Override
             public void onSeekComplete(MusicPlayer mp) {
-                notifySeekComplete(mp.getCurrentPosition());
+                notifySeekComplete(mp.getProgress());
 
                 if (mSeekCompleteAction != null) {
                     mSeekCompleteAction.run();
@@ -676,7 +676,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         mPlayerState.setPlaybackState(PlaybackState.PAUSED);
 
         if (mMusicPlayer != null) {
-            updatePlayProgress(mMusicPlayer.getCurrentPosition(), System.currentTimeMillis());
+            updatePlayProgress(mMusicPlayer.getProgress(), System.currentTimeMillis());
         }
 
         mAudioFocusHelper.abandonAudioFocus();
@@ -810,7 +810,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
         if (isPrepared()) {
             mMusicPlayer.start();
-            notifyPlaying(mMusicPlayer.getCurrentPosition(), System.currentTimeMillis());
+            notifyPlaying(mMusicPlayer.getProgress(), System.currentTimeMillis());
             return;
         }
 
@@ -909,7 +909,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
 
         int progress = Math.min(mMusicPlayer.getDuration(),
-                mMusicPlayer.getCurrentPosition() + FORWARD_STEP);
+                mMusicPlayer.getProgress() + FORWARD_STEP);
 
         seekTo(progress);
     }
@@ -930,7 +930,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             return;
         }
 
-        int progress = Math.max(0, mMusicPlayer.getCurrentPosition() - FORWARD_STEP);
+        int progress = Math.max(0, mMusicPlayer.getProgress() - FORWARD_STEP);
 
         seekTo(progress);
     }
@@ -947,7 +947,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
 
         final boolean playing = mMusicPlayer.isPlaying();
-        final int position = mMusicPlayer.getCurrentPosition();
+        final int position = mMusicPlayer.getProgress();
 
         releaseMusicPlayer();
         prepareMusicPlayer(new Runnable() {
@@ -1162,8 +1162,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
 
         @Override
-        public int getCurrentPosition() {
-            return mMusicPlayer.getCurrentPosition();
+        public int getProgress() {
+            return mMusicPlayer.getProgress();
         }
 
         @Override

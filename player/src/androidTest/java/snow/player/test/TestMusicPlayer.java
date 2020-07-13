@@ -132,7 +132,7 @@ public class TestMusicPlayer implements MusicPlayer {
     }
 
     @Override
-    public int getCurrentPosition() {
+    public int getProgress() {
         return mCurrentPosition;
     }
 
