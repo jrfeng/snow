@@ -25,16 +25,25 @@ import snow.player.PlayerManager;
 import snow.player.media.MusicItem;
 import snow.player.playlist.PlaylistPlayer;
 
+/**
+ * 一个与播放器播放进度相关的 ViewModel。
+ * <p>
+ * 注意！创建一个该类的对象后，需要调用 {@link #init(LifecycleOwner, PlayerClient)} 对其进行初始化。
+ */
 public class PlayProgressViewModel extends ViewModel {
     private PlayerClient mPlayerClient;
 
-    private MutableLiveData<Integer> mDuration; // 单位：秒
-    private MutableLiveData<Integer> mProgress; // 单位：秒
+    private MutableLiveData<Integer> mDuration;     // 单位：秒
+    private MutableLiveData<Integer> mLiveProgress; // 单位：秒
 
     private MutableLiveData<String> mTextDuration;
-    private MutableLiveData<String> mTextProgress;
+    private MutableLiveData<String> mTextLiveProgress;
+
+    private MutableLiveData<Integer> mBufferingPercent;
+    private MutableLiveData<Boolean> mStalled;
 
     private Player.OnPlaybackStateChangeListener mPlaybackStateChangeListener;
+    private Player.OnBufferingPercentChangeListener mBufferingPercentChangeListener;
     private Player.OnStalledChangeListener mStalledChangeListener;
     private Player.OnSeekListener mSeekCompleteListener;
     private Player.OnPlayingMusicItemChangeListener mPlayingMusicItemChangeListener;
@@ -47,9 +56,14 @@ public class PlayProgressViewModel extends ViewModel {
 
     public PlayProgressViewModel() {
         mDuration = new MutableLiveData<>(0);
-        mProgress = new MutableLiveData<>(0);
+        mLiveProgress = new MutableLiveData<>(0);
+
         mTextDuration = new MutableLiveData<>(formatSeconds(0));
-        mTextProgress = new MutableLiveData<>(formatSeconds(0));
+        mTextLiveProgress = new MutableLiveData<>(formatSeconds(0));
+
+        mBufferingPercent = new MutableLiveData<>(0);
+        mStalled = new MutableLiveData<>(false);
+
         mPlaybackState = Player.PlaybackState.UNKNOWN;
     }
 
@@ -92,9 +106,18 @@ public class PlayProgressViewModel extends ViewModel {
             }
         };
 
+        mBufferingPercentChangeListener = new Player.OnBufferingPercentChangeListener() {
+            @Override
+            public void onBufferingPercentChanged(int percent, long updateTime) {
+                mBufferingPercent.setValue(percent);
+            }
+        };
+
         mStalledChangeListener = new Player.OnStalledChangeListener() {
             @Override
             public void onStalledChanged(boolean stalled) {
+                mStalled.setValue(stalled);
+
                 if (stalled) {
                     stopTimer();
                     return;
@@ -166,16 +189,24 @@ public class PlayProgressViewModel extends ViewModel {
         return mDuration;
     }
 
-    public LiveData<Integer> getProgress() {
-        return mProgress;
+    public LiveData<Integer> getLiveProgress() {
+        return mLiveProgress;
     }
 
     public LiveData<String> getTextDuration() {
         return mTextDuration;
     }
 
-    public LiveData<String> getTextProgress() {
-        return mTextProgress;
+    public LiveData<String> getTextLiveProgress() {
+        return mTextLiveProgress;
+    }
+
+    public LiveData<Integer> getBufferingPercent() {
+        return mBufferingPercent;
+    }
+
+    public LiveData<Boolean> getStalled() {
+        return mStalled;
     }
 
     public void stopProgressClock() {
@@ -188,6 +219,9 @@ public class PlayProgressViewModel extends ViewModel {
 
         playlistController.addOnPlaybackStateChangeListener(mPlaybackStateChangeListener);
         radioStationController.addOnPlaybackStateChangeListener(mPlaybackStateChangeListener);
+
+        playlistController.addOnBufferingPercentChangeListener(mBufferingPercentChangeListener);
+        radioStationController.addOnBufferingPercentChangeListener(mBufferingPercentChangeListener);
 
         playlistController.addOnStalledChangeListener(mStalledChangeListener);
         radioStationController.addOnStalledChangeListener(mStalledChangeListener);
@@ -207,6 +241,9 @@ public class PlayProgressViewModel extends ViewModel {
 
         playlistController.removeOnPlaybackStateChangeListener(mPlaybackStateChangeListener);
         radioStationController.removeOnPlaybackStateChangeListener(mPlaybackStateChangeListener);
+
+        playlistController.removeOnBufferingPercentChangeListener(mBufferingPercentChangeListener);
+        radioStationController.removeOnBufferingPercentChangeListener(mBufferingPercentChangeListener);
 
         playlistController.removeOnStalledChangeListener(mStalledChangeListener);
         radioStationController.removeOnStalledChangeListener(mStalledChangeListener);
@@ -257,7 +294,7 @@ public class PlayProgressViewModel extends ViewModel {
     }
 
     private void updateProgress() {
-        Integer oldValue = mProgress.getValue();
+        Integer oldValue = mLiveProgress.getValue();
 
         if (oldValue == null) {
             updateProgress(0);
@@ -279,8 +316,8 @@ public class PlayProgressViewModel extends ViewModel {
     }
 
     private void updateProgress(int progressSec/*单位：秒*/) {
-        mProgress.setValue(progressSec);
-        mTextProgress.setValue(formatSeconds(progressSec));
+        mLiveProgress.setValue(progressSec);
+        mTextLiveProgress.setValue(formatSeconds(progressSec));
     }
 
     /**
