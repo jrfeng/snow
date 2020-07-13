@@ -34,7 +34,7 @@ public class PlayerStateViewModel extends ViewModel {
     private PlayerManager.OnPlayerTypeChangeListener mPlayerTypeChangeListener;
     private Player.OnPlaybackStateChangeListener mPlaybackStateChangeListener;
     private Player.OnStalledChangeListener mStalledChangeListener;
-    private Player.OnSeekCompleteListener mSeekCompleteListener;
+    private Player.OnSeekListener mSeekCompleteListener;
     private Player.OnBufferingPercentChangeListener mBufferingPercentChangeListener;
     private Player.OnPlayingMusicItemChangeListener mPlayingMusicItemChangeListener;
 
@@ -110,7 +110,12 @@ public class PlayerStateViewModel extends ViewModel {
             }
         };
 
-        mSeekCompleteListener = new Player.OnSeekCompleteListener()  {
+        mSeekCompleteListener = new Player.OnSeekListener()  {
+            @Override
+            public void onSeeking() {
+                // ignore
+            }
+
             @Override
             public void onSeekComplete(int progress, long updateTime) {
                 mPlayProgress.setValue(progress);

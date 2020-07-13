@@ -965,9 +965,9 @@ public class PlayerClient {
          * 如果监听器已添加，则忽略本次调用。
          *
          * @param listener 要添加的监听器
-         * @see Player.OnSeekCompleteListener
+         * @see OnSeekListener
          */
-        public void addOnSeekCompleteListener(Player.OnSeekCompleteListener listener) {
+        public void addOnSeekCompleteListener(OnSeekListener listener) {
             mPlaylistStateHolder.addOnSeekCompleteListener(listener);
         }
 
@@ -976,7 +976,7 @@ public class PlayerClient {
          *
          * @param listener 要移除的监听器
          */
-        public void removeOnSeekCompleteListener(Player.OnSeekCompleteListener listener) {
+        public void removeOnSeekCompleteListener(OnSeekListener listener) {
             mPlaylistStateHolder.removeOnSeekCompleteListener(listener);
         }
 
@@ -1419,9 +1419,9 @@ public class PlayerClient {
          * 如果监听器已添加，则忽略本次调用。
          *
          * @param listener 要添加的监听器
-         * @see Player.OnSeekCompleteListener
+         * @see OnSeekListener
          */
-        public void addOnSeekCompleteListener(Player.OnSeekCompleteListener listener) {
+        public void addOnSeekCompleteListener(OnSeekListener listener) {
             mRadioStationStateHolder.addOnSeekCompleteListener(listener);
         }
 
@@ -1430,7 +1430,7 @@ public class PlayerClient {
          *
          * @param listener 要移除的监听器
          */
-        public void removeOnSeekCompleteListener(Player.OnSeekCompleteListener listener) {
+        public void removeOnSeekCompleteListener(OnSeekListener listener) {
             mRadioStationStateHolder.removeOnSeekCompleteListener(listener);
         }
 
@@ -1475,14 +1475,14 @@ public class PlayerClient {
         private List<Player.OnStalledChangeListener> mAllStalledChangeListener;
         private List<Player.OnBufferingPercentChangeListener> mAllBufferingPercentChangeListener;
         private List<Player.OnPlayingMusicItemChangeListener> mAllPlayingMusicItemChangeListener;
-        private List<Player.OnSeekCompleteListener> mAllSeekCompleteListener;
+        private List<Player.OnSeekListener> mAllSeekListener;
 
         PlayerStateHolder() {
             mAllPlaybackStateChangeListener = new ArrayList<>();
             mAllStalledChangeListener = new ArrayList<>();
             mAllBufferingPercentChangeListener = new ArrayList<>();
             mAllPlayingMusicItemChangeListener = new ArrayList<>();
-            mAllSeekCompleteListener = new ArrayList<>();
+            mAllSeekListener = new ArrayList<>();
         }
 
         void addOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
@@ -1537,17 +1537,17 @@ public class PlayerClient {
             mAllPlayingMusicItemChangeListener.remove(listener);
         }
 
-        void addOnSeekCompleteListener(Player.OnSeekCompleteListener listener) {
-            if (mAllSeekCompleteListener.contains(listener)) {
+        void addOnSeekCompleteListener(Player.OnSeekListener listener) {
+            if (mAllSeekListener.contains(listener)) {
                 return;
             }
 
-            mAllSeekCompleteListener.add(listener);
+            mAllSeekListener.add(listener);
             notifySeekComplete(listener);
         }
 
-        void removeOnSeekCompleteListener(Player.OnSeekCompleteListener listener) {
-            mAllSeekCompleteListener.remove(listener);
+        void removeOnSeekCompleteListener(Player.OnSeekListener listener) {
+            mAllSeekListener.remove(listener);
         }
 
         void setPlayerState(PlayerState playerState) {
@@ -1664,7 +1664,15 @@ public class PlayerClient {
             }
         }
 
-        private void notifySeekComplete(Player.OnSeekCompleteListener listener) {
+        private void notifySeeking(Player.OnSeekListener listener) {
+            if (notConnect()) {
+                return;
+            }
+
+            listener.onSeeking();
+        }
+
+        private void notifySeekComplete(Player.OnSeekListener listener) {
             if (notConnect()) {
                 return;
             }
@@ -1672,12 +1680,22 @@ public class PlayerClient {
             listener.onSeekComplete(mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime());
         }
 
+        private void notifySeeking() {
+            if (notConnect()) {
+                return;
+            }
+
+            for (Player.OnSeekListener listener : mAllSeekListener) {
+                notifySeeking(listener);
+            }
+        }
+
         private void notifySeekComplete() {
             if (notConnect()) {
                 return;
             }
 
-            for (Player.OnSeekCompleteListener listener : mAllSeekCompleteListener) {
+            for (Player.OnSeekListener listener : mAllSeekListener) {
                 notifySeekComplete(listener);
             }
         }
@@ -1726,6 +1744,11 @@ public class PlayerClient {
             mPlayerState.setErrorMessage(errorMessage);
 
             notifyPlaybackStateChanged();
+        }
+
+        @Override
+        public void onSeeking() {
+            notifySeeking();
         }
 
         @Override

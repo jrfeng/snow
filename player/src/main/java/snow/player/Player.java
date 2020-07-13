@@ -202,9 +202,15 @@ public interface Player {
     /**
      * 用于监听调整播放进度事件。
      */
-    interface OnSeekCompleteListener {
+    interface OnSeekListener {
+
         /**
-         * 该方法会在播放进度调整完成时调用。
+         * 该方法会在执行 seek 操作前调用
+         */
+        void onSeeking();
+
+        /**
+         * 该方法会在 seek 操作执行完成时调用。
          *
          * @param progress   当前的播放进度
          * @param updateTime 当前播放进度的更新时间

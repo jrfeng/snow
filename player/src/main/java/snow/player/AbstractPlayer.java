@@ -780,6 +780,15 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
         }
     }
 
+    private void notifySeeking() {
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
+            if (listener != null) {
+                listener.onSeeking();
+            }
+        }
+    }
+
     private void notifySeekComplete(int position) {
         mPlayerState.setPlayProgress(position);
         mPlayerState.setPlayProgressUpdateTime(System.currentTimeMillis());
@@ -885,6 +894,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
         mSeekCompleteAction = seekCompleteAction;
         mMusicPlayer.seekTo(progress);
+        notifySeeking();
     }
 
     @Override
