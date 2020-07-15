@@ -871,6 +871,22 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return new MediaMusicPlayer();
     }
 
+    /**
+     * 准备音乐播放器。
+     * <p>
+     * 如果准备是个耗时过程，那么可以在异步线程中执行。例如，需要根据音质访问网络来获取要播放的音乐的播放链接，
+     * 此时可以在异步线程中执行网络操作，等到获取播放链接成功后再准备音乐播放器。注意！在调用
+     * {@link MusicPlayer#prepare(Uri)} 准备播放器前，应该先检查播放器的 {@link MusicPlayer#isInvalid()}
+     * 方法的返回值，如果返回 {@code true}，则说明播放可能已被释放，此时不应该再调用
+     * {@link MusicPlayer} 的任何方法。
+     * <p>
+     * 如果准备过程中发生了任何错误（例如，获取播放链接失败），可以
+     * 抛出一个异常，此时播放器会立即停止，并转入 {@link snow.player.Player.PlaybackState#ERROR} 状态。
+     *
+     * @param musicPlayer  要准备的音乐播放器
+     * @param musicItem    要播放的音乐
+     * @param soundQuality 要播放的音乐的音质
+     */
     protected void onPrepareMusicPlayer(MusicPlayer musicPlayer,
                                         MusicItem musicItem,
                                         Player.SoundQuality soundQuality) throws Exception {
