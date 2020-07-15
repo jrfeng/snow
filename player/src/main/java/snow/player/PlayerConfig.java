@@ -11,7 +11,7 @@ import com.tencent.mmkv.MMKV;
 /**
  * 用于保存播放器的通用配置信息。
  */
-class PlayerConfig {
+public class PlayerConfig {
     private static final String KEY_PLAYER_TYPE = "player_type";
     private static final String KEY_SOUND_QUALITY = "sound_quality";
     private static final String KEY_AUDIO_EFFECT_CONFIG = "audio_effect_config";

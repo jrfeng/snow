@@ -29,16 +29,20 @@ public class AbstractPlaylistPlayerTest {
     private PlaylistState mPlaylistState;
     private TestPlaylistPlayer mTestPlaylistPlayer;
 
+    private int mPlayerConfigId = 0;
+
     @Before
     public void initFields() {
         mPlaylist = createPlaylist(10);
         mTestPlaylistManager = new TestPlaylistManager(getContext(), mPlaylist);
         mPlaylistState = createPlaylistState();
         mTestPlaylistPlayer = new TestPlaylistPlayer(getContext(),
-                new PlayerConfig(),
+                new PlayerConfig(InstrumentationRegistry.getInstrumentation().getContext(),
+                        "test_player_config_" + mPlayerConfigId),
                 mPlaylistState,
                 mTestPlaylistManager,
                 mPlaylist);
+        mPlayerConfigId++;
     }
 
     private Context getContext() {

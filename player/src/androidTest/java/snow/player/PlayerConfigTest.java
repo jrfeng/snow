@@ -1,9 +1,9 @@
 package snow.player;
 
-import android.os.Parcel;
-
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -11,89 +11,52 @@ import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class PlayerConfigTest {
+    private static PlayerConfig mPlayerConfig;
 
-    @Test
-    public void defaultConstructorTest() {
-        PlayerConfig playerConfig = new PlayerConfig();
-
-        assertEquals(Player.SoundQuality.STANDARD, playerConfig.getSoundQuality());
-        assertFalse(playerConfig.isAudioEffectEnabled());
-        assertFalse(playerConfig.isOnlyWifiNetwork());
-        assertFalse(playerConfig.isIgnoreLossAudioFocus());
+    @BeforeClass
+    public static void initPlayerConfig() {
+        mPlayerConfig = new PlayerConfig(
+                InstrumentationRegistry.getInstrumentation().getContext(),
+                "test_id");
     }
 
     @Test
-    public void copyConstructorTest() {
-        PlayerConfig source = new PlayerConfig();
-
-        source.setPlayerType(PlayerManager.PlayerType.RADIO_STATION);
-        source.setSoundQuality(Player.SoundQuality.SUPER);
-        source.setAudioEffectEnabled(true);
-        source.setOnlyWifiNetwork(true);
-        source.setIgnoreLossAudioFocus(true);
-
-        PlayerConfig copy = new PlayerConfig(source);
-
-        assertEquals(source, copy);
-    }
-
-    @Test
-    public void equals_hashCode() {
+    public void setPlayerType() {
         final PlayerManager.PlayerType playerType = PlayerManager.PlayerType.RADIO_STATION;
-        final Player.SoundQuality soundQuality = Player.SoundQuality.SUPER;
-        final boolean audioEffectEnable = true;
-        final boolean onlyWifiNetwork = true;
-        final boolean ignoreAudioFocus = false;
 
-        PlayerConfig playerConfigA = new PlayerConfig();
-
-        playerConfigA.setPlayerType(playerType);
-        playerConfigA.setSoundQuality(soundQuality);
-        playerConfigA.setAudioEffectEnabled(audioEffectEnable);
-        playerConfigA.setOnlyWifiNetwork(onlyWifiNetwork);
-        playerConfigA.setIgnoreLossAudioFocus(ignoreAudioFocus);
-
-        PlayerConfig playerConfigB = new PlayerConfig();
-
-        playerConfigB.setPlayerType(playerType);
-        playerConfigB.setSoundQuality(soundQuality);
-        playerConfigB.setAudioEffectEnabled(audioEffectEnable);
-        playerConfigB.setOnlyWifiNetwork(onlyWifiNetwork);
-        playerConfigB.setIgnoreLossAudioFocus(ignoreAudioFocus);
-
-        assertEquals(playerConfigA, playerConfigB);
-        assertEquals(playerConfigA.hashCode(), playerConfigB.hashCode());
+        mPlayerConfig.setPlayerType(playerType);
+        assertEquals(playerType, mPlayerConfig.getPlayerType());
     }
 
     @Test
-    public void parcelableTest() {
-        final PlayerManager.PlayerType playerType = PlayerManager.PlayerType.RADIO_STATION;
+    public void setSoundQuality() {
         final Player.SoundQuality soundQuality = Player.SoundQuality.HIGH;
-        final boolean audioEffectEnabled = true;
+
+        mPlayerConfig.setSoundQuality(soundQuality);
+        assertEquals(soundQuality, mPlayerConfig.getSoundQuality());
+    }
+
+    @Test
+    public void setAudioEffectEnabled() {
+        final boolean enabled = true;
+
+        mPlayerConfig.setAudioEffectEnabled(enabled);
+        assertEquals(enabled, mPlayerConfig.isAudioEffectEnabled());
+    }
+
+    @Test
+    public void setOnlyWifiNetwork() {
         final boolean onlyWifiNetwork = true;
+
+        mPlayerConfig.setOnlyWifiNetwork(onlyWifiNetwork);
+        assertEquals(onlyWifiNetwork, mPlayerConfig.isOnlyWifiNetwork());
+    }
+
+    @Test
+    public void setIgnoreLossAudioFocus() {
         final boolean ignoreLossAudioFocus = true;
 
-        PlayerConfig playerConfigA = new PlayerConfig();
-
-        playerConfigA.setPlayerType(playerType);
-        playerConfigA.setSoundQuality(soundQuality);
-        playerConfigA.setAudioEffectEnabled(audioEffectEnabled);
-        playerConfigA.setOnlyWifiNetwork(onlyWifiNetwork);
-        playerConfigA.setIgnoreLossAudioFocus(ignoreLossAudioFocus);
-
-        Parcel parcel = Parcel.obtain();
-
-        playerConfigA.writeToParcel(parcel, 0);
-
-        parcel.setDataPosition(0);
-        PlayerConfig playerConfigB = new PlayerConfig(parcel);
-
-        assertEquals(playerConfigA, playerConfigB);
-
-        assertEquals(playerType, playerConfigB.getPlayerType());
-        assertEquals(soundQuality, playerConfigB.getSoundQuality());
-        assertEquals(audioEffectEnabled, playerConfigB.isAudioEffectEnabled());
-        assertEquals(onlyWifiNetwork, playerConfigB.isOnlyWifiNetwork());
-        assertEquals(ignoreLossAudioFocus, playerConfigB.isIgnoreLossAudioFocus());
+        mPlayerConfig.setIgnoreLossAudioFocus(ignoreLossAudioFocus);
+        assertEquals(ignoreLossAudioFocus, mPlayerConfig.isIgnoreLossAudioFocus());
     }
 }

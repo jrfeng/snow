@@ -26,6 +26,8 @@ public class AbstractPlayerTest {
 
     private final int mProgress = 1000;
 
+    private int mPlayerConfigId = 0;
+
     @Before
     public void initFields() {
         MusicItem musicItem = new MusicItem();
@@ -36,7 +38,9 @@ public class AbstractPlayerTest {
         musicItem.setDuration(duration);
         musicItem.setUri("http://www.test.com/test.mp3");
 
-        mPlayerConfig = new PlayerConfig();
+        mPlayerConfig = new PlayerConfig(InstrumentationRegistry.getInstrumentation().getContext(),
+                "test_player_config_" + mPlayerConfigId);
+        mPlayerConfigId++;
         mPlayerState = new PlayerState();
 
         mPlayerState.setPlayProgress(mProgress);

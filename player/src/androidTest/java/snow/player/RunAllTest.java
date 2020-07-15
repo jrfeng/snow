@@ -18,7 +18,6 @@ import snow.player.radio.RadioStationTest;
         AbstractPlayerTest.class,
         PlayerStateTest.class,
         PlayerConfigTest.class,
-        PersistentPlayerConfigTest.class,
         // snow.player.media
         MusicItemTest.class,
         // snow.player.playlist
