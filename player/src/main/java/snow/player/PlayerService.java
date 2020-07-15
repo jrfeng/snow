@@ -1976,6 +1976,15 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
     }
 
+    /**
+     * 抽象类，该类提供了 RemoteView 的基本实现。
+     * <p>
+     * 具体请查看它的子类：
+     * <ul>
+     *     <li>{@link SimplePlaylistRemoteView}</li>
+     *     <li>{@link SimpleRadioStationRemoteView}</li>
+     * </ul>
+     */
     public static abstract class SimpleRemoteView extends RemoteView {
         private static final String ACTION_SKIP_TO_PREVIOUS = "snow.player.action.skip_to_previous";
         private static final String ACTION_SKIP_TO_NEXT = "snow.player.action.skip_to_next";
@@ -2089,7 +2098,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 该类提供了 NotificationView 的默认实现。
+     * 该类提供了 列表播放器控制器 的默认实现。
      */
     public static class SimplePlaylistRemoteView extends SimpleRemoteView {
         @Override
@@ -2108,6 +2117,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
     }
 
+    /**
+     * 该类提供了 电台播放器控制器 的默认实现。
+     */
     public static class SimpleRadioStationRemoteView extends SimpleRemoteView {
         @Override
         public boolean enableSkipToPrevious() {
