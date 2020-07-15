@@ -1,5 +1,8 @@
 package snow.player.media;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
@@ -17,6 +20,9 @@ public class MediaMusicPlayer implements MusicPlayer {
 
     private boolean mInvalid;
 
+    private ObjectAnimator mStartVolumeAnimator;
+    private ObjectAnimator mPauseVolumeAnimator;
+
     public MediaMusicPlayer() {
         mMediaPlayer = new MediaPlayer();
         mInvalid = false;
@@ -32,6 +38,35 @@ public class MediaMusicPlayer implements MusicPlayer {
                     mErrorListener.onError(MediaMusicPlayer.this, Player.Error.PLAYER_ERROR);
                 }
                 return true;
+            }
+        });
+
+        initVolumeAnimator();
+    }
+
+    private void initVolumeAnimator() {
+        long volumeAnimDuration = 400L;
+
+        mStartVolumeAnimator = ObjectAnimator.ofFloat(this, "volume", 0.0F, 1.0F);
+        mStartVolumeAnimator.setDuration(volumeAnimDuration);
+        mStartVolumeAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                setVolume(1.0F);
+            }
+        });
+
+        mPauseVolumeAnimator = ObjectAnimator.ofFloat(this, "volume", 1.0F, 0.0F);
+        mPauseVolumeAnimator.setDuration(volumeAnimDuration);
+        mPauseVolumeAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mMediaPlayer.pause();
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mMediaPlayer.pause();
             }
         });
     }
@@ -78,16 +113,31 @@ public class MediaMusicPlayer implements MusicPlayer {
 
     @Override
     public void start() {
+        cancelVolumeAnim();
+        setVolume(0.0F);
         mMediaPlayer.start();
+        mStartVolumeAnimator.start();
     }
 
     @Override
     public void pause() {
-        mMediaPlayer.pause();
+        cancelVolumeAnim();
+        mPauseVolumeAnimator.start();
+    }
+
+    private void cancelVolumeAnim() {
+        if (mStartVolumeAnimator.isStarted()) {
+            mStartVolumeAnimator.cancel();
+        }
+
+        if (mPauseVolumeAnimator.isStarted()) {
+            mPauseVolumeAnimator.cancel();
+        }
     }
 
     @Override
     public void stop() {
+        cancelVolumeAnim();
         mMediaPlayer.stop();
     }
 
@@ -99,6 +149,10 @@ public class MediaMusicPlayer implements MusicPlayer {
     @Override
     public void setVolume(float leftVolume, float rightVolume) {
         mMediaPlayer.setVolume(leftVolume, rightVolume);
+    }
+
+    public void setVolume(float volume) {
+        setVolume(volume, volume);
     }
 
     @Override
@@ -114,6 +168,7 @@ public class MediaMusicPlayer implements MusicPlayer {
     @Override
     public synchronized void release() {
         setInvalid();
+        cancelVolumeAnim();
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
             mMediaPlayer = null;
