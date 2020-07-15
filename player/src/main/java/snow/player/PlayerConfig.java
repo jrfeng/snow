@@ -73,9 +73,9 @@ public class PlayerConfig {
     }
 
     /**
-     * 获取音乐特性的配置。
+     * 获取音频特效的配置。
      *
-     * @return 音乐特性的配置，如果当前播放器不支持音频特效，则会返回 null
+     * @return 音频特效的配置，如果当前播放器不支持音频特效，则会返回 null
      */
     @Nullable
     public AudioEffectEngine.Config getAudioEffectConfig() {
@@ -83,7 +83,7 @@ public class PlayerConfig {
     }
 
     /**
-     * 修改音乐特性的配置。
+     * 修改音频特效的配置。
      */
     public void setAudioEffectConfig(@NonNull AudioEffectEngine.Config audioEffectConfig) {
         Preconditions.checkNotNull(audioEffectConfig);
