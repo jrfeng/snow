@@ -20,6 +20,7 @@ import channel.helper.ChannelHelper;
 import channel.helper.DispatcherUtil;
 import channel.helper.pipe.CustomActionPipe;
 import channel.helper.pipe.MessengerPipe;
+import snow.player.effect.AudioEffectEngine;
 import snow.player.media.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
