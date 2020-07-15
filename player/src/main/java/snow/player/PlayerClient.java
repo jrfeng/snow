@@ -60,7 +60,7 @@ public class PlayerClient {
         mPlayerService = playerService;
         mToken = generateToken();
 
-        mPlayerConfig = new PersistentPlayerConfig(context, mToken);
+        mPlayerConfig = new PlayerConfig(context, mToken);
         mAllPlayerTypeChangeListener = new ArrayList<>();
 
         initMediaBrowser();
@@ -266,6 +266,15 @@ public class PlayerClient {
         mPlayerManager.setSoundQuality(soundQuality);
     }
 
+
+    public void setAudioEffectConfig(AudioEffectEngine.Config config) {
+        if (!isConnected()) {
+            return;
+        }
+
+        mPlayerManager.setAudioEffectConfig(config);
+    }
+
     /**
      * 设置是否启用音频特效（如：均衡器）（默认为 false）。
      * <p>
@@ -346,6 +355,17 @@ public class PlayerClient {
      */
     public Player.SoundQuality getSoundQuality() {
         return mPlayerConfig.getSoundQuality();
+    }
+
+    /**
+     * 获取音频特效的配置。
+     *
+     * @return 音频特效的配置，如果当前播放器不支持音频特效，则会返回 null。请在连接成功后再调用该方法，否则
+     * 即使当前播放器支持音频特效，可能也会返回 null
+     */
+    @Nullable
+    public AudioEffectEngine.Config getAudioEffectConfig() {
+        return mPlayerConfig.getAudioEffectConfig();
     }
 
     /**
