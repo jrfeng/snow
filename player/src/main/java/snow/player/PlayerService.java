@@ -98,6 +98,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private RemoteViewManager mRemoteViewManager;
 
+    @Nullable
+    private AudioEffectEngine mAudioEffectEngine;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -111,6 +114,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         initPlayerConfig();
+        initAudioEffectEngine();
         initPlayerState();
         initPlaylistManager();
         initPlayer();
@@ -123,7 +127,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initPlayerConfig() {
-        mPlayerConfig = new PersistentPlayerConfig(this, mPersistentId);
+        mPlayerConfig = new PlayerConfig(this, mPersistentId);
     }
 
     private void initPlayerState() {
@@ -185,7 +189,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private void initRemoteViewManager() {
         RemoteView playlistRemoteView = onCreatePlaylistRemoteView();
-        RemoteView radioStationRemoteView = onCreatePlaylistRemoteView();
+        RemoteView radioStationRemoteView = onCreateRadioStationRemoteView();
 
         if (playlistRemoteView != null) {
             playlistRemoteView.init(this);
@@ -252,6 +256,21 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         setSessionToken(mMediaSession.getSessionToken());
     }
 
+    private void initAudioEffectEngine() {
+        mAudioEffectEngine = onCreateAudioEffectEngine();
+
+        if (mAudioEffectEngine == null) {
+            return;
+        }
+
+        AudioEffectEngine.Config config = mPlayerConfig.getAudioEffectConfig();
+        if (config == null) {
+            config = mAudioEffectEngine.getDefaultConfig();
+            mPlayerConfig.setAudioEffectConfig(config);
+        }
+        mAudioEffectEngine.init(config);
+    }
+
     private PlaybackStateCompat buildPlaybackState(int state,
                                                    int position,
                                                    long updateTime,
@@ -312,6 +331,16 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return new SimpleRadioStationRemoteView();
     }
 
+    /**
+     * 创建音频特效引擎。
+     *
+     * @return 如果返回 null，将会关闭音频特效引擎
+     */
+    @Nullable
+    protected AudioEffectEngine onCreateAudioEffectEngine() {
+        return null;
+    }
+
     @Nullable
     @Override
     public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, @Nullable Bundle rootHints) {
@@ -348,6 +377,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         mPlaylistPlayer = null;
         mRadioStationPlayer = null;
+
+        if (mAudioEffectEngine != null) {
+            mAudioEffectEngine.release();
+        }
     }
 
     @Override
@@ -377,6 +410,44 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         mPlayerConfig.setAudioEffectEnabled(enabled);
         notifyAudioEffectEnableChanged();
+    }
+
+    @Override
+    public void setAudioEffectConfig(AudioEffectEngine.Config config) {
+        if (noAudioEffectEngine()) {
+            return;
+        }
+
+        mAudioEffectEngine.updateConfig(config);
+        mPlayerConfig.setAudioEffectConfig(config);
+    }
+
+    private boolean noAudioEffectEngine() {
+        return mAudioEffectEngine == null;
+    }
+
+    /**
+     * 对象指定的 audio session id 应用音频特效。
+     *
+     * @param audioSessionId 当前正在播放的音乐的 audio session id。如果为 0，则可以忽略。
+     */
+    protected void attachAudioEffect(int audioSessionId) {
+        if (noAudioEffectEngine()) {
+            return;
+        }
+
+        mAudioEffectEngine.attachAudioEffect(audioSessionId);
+    }
+
+    /**
+     * 取消当前的音频特效。
+     */
+    protected void detachAudioEffect() {
+        if (noAudioEffectEngine()) {
+            return;
+        }
+
+        mAudioEffectEngine.detachAudioEffect();
     }
 
     private void notifyAudioEffectEnableChanged() {
@@ -1111,6 +1182,18 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             super.onPlayingMusicItemChanged(musicItem);
             PlayerService.this.onPlayingMusicItemChanged(musicItem);
         }
+
+        @Override
+        protected void attachAudioEffect(int audioSessionId) {
+            super.attachAudioEffect(audioSessionId);
+            PlayerService.this.attachAudioEffect(audioSessionId);
+        }
+
+        @Override
+        protected void detachAudioEffect() {
+            super.detachAudioEffect();
+            PlayerService.this.detachAudioEffect();
+        }
     }
 
     private class RadioStationPlayerImp extends AbstractRadioStationPlayer {
@@ -1210,6 +1293,18 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
             super.onPlayingMusicItemChanged(musicItem);
             PlayerService.this.onPlayingMusicItemChanged(musicItem);
+        }
+
+        @Override
+        protected void attachAudioEffect(int audioSessionId) {
+            super.attachAudioEffect(audioSessionId);
+            PlayerService.this.attachAudioEffect(audioSessionId);
+        }
+
+        @Override
+        protected void detachAudioEffect() {
+            super.detachAudioEffect();
+            PlayerService.this.detachAudioEffect();
         }
     }
 
