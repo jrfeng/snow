@@ -1,37 +1,32 @@
 package snow.player;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.tencent.mmkv.MMKV;
 
 /**
  * 用于保存播放器的通用配置信息。
  */
-public class PlayerConfig implements Parcelable {
-    private PlayerManager.PlayerType mPlayerType;
-    private Player.SoundQuality mSoundQuality;
-    private boolean mAudioEffectEnabled;
-    private boolean mOnlyWifiNetwork;
-    private boolean mIgnoreLossAudioFocus;
+class PlayerConfig {
+    private static final String KEY_PLAYER_TYPE = "player_type";
+    private static final String KEY_SOUND_QUALITY = "sound_quality";
+    private static final String KEY_AUDIO_EFFECT_CONFIG = "audio_effect_config";
+    private static final String KEY_AUDIO_EFFECT_ENABLED = "audio_effect_enabled";
+    private static final String KEY_ONLY_WIFI_NETWORK = "only_wifi_network";
+    private static final String KEY_IGNORE_LOSS_AUDIO_FOCUS = "ignore_loss_audio_focus";
 
-    public PlayerConfig() {
-        mPlayerType = PlayerManager.PlayerType.PLAYLIST;
-        mSoundQuality = Player.SoundQuality.STANDARD;
-        mAudioEffectEnabled = false;
-        mOnlyWifiNetwork = false;
-        mIgnoreLossAudioFocus = false;
-    }
+    private MMKV mMMKV;
 
-    public PlayerConfig(PlayerConfig source) {
-        mPlayerType = source.mPlayerType;
-        mSoundQuality = source.mSoundQuality;
-        mAudioEffectEnabled = source.mAudioEffectEnabled;
-        mOnlyWifiNetwork = source.mOnlyWifiNetwork;
-        mIgnoreLossAudioFocus = source.mIgnoreLossAudioFocus;
+    public PlayerConfig(@NonNull Context context, @NonNull String id) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(id);
+
+        MMKV.initialize(context);
+        mMMKV = MMKV.mmkvWithID(id, MMKV.MULTI_PROCESS_MODE);
     }
 
     /**
@@ -41,7 +36,7 @@ public class PlayerConfig implements Parcelable {
      * @see PlayerManager.PlayerType#RADIO_STATION
      */
     public PlayerManager.PlayerType getPlayerType() {
-        return mPlayerType;
+        return PlayerManager.PlayerType.values()[mMMKV.decodeInt(KEY_PLAYER_TYPE, 0)];
     }
 
     /**
@@ -50,7 +45,7 @@ public class PlayerConfig implements Parcelable {
      * @see PlayerManager.PlayerType
      */
     public void setPlayerType(PlayerManager.PlayerType playerType) {
-        mPlayerType = playerType;
+        mMMKV.encode(KEY_PLAYER_TYPE, playerType.ordinal());
     }
 
     /**
@@ -60,7 +55,7 @@ public class PlayerConfig implements Parcelable {
      * @see Player.SoundQuality
      */
     public Player.SoundQuality getSoundQuality() {
-        return mSoundQuality;
+        return Player.SoundQuality.values()[mMMKV.decodeInt(KEY_SOUND_QUALITY, 0)];
     }
 
     /**
@@ -74,7 +69,25 @@ public class PlayerConfig implements Parcelable {
      */
     public void setSoundQuality(@NonNull Player.SoundQuality soundQuality) {
         Preconditions.checkNotNull(soundQuality);
-        mSoundQuality = soundQuality;
+        mMMKV.encode(KEY_SOUND_QUALITY, soundQuality.ordinal());
+    }
+
+    /**
+     * 获取音乐特性的配置。
+     *
+     * @return 音乐特性的配置，如果当前播放器不支持音频特效，则会返回 null
+     */
+    @Nullable
+    public AudioEffectEngine.Config getAudioEffectConfig() {
+        return mMMKV.decodeParcelable(KEY_AUDIO_EFFECT_CONFIG, AudioEffectEngine.Config.class);
+    }
+
+    /**
+     * 修改音乐特性的配置。
+     */
+    public void setAudioEffectConfig(@NonNull AudioEffectEngine.Config audioEffectConfig) {
+        Preconditions.checkNotNull(audioEffectConfig);
+        mMMKV.encode(KEY_AUDIO_EFFECT_CONFIG, audioEffectConfig);
     }
 
     /**
@@ -83,7 +96,7 @@ public class PlayerConfig implements Parcelable {
      * @return 是否已启用音频特效。
      */
     public boolean isAudioEffectEnabled() {
-        return mAudioEffectEnabled;
+        return mMMKV.decodeBool(KEY_AUDIO_EFFECT_ENABLED, false);
     }
 
     /**
@@ -92,7 +105,7 @@ public class PlayerConfig implements Parcelable {
      * @param audioEffectEnabled 是否启用音频特效。
      */
     public void setAudioEffectEnabled(boolean audioEffectEnabled) {
-        mAudioEffectEnabled = audioEffectEnabled;
+        mMMKV.encode(KEY_AUDIO_EFFECT_ENABLED, audioEffectEnabled);
     }
 
     /**
@@ -101,7 +114,7 @@ public class PlayerConfig implements Parcelable {
      * @return 如果返回 true，则表示只允许在 WiFi 网络下联网（默认为 false）。
      */
     public boolean isOnlyWifiNetwork() {
-        return mOnlyWifiNetwork;
+        return mMMKV.decodeBool(KEY_ONLY_WIFI_NETWORK, false);
     }
 
     /**
@@ -110,7 +123,7 @@ public class PlayerConfig implements Parcelable {
      * @param onlyWifiNetwork 是否只允许在 WiFi 网络下联网（默认为 true）。
      */
     public void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
-        mOnlyWifiNetwork = onlyWifiNetwork;
+        mMMKV.encode(KEY_ONLY_WIFI_NETWORK, onlyWifiNetwork);
     }
 
     /**
@@ -119,7 +132,7 @@ public class PlayerConfig implements Parcelable {
      * @return 是否忽略音频焦点丢失事件。
      */
     public boolean isIgnoreLossAudioFocus() {
-        return mIgnoreLossAudioFocus;
+        return mMMKV.decodeBool(KEY_IGNORE_LOSS_AUDIO_FOCUS, false);
     }
 
     /**
@@ -128,60 +141,6 @@ public class PlayerConfig implements Parcelable {
      * @param ignoreLossAudioFocus 是否忽略音频焦点丢失事件。
      */
     public void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
-        mIgnoreLossAudioFocus = ignoreLossAudioFocus;
+        mMMKV.encode(KEY_IGNORE_LOSS_AUDIO_FOCUS, ignoreLossAudioFocus);
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PlayerConfig)) return false;
-        PlayerConfig that = (PlayerConfig) o;
-        return mPlayerType == that.mPlayerType &&
-                mAudioEffectEnabled == that.mAudioEffectEnabled &&
-                mOnlyWifiNetwork == that.mOnlyWifiNetwork &&
-                mIgnoreLossAudioFocus == that.mIgnoreLossAudioFocus &&
-                mSoundQuality == that.mSoundQuality;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(mSoundQuality,
-                mAudioEffectEnabled,
-                mOnlyWifiNetwork,
-                mIgnoreLossAudioFocus);
-    }
-
-    protected PlayerConfig(Parcel in) {
-        mPlayerType = PlayerManager.PlayerType.values()[in.readInt()];
-        mSoundQuality = Player.SoundQuality.values()[in.readInt()];
-        mAudioEffectEnabled = in.readByte() != 0;
-        mOnlyWifiNetwork = in.readByte() != 0;
-        mIgnoreLossAudioFocus = in.readByte() != 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mPlayerType.ordinal());
-        dest.writeInt(mSoundQuality.ordinal());
-        dest.writeByte((byte) (mAudioEffectEnabled ? 1 : 0));
-        dest.writeByte((byte) (mOnlyWifiNetwork ? 1 : 0));
-        dest.writeByte((byte) (mIgnoreLossAudioFocus ? 1 : 0));
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<PlayerConfig> CREATOR = new Creator<PlayerConfig>() {
-        @Override
-        public PlayerConfig createFromParcel(Parcel in) {
-            return new PlayerConfig(in);
-        }
-
-        @Override
-        public PlayerConfig[] newArray(int size) {
-            return new PlayerConfig[size];
-        }
-    };
 }
