@@ -22,8 +22,8 @@
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_height="@dimen/snow_notif_icon_size"
+        android:gravity="center_vertical"
         android:layout_weight="1"
         android:orientation="vertical">
 
@@ -52,9 +52,7 @@
                 android:text="@string/snow_radio"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/snow_notif_radio_tip_text_size"
-                android:visibility="gone"
-                tools:ignore="RtlCompat,SpUsage"
-                tools:visibility="visible" />
+                tools:ignore="RtlCompat,SpUsage" />
 
             <TextView
                 android:id="@+id/snow_notif_text"
@@ -94,7 +92,7 @@
             tools:ignore="RtlCompat" />
 
         <ImageButton
-            android:id="@+id/snow_notif_compat_custom_action"
+            android:id="@+id/snow_notif_custom_action2"
             android:layout_width="@dimen/snow_notif_button_size_40dp"
             android:layout_height="@dimen/snow_notif_button_size_40dp"
             android:background="@drawable/snow_bg_notif_button"

@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -31,11 +32,13 @@ import androidx.media.session.MediaButtonReceiver;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,8 +96,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private HeadsetHookHelper mHeadsetHookHelper;
 
-    @Nullable
-    private NotificationView mNotificationView;
+    private RemoteViewManager mRemoteViewManager;
 
     @Override
     public void onCreate() {
@@ -113,7 +115,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         initPlaylistManager();
         initPlayer();
         initControllerPipe();
-        initNotificationView();
+        initRemoteViewManager();
         initHeadsetHookHelper();
         initMediaSession();
 
@@ -181,37 +183,29 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         });
     }
 
-    private void initNotificationView() {
-        mNotificationView = onCreateNotificationView();
+    private void initRemoteViewManager() {
+        RemoteView playlistRemoteView = onCreatePlaylistRemoteView();
+        RemoteView radioStationRemoteView = onCreatePlaylistRemoteView();
 
-        if (noNotificationView()) {
-            return;
+        if (playlistRemoteView != null) {
+            playlistRemoteView.init(this);
         }
 
-        mNotificationView.init(this,
-                addOnStartCommandAction("snow.player.action.skip_to_previous", new Runnable() {
-                    @Override
-                    public void run() {
-                        skipToPrevious();
-                    }
-                }),
-                addOnStartCommandAction("snow.player.action.play_pause", new Runnable() {
-                    @Override
-                    public void run() {
-                        playOrPause();
-                    }
-                }),
-                addOnStartCommandAction("snow.player.action.skip_to_next", new Runnable() {
-                    @Override
-                    public void run() {
-                        skipToNext();
-                    }
-                }));
+        if (radioStationRemoteView != null) {
+            radioStationRemoteView.init(this);
+        }
 
         MusicItem musicItem = getPlayingMusicItem();
-        if (musicItem != null) {
-            mNotificationView.setPlayingMusicItem(musicItem);
+
+        if (musicItem != null && playlistRemoteView != null) {
+            playlistRemoteView.setPlayingMusicItem(musicItem);
         }
+
+        if (musicItem != null && radioStationRemoteView != null) {
+            radioStationRemoteView.setPlayingMusicItem(musicItem);
+        }
+
+        mRemoteViewManager = new RemoteViewManager(playlistRemoteView, radioStationRemoteView);
     }
 
     private void initHeadsetHookHelper() {
@@ -292,21 +286,30 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return null;
     }
 
-    private boolean noNotificationView() {
-        return mNotificationView == null;
+    /***
+     * 创建一个适用于列表播放器的 {@link RemoteView}，你可以通过覆盖该方法来实现自定义的列表播放器控制器。
+     *
+     * 该方法默认返回 {@link SimplePlaylistRemoteView}，如果你不需要在通知栏中显示列表播放器控制器，可以覆盖
+     * 该方法并返回 null。
+     *
+     * @return {@link RemoteView} 对象，返回 null 时将隐藏列表播放器控制器
+     */
+    @Nullable
+    protected RemoteView onCreatePlaylistRemoteView() {
+        return new SimplePlaylistRemoteView();
     }
 
     /***
-     * 该方法用来创建 {@link NotificationView}，你可以通过覆盖该方法来实现自定义的 {@link NotificationView}。
+     * 创建一个适用于电台播放器的 {@link RemoteView}，你可以通过覆盖该方法来实现自定义的电台播放器控制器。
      *
-     * 该方法默认返回 {@link SimpleNotificationView}，如果你不需要 NotificationView，可以覆盖该方法并返
-     * 回 null。
+     * 该方法默认返回 {@link SimpleRadioStationRemoteView}，如果你不需要在通知栏中显示列表播放器控制器，可以覆盖
+     * 该方法并返回 null。
      *
-     * @return {@link NotificationView} 对象，返回 null 时将隐藏 NotificationView
+     * @return {@link RemoteView} 对象，返回 null 时将隐藏电台播放器控制器
      */
     @Nullable
-    protected NotificationView onCreateNotificationView() {
-        return new SimpleNotificationView();
+    protected RemoteView onCreateRadioStationRemoteView() {
+        return new SimpleRadioStationRemoteView();
     }
 
     @Nullable
@@ -337,9 +340,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         stopForegroundEx(true);
 
-        if (mNotificationView != null) {
-            mNotificationView.onRelease();
-        }
+        mRemoteViewManager.onRelease();
 
         mMediaSession.release();
         mPlaylistPlayer.release();
@@ -691,7 +692,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 要求 Service 更新 NotificationView，如果没有设置 NotificationView，则忽略本次操作。
      */
     protected final void updateNotificationView() {
-        if (noNotificationView()) {
+        if (mRemoteViewManager.noRemoteView(getPlayerType())) {
             return;
         }
 
@@ -701,7 +702,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return;
         }
 
-        mNotificationView.setPlayingMusicItem(musicItem);
+        mRemoteViewManager.setPlayingMusicItem(getPlayerType(), musicItem);
 
         if (isPreparingOrPlayingState() && !isForeground()) {
             startForeground();
@@ -730,7 +731,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 启动前台 Service。
      */
     protected final void startForeground() {
-        if (noNotificationView()) {
+        if (mRemoteViewManager.noRemoteView(getPlayerType())) {
             return;
         }
 
@@ -754,7 +755,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void updateNotification() {
-        if (noNotificationView()) {
+        if (mRemoteViewManager.noRemoteView(getPlayerType())) {
             return;
         }
 
@@ -768,10 +769,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     @NonNull
     private Notification createNotification(PlayerType playerType) {
-        if (mNotificationView == null) {
-            throw new IllegalStateException("NotificationView is null");
-        }
-        return mNotificationView.createNotification(playerType);
+        return mRemoteViewManager.createRemoteView(playerType);
     }
 
     /**
@@ -1009,12 +1007,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
         mMediaSession.setMetadata(getFreshMediaMetadata());
-
-        if (noNotificationView()) {
-            return;
-        }
-
-        mNotificationView.setNeedReloadIcon(true);
         updateNotificationView();
     }
 
@@ -1315,253 +1307,98 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
     }
 
-    /**
-     * 用于显示通知栏控制器。
-     */
-    public static abstract class NotificationView {
-        private PlayerService mPlayerService;
+    private static class RemoteViewManager {
+        private RemoteView mPlaylistRemoteView;
+        private RemoteView mRadioStationRemoteView;
 
-        private MusicItem mMusicItem;
-
-        private boolean mNeedReloadIcon;
-
-        private PendingIntent mSkipToPrevious;
-        private PendingIntent mPlayOrPause;
-        private PendingIntent mSkipToNext;
-
-        void init(PlayerService playerService,
-                  PendingIntent skipPrevious,
-                  PendingIntent playOrPause,
-                  PendingIntent skipNext) {
-            mMusicItem = new MusicItem();
-            mNeedReloadIcon = true;
-
-            mPlayerService = playerService;
-            mSkipToPrevious = skipPrevious;
-            mPlayOrPause = playOrPause;
-            mSkipToNext = skipNext;
-
-            onInit(mPlayerService);
+        RemoteViewManager(RemoteView playlistRemoteView, RemoteView radioStationRemoteView) {
+            mPlaylistRemoteView = playlistRemoteView;
+            mRadioStationRemoteView = radioStationRemoteView;
         }
 
-        /**
-         * 重写该方法创建一个新的 Notification 对象。
-         *
-         * @param playerType 播放器类型
-         * @return Notification 对象，不能为 null。
-         */
-        @NonNull
-        public abstract Notification onCreateNotification(PlayerType playerType);
-
-        /**
-         * 重写该方法以重新加载当前正在播放的音乐的图标。
-         */
-        protected void reloadIcon() {
-            setNeedReloadIcon(false);
-        }
-
-        /**
-         * 该方法会在初次创建 NotificationView 对象时调用，你可以重写该方法来进行一些初始化操作。
-         */
-        protected void onInit(Context context) {
-        }
-
-        /**
-         * 该方法会在 Service 销毁时调用，可以在该方法中是否占用的资源。
-         */
-        protected void onRelease() {
-        }
-
-        protected final Context getContext() {
-            return mPlayerService;
-        }
-
-        protected final String getPackageName() {
-            return getContext().getPackageName();
-        }
-
-        /**
-         * 获取播放器类型。
-         */
-        protected final PlayerType getPlayerType() {
-            return mPlayerService.getPlayerType();
-        }
-
-        /**
-         * 获取列表播放器的播放模式。
-         */
-        protected final PlaylistPlayer.PlayMode getPlaylistPlayMode() {
-            return mPlayerService.getPlaylistPlayMode();
-        }
-
-        /**
-         * 获取播放队列携带的额外参数（可为 null）。
-         */
-        @Nullable
-        protected final Bundle getPlaylistExtra() {
-            return mPlayerService.getPlaylistExtra();
-        }
-
-        /**
-         * 获取电台携带的额外参数（可为 null）。
-         */
-        @Nullable
-        protected final Bundle getRadioStationExtra() {
-            return mPlayerService.getRadioStationExtra();
-        }
-
-        /**
-         * 添加一个自定义动作。
-         * <p>
-         * 该方法会返回一个 PendingIntent 对象，该 PendingIntent 对象会使用指定的 action 启动当前 Service。当
-         * Service 在 {@link #onStartCommand(Intent, int, int)} 方法中检测到该 action 时，会执行其对应的 task。
-         */
-        protected final PendingIntent addCustomAction(@NonNull String action, @NonNull Runnable task) {
-            return mPlayerService.addOnStartCommandAction(action, task);
-        }
-
-        /**
-         * 移除一个已添加的自定义动作。
-         * <p>
-         * 需要指出的时，当一个自定义动作被移除后，其对应的 PendingIntent 仍然可以用来启动当前 Service，只不过
-         * {@link #onStartCommand(Intent, int, int)} 不会在响应对应的 action。建议在调用该方法后同时取消注册
-         * 时返回的那个 PendingIntent 对象（调用 PendingIntent 的 cancel() 方法进行取消）。
-         */
-        protected final void removeCustomAction(@NonNull String action) {
-            mPlayerService.removeOnStartCommandAction(action);
-        }
-
-        /**
-         * 获取用来触发 “上一曲” 的 PendingIntent 对象。
-         */
-        protected final PendingIntent getSkipToPreviousPendingIntent() {
-            return mSkipToPrevious;
-        }
-
-        /**
-         * 获取用来触发 “播放/暂停” 的 PendingIntent 对象。
-         */
-        protected final PendingIntent getPlayOrPausePendingIntent() {
-            return mPlayOrPause;
-        }
-
-        /**
-         * 获取用来触发 “下一曲” 的 PendingIntent 对象。
-         */
-        protected final PendingIntent getSkipToNextPendingIntent() {
-            return mSkipToNext;
-        }
-
-        /**
-         * 当前是否正在播放音乐。
-         */
-        public final boolean isPreparingOrPlayingState() {
-            return mPlayerService.isPreparingOrPlayingState();
-        }
-
-        public final boolean isPreparingState() {
-            return mPlayerService.isPreparingState();
-        }
-
-        public final boolean isStalled() {
-            return mPlayerService.isStalled();
-        }
-
-        /**
-         * 获取当前正在播放的音乐的 MusicItem 对象。
-         */
-        @NonNull
-        public final MusicItem getPlayingMusicItem() {
-            return mMusicItem;
-        }
-
-        /**
-         * 获取当前播放器的 {@link MediaSessionCompat} 对象。
-         *
-         * @return {@link MediaSessionCompat} 对象
-         */
-        public MediaSessionCompat getMediaSession() {
-            return mPlayerService.getMediaSession();
-        }
-
-        /**
-         * 播放器是否发生了错误。
-         */
-        public final boolean isError() {
-            return mPlayerService.isError();
-        }
-
-        /**
-         * 获取错误信息。
-         * <p>
-         * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
-         */
-        @NonNull
-        public final String getErrorMessage() {
-            return mPlayerService.getErrorMessage();
-        }
-
-        /**
-         * 要求 Service 更新 NotificationView，如果没有设置 NotificationView，则忽略本次操作。
-         */
-        public final void invalidate() {
-            mPlayerService.updateNotificationView();
-        }
-
-        @NonNull
-        Notification createNotification(PlayerType playerType) {
-            if (isNeedReloadIcon()) {
-                reloadIcon();
+        boolean noRemoteView(PlayerType playerType) {
+            switch (playerType) {
+                case PLAYLIST:
+                    return mPlaylistRemoteView == null;
+                case RADIO_STATION:
+                    return mRadioStationRemoteView == null;
             }
-            return onCreateNotification(playerType);
+
+            return true;
         }
 
-        void setPlayingMusicItem(@NonNull MusicItem musicItem) {
-            Preconditions.checkNotNull(musicItem);
+        void setPlayingMusicItem(PlayerType playerType, MusicItem musicItem) {
+            if (noRemoteView(playerType)) {
+                return;
+            }
 
-            mMusicItem = musicItem;
+            switch (playerType) {
+                case PLAYLIST:
+                    mPlaylistRemoteView.setPlayingMusicItem(musicItem);
+                    break;
+                case RADIO_STATION:
+                    mRadioStationRemoteView.setPlayingMusicItem(musicItem);
+                    break;
+            }
         }
 
-        boolean isNeedReloadIcon() {
-            return mNeedReloadIcon;
+        Notification createRemoteView(PlayerType playerType) {
+            if (noRemoteView(playerType)) {
+                throw new IllegalStateException("player type [" + playerType + "] not set remote view.");
+            }
+
+            switch (playerType) {
+                case PLAYLIST:
+                    return mPlaylistRemoteView.createNotification();
+                case RADIO_STATION:
+                    return mRadioStationRemoteView.createNotification();
+            }
+
+            throw new IllegalStateException("can't create remote view");
         }
 
-        void setNeedReloadIcon(boolean needReloadIcon) {
-            mNeedReloadIcon = needReloadIcon;
+        void onRelease() {
+            if (mPlaylistRemoteView != null) {
+                mPlaylistRemoteView.onRelease();
+            }
+
+            if (mRadioStationRemoteView != null) {
+                mRadioStationRemoteView.onRelease();
+            }
         }
     }
 
     /**
-     * 该类提供了 NotificationView 的默认实现。
+     * 用于显示通知栏控制器。
      */
-    public static class SimpleNotificationView extends NotificationView {
-        private static final String CUSTOM_ACTION_1 = "snow.player.custom_action_1";
-        private static final String CUSTOM_ACTION_2 = "snow.player.custom_action_2";
-        private static final String COMPAT_CUSTOM_ACTION = "snow.player.compat_custom_action";
+    public static abstract class RemoteView {
+        private PlayerService mPlayerService;
+        private MusicItem mMusicItem;
+
+        private String mChannelId;
+
+        private int[] mIconSize;            // [width, height]
+        private int[] mIconCornerRadius;    // [topLeft, topRight, bottomRight, bottomLeft]
+        private boolean mNeedReloadIcon;
+        private Bitmap mIcon;
+        private CustomTarget<Bitmap> mTarget;
 
         private PendingIntent mContentIntent;
 
-        private Bitmap mIcon;
-        private CustomTarget<Bitmap> mTarget;
-        private int mIconCornerRadius;
+        private List<CustomAction> mAllCustomAction;
 
-        private int mDefaultIconId;
+        void init(PlayerService playerService) {
+            mPlayerService = playerService;
+            mMusicItem = new MusicItem();
+            mChannelId = "player";
+            mIconSize = new int[2];
+            mIconCornerRadius = new int[4];
+            mAllCustomAction = new ArrayList<>();
 
-        private CustomAction mCustomAction1;
-        private CustomAction mCustomAction2;
-        private CustomAction mCompatCustomAction;
+            setNeedReloadIcon(true);
+            onInit(mPlayerService);
 
-        @Override
-        protected void onInit(Context context) {
-            super.onInit(context);
-            mDefaultIconId = R.mipmap.snow_notif_default_icon;
-
-            Resources res = context.getResources();
-
-            mIconCornerRadius = res.getDimensionPixelSize(R.dimen.snow_notif_icon_corner_radius);
-            int iconSize = res.getDimensionPixelSize(R.dimen.snow_notif_icon_size_big);
-
-            mTarget = new CustomTarget<Bitmap>(iconSize, iconSize) {
+            mTarget = new CustomTarget<Bitmap>(mIconSize[0], mIconSize[1]) {
                 @Override
                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                     setIcon(resource);
@@ -1574,22 +1411,146 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             };
         }
 
+        /**
+         * 创建自定义 Notification 视图，不能为 null。
+         */
         @NonNull
-        @Override
-        public Notification onCreateNotification(PlayerType playerType) {
-            return new NotificationCompat.Builder(getContext(), "player")
+        public abstract RemoteViews onCreateContentView();
+
+        /**
+         * 创建自定义 Big Notification 视图，不能为 null。
+         */
+        @NonNull
+        public abstract RemoteViews onCreateBigContentView();
+
+        /**
+         * 获取默认图标的资源 ID
+         */
+        @DrawableRes
+        public abstract int getDefaultIconId();
+
+        /**
+         * 该方法会在初次创建 NotificationView 对象时调用，你可以重写该方法来进行一些初始化操作。
+         */
+        protected void onInit(Context context) {
+        }
+
+        /**
+         * 该方法会在 Service 销毁时调用，可以在该方法中释放占用的资源。
+         */
+        protected void onRelease() {
+            Glide.with(getContext())
+                    .clear(mTarget);
+        }
+
+        /**
+         * 加载当前正在播放的歌曲的图标。
+         * <p>
+         * 你可以重写该方法实现自己的图标加载逻辑。
+         */
+        protected void reloadIcon() {
+            setNeedReloadIcon(false);
+
+            Glide.with(getContext())
+                    .clear(mTarget);
+
+            Glide.with(getContext())
+                    .asBitmap()
+                    .load(getPlayingMusicItem().getIconUri())
+                    .error(loadEmbeddedIcon())
+                    .transform(new GranularRoundedCorners(mIconCornerRadius[0],
+                            mIconCornerRadius[1],
+                            mIconCornerRadius[2],
+                            mIconCornerRadius[3]))
+                    .into(mTarget);
+        }
+
+        private boolean notLocaleMusic() {
+            String stringUri = getPlayingMusicItem().getUri();
+            String scheme = Uri.parse(stringUri).getScheme();
+
+            return "http".equalsIgnoreCase(scheme) | "https".equalsIgnoreCase(scheme);
+        }
+
+        private RequestBuilder<Bitmap> loadEmbeddedIcon() {
+            return Glide.with(getContext())
+                    .asBitmap()
+                    .load(getEmbeddedIcon())
+                    .error(loadDefaultIcon())
+                    .transform(new GranularRoundedCorners(mIconCornerRadius[0],
+                            mIconCornerRadius[1],
+                            mIconCornerRadius[2],
+                            mIconCornerRadius[3]));
+        }
+
+        private RequestBuilder<Bitmap> loadDefaultIcon() {
+            return Glide.with(getContext())
+                    .asBitmap()
+                    .load(getDefaultIconId())
+                    .transform(new GranularRoundedCorners(mIconCornerRadius[0],
+                            mIconCornerRadius[1],
+                            mIconCornerRadius[2],
+                            mIconCornerRadius[3]));
+        }
+
+        private byte[] getEmbeddedIcon() {
+            if (notLocaleMusic()) {
+                return null;
+            }
+
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+
+            try {
+                retriever.setDataSource(getPlayingMusicItem().getUri());
+                return retriever.getEmbeddedPicture();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                return null;
+            } finally {
+                retriever.release();
+            }
+        }
+
+        /**
+         * 重写该方法创建一个新的 Notification 对象。
+         *
+         * @return Notification 对象，不能为 null。
+         */
+        @NonNull
+        protected Notification onCreateNotification() {
+            RemoteViews contentView = onCreateContentView();
+            RemoteViews bigContentView = onCreateBigContentView();
+
+            initAllCustomAction(contentView, true);
+            initAllCustomAction(bigContentView, false);
+
+            return new NotificationCompat.Builder(getContext(), mChannelId)
                     .setSmallIcon(R.drawable.snow_ic_music)
                     .setStyle(new androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
-                    .setCustomContentView(onCreateContentView(playerType))
-                    .setCustomBigContentView(onCreateBigContentView(playerType))
+                    .setCustomContentView(contentView)
+                    .setCustomBigContentView(bigContentView)
                     .setContentIntent(getContentIntent())
                     .build();
         }
 
-        @Override
-        protected void onRelease() {
-            super.onRelease();
-            Glide.with(getContext()).clear(mTarget);
+        private void initAllCustomAction(RemoteViews remoteViews, boolean isContentView) {
+            for (CustomAction customAction : mAllCustomAction) {
+                if (isContentView && !customAction.isShowOnContentView()) {
+                    continue;
+                }
+
+                initCustomAction(customAction, remoteViews);
+            }
+        }
+
+        /**
+         * 设置 channelId，该值将用于创建 Notification 对象。
+         * <p>
+         * 默认的 channelId 值为 {@code "player"}
+         */
+        protected final void setChannelId(@NonNull String channelId) {
+            Preconditions.checkNotNull(channelId);
+            mChannelId = channelId;
         }
 
         /**
@@ -1613,6 +1574,34 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
+         * 上一曲
+         */
+        protected final void skipToPrevious() {
+            mPlayerService.skipToPrevious();
+        }
+
+        /**
+         * 下一曲
+         */
+        protected final void skipToNext() {
+            mPlayerService.skipToNext();
+        }
+
+        /**
+         * 播放/暂停
+         */
+        protected final void playOrPause() {
+            mPlayerService.playOrPause();
+        }
+
+        /**
+         * 关闭播放器
+         */
+        protected final void shutdown() {
+            mPlayerService.shutdown();
+        }
+
+        /**
          * 获取当前通知栏控制器的图标。
          */
         protected final Bitmap getIcon() {
@@ -1630,66 +1619,50 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 设置默认的通知栏图标资源。
+         * 设置图标的尺寸（默认尺寸为 0）。
          * <p>
-         * 如果你需要修改默认的通知栏图标，建议在 {@link #onInit(Context)} 调用该方法进行设置。
+         * 建议子类覆盖 {@link #onInit(Context)} 方法，并在该方法中完成图标尺寸的设置。
          */
-        protected final void setDefaultIconId(@DrawableRes int resId) {
-            mDefaultIconId = resId;
+        protected final void setIconSize(int size) {
+            setIconSize(size, size);
         }
 
         /**
-         * 获取默认的通知栏图标资源。
-         */
-        @DrawableRes
-        protected final int getDefaultIconId() {
-            return mDefaultIconId;
-        }
-
-        /**
-         * 设置第 1 号自定义动作。
-         *
-         * @param customAction 第 1 号自定义动作，可为 null。为 null 时相当于清除已设置的自定义动作。
-         */
-        public final void setCustomAction1(CustomAction customAction) {
-            mCustomAction1 = customAction;
-        }
-
-        /**
-         * 获取第 1 号自定义动作。
-         */
-        public final CustomAction getCustomAction1() {
-            return mCustomAction1;
-        }
-
-        /**
-         * 设置第 2 号自定义动作。
-         *
-         * @param customAction 第 2 号自定义动作，可为 null。为 null 时相当于清除已设置的自定义动作。
-         */
-        public final void setCustomAction2(CustomAction customAction) {
-            mCustomAction2 = customAction;
-        }
-
-        /**
-         * 获取第 2 号自定义动作。
-         */
-        public final CustomAction getCustomAction2() {
-            return mCustomAction2;
-        }
-
-        /**
-         * 设置 compat 自定义动作。
+         * 分别设置图标的宽高尺寸（默认宽高为 0）。
          * <p>
-         * 该自定义动作主要用于兼容低版本的通知栏控制器。默认情况下，使用的是第 2 号自定义动作，如果没有设置
-         * 第 2 号自定义动作，则使用第 1 号自定义动作。
-         * <p>
-         * 通过不需要调用该方法，除非你需要修改上述默认的行为。
-         *
-         * @param compatCustomAction 通常将其指定为第 1 号或第 2 号自定义动作。
+         * 建议子类覆盖 {@link #onInit(Context)} 方法，并在该方法中完成图标宽高尺寸的设置。
          */
-        public final void setCompatCustomAction(CustomAction compatCustomAction) {
-            mCompatCustomAction = compatCustomAction;
+        protected final void setIconSize(int width, int height) {
+            mIconSize[0] = width;
+            mIconSize[1] = height;
+        }
+
+        /**
+         * 设置图标圆角的半径。
+         * <p>
+         * 建议子类覆盖 {@link #onInit(Context)} 方法，并在该方法中完成圆角半径的设置。
+         *
+         * @param radius 图标圆角的半径
+         */
+        protected final void setIconCornerRadius(int radius) {
+            setIconCornerRadius(radius, radius, radius, radius);
+        }
+
+        /**
+         * 分别设置图标 4 个圆角的半径。
+         * <p>
+         * 建议子类覆盖 {@link #onInit(Context)} 方法，并在该方法中完成圆角半径的设置。
+         *
+         * @param topLeft     左上角圆角半径
+         * @param topRight    右上角圆角半径
+         * @param bottomLeft  左下角圆角半径
+         * @param bottomRight 右下角圆角半径
+         */
+        protected final void setIconCornerRadius(int topLeft, int topRight, int bottomRight, int bottomLeft) {
+            mIconCornerRadius[0] = topLeft;
+            mIconCornerRadius[1] = topRight;
+            mIconCornerRadius[2] = bottomRight;
+            mIconCornerRadius[3] = bottomLeft;
         }
 
         /**
@@ -1742,209 +1715,214 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return contentText;
         }
 
+        protected final Context getContext() {
+            return mPlayerService;
+        }
+
+        protected final String getPackageName() {
+            return getContext().getPackageName();
+        }
+
         /**
-         * 加载图标。
-         * <p>
-         * 你可以覆盖该方法来实现你自己的图标加载逻辑。
+         * 获取列表播放器的播放模式。
          */
-        @Override
-        protected void reloadIcon() {
-            super.reloadIcon();
-
-            Glide.with(getContext())
-                    .clear(mTarget);
-
-            Glide.with(getContext())
-                    .asBitmap()
-                    .load(getPlayingMusicItem().getIconUri())
-                    .error(loadEmbeddedIcon())
-                    .transform(new RoundedCorners(mIconCornerRadius))
-                    .into(mTarget);
-        }
-
-        private boolean notLocaleMusic() {
-            String stringUri = getPlayingMusicItem().getUri();
-            String scheme = Uri.parse(stringUri).getScheme();
-
-            return "http".equalsIgnoreCase(scheme) | "https".equalsIgnoreCase(scheme);
-        }
-
-        private RequestBuilder<Bitmap> loadEmbeddedIcon() {
-            return Glide.with(getContext())
-                    .asBitmap()
-                    .load(getEmbeddedIcon())
-                    .error(loadDefaultIcon())
-                    .transform(new RoundedCorners(mIconCornerRadius));
-        }
-
-        private RequestBuilder<Bitmap> loadDefaultIcon() {
-            return Glide.with(getContext())
-                    .asBitmap()
-                    .load(getDefaultIconId())
-                    .transform(new RoundedCorners(mIconCornerRadius));
-        }
-
-        private byte[] getEmbeddedIcon() {
-            if (notLocaleMusic()) {
-                return null;
-            }
-
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-
-            try {
-                retriever.setDataSource(getPlayingMusicItem().getUri());
-                return retriever.getEmbeddedPicture();
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-                return null;
-            } finally {
-                retriever.release();
-            }
+        protected final PlaylistPlayer.PlayMode getPlaylistPlayMode() {
+            return mPlayerService.getPlaylistPlayMode();
         }
 
         /**
-         * 根据 {@code playerType} 参数创建对应的 content view 对象。
+         * 获取播放队列携带的额外参数（可为 null）。
+         */
+        @Nullable
+        protected final Bundle getPlaylistExtra() {
+            return mPlayerService.getPlaylistExtra();
+        }
+
+        /**
+         * 获取电台携带的额外参数（可为 null）。
+         */
+        @Nullable
+        protected final Bundle getRadioStationExtra() {
+            return mPlayerService.getRadioStationExtra();
+        }
+
+        /**
+         * 添加自定义动作，不能为 null。
          * <p>
-         * 你可以覆盖该方法来自定义通知栏控制器的外观（折叠后）。注意！覆盖该方法时，请同时覆盖
-         * {@link #onCreateBigContentView(PlayerType)} 方法。
+         * 如果自定义动作已添加，则会将其替换掉。
          *
-         * @see #onCreateBigContentView(PlayerType)
+         * @param customAction 要添加的自定义动作，如果自定义动作已添加，则会将其替换掉
+         * @see CustomAction#equals(Object)
          */
-        protected RemoteViews onCreateContentView(PlayerType playerType) {
-            RemoteViews contentView = new RemoteViews(getPackageName(),
-                    R.layout.snow_simple_notification_view);
+        protected final void addCustomAction(@NonNull CustomAction customAction) {
+            Preconditions.checkNotNull(customAction);
 
-            contentView.setImageViewBitmap(R.id.snow_notif_icon, getIcon());
-            contentView.setTextViewText(R.id.snow_notif_title, getContentTitle());
-            contentView.setTextViewText(R.id.snow_notif_text, getContentText(getPlayingMusicItem().getArtist()));
-
-            contentView.setOnClickPendingIntent(R.id.snow_notif_play_pause, getPlayOrPausePendingIntent());
-            contentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_next, getSkipToNextPendingIntent());
-
-            if (isPreparingOrPlayingState()) {
-                contentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
-            }
-
-            if (playerType == PlayerType.RADIO_STATION) {
-                contentView.setViewVisibility(R.id.snow_notif_radio_tip, View.VISIBLE);
-            }
-
-            CustomAction customAction = mCompatCustomAction;
-            if (customAction == null) {
-                customAction = mCustomAction2;
-            }
-            if (customAction == null) {
-                customAction = mCustomAction1;
-            }
-            initCustomAction(COMPAT_CUSTOM_ACTION, customAction, contentView, playerType, R.id.snow_notif_compat_custom_action);
-
-            return contentView;
+            mAllCustomAction.remove(customAction);
+            mAllCustomAction.add(customAction);
         }
 
         /**
-         * 根据 {@code playerType} 参数创建对应的 big content view 对象。
-         * <p>
-         * 你可以覆盖该方法来自定义通知栏控制器的外观（大）。注意！覆盖该方法时，请同时覆盖
-         * {@link #onCreateContentView(PlayerType)} 方法。
+         * 移除自定义动作。
          *
-         * @see #onCreateContentView(PlayerType)
+         * @param customAction 要移除的自定义动作
          */
-        protected RemoteViews onCreateBigContentView(PlayerType playerType) {
-            RemoteViews bigContentView = new RemoteViews(getPackageName(),
-                    R.layout.snow_simple_notification_view_big);
-
-            bigContentView.setImageViewBitmap(R.id.snow_notif_icon, getIcon());
-            bigContentView.setTextViewText(R.id.snow_notif_title, getContentTitle());
-            bigContentView.setTextViewText(R.id.snow_notif_text, getContentText(getPlayingMusicItem().getArtist()));
-
-            bigContentView.setOnClickPendingIntent(R.id.snow_notif_play_pause, getPlayOrPausePendingIntent());
-            bigContentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_next, getSkipToNextPendingIntent());
-
-            if (isPreparingOrPlayingState()) {
-                bigContentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
-            }
-
-            if (playerType == PlayerType.RADIO_STATION) {
-                bigContentView.setViewVisibility(R.id.snow_notif_radio_tip, View.VISIBLE);
-                bigContentView.setImageViewResource(R.id.snow_notif_skip_to_previous, R.drawable.snow_ic_skip_previous_disabled);
-            } else {
-                bigContentView.setOnClickPendingIntent(R.id.snow_notif_skip_to_previous, getSkipToPreviousPendingIntent());
-            }
-
-            initCustomAction(CUSTOM_ACTION_1, mCustomAction1, bigContentView, playerType, R.id.snow_notif_custom_action1);
-            initCustomAction(CUSTOM_ACTION_2, mCustomAction2, bigContentView, playerType, R.id.snow_notif_custom_action2);
-
-            return bigContentView;
+        protected final void removeCustomAction(CustomAction customAction) {
+            mAllCustomAction.remove(customAction);
         }
 
-        private void initCustomAction(String customActionKey,
-                                      CustomAction customAction,
-                                      RemoteViews bigContentView,
-                                      PlayerType playerType,
-                                      int viewId) {
-            if (customAction == null) {
-                return;
-            }
+        /**
+         * 当前是否正在播放音乐。
+         */
+        public final boolean isPreparingOrPlayingState() {
+            return mPlayerService.isPreparingOrPlayingState();
+        }
 
+        public final boolean isPreparingState() {
+            return mPlayerService.isPreparingState();
+        }
+
+        public final boolean isStalled() {
+            return mPlayerService.isStalled();
+        }
+
+        /**
+         * 获取当前正在播放的音乐的 MusicItem 对象。
+         */
+        @NonNull
+        public final MusicItem getPlayingMusicItem() {
+            return mMusicItem;
+        }
+
+        /**
+         * 获取当前播放器的 {@link MediaSessionCompat} 对象。
+         *
+         * @return {@link MediaSessionCompat} 对象
+         */
+        public final MediaSessionCompat getMediaSession() {
+            return mPlayerService.getMediaSession();
+        }
+
+        /**
+         * 播放器是否发生了错误。
+         */
+        public final boolean isError() {
+            return mPlayerService.isError();
+        }
+
+        /**
+         * 获取错误信息。
+         * <p>
+         * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
+         */
+        @NonNull
+        public final String getErrorMessage() {
+            return mPlayerService.getErrorMessage();
+        }
+
+        /**
+         * 要求 Service 更新 NotificationView，如果没有设置 NotificationView，则忽略本次操作。
+         */
+        public final void invalidate() {
+            mPlayerService.updateNotificationView();
+        }
+
+        private PendingIntent createCustomActionPendingIntent(@NonNull String action, @NonNull Runnable task) {
+            return mPlayerService.addOnStartCommandAction(action, task);
+        }
+
+        private void initCustomAction(CustomAction customAction, RemoteViews remoteViews) {
+            int viewId = customAction.getViewId();
             int iconId = customAction.getIconId();
-            PendingIntent pendingIntent =
-                    getCustomActionPendingIntent(playerType, customActionKey, customAction);
 
-            bigContentView.setViewVisibility(viewId, View.VISIBLE);
-            bigContentView.setImageViewResource(viewId, iconId);
+            remoteViews.setViewVisibility(viewId, View.VISIBLE);
 
-            if (pendingIntent != null) {
-                bigContentView.setOnClickPendingIntent(viewId, pendingIntent);
+            if (iconId != CustomAction.IGNORE_ICON_ID) {
+                remoteViews.setImageViewResource(viewId, iconId);
             }
+
+            remoteViews.setOnClickPendingIntent(viewId,
+                    createCustomActionPendingIntent(customAction.getActionName(), customAction.getAction()));
         }
 
-        private PendingIntent getCustomActionPendingIntent(PlayerType playerType,
-                                                           String customActionName,
-                                                           CustomAction customAction) {
-            if (customAction.getAction() == null) {
-                return null;
+        @NonNull
+        Notification createNotification() {
+            if (isNeedReloadIcon()) {
+                reloadIcon();
             }
+            return onCreateNotification();
+        }
 
-            if (playerType == PlayerType.RADIO_STATION && customAction.isDisabledInRadioStationType()) {
-                return null;
-            }
+        void setPlayingMusicItem(@NonNull MusicItem musicItem) {
+            Preconditions.checkNotNull(musicItem);
 
-            return addCustomAction(customActionName, customAction.getAction());
+            mMusicItem = musicItem;
+        }
+
+        boolean isNeedReloadIcon() {
+            return mNeedReloadIcon;
+        }
+
+        void setNeedReloadIcon(boolean needReloadIcon) {
+            mNeedReloadIcon = needReloadIcon;
         }
 
         /**
-         * 用于创建一个可添加到 {@link SimpleNotificationView} 中的自定义动作。
+         * 用于创建一个可添加到 {@link SimplePlaylistRemoteView} 中的自定义动作。
          */
-        public static class CustomAction {
-            private int mIconId;
-            private boolean mDisabledInRadioStationType;
-            private int mDisabledIconId;
+        public static final class CustomAction {
+            public static final int IGNORE_ICON_ID = 0;
+
+            private String mActionName;
+            private int mViewId;
             private Runnable mAction;
 
-            /**
-             * 创建一个自定义动作，该自定义动作没有要执行的操作。
-             *
-             * @param iconId 自定义动作的图标。
-             */
-            public CustomAction(@DrawableRes int iconId) {
-                this(iconId, null);
-            }
+            private int mIconId;
+            private boolean mShowOnContentView;
 
             /**
              * 创建一个自定义动作。
              *
-             * @param iconId 自定义动作的图标的资源 ID。
-             * @param action 自定义动作要执行的操作。
+             * @param actionName 自定义动作的名称，请保证该值的唯一性，不能为 null
+             * @param viewId     自定义动作要绑定到的 View 的 ID
+             * @param action     自定义动作要执行的操作
              */
-            public CustomAction(@DrawableRes int iconId, Runnable action) {
-                mIconId = iconId;
+            public CustomAction(@NonNull String actionName,
+                                @IdRes int viewId,
+                                @NonNull Runnable action) {
+                Preconditions.checkNotNull(actionName);
+                Preconditions.checkNotNull(action);
+
+                mActionName = actionName;
+                mViewId = viewId;
                 mAction = action;
+
+                mIconId = IGNORE_ICON_ID;
+            }
+
+            /**
+             * 获取自定义动作的名称。
+             *
+             * @return 自定义动作的名称
+             */
+            @NonNull
+            public String getActionName() {
+                return mActionName;
+            }
+
+            /**
+             * 获取自定义动作要绑定到的 View 的 ID。
+             *
+             * @return 自定义动作要绑定到的 View 的 ID
+             */
+            @IdRes
+            public int getViewId() {
+                return mViewId;
             }
 
             /**
              * 设置自定义动作的图标的资源 ID。
              * <p>
-             * 对该方法的调用会在下次更新通知栏控制器时生效。
+             * 可以在运行时动态修改，将在下次跟新通知时生效。
              *
              * @param iconId 自定义动作的新图标的资源 ID
              */
@@ -1952,43 +1930,25 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                 mIconId = iconId;
             }
 
+            /**
+             * 设置自定义动作的图标的 ID。
+             */
             public int getIconId() {
                 return mIconId;
             }
 
             /**
-             * 设置在 “电台” 模式下 disable 当前自定义动作。
-             *
-             * @param disabledDrawableId 当前自定义动作在 disable 状态下的图标的资源 ID
+             * 设置是否在 content view（折叠后的视图）中显示当前的自定义动作。
              */
-            public void setDisabledInRadioStationType(int disabledDrawableId) {
-                mDisabledInRadioStationType = true;
-                mDisabledIconId = disabledDrawableId;
+            public void setShowOnContentView(boolean show) {
+                mShowOnContentView = show;
             }
 
             /**
-             * 判断是否在 “电台” 模式下 disable 当前自定义动作。
-             *
-             * @return 默认返回 false
+             * 判断是否在 content view（折叠后的视图）中显示当前的自定义动作。
              */
-            public boolean isDisabledInRadioStationType() {
-                return mDisabledInRadioStationType;
-            }
-
-            /**
-             * 获取当前自定义动作在 disable 状态下的图标的资源 ID。
-             */
-            public int getDisabledIconId() {
-                return mDisabledIconId;
-            }
-
-            /**
-             * 设置当前自定义动作要执行的操作。
-             * <p>
-             * 对该方法的调用会在下次更新通知栏控制器时生效。
-             */
-            public void setAction(Runnable action) {
-                mAction = action;
+            public boolean isShowOnContentView() {
+                return mShowOnContentView;
             }
 
             /**
@@ -1997,6 +1957,171 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             public Runnable getAction() {
                 return mAction;
             }
+
+            /**
+             * 如果两个 {@code CustomAction} 的 {@code actionName} 是一样的，则判定这两个对象相等。
+             */
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                CustomAction that = (CustomAction) o;
+                return Objects.equal(mActionName, that.mActionName);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hashCode(mActionName);
+            }
+        }
+    }
+
+    public static abstract class SimpleRemoteView extends RemoteView {
+        private static final String ACTION_SKIP_TO_PREVIOUS = "snow.player.action.skip_to_previous";
+        private static final String ACTION_SKIP_TO_NEXT = "snow.player.action.skip_to_next";
+        private static final String ACTION_PLAY_PAUSE = "snow.player.action.play_pause";
+        private static final String CUSTOM_ACTION_1 = "snow.player.action.custom_action_1";
+        private static final String CUSTOM_ACTION_2 = "snow.player.action.custom_action_2";
+
+        public abstract boolean enableSkipToPrevious();
+
+        public abstract int getContentViewLayoutId();
+
+        public abstract int getBigContentViewLayoutId();
+
+        @Override
+        protected void onInit(Context context) {
+            super.onInit(context);
+
+            Resources res = context.getResources();
+
+            setIconSize(res.getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
+            setIconCornerRadius(res.getDimensionPixelSize(R.dimen.snow_notif_icon_corner_radius));
+
+            initCustomAction();
+        }
+
+        private void initCustomAction() {
+            if (enableSkipToPrevious()) {
+                addCustomAction(new CustomAction(ACTION_SKIP_TO_PREVIOUS, R.id.snow_notif_skip_to_previous, new Runnable() {
+                    @Override
+                    public void run() {
+                        skipToPrevious();
+                    }
+                }));
+            }
+
+            addCustomAction(new CustomAction(ACTION_SKIP_TO_NEXT, R.id.snow_notif_skip_to_next, new Runnable() {
+                @Override
+                public void run() {
+                    skipToNext();
+                }
+            }));
+
+            addCustomAction(new CustomAction(ACTION_PLAY_PAUSE, R.id.snow_notif_play_pause, new Runnable() {
+                @Override
+                public void run() {
+                    playOrPause();
+                }
+            }));
+        }
+
+        @DrawableRes
+        @Override
+        public int getDefaultIconId() {
+            return R.mipmap.snow_notif_default_icon;
+        }
+
+        @NonNull
+        public RemoteViews onCreateContentView() {
+            RemoteViews contentView = new RemoteViews(getPackageName(), getContentViewLayoutId());
+
+            contentView.setImageViewBitmap(R.id.snow_notif_icon, getIcon());
+            contentView.setTextViewText(R.id.snow_notif_title, getContentTitle());
+            contentView.setTextViewText(R.id.snow_notif_text, getContentText(getPlayingMusicItem().getArtist()));
+
+            if (isPreparingOrPlayingState()) {
+                contentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
+            }
+
+            return contentView;
+        }
+
+        @NonNull
+        public RemoteViews onCreateBigContentView() {
+            RemoteViews bigContentView = new RemoteViews(getPackageName(), getBigContentViewLayoutId());
+
+            bigContentView.setImageViewBitmap(R.id.snow_notif_icon, getIcon());
+            bigContentView.setTextViewText(R.id.snow_notif_title, getContentTitle());
+            bigContentView.setTextViewText(R.id.snow_notif_text, getContentText(getPlayingMusicItem().getArtist()));
+
+            if (isPreparingOrPlayingState()) {
+                bigContentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
+            }
+
+            return bigContentView;
+        }
+
+        /**
+         * 设置 {@link SimplePlaylistRemoteView} 的第一个自定义动作。
+         *
+         * @param iconId 自定义动作的图标
+         * @param action 自定义动作触发时要执行的任务
+         */
+        public void setCustomAction1(int iconId, Runnable action) {
+            CustomAction customAction = new CustomAction(CUSTOM_ACTION_1, R.id.snow_notif_custom_action1, action);
+            customAction.setIconId(iconId);
+            addCustomAction(customAction);
+        }
+
+        /**
+         * 设置 {@link SimplePlaylistRemoteView} 的第一个自定义动作。
+         *
+         * @param iconId 自定义动作的图标
+         * @param action 自定义动作触发时要执行的任务
+         */
+        public void setCustomAction2(int iconId, Runnable action) {
+            CustomAction customAction = new CustomAction(CUSTOM_ACTION_2, R.id.snow_notif_custom_action2, action);
+            customAction.setIconId(iconId);
+            customAction.setShowOnContentView(true);
+            addCustomAction(customAction);
+        }
+    }
+
+    /**
+     * 该类提供了 NotificationView 的默认实现。
+     */
+    public static class SimplePlaylistRemoteView extends SimpleRemoteView {
+        @Override
+        public boolean enableSkipToPrevious() {
+            return true;
+        }
+
+        @Override
+        public int getContentViewLayoutId() {
+            return R.layout.snow_simple_playlist_remote_view;
+        }
+
+        @Override
+        public int getBigContentViewLayoutId() {
+            return R.layout.snow_simple_playlist_remote_view_big;
+        }
+    }
+
+    public static class SimpleRadioStationRemoteView extends SimpleRemoteView {
+        @Override
+        public boolean enableSkipToPrevious() {
+            return false;
+        }
+
+        @Override
+        public int getContentViewLayoutId() {
+            return R.layout.snow_simple_radio_station_remote_view;
+        }
+
+        @Override
+        public int getBigContentViewLayoutId() {
+            return R.layout.snow_simple_radio_station_remote_view_big;
         }
     }
 }

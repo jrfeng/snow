@@ -52,9 +52,7 @@
                     android:text="@string/snow_radio"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/snow_notif_radio_tip_text_size"
-                    android:visibility="gone"
-                    tools:ignore="RtlCompat,SpUsage"
-                    tools:visibility="visible" />
+                    tools:ignore="RtlCompat,SpUsage" />
 
                 <TextView
                     android:id="@+id/snow_notif_text"
@@ -83,9 +81,10 @@
                     android:layout_width="@dimen/snow_notif_button_size_40dp"
                     android:layout_height="@dimen/snow_notif_button_size_40dp"
                     android:background="@drawable/snow_bg_notif_button"
+                    android:clickable="false"
                     android:contentDescription="@string/snow_des_skip_to_previous"
                     android:scaleType="centerInside"
-                    android:src="@drawable/snow_ic_skip_previous" />
+                    android:src="@drawable/snow_ic_skip_previous_disabled" />
 
                 <ImageButton
                     android:id="@+id/snow_notif_play_pause"
