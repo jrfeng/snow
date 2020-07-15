@@ -1498,6 +1498,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         private PendingIntent mContentIntent;
 
         private List<CustomAction> mAllCustomAction;
+        private Map<String, PendingIntent> mPendingIntentMap;
 
         void init(PlayerService playerService) {
             mPlayerService = playerService;
@@ -1506,6 +1507,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             mIconSize = new int[2];
             mIconCornerRadius = new int[4];
             mAllCustomAction = new ArrayList<>();
+            mPendingIntentMap = new HashMap<>();
 
             setNeedReloadIcon(true);
             onInit(mPlayerService);
@@ -1861,16 +1863,23 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 添加自定义动作，不能为 null。
          * <p>
-         * 如果自定义动作已添加，则会将其替换掉。
+         * 如果自定义动作已添加，则会忽略。
          *
-         * @param customAction 要添加的自定义动作，如果自定义动作已添加，则会将其替换掉
+         * @param customAction 要添加的自定义动作，如果自定义动作已添加，则会忽略
          * @see CustomAction#equals(Object)
          */
         protected final void addCustomAction(@NonNull CustomAction customAction) {
             Preconditions.checkNotNull(customAction);
 
-            mAllCustomAction.remove(customAction);
+            if (mAllCustomAction.contains(customAction)) {
+                return;
+            }
+
             mAllCustomAction.add(customAction);
+
+            String actionName = customAction.getActionName();
+            mPendingIntentMap.put(actionName,
+                    mPlayerService.addOnStartCommandAction(actionName, customAction.getAction()));
         }
 
         /**
@@ -1879,7 +1888,16 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @param customAction 要移除的自定义动作
          */
         protected final void removeCustomAction(CustomAction customAction) {
-            mAllCustomAction.remove(customAction);
+            if (mAllCustomAction.remove(customAction)) {
+                cancelPendingIntent(mPendingIntentMap.remove(customAction.getActionName()));
+                mPlayerService.removeOnStartCommandAction(customAction.getActionName());
+            }
+        }
+
+        private void cancelPendingIntent(@Nullable PendingIntent pendingIntent) {
+            if (pendingIntent != null) {
+                pendingIntent.cancel();
+            }
         }
 
         /**
@@ -1938,10 +1956,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             mPlayerService.updateNotificationView();
         }
 
-        private PendingIntent createCustomActionPendingIntent(@NonNull String action, @NonNull Runnable task) {
-            return mPlayerService.addOnStartCommandAction(action, task);
-        }
-
         private void initCustomAction(CustomAction customAction, RemoteViews remoteViews) {
             int viewId = customAction.getViewId();
             int iconId = customAction.getIconId();
@@ -1952,8 +1966,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                 remoteViews.setImageViewResource(viewId, iconId);
             }
 
-            remoteViews.setOnClickPendingIntent(viewId,
-                    createCustomActionPendingIntent(customAction.getActionName(), customAction.getAction()));
+            remoteViews.setOnClickPendingIntent(viewId, mPendingIntentMap.get(customAction.getActionName()));
         }
 
         @NonNull
