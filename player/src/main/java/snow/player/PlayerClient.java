@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -268,7 +269,7 @@ public class PlayerClient {
     }
 
 
-    public void setAudioEffectConfig(AudioEffectEngine.Config config) {
+    public void setAudioEffectConfig(Bundle config) {
         if (!isConnected()) {
             return;
         }
@@ -365,7 +366,7 @@ public class PlayerClient {
      * 即使当前播放器支持音频特效，可能也会返回 null
      */
     @Nullable
-    public AudioEffectEngine.Config getAudioEffectConfig() {
+    public Bundle getAudioEffectConfig() {
         return mPlayerConfig.getAudioEffectConfig();
     }
 

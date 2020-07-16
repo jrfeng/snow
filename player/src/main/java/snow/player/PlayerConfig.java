@@ -1,6 +1,7 @@
 package snow.player;
 
 import android.content.Context;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -80,14 +81,14 @@ public class PlayerConfig {
      * @return 音频特效的配置，如果当前播放器不支持音频特效，则会返回 null
      */
     @Nullable
-    public AudioEffectEngine.Config getAudioEffectConfig() {
-        return mMMKV.decodeParcelable(KEY_AUDIO_EFFECT_CONFIG, AudioEffectEngine.Config.class);
+    public Bundle getAudioEffectConfig() {
+        return mMMKV.decodeParcelable(KEY_AUDIO_EFFECT_CONFIG, Bundle.class);
     }
 
     /**
      * 修改音频特效的配置。
      */
-    public void setAudioEffectConfig(@NonNull AudioEffectEngine.Config audioEffectConfig) {
+    public void setAudioEffectConfig(@NonNull Bundle audioEffectConfig) {
         Preconditions.checkNotNull(audioEffectConfig);
         mMMKV.encode(KEY_AUDIO_EFFECT_CONFIG, audioEffectConfig);
     }

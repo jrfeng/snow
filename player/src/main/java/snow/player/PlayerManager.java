@@ -1,5 +1,6 @@
 package snow.player;
 
+import android.os.Bundle;
 import android.os.IBinder;
 
 import channel.helper.Channel;
@@ -41,7 +42,7 @@ public interface PlayerManager {
     /**
      * 修改音频特性的配置。
      */
-    void setAudioEffectConfig(AudioEffectEngine.Config config);
+    void setAudioEffectConfig(Bundle config);
 
     /**
      * 设置是否启用音频特效（如：均衡器）（默认为 false）。

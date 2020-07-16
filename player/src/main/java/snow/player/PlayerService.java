@@ -264,7 +264,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return;
         }
 
-        AudioEffectEngine.Config config = mPlayerConfig.getAudioEffectConfig();
+        Bundle config = mPlayerConfig.getAudioEffectConfig();
         if (config == null) {
             config = mAudioEffectEngine.getDefaultConfig();
             mPlayerConfig.setAudioEffectConfig(config);
@@ -414,7 +414,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     @Override
-    public void setAudioEffectConfig(AudioEffectEngine.Config config) {
+    public void setAudioEffectConfig(Bundle config) {
         if (noAudioEffectEngine()) {
             return;
         }

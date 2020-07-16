@@ -1,6 +1,6 @@
 package snow.player.effect;
 
-import android.os.Parcelable;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
@@ -8,22 +8,16 @@ import androidx.annotation.NonNull;
  * 音频特效引擎。
  */
 public interface AudioEffectEngine {
-    void init(@NonNull Config config);
+    void init(@NonNull Bundle config);
 
-    void updateConfig(@NonNull Config config);
+    void updateConfig(@NonNull Bundle config);
 
     void attachAudioEffect(int audioSessionId);
 
     void detachAudioEffect();
 
     @NonNull
-    Config getDefaultConfig();
+    Bundle getDefaultConfig();
 
     void release();
-
-    /**
-     * 音频特效引擎的配置信息。
-     */
-    interface Config extends Parcelable {
-    }
 }
