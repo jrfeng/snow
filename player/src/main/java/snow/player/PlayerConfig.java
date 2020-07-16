@@ -38,6 +38,7 @@ public class PlayerConfig {
      * @see PlayerManager.PlayerType#PLAYLIST
      * @see PlayerManager.PlayerType#RADIO_STATION
      */
+    @NonNull
     public PlayerManager.PlayerType getPlayerType() {
         return PlayerManager.PlayerType.values()[mMMKV.decodeInt(KEY_PLAYER_TYPE, 0)];
     }
@@ -57,6 +58,7 @@ public class PlayerConfig {
      * @return 当前的首选音质。
      * @see Player.SoundQuality
      */
+    @NonNull
     public Player.SoundQuality getSoundQuality() {
         return Player.SoundQuality.values()[mMMKV.decodeInt(KEY_SOUND_QUALITY, 0)];
     }
@@ -80,9 +82,9 @@ public class PlayerConfig {
      *
      * @return 音频特效的配置，如果当前播放器不支持音频特效，则会返回 null
      */
-    @Nullable
+    @NonNull
     public Bundle getAudioEffectConfig() {
-        return mMMKV.decodeParcelable(KEY_AUDIO_EFFECT_CONFIG, Bundle.class);
+        return mMMKV.decodeParcelable(KEY_AUDIO_EFFECT_CONFIG, Bundle.class, new Bundle());
     }
 
     /**
