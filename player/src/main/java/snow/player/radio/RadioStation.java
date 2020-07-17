@@ -10,6 +10,8 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
+import snow.player.media.MusicItem;
+
 /**
  * 用于存储 “电台” 的基本信息。
  * <p>
@@ -157,5 +159,21 @@ public class RadioStation implements Parcelable {
     @Override
     public String toString() {
         return "[" + mId + ", " + mName + ", " + mDescription + "]";
+    }
+
+    /**
+     * 用于提供电台要播放的音乐。
+     * <p>
+     * {@link RadioStation} 本身并不包含任何 {@link MusicItem} 对象，而是通过将一个 {@link RadioStation}
+     * 对象传递给一个 {@link MusicItemProvider} 对象来获取要播放的 {@link MusicItem} 对象。
+     */
+    public interface MusicItemProvider {
+        /**
+         * 获取电台的下一首音乐。
+         *
+         * @param radioStation 正在播放的电台
+         * @return 电台中要播放的音乐
+         */
+        MusicItem next(RadioStation radioStation);
     }
 }
