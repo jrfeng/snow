@@ -3,8 +3,11 @@ package snow.player;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -38,6 +41,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -104,6 +108,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     @Nullable
     private AudioEffectEngine mAudioEffectEngine;
 
+    private ComponentFactory mComponentFactory;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -116,6 +122,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
+        initComponentFactory();
         initPlayerConfig();
         initAudioEffectEngine();
         initPlayerState();
@@ -127,6 +134,22 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         initMediaSession();
 
         updateNotificationView();
+    }
+
+    private void initComponentFactory() {
+        try {
+            ComponentName service = new ComponentName(this, this.getClass());
+            ServiceInfo serviceInfo = getPackageManager().getServiceInfo(service, PackageManager.GET_META_DATA);
+            String factoryName = serviceInfo.metaData.getString(NAME_COMPONENT_FACTORY);
+            if (factoryName == null) {
+                return;
+            }
+
+            Class<?> clazz = Class.forName(factoryName);
+            mComponentFactory = (ComponentFactory) clazz.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void initPlayerConfig() {
@@ -191,8 +214,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initRemoteViewManager() {
-        RemoteView playlistRemoteView = onCreatePlaylistRemoteView();
-        RemoteView radioStationRemoteView = onCreateRadioStationRemoteView();
+        RemoteView playlistRemoteView = createPlaylistRemoteView();
+        RemoteView radioStationRemoteView = createRadioStationRemoteView();
 
         if (playlistRemoteView != null) {
             playlistRemoteView.init(this);
@@ -260,7 +283,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initAudioEffectEngine() {
-        mAudioEffectEngine = onCreateAudioEffectEngine();
+        mAudioEffectEngine = createAudioEffectEngine();
 
         if (mAudioEffectEngine == null) {
             return;
@@ -308,6 +331,15 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return null;
     }
 
+    @Nullable
+    protected final RemoteView createPlaylistRemoteView() {
+        if (injectPlaylistRemoteView()) {
+            return mComponentFactory.createPlaylistRemoteView();
+        }
+
+        return onCreatePlaylistRemoteView();
+    }
+
     /***
      * 创建一个适用于列表播放器的 {@link RemoteView}，你可以通过覆盖该方法来实现自定义的列表播放器控制器。
      *
@@ -321,6 +353,15 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return new SimplePlaylistRemoteView();
     }
 
+    @Nullable
+    protected final RemoteView createRadioStationRemoteView() {
+        if (injectRadioStationRemoteView()) {
+            return mComponentFactory.createRadioStationRemoteView();
+        }
+
+        return onCreateRadioStationRemoteView();
+    }
+
     /***
      * 创建一个适用于电台播放器的 {@link RemoteView}，你可以通过覆盖该方法来实现自定义的电台播放器控制器。
      *
@@ -332,6 +373,15 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     @Nullable
     protected RemoteView onCreateRadioStationRemoteView() {
         return new SimpleRadioStationRemoteView();
+    }
+
+    @Nullable
+    protected final AudioEffectEngine createAudioEffectEngine() {
+        if (injectAudioEffectEngine()) {
+            return mComponentFactory.createAudioEffectEngine();
+        }
+
+        return onCreateAudioEffectEngine();
     }
 
     /**
@@ -860,6 +910,15 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return false;
     }
 
+    @NonNull
+    protected final MusicPlayer createMusicPlayer(Context context) {
+        if (injectMusicPlayer()) {
+            return mComponentFactory.createMusicPlayer(context);
+        }
+
+        return onCreateMusicPlayer(this);
+    }
+
     /**
      * 该方法会在创建 MusicPlayer 对象时调用。
      * <p>
@@ -873,6 +932,14 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return new MediaMusicPlayer();
     }
 
+    protected final Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull Player.SoundQuality soundQuality) throws Exception {
+        if (injectMusicItemUri()) {
+            return mComponentFactory.retrieveMusicItemUri(musicItem, soundQuality);
+        }
+
+        return onRetrieveMusicItemUri(musicItem, soundQuality);
+    }
+
     /**
      * 获取音乐的播放链接。
      * <p>
@@ -883,7 +950,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @return 音乐的播放链接
      * @throws Exception 获取音乐播放链接的过程中发生的任何异常
      */
-    protected Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull Player.SoundQuality soundQuality) throws Exception {
+    protected Uri onRetrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull Player.SoundQuality soundQuality) throws Exception {
         return Uri.parse(musicItem.getUri());
     }
 
@@ -1116,7 +1183,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         @NonNull
         @Override
         protected MusicPlayer onCreateMusicPlayer(Context context) {
-            return PlayerService.this.onCreateMusicPlayer(context);
+            return PlayerService.this.createMusicPlayer(context);
         }
 
         @Nullable
@@ -1227,7 +1294,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         @NonNull
         @Override
         protected MusicPlayer onCreateMusicPlayer(Context context) {
-            return PlayerService.this.onCreateMusicPlayer(context);
+            return PlayerService.this.createMusicPlayer(context);
         }
 
         @Nullable
@@ -2263,8 +2330,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 可自定义的组件：
      * <ul>
      *     <li>音乐播放器：{@link #createMusicPlayer(Context)}</li>
-     *     <li>列表播放器的通知栏控制器：{@link #createPlaylistRemoteView(PlayerService)}</li>
-     *     <li>电台播放器的通知栏控制器：{@link #createRadioStationRemoteView(PlayerService)}</li>
+     *     <li>列表播放器的通知栏控制器：{@link #createPlaylistRemoteView()}</li>
+     *     <li>电台播放器的通知栏控制器：{@link #createRadioStationRemoteView()}</li>
      *     <li>音频特性引擎：{@link #createAudioEffectEngine()}</li>
      * </ul>
      * <p>
@@ -2334,22 +2401,20 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 创建列表播放的通知栏控制器。
          *
-         * @param playerService 当前 PlayerService 对象。
          * @return {@link RemoteView} 对象，可为 null。为 null 时将隐藏列表播放器的通知栏控制器
          */
         @Nullable
-        public RemoteView createPlaylistRemoteView(PlayerService playerService) {
+        public RemoteView createPlaylistRemoteView() {
             return null;
         }
 
         /**
          * 创建电台播放的通知栏控制器。
          *
-         * @param playerService 当前 PlayerService 对象。
          * @return {@link RemoteView} 对象，可为 null。为 null 时将隐藏电台播放器的通知栏控制器
          */
         @Nullable
-        public RemoteView createRadioStationRemoteView(PlayerService playerService) {
+        public RemoteView createRadioStationRemoteView() {
             return null;
         }
 
@@ -2362,5 +2427,45 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         public AudioEffectEngine createAudioEffectEngine() {
             return null;
         }
+    }
+
+    private boolean isAnnotatedWithInject(Method method) {
+        return method.isAnnotationPresent(Inject.class);
+    }
+
+    private boolean shouldInject(String methodName, Class<?>... parameterTypes) {
+        if (mComponentFactory == null) {
+            return false;
+        }
+
+        try {
+            Method method = mComponentFactory.getClass()
+                    .getMethod(methodName, parameterTypes);
+            return isAnnotatedWithInject(method);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    private boolean injectMusicPlayer() {
+        return shouldInject("createMusicPlayer", Context.class);
+    }
+
+    private boolean injectMusicItemUri() {
+        return shouldInject("retrieveMusicItemUri", MusicItem.class, Player.SoundQuality.class);
+    }
+
+    private boolean injectPlaylistRemoteView() {
+        return shouldInject("createPlaylistRemoteView");
+    }
+
+    private boolean injectRadioStationRemoteView() {
+        return shouldInject("createRadioStationRemoteView");
+    }
+
+    private boolean injectAudioEffectEngine() {
+        return shouldInject("createAudioEffectEngine");
     }
 }
