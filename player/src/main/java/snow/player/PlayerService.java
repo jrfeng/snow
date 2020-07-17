@@ -110,6 +110,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private ComponentFactory mComponentFactory;
 
+    @Nullable
+    private HistoryRecorder mHistoryRecorder;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -132,6 +135,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         initRemoteViewManager();
         initHeadsetHookHelper();
         initMediaSession();
+        initHistoryRecorder();
 
         updateNotificationView();
     }
@@ -297,6 +301,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mAudioEffectEngine.init(config);
     }
 
+    private void initHistoryRecorder() {
+        mHistoryRecorder = createHistoryRecorder();
+    }
+
     private PlaybackStateCompat buildPlaybackState(int state,
                                                    int position,
                                                    long updateTime,
@@ -391,6 +399,25 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      */
     @Nullable
     protected AudioEffectEngine onCreateAudioEffectEngine() {
+        return null;
+    }
+
+    @Nullable
+    protected final HistoryRecorder createHistoryRecorder() {
+        if (injectHistoryRecorder()) {
+            return mComponentFactory.createHistoryRecorder();
+        }
+
+        return onCreateHistoryRecorder();
+    }
+
+    /**
+     * 创建历史记录器，用于记录播放器的播放历史。
+     *
+     * @return 如果返回 null，则不会记录播放历史（默认返回 null）
+     */
+    @Nullable
+    protected final HistoryRecorder onCreateHistoryRecorder() {
         return null;
     }
 
@@ -1155,6 +1182,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
         mMediaSession.setMetadata(getFreshMediaMetadata());
         updateNotificationView();
+
+        if (mHistoryRecorder != null && musicItem != null) {
+            mHistoryRecorder.onPlayingMusicItemChanged(musicItem);
+        }
     }
 
     protected boolean onMediaButtonEvent(Intent mediaButtonEvent) {
@@ -2427,6 +2458,16 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         public AudioEffectEngine createAudioEffectEngine() {
             return null;
         }
+
+        /**
+         * 创建历史记录器，用于记录播放器的播放历史。
+         *
+         * @return 如果返回 null，则不会记录播放器的播放历史
+         */
+        @Nullable
+        public HistoryRecorder createHistoryRecorder() {
+            return null;
+        }
     }
 
     private boolean isAnnotatedWithInject(Method method) {
@@ -2467,5 +2508,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private boolean injectAudioEffectEngine() {
         return shouldInject("createAudioEffectEngine");
+    }
+
+    private boolean injectHistoryRecorder() {
+        return shouldInject("createHistoryRecorder");
     }
 }
