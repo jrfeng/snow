@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import snow.player.AbstractPlayer;
 import snow.player.PlayerConfig;
@@ -125,14 +126,9 @@ public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
         return mTester.mTestMusicPlayer;
     }
 
+    @Nullable
     @Override
-    protected void onPrepareMusicPlayer(MusicPlayer musicPlayer,
-                                        MusicItem musicItem,
-                                        SoundQuality soundQuality) throws Exception {
-        if (musicPlayer.isInvalid()) {
-            return;
-        }
-
-        musicPlayer.prepare(Uri.parse(musicItem.getUri()));
+    protected Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception {
+        return Uri.parse(musicItem.getUri());
     }
 }

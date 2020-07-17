@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import snow.player.PlayerConfig;
 import snow.player.media.MusicItem;
@@ -74,12 +75,9 @@ public class TestPlaylistPlayer extends AbstractPlaylistPlayer {
         return new TestMusicPlayer();
     }
 
+    @Nullable
     @Override
-    protected void onPrepareMusicPlayer(MusicPlayer musicPlayer, MusicItem musicItem, SoundQuality soundQuality) throws Exception {
-        if (musicPlayer.isInvalid()) {
-            return;
-        }
-
-        musicPlayer.prepare(Uri.parse(musicItem.getUri()));
+    protected Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception {
+        return Uri.parse(musicItem.getUri());
     }
 }

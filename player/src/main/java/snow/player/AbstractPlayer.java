@@ -17,6 +17,13 @@ import com.google.common.base.Preconditions;
 
 import java.util.HashMap;
 
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import media.helper.AudioFocusHelper;
 import media.helper.BecomeNoiseHelper;
 import snow.player.media.MusicItem;
@@ -57,6 +64,8 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     private NetworkUtil mNetworkUtil;
 
     private boolean mEnabled;
+
+    private Disposable mRetrieveUriDisposable;
 
     /**
      * @param context      {@link Context} 对象，不能为 null
@@ -112,21 +121,17 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
     protected abstract MusicPlayer onCreateMusicPlayer(Context context);
 
     /**
-     * 该方法会在准备播放器时调用。
+     * 获取音乐的播放链接。
      * <p>
-     * 该方法会在主线程上执行，如果准备操作是个耗时操作，你应该再异步线程中执行它。如果你还需要在异步线程中执行
-     * 其他操作（如：获取音乐的 URI），那么应该在调用 {@link MusicPlayer#prepare(Uri)} 方法之前使用
-     * {@link MusicPlayer#isInvalid()} 方法检查播放器是否已失效，如果 {@link MusicPlayer#isInvalid()}
-     * 方法返回 true，则此时不应该再调用 {@link MusicPlayer} 的任何方法。
+     * 该方法会在异步线程中执行，因此可以执行各种耗时操作，例如访问网络。
      *
-     * @param musicPlayer  当前播放器对象
      * @param musicItem    要播放的音乐
-     * @param soundQuality 要播放的音乐的首选音质
-     * @throws Exception 如果该方法抛出任何异常，则本次播放将会自动停止
+     * @param soundQuality 要播放的音乐的音质
+     * @return 音乐的播放链接
+     * @throws Exception 获取音乐播放链接的过程中发生的任何异常
      */
-    protected abstract void onPrepareMusicPlayer(MusicPlayer musicPlayer,
-                                                 MusicItem musicItem,
-                                                 SoundQuality soundQuality) throws Exception;
+    @Nullable
+    protected abstract Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull Player.SoundQuality soundQuality) throws Exception;
 
     /**
      * 对象指定的 audio session id 应用音频特效。
@@ -267,6 +272,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      * 释放播放器所占用的资源。注意！调用该方法后，就不允许在使用当前 Player 对象了，否则会导致不可预见的错误。
      */
     public final void release() {
+        disposeRetrieveUri();
         releaseMusicPlayer();
 
         mStateListenerMap.clear();
@@ -316,17 +322,80 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             return;
         }
 
-        try {
-            mMusicPlayer = new MusicPlayerWrapper(mApplicationContext, onCreateMusicPlayer(mApplicationContext));
-            attachListeners(mMusicPlayer);
+        disposeRetrieveUri();
 
-            mPreparedAction = preparedAction;
-            notifyPreparing();
-            onPrepareMusicPlayer(mMusicPlayer, getMusicItem(), mPlayerConfig.getSoundQuality());
-        } catch (Exception e) {
-            e.printStackTrace();
-            notifyError(Error.DATA_LOAD_FAILED, Error.getErrorMessage(mApplicationContext, Error.DATA_LOAD_FAILED));
+        mRetrieveUriDisposable = getMusicItemUri(musicItem, mPlayerConfig.getSoundQuality())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(prepare(preparedAction), notifyError());
+    }
+
+    private void disposeRetrieveUri() {
+        if (mRetrieveUriDisposable != null && !mRetrieveUriDisposable.isDisposed()) {
+            mRetrieveUriDisposable.dispose();
         }
+    }
+
+    private Single<Uri> getMusicItemUri(@NonNull final MusicItem musicItem, @NonNull final SoundQuality soundQuality) {
+        return Single.create(new SingleOnSubscribe<Uri>() {
+            @Override
+            public void subscribe(SingleEmitter<Uri> emitter) {
+                Uri uri = null;
+
+                try {
+                    uri = retrieveMusicItemUri(musicItem, soundQuality);
+                } catch (Exception e) {
+                    emitter.onError(e);
+                }
+
+                if (emitter.isDisposed()) {
+                    return;
+                }
+
+                if (uri == null) {
+                    emitter.onError(new IllegalStateException("get uri failed."));
+                    return;
+                }
+
+                emitter.onSuccess(uri);
+            }
+        });
+    }
+
+    private Consumer<Uri> prepare(final @Nullable Runnable preparedAction) {
+        return new Consumer<Uri>() {
+            @Override
+            public void accept(Uri uri) {
+                mMusicPlayer = new MusicPlayerWrapper(mApplicationContext, onCreateMusicPlayer(mApplicationContext));
+                attachListeners(mMusicPlayer);
+
+                mPreparedAction = preparedAction;
+                notifyPreparing();
+
+                try {
+                    onPrepareMusicPlayer(mMusicPlayer, uri);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    notifyError(Error.DATA_LOAD_FAILED, Error.getErrorMessage(mApplicationContext, Error.DATA_LOAD_FAILED));
+                }
+            }
+        };
+    }
+
+    private void onPrepareMusicPlayer(MusicPlayer musicPlayer, Uri uri) throws Exception {
+        if (!musicPlayer.isInvalid()) {
+            musicPlayer.prepare(uri);
+        }
+    }
+
+    private Consumer<Throwable> notifyError() {
+        return new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) {
+                throwable.printStackTrace();
+                notifyError(Error.GET_URL_FAILED, Error.getErrorMessage(mApplicationContext, Error.GET_URL_FAILED));
+            }
+        };
     }
 
     private boolean isWiFiNetwork() {
