@@ -114,6 +114,7 @@ public interface Player {
         public static final int NETWORK_UNAVAILABLE = 3;
         public static final int FILE_NOT_FOUND = 4;
         public static final int DATA_LOAD_FAILED = 5;
+        public static final int GET_URL_FAILED = 6;
 
         private Error() {
             throw new AssertionError();
@@ -135,6 +136,8 @@ public interface Player {
                     return res.getString(R.string.snow_error_file_not_found);
                 case DATA_LOAD_FAILED:
                     return res.getString(R.string.snow_error_data_load_failed);
+                case GET_URL_FAILED:
+                    return res.getString(R.string.snow_error_get_url_failed);
                 default:
                     return res.getString(R.string.snow_error_unknown_error);
             }

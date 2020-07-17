@@ -16,4 +16,5 @@
     <string name="snow_preparing">准备中…</string>
     <string name="snow_buffering">缓冲中…</string>
     <string name="snow_des_custom_action">自定义按钮</string>
+    <string name="snow_error_get_url_failed">获取播放链接失败</string>
 </resources>
