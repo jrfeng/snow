@@ -71,6 +71,8 @@ import snow.player.radio.RadioStationStateListener;
 public class PlayerService extends MediaBrowserServiceCompat implements PlayerManager {
     public static final String DEFAULT_MEDIA_ROOT_ID = "root";
 
+    private static final String NAME_COMPONENT_FACTORY = "component-factory";
+
     private String mPersistentId;
     private int mNotificationId;
 
@@ -1472,6 +1474,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 用于显示通知栏控制器。
      */
     public static abstract class RemoteView {
+        /**
+         * 默认的 channelId 值，值为：{@code "player"}
+         */
+        public static final String DEFAULT_CHANNEL_ID = "player";
+
         private PlayerService mPlayerService;
         private MusicItem mMusicItem;
 
@@ -1491,7 +1498,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         void init(PlayerService playerService) {
             mPlayerService = playerService;
             mMusicItem = new MusicItem();
-            mChannelId = "player";
+            mChannelId = DEFAULT_CHANNEL_ID;
             mIconSize = new int[2];
             mIconCornerRadius = new int[4];
             mAllCustomAction = new ArrayList<>();
@@ -1648,7 +1655,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 设置 channelId，该值将用于创建 Notification 对象。
          * <p>
-         * 默认的 channelId 值为 {@code "player"}
+         * 默认的 channelId 值为 {@link #DEFAULT_CHANNEL_ID}。
          */
         protected final void setChannelId(@NonNull String channelId) {
             Preconditions.checkNotNull(channelId);
@@ -2247,6 +2254,113 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         @Override
         public int getBigContentViewLayoutId() {
             return R.layout.snow_simple_radio_station_remote_view_big;
+        }
+    }
+
+    /**
+     * PlayerService 组件工厂，可以通过重写该类的方法来自定义 PlayerService 的部分组件。
+     * <p>
+     * 可自定义的组件：
+     * <ul>
+     *     <li>音乐播放器：{@link #createMusicPlayer(Context)}</li>
+     *     <li>列表播放器的通知栏控制器：{@link #createPlaylistRemoteView(PlayerService)}</li>
+     *     <li>电台播放器的通知栏控制器：{@link #createRadioStationRemoteView(PlayerService)}</li>
+     *     <li>音频特性引擎：{@link #createAudioEffectEngine()}</li>
+     * </ul>
+     * <p>
+     * 此外，还可以重写 {@link #retrieveMusicItemUri(MusicItem, Player.SoundQuality)} 方法根据音质获取
+     * 不同的播放链接。
+     * <p>
+     * 你可以重写其中的一个或多个方法来使用自定义的组件，重写后的方法需要使用 {@link Inject} 注解进行标记，否
+     * 则会被忽略。
+     * <p>
+     * <b>还有就是，你的 {@link ComponentFactory} 实现还必须提供一个默认的无参构造方法。</b>
+     * <p>
+     * 例：<br>
+     * <pre>
+     * public class MyComponentFactory extends PlayerService.ComponentFactory {
+     *     &#64;Inject    // 使用 Inject 注解进行标注
+     *     &#64;NonNull
+     *     &#64;Override
+     *     public MusicPlayer createMusicPlayer(Context context) {
+     *         return new ExoMusicPlayer();
+     *     }
+     * }
+     * </pre>
+     * <p>
+     * 最后，还需要对 {@link ComponentFactory} 进行注册。注册方法为，在 {@code AndroidManifest.xml} 文
+     * 件中对 {@link PlayerService} 进行注册时使用 {@code <meta-date>} 标签进行指定你的
+     * {@link ComponentFactory}。其中，{@code <meta-data>} 标签的 {@code android:name} 属性的值为
+     * {@code "component-factory"}，{@code android:value} 属性的值为你的 {@link ComponentFactory} 的完
+     * 整类名。
+     * <p>
+     * 例：<br>
+     * <pre>
+     * &lt;service android:name="snow.player.PlayerService"&gt;
+     *     ...
+     *     &lt;meta-data android:name="component-factory" android:value="@string/factory-name"/&gt;
+     * &lt;/service&gt;
+     * </pre>
+     * 注：上例中 {@code android:value} 的值 {@code "@string/factory-name"} 是一个字符串资源，它的值是
+     * 你的 {@link ComponentFactory} 的完整类名。
+     */
+    public static abstract class ComponentFactory {
+        /**
+         * 创建一个 {@link MusicPlayer} 对象。
+         *
+         * @param context Context 对象
+         * @return {@link MusicPlayer} 对象，，不能为 null
+         */
+        @NonNull
+        public MusicPlayer createMusicPlayer(Context context) {
+            return new MediaMusicPlayer();
+        }
+
+        /**
+         * 获取音乐的播放链接。
+         * <p>
+         * 该方法会在异步线程中执行，因此可以在该方法中执行耗时操作，例如访问网络。
+         *
+         * @param musicItem    要播放的音乐
+         * @param soundQuality 要播放的音乐的音质
+         * @return 音乐的播放链接，为 null 时播放器会转至 {@link snow.player.Player.PlaybackState#ERROR}
+         * 状态
+         */
+        @Nullable
+        public Uri retrieveMusicItemUri(MusicItem musicItem, Player.SoundQuality soundQuality) {
+            return null;
+        }
+
+        /**
+         * 创建列表播放的通知栏控制器。
+         *
+         * @param playerService 当前 PlayerService 对象。
+         * @return {@link RemoteView} 对象，可为 null。为 null 时将隐藏列表播放器的通知栏控制器
+         */
+        @Nullable
+        public RemoteView createPlaylistRemoteView(PlayerService playerService) {
+            return null;
+        }
+
+        /**
+         * 创建电台播放的通知栏控制器。
+         *
+         * @param playerService 当前 PlayerService 对象。
+         * @return {@link RemoteView} 对象，可为 null。为 null 时将隐藏电台播放器的通知栏控制器
+         */
+        @Nullable
+        public RemoteView createRadioStationRemoteView(PlayerService playerService) {
+            return null;
+        }
+
+        /**
+         * 创建音频特效引擎。
+         *
+         * @return {@link AudioEffectEngine} 对象，为 null 时会关闭音频特效
+         */
+        @Nullable
+        public AudioEffectEngine createAudioEffectEngine() {
+            return null;
         }
     }
 }
