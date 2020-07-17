@@ -253,14 +253,15 @@ public class PlayerClient {
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
      *
-     * @param soundQuality 要设置的音质
+     * @param soundQuality 要设置的音质，不能为 null
      * @see Player.SoundQuality#STANDARD
      * @see Player.SoundQuality#LOW
      * @see Player.SoundQuality#HIGH
      * @see Player.SoundQuality#SUPER
      * @see #getSoundQuality()
      */
-    public void setSoundQuality(Player.SoundQuality soundQuality) {
+    public void setSoundQuality(@NonNull Player.SoundQuality soundQuality) {
+        Preconditions.checkNotNull(soundQuality);
         if (!isConnected()) {
             return;
         }
@@ -268,8 +269,13 @@ public class PlayerClient {
         mPlayerManager.setSoundQuality(soundQuality);
     }
 
-
-    public void setAudioEffectConfig(Bundle config) {
+    /**
+     * 修改音频特效的配置。
+     *
+     * @param config 要设置的音频特效配置，不能为 null
+     */
+    public void setAudioEffectConfig(@NonNull Bundle config) {
+        Preconditions.checkNotNull(config);
         if (!isConnected()) {
             return;
         }
@@ -361,9 +367,10 @@ public class PlayerClient {
 
     /**
      * 获取音频特效的配置。
+     * <p>
+     * 为了确保返回正确的值，请在连接成功后再调用该方法。
      *
-     * @return 音频特效的配置，如果当前播放器不支持音频特效，则会返回 null。请在连接成功后再调用该方法，否则
-     * 即使当前播放器支持音频特效，可能也会返回 null
+     * @return 音频特效的配置
      */
     @Nullable
     public Bundle getAudioEffectConfig() {

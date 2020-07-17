@@ -80,7 +80,7 @@ public class PlayerConfig {
     /**
      * 获取音频特效的配置。
      *
-     * @return 音频特效的配置，如果当前播放器不支持音频特效，则会返回 null
+     * @return 音频特效的配置
      */
     @NonNull
     public Bundle getAudioEffectConfig() {
