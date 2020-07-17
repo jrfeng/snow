@@ -130,8 +130,8 @@ public class PlayerClient {
     }
 
     private void initAllController() {
-        mPlaylistController = new PlaylistController(mApplicationContext, mToken);
-        mRadioStationController = new RadioStationController();
+        mPlaylistController = new PlaylistController(mApplicationContext, mToken, mPlayerConfig);
+        mRadioStationController = new RadioStationController(mPlayerConfig);
     }
 
     private void initConfigChangeListener() {
@@ -449,12 +449,10 @@ public class PlayerClient {
         private PlaylistManagerImp mPlaylistManager;
         private PlaylistPlayer mDelegate;
         private PlaylistStateHolder mPlaylistStateHolder;
-        private boolean mConnected;
 
-        PlaylistController(Context context, String playlistId) {
+        PlaylistController(Context context, String playlistId, PlayerConfig playerConfig) {
             mPlaylistManager = new PlaylistManagerImp(context, playlistId);
-            mPlaylistStateHolder = new PlaylistStateHolder(mPlaylistManager);
-            mConnected = false;
+            mPlaylistStateHolder = new PlaylistStateHolder(mPlaylistManager, playerConfig);
 
             mPlaylistManager.setOnModifyPlaylistListener(this);
         }
@@ -464,7 +462,7 @@ public class PlayerClient {
         }
 
         void setConnected(boolean connected) {
-            mConnected = connected;
+            mPlaylistStateHolder.setConnected(connected);
             mPlaylistManager.setEditable(connected);
         }
 
@@ -482,7 +480,11 @@ public class PlayerClient {
          * @return 如果播放器已连接，则返回 true，否则返回 false
          */
         public boolean isConnected() {
-            return mConnected;
+            return mPlaylistStateHolder.isConnected();
+        }
+
+        private boolean notConnected() {
+            return mPlaylistStateHolder.notConnected();
         }
 
         /**
@@ -721,7 +723,7 @@ public class PlayerClient {
          */
         @Override
         public void skipToNext() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -735,7 +737,7 @@ public class PlayerClient {
          */
         @Override
         public void skipToPrevious() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -751,7 +753,7 @@ public class PlayerClient {
          */
         @Override
         public void playOrPause(int position) {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -768,7 +770,7 @@ public class PlayerClient {
         @Override
         public void setPlayMode(@NonNull PlayMode playMode) {
             Preconditions.checkNotNull(playMode);
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -782,7 +784,7 @@ public class PlayerClient {
          */
         @Override
         public void play() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -796,7 +798,7 @@ public class PlayerClient {
          */
         @Override
         public void pause() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -810,7 +812,7 @@ public class PlayerClient {
          */
         @Override
         public void stop() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -824,7 +826,7 @@ public class PlayerClient {
          */
         @Override
         public void playOrPause() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -840,7 +842,7 @@ public class PlayerClient {
          */
         @Override
         public void seekTo(int progress) {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -854,7 +856,7 @@ public class PlayerClient {
          */
         @Override
         public void fastForward() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -868,7 +870,7 @@ public class PlayerClient {
          */
         @Override
         public void rewind() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -877,30 +879,38 @@ public class PlayerClient {
 
         @Override
         public void onNewPlaylist(int position, boolean play) {
-            if (mConnected) {
-                mDelegate.onNewPlaylist(position, play);
+            if (notConnected()) {
+                return;
             }
+
+            mDelegate.onNewPlaylist(position, play);
         }
 
         @Override
         public void onMusicItemMoved(int fromPosition, int toPosition) {
-            if (mConnected) {
-                mDelegate.onMusicItemMoved(fromPosition, toPosition);
+            if (notConnected()) {
+                return;
             }
+
+            mDelegate.onMusicItemMoved(fromPosition, toPosition);
         }
 
         @Override
         public void onMusicItemInserted(int position, MusicItem musicItem) {
-            if (mConnected) {
-                mDelegate.onMusicItemInserted(position, musicItem);
+            if (notConnected()) {
+                return;
             }
+
+            mDelegate.onMusicItemInserted(position, musicItem);
         }
 
         @Override
         public void onMusicItemRemoved(MusicItem musicItem) {
-            if (mConnected) {
-                mDelegate.onMusicItemRemoved(musicItem);
+            if (notConnected()) {
+                return;
             }
+
+            mDelegate.onMusicItemRemoved(musicItem);
         }
 
         /**
@@ -1086,10 +1096,9 @@ public class PlayerClient {
     public static class RadioStationController implements RadioStationPlayer {
         private RadioStationPlayer mDelegate;
         private RadioStationStateHolder mRadioStationStateHolder;
-        private boolean mConnected;
 
-        RadioStationController() {
-            mRadioStationStateHolder = new RadioStationStateHolder();
+        RadioStationController(PlayerConfig playerConfig) {
+            mRadioStationStateHolder = new RadioStationStateHolder(playerConfig);
         }
 
         void setDelegate(RadioStationPlayer delegate) {
@@ -1105,7 +1114,7 @@ public class PlayerClient {
         }
 
         void setConnected(boolean connected) {
-            mConnected = connected;
+            mRadioStationStateHolder.setConnected(connected);
         }
 
         /**
@@ -1114,7 +1123,11 @@ public class PlayerClient {
          * @return 如果播放器已连接，则返回 true，否则返回 false
          */
         public boolean isConnected() {
-            return mConnected;
+            return mRadioStationStateHolder.isConnected();
+        }
+
+        private boolean notConnected() {
+            return mRadioStationStateHolder.notConnected();
         }
 
         /**
@@ -1234,7 +1247,7 @@ public class PlayerClient {
          */
         @Override
         public void skipToNext() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1250,7 +1263,7 @@ public class PlayerClient {
          */
         @Override
         public void setRadioStation(RadioStation radioStation) {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1264,7 +1277,7 @@ public class PlayerClient {
          */
         @Override
         public void play() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1278,7 +1291,7 @@ public class PlayerClient {
          */
         @Override
         public void pause() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1292,7 +1305,7 @@ public class PlayerClient {
          */
         @Override
         public void stop() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1306,7 +1319,7 @@ public class PlayerClient {
          */
         @Override
         public void playOrPause() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1322,7 +1335,7 @@ public class PlayerClient {
          */
         @Override
         public void seekTo(int progress) {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1336,7 +1349,7 @@ public class PlayerClient {
          */
         @Override
         public void fastForward() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1350,7 +1363,7 @@ public class PlayerClient {
          */
         @Override
         public void rewind() {
-            if (!mConnected) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1495,7 +1508,7 @@ public class PlayerClient {
         void onConnected(boolean success);
     }
 
-    private static class PlayerStateHolder implements PlayerStateListener {
+    private static abstract class PlayerStateHolder implements PlayerStateListener {
         private PlayerState mPlayerState;
         private boolean mConnected;
 
@@ -1512,6 +1525,8 @@ public class PlayerClient {
             mAllPlayingMusicItemChangeListener = new ArrayList<>();
             mAllSeekListener = new ArrayList<>();
         }
+
+        abstract boolean notEnabled();
 
         void addOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
             if (mAllPlaybackStateChangeListener.contains(listener)) {
@@ -1581,7 +1596,7 @@ public class PlayerClient {
         void setPlayerState(PlayerState playerState) {
             mPlayerState = playerState;
 
-            if (notConnect()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1590,7 +1605,11 @@ public class PlayerClient {
             notifyOnBufferingPercentChanged();
         }
 
-        boolean notConnect() {
+        boolean isConnected() {
+            return mConnected;
+        }
+
+        boolean notConnected() {
             return !mConnected;
         }
 
@@ -1599,7 +1618,7 @@ public class PlayerClient {
         }
 
         private void notifyPlaybackStateChanged(Player.OnPlaybackStateChangeListener listener) {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1628,7 +1647,7 @@ public class PlayerClient {
         }
 
         private void notifyPlaybackStateChanged() {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1638,7 +1657,7 @@ public class PlayerClient {
         }
 
         private void notifyStalledChanged(Player.OnStalledChangeListener listener) {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1646,7 +1665,7 @@ public class PlayerClient {
         }
 
         private void notifyStalledChanged() {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1656,7 +1675,7 @@ public class PlayerClient {
         }
 
         private void notifyOnBufferingPercentChanged(Player.OnBufferingPercentChangeListener listener) {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1665,7 +1684,7 @@ public class PlayerClient {
         }
 
         private void notifyOnBufferingPercentChanged() {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1675,7 +1694,7 @@ public class PlayerClient {
         }
 
         private void notifyPlayingMusicItemChanged(Player.OnPlayingMusicItemChangeListener listener) {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1683,7 +1702,7 @@ public class PlayerClient {
         }
 
         private void notifyPlayingMusicItemChanged() {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1693,7 +1712,7 @@ public class PlayerClient {
         }
 
         private void notifySeeking(Player.OnSeekListener listener) {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1701,7 +1720,7 @@ public class PlayerClient {
         }
 
         private void notifySeekComplete(Player.OnSeekListener listener) {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1709,7 +1728,7 @@ public class PlayerClient {
         }
 
         private void notifySeeking() {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1719,7 +1738,7 @@ public class PlayerClient {
         }
 
         private void notifySeekComplete() {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1812,14 +1831,16 @@ public class PlayerClient {
 
     private static class PlaylistStateHolder extends PlayerStateHolder implements PlaylistStateListener {
         private PlaylistManager mPlaylistManager;
+        private PlayerConfig mPlayerConfig;
         private PlaylistState mPlaylistState;
 
         private List<PlaylistPlayer.OnPlaylistChangeListener> mAllPlaylistChangeListener;
         private List<PlaylistPlayer.OnPlayModeChangeListener> mAllPlayModeChangeListener;
         private List<PlaylistPlayer.OnPositionChangeListener> mAllPositionChangeListener;
 
-        PlaylistStateHolder(PlaylistManager playlistManager) {
+        PlaylistStateHolder(PlaylistManager playlistManager, PlayerConfig playerConfig) {
             mPlaylistManager = playlistManager;
+            mPlayerConfig = playerConfig;
 
             mAllPlaylistChangeListener = new ArrayList<>();
             mAllPlayModeChangeListener = new ArrayList<>();
@@ -1876,7 +1897,7 @@ public class PlayerClient {
         }
 
         private void notifyPlaylistChanged(PlaylistPlayer.OnPlaylistChangeListener listener) {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1884,7 +1905,7 @@ public class PlayerClient {
         }
 
         private void notifyPlaylistChanged() {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1894,7 +1915,7 @@ public class PlayerClient {
         }
 
         private void notifyPlayModeChanged(PlaylistPlayer.OnPlayModeChangeListener listener) {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1902,7 +1923,7 @@ public class PlayerClient {
         }
 
         private void notifyPlayModeChanged() {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1912,7 +1933,7 @@ public class PlayerClient {
         }
 
         private void notifyPositionChanged(PlaylistPlayer.OnPositionChangeListener listener) {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1920,7 +1941,7 @@ public class PlayerClient {
         }
 
         private void notifyPositionChanged() {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1949,16 +1970,29 @@ public class PlayerClient {
 
             notifyPositionChanged();
         }
+
+        @Override
+        boolean notEnabled() {
+            return mPlayerConfig.getPlayerType() != PlayerManager.PlayerType.PLAYLIST;
+        }
     }
 
     private static class RadioStationStateHolder extends PlayerStateHolder implements RadioStationStateListener {
+        private PlayerConfig mPlayerConfig;
         private RadioStationState mRadioStationState;
 
         private List<RadioStationPlayer.OnRadioStationChangeListener> mAllRadioStationChangeListener;
 
-        RadioStationStateHolder() {
+        RadioStationStateHolder(PlayerConfig playerConfig) {
+            mPlayerConfig = playerConfig;
+
             mAllRadioStationChangeListener = new ArrayList<>();
             mRadioStationState = new RadioStationState();
+        }
+
+        @Override
+        boolean notEnabled() {
+            return mPlayerConfig.getPlayerType() != PlayerManager.PlayerType.RADIO_STATION;
         }
 
         void setRadioStationState(RadioStationState radioStationState) {
@@ -1982,7 +2016,7 @@ public class PlayerClient {
         }
 
         private void notifyRadioStationChanged(RadioStationPlayer.OnRadioStationChangeListener listener) {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
@@ -1990,7 +2024,7 @@ public class PlayerClient {
         }
 
         private void notifyRadioStationChanged() {
-            if (notConnect()) {
+            if (notConnected() || notEnabled()) {
                 return;
             }
 
