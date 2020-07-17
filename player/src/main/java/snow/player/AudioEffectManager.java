@@ -5,7 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 
 /**
- * 音频特效引擎。
+ * 用于管理和同步音频特效的配置。
  */
 public interface AudioEffectManager {
     void init(@NonNull Bundle config);
