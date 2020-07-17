@@ -170,6 +170,8 @@ public class RadioStation implements Parcelable {
     public interface MusicItemProvider {
         /**
          * 获取电台的下一首音乐。
+         * <p>
+         * 该方法会在异步线程中调用，因此可以执行耗时操作，例如访问数据库或者网络。
          *
          * @param radioStation 正在播放的电台
          * @return 电台中要播放的音乐

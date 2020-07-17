@@ -26,6 +26,9 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
         implements RadioStationPlayer {
     private RadioStationState mRadioStationState;
 
+    @Nullable
+    private RadioStation.MusicItemProvider mMusicItemProvider;
+
     private Disposable mDisposable;
 
     /**
@@ -37,10 +40,12 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
     public AbstractRadioStationPlayer(@NonNull Context context,
                                       @NonNull PlayerConfig playerConfig,
                                       @NonNull RadioStationState radioStationState,
+                                      @Nullable RadioStation.MusicItemProvider musicItemProvider,
                                       boolean enabled) {
         super(context, playerConfig, radioStationState, enabled);
 
         mRadioStationState = radioStationState;
+        mMusicItemProvider = musicItemProvider;
     }
 
     private void notifyRadioStationChanged(RadioStation radioStation) {
@@ -55,17 +60,6 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
             }
         }
     }
-
-    /**
-     * 获取 “电台” 的下一首音乐。
-     * <p>
-     * 该方法会在异步线程中调用。
-     *
-     * @param radioStation 用于表示电台的 RadioStation 对象
-     * @return “电台” 的下一首音乐（返回 null 时会停止播放）
-     */
-    @Nullable
-    protected abstract MusicItem getNextMusicItem(RadioStation radioStation);
 
     /**
      * 获取当前电台携带的额外参数。
@@ -92,7 +86,12 @@ public abstract class AbstractRadioStationPlayer extends AbstractPlayer<RadioSta
         return Single.create(new SingleOnSubscribe<MusicItem>() {
             @Override
             public void subscribe(SingleEmitter<MusicItem> emitter) {
-                MusicItem musicItem = getNextMusicItem(radioStation);
+                if (mMusicItemProvider == null) {
+                    emitter.onError(new UnsupportedOperationException("MusicItemProvider is null."));
+                    return;
+                }
+
+                MusicItem musicItem = mMusicItemProvider.next(radioStation);
 
                 if (emitter.isDisposed()) {
                     return;

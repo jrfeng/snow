@@ -113,6 +113,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     @Nullable
     private HistoryRecorder mHistoryRecorder;
 
+    @Nullable
+    private RadioStation.MusicItemProvider mMusicItemProvider;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -130,6 +133,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         initAudioEffectEngine();
         initPlayerState();
         initPlaylistManager();
+        initMusicItemProvider();
         initPlayer();
         initControllerPipe();
         initRemoteViewManager();
@@ -170,11 +174,24 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         };
     }
 
+    private void initMusicItemProvider() {
+        mMusicItemProvider = createMusicItemProvider();
+    }
+
     private void initPlayer() {
         boolean enableRadioStationPlayer = (getPlayerType() == PlayerType.RADIO_STATION);
 
-        mPlaylistPlayer = new PlaylistPlayerImp(this, mPlayerConfig, mPlaylistState, !enableRadioStationPlayer, mPlaylistManager);
-        mRadioStationPlayer = new RadioStationPlayerImp(this, mPlayerConfig, mRadioStationState, enableRadioStationPlayer);
+        mPlaylistPlayer = new PlaylistPlayerImp(this,
+                mPlayerConfig,
+                mPlaylistState,
+                !enableRadioStationPlayer,
+                mPlaylistManager);
+
+        mRadioStationPlayer = new RadioStationPlayerImp(this,
+                mPlayerConfig,
+                mRadioStationState,
+                mMusicItemProvider,
+                enableRadioStationPlayer);
     }
 
     private void initControllerPipe() {
@@ -200,7 +217,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                     return true;
                 }
 
-                if (radioStationDispatcher.match(data)) {
+                if (supportRadioStationPlayer() && radioStationDispatcher.match(data)) {
                     notifyPlayerTypeChanged(PlayerType.RADIO_STATION);
                     radioStationDispatcher.dispatch(data);
                     return true;
@@ -215,6 +232,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                 return false;
             }
         });
+    }
+
+    private boolean supportRadioStationPlayer() {
+        return mMusicItemProvider != null;
     }
 
     private void initRemoteViewManager() {
@@ -409,6 +430,32 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         return onCreateHistoryRecorder();
+    }
+
+    @Nullable
+    protected final RadioStation.MusicItemProvider createMusicItemProvider() {
+        if (injectMusicItemProvider()) {
+            return mComponentFactory.createMusicItemProvider(this);
+        }
+
+        return onCreateMusicItemProvider();
+    }
+
+    /**
+     * 创建一个 {@link RadioStation.MusicItemProvider} 对象，用于支持 “电台” 播放器，如果
+     * 返回 {@code null}，播放器将不支持 “电台” 模式。
+     * <p>
+     * 注意！该方法默认返回 {@code null}，也就播放器默认不支持 “电台” 模式。要支持 “电台” 模式，你需要重写该
+     * 方法，并返回一个非 {@code null} 的 {@link RadioStation.MusicItemProvider} 对象。或者，通过
+     * {@link ComponentFactory} 来创建一个非 {@code null} 的 {@link RadioStation.MusicItemProvider}
+     * 对象。
+     *
+     * @return 如果返回 {@code null}，播放器将不支持 “电台” 模式。
+     * @see ComponentFactory#createMusicItemProvider(Context)
+     */
+    @Nullable
+    protected RadioStation.MusicItemProvider onCreateMusicItemProvider() {
+        return null;
     }
 
     /**
@@ -1307,14 +1354,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         public RadioStationPlayerImp(@NonNull Context context,
                                      @NonNull PlayerConfig playerConfig,
                                      @NonNull RadioStationState radioStationState,
+                                     @Nullable RadioStation.MusicItemProvider musicItemProvider,
                                      boolean enabled) {
-            super(context, playerConfig, radioStationState, enabled);
-        }
-
-        @Nullable
-        @Override
-        protected MusicItem getNextMusicItem(RadioStation radioStation) {
-            return PlayerService.this.getNextMusicItem(radioStation);
+            super(context, playerConfig, radioStationState, musicItemProvider, enabled);
         }
 
         @Override
@@ -2364,6 +2406,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      *     <li>列表播放器的通知栏控制器：{@link #createPlaylistRemoteView()}</li>
      *     <li>电台播放器的通知栏控制器：{@link #createRadioStationRemoteView()}</li>
      *     <li>音频特性引擎：{@link #createAudioEffectEngine()}</li>
+     *     <li>历史记录器：{@link #createHistoryRecorder()}</li>
+     *     <li>支持 “电台” 模式：{@link #createMusicItemProvider(Context)}</li>
      * </ul>
      * <p>
      * 此外，还可以重写 {@link #retrieveMusicItemUri(MusicItem, Player.SoundQuality)} 方法根据音质获取
@@ -2469,6 +2513,22 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         public HistoryRecorder createHistoryRecorder() {
             return null;
         }
+
+        /**
+         * 创建一个 {@link RadioStation.MusicItemProvider} 对象，用于支持 “电台” 播放器，如果
+         * 返回 {@code null}，播放器将不支持 “电台” 模式。
+         * <p>
+         * 如果你需要支持 “电台” 模式，必须返回一个非 {@code null} 的
+         * {@link RadioStation.MusicItemProvider} 对象。
+         *
+         * @param context Context 对象
+         * @return {@link RadioStation.MusicItemProvider} 对象，用于支持 “电台” 播
+         * 放器，如果返回 {@code null}，播放器将不支持电台模式。
+         */
+        @Nullable
+        public RadioStation.MusicItemProvider createMusicItemProvider(Context context) {
+            return null;
+        }
     }
 
     private boolean isAnnotatedWithInject(Method method) {
@@ -2513,5 +2573,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private boolean injectHistoryRecorder() {
         return shouldInject("createHistoryRecorder");
+    }
+
+    private boolean injectMusicItemProvider() {
+        return shouldInject("createMusicItemProvider", Context.class);
     }
 }
