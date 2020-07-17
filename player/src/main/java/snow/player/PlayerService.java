@@ -54,7 +54,6 @@ import channel.helper.pipe.CustomActionPipe;
 import channel.helper.pipe.MessengerPipe;
 import media.helper.HeadsetHookHelper;
 
-import snow.player.effect.AudioEffectEngine;
 import snow.player.media.MediaMusicPlayer;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
@@ -106,7 +105,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     private RemoteViewManager mRemoteViewManager;
 
     @Nullable
-    private AudioEffectEngine mAudioEffectEngine;
+    private AudioEffectManager mAudioEffectManager;
 
     private ComponentFactory mComponentFactory;
 
@@ -130,7 +129,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         initComponentFactory();
         initPlayerConfig();
-        initAudioEffectEngine();
+        initAudioEffectManager();
         initPlayerState();
         initPlaylistManager();
         initMusicItemProvider();
@@ -307,19 +306,19 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         setSessionToken(mMediaSession.getSessionToken());
     }
 
-    private void initAudioEffectEngine() {
-        mAudioEffectEngine = createAudioEffectEngine();
+    private void initAudioEffectManager() {
+        mAudioEffectManager = createAudioEffectManager();
 
-        if (mAudioEffectEngine == null) {
+        if (mAudioEffectManager == null) {
             return;
         }
 
         Bundle config = mPlayerConfig.getAudioEffectConfig();
         if (config.isEmpty()) {
-            config = mAudioEffectEngine.getDefaultConfig();
+            config = mAudioEffectManager.getDefaultConfig();
             mPlayerConfig.setAudioEffectConfig(config);
         }
-        mAudioEffectEngine.init(config);
+        mAudioEffectManager.init(config);
     }
 
     private void initHistoryRecorder() {
@@ -405,12 +404,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     @Nullable
-    protected final AudioEffectEngine createAudioEffectEngine() {
-        if (injectAudioEffectEngine()) {
-            return mComponentFactory.createAudioEffectEngine();
+    protected final AudioEffectManager createAudioEffectManager() {
+        if (injectAudioEffectManager()) {
+            return mComponentFactory.createAudioEffectManager();
         }
 
-        return onCreateAudioEffectEngine();
+        return onCreateAudioEffectManager();
     }
 
     /**
@@ -419,7 +418,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @return 如果返回 null，将会关闭音频特效引擎
      */
     @Nullable
-    protected AudioEffectEngine onCreateAudioEffectEngine() {
+    protected AudioEffectManager onCreateAudioEffectManager() {
         return null;
     }
 
@@ -505,8 +504,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mPlaylistPlayer = null;
         mRadioStationPlayer = null;
 
-        if (mAudioEffectEngine != null) {
-            mAudioEffectEngine.release();
+        if (mAudioEffectManager != null) {
+            mAudioEffectManager.release();
         }
     }
 
@@ -541,16 +540,16 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     @Override
     public void setAudioEffectConfig(Bundle config) {
-        if (noAudioEffectEngine()) {
+        if (noAudioEffectManager()) {
             return;
         }
 
-        mAudioEffectEngine.updateConfig(config);
+        mAudioEffectManager.updateConfig(config);
         mPlayerConfig.setAudioEffectConfig(config);
     }
 
-    private boolean noAudioEffectEngine() {
-        return mAudioEffectEngine == null;
+    private boolean noAudioEffectManager() {
+        return mAudioEffectManager == null;
     }
 
     /**
@@ -559,22 +558,22 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @param audioSessionId 当前正在播放的音乐的 audio session id。如果为 0，则可以忽略。
      */
     protected void attachAudioEffect(int audioSessionId) {
-        if (noAudioEffectEngine()) {
+        if (noAudioEffectManager()) {
             return;
         }
 
-        mAudioEffectEngine.attachAudioEffect(audioSessionId);
+        mAudioEffectManager.attachAudioEffect(audioSessionId);
     }
 
     /**
      * 取消当前的音频特效。
      */
     protected void detachAudioEffect() {
-        if (noAudioEffectEngine()) {
+        if (noAudioEffectManager()) {
             return;
         }
 
-        mAudioEffectEngine.detachAudioEffect();
+        mAudioEffectManager.detachAudioEffect();
     }
 
     private void notifyAudioEffectEnableChanged() {
@@ -2405,7 +2404,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      *     <li>音乐播放器：{@link #createMusicPlayer(Context)}</li>
      *     <li>列表播放器的通知栏控制器：{@link #createPlaylistRemoteView()}</li>
      *     <li>电台播放器的通知栏控制器：{@link #createRadioStationRemoteView()}</li>
-     *     <li>音频特性引擎：{@link #createAudioEffectEngine()}</li>
+     *     <li>音频特性引擎：{@link #createAudioEffectManager()}</li>
      *     <li>历史记录器：{@link #createHistoryRecorder()}</li>
      *     <li>支持 “电台” 模式：{@link #createMusicItemProvider(Context)}</li>
      * </ul>
@@ -2497,10 +2496,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 创建音频特效引擎。
          *
-         * @return {@link AudioEffectEngine} 对象，为 null 时会关闭音频特效
+         * @return {@link AudioEffectManager} 对象，为 null 时会关闭音频特效
          */
         @Nullable
-        public AudioEffectEngine createAudioEffectEngine() {
+        public AudioEffectManager createAudioEffectManager() {
             return null;
         }
 
@@ -2567,8 +2566,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return shouldInject("createRadioStationRemoteView");
     }
 
-    private boolean injectAudioEffectEngine() {
-        return shouldInject("createAudioEffectEngine");
+    private boolean injectAudioEffectManager() {
+        return shouldInject("createAudioEffectManager");
     }
 
     private boolean injectHistoryRecorder() {

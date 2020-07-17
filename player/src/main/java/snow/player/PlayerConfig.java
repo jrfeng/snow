@@ -4,12 +4,9 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
-
-import snow.player.effect.AudioEffectEngine;
 
 /**
  * 用于保存播放器的通用配置信息。
