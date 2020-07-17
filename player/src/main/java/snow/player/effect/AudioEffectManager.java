@@ -1,4 +1,4 @@
-package snow.player;
+package snow.player.effect;
 
 import android.os.Bundle;
 

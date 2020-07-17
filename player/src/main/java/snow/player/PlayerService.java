@@ -54,6 +54,7 @@ import channel.helper.pipe.CustomActionPipe;
 import channel.helper.pipe.MessengerPipe;
 import media.helper.HeadsetHookHelper;
 
+import snow.player.effect.AudioEffectManager;
 import snow.player.media.MediaMusicPlayer;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
