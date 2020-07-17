@@ -2423,9 +2423,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @param soundQuality 要播放的音乐的音质
          * @return 音乐的播放链接，为 null 时播放器会转至 {@link snow.player.Player.PlaybackState#ERROR}
          * 状态
+         * @throws Exception 获取音乐播放链接的过程中发生的任何异常
          */
         @Nullable
-        public Uri retrieveMusicItemUri(MusicItem musicItem, Player.SoundQuality soundQuality) {
+        public Uri retrieveMusicItemUri(MusicItem musicItem, Player.SoundQuality soundQuality) throws Exception {
             return null;
         }
 
