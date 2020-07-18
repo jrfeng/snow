@@ -2013,6 +2013,16 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 更多信息，请参考官方文档： <a href="https://developer.android.google.cn/training/notify-user/expanded?hl=zh-cn#media-style">https://developer.android.google.cn/training/notify-user/expanded?hl=zh-cn#media-style</a>
      */
     public static abstract class MediaRemoteView extends RemoteView {
+        @Override
+        protected void onInit(Context context) {
+            super.onInit(context);
+
+            Resources res = context.getResources();
+
+            setIconSize(res.getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
+            setIconCornerRadius(res.getDimensionPixelSize(R.dimen.snow_notif_icon_corner_radius));
+        }
+
         @NonNull
         @Override
         protected Notification onCreateNotification() {
