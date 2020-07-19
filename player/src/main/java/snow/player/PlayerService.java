@@ -2032,7 +2032,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
             onBuildMediaStyle(mediaStyle);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "test")
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), getChannelId())
                     .setSmallIcon(getSmallIconId())
                     .setLargeIcon(getIcon())
                     .setContentTitle(getContentTitle())
@@ -2049,6 +2049,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          */
         @DrawableRes
         protected abstract int getSmallIconId();
+
+        /**
+         * @return Notification 的 channelId，不能为 null
+         */
+        @NonNull
+        protected abstract String getChannelId();
 
         /**
          * 该方法会在创建 {@code NotificationCompat.MediaStyle} 对象期间调用。
@@ -2314,7 +2320,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 用于创建一个可添加到 {@link SimplePlaylistRemoteView} 中的自定义动作。
+         * 用于创建一个可添加到 {@link SimpleRemoteView} 中的自定义动作。
          */
         public static final class CustomAction {
             public static final int IGNORE_ICON_ID = 0;
