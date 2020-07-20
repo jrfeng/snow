@@ -541,7 +541,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     @Override
     public void setAudioEffectConfig(Bundle config) {
-        if (noAudioEffectManager()) {
+        if (noAudioEffectManager() || !mPlayerConfig.isAudioEffectEnabled()) {
             return;
         }
 
