@@ -25,12 +25,8 @@ import snow.player.media.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
 import snow.player.playlist.PlaylistPlayer;
-import snow.player.radio.RadioStation;
-import snow.player.radio.RadioStationPlayer;
 import snow.player.playlist.PlaylistState;
 import snow.player.playlist.PlaylistStateListener;
-import snow.player.radio.RadioStationState;
-import snow.player.radio.RadioStationStateListener;
 
 /**
  * 播放器客户端，用于向播放器发生各种控制命令。
@@ -48,11 +44,8 @@ public class PlayerClient {
     private PlayerManager mPlayerManager;
 
     private PlaylistController mPlaylistController;
-    private RadioStationController mRadioStationController;
 
     private PlayerManager.OnCommandCallback mCommandCallback;
-
-    private List<PlayerManager.OnPlayerTypeChangeListener> mAllPlayerTypeChangeListener;
 
     private OnConnectCallback mConnectCallback;
 
@@ -62,7 +55,6 @@ public class PlayerClient {
         mToken = generateToken();
 
         mPlayerConfig = new PlayerConfig(context, mToken);
-        mAllPlayerTypeChangeListener = new ArrayList<>();
 
         initMediaBrowser();
         initAllController();
@@ -131,7 +123,6 @@ public class PlayerClient {
 
     private void initAllController() {
         mPlaylistController = new PlaylistController(mApplicationContext, mToken, mPlayerConfig);
-        mRadioStationController = new RadioStationController(mPlayerConfig);
     }
 
     private void initConfigChangeListener() {
@@ -142,24 +133,10 @@ public class PlayerClient {
             }
 
             @Override
-            public void onPlayerTypeChanged(PlayerManager.PlayerType playerType) {
-                notifyPlayerTypeChanged(playerType);
-            }
-
-            @Override
-            public void syncPlayerState(PlayerManager.PlayerType playerType, PlaylistState playlistState, RadioStationState radioStationState) {
-                notifyPlayerTypeChanged(playerType);
-
+            public void syncPlayerState(PlaylistState playlistState) {
                 mPlaylistController.setPlaylistState(playlistState);
-                mRadioStationController.setRadioStationState(radioStationState);
             }
         };
-    }
-
-    private void notifyPlayerTypeChanged(PlayerManager.PlayerType playerType) {
-        for (PlayerManager.OnPlayerTypeChangeListener listener : mAllPlayerTypeChangeListener) {
-            listener.onPlayerTypeChanged(playerType);
-        }
     }
 
     private void onConnected(MediaControllerCompat mediaController) {
@@ -168,15 +145,12 @@ public class PlayerClient {
         mPlayerManager = ChannelHelper.newEmitter(PlayerManager.class, controllerPipe);
 
         mPlaylistController.setDelegate(ChannelHelper.newEmitter(PlaylistPlayer.class, controllerPipe));
-        mRadioStationController.setDelegate(ChannelHelper.newEmitter(RadioStationPlayer.class, controllerPipe));
 
         mPlaylistController.setConnected(true);
-        mRadioStationController.setConnected(true);
 
         MessengerPipe listenerPipe = new MessengerPipe(DispatcherUtil.merge(
                 ChannelHelper.newDispatcher(PlayerManager.OnCommandCallback.class, mCommandCallback),
-                ChannelHelper.newDispatcher(PlaylistStateListener.class, mPlaylistController.getPlaylistStateListener()),
-                ChannelHelper.newDispatcher(RadioStationStateListener.class, mRadioStationController.getRadioStationStateListener())
+                ChannelHelper.newDispatcher(PlaylistStateListener.class, mPlaylistController.getPlaylistStateListener())
         ));
 
         mPlayerManager.registerPlayerStateListener(mToken, listenerPipe.getBinder());
@@ -184,7 +158,6 @@ public class PlayerClient {
 
     private void onDisconnected() {
         mPlaylistController.setConnected(false);
-        mRadioStationController.setConnected(false);
 
         if (isConnected()) {
             mPlayerManager.unregisterPlayerStateListener(mToken);
@@ -333,29 +306,6 @@ public class PlayerClient {
     }
 
     /**
-     * 获取当前播放器类型。
-     * <p>
-     * 共有两种播放器类型：
-     * <ol>
-     *     <li>{@link PlayerManager.PlayerType#PLAYLIST}：列表播放器</li>
-     *     <li>{@link PlayerManager.PlayerType#RADIO_STATION}：电台播放器</li>
-     * </ol>
-     * <p>
-     * 使用 {@link PlaylistController} 控制播放器时，播放器类型为自动切换为
-     * {@link PlayerManager.PlayerType#PLAYLIST}；使用 {@link RadioStationController} 控制播放器时，
-     * 播放器类型会自动切换为 {@link PlayerManager.PlayerType#RADIO_STATION}。
-     * <p>
-     * 默认的播放器类型为 {@link PlayerManager.PlayerType#PLAYLIST} 列表播放器。你可以注册一个
-     * {@link PlayerManager.OnPlayerTypeChangeListener} 来监听播放器类型的改变，并根据不同的播放器类型调
-     * 整 UI 外观。
-     *
-     * @return 当前播放器类型
-     */
-    public PlayerManager.PlayerType getPlayerType() {
-        return mPlayerConfig.getPlayerType();
-    }
-
-    /**
      * 获取当前播放器的首选音质。
      *
      * @see #setSoundQuality(Player.SoundQuality)
@@ -407,10 +357,6 @@ public class PlayerClient {
         return mPlaylistController;
     }
 
-    public RadioStationController getRadioStationController() {
-        return mRadioStationController;
-    }
-
     /**
      * 关闭播放器。
      * <p>
@@ -421,28 +367,6 @@ public class PlayerClient {
         if (isConnected()) {
             mPlayerManager.shutdown();
         }
-    }
-
-    /**
-     * 添加播放器类型监听器。
-     *
-     * @param listener 播放器类型监听器，该监听器会在播放器类型改变时被调用
-     */
-    public void addOnPlayerTypeChangeListener(PlayerManager.OnPlayerTypeChangeListener listener) {
-        if (mAllPlayerTypeChangeListener.contains(listener)) {
-            return;
-        }
-
-        mAllPlayerTypeChangeListener.add(listener);
-    }
-
-    /**
-     * 移除播放器类型监听器。
-     *
-     * @param listener 要移除的监听器。
-     */
-    public void removeOnPlayerTypeChangeListener(PlayerManager.OnPlayerTypeChangeListener listener) {
-        mAllPlayerTypeChangeListener.remove(listener);
     }
 
     public static class PlaylistController implements PlaylistPlayer {
@@ -1093,409 +1017,6 @@ public class PlayerClient {
         }
     }
 
-    public static class RadioStationController implements RadioStationPlayer {
-        private RadioStationPlayer mDelegate;
-        private RadioStationStateHolder mRadioStationStateHolder;
-
-        RadioStationController(PlayerConfig playerConfig) {
-            mRadioStationStateHolder = new RadioStationStateHolder(playerConfig);
-        }
-
-        void setDelegate(RadioStationPlayer delegate) {
-            mDelegate = delegate;
-        }
-
-        void setRadioStationState(RadioStationState radioStationState) {
-            mRadioStationStateHolder.setRadioStationState(radioStationState);
-        }
-
-        RadioStationStateListener getRadioStationStateListener() {
-            return mRadioStationStateHolder;
-        }
-
-        void setConnected(boolean connected) {
-            mRadioStationStateHolder.setConnected(connected);
-        }
-
-        /**
-         * 是否已连接到播放器。
-         *
-         * @return 如果播放器已连接，则返回 true，否则返回 false
-         */
-        public boolean isConnected() {
-            return mRadioStationStateHolder.isConnected();
-        }
-
-        private boolean notConnected() {
-            return mRadioStationStateHolder.notConnected();
-        }
-
-        /**
-         * 获取播放进度。
-         *
-         * @return 播放进度
-         */
-        public long getPlayProgress() {
-            return mRadioStationStateHolder.mRadioStationState.getPlayProgress();
-        }
-
-        /**
-         * 获取播放进度的更新时间。
-         *
-         * @return 播放进度的更新时间
-         */
-        public long getPlayProgressUpdateTime() {
-            return mRadioStationStateHolder.mRadioStationState.getPlayProgressUpdateTime();
-        }
-
-        /**
-         * 获取当前正在播放的音乐。
-         *
-         * @return 当前正在播放的音乐，如果当前没有任何播放的音乐，则返回 null
-         */
-        @Nullable
-        public MusicItem getPlayingMusicItem() {
-            return mRadioStationStateHolder.mRadioStationState.getMusicItem();
-        }
-
-        /**
-         * 获取当前播放状态。
-         *
-         * @return 当前播放状态
-         * @see snow.player.Player.PlaybackState
-         */
-        public PlaybackState getPlaybackState() {
-            return mRadioStationStateHolder.mRadioStationState.getPlaybackState();
-        }
-
-        /**
-         * 获取 audio session id。
-         *
-         * @return 如果 audio session id 不可用，则返回 0
-         */
-        public int getAudioSessionId() {
-            return mRadioStationStateHolder.mRadioStationState.getAudioSessionId();
-        }
-
-        /**
-         * 获取当前的缓存进度。
-         *
-         * @return 当前缓存进度，使用整数表示的百分比值，范围为 [0, 100]
-         */
-        public int getBufferingPercent() {
-            return mRadioStationStateHolder.mRadioStationState.getBufferingPercent();
-        }
-
-        /**
-         * 获取缓存进度更新时间。
-         *
-         * @return 缓存进度更新时间
-         */
-        public long getBufferingPercentUpdateTime() {
-            return mRadioStationStateHolder.mRadioStationState.getBufferingPercentUpdateTime();
-        }
-
-        /**
-         * 当前播放器是否处于 stalled 状态。
-         * <p>
-         * stalled 状态用于表示当前缓冲区是否有足够的数据继续播放，如果缓冲区没有足够的数据支撑继续播放，则该
-         * 方法会返回 true，如果缓冲区有足够的数据可以继续播放，则返回 false。
-         */
-        public boolean isStalled() {
-            return mRadioStationStateHolder.mRadioStationState.isStalled();
-        }
-
-        /**
-         * 播放器是否发生了错误。
-         */
-        public boolean isError() {
-            return getErrorCode() != Error.NO_ERROR;
-        }
-
-        /**
-         * 获取错误码。
-         *
-         * @return 错误码。如果播放器没有发生错误，则返回 {@link snow.player.Player.Error#NO_ERROR}
-         * @see snow.player.Player.Error
-         */
-        public int getErrorCode() {
-            return mRadioStationStateHolder.mRadioStationState.getErrorCode();
-        }
-
-        /**
-         * 获取错误信息。
-         *
-         * @return 错误信息。该方法的返回值只在错误发生时才有意义
-         * @see #isError()
-         * @see #getErrorCode()
-         */
-        public String getErrorMessage() {
-            return mRadioStationStateHolder.mRadioStationState.getErrorMessage();
-        }
-
-        /**
-         * 获取当前正在播放的 RadioStation 对象。
-         */
-        public RadioStation getRadioStation() {
-            return mRadioStationStateHolder.mRadioStationState.getRadioStation();
-        }
-
-        /**
-         * 下一曲。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void skipToNext() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.skipToNext();
-        }
-
-        /**
-         * 设置一个新的电台。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         *
-         * @param radioStation 要播放的新电台
-         */
-        @Override
-        public void setRadioStation(RadioStation radioStation) {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.setRadioStation(radioStation);
-        }
-
-        /**
-         * 开始播放。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void play() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.play();
-        }
-
-        /**
-         * 暂停播放。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void pause() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.pause();
-        }
-
-        /**
-         * 停止播放。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void stop() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.stop();
-        }
-
-        /**
-         * 播放/暂停。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void playOrPause() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.playOrPause();
-        }
-
-        /**
-         * 调整音乐播放进度。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         *
-         * @param progress 要调整到的播放进度
-         */
-        @Override
-        public void seekTo(int progress) {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.seekTo(progress);
-        }
-
-        /**
-         * 快进。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void fastForward() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.fastForward();
-        }
-
-        /**
-         * 快退。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void rewind() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.rewind();
-        }
-
-        /**
-         * 添加一个播放器播放状态监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 播放器播放状态监听器
-         * @see Player.OnPlaybackStateChangeListener
-         */
-        public void addOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
-            mRadioStationStateHolder.addOnPlaybackStateChangeListener(listener);
-        }
-
-        /**
-         * 移除播放器播放状态监听器。
-         *
-         * @param listener 要移除的监听器。
-         */
-        public void removeOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
-            mRadioStationStateHolder.removeOnPlaybackStateChangeListener(listener);
-        }
-
-        /**
-         * 添加一个 stalled 状态监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 要添加的监听器
-         * @see Player.OnStalledChangeListener
-         */
-        public void addOnStalledChangeListener(OnStalledChangeListener listener) {
-            mRadioStationStateHolder.addOnStalledChangeListener(listener);
-        }
-
-        /**
-         * 移除 stalled 状态监听器。
-         *
-         * @param listener 要移除的监听器。
-         */
-        public void removeOnStalledChangeListener(OnStalledChangeListener listener) {
-            mRadioStationStateHolder.removeOnStalledChangeListener(listener);
-        }
-
-        /**
-         * 添加一个缓存进度监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 要添加的监听器。
-         * @see Player.OnBufferingPercentChangeListener
-         */
-        public void addOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
-            mRadioStationStateHolder.addOnBufferingPercentChangeListener(listener);
-        }
-
-        /**
-         * 移除缓存进度监听器。
-         *
-         * @param listener 要移除的监听器
-         */
-        public void removeOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
-            mRadioStationStateHolder.removeOnBufferingPercentChangeListener(listener);
-        }
-
-        /**
-         * 添加一个监听当前播放的 MusicItem 改变事件的监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 要添加的监听器
-         * @see Player.OnPlayingMusicItemChangeListener
-         */
-        public void addOnPlayingMusicItemChangeListener(Player.OnPlayingMusicItemChangeListener listener) {
-            mRadioStationStateHolder.addOnPlayingMusicItemChangeListener(listener);
-        }
-
-        /**
-         * 移除当前播放的 MusicItem 改变事件监听器
-         *
-         * @param listener 要移除的监听器
-         */
-        public void removeOnPlayingMusicItemChangeListener(Player.OnPlayingMusicItemChangeListener listener) {
-            mRadioStationStateHolder.removeOnPlayingMusicItemChangeListener(listener);
-        }
-
-        /**
-         * 添加一个用于监听播放器播放进度调整完毕事件的监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 要添加的监听器
-         * @see OnSeekListener
-         */
-        public void addOnSeekCompleteListener(OnSeekListener listener) {
-            mRadioStationStateHolder.addOnSeekCompleteListener(listener);
-        }
-
-        /**
-         * 移除用于监听播放器播放进度调整完毕的监听器。
-         *
-         * @param listener 要移除的监听器
-         */
-        public void removeOnSeekCompleteListener(OnSeekListener listener) {
-            mRadioStationStateHolder.removeOnSeekCompleteListener(listener);
-        }
-
-        /**
-         * 添加一个用于监听器 RadioStation 改变事件的监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 要添加的监听器
-         */
-        public void addOnRadioStationChangeListener(RadioStationPlayer.OnRadioStationChangeListener listener) {
-            mRadioStationStateHolder.addOnRadioStationChangeListener(listener);
-        }
-
-        /**
-         * 移除一个用于监听器 RadioStation 改变事件的监听器。
-         *
-         * @param listener 要移除的监听器
-         */
-        public void removeOnRadioStationChangeListener(RadioStationPlayer.OnRadioStationChangeListener listener) {
-            mRadioStationStateHolder.removeOnRadioStationChangeListener(listener);
-        }
-    }
-
     /**
      * 用于监听播放器连接状态的回调接口。
      */
@@ -1508,7 +1029,7 @@ public class PlayerClient {
         void onConnected(boolean success);
     }
 
-    private static abstract class PlayerStateHolder implements PlayerStateListener {
+    private static class PlayerStateHolder implements PlayerStateListener {
         private PlayerState mPlayerState;
         private boolean mConnected;
 
@@ -1525,8 +1046,6 @@ public class PlayerClient {
             mAllPlayingMusicItemChangeListener = new ArrayList<>();
             mAllSeekListener = new ArrayList<>();
         }
-
-        abstract boolean notEnabled();
 
         void addOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
             if (mAllPlaybackStateChangeListener.contains(listener)) {
@@ -1618,7 +1137,7 @@ public class PlayerClient {
         }
 
         private void notifyPlaybackStateChanged(Player.OnPlaybackStateChangeListener listener) {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1647,7 +1166,7 @@ public class PlayerClient {
         }
 
         private void notifyPlaybackStateChanged() {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1657,7 +1176,7 @@ public class PlayerClient {
         }
 
         private void notifyStalledChanged(Player.OnStalledChangeListener listener) {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1665,7 +1184,7 @@ public class PlayerClient {
         }
 
         private void notifyStalledChanged() {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1675,7 +1194,7 @@ public class PlayerClient {
         }
 
         private void notifyOnBufferingPercentChanged(Player.OnBufferingPercentChangeListener listener) {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1684,7 +1203,7 @@ public class PlayerClient {
         }
 
         private void notifyOnBufferingPercentChanged() {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1694,7 +1213,7 @@ public class PlayerClient {
         }
 
         private void notifyPlayingMusicItemChanged(Player.OnPlayingMusicItemChangeListener listener) {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1702,7 +1221,7 @@ public class PlayerClient {
         }
 
         private void notifyPlayingMusicItemChanged() {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1712,7 +1231,7 @@ public class PlayerClient {
         }
 
         private void notifySeeking(Player.OnSeekListener listener) {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1720,7 +1239,7 @@ public class PlayerClient {
         }
 
         private void notifySeekComplete(Player.OnSeekListener listener) {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1728,7 +1247,7 @@ public class PlayerClient {
         }
 
         private void notifySeeking() {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1738,7 +1257,7 @@ public class PlayerClient {
         }
 
         private void notifySeekComplete() {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1897,7 +1416,7 @@ public class PlayerClient {
         }
 
         private void notifyPlaylistChanged(PlaylistPlayer.OnPlaylistChangeListener listener) {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1905,7 +1424,7 @@ public class PlayerClient {
         }
 
         private void notifyPlaylistChanged() {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1915,7 +1434,7 @@ public class PlayerClient {
         }
 
         private void notifyPlayModeChanged(PlaylistPlayer.OnPlayModeChangeListener listener) {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1923,7 +1442,7 @@ public class PlayerClient {
         }
 
         private void notifyPlayModeChanged() {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1933,7 +1452,7 @@ public class PlayerClient {
         }
 
         private void notifyPositionChanged(PlaylistPlayer.OnPositionChangeListener listener) {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1941,7 +1460,7 @@ public class PlayerClient {
         }
 
         private void notifyPositionChanged() {
-            if (notConnected() || notEnabled()) {
+            if (notConnected()) {
                 return;
             }
 
@@ -1969,75 +1488,6 @@ public class PlayerClient {
             mPlaylistState.setPosition(position);
 
             notifyPositionChanged();
-        }
-
-        @Override
-        boolean notEnabled() {
-            return mPlayerConfig.getPlayerType() != PlayerManager.PlayerType.PLAYLIST;
-        }
-    }
-
-    private static class RadioStationStateHolder extends PlayerStateHolder implements RadioStationStateListener {
-        private PlayerConfig mPlayerConfig;
-        private RadioStationState mRadioStationState;
-
-        private List<RadioStationPlayer.OnRadioStationChangeListener> mAllRadioStationChangeListener;
-
-        RadioStationStateHolder(PlayerConfig playerConfig) {
-            mPlayerConfig = playerConfig;
-
-            mAllRadioStationChangeListener = new ArrayList<>();
-            mRadioStationState = new RadioStationState();
-        }
-
-        @Override
-        boolean notEnabled() {
-            return mPlayerConfig.getPlayerType() != PlayerManager.PlayerType.RADIO_STATION;
-        }
-
-        void setRadioStationState(RadioStationState radioStationState) {
-            mRadioStationState = radioStationState;
-
-            notifyRadioStationChanged();
-            super.setPlayerState(radioStationState);
-        }
-
-        void addOnRadioStationChangeListener(RadioStationPlayer.OnRadioStationChangeListener listener) {
-            if (mAllRadioStationChangeListener.contains(listener)) {
-                return;
-            }
-
-            mAllRadioStationChangeListener.add(listener);
-            notifyRadioStationChanged(listener);
-        }
-
-        void removeOnRadioStationChangeListener(RadioStationPlayer.OnRadioStationChangeListener listener) {
-            mAllRadioStationChangeListener.remove(listener);
-        }
-
-        private void notifyRadioStationChanged(RadioStationPlayer.OnRadioStationChangeListener listener) {
-            if (notConnected() || notEnabled()) {
-                return;
-            }
-
-            listener.onRadioStationChanged(mRadioStationState.getRadioStation());
-        }
-
-        private void notifyRadioStationChanged() {
-            if (notConnected() || notEnabled()) {
-                return;
-            }
-
-            for (RadioStationPlayer.OnRadioStationChangeListener listener : mAllRadioStationChangeListener) {
-                notifyRadioStationChanged(listener);
-            }
-        }
-
-        @Override
-        public void onRadioStationChanged(RadioStation radioStation) {
-            mRadioStationState.setRadioStation(radioStation);
-
-            notifyRadioStationChanged();
         }
     }
 }

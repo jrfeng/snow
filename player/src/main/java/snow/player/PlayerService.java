@@ -61,15 +61,9 @@ import snow.player.media.MusicPlayer;
 import snow.player.playlist.AbstractPlaylistPlayer;
 import snow.player.playlist.PlaylistManager;
 import snow.player.playlist.PlaylistPlayer;
-import snow.player.radio.AbstractRadioStationPlayer;
-import snow.player.radio.RadioStation;
-import snow.player.radio.RadioStationPlayer;
 import snow.player.playlist.PersistentPlaylistState;
-import snow.player.radio.PersistentRadioStationState;
 import snow.player.playlist.PlaylistState;
 import snow.player.playlist.PlaylistStateListener;
-import snow.player.radio.RadioStationState;
-import snow.player.radio.RadioStationStateListener;
 
 @SuppressWarnings("EmptyMethod")
 public class PlayerService extends MediaBrowserServiceCompat implements PlayerManager {
@@ -82,11 +76,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private PlayerConfig mPlayerConfig;
     private PlaylistState mPlaylistState;
-    private RadioStationState mRadioStationState;
 
     private PlaylistManager mPlaylistManager;
     private PlaylistPlayerImp mPlaylistPlayer;
-    private RadioStationPlayerImp mRadioStationPlayer;
     private CustomActionPipe mControllerPipe;
 
     private HashMap<String, OnCommandCallback> mCommandCallbackMap;
@@ -113,9 +105,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     @Nullable
     private HistoryRecorder mHistoryRecorder;
 
-    @Nullable
-    private RadioStation.MusicItemProvider mMusicItemProvider;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -133,7 +122,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         initAudioEffectManager();
         initPlayerState();
         initPlaylistManager();
-        initMusicItemProvider();
         initPlayer();
         initControllerPipe();
         initRemoteViewManager();
@@ -166,7 +154,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private void initPlayerState() {
         mPlaylistState = new PersistentPlaylistState(this, mPersistentId);
-        mRadioStationState = new PersistentRadioStationState(this, mPersistentId);
     }
 
     private void initPlaylistManager() {
@@ -174,24 +161,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         };
     }
 
-    private void initMusicItemProvider() {
-        mMusicItemProvider = createMusicItemProvider();
-    }
-
     private void initPlayer() {
-        boolean enableRadioStationPlayer = (getPlayerType() == PlayerType.RADIO_STATION);
-
         mPlaylistPlayer = new PlaylistPlayerImp(this,
                 mPlayerConfig,
                 mPlaylistState,
-                !enableRadioStationPlayer,
+                true,
                 mPlaylistManager);
-
-        mRadioStationPlayer = new RadioStationPlayerImp(this,
-                mPlayerConfig,
-                mRadioStationState,
-                mMusicItemProvider,
-                enableRadioStationPlayer);
     }
 
     private void initControllerPipe() {
@@ -201,9 +176,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         final Dispatcher playlistDispatcher =
                 ChannelHelper.newDispatcher(PlaylistPlayer.class, mPlaylistPlayer);
 
-        final Dispatcher radioStationDispatcher =
-                ChannelHelper.newDispatcher(RadioStationPlayer.class, mRadioStationPlayer);
-
         mControllerPipe = new CustomActionPipe(new Dispatcher() {
             @Override
             public boolean dispatch(Map<String, Object> data) {
@@ -211,19 +183,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                     return true;
                 }
 
-                if (playlistDispatcher.match(data)) {
-                    notifyPlayerTypeChanged(PlayerType.PLAYLIST);
-                    playlistDispatcher.dispatch(data);
-                    return true;
-                }
-
-                if (supportRadioStationPlayer() && radioStationDispatcher.match(data)) {
-                    notifyPlayerTypeChanged(PlayerType.RADIO_STATION);
-                    radioStationDispatcher.dispatch(data);
-                    return true;
-                }
-
-                return false;
+                return playlistDispatcher.dispatch(data);
             }
 
             @Override
@@ -234,20 +194,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         });
     }
 
-    private boolean supportRadioStationPlayer() {
-        return mMusicItemProvider != null;
-    }
-
     private void initRemoteViewManager() {
         RemoteView playlistRemoteView = createPlaylistRemoteView();
-        RemoteView radioStationRemoteView = createRadioStationRemoteView();
 
         if (playlistRemoteView != null) {
             playlistRemoteView.init(this);
-        }
-
-        if (radioStationRemoteView != null) {
-            radioStationRemoteView.init(this);
         }
 
         MusicItem musicItem = getPlayingMusicItem();
@@ -256,11 +207,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             playlistRemoteView.setPlayingMusicItem(musicItem);
         }
 
-        if (musicItem != null && radioStationRemoteView != null) {
-            radioStationRemoteView.setPlayingMusicItem(musicItem);
-        }
-
-        mRemoteViewManager = new RemoteViewManager(playlistRemoteView, radioStationRemoteView);
+        mRemoteViewManager = new RemoteViewManager(playlistRemoteView);
     }
 
     private void initHeadsetHookHelper() {
@@ -383,28 +330,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     @Nullable
-    protected final RemoteView createRadioStationRemoteView() {
-        if (injectRadioStationRemoteView()) {
-            return mComponentFactory.createRadioStationRemoteView();
-        }
-
-        return onCreateRadioStationRemoteView();
-    }
-
-    /***
-     * 创建一个适用于电台播放器的 {@link RemoteView}，你可以通过覆盖该方法来实现自定义的电台播放器控制器。
-     *
-     * 该方法默认返回 {@link SimpleRadioStationRemoteView}，如果你不需要在通知栏中显示列表播放器控制器，可以覆盖
-     * 该方法并返回 null。
-     *
-     * @return {@link RemoteView} 对象，返回 null 时将隐藏电台播放器控制器
-     */
-    @Nullable
-    protected RemoteView onCreateRadioStationRemoteView() {
-        return new SimpleRadioStationRemoteView();
-    }
-
-    @Nullable
     protected final AudioEffectManager createAudioEffectManager() {
         if (injectAudioEffectManager()) {
             return mComponentFactory.createAudioEffectManager();
@@ -430,32 +355,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         return onCreateHistoryRecorder();
-    }
-
-    @Nullable
-    protected final RadioStation.MusicItemProvider createMusicItemProvider() {
-        if (injectMusicItemProvider()) {
-            return mComponentFactory.createMusicItemProvider(this);
-        }
-
-        return onCreateMusicItemProvider();
-    }
-
-    /**
-     * 创建一个 {@link RadioStation.MusicItemProvider} 对象，用于支持 “电台” 播放器，如果
-     * 返回 {@code null}，播放器将不支持 “电台” 模式。
-     * <p>
-     * 注意！该方法默认返回 {@code null}，也就播放器默认不支持 “电台” 模式。要支持 “电台” 模式，你需要重写该
-     * 方法，并返回一个非 {@code null} 的 {@link RadioStation.MusicItemProvider} 对象。或者，通过
-     * {@link ComponentFactory} 来创建一个非 {@code null} 的 {@link RadioStation.MusicItemProvider}
-     * 对象。
-     *
-     * @return 如果返回 {@code null}，播放器将不支持 “电台” 模式。
-     * @see ComponentFactory#createMusicItemProvider(Context)
-     */
-    @Nullable
-    protected RadioStation.MusicItemProvider onCreateMusicItemProvider() {
-        return null;
     }
 
     /**
@@ -500,10 +399,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         mMediaSession.release();
         mPlaylistPlayer.release();
-        mRadioStationPlayer.release();
 
         mPlaylistPlayer = null;
-        mRadioStationPlayer = null;
 
         if (mAudioEffectManager != null) {
             mAudioEffectManager.release();
@@ -521,11 +418,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void notifySoundQualityChanged() {
-        if (getPlayerType() == PlayerType.RADIO_STATION) {
-            mRadioStationPlayer.notifySoundQualityChanged();
-            return;
-        }
-
         mPlaylistPlayer.notifySoundQualityChanged();
     }
 
@@ -578,11 +470,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void notifyAudioEffectEnableChanged() {
-        if (getPlayerType() == PlayerType.RADIO_STATION) {
-            mRadioStationPlayer.notifyAudioEffectEnableChanged();
-            return;
-        }
-
         mPlaylistPlayer.notifyAudioEffectEnableChanged();
     }
 
@@ -597,11 +484,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void notifyOnlyWifiNetworkChanged() {
-        if (getPlayerType() == PlayerType.RADIO_STATION) {
-            mRadioStationPlayer.notifyOnlyWifiNetworkChanged();
-            return;
-        }
-
         mPlaylistPlayer.notifyOnlyWifiNetworkChanged();
     }
 
@@ -631,14 +513,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         addOnCommandCallback(token, ChannelHelper.newEmitter(OnCommandCallback.class, pipe));
         mPlaylistPlayer.addStateListener(token, ChannelHelper.newEmitter(PlaylistStateListener.class, pipe));
-        mRadioStationPlayer.addStateListener(token, ChannelHelper.newEmitter(RadioStationStateListener.class, pipe));
     }
 
     @Override
     public void unregisterPlayerStateListener(String token) {
         removeOnConfigChangeListener(token);
         mPlaylistPlayer.removeStateListener(token);
-        mRadioStationPlayer.removeStateListener(token);
     }
 
     /**
@@ -680,25 +560,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mStartCommandActionMap.remove(action);
     }
 
-    protected final void notifyPlayerTypeChanged(PlayerType playerType) {
-        if (playerType == getPlayerType()) {
-            return;
-        }
-
-        mPlayerConfig.setPlayerType(playerType);
-        mPlaylistPlayer.setEnabled(playerType == PlayerType.PLAYLIST);
-        mRadioStationPlayer.setEnabled(playerType == PlayerType.RADIO_STATION);
-
-        for (String key : mCommandCallbackMap.keySet()) {
-            OnCommandCallback listener = mCommandCallbackMap.get(key);
-            if (listener != null) {
-                listener.onPlayerTypeChanged(playerType);
-            }
-        }
-    }
-
     private void syncPlayerState(OnCommandCallback listener) {
-        listener.syncPlayerState(getPlayerType(), new PlaylistState(mPlaylistState), new RadioStationState(mRadioStationState));
+        listener.syncPlayerState(new PlaylistState(mPlaylistState));
     }
 
     private void addOnCommandCallback(@NonNull String token, @NonNull OnCommandCallback listener) {
@@ -745,13 +608,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 获取播放器类型。
-     */
-    protected final PlayerType getPlayerType() {
-        return mPlayerConfig.getPlayerType();
-    }
-
-    /**
      * 获取列表播放器的播放模式。
      */
     protected final PlaylistPlayer.PlayMode getPlaylistPlayMode() {
@@ -767,25 +623,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 获取电台携带的额外参数（可为 null）。
-     */
-    @Nullable
-    protected final Bundle getRadioStationExtra() {
-        return mRadioStationPlayer.getRadioStationExtra();
-    }
-
-    /**
      * 当前是否正在播放音乐。
      */
     protected final boolean isPlaying() {
-        switch (getPlayerType()) {
-            case PLAYLIST:
-                return mPlaylistPlayer.isPlaying();
-            case RADIO_STATION:
-                return mRadioStationPlayer.isPlaying();
-            default:
-                return false;
-        }
+        return mPlaylistPlayer.isPlaying();
     }
 
     /**
@@ -802,19 +643,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     /**
      * 获取播放器状态。
-     * <p>
-     * 当播放器类型为 {@link PlayerType#PLAYLIST} 时，返回是实际上是 {@link PlaylistState}；当播放器类型为
-     * {@link PlayerType#RADIO_STATION} 时，返回是实际上是 {@link RadioStationState}。
-     *
-     * @see #getPlayerType()
-     * @see #getPlaylistState()
-     * @see #getRadioStationState()
      */
     protected final PlayerState getPlayerState() {
-        if (getPlayerType() == PlayerType.RADIO_STATION) {
-            return mRadioStationState;
-        }
-
         return mPlaylistState;
     }
 
@@ -823,13 +653,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      */
     protected final PlaylistState getPlaylistState() {
         return mPlaylistState;
-    }
-
-    /**
-     * 获取电台播放的状态。
-     */
-    protected final RadioStationState getRadioStationState() {
-        return mRadioStationState;
     }
 
     public final boolean isPreparingState() {
@@ -844,14 +667,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 获取当前正在播放的音乐的 MusicItem 对象。
      */
     protected final MusicItem getPlayingMusicItem() {
-        switch (getPlayerType()) {
-            case PLAYLIST:
-                return mPlaylistState.getMusicItem();
-            case RADIO_STATION:
-                return mRadioStationState.getMusicItem();
-            default:
-                return null;
-        }
+        return mPlaylistState.getMusicItem();
     }
 
     /**
@@ -867,14 +683,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
      */
     protected final int getErrorCode() {
-        switch (getPlayerType()) {
-            case PLAYLIST:
-                return mPlaylistState.getErrorCode();
-            case RADIO_STATION:
-                return mRadioStationState.getErrorCode();
-            default:
-                return Player.Error.NO_ERROR;
-        }
+        return mPlaylistState.getErrorCode();
     }
 
     /**
@@ -890,7 +699,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 要求 Service 更新 NotificationView，如果没有设置 NotificationView，则忽略本次操作。
      */
     protected final void updateNotificationView() {
-        if (mRemoteViewManager.noRemoteView(getPlayerType())) {
+        if (mRemoteViewManager.noRemoteView()) {
             return;
         }
 
@@ -900,7 +709,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return;
         }
 
-        mRemoteViewManager.setPlayingMusicItem(getPlayerType(), musicItem);
+        mRemoteViewManager.setPlayingMusicItem(musicItem);
 
         if (isPreparingOrPlayingState() && !isForeground()) {
             startForeground();
@@ -929,7 +738,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 启动前台 Service。
      */
     protected final void startForeground() {
-        if (mRemoteViewManager.noRemoteView(getPlayerType())) {
+        if (mRemoteViewManager.noRemoteView()) {
             return;
         }
 
@@ -939,7 +748,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         mForeground = true;
-        startForeground(mNotificationId, createNotification(getPlayerType()));
+        startForeground(mNotificationId, createNotification());
     }
 
     /**
@@ -953,7 +762,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void updateNotification() {
-        if (mRemoteViewManager.noRemoteView(getPlayerType())) {
+        if (mRemoteViewManager.noRemoteView()) {
             return;
         }
 
@@ -962,12 +771,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return;
         }
 
-        mNotificationManager.notify(mNotificationId, createNotification(getPlayerType()));
+        mNotificationManager.notify(mNotificationId, createNotification());
     }
 
     @NonNull
-    private Notification createNotification(PlayerType playerType) {
-        return mRemoteViewManager.createRemoteView(playerType);
+    private Notification createNotification() {
+        return mRemoteViewManager.createRemoteView();
     }
 
     /**
@@ -1028,28 +837,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return Uri.parse(musicItem.getUri());
     }
 
-    /**
-     * 获取 “电台” 的下一首音乐。
-     * <p>
-     * “电台” 播放器专用。如果你需要实现 “电台” 功能，那么需要覆盖该方法，并返回 {@code radioStation} 参数
-     * 表示的 “电台” 的下一首歌曲。
-     * <p>
-     * 该方法会在异步线程中调用。
-     *
-     * @param radioStation 用于表示电台的 RadioStation 对象
-     * @return “电台” 的下一首音乐（返回 null 时会停止播放）
-     */
-    @SuppressWarnings("SameReturnValue")
-    @Nullable
-    protected MusicItem getNextMusicItem(RadioStation radioStation) {
-        return null;
-    }
-
     private Player getPlayer() {
-        if (getPlayerType() == PlayerType.RADIO_STATION) {
-            return mRadioStationPlayer;
-        }
-
+        // TODO 优化
         return mPlaylistPlayer;
     }
 
@@ -1108,24 +897,13 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 下一曲。
      */
     protected final void skipToNext() {
-        if (getPlayerType() == PlayerType.RADIO_STATION) {
-            mRadioStationPlayer.skipToNext();
-            return;
-        }
-
         mPlaylistPlayer.skipToNext();
     }
 
     /**
      * 上一曲。
-     * <p>
-     * 但播放器类型为 {@link PlayerType#RADIO_STATION}（电台模式）时，该方法无效。
      */
     protected final void skipToPrevious() {
-        if (getPlayerType() == PlayerType.RADIO_STATION) {
-            return;
-        }
-
         mPlaylistPlayer.skipToPrevious();
     }
 
@@ -1349,112 +1127,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
     }
 
-    private class RadioStationPlayerImp extends AbstractRadioStationPlayer {
-
-        public RadioStationPlayerImp(@NonNull Context context,
-                                     @NonNull PlayerConfig playerConfig,
-                                     @NonNull RadioStationState radioStationState,
-                                     @Nullable RadioStation.MusicItemProvider musicItemProvider,
-                                     boolean enabled) {
-            super(context, playerConfig, radioStationState, musicItemProvider, enabled);
-        }
-
-        @Override
-        protected boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
-            return PlayerService.this.isCached(musicItem, soundQuality);
-        }
-
-        @NonNull
-        @Override
-        protected MusicPlayer onCreateMusicPlayer(Context context) {
-            return PlayerService.this.createMusicPlayer(context);
-        }
-
-        @Nullable
-        @Override
-        protected Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception {
-            return PlayerService.this.retrieveMusicItemUri(musicItem, soundQuality);
-        }
-
-        @Override
-        protected void onPreparing() {
-            super.onPreparing();
-            PlayerService.this.onPreparing();
-        }
-
-        @Override
-        protected void onPrepared(int audioSessionId) {
-            super.onPrepared(audioSessionId);
-            PlayerService.this.onPrepared(audioSessionId);
-        }
-
-        @Override
-        protected void onPlaying(int progress, long updateTime) {
-            super.onPlaying(progress, updateTime);
-            PlayerService.this.onPlaying(progress, updateTime);
-        }
-
-        @Override
-        protected void onPaused() {
-            super.onPaused();
-            PlayerService.this.onPaused();
-        }
-
-        @Override
-        protected void onStalledChanged(boolean stalled) {
-            super.onStalledChanged(stalled);
-            PlayerService.this.onStalledChanged(stalled);
-        }
-
-        @Override
-        protected void onStopped() {
-            super.onStopped();
-            PlayerService.this.onStopped();
-        }
-
-        @Override
-        protected void onError(int errorCode, String errorMessage) {
-            super.onError(errorCode, errorMessage);
-            PlayerService.this.onError(errorCode, errorMessage);
-        }
-
-        @Override
-        protected void onPlayComplete(MusicItem musicItem) {
-            super.onPlayComplete(musicItem);
-            PlayerService.this.onPlayComplete(musicItem);
-        }
-
-        @Override
-        protected void onRequestAudioFocus(boolean success) {
-            super.onRequestAudioFocus(success);
-            PlayerService.this.onRequestAudioFocus(success);
-        }
-
-        @Override
-        protected void onLossAudioFocus() {
-            super.onLossAudioFocus();
-            PlayerService.this.onLossAudioFocus();
-        }
-
-        @Override
-        protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
-            super.onPlayingMusicItemChanged(musicItem);
-            PlayerService.this.onPlayingMusicItemChanged(musicItem);
-        }
-
-        @Override
-        protected void attachAudioEffect(int audioSessionId) {
-            super.attachAudioEffect(audioSessionId);
-            PlayerService.this.attachAudioEffect(audioSessionId);
-        }
-
-        @Override
-        protected void detachAudioEffect() {
-            super.detachAudioEffect();
-            PlayerService.this.detachAudioEffect();
-        }
-    }
-
     private class MediaSessionCallbackImp extends MediaSessionCompat.Callback {
         @Override
         public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
@@ -1477,10 +1149,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         public void onSkipToQueueItem(long id) {
-            if (getPlayerType() == PlayerType.RADIO_STATION) {
-                return;
-            }
-
             mPlaylistPlayer.playOrPause((int) id);
         }
 
@@ -1521,10 +1189,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         public void onSetRepeatMode(int repeatMode) {
-            if (getPlayerType() == PlayerType.RADIO_STATION) {
-                return;
-            }
-
             if (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE) {
                 mPlaylistPlayer.setPlayMode(PlaylistPlayer.PlayMode.LOOP);
                 return;
@@ -1535,10 +1199,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         public void onSetShuffleMode(int shuffleMode) {
-            if (getPlayerType() == PlayerType.RADIO_STATION) {
-                return;
-            }
-
             if (shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_NONE ||
                     shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_INVALID) {
                 mPlaylistPlayer.setPlayMode(PlaylistPlayer.PlayMode.SEQUENTIAL);
@@ -1551,61 +1211,34 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private static class RemoteViewManager {
         private RemoteView mPlaylistRemoteView;
-        private RemoteView mRadioStationRemoteView;
 
-        RemoteViewManager(RemoteView playlistRemoteView, RemoteView radioStationRemoteView) {
+        RemoteViewManager(RemoteView playlistRemoteView) {
             mPlaylistRemoteView = playlistRemoteView;
-            mRadioStationRemoteView = radioStationRemoteView;
         }
 
-        boolean noRemoteView(PlayerType playerType) {
-            switch (playerType) {
-                case PLAYLIST:
-                    return mPlaylistRemoteView == null;
-                case RADIO_STATION:
-                    return mRadioStationRemoteView == null;
-            }
-
-            return true;
+        boolean noRemoteView() {
+            return mPlaylistRemoteView == null;
         }
 
-        void setPlayingMusicItem(PlayerType playerType, MusicItem musicItem) {
-            if (noRemoteView(playerType)) {
+        void setPlayingMusicItem(MusicItem musicItem) {
+            if (noRemoteView()) {
                 return;
             }
 
-            switch (playerType) {
-                case PLAYLIST:
-                    mPlaylistRemoteView.setPlayingMusicItem(musicItem);
-                    break;
-                case RADIO_STATION:
-                    mRadioStationRemoteView.setPlayingMusicItem(musicItem);
-                    break;
-            }
+            mPlaylistRemoteView.setPlayingMusicItem(musicItem);
         }
 
-        Notification createRemoteView(PlayerType playerType) {
-            if (noRemoteView(playerType)) {
-                throw new IllegalStateException("player type [" + playerType + "] not set remote view.");
+        Notification createRemoteView() {
+            if (noRemoteView()) {
+                throw new IllegalStateException("not set remote view.");
             }
 
-            switch (playerType) {
-                case PLAYLIST:
-                    return mPlaylistRemoteView.createNotification();
-                case RADIO_STATION:
-                    return mRadioStationRemoteView.createNotification();
-            }
-
-            throw new IllegalStateException("can't create remote view");
+            return mPlaylistRemoteView.createNotification();
         }
 
         void onRelease() {
             if (mPlaylistRemoteView != null) {
                 mPlaylistRemoteView.onRelease();
-            }
-
-            if (mRadioStationRemoteView != null) {
-                mRadioStationRemoteView.onRelease();
             }
         }
     }
@@ -1910,14 +1543,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         @Nullable
         protected final Bundle getPlaylistExtra() {
             return mPlayerService.getPlaylistExtra();
-        }
-
-        /**
-         * 获取电台携带的额外参数（可为 null）。
-         */
-        @Nullable
-        protected final Bundle getRadioStationExtra() {
-            return mPlayerService.getRadioStationExtra();
         }
 
         protected final PendingIntent addOnStartCommandAction(@NonNull String action, @NonNull Runnable task) {
@@ -2471,10 +2096,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * <ul>
      *     <li>音乐播放器：{@link #createMusicPlayer(Context)}</li>
      *     <li>列表播放器的通知栏控制器：{@link #createPlaylistRemoteView()}</li>
-     *     <li>电台播放器的通知栏控制器：{@link #createRadioStationRemoteView()}</li>
      *     <li>音频特性引擎：{@link #createAudioEffectManager()}</li>
      *     <li>历史记录器：{@link #createHistoryRecorder()}</li>
-     *     <li>支持 “电台” 模式：{@link #createMusicItemProvider(Context)}</li>
      * </ul>
      * <p>
      * 此外，还可以重写 {@link #retrieveMusicItemUri(MusicItem, Player.SoundQuality)} 方法根据音质获取
@@ -2552,16 +2175,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 创建电台播放的通知栏控制器。
-         *
-         * @return {@link RemoteView} 对象，可为 null。为 null 时将隐藏电台播放器的通知栏控制器
-         */
-        @Nullable
-        public RemoteView createRadioStationRemoteView() {
-            return null;
-        }
-
-        /**
          * 创建音频特效引擎。
          *
          * @return {@link AudioEffectManager} 对象，为 null 时会关闭音频特效
@@ -2578,22 +2191,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          */
         @Nullable
         public HistoryRecorder createHistoryRecorder() {
-            return null;
-        }
-
-        /**
-         * 创建一个 {@link RadioStation.MusicItemProvider} 对象，用于支持 “电台” 播放器，如果
-         * 返回 {@code null}，播放器将不支持 “电台” 模式。
-         * <p>
-         * 如果你需要支持 “电台” 模式，必须返回一个非 {@code null} 的
-         * {@link RadioStation.MusicItemProvider} 对象。
-         *
-         * @param context Context 对象
-         * @return {@link RadioStation.MusicItemProvider} 对象，用于支持 “电台” 播
-         * 放器，如果返回 {@code null}，播放器将不支持电台模式。
-         */
-        @Nullable
-        public RadioStation.MusicItemProvider createMusicItemProvider(Context context) {
             return null;
         }
     }
@@ -2628,10 +2225,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private boolean injectPlaylistRemoteView() {
         return shouldInject("createPlaylistRemoteView");
-    }
-
-    private boolean injectRadioStationRemoteView() {
-        return shouldInject("createRadioStationRemoteView");
     }
 
     private boolean injectAudioEffectManager() {

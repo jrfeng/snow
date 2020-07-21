@@ -222,45 +222,23 @@ public class PlayProgressViewModel extends ViewModel {
 
     private void registerAllListener() {
         PlayerClient.PlaylistController playlistController = mPlayerClient.getPlaylistController();
-        PlayerClient.RadioStationController radioStationController = mPlayerClient.getRadioStationController();
 
         playlistController.addOnPlaybackStateChangeListener(mPlaybackStateChangeListener);
-        radioStationController.addOnPlaybackStateChangeListener(mPlaybackStateChangeListener);
-
         playlistController.addOnBufferingPercentChangeListener(mBufferingPercentChangeListener);
-        radioStationController.addOnBufferingPercentChangeListener(mBufferingPercentChangeListener);
-
         playlistController.addOnStalledChangeListener(mStalledChangeListener);
-        radioStationController.addOnStalledChangeListener(mStalledChangeListener);
-
         playlistController.addOnSeekCompleteListener(mSeekCompleteListener);
-        radioStationController.addOnSeekCompleteListener(mSeekCompleteListener);
-
         playlistController.addOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
-        radioStationController.addOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
-
         playlistController.addOnPlayModeChangeListener(mPlayModeChangeListener);
     }
 
     private void unregisterAllListener() {
         PlayerClient.PlaylistController playlistController = mPlayerClient.getPlaylistController();
-        PlayerClient.RadioStationController radioStationController = mPlayerClient.getRadioStationController();
 
         playlistController.removeOnPlaybackStateChangeListener(mPlaybackStateChangeListener);
-        radioStationController.removeOnPlaybackStateChangeListener(mPlaybackStateChangeListener);
-
         playlistController.removeOnBufferingPercentChangeListener(mBufferingPercentChangeListener);
-        radioStationController.removeOnBufferingPercentChangeListener(mBufferingPercentChangeListener);
-
         playlistController.removeOnStalledChangeListener(mStalledChangeListener);
-        radioStationController.removeOnStalledChangeListener(mStalledChangeListener);
-
         playlistController.removeOnSeekCompleteListener(mSeekCompleteListener);
-        radioStationController.removeOnSeekCompleteListener(mSeekCompleteListener);
-
         playlistController.removeOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
-        radioStationController.removeOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
-
         playlistController.removeOnPlayModeChangeListener(mPlayModeChangeListener);
     }
 
@@ -281,8 +259,7 @@ public class PlayProgressViewModel extends ViewModel {
     private void startTimer() {
         stopTimer();
 
-        mLoop = (mPlayerClient.getPlayerType() == PlayerManager.PlayerType.PLAYLIST) &&
-                mPlayerClient.getPlaylistController().isLooping();
+        mLoop = mPlayerClient.getPlaylistController().isLooping();
 
         mDisposable = Observable.interval(1000, 1000, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Long>() {

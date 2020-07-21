@@ -12,7 +12,6 @@ import com.tencent.mmkv.MMKV;
  * 用于保存播放器的通用配置信息。
  */
 public class PlayerConfig {
-    private static final String KEY_PLAYER_TYPE = "player_type";
     private static final String KEY_SOUND_QUALITY = "sound_quality";
     private static final String KEY_AUDIO_EFFECT_CONFIG = "audio_effect_config";
     private static final String KEY_AUDIO_EFFECT_ENABLED = "audio_effect_enabled";
@@ -27,26 +26,6 @@ public class PlayerConfig {
 
         MMKV.initialize(context);
         mMMKV = MMKV.mmkvWithID(id, MMKV.MULTI_PROCESS_MODE);
-    }
-
-    /**
-     * 获取播放器类型。
-     *
-     * @see PlayerManager.PlayerType#PLAYLIST
-     * @see PlayerManager.PlayerType#RADIO_STATION
-     */
-    @NonNull
-    public PlayerManager.PlayerType getPlayerType() {
-        return PlayerManager.PlayerType.values()[mMMKV.decodeInt(KEY_PLAYER_TYPE, 0)];
-    }
-
-    /**
-     * 设置播放器类型。
-     *
-     * @see PlayerManager.PlayerType
-     */
-    public void setPlayerType(PlayerManager.PlayerType playerType) {
-        mMMKV.encode(KEY_PLAYER_TYPE, playerType.ordinal());
     }
 
     /**
