@@ -9,9 +9,6 @@ import snow.player.playlist.PersistentPlaylistStateTest;
 import snow.player.playlist.PlaylistManagerTest;
 import snow.player.playlist.PlaylistStateTest;
 import snow.player.playlist.PlaylistTest;
-import snow.player.radio.PersistentRadioStationStateTest;
-import snow.player.radio.RadioStationStateTest;
-import snow.player.radio.RadioStationTest;
 
 @Suite.SuiteClasses({
         // snow.player
@@ -25,11 +22,7 @@ import snow.player.radio.RadioStationTest;
         PersistentPlaylistStateTest.class,
         PlaylistManagerTest.class,
         PlaylistStateTest.class,
-        PlaylistTest.class,
-        // snow.player.radio
-        PersistentRadioStationStateTest.class,
-        RadioStationStateTest.class,
-        RadioStationTest.class
+        PlaylistTest.class
 })
 @RunWith(Suite.class)
 public class RunAllTest {
