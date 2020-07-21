@@ -6,6 +6,9 @@ import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.util.Log;
 
@@ -16,6 +19,7 @@ import androidx.core.content.ContextCompat;
 import com.google.common.base.Preconditions;
 
 import java.util.HashMap;
+import java.util.Random;
 
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
@@ -28,20 +32,20 @@ import media.helper.AudioFocusHelper;
 import media.helper.BecomeNoiseHelper;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
+import snow.player.playlist.Playlist;
+import snow.player.playlist.PlaylistManager;
 import snow.player.util.NetworkUtil;
 
 /**
  * 该类实现了 {@link Player} 接口，并实现了其大部分功能。
- *
- * @param <T> {@link PlayerStateListener} 播放器状态监听器。
  */
-public abstract class AbstractPlayer<T extends PlayerStateListener> implements Player {
+public abstract class AbstractPlayer implements Player {
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
 
     private Context mApplicationContext;
     private PlayerConfig mPlayerConfig;
     private PlayerState mPlayerState;
-    private HashMap<String, T> mStateListenerMap;
+    private HashMap<String, PlayerStateListener> mStateListenerMap;
 
     private MusicPlayer mMusicPlayer;
 
@@ -63,43 +67,46 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
 
     private NetworkUtil mNetworkUtil;
 
-    private boolean mEnabled;
-
     private Disposable mRetrieveUriDisposable;
+
+    private PlaylistManager mPlaylistManager;
+    private Playlist mPlaylist;
+
+    private volatile boolean mLoadingPlaylist;
+
+    private Handler mMainHandler;
+    private volatile Runnable mPlaylistLoadedAction;
+
+    private Random mRandom;
 
     /**
      * @param context      {@link Context} 对象，不能为 null
      * @param playerConfig {@link PlayerConfig} 对象，保存了播放器的初始配置信息，不能为 null
      * @param playerState  {@link PlayerState} 对象，保存了播放器的初始状态，不能为 null
-     * @param enabled      是否启用当前播放器，如果为 {@code false}，则当前播放器不会响应任何操作
      */
     public AbstractPlayer(@NonNull Context context,
                           @NonNull PlayerConfig playerConfig,
                           @NonNull PlayerState playerState,
-                          boolean enabled) {
+                          @NonNull PlaylistManager playlistManager) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerConfig);
         Preconditions.checkNotNull(playerState);
+        Preconditions.checkNotNull(playlistManager);
 
         mApplicationContext = context.getApplicationContext();
         mPlayerConfig = playerConfig;
         mPlayerState = playerState;
-        mEnabled = enabled;
+        mPlaylistManager = playlistManager;
 
         mStateListenerMap = new HashMap<>();
+        mMainHandler = new Handler(Looper.getMainLooper());
 
         initAllListener();
         initAllHelper();
 
         mNetworkUtil.subscribeNetworkState();
+        loadPlaylistAsync();
     }
-
-    /**
-     * 当前的播放模式是否是单曲循环。
-     *
-     * @see snow.player.playlist.PlaylistPlayer.PlayMode
-     */
-    public abstract boolean isLooping();
 
     /**
      * 查询具有 soundQuality 音质的 MusicItem 表示的的音乐是否已被缓存。
@@ -210,6 +217,11 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      * @param musicItem 本次播放的 MusicItem 对象。
      */
     protected void onPlayComplete(MusicItem musicItem) {
+        if (mPlayerState.getPlayMode() == PlayMode.LOOP) {
+            return;
+        }
+
+        skipToNext();
     }
 
     /**
@@ -232,6 +244,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      * 你可以重写该方法来释放占用的资源。
      */
     protected void onRelease() {
+        mPlaylistLoadedAction = null;
     }
 
     /**
@@ -240,32 +253,6 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      * @param musicItem 本次要播放的 MusicItem 对象（可能为 null）。
      */
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
-    }
-
-    /**
-     * 设置是否启用当前播放器。
-     *
-     * @param enabled 是否启用当前播放器，为 {@code true} 时启用当前播放器，为 {@code false} 时不启用
-     *                当前播放器，此时如果播放器正在播放，会立即暂停并释放掉内部的 {@link MusicPlayer}
-     */
-    public final void setEnabled(boolean enabled) {
-        if (mEnabled == enabled) {
-            return;
-        }
-
-        mEnabled = enabled;
-
-        if (!mEnabled) {
-            pause();
-            releaseMusicPlayer();
-        }
-    }
-
-    /**
-     * 当前播放器释放已启用。
-     */
-    protected final boolean isEnabled() {
-        return mEnabled;
     }
 
     /**
@@ -305,10 +292,6 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      */
     protected final void prepareMusicPlayer(@Nullable Runnable preparedAction) {
         releaseMusicPlayer();
-
-        if (!isEnabled()) {
-            return;
-        }
 
         notifyBufferingPercentChanged(0, System.currentTimeMillis());
 
@@ -660,7 +643,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      * @param token    监听器的 token（不能为 null），请务必保证该参数的唯一性。
      * @param listener 监听器（不能为 null）。
      */
-    public final void addStateListener(@NonNull String token, @NonNull T listener) {
+    protected final void addStateListener(@NonNull String token, @NonNull PlayerStateListener listener) {
         Preconditions.checkNotNull(token);
         Preconditions.checkNotNull(listener);
 
@@ -683,7 +666,7 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
      *
      * @return 所有已注册的播放器状态监听器
      */
-    protected final HashMap<String, T> getAllStateListener() {
+    protected final HashMap<String, PlayerStateListener> getAllStateListener() {
         return mStateListenerMap;
     }
 
@@ -1080,6 +1063,345 @@ public abstract class AbstractPlayer<T extends PlayerStateListener> implements P
             notifyError(Error.ONLY_WIFI_NETWORK,
                     Error.getErrorMessage(mApplicationContext, Error.ONLY_WIFI_NETWORK));
         }
+    }
+
+    private void loadPlaylistAsync() {
+        mLoadingPlaylist = true;
+        mPlaylistManager.getPlaylistAsync(new PlaylistManager.Callback() {
+            @Override
+            public void onFinished(@NonNull final Playlist playlist) {
+                mMainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPlaylist = playlist;
+                        mLoadingPlaylist = false;
+
+                        if (mPlaylistLoadedAction != null) {
+                            mPlaylistLoadedAction.run();
+                            mPlaylistLoadedAction = null;
+                        }
+
+                        onPlaylistAvailable(mPlaylist);
+                    }
+                });
+            }
+        });
+    }
+
+    private int getRandomPosition(int exclude) {
+        if (mPlaylist == null || getPlaylistSize() < 2) {
+            return 0;
+        }
+
+        if (mRandom == null) {
+            mRandom = new Random();
+        }
+
+        int position = mRandom.nextInt(getPlaylistSize());
+
+        if (position != exclude) {
+            return position;
+        }
+
+        return getRandomPosition(exclude);
+    }
+
+    private void notifyPlayingMusicItemPositionChanged(int position) {
+        mPlayerState.setPosition(position);
+
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
+            if (listener != null) {
+                listener.onPositionChanged(position);
+            }
+        }
+    }
+
+    private void notifyPlayModeChanged(PlayMode playMode) {
+        mPlayerState.setPlayMode(playMode);
+
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
+            if (listener != null) {
+                listener.onPlayModeChanged(playMode);
+            }
+        }
+    }
+
+    private void notifyPlaylistChanged(int position) {
+        mPlayerState.setPosition(position);
+
+        for (String key : mStateListenerMap.keySet()) {
+            PlayerStateListener listener = mStateListenerMap.get(key);
+            if (listener != null) {
+                // 注意！playlistManager 参数为 null，客户端接收到该事件后，应该将其替换为自己的 PlaylistManager 对象
+                listener.onPlaylistChanged(null, position);
+            }
+        }
+    }
+
+    /**
+     * 查询播放列表当前是否可用。
+     * <p>
+     * 当播放列表被修改时，播放器会重新加载播放列表，在加载完成前，该方法会返回 {@code false}，加
+     * 载完成后，该方法会返回 {@code true}。在播放列表加载完成前，不应访问播放列表。
+     * <p>
+     * 如果你需要在播放列表加载完成后访问它，可以重写 {@link #onPlaylistAvailable(Playlist)} 方法。
+     *
+     * @return 播放队列当前是否可用
+     * @see #onPlaylistAvailable(Playlist)
+     */
+    @SuppressWarnings("unused")
+    protected final boolean isPlaylistAvailable() {
+        return !mLoadingPlaylist;
+    }
+
+    /**
+     * 该方法会在播放列表变得可用时调用。
+     *
+     * @param playlist 当前的播放列表
+     */
+    protected void onPlaylistAvailable(Playlist playlist) {
+    }
+
+    /**
+     * 获取当前的播放列表。
+     *
+     * @return 当前播放列表
+     */
+    protected final Playlist getPlaylist() {
+        return mPlaylist;
+    }
+
+    /**
+     * 获取播放列表的大小。
+     *
+     * @return 播放列表的大小
+     */
+    protected final int getPlaylistSize() {
+        return mPlaylistManager.getPlaylistSize();
+    }
+
+    /**
+     * 获取播放列表携带的额外参数。
+     *
+     * @return 播放列表携带的额外参数，可能为 null
+     */
+    @Nullable
+    public final Bundle getPlaylistExtra() {
+        if (mPlaylist == null) {
+            return null;
+        }
+
+        return mPlaylist.getExtra();
+    }
+
+    public boolean isLooping() {
+        return mPlayerState.getPlayMode() == PlayMode.LOOP;
+    }
+
+    @Override
+    public void skipToNext() {
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
+                @Override
+                public void run() {
+                    skipToNext();
+                }
+            };
+            return;
+        }
+
+        if (getPlaylistSize() < 1) {
+            return;
+        }
+
+        int position = mPlayerState.getPosition();
+
+        switch (mPlayerState.getPlayMode()) {
+            case SEQUENTIAL:   // 注意！case 穿透
+            case LOOP:
+                position = getNextPosition(position);
+                break;
+            case SHUFFLE:
+                position = getRandomPosition(position);
+                break;
+        }
+
+        notifyPlayingMusicItemChanged(mPlaylist.get(position), true);
+        notifyPlayingMusicItemPositionChanged(position);
+    }
+
+    protected int getNextPosition(int currentPosition) {
+        int position = currentPosition + 1;
+
+        if (position >= getPlaylistSize()) {
+            return 0;
+        }
+
+        return position;
+    }
+
+    @Override
+    public void skipToPrevious() {
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
+                @Override
+                public void run() {
+                    skipToPrevious();
+                }
+            };
+            return;
+        }
+
+        if (getPlaylistSize() < 1) {
+            return;
+        }
+
+        int position = mPlayerState.getPosition();
+
+        switch (mPlayerState.getPlayMode()) {
+            case SEQUENTIAL:   // 注意！case 穿透
+            case LOOP:
+                position = getPreviousPosition(position);
+                break;
+            case SHUFFLE:
+                position = getRandomPosition(position);
+                break;
+        }
+
+        notifyPlayingMusicItemChanged(mPlaylist.get(position), true);
+        notifyPlayingMusicItemPositionChanged(position);
+    }
+
+    protected int getPreviousPosition(int currentPosition) {
+        int position = currentPosition - 1;
+
+        if (position < 0) {
+            return getPlaylistSize() - 1;
+        }
+
+        return position;
+    }
+
+    @Override
+    public void playOrPause(final int position) {
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
+                @Override
+                public void run() {
+                    playOrPause(position);
+                }
+            };
+            return;
+        }
+
+        if (position == mPlayerState.getPosition()) {
+            playOrPause();
+            return;
+        }
+
+        notifyPlayingMusicItemChanged(mPlaylist.get(position), true);
+        notifyPlayingMusicItemPositionChanged(position);
+    }
+
+    @Override
+    public void setPlayMode(@NonNull PlayMode playMode) {
+        Preconditions.checkNotNull(playMode);
+        if (playMode == mPlayerState.getPlayMode()) {
+            return;
+        }
+
+        notifyPlayModeChanged(playMode);
+    }
+
+    @Override
+    public void onNewPlaylist(final int position, final boolean play) {
+        stop();
+        notifyPlaylistChanged(position);
+        mPlaylistLoadedAction = new Runnable() {
+            @Override
+            public void run() {
+                MusicItem musicItem = null;
+                if (getPlaylistSize() > 0) {
+                    musicItem = mPlaylist.get(position);
+                }
+
+                notifyPlayingMusicItemChanged(musicItem, play);
+            }
+        };
+        loadPlaylistAsync();
+    }
+
+    @Override
+    public void onMusicItemMoved(int fromPosition, int toPosition) {
+        int position = mPlayerState.getPosition();
+        if (notInRegion(position, fromPosition, toPosition)) {
+            notifyPlaylistChanged(position);
+            loadPlaylistAsync();
+            return;
+        }
+
+        if (fromPosition < position) {
+            position -= 1;
+        } else if (fromPosition == position) {
+            position = toPosition;
+        } else {
+            position += 1;
+        }
+
+        notifyPlaylistChanged(position);
+        loadPlaylistAsync();
+    }
+
+    @Override
+    public void onMusicItemInserted(int position, MusicItem musicItem) {
+        int playingPosition = mPlayerState.getPosition();
+
+        if (position <= playingPosition) {
+            playingPosition += 1;
+        }
+
+        notifyPlaylistChanged(playingPosition);
+        loadPlaylistAsync();
+    }
+
+    @Override
+    public void onMusicItemRemoved(final MusicItem musicItem) {
+        int removePosition = mPlaylist.indexOf(musicItem);
+        if (removePosition < 0) {
+            return;
+        }
+
+        if (getPlaylistSize() < 1) {
+            notifyPlaylistChanged(-1);
+            notifyPlayingMusicItemChanged(null, false);
+            loadPlaylistAsync();
+            return;
+        }
+
+        int position = mPlayerState.getPosition();
+
+        if (removePosition < position) {
+            position -= 1;
+        } else if (removePosition == position) {
+            position = getNextPosition(position - 1);
+
+            final boolean play = isPlaying();
+            mPlaylistLoadedAction = new Runnable() {
+                @Override
+                public void run() {
+                    notifyPlayingMusicItemChanged(mPlaylist.get(mPlayerState.getPosition()), play);
+                }
+            };
+        }
+
+        notifyPlaylistChanged(position);
+        loadPlaylistAsync();
+    }
+
+    private boolean notInRegion(int position, int fromPosition, int toPosition) {
+        return position > Math.max(fromPosition, toPosition) || position < Math.min(fromPosition, toPosition);
     }
 
     /**

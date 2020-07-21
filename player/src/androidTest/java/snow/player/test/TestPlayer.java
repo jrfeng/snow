@@ -12,14 +12,16 @@ import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.PlayerState;
 import snow.player.PlayerStateListener;
+import snow.player.playlist.PlaylistManager;
 
-public class TestPlayer extends AbstractPlayer<PlayerStateListener> {
+public class TestPlayer extends AbstractPlayer {
     private Tester mTester;
 
     public TestPlayer(@NonNull Context context,
                       @NonNull PlayerConfig playerConfig,
-                      @NonNull PlayerState playerState) {
-        super(context, playerConfig, playerState, true);
+                      @NonNull PlayerState playerState,
+                      @NonNull PlaylistManager playlistManager) {
+        super(context, playerConfig, playerState, playlistManager);
 
         mTester = new Tester();
     }

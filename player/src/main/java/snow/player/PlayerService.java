@@ -58,12 +58,7 @@ import snow.player.effect.AudioEffectManager;
 import snow.player.media.MediaMusicPlayer;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
-import snow.player.playlist.AbstractPlaylistPlayer;
 import snow.player.playlist.PlaylistManager;
-import snow.player.playlist.PlaylistPlayer;
-import snow.player.playlist.PersistentPlaylistState;
-import snow.player.playlist.PlaylistState;
-import snow.player.playlist.PlaylistStateListener;
 
 @SuppressWarnings("EmptyMethod")
 public class PlayerService extends MediaBrowserServiceCompat implements PlayerManager {
@@ -75,10 +70,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     private int mNotificationId;
 
     private PlayerConfig mPlayerConfig;
-    private PlaylistState mPlaylistState;
+    private PlayerState mPlayerState;
 
     private PlaylistManager mPlaylistManager;
-    private PlaylistPlayerImp mPlaylistPlayer;
+    private PlayerImp mPlaylistPlayer;
     private CustomActionPipe mControllerPipe;
 
     private HashMap<String, OnCommandCallback> mCommandCallbackMap;
@@ -153,7 +148,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initPlayerState() {
-        mPlaylistState = new PersistentPlaylistState(this, mPersistentId);
+        mPlayerState = new PersistentPlayerState(this, mPersistentId);
     }
 
     private void initPlaylistManager() {
@@ -162,10 +157,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initPlayer() {
-        mPlaylistPlayer = new PlaylistPlayerImp(this,
+        mPlaylistPlayer = new PlayerImp(this,
                 mPlayerConfig,
-                mPlaylistState,
-                true,
+                mPlayerState,
                 mPlaylistManager);
     }
 
@@ -173,8 +167,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         final Dispatcher playerManagerDispatcher
                 = ChannelHelper.newDispatcher(PlayerManager.class, this);
 
-        final Dispatcher playlistDispatcher =
-                ChannelHelper.newDispatcher(PlaylistPlayer.class, mPlaylistPlayer);
+        final Dispatcher playerDispatcher =
+                ChannelHelper.newDispatcher(Player.class, mPlaylistPlayer);
 
         mControllerPipe = new CustomActionPipe(new Dispatcher() {
             @Override
@@ -183,7 +177,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                     return true;
                 }
 
-                return playlistDispatcher.dispatch(data);
+                return playerDispatcher.dispatch(data);
             }
 
             @Override
@@ -512,7 +506,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         MessengerPipe pipe = new MessengerPipe(listener);
 
         addOnCommandCallback(token, ChannelHelper.newEmitter(OnCommandCallback.class, pipe));
-        mPlaylistPlayer.addStateListener(token, ChannelHelper.newEmitter(PlaylistStateListener.class, pipe));
+        mPlaylistPlayer.addStateListener(token, ChannelHelper.newEmitter(PlayerStateListener.class, pipe));
     }
 
     @Override
@@ -561,7 +555,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void syncPlayerState(OnCommandCallback listener) {
-        listener.syncPlayerState(new PlaylistState(mPlaylistState));
+        listener.syncPlayerState(new PlayerState(mPlayerState));
     }
 
     private void addOnCommandCallback(@NonNull String token, @NonNull OnCommandCallback listener) {
@@ -610,8 +604,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * 获取列表播放器的播放模式。
      */
-    protected final PlaylistPlayer.PlayMode getPlaylistPlayMode() {
-        return mPlaylistState.getPlayMode();
+    protected final Player.PlayMode getPlaylistPlayMode() {
+        return mPlayerState.getPlayMode();
     }
 
     /**
@@ -642,17 +636,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 获取播放器状态。
-     */
-    protected final PlayerState getPlayerState() {
-        return mPlaylistState;
-    }
-
-    /**
      * 获取列表播放器的状态。
      */
-    protected final PlaylistState getPlaylistState() {
-        return mPlaylistState;
+    protected final PlayerState getPlayerState() {
+        return mPlayerState;
     }
 
     public final boolean isPreparingState() {
@@ -667,7 +654,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 获取当前正在播放的音乐的 MusicItem 对象。
      */
     protected final MusicItem getPlayingMusicItem() {
-        return mPlaylistState.getMusicItem();
+        return mPlayerState.getMusicItem();
     }
 
     /**
@@ -683,7 +670,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
      */
     protected final int getErrorCode() {
-        return mPlaylistState.getErrorCode();
+        return mPlayerState.getErrorCode();
     }
 
     /**
@@ -1021,14 +1008,13 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mControllerPipe.dispatch(action, extras);
     }
 
-    private class PlaylistPlayerImp extends AbstractPlaylistPlayer {
+    private class PlayerImp extends AbstractPlayer {
 
-        public PlaylistPlayerImp(@NonNull Context context,
-                                 @NonNull PlayerConfig playerConfig,
-                                 @NonNull PlaylistState playlistState,
-                                 boolean enable,
-                                 @NonNull PlaylistManager playlistManager) {
-            super(context, playerConfig, playlistState, enable, playlistManager);
+        public PlayerImp(@NonNull Context context,
+                         @NonNull PlayerConfig playerConfig,
+                         @NonNull PlayerState playlistState,
+                         @NonNull PlaylistManager playlistManager) {
+            super(context, playerConfig, playlistState, playlistManager);
         }
 
         @Override
@@ -1190,22 +1176,22 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         @Override
         public void onSetRepeatMode(int repeatMode) {
             if (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE) {
-                mPlaylistPlayer.setPlayMode(PlaylistPlayer.PlayMode.LOOP);
+                mPlaylistPlayer.setPlayMode(Player.PlayMode.LOOP);
                 return;
             }
 
-            mPlaylistPlayer.setPlayMode(PlaylistPlayer.PlayMode.SEQUENTIAL);
+            mPlaylistPlayer.setPlayMode(Player.PlayMode.SEQUENTIAL);
         }
 
         @Override
         public void onSetShuffleMode(int shuffleMode) {
             if (shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_NONE ||
                     shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_INVALID) {
-                mPlaylistPlayer.setPlayMode(PlaylistPlayer.PlayMode.SEQUENTIAL);
+                mPlaylistPlayer.setPlayMode(Player.PlayMode.SEQUENTIAL);
                 return;
             }
 
-            mPlaylistPlayer.setPlayMode(PlaylistPlayer.PlayMode.SHUFFLE);
+            mPlaylistPlayer.setPlayMode(Player.PlayMode.SHUFFLE);
         }
     }
 
@@ -1533,7 +1519,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 获取列表播放器的播放模式。
          */
-        protected final PlaylistPlayer.PlayMode getPlaylistPlayMode() {
+        protected final Player.PlayMode getPlaylistPlayMode() {
             return mPlayerService.getPlaylistPlayMode();
         }
 

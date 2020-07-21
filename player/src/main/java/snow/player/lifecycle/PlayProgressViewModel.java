@@ -21,9 +21,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import snow.player.Player;
 import snow.player.PlayerClient;
-import snow.player.PlayerManager;
 import snow.player.media.MusicItem;
-import snow.player.playlist.PlaylistPlayer;
 
 /**
  * 一个与播放器播放进度相关的 ViewModel。
@@ -47,7 +45,7 @@ public class PlayProgressViewModel extends ViewModel {
     private Player.OnStalledChangeListener mStalledChangeListener;
     private Player.OnSeekListener mSeekCompleteListener;
     private Player.OnPlayingMusicItemChangeListener mPlayingMusicItemChangeListener;
-    private PlaylistPlayer.OnPlayModeChangeListener mPlayModeChangeListener;
+    private Player.OnPlayModeChangeListener mPlayModeChangeListener;
 
     private boolean mLoop;
     private int mDurationSec; // 单位：秒
@@ -159,10 +157,10 @@ public class PlayProgressViewModel extends ViewModel {
             }
         };
 
-        mPlayModeChangeListener = new PlaylistPlayer.OnPlayModeChangeListener() {
+        mPlayModeChangeListener = new Player.OnPlayModeChangeListener() {
             @Override
-            public void onPlayModeChanged(PlaylistPlayer.PlayMode playMode) {
-                mLoop = playMode == PlaylistPlayer.PlayMode.LOOP;
+            public void onPlayModeChanged(Player.PlayMode playMode) {
+                mLoop = playMode == Player.PlayMode.LOOP;
             }
         };
     }
@@ -221,25 +219,21 @@ public class PlayProgressViewModel extends ViewModel {
     }
 
     private void registerAllListener() {
-        PlayerClient.PlaylistController playlistController = mPlayerClient.getPlaylistController();
-
-        playlistController.addOnPlaybackStateChangeListener(mPlaybackStateChangeListener);
-        playlistController.addOnBufferingPercentChangeListener(mBufferingPercentChangeListener);
-        playlistController.addOnStalledChangeListener(mStalledChangeListener);
-        playlistController.addOnSeekCompleteListener(mSeekCompleteListener);
-        playlistController.addOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
-        playlistController.addOnPlayModeChangeListener(mPlayModeChangeListener);
+        mPlayerClient.addOnPlaybackStateChangeListener(mPlaybackStateChangeListener);
+        mPlayerClient.addOnBufferingPercentChangeListener(mBufferingPercentChangeListener);
+        mPlayerClient.addOnStalledChangeListener(mStalledChangeListener);
+        mPlayerClient.addOnSeekCompleteListener(mSeekCompleteListener);
+        mPlayerClient.addOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
+        mPlayerClient.addOnPlayModeChangeListener(mPlayModeChangeListener);
     }
 
     private void unregisterAllListener() {
-        PlayerClient.PlaylistController playlistController = mPlayerClient.getPlaylistController();
-
-        playlistController.removeOnPlaybackStateChangeListener(mPlaybackStateChangeListener);
-        playlistController.removeOnBufferingPercentChangeListener(mBufferingPercentChangeListener);
-        playlistController.removeOnStalledChangeListener(mStalledChangeListener);
-        playlistController.removeOnSeekCompleteListener(mSeekCompleteListener);
-        playlistController.removeOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
-        playlistController.removeOnPlayModeChangeListener(mPlayModeChangeListener);
+        mPlayerClient.removeOnPlaybackStateChangeListener(mPlaybackStateChangeListener);
+        mPlayerClient.removeOnBufferingPercentChangeListener(mBufferingPercentChangeListener);
+        mPlayerClient.removeOnStalledChangeListener(mStalledChangeListener);
+        mPlayerClient.removeOnSeekCompleteListener(mSeekCompleteListener);
+        mPlayerClient.removeOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
+        mPlayerClient.removeOnPlayModeChangeListener(mPlayModeChangeListener);
     }
 
     private void updateDuration(int durationMS/*单位：毫秒*/) {
@@ -259,7 +253,7 @@ public class PlayProgressViewModel extends ViewModel {
     private void startTimer() {
         stopTimer();
 
-        mLoop = mPlayerClient.getPlaylistController().isLooping();
+        mLoop = mPlayerClient.isLooping();
 
         mDisposable = Observable.interval(1000, 1000, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Long>() {

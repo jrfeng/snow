@@ -24,14 +24,11 @@ import channel.helper.pipe.MessengerPipe;
 import snow.player.media.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
-import snow.player.playlist.PlaylistPlayer;
-import snow.player.playlist.PlaylistState;
-import snow.player.playlist.PlaylistStateListener;
 
 /**
  * 播放器客户端，用于向播放器发生各种控制命令。
  */
-public class PlayerClient {
+public class PlayerClient implements Player, PlaylistManager.OnModifyPlaylistListener {
     private Context mApplicationContext;
     private Class<? extends PlayerService> mPlayerService;
     private String mToken;
@@ -43,11 +40,13 @@ public class PlayerClient {
 
     private PlayerManager mPlayerManager;
 
-    private PlaylistController mPlaylistController;
-
     private PlayerManager.OnCommandCallback mCommandCallback;
 
     private OnConnectCallback mConnectCallback;
+
+    private PlaylistManagerImp mPlaylistManager;
+    private Player mDelegate;
+    private PlayerStateHolder mPlayerStateHolder;
 
     private PlayerClient(Context context, Class<? extends PlayerService> playerService) {
         mApplicationContext = context.getApplicationContext();
@@ -122,7 +121,10 @@ public class PlayerClient {
     }
 
     private void initAllController() {
-        mPlaylistController = new PlaylistController(mApplicationContext, mToken, mPlayerConfig);
+        mPlaylistManager = new PlaylistManagerImp(mApplicationContext, mToken);
+        mPlayerStateHolder = new PlayerStateHolder(mPlaylistManager, mPlayerConfig);
+
+        mPlaylistManager.setOnModifyPlaylistListener(this);
     }
 
     private void initConfigChangeListener() {
@@ -133,8 +135,8 @@ public class PlayerClient {
             }
 
             @Override
-            public void syncPlayerState(PlaylistState playlistState) {
-                mPlaylistController.setPlaylistState(playlistState);
+            public void syncPlayerState(PlayerState playlistState) {
+                setPlaylistState(playlistState);
             }
         };
     }
@@ -144,20 +146,20 @@ public class PlayerClient {
 
         mPlayerManager = ChannelHelper.newEmitter(PlayerManager.class, controllerPipe);
 
-        mPlaylistController.setDelegate(ChannelHelper.newEmitter(PlaylistPlayer.class, controllerPipe));
+        setDelegate(ChannelHelper.newEmitter(Player.class, controllerPipe));
 
-        mPlaylistController.setConnected(true);
+        setConnected(true);
 
         MessengerPipe listenerPipe = new MessengerPipe(DispatcherUtil.merge(
                 ChannelHelper.newDispatcher(PlayerManager.OnCommandCallback.class, mCommandCallback),
-                ChannelHelper.newDispatcher(PlaylistStateListener.class, mPlaylistController.getPlaylistStateListener())
+                ChannelHelper.newDispatcher(PlayerStateListener.class, getPlayerStateListener())
         ));
 
         mPlayerManager.registerPlayerStateListener(mToken, listenerPipe.getBinder());
     }
 
     private void onDisconnected() {
-        mPlaylistController.setConnected(false);
+        setConnected(false);
 
         if (isConnected()) {
             mPlayerManager.unregisterPlayerStateListener(mToken);
@@ -353,10 +355,6 @@ public class PlayerClient {
         return mPlayerConfig.isIgnoreLossAudioFocus();
     }
 
-    public PlaylistController getPlaylistController() {
-        return mPlaylistController;
-    }
-
     /**
      * 关闭播放器。
      * <p>
@@ -369,651 +367,628 @@ public class PlayerClient {
         }
     }
 
-    public static class PlaylistController implements PlaylistPlayer {
-        private PlaylistManagerImp mPlaylistManager;
-        private PlaylistPlayer mDelegate;
-        private PlaylistStateHolder mPlaylistStateHolder;
+    void setDelegate(Player delegate) {
+        mDelegate = delegate;
+    }
 
-        PlaylistController(Context context, String playlistId, PlayerConfig playerConfig) {
-            mPlaylistManager = new PlaylistManagerImp(context, playlistId);
-            mPlaylistStateHolder = new PlaylistStateHolder(mPlaylistManager, playerConfig);
+    void setConnected(boolean connected) {
+        mPlaylistManager.setEditable(connected);
+    }
 
-            mPlaylistManager.setOnModifyPlaylistListener(this);
+    void setPlaylistState(PlayerState playlistState) {
+        mPlayerStateHolder.setPlaylistState(playlistState);
+    }
+
+    PlayerStateListener getPlayerStateListener() {
+        return mPlayerStateHolder;
+    }
+
+    private boolean notConnected() {
+        return mPlayerStateHolder.notConnected();
+    }
+
+    /**
+     * 获取当前 PlayerController 的 PlaylistManager 对象。
+     * <p>
+     * 注意！只允许在播放器已连接（{@link #isConnected()} 返回 true）时，才允许使用 PlaylistManager
+     * 修改播放队列。当然，即使未连接，使用 PlaylistManager 访问播放队列还是允许的。
+     *
+     * @return 当前 PlayerController 的 PlaylistManager 对象。
+     */
+    public PlaylistManager getPlaylistManager() {
+        return mPlaylistManager;
+    }
+
+    /**
+     * 设置一个新的播放列表。
+     *
+     * @param playlist 播放列表（不能为 null）
+     */
+    public void setPlaylist(@NonNull Playlist playlist) {
+        setPlaylist(playlist, 0, false);
+    }
+
+    /**
+     * 设置一个新的播放列表。
+     *
+     * @param playlist 播放列表（不能为 null）
+     * @param play     是否立即播放列表中的音乐
+     */
+    public void setPlaylist(@NonNull Playlist playlist, boolean play) {
+        setPlaylist(playlist, 0, play);
+    }
+
+    /**
+     * 设置一个新的播放列表。
+     *
+     * @param playlist 播放列表（不能为 null）
+     * @param position 播放列表中要播放的歌曲的位置
+     * @param play     是否立即播放 {@code position} 参数指定处的音乐
+     */
+    public void setPlaylist(@NonNull Playlist playlist, int position, boolean play) {
+        Preconditions.checkNotNull(playlist);
+        if (!isConnected()) {
+            return;
         }
 
-        void setDelegate(PlaylistPlayer delegate) {
-            mDelegate = delegate;
+        mPlaylistManager.setPlaylist(playlist, position, play);
+    }
+
+    public void getPlaylistAsync(@NonNull PlaylistManager.Callback callback) {
+        Preconditions.checkNotNull(callback);
+        mPlaylistManager.getPlaylistAsync(callback);
+    }
+
+    public void setNextPlay(@NonNull MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
+        if (!isConnected()) {
+            return;
         }
 
-        void setConnected(boolean connected) {
-            mPlaylistStateHolder.setConnected(connected);
-            mPlaylistManager.setEditable(connected);
+        if (musicItem.equals(getPlayingMusicItem())) {
+            return;
         }
 
-        void setPlaylistState(PlaylistState playlistState) {
-            mPlaylistStateHolder.setPlaylistState(playlistState);
+        mPlaylistManager.insertMusicItem(getPlayingMusicItemPosition() + 1, musicItem);
+    }
+
+    public void moveMusicItem(int fromPosition, int toPosition) {
+        if (!isConnected()) {
+            return;
         }
 
-        PlaylistStateListener getPlaylistStateListener() {
-            return mPlaylistStateHolder;
+        mPlaylistManager.moveMusicItem(fromPosition, toPosition);
+    }
+
+    public void removeMusicItem(@NonNull MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
+        if (!isConnected()) {
+            return;
         }
 
-        /**
-         * 是否已连接到播放器。
-         *
-         * @return 如果播放器已连接，则返回 true，否则返回 false
-         */
-        public boolean isConnected() {
-            return mPlaylistStateHolder.isConnected();
+        mPlaylistManager.removeMusicItem(musicItem);
+    }
+
+    /**
+     * 获取播放列表的尺寸大小。
+     */
+    public int getPlaylistSize() {
+        return mPlaylistManager.getPlaylistSize();
+    }
+
+    /**
+     * 获取播放进度。
+     *
+     * @return 播放进度
+     */
+    public long getPlayProgress() {
+        return mPlayerStateHolder.mPlaylistState.getPlayProgress();
+    }
+
+    /**
+     * 获取播放进度的更新时间。
+     *
+     * @return 播放进度的更新时间
+     */
+    public long getPlayProgressUpdateTime() {
+        return mPlayerStateHolder.mPlaylistState.getPlayProgressUpdateTime();
+    }
+
+    /**
+     * 是否单曲循环播放。
+     */
+    public boolean isLooping() {
+        return getPlayMode() == Player.PlayMode.LOOP;
+    }
+
+    /**
+     * 获取当前正在播放的音乐。
+     *
+     * @return 当前正在播放的音乐，如果当前没有任何播放的音乐，则返回 null
+     */
+    @Nullable
+    public MusicItem getPlayingMusicItem() {
+        return mPlayerStateHolder.mPlaylistState.getMusicItem();
+    }
+
+    /**
+     * 获取当前正在播放的音乐的持续时间。
+     */
+    public int getPlayingMusicItemDuration() {
+        MusicItem musicItem = getPlayingMusicItem();
+        if (musicItem == null) {
+            return 0;
         }
 
-        private boolean notConnected() {
-            return mPlaylistStateHolder.notConnected();
+        return musicItem.getDuration();
+    }
+
+    /**
+     * 获取当前播放状态。
+     *
+     * @return 当前播放状态
+     * @see snow.player.Player.PlaybackState
+     */
+    public Player.PlaybackState getPlaybackState() {
+        return mPlayerStateHolder.mPlaylistState.getPlaybackState();
+    }
+
+    /**
+     * 获取 audio session id。
+     *
+     * @return 如果 audio session id 不可用，则返回 0
+     */
+    public int getAudioSessionId() {
+        return mPlayerStateHolder.mPlaylistState.getAudioSessionId();
+    }
+
+    /**
+     * 获取当前的缓存进度。
+     *
+     * @return 当前缓存进度，使用整数表示的百分比值，范围为 [0, 100]
+     */
+    public int getBufferingPercent() {
+        return mPlayerStateHolder.mPlaylistState.getBufferingPercent();
+    }
+
+    /**
+     * 获取缓存进度更新时间。
+     *
+     * @return 缓存进度更新时间
+     */
+    public long getBufferingPercentUpdateTime() {
+        return mPlayerStateHolder.mPlaylistState.getBufferingPercentUpdateTime();
+    }
+
+    /**
+     * 当前播放器是否处于 stalled 状态。
+     * <p>
+     * stalled 状态用于表示当前缓冲区是否有足够的数据继续播放，如果缓冲区没有足够的数据支撑继续播放，则该
+     * 方法会返回 true，如果缓冲区有足够的数据可以继续播放，则返回 false。
+     */
+    public boolean isStalled() {
+        return mPlayerStateHolder.mPlaylistState.isStalled();
+    }
+
+    /**
+     * 播放器是否发生了错误。
+     */
+    public boolean isError() {
+        return getErrorCode() != Player.Error.NO_ERROR;
+    }
+
+    /**
+     * 获取错误码。
+     *
+     * @return 错误码。如果播放器没有发生错误，则返回 {@link snow.player.Player.Error#NO_ERROR}
+     * @see snow.player.Player.Error
+     */
+    public int getErrorCode() {
+        return mPlayerStateHolder.mPlaylistState.getErrorCode();
+    }
+
+    /**
+     * 获取错误信息。
+     *
+     * @return 错误信息。该方法的返回值只在错误发生时才有意义
+     * @see #isError()
+     * @see #getErrorCode()
+     */
+    public String getErrorMessage() {
+        return mPlayerStateHolder.mPlaylistState.getErrorMessage();
+    }
+
+    /**
+     * 获取当前播放模式。
+     *
+     * @return 当前播放模式。
+     */
+    public Player.PlayMode getPlayMode() {
+        return mPlayerStateHolder.mPlaylistState.getPlayMode();
+    }
+
+    /**
+     * 获取当前播放列表的播放位置。
+     *
+     * @return 当前播放列表的播放位置
+     */
+    public int getPlayingMusicItemPosition() {
+        return mPlayerStateHolder.mPlaylistState.getPosition();
+    }
+
+    /**
+     * 下一曲。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     */
+    @Override
+    public void skipToNext() {
+        if (notConnected()) {
+            return;
         }
 
-        /**
-         * 获取当前 PlayerController 的 PlaylistManager 对象。
-         * <p>
-         * 注意！只允许在播放器已连接（{@link #isConnected()} 返回 true）时，才允许使用 PlaylistManager
-         * 修改播放队列。当然，即使未连接，使用 PlaylistManager 访问播放队列还是允许的。
-         *
-         * @return 当前 PlayerController 的 PlaylistManager 对象。
-         */
-        public PlaylistManager getPlaylistManager() {
-            return mPlaylistManager;
+        mDelegate.skipToNext();
+    }
+
+    /**
+     * 上一曲。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     */
+    @Override
+    public void skipToPrevious() {
+        if (notConnected()) {
+            return;
         }
 
-        /**
-         * 设置一个新的播放列表。
-         *
-         * @param playlist 播放列表（不能为 null）
-         */
-        public void setPlaylist(@NonNull Playlist playlist) {
-            setPlaylist(playlist, 0, false);
+        mDelegate.skipToPrevious();
+    }
+
+    /**
+     * 播放或暂停播放列表中指定索引处的音乐。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     *
+     * @param position 目标位置。
+     */
+    @Override
+    public void playOrPause(int position) {
+        if (notConnected()) {
+            return;
         }
 
-        /**
-         * 设置一个新的播放列表。
-         *
-         * @param playlist 播放列表（不能为 null）
-         * @param play     是否立即播放列表中的音乐
-         */
-        public void setPlaylist(@NonNull Playlist playlist, boolean play) {
-            setPlaylist(playlist, 0, play);
+        mDelegate.playOrPause(position);
+    }
+
+    /**
+     * 设置播放模式。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     *
+     * @param playMode 播放模式
+     */
+    @Override
+    public void setPlayMode(@NonNull Player.PlayMode playMode) {
+        Preconditions.checkNotNull(playMode);
+        if (notConnected()) {
+            return;
         }
 
-        /**
-         * 设置一个新的播放列表。
-         *
-         * @param playlist 播放列表（不能为 null）
-         * @param position 播放列表中要播放的歌曲的位置
-         * @param play     是否立即播放 {@code position} 参数指定处的音乐
-         */
-        public void setPlaylist(@NonNull Playlist playlist, int position, boolean play) {
-            Preconditions.checkNotNull(playlist);
-            if (!isConnected()) {
-                return;
-            }
+        mDelegate.setPlayMode(playMode);
+    }
 
-            mPlaylistManager.setPlaylist(playlist, position, play);
+    /**
+     * 开始播放。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     */
+    @Override
+    public void play() {
+        if (notConnected()) {
+            return;
         }
 
-        public void getPlaylistAsync(@NonNull PlaylistManager.Callback callback) {
-            Preconditions.checkNotNull(callback);
-            mPlaylistManager.getPlaylistAsync(callback);
+        mDelegate.play();
+    }
+
+    /**
+     * 暂停播放。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     */
+    @Override
+    public void pause() {
+        if (notConnected()) {
+            return;
         }
 
-        public void setNextPlay(@NonNull MusicItem musicItem) {
-            Preconditions.checkNotNull(musicItem);
-            if (!isConnected()) {
-                return;
-            }
+        mDelegate.pause();
+    }
 
-            if (musicItem.equals(getPlayingMusicItem())) {
-                return;
-            }
-
-            mPlaylistManager.insertMusicItem(getPlayingMusicItemPosition() + 1, musicItem);
+    /**
+     * 停止播放。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     */
+    @Override
+    public void stop() {
+        if (notConnected()) {
+            return;
         }
 
-        public void moveMusicItem(int fromPosition, int toPosition) {
-            if (!isConnected()) {
-                return;
-            }
+        mDelegate.stop();
+    }
 
-            mPlaylistManager.moveMusicItem(fromPosition, toPosition);
+    /**
+     * 播放/暂停。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     */
+    @Override
+    public void playOrPause() {
+        if (notConnected()) {
+            return;
         }
 
-        public void removeMusicItem(@NonNull MusicItem musicItem) {
-            Preconditions.checkNotNull(musicItem);
-            if (!isConnected()) {
-                return;
-            }
+        mDelegate.playOrPause();
+    }
 
-            mPlaylistManager.removeMusicItem(musicItem);
+    /**
+     * 调整音乐播放进度。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     *
+     * @param progress 要调整到的播放进度
+     */
+    @Override
+    public void seekTo(int progress) {
+        if (notConnected()) {
+            return;
         }
 
-        /**
-         * 获取播放列表的尺寸大小。
-         */
-        public int getPlaylistSize() {
-            return mPlaylistManager.getPlaylistSize();
+        mDelegate.seekTo(progress);
+    }
+
+    /**
+     * 快进。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     */
+    @Override
+    public void fastForward() {
+        if (notConnected()) {
+            return;
         }
 
-        /**
-         * 获取播放进度。
-         *
-         * @return 播放进度
-         */
-        public long getPlayProgress() {
-            return mPlaylistStateHolder.mPlaylistState.getPlayProgress();
+        mDelegate.fastForward();
+    }
+
+    /**
+     * 快退。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     */
+    @Override
+    public void rewind() {
+        if (notConnected()) {
+            return;
         }
 
-        /**
-         * 获取播放进度的更新时间。
-         *
-         * @return 播放进度的更新时间
-         */
-        public long getPlayProgressUpdateTime() {
-            return mPlaylistStateHolder.mPlaylistState.getPlayProgressUpdateTime();
+        mDelegate.rewind();
+    }
+
+    @Override
+    public void onNewPlaylist(int position, boolean play) {
+        if (notConnected()) {
+            return;
         }
 
-        /**
-         * 是否单曲循环播放。
-         */
-        public boolean isLooping() {
-            return getPlayMode() == PlayMode.LOOP;
+        mDelegate.onNewPlaylist(position, play);
+    }
+
+    @Override
+    public void onMusicItemMoved(int fromPosition, int toPosition) {
+        if (notConnected()) {
+            return;
         }
 
-        /**
-         * 获取当前正在播放的音乐。
-         *
-         * @return 当前正在播放的音乐，如果当前没有任何播放的音乐，则返回 null
-         */
-        @Nullable
-        public MusicItem getPlayingMusicItem() {
-            return mPlaylistStateHolder.mPlaylistState.getMusicItem();
+        mDelegate.onMusicItemMoved(fromPosition, toPosition);
+    }
+
+    @Override
+    public void onMusicItemInserted(int position, MusicItem musicItem) {
+        if (notConnected()) {
+            return;
         }
 
-        /**
-         * 获取当前正在播放的音乐的持续时间。
-         */
-        public int getPlayingMusicItemDuration() {
-            MusicItem musicItem = getPlayingMusicItem();
-            if (musicItem == null) {
-                return 0;
-            }
+        mDelegate.onMusicItemInserted(position, musicItem);
+    }
 
-            return musicItem.getDuration();
+    @Override
+    public void onMusicItemRemoved(MusicItem musicItem) {
+        if (notConnected()) {
+            return;
         }
 
-        /**
-         * 获取当前播放状态。
-         *
-         * @return 当前播放状态
-         * @see snow.player.Player.PlaybackState
-         */
-        public PlaybackState getPlaybackState() {
-            return mPlaylistStateHolder.mPlaylistState.getPlaybackState();
+        mDelegate.onMusicItemRemoved(musicItem);
+    }
+
+    /**
+     * 添加一个播放器播放状态监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 播放器播放状态监听器
+     * @see Player.OnPlaybackStateChangeListener
+     */
+    public void addOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
+        mPlayerStateHolder.addOnPlaybackStateChangeListener(listener);
+    }
+
+    /**
+     * 移除播放器播放状态监听器。
+     *
+     * @param listener 要移除的监听器。
+     */
+    public void removeOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
+        mPlayerStateHolder.removeOnPlaybackStateChangeListener(listener);
+    }
+
+    /**
+     * 添加一个 stalled 状态监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 要添加的监听器
+     * @see Player.OnStalledChangeListener
+     */
+    public void addOnStalledChangeListener(Player.OnStalledChangeListener listener) {
+        mPlayerStateHolder.addOnStalledChangeListener(listener);
+    }
+
+    /**
+     * 移除 stalled 状态监听器。
+     *
+     * @param listener 要移除的监听器。
+     */
+    public void removeOnStalledChangeListener(Player.OnStalledChangeListener listener) {
+        mPlayerStateHolder.removeOnStalledChangeListener(listener);
+    }
+
+    /**
+     * 添加一个缓存进度监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 要添加的监听器。
+     * @see Player.OnBufferingPercentChangeListener
+     */
+    public void addOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
+        mPlayerStateHolder.addOnBufferingPercentChangeListener(listener);
+    }
+
+    /**
+     * 移除缓存进度监听器。
+     *
+     * @param listener 要移除的监听器
+     */
+    public void removeOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
+        mPlayerStateHolder.removeOnBufferingPercentChangeListener(listener);
+    }
+
+    /**
+     * 添加一个监听当前播放的 MusicItem 改变事件的监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 要添加的监听器
+     * @see Player.OnPlayingMusicItemChangeListener
+     */
+    public void addOnPlayingMusicItemChangeListener(Player.OnPlayingMusicItemChangeListener listener) {
+        mPlayerStateHolder.addOnPlayingMusicItemChangeListener(listener);
+    }
+
+    /**
+     * 移除当前播放的 MusicItem 改变事件监听器
+     *
+     * @param listener 要移除的监听器
+     */
+    public void removeOnPlayingMusicItemChangeListener(Player.OnPlayingMusicItemChangeListener listener) {
+        mPlayerStateHolder.removeOnPlayingMusicItemChangeListener(listener);
+    }
+
+    /**
+     * 添加一个用于监听播放器播放进度调整完毕事件的监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 要添加的监听器
+     * @see Player.OnSeekListener
+     */
+    public void addOnSeekCompleteListener(Player.OnSeekListener listener) {
+        mPlayerStateHolder.addOnSeekCompleteListener(listener);
+    }
+
+    /**
+     * 移除用于监听播放器播放进度调整完毕的监听器。
+     *
+     * @param listener 要移除的监听器
+     */
+    public void removeOnSeekCompleteListener(Player.OnSeekListener listener) {
+        mPlayerStateHolder.removeOnSeekCompleteListener(listener);
+    }
+
+    /**
+     * 添加一个用于监听播放列表改变事件的监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 要添加的监听器
+     * @see Player.OnPlaylistChangeListener
+     */
+    public void addOnPlaylistChangeListener(Player.OnPlaylistChangeListener listener) {
+        mPlayerStateHolder.addOnPlaylistChangeListener(listener);
+    }
+
+    /**
+     * 移除用于监听播放列表改变事件的监听器。
+     *
+     * @param listener 要移除的监听器
+     */
+    public void removeOnPlaylistChangeListener(Player.OnPlaylistChangeListener listener) {
+        mPlayerStateHolder.removeOnPlaylistChangeListener(listener);
+    }
+
+    /**
+     * 添加一个用于监听播放模式改变的监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 要添加的监听器
+     * @see Player.OnPlayModeChangeListener
+     */
+    public void addOnPlayModeChangeListener(Player.OnPlayModeChangeListener listener) {
+        mPlayerStateHolder.addOnPlayModeChangeListener(listener);
+    }
+
+    /**
+     * 移除一个用于监听播放模式改变的监听器。
+     *
+     * @param listener 要移除的事件监听器
+     */
+    public void removeOnPlayModeChangeListener(Player.OnPlayModeChangeListener listener) {
+        mPlayerStateHolder.removeOnPlayModeChangeListener(listener);
+    }
+
+    /**
+     * 添加一个监听播放列表播放位置改变事件的监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 要添加的监听器
+     * @see Player.OnPositionChangeListener
+     */
+    public void addOnPositionChangeListener(Player.OnPositionChangeListener listener) {
+        mPlayerStateHolder.addOnPositionChangeListener(listener);
+    }
+
+    /**
+     * 移除一个监听播放列表播放位置改变事件的监听器。
+     *
+     * @param listener 要移除的监听器
+     */
+    public void removeOnPositionChangeListener(Player.OnPositionChangeListener listener) {
+        mPlayerStateHolder.removeOnPositionChangeListener(listener);
+    }
+
+    private static class PlaylistManagerImp extends PlaylistManager {
+        protected PlaylistManagerImp(Context context, String playlistId) {
+            super(context, playlistId);
         }
 
-        /**
-         * 获取 audio session id。
-         *
-         * @return 如果 audio session id 不可用，则返回 0
-         */
-        public int getAudioSessionId() {
-            return mPlaylistStateHolder.mPlaylistState.getAudioSessionId();
-        }
-
-        /**
-         * 获取当前的缓存进度。
-         *
-         * @return 当前缓存进度，使用整数表示的百分比值，范围为 [0, 100]
-         */
-        public int getBufferingPercent() {
-            return mPlaylistStateHolder.mPlaylistState.getBufferingPercent();
-        }
-
-        /**
-         * 获取缓存进度更新时间。
-         *
-         * @return 缓存进度更新时间
-         */
-        public long getBufferingPercentUpdateTime() {
-            return mPlaylistStateHolder.mPlaylistState.getBufferingPercentUpdateTime();
-        }
-
-        /**
-         * 当前播放器是否处于 stalled 状态。
-         * <p>
-         * stalled 状态用于表示当前缓冲区是否有足够的数据继续播放，如果缓冲区没有足够的数据支撑继续播放，则该
-         * 方法会返回 true，如果缓冲区有足够的数据可以继续播放，则返回 false。
-         */
-        public boolean isStalled() {
-            return mPlaylistStateHolder.mPlaylistState.isStalled();
-        }
-
-        /**
-         * 播放器是否发生了错误。
-         */
-        public boolean isError() {
-            return getErrorCode() != Error.NO_ERROR;
-        }
-
-        /**
-         * 获取错误码。
-         *
-         * @return 错误码。如果播放器没有发生错误，则返回 {@link snow.player.Player.Error#NO_ERROR}
-         * @see snow.player.Player.Error
-         */
-        public int getErrorCode() {
-            return mPlaylistStateHolder.mPlaylistState.getErrorCode();
-        }
-
-        /**
-         * 获取错误信息。
-         *
-         * @return 错误信息。该方法的返回值只在错误发生时才有意义
-         * @see #isError()
-         * @see #getErrorCode()
-         */
-        public String getErrorMessage() {
-            return mPlaylistStateHolder.mPlaylistState.getErrorMessage();
-        }
-
-        /**
-         * 获取当前播放模式。
-         *
-         * @return 当前播放模式。
-         */
-        public PlayMode getPlayMode() {
-            return mPlaylistStateHolder.mPlaylistState.getPlayMode();
-        }
-
-        /**
-         * 获取当前播放列表的播放位置。
-         *
-         * @return 当前播放列表的播放位置
-         */
-        public int getPlayingMusicItemPosition() {
-            return mPlaylistStateHolder.mPlaylistState.getPosition();
-        }
-
-        /**
-         * 下一曲。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
         @Override
-        public void skipToNext() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.skipToNext();
-        }
-
-        /**
-         * 上一曲。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void skipToPrevious() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.skipToPrevious();
-        }
-
-        /**
-         * 播放或暂停播放列表中指定索引处的音乐。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         *
-         * @param position 目标位置。
-         */
-        @Override
-        public void playOrPause(int position) {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.playOrPause(position);
-        }
-
-        /**
-         * 设置播放模式。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         *
-         * @param playMode 播放模式
-         */
-        @Override
-        public void setPlayMode(@NonNull PlayMode playMode) {
-            Preconditions.checkNotNull(playMode);
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.setPlayMode(playMode);
-        }
-
-        /**
-         * 开始播放。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void play() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.play();
-        }
-
-        /**
-         * 暂停播放。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void pause() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.pause();
-        }
-
-        /**
-         * 停止播放。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void stop() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.stop();
-        }
-
-        /**
-         * 播放/暂停。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void playOrPause() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.playOrPause();
-        }
-
-        /**
-         * 调整音乐播放进度。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         *
-         * @param progress 要调整到的播放进度
-         */
-        @Override
-        public void seekTo(int progress) {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.seekTo(progress);
-        }
-
-        /**
-         * 快进。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void fastForward() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.fastForward();
-        }
-
-        /**
-         * 快退。
-         * <p>
-         * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-         */
-        @Override
-        public void rewind() {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.rewind();
-        }
-
-        @Override
-        public void onNewPlaylist(int position, boolean play) {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.onNewPlaylist(position, play);
-        }
-
-        @Override
-        public void onMusicItemMoved(int fromPosition, int toPosition) {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.onMusicItemMoved(fromPosition, toPosition);
-        }
-
-        @Override
-        public void onMusicItemInserted(int position, MusicItem musicItem) {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.onMusicItemInserted(position, musicItem);
-        }
-
-        @Override
-        public void onMusicItemRemoved(MusicItem musicItem) {
-            if (notConnected()) {
-                return;
-            }
-
-            mDelegate.onMusicItemRemoved(musicItem);
-        }
-
-        /**
-         * 添加一个播放器播放状态监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 播放器播放状态监听器
-         * @see Player.OnPlaybackStateChangeListener
-         */
-        public void addOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
-            mPlaylistStateHolder.addOnPlaybackStateChangeListener(listener);
-        }
-
-        /**
-         * 移除播放器播放状态监听器。
-         *
-         * @param listener 要移除的监听器。
-         */
-        public void removeOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
-            mPlaylistStateHolder.removeOnPlaybackStateChangeListener(listener);
-        }
-
-        /**
-         * 添加一个 stalled 状态监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 要添加的监听器
-         * @see Player.OnStalledChangeListener
-         */
-        public void addOnStalledChangeListener(OnStalledChangeListener listener) {
-            mPlaylistStateHolder.addOnStalledChangeListener(listener);
-        }
-
-        /**
-         * 移除 stalled 状态监听器。
-         *
-         * @param listener 要移除的监听器。
-         */
-        public void removeOnStalledChangeListener(OnStalledChangeListener listener) {
-            mPlaylistStateHolder.removeOnStalledChangeListener(listener);
-        }
-
-        /**
-         * 添加一个缓存进度监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 要添加的监听器。
-         * @see Player.OnBufferingPercentChangeListener
-         */
-        public void addOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
-            mPlaylistStateHolder.addOnBufferingPercentChangeListener(listener);
-        }
-
-        /**
-         * 移除缓存进度监听器。
-         *
-         * @param listener 要移除的监听器
-         */
-        public void removeOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
-            mPlaylistStateHolder.removeOnBufferingPercentChangeListener(listener);
-        }
-
-        /**
-         * 添加一个监听当前播放的 MusicItem 改变事件的监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 要添加的监听器
-         * @see Player.OnPlayingMusicItemChangeListener
-         */
-        public void addOnPlayingMusicItemChangeListener(Player.OnPlayingMusicItemChangeListener listener) {
-            mPlaylistStateHolder.addOnPlayingMusicItemChangeListener(listener);
-        }
-
-        /**
-         * 移除当前播放的 MusicItem 改变事件监听器
-         *
-         * @param listener 要移除的监听器
-         */
-        public void removeOnPlayingMusicItemChangeListener(Player.OnPlayingMusicItemChangeListener listener) {
-            mPlaylistStateHolder.removeOnPlayingMusicItemChangeListener(listener);
-        }
-
-        /**
-         * 添加一个用于监听播放器播放进度调整完毕事件的监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 要添加的监听器
-         * @see OnSeekListener
-         */
-        public void addOnSeekCompleteListener(OnSeekListener listener) {
-            mPlaylistStateHolder.addOnSeekCompleteListener(listener);
-        }
-
-        /**
-         * 移除用于监听播放器播放进度调整完毕的监听器。
-         *
-         * @param listener 要移除的监听器
-         */
-        public void removeOnSeekCompleteListener(OnSeekListener listener) {
-            mPlaylistStateHolder.removeOnSeekCompleteListener(listener);
-        }
-
-        /**
-         * 添加一个用于监听播放列表改变事件的监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 要添加的监听器
-         * @see PlaylistPlayer.OnPlaylistChangeListener
-         */
-        public void addOnPlaylistChangeListener(PlaylistPlayer.OnPlaylistChangeListener listener) {
-            mPlaylistStateHolder.addOnPlaylistChangeListener(listener);
-        }
-
-        /**
-         * 移除用于监听播放列表改变事件的监听器。
-         *
-         * @param listener 要移除的监听器
-         */
-        public void removeOnPlaylistChangeListener(PlaylistPlayer.OnPlaylistChangeListener listener) {
-            mPlaylistStateHolder.removeOnPlaylistChangeListener(listener);
-        }
-
-        /**
-         * 添加一个用于监听播放模式改变的监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 要添加的监听器
-         * @see PlaylistPlayer.OnPlayModeChangeListener
-         */
-        public void addOnPlayModeChangeListener(PlaylistPlayer.OnPlayModeChangeListener listener) {
-            mPlaylistStateHolder.addOnPlayModeChangeListener(listener);
-        }
-
-        /**
-         * 移除一个用于监听播放模式改变的监听器。
-         *
-         * @param listener 要移除的事件监听器
-         */
-        public void removeOnPlayModeChangeListener(PlaylistPlayer.OnPlayModeChangeListener listener) {
-            mPlaylistStateHolder.removeOnPlayModeChangeListener(listener);
-        }
-
-        /**
-         * 添加一个监听播放列表播放位置改变事件的监听器。
-         * <p>
-         * 如果监听器已添加，则忽略本次调用。
-         *
-         * @param listener 要添加的监听器
-         * @see PlaylistPlayer.OnPositionChangeListener
-         */
-        public void addOnPositionChangeListener(PlaylistPlayer.OnPositionChangeListener listener) {
-            mPlaylistStateHolder.addOnPositionChangeListener(listener);
-        }
-
-        /**
-         * 移除一个监听播放列表播放位置改变事件的监听器。
-         *
-         * @param listener 要移除的监听器
-         */
-        public void removeOnPositionChangeListener(PlaylistPlayer.OnPositionChangeListener listener) {
-            mPlaylistStateHolder.removeOnPositionChangeListener(listener);
-        }
-
-        private static class PlaylistManagerImp extends PlaylistManager {
-            protected PlaylistManagerImp(Context context, String playlistId) {
-                super(context, playlistId);
-            }
-
-            @Override
-            protected void setEditable(boolean editable) {
-                super.setEditable(editable);
-            }
+        protected void setEditable(boolean editable) {
+            super.setEditable(editable);
         }
     }
 
@@ -1029,8 +1004,13 @@ public class PlayerClient {
         void onConnected(boolean success);
     }
 
-    private static class PlayerStateHolder implements PlayerStateListener {
+    private static class PlayerStateHolder implements PlayerStateListener,
+            Player.OnPositionChangeListener,
+            Player.OnPlaylistChangeListener,
+            Player.OnPlayModeChangeListener {
         private PlayerState mPlayerState;
+        private PlaylistManager mPlaylistManager;
+        private PlayerState mPlaylistState;
         private boolean mConnected;
 
         private List<Player.OnPlaybackStateChangeListener> mAllPlaybackStateChangeListener;
@@ -1038,13 +1018,22 @@ public class PlayerClient {
         private List<Player.OnBufferingPercentChangeListener> mAllBufferingPercentChangeListener;
         private List<Player.OnPlayingMusicItemChangeListener> mAllPlayingMusicItemChangeListener;
         private List<Player.OnSeekListener> mAllSeekListener;
+        private List<Player.OnPlaylistChangeListener> mAllPlaylistChangeListener;
+        private List<Player.OnPlayModeChangeListener> mAllPlayModeChangeListener;
+        private List<Player.OnPositionChangeListener> mAllPositionChangeListener;
 
-        PlayerStateHolder() {
+        PlayerStateHolder(PlaylistManager playlistManager, PlayerConfig playerConfig) {
+            mPlaylistManager = playlistManager;
+            mPlaylistState = new PlayerState();
+
             mAllPlaybackStateChangeListener = new ArrayList<>();
             mAllStalledChangeListener = new ArrayList<>();
             mAllBufferingPercentChangeListener = new ArrayList<>();
             mAllPlayingMusicItemChangeListener = new ArrayList<>();
             mAllSeekListener = new ArrayList<>();
+            mAllPlaylistChangeListener = new ArrayList<>();
+            mAllPlayModeChangeListener = new ArrayList<>();
+            mAllPositionChangeListener = new ArrayList<>();
         }
 
         void addOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
@@ -1129,7 +1118,7 @@ public class PlayerClient {
         }
 
         boolean notConnected() {
-            return !mConnected;
+            return !isConnected();
         }
 
         void setConnected(boolean connected) {
@@ -1346,37 +1335,15 @@ public class PlayerClient {
 
             notifyStalledChanged();
         }
-    }
 
-    private static class PlaylistStateHolder extends PlayerStateHolder implements PlaylistStateListener {
-        private PlaylistManager mPlaylistManager;
-        private PlayerConfig mPlayerConfig;
-        private PlaylistState mPlaylistState;
-
-        private List<PlaylistPlayer.OnPlaylistChangeListener> mAllPlaylistChangeListener;
-        private List<PlaylistPlayer.OnPlayModeChangeListener> mAllPlayModeChangeListener;
-        private List<PlaylistPlayer.OnPositionChangeListener> mAllPositionChangeListener;
-
-        PlaylistStateHolder(PlaylistManager playlistManager, PlayerConfig playerConfig) {
-            mPlaylistManager = playlistManager;
-            mPlayerConfig = playerConfig;
-
-            mAllPlaylistChangeListener = new ArrayList<>();
-            mAllPlayModeChangeListener = new ArrayList<>();
-            mAllPositionChangeListener = new ArrayList<>();
-
-            mPlaylistState = new PlaylistState();
-        }
-
-        void setPlaylistState(PlaylistState playlistState) {
+        void setPlaylistState(PlayerState playlistState) {
             mPlaylistState = playlistState;
 
             notifyPlaylistChanged();
             notifyPlayModeChanged();
-            super.setPlayerState(playlistState);
         }
 
-        void addOnPlaylistChangeListener(PlaylistPlayer.OnPlaylistChangeListener listener) {
+        void addOnPlaylistChangeListener(Player.OnPlaylistChangeListener listener) {
             if (mAllPlaylistChangeListener.contains(listener)) {
                 return;
             }
@@ -1385,11 +1352,11 @@ public class PlayerClient {
             notifyPlaylistChanged(listener);
         }
 
-        void removeOnPlaylistChangeListener(PlaylistPlayer.OnPlaylistChangeListener listener) {
+        void removeOnPlaylistChangeListener(Player.OnPlaylistChangeListener listener) {
             mAllPlaylistChangeListener.remove(listener);
         }
 
-        void addOnPlayModeChangeListener(PlaylistPlayer.OnPlayModeChangeListener listener) {
+        void addOnPlayModeChangeListener(Player.OnPlayModeChangeListener listener) {
             if (mAllPlayModeChangeListener.contains(listener)) {
                 return;
             }
@@ -1398,11 +1365,11 @@ public class PlayerClient {
             notifyPlayModeChanged();
         }
 
-        void removeOnPlayModeChangeListener(PlaylistPlayer.OnPlayModeChangeListener listener) {
+        void removeOnPlayModeChangeListener(Player.OnPlayModeChangeListener listener) {
             mAllPlayModeChangeListener.remove(listener);
         }
 
-        void addOnPositionChangeListener(PlaylistPlayer.OnPositionChangeListener listener) {
+        void addOnPositionChangeListener(Player.OnPositionChangeListener listener) {
             if (mAllPositionChangeListener.contains(listener)) {
                 return;
             }
@@ -1411,11 +1378,11 @@ public class PlayerClient {
             notifyPositionChanged(listener);
         }
 
-        void removeOnPositionChangeListener(PlaylistPlayer.OnPositionChangeListener listener) {
+        void removeOnPositionChangeListener(Player.OnPositionChangeListener listener) {
             mAllPositionChangeListener.remove(listener);
         }
 
-        private void notifyPlaylistChanged(PlaylistPlayer.OnPlaylistChangeListener listener) {
+        private void notifyPlaylistChanged(Player.OnPlaylistChangeListener listener) {
             if (notConnected()) {
                 return;
             }
@@ -1428,12 +1395,12 @@ public class PlayerClient {
                 return;
             }
 
-            for (PlaylistPlayer.OnPlaylistChangeListener listener : mAllPlaylistChangeListener) {
+            for (Player.OnPlaylistChangeListener listener : mAllPlaylistChangeListener) {
                 notifyPlaylistChanged(listener);
             }
         }
 
-        private void notifyPlayModeChanged(PlaylistPlayer.OnPlayModeChangeListener listener) {
+        private void notifyPlayModeChanged(Player.OnPlayModeChangeListener listener) {
             if (notConnected()) {
                 return;
             }
@@ -1446,12 +1413,12 @@ public class PlayerClient {
                 return;
             }
 
-            for (PlaylistPlayer.OnPlayModeChangeListener listener : mAllPlayModeChangeListener) {
+            for (Player.OnPlayModeChangeListener listener : mAllPlayModeChangeListener) {
                 notifyPlayModeChanged(listener);
             }
         }
 
-        private void notifyPositionChanged(PlaylistPlayer.OnPositionChangeListener listener) {
+        private void notifyPositionChanged(Player.OnPositionChangeListener listener) {
             if (notConnected()) {
                 return;
             }
@@ -1464,7 +1431,7 @@ public class PlayerClient {
                 return;
             }
 
-            for (PlaylistPlayer.OnPositionChangeListener listener : mAllPositionChangeListener) {
+            for (Player.OnPositionChangeListener listener : mAllPositionChangeListener) {
                 notifyPositionChanged(listener);
             }
         }
@@ -1477,7 +1444,7 @@ public class PlayerClient {
         }
 
         @Override
-        public void onPlayModeChanged(PlaylistPlayer.PlayMode playMode) {
+        public void onPlayModeChanged(Player.PlayMode playMode) {
             mPlaylistState.setPlayMode(playMode);
 
             notifyPlayModeChanged();

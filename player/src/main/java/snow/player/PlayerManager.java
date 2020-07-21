@@ -5,7 +5,6 @@ import android.os.IBinder;
 
 import channel.helper.Channel;
 import channel.helper.UseOrdinal;
-import snow.player.playlist.PlaylistState;
 
 /**
  * 该接口定义了用于管理播放器的基本功能。
@@ -87,6 +86,6 @@ public interface PlayerManager {
          *
          * @param playlistState 列表播放器的状态
          */
-        void syncPlayerState(PlaylistState playlistState);
+        void syncPlayerState(PlayerState playlistState);
     }
 }

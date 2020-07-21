@@ -20,6 +20,8 @@ public class PlayerState implements Parcelable {
     private long mPlayProgressUpdateTime;
     @Nullable
     private MusicItem mMusicItem;
+    private int mPosition;
+    private Player.PlayMode mPlayMode;
 
     // no persistent
     private Player.PlaybackState mPlaybackState;
@@ -33,6 +35,8 @@ public class PlayerState implements Parcelable {
     public PlayerState() {
         mPlayProgress = 0;
         mPlayProgressUpdateTime = 0;
+        mPosition = 0;
+        mPlayMode = Player.PlayMode.SEQUENTIAL;
 
         mPlaybackState = Player.PlaybackState.UNKNOWN;
         mAudioSessionId = 0;
@@ -49,6 +53,8 @@ public class PlayerState implements Parcelable {
         if (source.mMusicItem != null) {
             mMusicItem = new MusicItem(source.mMusicItem);
         }
+        mPosition = source.mPosition;
+        mPlayMode = source.mPlayMode;
 
         mPlaybackState = source.mPlaybackState;
         mAudioSessionId = source.mAudioSessionId;
@@ -114,6 +120,51 @@ public class PlayerState implements Parcelable {
      */
     public void setMusicItem(@Nullable MusicItem musicItem) {
         mMusicItem = musicItem;
+    }
+
+    /**
+     * 获取播放队列的播放位置。
+     *
+     * @return 播放队列的播放位置。
+     */
+    public int getPosition() {
+        return mPosition;
+    }
+
+    /**
+     * 设置播放队列的播放位置。
+     *
+     * @param position 播放队列的播放位置（小于 0 时相当于设置为 0）。
+     */
+    public void setPosition(int position) {
+        if (position < 0) {
+            mPosition = 0;
+            return;
+        }
+
+        mPosition = position;
+    }
+
+    /**
+     * 获取播放队列的播放模式。
+     *
+     * @return 播放队列的播放模式。
+     * @see Player.PlayMode
+     */
+    public Player.PlayMode getPlayMode() {
+        return mPlayMode;
+    }
+
+    /**
+     * 设置播放队列的播放模式。
+     *
+     * @param playMode 播放队列的播放模式。只能是这些值之一：{@link Player.PlayMode#SEQUENTIAL},
+     *                 {@link Player.PlayMode#LOOP},
+     *                 {@link Player.PlayMode#SHUFFLE}
+     * @see Player.PlayMode
+     */
+    public void setPlayMode(@NonNull Player.PlayMode playMode) {
+        mPlayMode = playMode;
     }
 
     /**
@@ -264,6 +315,8 @@ public class PlayerState implements Parcelable {
         return Objects.equal(mPlayProgress, other.mPlayProgress)
                 && Objects.equal(mPlayProgressUpdateTime, other.mPlayProgressUpdateTime)
                 && Objects.equal(mMusicItem, other.mMusicItem)
+                && Objects.equal(mPosition, other.mPosition)
+                && Objects.equal(mPlayMode, other.mPlayMode)
                 && Objects.equal(mPlaybackState, other.mPlaybackState)
                 && Objects.equal(mAudioSessionId, other.mAudioSessionId)
                 && Objects.equal(mBufferingPercent, other.mBufferingPercent)
@@ -278,6 +331,8 @@ public class PlayerState implements Parcelable {
         return Objects.hashCode(mPlayProgress,
                 mPlayProgressUpdateTime,
                 mMusicItem,
+                mPosition,
+                mPlayMode,
                 mPlaybackState,
                 mAudioSessionId,
                 mBufferingPercent,
@@ -291,6 +346,8 @@ public class PlayerState implements Parcelable {
         mPlayProgress = in.readInt();
         mPlayProgressUpdateTime = in.readLong();
         mMusicItem = in.readParcelable(Thread.currentThread().getContextClassLoader());
+        mPosition = in.readInt();
+        mPlayMode = Player.PlayMode.values()[in.readInt()];
 
         mPlaybackState = Player.PlaybackState.values()[in.readInt()];
         mAudioSessionId = in.readInt();
@@ -306,6 +363,8 @@ public class PlayerState implements Parcelable {
         dest.writeInt(mPlayProgress);
         dest.writeLong(mPlayProgressUpdateTime);
         dest.writeParcelable(mMusicItem, flags);
+        dest.writeInt(mPosition);
+        dest.writeInt(mPlayMode.ordinal());
 
         dest.writeInt(mPlaybackState.ordinal());
         dest.writeInt(mAudioSessionId);

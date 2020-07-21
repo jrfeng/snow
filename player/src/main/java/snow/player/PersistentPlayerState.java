@@ -1,4 +1,4 @@
-package snow.player.playlist;
+package snow.player;
 
 import android.content.Context;
 
@@ -10,20 +10,16 @@ import com.tencent.mmkv.MMKV;
 
 import snow.player.media.MusicItem;
 
-/**
- * 用于对播放队列的状态进行持久化。
- */
-public class PersistentPlaylistState extends PlaylistState {
+class PersistentPlayerState extends PlayerState {
     private static final String KEY_PLAY_PROGRESS = "play_progress";
     private static final String KEY_PLAY_PROGRESS_UPDATE_TIME = "play_progress_update_time";
     private static final String KEY_MUSIC_ITEM = "music_item";
-
     private static final String KEY_POSITION = "position";
     private static final String KEY_PLAY_MODE = "play_mode";
 
     private MMKV mMMKV;
 
-    public PersistentPlaylistState(@NonNull Context context, @NonNull String id) {
+    public PersistentPlayerState(@NonNull Context context, @NonNull String id) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(id);
 
@@ -36,7 +32,7 @@ public class PersistentPlaylistState extends PlaylistState {
         super.setMusicItem(mMMKV.decodeParcelable(KEY_MUSIC_ITEM, MusicItem.class));
 
         super.setPosition(mMMKV.decodeInt(KEY_POSITION, 0));
-        super.setPlayMode(PlaylistPlayer.PlayMode.values()[mMMKV.decodeInt(KEY_PLAY_MODE, 0)]);
+        super.setPlayMode(Player.PlayMode.values()[mMMKV.decodeInt(KEY_PLAY_MODE, 0)]);
     }
 
     @Override
@@ -54,20 +50,6 @@ public class PersistentPlaylistState extends PlaylistState {
     }
 
     @Override
-    public void setPosition(int position) {
-        super.setPosition(position);
-
-        mMMKV.encode(KEY_POSITION, position);
-    }
-
-    @Override
-    public void setPlayMode(@NonNull PlaylistPlayer.PlayMode playMode) {
-        super.setPlayMode(playMode);
-
-        mMMKV.encode(KEY_PLAY_MODE, playMode.ordinal());
-    }
-
-    @Override
     public void setMusicItem(@Nullable MusicItem musicItem) {
         super.setMusicItem(musicItem);
 
@@ -79,10 +61,17 @@ public class PersistentPlaylistState extends PlaylistState {
         mMMKV.encode(KEY_MUSIC_ITEM, musicItem);
     }
 
-    /**
-     * 创建一个拷贝了当前对象的所有属性的 {@link PlaylistState} 对象。
-     */
-    public PlaylistState getPlaylistState() {
-        return new PlaylistState(this);
+    @Override
+    public void setPosition(int position) {
+        super.setPosition(position);
+
+        mMMKV.encode(KEY_POSITION, position);
+    }
+
+    @Override
+    public void setPlayMode(@NonNull Player.PlayMode playMode) {
+        super.setPlayMode(playMode);
+
+        mMMKV.encode(KEY_PLAY_MODE, playMode.ordinal());
     }
 }

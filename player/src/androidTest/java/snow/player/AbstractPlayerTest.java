@@ -56,15 +56,17 @@ public class AbstractPlayerTest {
     }
 
     protected TestPlayer createTestPlayer(PlayerConfig playerConfig, PlayerState playerState, TestMusicPlayer musicPlayer) {
-        TestPlayer player = new TestPlayer(getContext(), playerConfig, playerState);
-        player.tester().setTestMusicPlayer(musicPlayer);
-
-        MusicItem musicItem = playerState.getMusicItem();
-        if (musicItem != null) {
-            musicPlayer.tester().setDuration(musicItem.getDuration());
-        }
-
-        return player;
+//        TestPlayer player = new TestPlayer(getContext(), playerConfig, playerState);
+//        player.tester().setTestMusicPlayer(musicPlayer);
+//
+//        MusicItem musicItem = playerState.getMusicItem();
+//        if (musicItem != null) {
+//            musicPlayer.tester().setDuration(musicItem.getDuration());
+//        }
+//
+//        return player;
+        // TODO
+        return null;
     }
 
     @Test(timeout = 3_000)
