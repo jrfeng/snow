@@ -24,7 +24,7 @@ public final class MusicItem implements Parcelable {
     private String iconUri;
     private int duration;
     @Nullable
-    private Bundle mExtra;
+    private Bundle extra;
 
     /**
      * 构造一个 MusicItem 对象。
@@ -37,7 +37,7 @@ public final class MusicItem implements Parcelable {
         this.uri = "";
         this.iconUri = "";
         this.duration = 0;
-        this.mExtra = null;
+        this.extra = null;
     }
 
     public MusicItem(MusicItem source) {
@@ -48,8 +48,8 @@ public final class MusicItem implements Parcelable {
         uri = source.uri;
         iconUri = source.iconUri;
         duration = source.duration;
-        if (source.mExtra != null) {
-            mExtra = new Bundle(source.mExtra);
+        if (source.extra != null) {
+            extra = new Bundle(source.extra);
         }
     }
 
@@ -133,14 +133,14 @@ public final class MusicItem implements Parcelable {
 
     @Nullable
     public Bundle getExtra() {
-        return mExtra;
+        return extra;
     }
 
     /**
      * 设置 MusicItem 携带的额外数据。
      */
     public void setExtra(@Nullable Bundle extra) {
-        mExtra = extra;
+        this.extra = extra;
     }
 
     /**
@@ -149,15 +149,15 @@ public final class MusicItem implements Parcelable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MusicItem musicItem = (MusicItem) o;
-        return duration == musicItem.duration &&
-                Objects.equal(musicId, musicItem.musicId) &&
-                Objects.equal(title, musicItem.title) &&
-                Objects.equal(artist, musicItem.artist) &&
-                Objects.equal(album, musicItem.album) &&
-                Objects.equal(uri, musicItem.uri) &&
-                Objects.equal(iconUri, musicItem.iconUri);
+        if (!(o instanceof MusicItem)) return false;
+        MusicItem other = (MusicItem) o;
+        return Objects.equal(musicId, other.musicId) &&
+                Objects.equal(title, other.title) &&
+                Objects.equal(artist, other.artist) &&
+                Objects.equal(album, other.album) &&
+                Objects.equal(uri, other.uri) &&
+                Objects.equal(iconUri, other.iconUri) &&
+                Objects.equal(duration, other.duration);
     }
 
     /**
@@ -165,7 +165,26 @@ public final class MusicItem implements Parcelable {
      */
     @Override
     public int hashCode() {
-        return Objects.hashCode(musicId, title, artist, album, uri, iconUri, duration);
+        return Objects.hashCode(musicId,
+                title,
+                artist,
+                album,
+                uri,
+                iconUri,
+                duration);
+    }
+
+    @Override
+    public String toString() {
+        return "MusicItem{" +
+                "musicId='" + musicId + '\'' +
+                ", title='" + title + '\'' +
+                ", artist='" + artist + '\'' +
+                ", album='" + album + '\'' +
+                ", uri='" + uri + '\'' +
+                ", iconUri='" + iconUri + '\'' +
+                ", duration=" + duration +
+                '}';
     }
 
     @Override
@@ -182,7 +201,7 @@ public final class MusicItem implements Parcelable {
         dest.writeString(this.uri);
         dest.writeString(this.iconUri);
         dest.writeInt(this.duration);
-        dest.writeParcelable(mExtra, 0);
+        dest.writeParcelable(extra, 0);
     }
 
     protected MusicItem(Parcel in) {
@@ -193,7 +212,7 @@ public final class MusicItem implements Parcelable {
         this.uri = in.readString();
         this.iconUri = in.readString();
         this.duration = in.readInt();
-        this.mExtra = in.readParcelable(Thread.currentThread().getContextClassLoader());
+        this.extra = in.readParcelable(Thread.currentThread().getContextClassLoader());
     }
 
     public static final Creator<MusicItem> CREATOR = new Creator<MusicItem>() {
