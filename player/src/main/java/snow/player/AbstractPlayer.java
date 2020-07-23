@@ -14,6 +14,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.content.ContextCompat;
 
 import com.google.common.base.Preconditions;
@@ -47,8 +48,6 @@ public abstract class AbstractPlayer implements Player {
     private PlayerState mPlayerState;
     private HashMap<String, PlayerStateListener> mStateListenerMap;
 
-    private MusicPlayer mMusicPlayer;
-
     private MusicPlayer.OnPreparedListener mOnPreparedListener;
     private MusicPlayer.OnCompletionListener mOnCompletionListener;
     private MusicPlayer.OnSeekCompleteListener mOnSeekCompleteListener;
@@ -56,28 +55,25 @@ public abstract class AbstractPlayer implements Player {
     private MusicPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener;
     private MusicPlayer.OnErrorListener mOnErrorListener;
 
-    private volatile boolean mPreparing;
-    private volatile boolean mPrepared;
-
-    private volatile Runnable mPreparedAction;
-    private volatile Runnable mSeekCompleteAction;
-
     private AudioFocusHelper mAudioFocusHelper;
     private BecomeNoiseHelper mBecomeNoiseHelper;
-
     private NetworkUtil mNetworkUtil;
 
-    private Disposable mRetrieveUriDisposable;
+    private MusicPlayer mMusicPlayer;
+
+    private boolean mPreparing;
+    private boolean mPrepared;
+    private boolean mLoadingPlaylist;
+
+    private Runnable mPreparedAction;
+    private Runnable mSeekCompleteAction;
+    private Runnable mPlaylistLoadedAction;
 
     private PlaylistManager mPlaylistManager;
     private Playlist mPlaylist;
 
-    private volatile boolean mLoadingPlaylist;
-
-    private Handler mMainHandler;
-    private volatile Runnable mPlaylistLoadedAction;
-
     private Random mRandom;
+    private Disposable mRetrieveUriDisposable;
 
     /**
      * @param context      {@link Context} 对象，不能为 null
@@ -97,15 +93,13 @@ public abstract class AbstractPlayer implements Player {
         mPlayerConfig = playerConfig;
         mPlayerState = playerState;
         mPlaylistManager = playlistManager;
-
         mStateListenerMap = new HashMap<>();
-        mMainHandler = new Handler(Looper.getMainLooper());
 
         initAllListener();
         initAllHelper();
 
         mNetworkUtil.subscribeNetworkState();
-        loadPlaylistAsync();
+        reloadPlaylist();
     }
 
     /**
@@ -217,11 +211,6 @@ public abstract class AbstractPlayer implements Player {
      * @param musicItem 本次播放的 MusicItem 对象。
      */
     protected void onPlayComplete(MusicItem musicItem) {
-        if (mPlayerState.getPlayMode() == PlayMode.LOOP) {
-            return;
-        }
-
-        skipToNext();
     }
 
     /**
@@ -244,7 +233,6 @@ public abstract class AbstractPlayer implements Player {
      * 你可以重写该方法来释放占用的资源。
      */
     protected void onRelease() {
-        mPlaylistLoadedAction = null;
     }
 
     /**
@@ -272,6 +260,10 @@ public abstract class AbstractPlayer implements Player {
         mBecomeNoiseHelper = null;
         mNetworkUtil = null;
 
+        mPreparedAction = null;
+        mSeekCompleteAction = null;
+        mPlaylistLoadedAction = null;
+
         onRelease();
     }
 
@@ -286,10 +278,11 @@ public abstract class AbstractPlayer implements Player {
     }
 
     /**
-     * 准备当前播放器所持有的 {@link MusicItem} 对象。
+     * 准备当前播放器所持有的 {@link MusicItem} 对象（测试用）。
      *
      * @param preparedAction 在音乐播放器准备完成后要执行的操作
      */
+    @VisibleForTesting
     protected final void prepareMusicPlayer(@Nullable Runnable preparedAction) {
         releaseMusicPlayer();
 
@@ -413,6 +406,12 @@ public abstract class AbstractPlayer implements Player {
             @Override
             public void onCompletion(MusicPlayer mp) {
                 onPlayComplete(mPlayerState.getMusicItem());
+
+                if (mPlayerState.getPlayMode() == PlayMode.LOOP) {
+                    return;
+                }
+
+                skipToNext();
             }
         };
 
@@ -540,8 +539,9 @@ public abstract class AbstractPlayer implements Player {
     }
 
     /**
-     * 释放当前播放器所持有的 {@link MusicPlayer} 对象。
+     * 释放当前播放器所持有的 {@link MusicPlayer} 对象（测试用）。
      */
+    @VisibleForTesting
     protected final void releaseMusicPlayer() {
         if (mMusicPlayer != null) {
             mMusicPlayer.release();
@@ -560,14 +560,14 @@ public abstract class AbstractPlayer implements Player {
      *
      * @return 当播放器处于准备中状态时返回 true，否则返回false。
      */
-    protected final boolean isPreparing() {
+    public final boolean isPreparing() {
         return mPreparing;
     }
 
     /**
      * 缓存区是否没有足够的数据继续播放。
      */
-    protected final boolean isStalled() {
+    public final boolean isStalled() {
         return mPlayerState.isStalled();
     }
 
@@ -576,7 +576,7 @@ public abstract class AbstractPlayer implements Player {
      *
      * @return 当播放器已经准备完毕时返回 true，否则返回 false。
      */
-    protected final boolean isPrepared() {
+    public final boolean isPrepared() {
         return mPrepared;
     }
 
@@ -585,28 +585,28 @@ public abstract class AbstractPlayer implements Player {
      *
      * @return 当正在播放时返回 true，否则返回 false。
      */
-    protected final boolean isPlaying() {
+    public final boolean isPlaying() {
         return isPrepared() && mMusicPlayer.isPlaying();
     }
 
     /**
      * 是否已暂停。
      */
-    protected final boolean isPaused() {
+    public final boolean isPaused() {
         return mPlayerState.getPlaybackState() == PlaybackState.PAUSED;
     }
 
     /**
      * 是否已停止。
      */
-    protected final boolean isStopped() {
+    public final boolean isStopped() {
         return mPlayerState.getPlaybackState() == PlaybackState.STOPPED;
     }
 
     /**
      * 是否发生了错误。
      */
-    protected final boolean isError() {
+    public final boolean isError() {
         return mPlayerState.getPlaybackState() == PlaybackState.ERROR;
     }
 
@@ -618,7 +618,7 @@ public abstract class AbstractPlayer implements Player {
      *
      * @return 当前正在播放的应用的 audio session id。
      */
-    protected final int getAudioSessionId() {
+    public final int getAudioSessionId() {
         if (isPrepared()) {
             return mMusicPlayer.getAudioSessionId();
         }
@@ -626,13 +626,7 @@ public abstract class AbstractPlayer implements Player {
         return 0;
     }
 
-    /**
-     * 更新播放进度。
-     *
-     * @param progress   播放进度
-     * @param updateTime 播放进度更新时间
-     */
-    protected final void updatePlayProgress(int progress, long updateTime) {
+    private void updatePlayProgress(int progress, long updateTime) {
         mPlayerState.setPlayProgress(progress);
         mPlayerState.setPlayProgressUpdateTime(updateTime);
     }
@@ -643,7 +637,7 @@ public abstract class AbstractPlayer implements Player {
      * @param token    监听器的 token（不能为 null），请务必保证该参数的唯一性。
      * @param listener 监听器（不能为 null）。
      */
-    protected final void addStateListener(@NonNull String token, @NonNull PlayerStateListener listener) {
+    public final void addStateListener(@NonNull String token, @NonNull PlayerStateListener listener) {
         Preconditions.checkNotNull(token);
         Preconditions.checkNotNull(listener);
 
@@ -659,15 +653,6 @@ public abstract class AbstractPlayer implements Player {
         Preconditions.checkNotNull(token);
 
         mStateListenerMap.remove(token);
-    }
-
-    /**
-     * 获取所有已注册的播放器状态监听器。
-     *
-     * @return 所有已注册的播放器状态监听器
-     */
-    protected final HashMap<String, PlayerStateListener> getAllStateListener() {
-        return mStateListenerMap;
     }
 
     private void notifyPreparing() {
@@ -805,11 +790,12 @@ public abstract class AbstractPlayer implements Player {
     }
 
     /**
-     * 通知当前正在播放的音乐以改变。
+     * 通知当前正在播放的音乐以改变（测试用）。
      *
      * @param musicItem 本次要播放的音乐
      * @param play      是否播放歌曲
      */
+    @VisibleForTesting
     protected final void notifyPlayingMusicItemChanged(@Nullable MusicItem musicItem, boolean play) {
         releaseMusicPlayer();
         updatePlayProgress(0, System.currentTimeMillis());
@@ -918,7 +904,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     @Override
-    public void playOrPause() {
+    public void playPause() {
         if (isPlaying() | isPreparing()) {
             pause();
         } else {
@@ -1065,25 +1051,18 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    private void loadPlaylistAsync() {
+    private void reloadPlaylist() {
         mLoadingPlaylist = true;
         mPlaylistManager.getPlaylistAsync(new PlaylistManager.Callback() {
             @Override
             public void onFinished(@NonNull final Playlist playlist) {
-                mMainHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mPlaylist = playlist;
-                        mLoadingPlaylist = false;
+                mPlaylist = playlist;
+                mLoadingPlaylist = false;
 
-                        if (mPlaylistLoadedAction != null) {
-                            mPlaylistLoadedAction.run();
-                            mPlaylistLoadedAction = null;
-                        }
-
-                        onPlaylistAvailable(mPlaylist);
-                    }
-                });
+                if (mPlaylistLoadedAction != null) {
+                    mPlaylistLoadedAction.run();
+                    mPlaylistLoadedAction = null;
+                }
             }
         });
     }
@@ -1138,39 +1117,6 @@ public abstract class AbstractPlayer implements Player {
                 listener.onPlaylistChanged(null, position);
             }
         }
-    }
-
-    /**
-     * 查询播放列表当前是否可用。
-     * <p>
-     * 当播放列表被修改时，播放器会重新加载播放列表，在加载完成前，该方法会返回 {@code false}，加
-     * 载完成后，该方法会返回 {@code true}。在播放列表加载完成前，不应访问播放列表。
-     * <p>
-     * 如果你需要在播放列表加载完成后访问它，可以重写 {@link #onPlaylistAvailable(Playlist)} 方法。
-     *
-     * @return 播放队列当前是否可用
-     * @see #onPlaylistAvailable(Playlist)
-     */
-    @SuppressWarnings("unused")
-    protected final boolean isPlaylistAvailable() {
-        return !mLoadingPlaylist;
-    }
-
-    /**
-     * 该方法会在播放列表变得可用时调用。
-     *
-     * @param playlist 当前的播放列表
-     */
-    protected void onPlaylistAvailable(Playlist playlist) {
-    }
-
-    /**
-     * 获取当前的播放列表。
-     *
-     * @return 当前播放列表
-     */
-    protected final Playlist getPlaylist() {
-        return mPlaylist;
     }
 
     /**
@@ -1232,7 +1178,7 @@ public abstract class AbstractPlayer implements Player {
         notifyPlayingMusicItemPositionChanged(position);
     }
 
-    protected int getNextPosition(int currentPosition) {
+    private int getNextPosition(int currentPosition) {
         int position = currentPosition + 1;
 
         if (position >= getPlaylistSize()) {
@@ -1274,7 +1220,7 @@ public abstract class AbstractPlayer implements Player {
         notifyPlayingMusicItemPositionChanged(position);
     }
 
-    protected int getPreviousPosition(int currentPosition) {
+    private int getPreviousPosition(int currentPosition) {
         int position = currentPosition - 1;
 
         if (position < 0) {
@@ -1285,19 +1231,19 @@ public abstract class AbstractPlayer implements Player {
     }
 
     @Override
-    public void playOrPause(final int position) {
+    public void playPause(final int position) {
         if (mLoadingPlaylist) {
             mPlaylistLoadedAction = new Runnable() {
                 @Override
                 public void run() {
-                    playOrPause(position);
+                    playPause(position);
                 }
             };
             return;
         }
 
         if (position == mPlayerState.getPosition()) {
-            playOrPause();
+            playPause();
             return;
         }
 
@@ -1330,7 +1276,7 @@ public abstract class AbstractPlayer implements Player {
                 notifyPlayingMusicItemChanged(musicItem, play);
             }
         };
-        loadPlaylistAsync();
+        reloadPlaylist();
     }
 
     @Override
@@ -1338,7 +1284,7 @@ public abstract class AbstractPlayer implements Player {
         int position = mPlayerState.getPosition();
         if (notInRegion(position, fromPosition, toPosition)) {
             notifyPlaylistChanged(position);
-            loadPlaylistAsync();
+            reloadPlaylist();
             return;
         }
 
@@ -1351,7 +1297,7 @@ public abstract class AbstractPlayer implements Player {
         }
 
         notifyPlaylistChanged(position);
-        loadPlaylistAsync();
+        reloadPlaylist();
     }
 
     @Override
@@ -1363,7 +1309,7 @@ public abstract class AbstractPlayer implements Player {
         }
 
         notifyPlaylistChanged(playingPosition);
-        loadPlaylistAsync();
+        reloadPlaylist();
     }
 
     @Override
@@ -1376,7 +1322,7 @@ public abstract class AbstractPlayer implements Player {
         if (getPlaylistSize() < 1) {
             notifyPlaylistChanged(-1);
             notifyPlayingMusicItemChanged(null, false);
-            loadPlaylistAsync();
+            reloadPlaylist();
             return;
         }
 
@@ -1397,7 +1343,7 @@ public abstract class AbstractPlayer implements Player {
         }
 
         notifyPlaylistChanged(position);
-        loadPlaylistAsync();
+        reloadPlaylist();
     }
 
     private boolean notInRegion(int position, int fromPosition, int toPosition) {
@@ -1421,12 +1367,15 @@ public abstract class AbstractPlayer implements Player {
         private OnCompletionListener mCompletionListener;
         private OnErrorListener mErrorListener;
 
+        private Handler mMainHandler;
+
         MusicPlayerWrapper(@NonNull Context context, @NonNull MusicPlayer musicPlayer) {
             Preconditions.checkNotNull(context);
             Preconditions.checkNotNull(musicPlayer);
 
             mApplicationContext = context.getApplicationContext();
             mMusicPlayer = musicPlayer;
+            mMainHandler = new Handler(Looper.getMainLooper());
 
             initWakeLock(context);
             initDelegateMusicPlayer();
@@ -1449,26 +1398,49 @@ public abstract class AbstractPlayer implements Player {
             }
         }
 
+        private boolean isMainThread() {
+            return Looper.myLooper() == Looper.getMainLooper();
+        }
+
+        private void runOnMainThread(Runnable task) {
+            if (isMainThread()) {
+                task.run();
+                return;
+            }
+
+            mMainHandler.post(task);
+        }
+
         private void initDelegateMusicPlayer() {
             mMusicPlayer.setOnCompletionListener(new OnCompletionListener() {
                 @Override
-                public void onCompletion(MusicPlayer mp) {
-                    releaseWakeLock();
+                public void onCompletion(final MusicPlayer mp) {
+                    runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            releaseWakeLock();
 
-                    if (mCompletionListener != null) {
-                        mCompletionListener.onCompletion(mp);
-                    }
+                            if (mCompletionListener != null) {
+                                mCompletionListener.onCompletion(mp);
+                            }
+                        }
+                    });
                 }
             });
 
             mMusicPlayer.setOnErrorListener(new OnErrorListener() {
                 @Override
-                public void onError(MusicPlayer mp, int errorCode) {
-                    releaseWakeLock();
+                public void onError(final MusicPlayer mp, final int errorCode) {
+                    runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            releaseWakeLock();
 
-                    if (mErrorListener != null) {
-                        mErrorListener.onError(mp, errorCode);
-                    }
+                            if (mErrorListener != null) {
+                                mErrorListener.onError(mp, errorCode);
+                            }
+                        }
+                    });
                 }
             });
         }
@@ -1587,8 +1559,23 @@ public abstract class AbstractPlayer implements Player {
         }
 
         @Override
-        public void setOnPreparedListener(OnPreparedListener listener) {
-            mMusicPlayer.setOnPreparedListener(listener);
+        public void setOnPreparedListener(final OnPreparedListener listener) {
+            if (listener == null) {
+                mMusicPlayer.setOnPreparedListener(null);
+                return;
+            }
+
+            mMusicPlayer.setOnPreparedListener(new OnPreparedListener() {
+                @Override
+                public void onPrepared(final MusicPlayer mp) {
+                    runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onPrepared(mp);
+                        }
+                    });
+                }
+            });
         }
 
         @Override
@@ -1597,18 +1584,63 @@ public abstract class AbstractPlayer implements Player {
         }
 
         @Override
-        public void setOnSeekCompleteListener(OnSeekCompleteListener listener) {
-            mMusicPlayer.setOnSeekCompleteListener(listener);
+        public void setOnSeekCompleteListener(final OnSeekCompleteListener listener) {
+            if (listener == null) {
+                mMusicPlayer.setOnSeekCompleteListener(null);
+                return;
+            }
+
+            mMusicPlayer.setOnSeekCompleteListener(new OnSeekCompleteListener() {
+                @Override
+                public void onSeekComplete(final MusicPlayer mp) {
+                    runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onSeekComplete(mp);
+                        }
+                    });
+                }
+            });
         }
 
         @Override
-        public void setOnStalledListener(OnStalledListener listener) {
-            mMusicPlayer.setOnStalledListener(listener);
+        public void setOnStalledListener(final OnStalledListener listener) {
+            if (listener == null) {
+                mMusicPlayer.setOnStalledListener(null);
+                return;
+            }
+
+            mMusicPlayer.setOnStalledListener(new OnStalledListener() {
+                @Override
+                public void onStalled(final boolean stalled) {
+                    runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onStalled(stalled);
+                        }
+                    });
+                }
+            });
         }
 
         @Override
-        public void setOnBufferingUpdateListener(OnBufferingUpdateListener listener) {
-            mMusicPlayer.setOnBufferingUpdateListener(listener);
+        public void setOnBufferingUpdateListener(final OnBufferingUpdateListener listener) {
+            if (listener == null) {
+                mMusicPlayer.setOnBufferingUpdateListener(null);
+                return;
+            }
+
+            mMusicPlayer.setOnBufferingUpdateListener(new OnBufferingUpdateListener() {
+                @Override
+                public void onBufferingUpdate(final MusicPlayer mp, final int percent) {
+                    runOnMainThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onBufferingUpdate(mp, percent);
+                        }
+                    });
+                }
+            });
         }
 
         @Override
