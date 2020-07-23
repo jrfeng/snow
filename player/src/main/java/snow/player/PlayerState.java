@@ -16,53 +16,53 @@ import snow.player.media.MusicItem;
  * 用于保存基本的播放器状态。
  */
 public class PlayerState implements Parcelable {
-    private int mPlayProgress;
-    private long mPlayProgressUpdateTime;
+    private int playProgress;
+    private long playProgressUpdateTime;
     @Nullable
-    private MusicItem mMusicItem;
-    private int mPosition;
-    private Player.PlayMode mPlayMode;
+    private MusicItem musicItem;
+    private int position;
+    private Player.PlayMode playMode;
 
     // no persistent
-    private Player.PlaybackState mPlaybackState;
-    private int mAudioSessionId;
-    private int mBufferingPercent;
-    private long mBufferingPercentUpdateTime;
-    private boolean mStalled;
-    private int mErrorCode;
-    private String mErrorMessage;
+    private Player.PlaybackState playbackState;
+    private int audioSessionId;
+    private int bufferingPercent;
+    private long bufferingPercentUpdateTime;
+    private boolean stalled;
+    private int errorCode;
+    private String errorMessage;
 
     public PlayerState() {
-        mPlayProgress = 0;
-        mPlayProgressUpdateTime = 0;
-        mPosition = 0;
-        mPlayMode = Player.PlayMode.SEQUENTIAL;
+        playProgress = 0;
+        playProgressUpdateTime = 0;
+        position = 0;
+        playMode = Player.PlayMode.SEQUENTIAL;
 
-        mPlaybackState = Player.PlaybackState.UNKNOWN;
-        mAudioSessionId = 0;
-        mBufferingPercent = 0;
-        mBufferingPercentUpdateTime = 0;
-        mStalled = false;
-        mErrorCode = Player.Error.NO_ERROR;
-        mErrorMessage = "";
+        playbackState = Player.PlaybackState.UNKNOWN;
+        audioSessionId = 0;
+        bufferingPercent = 0;
+        bufferingPercentUpdateTime = 0;
+        stalled = false;
+        errorCode = Player.Error.NO_ERROR;
+        errorMessage = "";
     }
 
     public PlayerState(PlayerState source) {
-        mPlayProgress = source.mPlayProgress;
-        mPlayProgressUpdateTime = source.mPlayProgressUpdateTime;
-        if (source.mMusicItem != null) {
-            mMusicItem = new MusicItem(source.mMusicItem);
+        playProgress = source.playProgress;
+        playProgressUpdateTime = source.playProgressUpdateTime;
+        if (source.musicItem != null) {
+            musicItem = new MusicItem(source.musicItem);
         }
-        mPosition = source.mPosition;
-        mPlayMode = source.mPlayMode;
+        position = source.position;
+        playMode = source.playMode;
 
-        mPlaybackState = source.mPlaybackState;
-        mAudioSessionId = source.mAudioSessionId;
-        mBufferingPercent = source.mBufferingPercent;
-        mBufferingPercentUpdateTime = source.mBufferingPercentUpdateTime;
-        mStalled = source.mStalled;
-        mErrorCode = source.mErrorCode;
-        mErrorMessage = source.mErrorMessage;
+        playbackState = source.playbackState;
+        audioSessionId = source.audioSessionId;
+        bufferingPercent = source.bufferingPercent;
+        bufferingPercentUpdateTime = source.bufferingPercentUpdateTime;
+        stalled = source.stalled;
+        errorCode = source.errorCode;
+        errorMessage = source.errorMessage;
     }
 
     /**
@@ -71,7 +71,7 @@ public class PlayerState implements Parcelable {
      * @return 播放进度。
      */
     public int getPlayProgress() {
-        return mPlayProgress;
+        return playProgress;
     }
 
     /**
@@ -81,11 +81,11 @@ public class PlayerState implements Parcelable {
      */
     public void setPlayProgress(int playProgress) {
         if (playProgress < 0) {
-            mPlayProgress = 0;
+            this.playProgress = 0;
             return;
         }
 
-        mPlayProgress = playProgress;
+        this.playProgress = playProgress;
     }
 
 
@@ -95,7 +95,7 @@ public class PlayerState implements Parcelable {
      * @return 上次播放进度的更新时间。
      */
     public long getPlayProgressUpdateTime() {
-        return mPlayProgressUpdateTime;
+        return playProgressUpdateTime;
     }
 
     /**
@@ -104,7 +104,7 @@ public class PlayerState implements Parcelable {
      * @param updateTime 上次播放进度的更新时间。
      */
     public void setPlayProgressUpdateTime(long updateTime) {
-        mPlayProgressUpdateTime = updateTime;
+        playProgressUpdateTime = updateTime;
     }
 
     /**
@@ -112,14 +112,14 @@ public class PlayerState implements Parcelable {
      */
     @Nullable
     public MusicItem getMusicItem() {
-        return mMusicItem;
+        return musicItem;
     }
 
     /**
      * 设置当前播放歌曲的 MusicItem 对象。
      */
     public void setMusicItem(@Nullable MusicItem musicItem) {
-        mMusicItem = musicItem;
+        this.musicItem = musicItem;
     }
 
     /**
@@ -128,7 +128,7 @@ public class PlayerState implements Parcelable {
      * @return 播放队列的播放位置。
      */
     public int getPosition() {
-        return mPosition;
+        return position;
     }
 
     /**
@@ -138,11 +138,11 @@ public class PlayerState implements Parcelable {
      */
     public void setPosition(int position) {
         if (position < 0) {
-            mPosition = 0;
+            this.position = 0;
             return;
         }
 
-        mPosition = position;
+        this.position = position;
     }
 
     /**
@@ -152,7 +152,7 @@ public class PlayerState implements Parcelable {
      * @see Player.PlayMode
      */
     public Player.PlayMode getPlayMode() {
-        return mPlayMode;
+        return playMode;
     }
 
     /**
@@ -164,7 +164,7 @@ public class PlayerState implements Parcelable {
      * @see Player.PlayMode
      */
     public void setPlayMode(@NonNull Player.PlayMode playMode) {
-        mPlayMode = playMode;
+        this.playMode = playMode;
     }
 
     /**
@@ -174,7 +174,7 @@ public class PlayerState implements Parcelable {
      * @see Player.PlaybackState
      */
     public Player.PlaybackState getPlaybackState() {
-        return mPlaybackState;
+        return playbackState;
     }
 
     /**
@@ -191,11 +191,11 @@ public class PlayerState implements Parcelable {
      */
     public void setPlaybackState(@NonNull Player.PlaybackState playbackState) {
         Preconditions.checkNotNull(playbackState);
-        mPlaybackState = playbackState;
+        this.playbackState = playbackState;
 
         if (playbackState != Player.PlaybackState.ERROR) {
-            mErrorCode = Player.Error.NO_ERROR;
-            mErrorMessage = "";
+            errorCode = Player.Error.NO_ERROR;
+            errorMessage = "";
         }
     }
 
@@ -206,7 +206,7 @@ public class PlayerState implements Parcelable {
      * audio session id 不可用。
      */
     public int getAudioSessionId() {
-        return mAudioSessionId;
+        return audioSessionId;
     }
 
     /**
@@ -216,14 +216,14 @@ public class PlayerState implements Parcelable {
      *                       设为 0 （API 21: {@link android.media.AudioManager#AUDIO_SESSION_ID_GENERATE}）。
      */
     public void setAudioSessionId(int audioSessionId) {
-        mAudioSessionId = audioSessionId;
+        this.audioSessionId = audioSessionId;
     }
 
     /**
      * 获取当前音乐的缓存进度。百分比值，范围为 [0 ~ 100]。
      */
     public int getBufferingPercent() {
-        return mBufferingPercent;
+        return bufferingPercent;
     }
 
     /**
@@ -231,38 +231,38 @@ public class PlayerState implements Parcelable {
      */
     public void setBufferingPercent(int bufferingPercent) {
         if (bufferingPercent < 0) {
-            mBufferingPercent = 0;
+            this.bufferingPercent = 0;
             return;
         }
 
         if (bufferingPercent > 100) {
-            mBufferingPercent = 100;
+            this.bufferingPercent = 100;
             return;
         }
 
-        mBufferingPercent = bufferingPercent;
+        this.bufferingPercent = bufferingPercent;
     }
 
     /**
      * 获取上一次缓存进度的更新时间（单位：毫秒 ms）。
      */
     public long getBufferingPercentUpdateTime() {
-        return mBufferingPercentUpdateTime;
+        return bufferingPercentUpdateTime;
     }
 
     /**
      * 设置上一次缓存进度的更新时间（单位：毫秒 ms）。
      */
     public void setBufferingPercentUpdateTime(long bufferingPercentUpdateTime) {
-        mBufferingPercentUpdateTime = bufferingPercentUpdateTime;
+        this.bufferingPercentUpdateTime = bufferingPercentUpdateTime;
     }
 
     public boolean isStalled() {
-        return mStalled;
+        return stalled;
     }
 
     public void setStalled(boolean stalled) {
-        mStalled = stalled;
+        this.stalled = stalled;
     }
 
     /**
@@ -271,7 +271,7 @@ public class PlayerState implements Parcelable {
      * @see Player.Error
      */
     public int getErrorCode() {
-        return mErrorCode;
+        return errorCode;
     }
 
     /**
@@ -284,14 +284,14 @@ public class PlayerState implements Parcelable {
      * @see Player.Error
      */
     public void setErrorCode(int errorCode) {
-        mErrorCode = errorCode;
+        this.errorCode = errorCode;
     }
 
     /**
      * 获取错误信息。
      */
     public String getErrorMessage() {
-        return mErrorMessage;
+        return errorMessage;
     }
 
     /**
@@ -302,7 +302,7 @@ public class PlayerState implements Parcelable {
      */
     public void setErrorMessage(@NonNull String errorMessage) {
         Preconditions.checkNotNull(errorMessage);
-        mErrorMessage = errorMessage;
+        this.errorMessage = errorMessage;
     }
 
     @Override
@@ -312,85 +312,86 @@ public class PlayerState implements Parcelable {
 
         PlayerState other = (PlayerState) o;
 
-        return Objects.equal(mPlayProgress, other.mPlayProgress)
-                && Objects.equal(mPlayProgressUpdateTime, other.mPlayProgressUpdateTime)
-                && Objects.equal(mMusicItem, other.mMusicItem)
-                && Objects.equal(mPosition, other.mPosition)
-                && Objects.equal(mPlayMode, other.mPlayMode)
-                && Objects.equal(mPlaybackState, other.mPlaybackState)
-                && Objects.equal(mAudioSessionId, other.mAudioSessionId)
-                && Objects.equal(mBufferingPercent, other.mBufferingPercent)
-                && Objects.equal(mBufferingPercentUpdateTime, other.mBufferingPercentUpdateTime)
-                && Objects.equal(mStalled, other.mStalled)
-                && Objects.equal(mErrorCode, other.mErrorCode)
-                && Objects.equal(mErrorMessage, other.mErrorMessage);
+        return Objects.equal(playProgress, other.playProgress)
+                && Objects.equal(playProgressUpdateTime, other.playProgressUpdateTime)
+                && Objects.equal(musicItem, other.musicItem)
+                && Objects.equal(position, other.position)
+                && Objects.equal(playMode, other.playMode)
+                && Objects.equal(playbackState, other.playbackState)
+                && Objects.equal(audioSessionId, other.audioSessionId)
+                && Objects.equal(bufferingPercent, other.bufferingPercent)
+                && Objects.equal(bufferingPercentUpdateTime, other.bufferingPercentUpdateTime)
+                && Objects.equal(stalled, other.stalled)
+                && Objects.equal(errorCode, other.errorCode)
+                && Objects.equal(errorMessage, other.errorMessage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mPlayProgress,
-                mPlayProgressUpdateTime,
-                mMusicItem,
-                mPosition,
-                mPlayMode,
-                mPlaybackState,
-                mAudioSessionId,
-                mBufferingPercent,
-                mBufferingPercentUpdateTime,
-                mStalled,
-                mErrorCode,
-                mErrorMessage);
+        return Objects.hashCode(playProgress,
+                playProgressUpdateTime,
+                musicItem,
+                position,
+                playMode,
+                playbackState,
+                audioSessionId,
+                bufferingPercent,
+                bufferingPercentUpdateTime,
+                stalled,
+                errorCode,
+                errorMessage);
     }
 
     @NonNull
     @Override
     public String toString() {
-        return "PlayerState{" + "playProgress=" + mPlayProgress +
-                ", playProgressUpdateTime=" + mPlayProgressUpdateTime +
-                ", musicItem=" + mMusicItem +
-                ", position=" + mPosition +
-                ", playMode=" + mPlayMode +
-                ", playbackState=" + mPlaybackState +
-                ", audioSessionId=" + mAudioSessionId +
-                ", bufferingPercent=" + mBufferingPercent +
-                ", bufferingPercentUpdateTime=" + mBufferingPercentUpdateTime +
-                ", stalled=" + mStalled +
-                ", errorCode=" + mErrorCode +
-                ", errorMessage='" + mErrorMessage + '\'' +
+        return "PlayerState{" +
+                "playProgress=" + playProgress +
+                ", playProgressUpdateTime=" + playProgressUpdateTime +
+                ", musicItem=" + musicItem +
+                ", position=" + position +
+                ", playMode=" + playMode +
+                ", playbackState=" + playbackState +
+                ", audioSessionId=" + audioSessionId +
+                ", bufferingPercent=" + bufferingPercent +
+                ", bufferingPercentUpdateTime=" + bufferingPercentUpdateTime +
+                ", stalled=" + stalled +
+                ", errorCode=" + errorCode +
+                ", errorMessage='" + errorMessage + '\'' +
                 '}';
     }
 
     protected PlayerState(Parcel in) {
-        mPlayProgress = in.readInt();
-        mPlayProgressUpdateTime = in.readLong();
-        mMusicItem = in.readParcelable(Thread.currentThread().getContextClassLoader());
-        mPosition = in.readInt();
-        mPlayMode = Player.PlayMode.values()[in.readInt()];
+        playProgress = in.readInt();
+        playProgressUpdateTime = in.readLong();
+        musicItem = in.readParcelable(Thread.currentThread().getContextClassLoader());
+        position = in.readInt();
+        playMode = Player.PlayMode.values()[in.readInt()];
 
-        mPlaybackState = Player.PlaybackState.values()[in.readInt()];
-        mAudioSessionId = in.readInt();
-        mBufferingPercent = in.readInt();
-        mBufferingPercentUpdateTime = in.readLong();
-        mStalled = in.readByte() != 0;
-        mErrorCode = in.readInt();
-        mErrorMessage = in.readString();
+        playbackState = Player.PlaybackState.values()[in.readInt()];
+        audioSessionId = in.readInt();
+        bufferingPercent = in.readInt();
+        bufferingPercentUpdateTime = in.readLong();
+        stalled = in.readByte() != 0;
+        errorCode = in.readInt();
+        errorMessage = in.readString();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mPlayProgress);
-        dest.writeLong(mPlayProgressUpdateTime);
-        dest.writeParcelable(mMusicItem, flags);
-        dest.writeInt(mPosition);
-        dest.writeInt(mPlayMode.ordinal());
+        dest.writeInt(playProgress);
+        dest.writeLong(playProgressUpdateTime);
+        dest.writeParcelable(musicItem, flags);
+        dest.writeInt(position);
+        dest.writeInt(playMode.ordinal());
 
-        dest.writeInt(mPlaybackState.ordinal());
-        dest.writeInt(mAudioSessionId);
-        dest.writeInt(mBufferingPercent);
-        dest.writeLong(mBufferingPercentUpdateTime);
-        dest.writeByte((byte) (mStalled ? 1 : 0));
-        dest.writeInt(mErrorCode);
-        dest.writeString(mErrorMessage);
+        dest.writeInt(playbackState.ordinal());
+        dest.writeInt(audioSessionId);
+        dest.writeInt(bufferingPercent);
+        dest.writeLong(bufferingPercentUpdateTime);
+        dest.writeByte((byte) (stalled ? 1 : 0));
+        dest.writeInt(errorCode);
+        dest.writeString(errorMessage);
     }
 
     @Override
