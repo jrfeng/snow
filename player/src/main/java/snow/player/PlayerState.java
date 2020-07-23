@@ -342,6 +342,24 @@ public class PlayerState implements Parcelable {
                 mErrorMessage);
     }
 
+    @NonNull
+    @Override
+    public String toString() {
+        return "PlayerState{" + "playProgress=" + mPlayProgress +
+                ", playProgressUpdateTime=" + mPlayProgressUpdateTime +
+                ", musicItem=" + mMusicItem +
+                ", position=" + mPosition +
+                ", playMode=" + mPlayMode +
+                ", playbackState=" + mPlaybackState +
+                ", audioSessionId=" + mAudioSessionId +
+                ", bufferingPercent=" + mBufferingPercent +
+                ", bufferingPercentUpdateTime=" + mBufferingPercentUpdateTime +
+                ", stalled=" + mStalled +
+                ", errorCode=" + mErrorCode +
+                ", errorMessage='" + mErrorMessage + '\'' +
+                '}';
+    }
+
     protected PlayerState(Parcel in) {
         mPlayProgress = in.readInt();
         mPlayProgressUpdateTime = in.readLong();
