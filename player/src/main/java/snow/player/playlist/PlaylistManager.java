@@ -134,12 +134,19 @@ public abstract class PlaylistManager {
 
     /**
      * 以异步的方式获取当前播放队列。
+     * <p>
+     * 回调接口会在主线程上调用。
      */
     public void getPlaylistAsync(final Callback callback) {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                callback.onFinished(getPlaylist());
+                mMainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onFinished(getPlaylist());
+                    }
+                });
             }
         });
     }
