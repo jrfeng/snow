@@ -1736,19 +1736,23 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                 }));
             }
 
-            addCustomAction(new CustomAction(ACTION_SKIP_TO_NEXT, R.id.snow_notif_skip_to_next, new Runnable() {
+            CustomAction skipToNext = new CustomAction(ACTION_SKIP_TO_NEXT, R.id.snow_notif_skip_to_next, new Runnable() {
                 @Override
                 public void run() {
                     skipToNext();
                 }
-            }));
+            });
+            skipToNext.setShowOnContentView(true);
+            addCustomAction(skipToNext);
 
-            addCustomAction(new CustomAction(ACTION_PLAY_PAUSE, R.id.snow_notif_play_pause, new Runnable() {
+            CustomAction playPause = new CustomAction(ACTION_PLAY_PAUSE, R.id.snow_notif_play_pause, new Runnable() {
                 @Override
                 public void run() {
                     playOrPause();
                 }
-            }));
+            });
+            playPause.setShowOnContentView(true);
+            addCustomAction(playPause);
         }
 
         @NonNull
