@@ -23,14 +23,6 @@ public class PlayerConfigTest {
     }
 
     @Test
-    public void setPlayerType() {
-        final PlayerManager.PlayerType playerType = PlayerManager.PlayerType.RADIO_STATION;
-
-        mPlayerConfig.setPlayerType(playerType);
-        assertEquals(playerType, mPlayerConfig.getPlayerType());
-    }
-
-    @Test
     public void setSoundQuality() {
         final Player.SoundQuality soundQuality = Player.SoundQuality.HIGH;
 
