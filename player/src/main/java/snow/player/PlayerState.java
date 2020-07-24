@@ -180,7 +180,9 @@ public class PlayerState implements Parcelable {
     /**
      * 设置播放状态。
      *
-     * @param playbackState 要设置的播放状态。只能为这些值之一：{@link Player.PlaybackState#UNKNOWN},
+     * @param playbackState 要设置的播放状态。如果该参数的值不是 {@link Player.PlaybackState#ERROR} 则会
+     *                      清除错误码（重置为 {@link Player.Error#NO_ERROR}）与错误信息。
+     *                      只能是这些值之一：{@link Player.PlaybackState#UNKNOWN},
      *                      {@link Player.PlaybackState#PREPARING},
      *                      {@link Player.PlaybackState#PREPARED},
      *                      {@link Player.PlaybackState#PLAYING},
