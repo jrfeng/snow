@@ -72,7 +72,7 @@
                     android:background="@drawable/snow_bg_notif_button"
                     android:contentDescription="@string/snow_des_play_pause"
                     android:scaleType="centerInside"
-                    android:src="@drawable/snow_ic_play" />
+                    android:src="@drawable/snow_ic_play_pause" />
 
                 <ImageButton
                     android:id="@+id/snow_notif_skip_to_next"

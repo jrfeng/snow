@@ -1801,7 +1801,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             contentView.setTextViewText(R.id.snow_notif_text, getContentText(getPlayingMusicItem().getArtist()));
 
             if (isPreparingOrPlayingState()) {
-                contentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
+                contentView.setInt(R.id.snow_notif_play_pause, "setImageLevel", 1);
             }
 
             return contentView;
@@ -1816,7 +1816,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             bigContentView.setTextViewText(R.id.snow_notif_text, getContentText(getPlayingMusicItem().getArtist()));
 
             if (isPreparingOrPlayingState()) {
-                bigContentView.setImageViewResource(R.id.snow_notif_play_pause, R.drawable.snow_ic_pause);
+                bigContentView.setInt(R.id.snow_notif_play_pause, "setImageLevel", 1);
             }
 
             return bigContentView;
