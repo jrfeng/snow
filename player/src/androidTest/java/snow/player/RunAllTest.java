@@ -9,8 +9,8 @@ import snow.player.playlist.PlaylistTest;
 
 @Suite.SuiteClasses({
         // snow.player
-        AbstractPlayerTest.class,
         PlayerStateTest.class,
+        PersistentPlayerStateTest.class,
         PlayerConfigTest.class,
         // snow.player.media
         MusicItemTest.class,
