@@ -49,6 +49,7 @@ import java.util.Map;
 
 import channel.helper.ChannelHelper;
 import channel.helper.Dispatcher;
+import channel.helper.DispatcherUtil;
 import channel.helper.pipe.CustomActionPipe;
 
 import channel.helper.pipe.MessengerPipe;
@@ -60,7 +61,7 @@ import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.playlist.PlaylistManager;
 
-@SuppressWarnings("EmptyMethod")
+
 public class PlayerService extends MediaBrowserServiceCompat implements PlayerManager {
     public static final String DEFAULT_MEDIA_ROOT_ID = "root";
 
@@ -73,7 +74,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     private PlayerState mPlayerState;
 
     private PlaylistManager mPlaylistManager;
-    private PlayerImp mPlaylistPlayer;
+    private PlayerImp mPlayer;
     private CustomActionPipe mControllerPipe;
 
     private HashMap<String, OnCommandCallback> mCommandCallbackMap;
@@ -90,7 +91,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private HeadsetHookHelper mHeadsetHookHelper;
 
-    private RemoteViewManager mRemoteViewManager;
+    private RemoteView mRemoteView;
 
     @Nullable
     private AudioEffectManager mAudioEffectManager;
@@ -127,6 +128,46 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         updateNotificationView();
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        MediaButtonReceiver.handleIntent(mMediaSession, intent);
+
+        Runnable task = mStartCommandActionMap.get(intent.getAction());
+        if (task != null) {
+            task.run();
+        }
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Nullable
+    @Override
+    public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, @Nullable Bundle rootHints) {
+        return new BrowserRoot(DEFAULT_MEDIA_ROOT_ID, null);
+    }
+
+    @Override
+    public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
+        result.sendResult(null);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        stopForegroundEx(true);
+
+        mRemoteView.onRelease();
+
+        mMediaSession.release();
+        mPlayer.release();
+
+        mPlayer = null;
+
+        if (mAudioEffectManager != null) {
+            mAudioEffectManager.release();
+        }
+    }
+
     private void initComponentFactory() {
         try {
             ComponentName service = new ComponentName(this, this.getClass());
@@ -157,7 +198,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initPlayer() {
-        mPlaylistPlayer = new PlayerImp(this,
+        mPlayer = new PlayerImp(this,
                 mPlayerConfig,
                 mPlayerState,
                 mPlaylistManager);
@@ -168,40 +209,28 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                 = ChannelHelper.newDispatcher(PlayerManager.class, this);
 
         final Dispatcher playerDispatcher =
-                ChannelHelper.newDispatcher(Player.class, mPlaylistPlayer);
+                ChannelHelper.newDispatcher(Player.class, mPlayer);
 
-        mControllerPipe = new CustomActionPipe(new Dispatcher() {
-            @Override
-            public boolean dispatch(Map<String, Object> data) {
-                if (playerManagerDispatcher.dispatch(data)) {
-                    return true;
-                }
-
-                return playerDispatcher.dispatch(data);
-            }
-
-            @Override
-            public boolean match(Map<String, Object> data) {
-                // ignore
-                return false;
-            }
-        });
+        mControllerPipe = new CustomActionPipe(
+                DispatcherUtil.merge(playerManagerDispatcher, playerDispatcher)
+        );
     }
 
     private void initRemoteViewManager() {
-        RemoteView playlistRemoteView = createPlaylistRemoteView();
+        RemoteView remoteView = createRemoteView();
 
-        if (playlistRemoteView != null) {
-            playlistRemoteView.init(this);
+        if (remoteView == null) {
+            return;
         }
 
+        remoteView.init(this);
         MusicItem musicItem = getPlayingMusicItem();
 
-        if (musicItem != null && playlistRemoteView != null) {
-            playlistRemoteView.setPlayingMusicItem(musicItem);
+        if (musicItem != null) {
+            remoteView.setPlayingMusicItem(musicItem);
         }
 
-        mRemoteViewManager = new RemoteViewManager(playlistRemoteView);
+        mRemoteView = remoteView;
     }
 
     private void initHeadsetHookHelper() {
@@ -302,12 +331,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     @Nullable
-    protected final RemoteView createPlaylistRemoteView() {
-        if (injectPlaylistRemoteView()) {
-            return mComponentFactory.createPlaylistRemoteView();
+    protected final RemoteView createRemoteView() {
+        if (injectRemoteView()) {
+            return mComponentFactory.createRemoteView();
         }
 
-        return onCreatePlaylistRemoteView();
+        return onCreateRemoteView();
     }
 
     /***
@@ -319,7 +348,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @return {@link RemoteView} 对象，返回 null 时将隐藏列表播放器控制器
      */
     @Nullable
-    protected RemoteView onCreatePlaylistRemoteView() {
+    protected RemoteView onCreateRemoteView() {
         return new SimplePlaylistRemoteView();
     }
 
@@ -361,46 +390,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return null;
     }
 
-    @Nullable
-    @Override
-    public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, @Nullable Bundle rootHints) {
-        return new BrowserRoot(DEFAULT_MEDIA_ROOT_ID, null);
-    }
-
-    @Override
-    public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
-        result.sendResult(null);
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        MediaButtonReceiver.handleIntent(mMediaSession, intent);
-
-        Runnable task = mStartCommandActionMap.get(intent.getAction());
-        if (task != null) {
-            task.run();
-        }
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        stopForegroundEx(true);
-
-        mRemoteViewManager.onRelease();
-
-        mMediaSession.release();
-        mPlaylistPlayer.release();
-
-        mPlaylistPlayer = null;
-
-        if (mAudioEffectManager != null) {
-            mAudioEffectManager.release();
-        }
-    }
-
     @Override
     public void setSoundQuality(Player.SoundQuality soundQuality) {
         if (soundQuality == mPlayerConfig.getSoundQuality()) {
@@ -412,7 +401,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void notifySoundQualityChanged() {
-        mPlaylistPlayer.notifySoundQualityChanged();
+        mPlayer.notifySoundQualityChanged();
     }
 
     @Override
@@ -464,7 +453,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void notifyAudioEffectEnableChanged() {
-        mPlaylistPlayer.notifyAudioEffectEnableChanged();
+        mPlayer.notifyAudioEffectEnableChanged();
     }
 
     @Override
@@ -478,7 +467,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void notifyOnlyWifiNetworkChanged() {
-        mPlaylistPlayer.notifyOnlyWifiNetworkChanged();
+        mPlayer.notifyOnlyWifiNetworkChanged();
     }
 
     /**
@@ -501,13 +490,13 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         MessengerPipe pipe = new MessengerPipe(listener);
 
         addOnCommandCallback(token, ChannelHelper.newEmitter(OnCommandCallback.class, pipe));
-        mPlaylistPlayer.addStateListener(token, ChannelHelper.newEmitter(PlayerStateListener.class, pipe));
+        mPlayer.addStateListener(token, ChannelHelper.newEmitter(PlayerStateListener.class, pipe));
     }
 
     @Override
     public void unregisterPlayerStateListener(String token) {
         removeOnConfigChangeListener(token);
-        mPlaylistPlayer.removeStateListener(token);
+        mPlayer.removeStateListener(token);
     }
 
     /**
@@ -608,14 +597,14 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      */
     @Nullable
     protected final Bundle getPlaylistExtra() {
-        return mPlaylistPlayer.getPlaylistExtra();
+        return mPlayer.getPlaylistExtra();
     }
 
     /**
      * 当前是否正在播放音乐。
      */
     protected final boolean isPlaying() {
-        return mPlaylistPlayer.isPlaying();
+        return mPlayer.isPlaying();
     }
 
     /**
@@ -642,7 +631,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     public final boolean isStalled() {
-        return mPlaylistPlayer.isStalled();
+        return mPlayer.isStalled();
     }
 
     /**
@@ -681,7 +670,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 要求 Service 更新 NotificationView，如果没有设置 NotificationView，则忽略本次操作。
      */
     protected final void updateNotificationView() {
-        if (mRemoteViewManager.noRemoteView()) {
+        if (noRemoteView()) {
             return;
         }
 
@@ -691,7 +680,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return;
         }
 
-        mRemoteViewManager.setPlayingMusicItem(musicItem);
+        mRemoteView.setPlayingMusicItem(musicItem);
 
         if (isPreparingOrPlayingState() && !isForeground()) {
             startForeground();
@@ -703,6 +692,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         updateNotification();
+    }
+
+    private boolean noRemoteView() {
+        return mRemoteView == null;
     }
 
     private boolean isPreparingOrPlayingState() {
@@ -720,7 +713,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 启动前台 Service。
      */
     protected final void startForeground() {
-        if (mRemoteViewManager.noRemoteView()) {
+        if (noRemoteView()) {
             return;
         }
 
@@ -744,7 +737,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void updateNotification() {
-        if (mRemoteViewManager.noRemoteView()) {
+        if (noRemoteView()) {
             return;
         }
 
@@ -758,7 +751,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     @NonNull
     private Notification createNotification() {
-        return mRemoteViewManager.createRemoteView();
+        return mRemoteView.createNotification();
     }
 
     /**
@@ -819,9 +812,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return Uri.parse(musicItem.getUri());
     }
 
-    private Player getPlayer() {
-        // TODO 优化
-        return mPlaylistPlayer;
+    /**
+     * 获取播放器的 Player 对象。可用于对播放器进行控制。
+     */
+    protected final Player getPlayer() {
+        return mPlayer;
     }
 
     /**
@@ -879,23 +874,37 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 下一曲。
      */
     protected final void skipToNext() {
-        mPlaylistPlayer.skipToNext();
+        getPlayer().skipToNext();
     }
 
     /**
      * 上一曲。
      */
     protected final void skipToPrevious() {
-        mPlaylistPlayer.skipToPrevious();
+        getPlayer().skipToPrevious();
     }
 
+    /**
+     * 正在准备播放器。
+     */
     protected void onPreparing() {
         updateNotificationView();
     }
 
+    /**
+     * 播放器准备完毕。
+     *
+     * @param audioSessionId 播放器的 audio session id
+     */
     protected void onPrepared(int audioSessionId) {
     }
 
+    /**
+     * 播放器开始播放。
+     *
+     * @param progress   播放进度
+     * @param updateTime 播放进度的更新时间
+     */
     protected void onPlaying(int progress, long updateTime) {
         mMediaSession.setActive(true);
 
@@ -918,6 +927,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         updateNotificationView();
     }
 
+    /**
+     * 已暂停播放。
+     */
     protected void onPaused() {
         PlaybackStateCompat playbackState = buildPlaybackState(
                 PlaybackStateCompat.STATE_PAUSED,
@@ -938,10 +950,19 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         updateNotificationView();
     }
 
+    /**
+     * 播放器的 {@code stalled} 状态发生了改变。
+     *
+     * @param stalled 播放器的 {@code stalled} 状态。当缓冲区中没有足够的数据支持继续播放时，该参数为 true，
+     *                否则为 false
+     */
     protected void onStalledChanged(boolean stalled) {
         updateNotificationView();
     }
 
+    /**
+     * 播放器已停止播放。
+     */
     protected void onStopped() {
         mMediaSession.setActive(false);
 
@@ -959,6 +980,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         updateNotificationView();
     }
 
+    /**
+     * 播放器发生了错误。
+     *
+     * @param errorCode    错误码
+     * @param errorMessage 错误信息
+     */
     protected void onError(int errorCode, String errorMessage) {
         PlaybackStateCompat playbackState = buildPlaybackState(
                 PlaybackStateCompat.STATE_ERROR,
@@ -977,15 +1004,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         updateNotificationView();
     }
 
-    protected void onPlayComplete(MusicItem musicItem) {
-    }
-
-    protected void onRequestAudioFocus(boolean success) {
-    }
-
-    protected void onLossAudioFocus() {
-    }
-
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
         mMediaSession.setMetadata(getFreshMediaMetadata());
         updateNotificationView();
@@ -995,10 +1013,22 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
     }
 
+    /**
+     * 该方法会在媒体按钮被触发时调用。
+     *
+     * @param mediaButtonEvent 被触发的每天按钮
+     * @return 是否已处理该媒体按钮事件，如果已处理，则应该返回 true，否则返回 false
+     */
     protected boolean onMediaButtonEvent(Intent mediaButtonEvent) {
         return mHeadsetHookHelper.handleMediaButton(mediaButtonEvent);
     }
 
+    /**
+     * 该方法会在 MediaSession 接收到 custom action 时调用。
+     *
+     * @param action 自定义动作的名称
+     * @param extras 自定义动作携带的额外数据
+     */
     protected void onCustomAction(String action, Bundle extras) {
         mControllerPipe.dispatch(action, extras);
     }
@@ -1072,24 +1102,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         @Override
-        protected void onPlayComplete(MusicItem musicItem) {
-            super.onPlayComplete(musicItem);
-            PlayerService.this.onPlayComplete(musicItem);
-        }
-
-        @Override
-        protected void onRequestAudioFocus(boolean success) {
-            super.onRequestAudioFocus(success);
-            PlayerService.this.onRequestAudioFocus(success);
-        }
-
-        @Override
-        protected void onLossAudioFocus() {
-            super.onLossAudioFocus();
-            PlayerService.this.onLossAudioFocus();
-        }
-
-        @Override
         protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
             super.onPlayingMusicItemChanged(musicItem);
             PlayerService.this.onPlayingMusicItemChanged(musicItem);
@@ -1130,7 +1142,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         public void onSkipToQueueItem(long id) {
-            mPlaylistPlayer.playPause((int) id);
+            mPlayer.playPause((int) id);
         }
 
         @Override
@@ -1171,56 +1183,22 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         @Override
         public void onSetRepeatMode(int repeatMode) {
             if (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE) {
-                mPlaylistPlayer.setPlayMode(Player.PlayMode.LOOP);
+                mPlayer.setPlayMode(Player.PlayMode.LOOP);
                 return;
             }
 
-            mPlaylistPlayer.setPlayMode(Player.PlayMode.SEQUENTIAL);
+            mPlayer.setPlayMode(Player.PlayMode.SEQUENTIAL);
         }
 
         @Override
         public void onSetShuffleMode(int shuffleMode) {
             if (shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_NONE ||
                     shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_INVALID) {
-                mPlaylistPlayer.setPlayMode(Player.PlayMode.SEQUENTIAL);
+                mPlayer.setPlayMode(Player.PlayMode.SEQUENTIAL);
                 return;
             }
 
-            mPlaylistPlayer.setPlayMode(Player.PlayMode.SHUFFLE);
-        }
-    }
-
-    private static class RemoteViewManager {
-        private RemoteView mPlaylistRemoteView;
-
-        RemoteViewManager(RemoteView playlistRemoteView) {
-            mPlaylistRemoteView = playlistRemoteView;
-        }
-
-        boolean noRemoteView() {
-            return mPlaylistRemoteView == null;
-        }
-
-        void setPlayingMusicItem(MusicItem musicItem) {
-            if (noRemoteView()) {
-                return;
-            }
-
-            mPlaylistRemoteView.setPlayingMusicItem(musicItem);
-        }
-
-        Notification createRemoteView() {
-            if (noRemoteView()) {
-                throw new IllegalStateException("not set remote view.");
-            }
-
-            return mPlaylistRemoteView.createNotification();
-        }
-
-        void onRelease() {
-            if (mPlaylistRemoteView != null) {
-                mPlaylistRemoteView.onRelease();
-            }
+            mPlayer.setPlayMode(Player.PlayMode.SHUFFLE);
         }
     }
 
@@ -2076,7 +2054,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 可自定义的组件：
      * <ul>
      *     <li>音乐播放器：{@link #createMusicPlayer(Context)}</li>
-     *     <li>列表播放器的通知栏控制器：{@link #createPlaylistRemoteView()}</li>
+     *     <li>列表播放器的通知栏控制器：{@link #createRemoteView()}</li>
      *     <li>音频特性引擎：{@link #createAudioEffectManager()}</li>
      *     <li>历史记录器：{@link #createHistoryRecorder()}</li>
      * </ul>
@@ -2151,7 +2129,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @return {@link RemoteView} 对象，可为 null。为 null 时将隐藏列表播放器的通知栏控制器
          */
         @Nullable
-        public RemoteView createPlaylistRemoteView() {
+        public RemoteView createRemoteView() {
             return null;
         }
 
@@ -2204,8 +2182,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return shouldInject("retrieveMusicItemUri", MusicItem.class, Player.SoundQuality.class);
     }
 
-    private boolean injectPlaylistRemoteView() {
-        return shouldInject("createPlaylistRemoteView");
+    private boolean injectRemoteView() {
+        return shouldInject("createRemoteView");
     }
 
     private boolean injectAudioEffectManager() {
@@ -2214,9 +2192,5 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private boolean injectHistoryRecorder() {
         return shouldInject("createHistoryRecorder");
-    }
-
-    private boolean injectMusicItemProvider() {
-        return shouldInject("createMusicItemProvider", Context.class);
     }
 }
