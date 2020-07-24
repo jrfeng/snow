@@ -8,23 +8,12 @@ import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
 
 public class TestPlaylistManager extends PlaylistManager {
-    private Tester mTester;
     private Playlist mPlaylist;
+    private Callback mCallback;
 
     public TestPlaylistManager(@NonNull Context context, Playlist playlist) {
         super(context, "TestPlaylistManager");
         mPlaylist = playlist;
-        mTester = new Tester();
-    }
-
-    public Tester tester() {
-        return mTester;
-    }
-
-    public class Tester {
-        public void setPlaylist(Playlist playlist) {
-            mPlaylist = playlist;
-        }
     }
 
     @Override
@@ -40,17 +29,16 @@ public class TestPlaylistManager extends PlaylistManager {
 
     @Override
     public void getPlaylistAsync(final Callback callback) {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(300);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        mCallback = callback;
+    }
 
-                callback.onFinished(mPlaylist);
-            }
-        }.start();
+    public void updateInternalPlaylist(Playlist playlist) {
+        mPlaylist = playlist;
+    }
+
+    public void notifyPlaylistLoaded() {
+        if (mCallback != null) {
+            mCallback.onFinished(mPlaylist);
+        }
     }
 }
