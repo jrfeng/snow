@@ -785,7 +785,17 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
-        if (isPreparing() || mLoadingPlaylist) {
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
+                @Override
+                public void run() {
+                    play();
+                }
+            };
+            return;
+        }
+
+        if (isPreparing()) {
             mPreparedAction = new Runnable() {
                 @Override
                 public void run() {
@@ -815,7 +825,17 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
-        if (isPreparing() || mLoadingPlaylist) {
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
+                @Override
+                public void run() {
+                    pause();
+                }
+            };
+            return;
+        }
+
+        if (isPreparing()) {
             mPreparedAction = new Runnable() {
                 @Override
                 public void run() {
@@ -838,6 +858,13 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = null;
+            releaseMusicPlayer();
+            notifyStopped();
+            return;
+        }
+
         if (isPrepared()) {
             mMusicPlayer.stop();
         }
@@ -855,12 +882,22 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    private void seekTo(final int progress, Runnable seekCompleteAction) {
+    private void seekTo(final int progress, final Runnable seekCompleteAction) {
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
+                @Override
+                public void run() {
+                    seekTo(progress, seekCompleteAction);
+                }
+            };
+            return;
+        }
+
         if (isPreparing()) {
             mPreparedAction = new Runnable() {
                 @Override
                 public void run() {
-                    seekTo(progress);
+                    seekTo(progress, seekCompleteAction);
                 }
             };
             return;
