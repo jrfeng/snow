@@ -259,10 +259,24 @@ public class PlayerState implements Parcelable {
         this.bufferingPercentUpdateTime = bufferingPercentUpdateTime;
     }
 
+    /**
+     * 获取 {@code stalled} 状态。
+     *
+     * <b>{@code stalled} 状态</b>：播放器的缓冲区中没有足够的数据支持播放器继续播放时的状态。
+     *
+     * @return {@code stalled} 状态。当播放器的缓冲区没有足够的数据支持继续播放时，则返回 true。
+     */
     public boolean isStalled() {
         return stalled;
     }
 
+    /**
+     * 设置 {@code stalled} 状态。
+     *
+     * <b>{@code stalled} 状态</b>：播放器的缓冲区中没有足够的数据支持播放器继续播放时的状态。
+     *
+     * @param stalled {@code stalled} 状态
+     */
     public void setStalled(boolean stalled) {
         this.stalled = stalled;
     }
