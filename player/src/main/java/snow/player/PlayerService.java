@@ -172,6 +172,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         try {
             ComponentName service = new ComponentName(this, this.getClass());
             ServiceInfo serviceInfo = getPackageManager().getServiceInfo(service, PackageManager.GET_META_DATA);
+            if (serviceInfo.metaData == null) {
+                return;
+            }
+
             String factoryName = serviceInfo.metaData.getString(NAME_COMPONENT_FACTORY);
             if (factoryName == null) {
                 return;
@@ -179,7 +183,13 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
             Class<?> clazz = Class.forName(factoryName);
             mComponentFactory = (ComponentFactory) clazz.newInstance();
-        } catch (Exception e) {
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
     }
