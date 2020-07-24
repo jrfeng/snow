@@ -282,7 +282,7 @@ public abstract class AbstractPlayer implements Player {
      *
      * @param preparedAction 在音乐播放器准备完成后要执行的操作
      */
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     protected final void prepareMusicPlayer(@Nullable Runnable preparedAction) {
         releaseMusicPlayer();
 
@@ -541,7 +541,7 @@ public abstract class AbstractPlayer implements Player {
     /**
      * 释放当前播放器所持有的 {@link MusicPlayer} 对象（测试用）。
      */
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     protected final void releaseMusicPlayer() {
         if (mMusicPlayer != null) {
             mMusicPlayer.release();
