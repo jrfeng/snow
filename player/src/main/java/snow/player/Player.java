@@ -33,7 +33,7 @@ public interface Player extends PlaylistManager.OnModifyPlaylistListener {
     /**
      * 开始或暂停播放。
      */
-    void playOrPause();
+    void playPause();
 
     /**
      * 调整音乐播放进度。
@@ -65,7 +65,7 @@ public interface Player extends PlaylistManager.OnModifyPlaylistListener {
     /**
      * 播放队列中 position 位置处的音乐。
      */
-    void playOrPause(int position);
+    void playPause(int position);
 
     /**
      * 设置播放器的播放模式。
