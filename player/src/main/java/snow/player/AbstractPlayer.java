@@ -74,6 +74,8 @@ public abstract class AbstractPlayer implements Player {
     private Random mRandom;
     private Disposable mRetrieveUriDisposable;
 
+    private boolean mReleased;
+
     /**
      * @param context      {@link Context} 对象，不能为 null
      * @param playerConfig {@link PlayerConfig} 对象，保存了播放器的初始配置信息，不能为 null
@@ -216,6 +218,7 @@ public abstract class AbstractPlayer implements Player {
      * 释放播放器所占用的资源。注意！调用该方法后，就不允许在使用当前 Player 对象了，否则会导致不可预见的错误。
      */
     public void release() {
+        mReleased = true;
         disposeRetrieveUri();
         releaseMusicPlayer();
 
@@ -348,6 +351,10 @@ public abstract class AbstractPlayer implements Player {
         mOnPreparedListener = new MusicPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MusicPlayer mp) {
+                if (mReleased) {
+                    return;
+                }
+
                 mp.setLooping(isLooping());
 
                 if (mPlayerConfig.isAudioEffectEnabled()) {
@@ -382,6 +389,10 @@ public abstract class AbstractPlayer implements Player {
         mOnSeekCompleteListener = new MusicPlayer.OnSeekCompleteListener() {
             @Override
             public void onSeekComplete(MusicPlayer mp) {
+                if (mReleased) {
+                    return;
+                }
+
                 notifySeekComplete(mp.getProgress());
 
                 if (mSeekCompleteAction != null) {
@@ -1040,6 +1051,10 @@ public abstract class AbstractPlayer implements Player {
         mPlaylistManager.getPlaylistAsync(new PlaylistManager.Callback() {
             @Override
             public void onFinished(@NonNull final Playlist playlist) {
+                if (mReleased) {
+                    return;
+                }
+
                 mPlaylist = playlist;
                 mLoadingPlaylist = false;
 
