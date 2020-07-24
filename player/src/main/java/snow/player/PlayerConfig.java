@@ -20,7 +20,6 @@ public class PlayerConfig {
     private static final String KEY_AUDIO_EFFECT_CONFIG = "audio_effect_config";
     private static final String KEY_AUDIO_EFFECT_ENABLED = "audio_effect_enabled";
     private static final String KEY_ONLY_WIFI_NETWORK = "only_wifi_network";
-    private static final String KEY_IGNORE_LOSS_AUDIO_FOCUS = "ignore_loss_audio_focus";
 
     private MMKV mMMKV;
 
@@ -109,23 +108,5 @@ public class PlayerConfig {
      */
     public void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
         mMMKV.encode(KEY_ONLY_WIFI_NETWORK, onlyWifiNetwork);
-    }
-
-    /**
-     * 判断是否忽略音频焦点丢失事件。
-     *
-     * @return 是否忽略音频焦点丢失事件。
-     */
-    public boolean isIgnoreLossAudioFocus() {
-        return mMMKV.decodeBool(KEY_IGNORE_LOSS_AUDIO_FOCUS, false);
-    }
-
-    /**
-     * 设置是否忽略音频焦点丢失事件。
-     *
-     * @param ignoreLossAudioFocus 是否忽略音频焦点丢失事件。
-     */
-    public void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
-        mMMKV.encode(KEY_IGNORE_LOSS_AUDIO_FOCUS, ignoreLossAudioFocus);
     }
 }
