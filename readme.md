@@ -87,19 +87,21 @@ Playlist playlist = createPlaylist();
 playerClient.setPlaylist(playlist, true);
 ```
 
-**`PlayerClient` 提供了全部的列表播放器功能，例如：**
+**`PlayerClient` 提供了全部的列表播放器功能：**
 
+* `setPlaylist(Playlist playlist, boolean play)`：设置播放列表
 * `play()`：播放
 * `pause()`：暂停
-* `playOrPause()`：播放/暂停
+* `playPause()`：播放/暂停
+* `playPause(int position)`：播放/暂停列表中指定位置处的音乐
 * `stop()`：停止
 * `seekTo(int progress)`：调整播放位置
 * `skipToPrevious()`：上一曲
 * `skipToNext()`：下一曲
 * `fastForward()`：快进
 * `rewind()`：快退
-* `setPlayMode(PlayMode)`：设置播放模式（共 `3` 种模式：顺序播放、单曲循环、随机播放）
-* `setPlaylist(Playlist playlist, boolean play)`：设置播放列表
+* `setNextPlay(MusicItem musicItem)`：下一首播放
+* `setPlayMode(PlayMode playMode)`：设置播放模式（共 `3` 种模式：顺序播放、单曲循环、随机播放）
 
 **更多详细介绍，请查看 `Wiki`（编写中...）**
 
