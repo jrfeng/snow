@@ -103,6 +103,12 @@ playerClient.setPlaylist(playlist, true);
 
 **更多详细介绍，请查看 `Wiki`（编写中...）**
 
+### ProGuard
+
+```txt
+-keep public class * extends snow.player.PlayerService$ComponentFactory { *; }
+```
+
 ## LICENSE
 
 ```txt
