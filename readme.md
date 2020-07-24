@@ -17,7 +17,7 @@ allprojects {
 
 ```gradle
 dependencies {
-    implementation 'com.github.jrfeng.snow:player:1.0-alpha2'
+    implementation 'com.github.jrfeng.snow:player:1.0-alpha3'
 }
 ```
 
@@ -79,14 +79,17 @@ playerClient.connect(new PlayerClient.OnConnectCallback() {
 });
 ```
 
-2. 获取 `PlaylistController`
+3. 设置播放列表并播放音乐
 
 ```java
-// 当 PlayerClient 连接成功后，可以调用其 getPlaylistController() 方法获取到一个 PlaylistController 对象
-PlayerClient.PlaylistController playlistController =  playerClient.getPlaylistController();
+// 创建播放列表
+Playlist playlist = createPlaylist();
+
+// 设置播放列表，并播放指定索引处的音乐
+playlistController.setPlaylist(playlist, 0, true);
 ```
 
-**`PlaylistController` 提供了基本的列表播放器功能，例如：**
+**`PlayerClient` 提供了全部的列表播放器功能，例如：**
 
 * `play()`：播放
 * `pause()`：暂停
@@ -99,46 +102,6 @@ PlayerClient.PlaylistController playlistController =  playerClient.getPlaylistCo
 * `rewind()`：快退
 * `setPlayMode(PlayMode)`：设置播放模式（共 `3` 种模式：顺序播放、单曲循环、随机播放）
 * `setPlaylist(Playlist playlist, int position, boolean play)`：设置播放列表
-
-3. 设置播放列表并播放音乐
-
-```java
-// 创建播放列表
-Playlist playlist = createPlaylist();
-
-// 设备播放列表，并播放指定索引处的音乐
-playlistController.setPlaylist(playlist, 0, true);
-
-private Playlist createPlaylist() {
-    List<MusicItem> musicItemList = new ArrayList<>();
-
-    MusicItem musicItem1 = new MusicItem();
-    musicItem1.setTitle("title 1");
-    musicItem1.setArtist("artist 1");
-    // 设置音乐的 URI（可以是本地路径，但需要有存储器访问权限）
-    musicItem1.setUri("http://www.demo.com/songs/song1.mp3");
-    // 设置音乐的图标的 URI（可以是本地路径，但需要有存储器访问权限）
-    musicItem1.setIconUri("http://www.demo.com/icon/song1_icon.png");
-
-    MusicItem musicItem2 = new MusicItem();
-    musicItem2.setTitle("title 2");
-    musicItem2.setArtist("artist 2");
-    musicItem2.setUri("http://www.demo.com/songs/song2.mp3");
-    musicItem2.setIconUri("http://www.demo.com/icon/song2_icon.png");
-
-    MusicItem musicItem3 = new MusicItem();
-    musicItem3.setTitle("title 3");
-    musicItem3.setArtist("artist 3");
-    musicItem3.setUri("http://www.demo.com/songs/song3.mp3");
-    musicItem3.setIconUri("http://www.demo.com/icon/song3_icon.png");
-
-    musicItemList.add(musicItem1);
-    musicItemList.add(musicItem2);
-    musicItemList.add(musicItem3);
-
-    return new Playlist(musicItemList);
-}
-```
 
 **更多详细介绍，请查看 `Wiki`（编写中...）**
 
