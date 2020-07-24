@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
@@ -14,8 +13,7 @@ import com.tencent.mmkv.MMKV;
  * <p>
  * 支持跨进程访问。
  */
-@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
-public class PlayerConfig {
+class PlayerConfig {
     private static final String KEY_SOUND_QUALITY = "sound_quality";
     private static final String KEY_AUDIO_EFFECT_CONFIG = "audio_effect_config";
     private static final String KEY_AUDIO_EFFECT_ENABLED = "audio_effect_enabled";
