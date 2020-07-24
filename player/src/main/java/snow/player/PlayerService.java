@@ -1597,7 +1597,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         void setPlayingMusicItem(@NonNull MusicItem musicItem) {
             Preconditions.checkNotNull(musicItem);
+            if (mMusicItem.equals(musicItem)) {
+                return;
+            }
 
+            mNeedReloadIcon = true;
             mMusicItem = musicItem;
         }
 
