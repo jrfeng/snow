@@ -17,13 +17,13 @@ import snow.player.media.MusicItem;
  */
 public class PlayerState implements Parcelable {
     private int playProgress;
-    private long playProgressUpdateTime;
     @Nullable
     private MusicItem musicItem;
     private int position;
     private Player.PlayMode playMode;
 
     // no persistent
+    private long playProgressUpdateTime;
     private Player.PlaybackState playbackState;
     private int audioSessionId;
     private int bufferingPercent;
