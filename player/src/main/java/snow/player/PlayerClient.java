@@ -290,24 +290,6 @@ public class PlayerClient implements Player, PlaylistManager.OnModifyPlaylistLis
     }
 
     /**
-     * 设置是否忽略音频焦点的丢失（默认为 false）。
-     * <p>
-     * 如果设为 true，即使音频焦点丢失，当前播放器依然会继续播放。简单的说，就是是否可以和其他应用同时播放音频。
-     * <p>
-     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
-     *
-     * @param ignoreLossAudioFocus 是否忽略音频焦点的丢失
-     * @see #isIgnoreLossAudioFocus()
-     */
-    public void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
-        if (!isConnected()) {
-            return;
-        }
-
-        mPlayerManager.setIgnoreLossAudioFocus(ignoreLossAudioFocus);
-    }
-
-    /**
      * 获取当前播放器的首选音质。
      *
      * @see #setSoundQuality(Player.SoundQuality)
@@ -344,15 +326,6 @@ public class PlayerClient implements Player, PlaylistManager.OnModifyPlaylistLis
      */
     public boolean isOnlyWifiNetwork() {
         return mPlayerConfig.isOnlyWifiNetwork();
-    }
-
-    /**
-     * 是否忽略音频焦点的丢失。
-     *
-     * @see #setIgnoreLossAudioFocus(boolean)
-     */
-    public boolean isIgnoreLossAudioFocus() {
-        return mPlayerConfig.isIgnoreLossAudioFocus();
     }
 
     /**
@@ -652,12 +625,12 @@ public class PlayerClient implements Player, PlaylistManager.OnModifyPlaylistLis
      * @param position 目标位置。
      */
     @Override
-    public void playOrPause(int position) {
+    public void playPause(int position) {
         if (notConnected()) {
             return;
         }
 
-        mDelegate.playOrPause(position);
+        mDelegate.playPause(position);
     }
 
     /**
@@ -725,12 +698,12 @@ public class PlayerClient implements Player, PlaylistManager.OnModifyPlaylistLis
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
      */
     @Override
-    public void playOrPause() {
+    public void playPause() {
         if (notConnected()) {
             return;
         }
 
-        mDelegate.playOrPause();
+        mDelegate.playPause();
     }
 
     /**

@@ -458,20 +458,12 @@ public abstract class AbstractPlayer implements Player {
 
             @Override
             public void onLoss() {
-                if (mPlayerConfig.isIgnoreLossAudioFocus()) {
-                    return;
-                }
-
                 pause();
                 onLossAudioFocus();
             }
 
             @Override
             public void onLossTransient() {
-                if (mPlayerConfig.isIgnoreLossAudioFocus()) {
-                    return;
-                }
-
                 playing = isPlaying();
                 pause();
                 onLossAudioFocus();
@@ -479,10 +471,6 @@ public abstract class AbstractPlayer implements Player {
 
             @Override
             public void onLossTransientCanDuck() {
-                if (mPlayerConfig.isIgnoreLossAudioFocus()) {
-                    return;
-                }
-
                 playing = isPlaying();
                 if (playing) {
                     mMusicPlayer.quiet();
@@ -491,10 +479,6 @@ public abstract class AbstractPlayer implements Player {
 
             @Override
             public void onGain(boolean lossTransient, boolean lossTransientCanDuck) {
-                if (mPlayerConfig.isIgnoreLossAudioFocus()) {
-                    return;
-                }
-
                 if (!playing) {
                     return;
                 }

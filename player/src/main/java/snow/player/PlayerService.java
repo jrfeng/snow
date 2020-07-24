@@ -481,11 +481,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mPlaylistPlayer.notifyOnlyWifiNetworkChanged();
     }
 
-    @Override
-    public void setIgnoreLossAudioFocus(boolean ignoreLossAudioFocus) {
-        mPlayerConfig.setIgnoreLossAudioFocus(ignoreLossAudioFocus);
-    }
-
     /**
      * 关闭播放器。
      * <p>
@@ -647,7 +642,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     public final boolean isStalled() {
-        return getPlayerState().isStalled();
+        return mPlaylistPlayer.isStalled();
     }
 
     /**
@@ -847,7 +842,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 播放/暂停。
      */
     protected final void playOrPause() {
-        getPlayer().playOrPause();
+        getPlayer().playPause();
     }
 
     /**
@@ -1135,7 +1130,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         public void onSkipToQueueItem(long id) {
-            mPlaylistPlayer.playOrPause((int) id);
+            mPlaylistPlayer.playPause((int) id);
         }
 
         @Override
