@@ -205,36 +205,6 @@ public abstract class AbstractPlayer implements Player {
     }
 
     /**
-     * 该方法会在播放完毕时调用。
-     *
-     * @param musicItem 本次播放的 MusicItem 对象。
-     */
-    protected void onPlayComplete(MusicItem musicItem) {
-    }
-
-    /**
-     * 该方法会在申请音频焦点时调用。
-     *
-     * @param success 音频焦点申请成功时为 true，否则为 false。
-     */
-    protected void onRequestAudioFocus(boolean success) {
-    }
-
-    /**
-     * 该方法会在丢失音频焦点时调用。
-     */
-    protected void onLossAudioFocus() {
-    }
-
-    /**
-     * 该方法会在播放器释放时调用。
-     * <p>
-     * 你可以重写该方法来释放占用的资源。
-     */
-    protected void onRelease() {
-    }
-
-    /**
      * 该方法会在当前播放的 MusicItem 对象改变时调用。
      *
      * @param musicItem 本次要播放的 MusicItem 对象（可能为 null）。
@@ -245,7 +215,7 @@ public abstract class AbstractPlayer implements Player {
     /**
      * 释放播放器所占用的资源。注意！调用该方法后，就不允许在使用当前 Player 对象了，否则会导致不可预见的错误。
      */
-    public final void release() {
+    public void release() {
         disposeRetrieveUri();
         releaseMusicPlayer();
 
@@ -262,8 +232,6 @@ public abstract class AbstractPlayer implements Player {
         mPreparedAction = null;
         mSeekCompleteAction = null;
         mPlaylistLoadedAction = null;
-
-        onRelease();
     }
 
     /**
@@ -403,8 +371,6 @@ public abstract class AbstractPlayer implements Player {
         mOnCompletionListener = new MusicPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MusicPlayer mp) {
-                onPlayComplete(mPlayerState.getMusicItem());
-
                 if (mPlayerState.getPlayMode() == PlayMode.LOOP) {
                     return;
                 }
@@ -457,14 +423,12 @@ public abstract class AbstractPlayer implements Player {
             @Override
             public void onLoss() {
                 pause();
-                onLossAudioFocus();
             }
 
             @Override
             public void onLossTransient() {
                 playing = isPlaying();
                 pause();
-                onLossAudioFocus();
             }
 
             @Override
@@ -674,7 +638,6 @@ public abstract class AbstractPlayer implements Player {
         updatePlayProgress(progress, updateTime);
 
         int result = mAudioFocusHelper.requestAudioFocus(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-        onRequestAudioFocus(result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
         mBecomeNoiseHelper.registerBecomeNoiseReceiver();
 
         onPlaying(progress, updateTime);
@@ -822,7 +785,7 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
-        if (isPreparing()) {
+        if (isPreparing() || mLoadingPlaylist) {
             mPreparedAction = new Runnable() {
                 @Override
                 public void run() {
@@ -852,7 +815,7 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
-        if (isPreparing()) {
+        if (isPreparing() || mLoadingPlaylist) {
             mPreparedAction = new Runnable() {
                 @Override
                 public void run() {
@@ -1031,13 +994,26 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    private void reloadPlaylist() {
+    private void reloadPlaylist(){
+        reloadPlaylist(false, false);
+    }
+
+    private void reloadPlaylist(final boolean playingMusicChanged, final boolean play) {
         mLoadingPlaylist = true;
         mPlaylistManager.getPlaylistAsync(new PlaylistManager.Callback() {
             @Override
             public void onFinished(@NonNull final Playlist playlist) {
                 mPlaylist = playlist;
                 mLoadingPlaylist = false;
+
+                if (playingMusicChanged) {
+                    MusicItem musicItem = null;
+                    if (mPlaylist.size() > 0) {
+                        musicItem = mPlaylist.get(mPlayerState.getPosition());
+                    }
+
+                    notifyPlayingMusicItemChanged(musicItem, play);
+                }
 
                 if (mPlaylistLoadedAction != null) {
                     mPlaylistLoadedAction.run();
@@ -1245,18 +1221,7 @@ public abstract class AbstractPlayer implements Player {
     public void onNewPlaylist(final int position, final boolean play) {
         stop();
         notifyPlaylistChanged(position);
-        mPlaylistLoadedAction = new Runnable() {
-            @Override
-            public void run() {
-                MusicItem musicItem = null;
-                if (getPlaylistSize() > 0) {
-                    musicItem = mPlaylist.get(position);
-                }
-
-                notifyPlayingMusicItemChanged(musicItem, play);
-            }
-        };
-        reloadPlaylist();
+        reloadPlaylist(true, play);
     }
 
     @Override
@@ -1301,8 +1266,7 @@ public abstract class AbstractPlayer implements Player {
 
         if (getPlaylistSize() < 1) {
             notifyPlaylistChanged(-1);
-            notifyPlayingMusicItemChanged(null, false);
-            reloadPlaylist();
+            reloadPlaylist(true, false);
             return;
         }
 
@@ -1312,14 +1276,9 @@ public abstract class AbstractPlayer implements Player {
             position -= 1;
         } else if (removePosition == position) {
             position = getNextPosition(position - 1);
-
-            final boolean play = isPlaying();
-            mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    notifyPlayingMusicItemChanged(mPlaylist.get(mPlayerState.getPosition()), play);
-                }
-            };
+            notifyPlayingMusicItemPositionChanged(position);
+            reloadPlaylist(true, isPlaying());
+            return;
         }
 
         notifyPlaylistChanged(position);
