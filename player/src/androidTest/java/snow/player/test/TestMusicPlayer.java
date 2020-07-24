@@ -1,12 +1,15 @@
 package snow.player.test;
 
 import android.net.Uri;
+import android.util.Log;
 
 import java.util.Random;
 
 import snow.player.media.MusicPlayer;
 
 public class TestMusicPlayer implements MusicPlayer {
+    private static final String TAG = "TestMusicPlayer";
+
     private OnPreparedListener mPreparedListener;
     private OnCompletionListener mCompletionListener;
     private OnSeekCompleteListener mSeekCompleteListener;
@@ -19,96 +22,21 @@ public class TestMusicPlayer implements MusicPlayer {
 
     private boolean mLooping;
     private boolean mPlaying;
-    private int mCurrentPosition;
+    private int mPlayProgress;
 
     private boolean mInvalid;
 
-    private Tester mTester;
+    private int mSeekToProgress;
 
-    public TestMusicPlayer() {
+    public TestMusicPlayer(int duration) {
+        mDuration = duration;
         mInvalid = false;
         mAudioSessionId = new Random().nextInt(100);
-
-        mTester = new Tester(this);
-    }
-
-    public Tester tester() {
-        return mTester;
-    }
-
-    public void reset() {
-        mInvalid = false;
-        mLooping = false;
-        mPlaying = false;
-        mCurrentPosition = 0;
-
-        mTester.reset();
-    }
-
-    public static class Tester {
-        private TestMusicPlayer mMusicPlayer;
-        private boolean mError;
-        private long mPreparedTime = 100;
-
-        Tester(TestMusicPlayer testMusicPlayer) {
-            mMusicPlayer = testMusicPlayer;
-        }
-
-        public void setPreparedTime(long ms) {
-            mPreparedTime = ms;
-        }
-
-        public void setPlayPosition(int currentPosition) {
-            mMusicPlayer.mCurrentPosition = currentPosition;
-        }
-
-        public void completion() {
-            mMusicPlayer.mCompletionListener.onCompletion(mMusicPlayer);
-        }
-
-        public void stalled(boolean stalled) {
-            mMusicPlayer.mStalledListener.onStalled(stalled);
-        }
-
-        public void bufferingUpdate(int percent) {
-            mMusicPlayer.mBufferingUpdateListener.onBufferingUpdate(mMusicPlayer, percent);
-        }
-
-        public void setError(boolean error, int errorCode) {
-            mError = error;
-
-            if (mError) {
-                mMusicPlayer.setInvalid();
-                mMusicPlayer.mPlaying = false;
-                mMusicPlayer.mErrorListener.onError(mMusicPlayer, errorCode);
-            }
-        }
-
-        public void setDuration(int duration) {
-            mMusicPlayer.mDuration = duration;
-        }
-
-        private void reset() {
-            mError = false;
-        }
     }
 
     @Override
     public void prepare(Uri uri) {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(mTester.mPreparedTime);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                if (mPreparedListener != null) {
-                    mPreparedListener.onPrepared(TestMusicPlayer.this);
-                }
-            }
-        }.start();
+        Log.d(TAG, uri.toString());
     }
 
     @Override
@@ -133,12 +61,12 @@ public class TestMusicPlayer implements MusicPlayer {
 
     @Override
     public int getProgress() {
-        return mCurrentPosition;
+        return mPlayProgress;
     }
 
     @Override
     public void start() {
-        if (mTester.mError) {
+        if (isInvalid()) {
             return;
         }
 
@@ -147,7 +75,7 @@ public class TestMusicPlayer implements MusicPlayer {
 
     @Override
     public void pause() {
-        if (mTester.mError) {
+        if (isInvalid()) {
             return;
         }
 
@@ -156,7 +84,7 @@ public class TestMusicPlayer implements MusicPlayer {
 
     @Override
     public void stop() {
-        if (mTester.mError) {
+        if (isInvalid()) {
             return;
         }
 
@@ -180,15 +108,21 @@ public class TestMusicPlayer implements MusicPlayer {
 
     @Override
     public void seekTo(int pos) {
-        if (mTester.mError) {
+        if (isInvalid()) {
             return;
         }
 
-        mCurrentPosition = pos;
-
-        if (mSeekCompleteListener != null) {
-            mSeekCompleteListener.onSeekComplete(this);
+        if (pos < 0) {
+            mSeekToProgress = 0;
+            return;
         }
+
+        if (pos > mDuration) {
+            mSeekToProgress = mDuration;
+            return;
+        }
+
+        mSeekToProgress = pos;
     }
 
     @Override
@@ -239,5 +173,45 @@ public class TestMusicPlayer implements MusicPlayer {
     @Override
     public void setOnErrorListener(OnErrorListener listener) {
         mErrorListener = listener;
+    }
+
+    public void notifyPrepared() {
+        if (mPreparedListener != null) {
+            mPreparedListener.onPrepared(this);
+        }
+    }
+
+    public void notifySeekComplete() {
+        if (mSeekCompleteListener != null) {
+            mPlayProgress = mSeekToProgress;
+            mSeekCompleteListener.onSeekComplete(this);
+        }
+    }
+
+    public void notifyCompletion() {
+        if (mCompletionListener != null) {
+            mCompletionListener.onCompletion(this);
+        }
+    }
+
+    public void notifyStalled(boolean stalled) {
+        if (mStalledListener != null) {
+            mStalledListener.onStalled(stalled);
+        }
+    }
+
+    public void notifyBufferingUpdate(int percent) {
+        if (mBufferingUpdateListener != null) {
+            mBufferingUpdateListener.onBufferingUpdate(this, percent);
+        }
+    }
+
+    public void notifyError(int errorCode) {
+        setInvalid();
+        mPlaying = false;
+
+        if (mErrorListener != null) {
+            mErrorListener.onError(this, errorCode);
+        }
     }
 }
