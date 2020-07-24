@@ -237,7 +237,7 @@ public class PlayProgressViewModel extends ViewModel {
     }
 
     private void updateDuration(int durationMS/*单位：毫秒*/) {
-        mDurationSec = (int) durationMS / 1000;
+        mDurationSec = durationMS / 1000;
 
         mDuration.setValue(mDurationSec);
         mTextDuration.setValue(formatSeconds(mDurationSec));
