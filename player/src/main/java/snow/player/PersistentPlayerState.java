@@ -10,9 +10,11 @@ import com.tencent.mmkv.MMKV;
 
 import snow.player.media.MusicItem;
 
+/**
+ * 用于对播放器的部分关键状态进行持久化。
+ */
 class PersistentPlayerState extends PlayerState {
     private static final String KEY_PLAY_PROGRESS = "play_progress";
-    private static final String KEY_PLAY_PROGRESS_UPDATE_TIME = "play_progress_update_time";
     private static final String KEY_MUSIC_ITEM = "music_item";
     private static final String KEY_POSITION = "position";
     private static final String KEY_PLAY_MODE = "play_mode";
@@ -28,9 +30,7 @@ class PersistentPlayerState extends PlayerState {
         mMMKV = MMKV.mmkvWithID(id);
 
         super.setPlayProgress(mMMKV.decodeInt(KEY_PLAY_PROGRESS, 0));
-        super.setPlayProgressUpdateTime(mMMKV.decodeLong(KEY_PLAY_PROGRESS_UPDATE_TIME, System.currentTimeMillis()));
         super.setMusicItem(mMMKV.decodeParcelable(KEY_MUSIC_ITEM, MusicItem.class));
-
         super.setPosition(mMMKV.decodeInt(KEY_POSITION, 0));
         super.setPlayMode(Player.PlayMode.values()[mMMKV.decodeInt(KEY_PLAY_MODE, 0)]);
     }
@@ -40,13 +40,6 @@ class PersistentPlayerState extends PlayerState {
         super.setPlayProgress(playProgress);
 
         mMMKV.encode(KEY_PLAY_PROGRESS, playProgress);
-    }
-
-    @Override
-    public void setPlayProgressUpdateTime(long updateTime) {
-        super.setPlayProgressUpdateTime(updateTime);
-
-        mMMKV.encode(KEY_PLAY_PROGRESS_UPDATE_TIME, updateTime);
     }
 
     @Override
