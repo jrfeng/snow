@@ -342,14 +342,16 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /***
      * 创建一个适用于列表播放器的 {@link RemoteView}，你可以通过覆盖该方法来实现自定义的列表播放器控制器。
      *
-     * 该方法默认返回 {@link SimplePlaylistRemoteView}，如果你不需要在通知栏中显示列表播放器控制器，可以覆盖
+     * 该方法默认返回 {@link SimpleRemoteView}，如果你不需要在通知栏中显示列表播放器控制器，可以覆盖
      * 该方法并返回 null。
      *
      * @return {@link RemoteView} 对象，返回 null 时将隐藏列表播放器控制器
+     * @see SimpleRemoteView
+     * @see MediaRemoteView
      */
     @Nullable
     protected RemoteView onCreateRemoteView() {
-        return new SimplePlaylistRemoteView();
+        return new SimpleRemoteView();
     }
 
     @Nullable
@@ -1206,6 +1208,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 用于显示通知栏控制器。
      */
     public static abstract class RemoteView {
+        /**
+         * 默认的 channelId 值，值为：{@code "player"}
+         */
+        public static final String DEFAULT_CHANNEL_ID = "player";
+
         private PlayerService mPlayerService;
         private MusicItem mMusicItem;
 
@@ -1249,6 +1256,18 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 该方法会在初次创建 NotificationView 对象时调用，你可以重写该方法来进行一些初始化操作。
          */
         protected void onInit(Context context) {
+        }
+
+        /**
+         * 获取 Notification 的 {@code channelId}，不能为 null。
+         * <p>
+         * 可以覆盖该方法来提供你自己的 {@code channelId}。
+         *
+         * @return channelId，不能为 null。
+         */
+        @NonNull
+        protected String getChannelId() {
+            return DEFAULT_CHANNEL_ID;
         }
 
         /**
@@ -1594,6 +1613,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * 通知栏控制器，使用 Android 系统提供的样式。通知的样式为：<a href="https://developer.android.google.cn/reference/androidx/media/app/NotificationCompat.MediaStyle?hl=en">NotificationCompat.MediaStyle</a>
      * <p>
+     * 可以通过实现 {@link #onBuildMediaStyle(androidx.media.app.NotificationCompat.MediaStyle)} 方法
+     * 和实现 {@link #onBuildNotification(NotificationCompat.Builder)} 来对当前 RemoteView 的外观进行定
+     * 制。
+     * <p>
      * 更多信息，请参考官方文档： <a href="https://developer.android.google.cn/training/notify-user/expanded?hl=zh-cn#media-style">https://developer.android.google.cn/training/notify-user/expanded?hl=zh-cn#media-style</a>
      */
     public static abstract class MediaRemoteView extends RemoteView {
@@ -1635,12 +1658,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         protected abstract int getSmallIconId();
 
         /**
-         * @return Notification 的 channelId，不能为 null
-         */
-        @NonNull
-        protected abstract String getChannelId();
-
-        /**
          * 该方法会在创建 {@code NotificationCompat.MediaStyle} 对象期间调用。
          * <p>
          * 可以在该方法中对 {@code NotificationCompat.MediaStyle} 对象进行配置。例如，调用
@@ -1658,27 +1675,15 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 抽象类，该类提供了 RemoteView 的基本实现。
-     * <p>
-     * 具体请查看它的子类：
-     * <ul>
-     *     <li>{@link SimplePlaylistRemoteView}</li>
-     *     <li>{@link SimpleRadioStationRemoteView}</li>
-     * </ul>
+     * {@link RemoteView} 的默认实现，提供了一个自定义的外观。
      */
-    public static abstract class SimpleRemoteView extends RemoteView {
-        /**
-         * 默认的 channelId 值，值为：{@code "player"}
-         */
-        public static final String DEFAULT_CHANNEL_ID = "player";
-
+    public static class SimpleRemoteView extends RemoteView {
         private static final String ACTION_SKIP_TO_PREVIOUS = "snow.player.action.skip_to_previous";
         private static final String ACTION_SKIP_TO_NEXT = "snow.player.action.skip_to_next";
         private static final String ACTION_PLAY_PAUSE = "snow.player.action.play_pause";
         private static final String CUSTOM_ACTION_1 = "snow.player.action.custom_action_1";
         private static final String CUSTOM_ACTION_2 = "snow.player.action.custom_action_2";
 
-        private String mChannelId;
         private PendingIntent mContentIntent;
 
         private List<CustomAction> mAllCustomAction;
@@ -1688,7 +1693,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         protected void onInit(Context context) {
             super.onInit(context);
 
-            mChannelId = DEFAULT_CHANNEL_ID;
             mAllCustomAction = new ArrayList<>();
             mPendingIntentMap = new HashMap<>();
 
@@ -1700,9 +1704,13 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             initCustomAction();
         }
 
-        public abstract int getContentViewLayoutId();
+        public int getContentViewLayoutId() {
+            return R.layout.snow_simple_playlist_remote_view;
+        }
 
-        public abstract int getBigContentViewLayoutId();
+        public int getBigContentViewLayoutId() {
+            return R.layout.snow_simple_playlist_remote_view_big;
+        }
 
         /**
          * 是否支持 “上一曲” 功能（默认为 true）。
@@ -1711,16 +1719,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          */
         protected boolean supportSkipToPrevious() {
             return true;
-        }
-
-        /**
-         * 设置 channelId，该值将用于创建 Notification 对象。
-         * <p>
-         * 默认的 channelId 值为 {@link #DEFAULT_CHANNEL_ID}。
-         */
-        protected final void setChannelId(@NonNull String channelId) {
-            Preconditions.checkNotNull(channelId);
-            mChannelId = channelId;
         }
 
         private void initCustomAction() {
@@ -1757,7 +1755,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             initAllCustomAction(contentView, true);
             initAllCustomAction(bigContentView, false);
 
-            return new NotificationCompat.Builder(getContext(), mChannelId)
+            return new NotificationCompat.Builder(getContext(), getChannelId())
                     .setSmallIcon(R.drawable.snow_ic_music)
                     .setStyle(new androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
                     .setCustomContentView(contentView)
@@ -1879,7 +1877,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 设置 {@link SimplePlaylistRemoteView} 的第一个自定义动作。
+         * 设置 {@link SimpleRemoteView} 的第一个自定义动作。
          *
          * @param iconId 自定义动作的图标
          * @param action 自定义动作触发时要执行的任务
@@ -1891,7 +1889,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 设置 {@link SimplePlaylistRemoteView} 的第一个自定义动作。
+         * 设置 {@link SimpleRemoteView} 的第一个自定义动作。
          *
          * @param iconId 自定义动作的图标
          * @param action 自定义动作触发时要执行的任务
@@ -2010,41 +2008,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             public int hashCode() {
                 return Objects.hashCode(mActionName);
             }
-        }
-    }
-
-    /**
-     * 该类提供了 列表播放器控制器 的默认实现。
-     */
-    public static class SimplePlaylistRemoteView extends SimpleRemoteView {
-        @Override
-        public int getContentViewLayoutId() {
-            return R.layout.snow_simple_playlist_remote_view;
-        }
-
-        @Override
-        public int getBigContentViewLayoutId() {
-            return R.layout.snow_simple_playlist_remote_view_big;
-        }
-    }
-
-    /**
-     * 该类提供了 电台播放器控制器 的默认实现。
-     */
-    public static class SimpleRadioStationRemoteView extends SimpleRemoteView {
-        @Override
-        public boolean supportSkipToPrevious() {
-            return false;
-        }
-
-        @Override
-        public int getContentViewLayoutId() {
-            return R.layout.snow_simple_radio_station_remote_view;
-        }
-
-        @Override
-        public int getBigContentViewLayoutId() {
-            return R.layout.snow_simple_radio_station_remote_view_big;
         }
     }
 
