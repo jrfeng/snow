@@ -810,6 +810,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @return 音乐的播放链接
      * @throws Exception 获取音乐播放链接的过程中发生的任何异常
      */
+    @SuppressWarnings("RedundantThrows")
     protected Uri onRetrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull Player.SoundQuality soundQuality) throws Exception {
         return Uri.parse(musicItem.getUri());
     }
@@ -2085,6 +2086,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 状态
          * @throws Exception 获取音乐播放链接的过程中发生的任何异常
          */
+        @SuppressWarnings("RedundantThrows")
         @Nullable
         public Uri retrieveMusicItemUri(MusicItem musicItem, Player.SoundQuality soundQuality) throws Exception {
             return null;
