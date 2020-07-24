@@ -1710,11 +1710,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         public int getContentViewLayoutId() {
-            return R.layout.snow_simple_playlist_remote_view;
+            return R.layout.snow_simple_remote_view;
         }
 
         public int getBigContentViewLayoutId() {
-            return R.layout.snow_simple_playlist_remote_view_big;
+            return R.layout.snow_simple_remote_view_big;
         }
 
         /**
