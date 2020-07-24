@@ -30,8 +30,6 @@ dependencies {
 
 <!-- 可选，用于播放网络音乐 -->
 <uses-permission android:name="android.permission.INTERNET" />
-
-<!-- 可选，用于访问网络状态 -->
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 ```
