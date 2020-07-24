@@ -11,6 +11,10 @@ import android.support.v4.media.session.MediaControllerCompat;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.OnLifecycleEvent;
 
 import com.google.common.base.Preconditions;
 
@@ -827,6 +831,32 @@ public class PlayerClient implements Player {
     }
 
     /**
+     * 添加一个播放器播放状态监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param owner    LifecycleOwner 对象
+     * @param listener 播放器播放状态监听器
+     * @see Player.OnPlaybackStateChangeListener
+     */
+    public void addOnPlaybackStateChangeListener(LifecycleOwner owner,
+                                                 final Player.OnPlaybackStateChangeListener listener) {
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnPlaybackStateChangeListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnPlaybackStateChangeListener(listener);
+            }
+        }));
+    }
+
+    /**
      * 移除播放器播放状态监听器。
      *
      * @param listener 要移除的监听器。
@@ -848,6 +878,31 @@ public class PlayerClient implements Player {
     }
 
     /**
+     * 添加一个 stalled 状态监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param listener 要添加的监听器
+     * @see Player.OnStalledChangeListener
+     */
+    public void addOnStalledChangeListener(LifecycleOwner owner,
+                                           final Player.OnStalledChangeListener listener) {
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnStalledChangeListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnStalledChangeListener(listener);
+            }
+        }));
+    }
+
+    /**
      * 移除 stalled 状态监听器。
      *
      * @param listener 要移除的监听器。
@@ -861,11 +916,36 @@ public class PlayerClient implements Player {
      * <p>
      * 如果监听器已添加，则忽略本次调用。
      *
-     * @param listener 要添加的监听器。
+     * @param listener 要添加的监听器
      * @see Player.OnBufferingPercentChangeListener
      */
     public void addOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
         mPlayerStateHolder.addOnBufferingPercentChangeListener(listener);
+    }
+
+    /**
+     * 添加一个缓存进度监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param owner    LifecycleOwner 对象
+     * @param listener 要添加的监听器
+     */
+    public void addOnBufferingPercentChangeListener(LifecycleOwner owner,
+                                                    final Player.OnBufferingPercentChangeListener listener) {
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnBufferingPercentChangeListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnBufferingPercentChangeListener(listener);
+            }
+        }));
     }
 
     /**
@@ -890,6 +970,31 @@ public class PlayerClient implements Player {
     }
 
     /**
+     * 添加一个监听当前播放的 MusicItem 改变事件的监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param listener 要添加的监听器
+     * @see Player.OnPlayingMusicItemChangeListener
+     */
+    public void addOnPlayingMusicItemChangeListener(LifecycleOwner owner,
+                                                    final Player.OnPlayingMusicItemChangeListener listener) {
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnPlayingMusicItemChangeListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnPlayingMusicItemChangeListener(listener);
+            }
+        }));
+    }
+
+    /**
      * 移除当前播放的 MusicItem 改变事件监听器
      *
      * @param listener 要移除的监听器
@@ -908,6 +1013,31 @@ public class PlayerClient implements Player {
      */
     public void addOnSeekCompleteListener(Player.OnSeekListener listener) {
         mPlayerStateHolder.addOnSeekCompleteListener(listener);
+    }
+
+    /**
+     * 添加一个用于监听播放器播放进度调整完毕事件的监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param listener 要添加的监听器
+     * @see Player.OnSeekListener
+     */
+    public void addOnSeekCompleteListener(LifecycleOwner owner,
+                                          final Player.OnSeekListener listener) {
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnSeekCompleteListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnSeekCompleteListener(listener);
+            }
+        }));
     }
 
     /**
@@ -932,6 +1062,31 @@ public class PlayerClient implements Player {
     }
 
     /**
+     * 添加一个用于监听播放列表改变事件的监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param listener 要添加的监听器
+     * @see Player.OnPlaylistChangeListener
+     */
+    public void addOnPlaylistChangeListener(LifecycleOwner owner,
+                                            final Player.OnPlaylistChangeListener listener) {
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnPlaylistChangeListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnPlaylistChangeListener(listener);
+            }
+        }));
+    }
+
+    /**
      * 移除用于监听播放列表改变事件的监听器。
      *
      * @param listener 要移除的监听器
@@ -950,6 +1105,31 @@ public class PlayerClient implements Player {
      */
     public void addOnPlayModeChangeListener(Player.OnPlayModeChangeListener listener) {
         mPlayerStateHolder.addOnPlayModeChangeListener(listener);
+    }
+
+    /**
+     * 添加一个用于监听播放模式改变的监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param listener 要添加的监听器
+     * @see Player.OnPlayModeChangeListener
+     */
+    public void addOnPlayModeChangeListener(LifecycleOwner owner,
+                                            final Player.OnPlayModeChangeListener listener) {
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnPlayModeChangeListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnPlayModeChangeListener(listener);
+            }
+        }));
     }
 
     /**
@@ -974,6 +1154,31 @@ public class PlayerClient implements Player {
     }
 
     /**
+     * 添加一个监听播放列表播放位置改变事件的监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param listener 要添加的监听器
+     * @see Player.OnPositionChangeListener
+     */
+    public void addOnPositionChangeListener(LifecycleOwner owner,
+                                            final Player.OnPositionChangeListener listener) {
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnPositionChangeListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnPositionChangeListener(listener);
+            }
+        }));
+    }
+
+    /**
      * 移除一个监听播放列表播放位置改变事件的监听器。
      *
      * @param listener 要移除的监听器
@@ -982,20 +1187,96 @@ public class PlayerClient implements Player {
         mPlayerStateHolder.removeOnPositionChangeListener(listener);
     }
 
+    /**
+     * 监听播放器状态。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 要添加的监听器
+     */
     public void addOnPlaybackStateChangeListener(OnPlaybackStateChangeListener listener) {
         mPlayerStateHolder.addOnPlaybackStateChangeListener(listener);
     }
 
+    /**
+     * 监听播放器状态。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param listener 要添加的监听器
+     */
+    public void addOnPlaybackStateChangeListener(LifecycleOwner owner,
+                                                 final OnPlaybackStateChangeListener listener) {
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnPlaybackStateChangeListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnPlaybackStateChangeListener(listener);
+            }
+        }));
+    }
+
+    /**
+     * 移除播放器状态监听器。
+     *
+     * @param listener 要移除的监听器
+     */
     public void removeOnPlaybackStateChangeListener(OnPlaybackStateChangeListener listener) {
         mPlayerStateHolder.removeOnPlaybackStateChangeListener(listener);
     }
 
+    /**
+     * 添加一个 audio session id 监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 要添加的监听器
+     */
     public void addOnAudioSessionChangeListener(OnAudioSessionChangeListener listener) {
         mPlayerStateHolder.addOnAudioSessionChangeListener(listener);
     }
 
+    /**
+     * 监听播放器的 audio session id
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param listener 要添加的监听器
+     */
+    public void addOnAudioSessionChangeListener(LifecycleOwner owner,
+                                                final OnAudioSessionChangeListener listener) {
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnAudioSessionChangeListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnAudioSessionChangeListener(listener);
+            }
+        }));
+    }
+
+    /**
+     * 移除 audio session id 监听器。
+     *
+     * @param listener 要移除的监听器
+     */
     public void removeOnAudioSessionChangeListener(OnAudioSessionChangeListener listener) {
         mPlayerStateHolder.removeOnAudioSessionChangeListener(listener);
+    }
+
+    private boolean isDestroyed(LifecycleOwner owner) {
+        return owner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED;
     }
 
     /**
@@ -1561,6 +1842,20 @@ public class PlayerClient implements Player {
             mPlayerState.setPosition(position);
 
             notifyPositionChanged();
+        }
+    }
+
+    private static class DestroyObserver implements LifecycleObserver {
+        private Runnable mOnDestroyAction;
+
+        DestroyObserver(@NonNull Runnable action) {
+            Preconditions.checkNotNull(action);
+            mOnDestroyAction = action;
+        }
+
+        @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        public void onDestroy() {
+            mOnDestroyAction.run();
         }
     }
 }
