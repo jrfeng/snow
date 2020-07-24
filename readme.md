@@ -1,5 +1,3 @@
-**【开发中】大部分功能已完成，但部分功能尚未进行测试，暂不能用于生产环境。**
-
 ## 项目配置
 
 1. 将以下代码添加到项目根目录中的 `build.gradle` 中：
@@ -85,8 +83,8 @@ playerClient.connect(new PlayerClient.OnConnectCallback() {
 // 创建播放列表
 Playlist playlist = createPlaylist();
 
-// 设置播放列表，并播放指定索引处的音乐
-playlistController.setPlaylist(playlist, 0, true);
+// 设置播放列表，并播放音乐
+playerClient.setPlaylist(playlist, true);
 ```
 
 **`PlayerClient` 提供了全部的列表播放器功能，例如：**
@@ -101,7 +99,7 @@ playlistController.setPlaylist(playlist, 0, true);
 * `fastForward()`：快进
 * `rewind()`：快退
 * `setPlayMode(PlayMode)`：设置播放模式（共 `3` 种模式：顺序播放、单曲循环、随机播放）
-* `setPlaylist(Playlist playlist, int position, boolean play)`：设置播放列表
+* `setPlaylist(Playlist playlist, boolean play)`：设置播放列表
 
 **更多详细介绍，请查看 `Wiki`（编写中...）**
 
