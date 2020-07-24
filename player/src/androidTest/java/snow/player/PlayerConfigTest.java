@@ -56,12 +56,4 @@ public class PlayerConfigTest {
         mPlayerConfig.setOnlyWifiNetwork(onlyWifiNetwork);
         assertEquals(onlyWifiNetwork, mPlayerConfig.isOnlyWifiNetwork());
     }
-
-    @Test
-    public void setIgnoreLossAudioFocus() {
-        final boolean ignoreLossAudioFocus = true;
-
-        mPlayerConfig.setIgnoreLossAudioFocus(ignoreLossAudioFocus);
-        assertEquals(ignoreLossAudioFocus, mPlayerConfig.isIgnoreLossAudioFocus());
-    }
 }
