@@ -1,11 +1,9 @@
-package snow.player.test;
+package snow.player.media;
 
 import android.net.Uri;
 import android.util.Log;
 
 import java.util.Random;
-
-import snow.player.media.MusicPlayer;
 
 public class TestMusicPlayer implements MusicPlayer {
     private static final String TAG = "TestMusicPlayer";
