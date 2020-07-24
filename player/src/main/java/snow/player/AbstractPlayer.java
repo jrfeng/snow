@@ -14,7 +14,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import androidx.core.content.ContextCompat;
 
 import com.google.common.base.Preconditions;
@@ -282,8 +281,7 @@ public abstract class AbstractPlayer implements Player {
      *
      * @param preparedAction 在音乐播放器准备完成后要执行的操作
      */
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    protected final void prepareMusicPlayer(@Nullable Runnable preparedAction) {
+    private void prepareMusicPlayer(@Nullable Runnable preparedAction) {
         releaseMusicPlayer();
 
         notifyBufferingPercentChanged(0, System.currentTimeMillis());
@@ -525,8 +523,7 @@ public abstract class AbstractPlayer implements Player {
     /**
      * 释放当前播放器所持有的 {@link MusicPlayer} 对象（测试用）。
      */
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    protected final void releaseMusicPlayer() {
+    private void releaseMusicPlayer() {
         if (mMusicPlayer != null) {
             mMusicPlayer.release();
             mMusicPlayer = null;
@@ -779,8 +776,7 @@ public abstract class AbstractPlayer implements Player {
      * @param musicItem 本次要播放的音乐
      * @param play      是否播放歌曲
      */
-    @VisibleForTesting
-    protected final void notifyPlayingMusicItemChanged(@Nullable MusicItem musicItem, boolean play) {
+    private void notifyPlayingMusicItemChanged(@Nullable MusicItem musicItem, boolean play) {
         releaseMusicPlayer();
         updatePlayProgress(0, System.currentTimeMillis());
 
