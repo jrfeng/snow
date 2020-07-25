@@ -42,12 +42,10 @@ dependencies {
 <service android:name="snow.player.PlayerService">
     <intent-filter>
         <action android:name="android.media.browse.MediaBrowserService" />
-        <!-- 可选，用于支持低于 Android 5.0(API Level 21) 的版本 -->
         <action android:name="android.intent.action.MEDIA_BUTTON" />
     </intent-filter>
 </service>
 
-<!-- 可选，用于支持低于 Android 5.0(API Level 21) 的版本 -->
 <receiver android:name="androidx.media.session.MediaButtonReceiver" >
     <intent-filter>
         <action android:name="android.intent.action.MEDIA_BUTTON" />
