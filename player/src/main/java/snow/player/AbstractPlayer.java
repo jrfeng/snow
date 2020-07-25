@@ -20,7 +20,9 @@ import com.google.common.base.Preconditions;
 
 import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
@@ -76,6 +78,9 @@ public abstract class AbstractPlayer implements Player {
 
     private boolean mReleased;
 
+    private boolean mRecordProgress;
+    private Disposable mRecordProgressDisposable;
+
     /**
      * @param context      {@link Context} 对象，不能为 null
      * @param playerConfig {@link PlayerConfig} 对象，保存了播放器的初始配置信息，不能为 null
@@ -95,6 +100,7 @@ public abstract class AbstractPlayer implements Player {
         mPlayerState = playerState;
         mPlaylistManager = playlistManager;
         mStateListenerMap = new HashMap<>();
+        mRecordProgress = true;
 
         initAllListener();
         initAllHelper();
@@ -235,6 +241,16 @@ public abstract class AbstractPlayer implements Player {
         mPreparedAction = null;
         mSeekCompleteAction = null;
         mPlaylistLoadedAction = null;
+    }
+
+    /**
+     * 设置是否实时记录播放进度。
+     *
+     * @param enable 是否实时记录播放进度（默认为 true）。为 true 时，会在播放时每隔 3 秒将歌曲的播放进度记
+     *               录到本地磁盘，这样即使应用被突然终止，下次播放时也能自动恢复到与上次播放相近的播放进度。
+     */
+    public final void setRecordProgress(boolean enable) {
+        mRecordProgress = enable;
     }
 
     /**
@@ -499,6 +515,7 @@ public abstract class AbstractPlayer implements Player {
      * 释放当前播放器所持有的 {@link MusicPlayer} 对象（测试用）。
      */
     private void releaseMusicPlayer() {
+        cancelRecordProgress();
         if (mMusicPlayer != null) {
             mMusicPlayer.release();
             mMusicPlayer = null;
@@ -647,8 +664,9 @@ public abstract class AbstractPlayer implements Player {
     private void notifyPlaying(int progress, long updateTime) {
         mPlayerState.setPlaybackState(PlaybackState.PLAYING);
         updatePlayProgress(progress, updateTime);
+        startRecordProgress();
 
-        int result = mAudioFocusHelper.requestAudioFocus(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        mAudioFocusHelper.requestAudioFocus(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         mBecomeNoiseHelper.registerBecomeNoiseReceiver();
 
         onPlaying(progress, updateTime);
@@ -663,6 +681,7 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyPaused() {
         mPlayerState.setPlaybackState(PlaybackState.PAUSED);
+        cancelRecordProgress();
 
         if (mMusicPlayer != null) {
             updatePlayProgress(mMusicPlayer.getProgress(), System.currentTimeMillis());
@@ -683,6 +702,7 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyStopped() {
         mPlayerState.setPlaybackState(PlaybackState.STOPPED);
+        cancelRecordProgress();
         updatePlayProgress(0, System.currentTimeMillis());
 
         mAudioFocusHelper.abandonAudioFocus();
@@ -700,6 +720,11 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyStalled(boolean stalled) {
         mPlayerState.setStalled(stalled);
+        if (!stalled && isPlaying()) {
+            startRecordProgress();
+        } else {
+            cancelRecordProgress();
+        }
 
         onStalledChanged(stalled);
 
@@ -1042,7 +1067,7 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    private void reloadPlaylist(){
+    private void reloadPlaylist() {
         reloadPlaylist(false, false);
     }
 
@@ -1339,6 +1364,33 @@ public abstract class AbstractPlayer implements Player {
 
     private boolean notInRegion(int position, int fromPosition, int toPosition) {
         return position > Math.max(fromPosition, toPosition) || position < Math.min(fromPosition, toPosition);
+    }
+
+    private void startRecordProgress() {
+        cancelRecordProgress();
+        if (!mRecordProgress) {
+            return;
+        }
+
+        mRecordProgressDisposable = Observable.interval(3, 3, TimeUnit.SECONDS, Schedulers.io())
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long aLong) {
+                        if (!isPrepared()) {
+                            return;
+                        }
+
+                        mPlayerState.setPlayProgress(mMusicPlayer.getProgress());
+                    }
+                });
+    }
+
+    private void cancelRecordProgress() {
+        if (mRecordProgressDisposable == null || mRecordProgressDisposable.isDisposed()) {
+            return;
+        }
+
+        mRecordProgressDisposable.dispose();
     }
 
     /**
