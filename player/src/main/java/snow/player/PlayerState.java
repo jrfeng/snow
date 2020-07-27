@@ -293,10 +293,7 @@ public class PlayerState implements Parcelable {
     /**
      * 设置错误码。
      *
-     * @param errorCode 错误码。预定义的错误码：{@link Player.Error#NO_ERROR},
-     *                  {@link Player.Error#ONLY_WIFI_NETWORK},
-     *                  {@link Player.Error#PLAYER_ERROR},
-     *                  {@link Player.Error#NETWORK_UNAVAILABLE}
+     * @param errorCode 错误码。预定义错误码，请查看 {@link Player.Error} 类。
      * @see Player.Error
      */
     public void setErrorCode(int errorCode) {
