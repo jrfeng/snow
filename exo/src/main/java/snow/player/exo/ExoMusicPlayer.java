@@ -121,7 +121,7 @@ public class ExoMusicPlayer implements MusicPlayer {
             case ExoPlaybackException.TYPE_SOURCE:
                 return snow.player.Player.Error.DATA_LOAD_FAILED;
             case ExoPlaybackException.TYPE_REMOTE:
-                return snow.player.Player.Error.NETWORK_UNAVAILABLE;
+                return snow.player.Player.Error.NETWORK_ERROR;
             default:
                 return snow.player.Player.Error.PLAYER_ERROR;
         }

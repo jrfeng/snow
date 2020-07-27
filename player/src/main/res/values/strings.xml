@@ -4,7 +4,7 @@
     <string name="snow_error_unknown_error">unknown error</string>
     <string name="snow_error_only_wifi_network">only WiFi network</string>
     <string name="snow_error_player_error">player error</string>
-    <string name="snow_error_network_unavailable">network unavailable</string>
+    <string name="snow_error_network_error">network error</string>
     <string name="snow_error_file_not_found">file not found</string>
     <string name="snow_error_data_load_failed">data load failed</string>
     <string name="snow_error_get_url_failed">get url failed</string>
