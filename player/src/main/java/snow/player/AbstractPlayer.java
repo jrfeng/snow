@@ -66,6 +66,7 @@ public abstract class AbstractPlayer implements Player {
     private boolean mPrepared;
     private boolean mLoadingPlaylist;
 
+    private boolean mPlayOnPrepared;
     private Runnable mPreparedAction;
     private Runnable mSeekCompleteAction;
     private Runnable mPlaylistLoadedAction;
@@ -268,7 +269,7 @@ public abstract class AbstractPlayer implements Player {
      *
      * @param preparedAction 在音乐播放器准备完成后要执行的操作
      */
-    private void prepareMusicPlayer(@Nullable Runnable preparedAction) {
+    private void prepareMusicPlayer(boolean playOnPrepared, @Nullable Runnable preparedAction) {
         releaseMusicPlayer();
 
         notifyBufferingPercentChanged(0, System.currentTimeMillis());
@@ -285,6 +286,7 @@ public abstract class AbstractPlayer implements Player {
 
         disposeRetrieveUri();
 
+        mPlayOnPrepared = playOnPrepared;
         mRetrieveUriDisposable = getMusicItemUri(musicItem, mPlayerConfig.getSoundQuality())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -378,6 +380,11 @@ public abstract class AbstractPlayer implements Player {
                 }
 
                 notifyPrepared(mp.getAudioSessionId());
+
+                if (mPlayOnPrepared) {
+                    mPlayOnPrepared = false;
+                    play();
+                }
 
                 if (mPlayerState.getPlayProgress() > 0) {
                     seekTo(mPlayerState.getPlayProgress(), mPreparedAction);
@@ -523,6 +530,7 @@ public abstract class AbstractPlayer implements Player {
 
         mPreparing = false;
         mPrepared = false;
+        mPlayOnPrepared = false;
 
         mPreparedAction = null;
         mSeekCompleteAction = null;
@@ -847,12 +855,7 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
-        prepareMusicPlayer(new Runnable() {
-            @Override
-            public void run() {
-                play();
-            }
-        });
+        prepareMusicPlayer(true, null);
     }
 
     @Override
@@ -1007,19 +1010,15 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
-        final boolean playing = mMusicPlayer.isPlaying();
+        boolean playing = mMusicPlayer.isPlaying();
         final int position = mMusicPlayer.getProgress();
 
         releaseMusicPlayer();
-        prepareMusicPlayer(new Runnable() {
+        prepareMusicPlayer(playing, new Runnable() {
             @Override
             public void run() {
                 if (position > 0) {
                     seekTo(position);
-                }
-
-                if (playing) {
-                    play();
                 }
             }
         });
