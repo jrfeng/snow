@@ -271,6 +271,7 @@ public abstract class AbstractPlayer implements Player {
      */
     private void prepareMusicPlayer(boolean playOnPrepared, @Nullable Runnable preparedAction) {
         releaseMusicPlayer();
+        disposeRetrieveUri();
 
         notifyBufferingPercentChanged(0, System.currentTimeMillis());
 
@@ -283,8 +284,6 @@ public abstract class AbstractPlayer implements Player {
             onError(Error.ONLY_WIFI_NETWORK, Error.getErrorMessage(mApplicationContext, Error.ONLY_WIFI_NETWORK));
             return;
         }
-
-        disposeRetrieveUri();
 
         mPlayOnPrepared = playOnPrepared;
         mRetrieveUriDisposable = getMusicItemUri(musicItem, mPlayerConfig.getSoundQuality())
