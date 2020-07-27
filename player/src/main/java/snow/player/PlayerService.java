@@ -777,6 +777,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      */
     @SuppressWarnings("SameReturnValue")
     protected boolean isCached(MusicItem musicItem, Player.SoundQuality soundQuality) {
+        if (mComponentFactory != null) {
+            return mComponentFactory.isCached(musicItem, soundQuality);
+        }
+
         return false;
     }
 
@@ -2052,6 +2056,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 例：<br>
      * <pre>
      * public class MyComponentFactory extends PlayerService.ComponentFactory {
+     *     ...
      *     &#64;Inject    // 使用 Inject 注解进行标注
      *     &#64;NonNull
      *     &#64;Override
@@ -2078,6 +2083,17 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 你的 {@link ComponentFactory} 的完整类名。
      */
     public static abstract class ComponentFactory {
+        /**
+         * 查询具有 soundQuality 音质的 MusicItem 表示的的音乐是否已被缓存。
+         * <p>
+         * 该方法会在异步线程中被调用。
+         *
+         * @param musicItem    要查询的 MusicItem 对象
+         * @param soundQuality 音乐的音质
+         * @return 如果已被缓存，则返回 true，否则返回 false
+         */
+        public abstract boolean isCached(MusicItem musicItem, Player.SoundQuality soundQuality);
+
         /**
          * 创建一个 {@link MusicPlayer} 对象。
          *
