@@ -443,8 +443,7 @@ public abstract class AbstractPlayer implements Player {
             public void onError(MusicPlayer mp, int errorCode) {
                 Log.e("MusicPlayer", "errorCode:" + errorCode);
 
-                notifyError(Error.PLAYER_ERROR,
-                        Error.getErrorMessage(mApplicationContext, Error.PLAYER_ERROR));
+                notifyError(errorCode, Error.getErrorMessage(mApplicationContext, errorCode));
             }
         };
     }
