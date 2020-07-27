@@ -1,8 +1,10 @@
 package snow.player.exo;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -11,10 +13,6 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceFactory;
-import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.util.Util;
 
 import snow.player.media.MusicPlayer;
 
@@ -22,6 +20,8 @@ import snow.player.media.MusicPlayer;
  * 封装了一个 SimpleExoPlayer
  */
 public class ExoMusicPlayer implements MusicPlayer {
+    private static final String TAG = "ExoMusicPlayer";
+
     private MediaSourceFactory mMediaSourceFactory;
     private SimpleExoPlayer mSimpleExoPlayer;
     private Player.EventListener mEventListener;
@@ -97,8 +97,12 @@ public class ExoMusicPlayer implements MusicPlayer {
             @Override
             public void onPlayerError(ExoPlaybackException error) {
                 setInvalid();
+
+                Log.e(TAG, error.toString());
+                error.printStackTrace();
+
                 if (mErrorListener != null) {
-                    mErrorListener.onError(ExoMusicPlayer.this, snow.player.Player.Error.PLAYER_ERROR);
+                    mErrorListener.onError(ExoMusicPlayer.this, toErrorCode(error));
                 }
             }
 
@@ -109,6 +113,18 @@ public class ExoMusicPlayer implements MusicPlayer {
                 }
             }
         };
+    }
+
+    @SuppressLint("SwitchIntDef")
+    private int toErrorCode(ExoPlaybackException error) {
+        switch (error.type) {
+            case ExoPlaybackException.TYPE_SOURCE:
+                return snow.player.Player.Error.DATA_LOAD_FAILED;
+            case ExoPlaybackException.TYPE_REMOTE:
+                return snow.player.Player.Error.NETWORK_UNAVAILABLE;
+            default:
+                return snow.player.Player.Error.PLAYER_ERROR;
+        }
     }
 
     private void initExoPlayer(Context context) {
