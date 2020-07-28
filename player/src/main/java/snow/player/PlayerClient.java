@@ -554,17 +554,8 @@ public class PlayerClient implements Player {
      *
      * @return 当前缓存进度，使用整数表示的百分比值，范围为 [0, 100]
      */
-    public int getBufferingPercent() {
-        return mPlayerStateHolder.mPlayerState.getBufferingPercent();
-    }
-
-    /**
-     * 获取缓存进度更新时间。
-     *
-     * @return 缓存进度更新时间
-     */
-    public long getBufferingPercentUpdateTime() {
-        return mPlayerStateHolder.mPlayerState.getBufferingPercentUpdateTime();
+    public int getBufferedProgress() {
+        return mPlayerStateHolder.mPlayerState.getBufferedProgress();
     }
 
     /**
@@ -923,10 +914,10 @@ public class PlayerClient implements Player {
      * 如果监听器已添加，则忽略本次调用。
      *
      * @param listener 要添加的监听器
-     * @see Player.OnBufferingPercentChangeListener
+     * @see OnBufferedProgressChangeListener
      */
-    public void addOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
-        mPlayerStateHolder.addOnBufferingPercentChangeListener(listener);
+    public void addOnBufferedProgressChangeListener(OnBufferedProgressChangeListener listener) {
+        mPlayerStateHolder.addOnBufferedProgressChangeListener(listener);
     }
 
     /**
@@ -939,17 +930,17 @@ public class PlayerClient implements Player {
      * @param owner    LifecycleOwner 对象
      * @param listener 要添加的监听器
      */
-    public void addOnBufferingPercentChangeListener(LifecycleOwner owner,
-                                                    final Player.OnBufferingPercentChangeListener listener) {
+    public void addOnBufferedProgressChangeListener(LifecycleOwner owner,
+                                                    final OnBufferedProgressChangeListener listener) {
         if (isDestroyed(owner)) {
             return;
         }
 
-        addOnBufferingPercentChangeListener(listener);
+        addOnBufferedProgressChangeListener(listener);
         owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
             @Override
             public void run() {
-                removeOnBufferingPercentChangeListener(listener);
+                removeOnBufferedProgressChangeListener(listener);
             }
         }));
     }
@@ -959,8 +950,8 @@ public class PlayerClient implements Player {
      *
      * @param listener 要移除的监听器
      */
-    public void removeOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
-        mPlayerStateHolder.removeOnBufferingPercentChangeListener(listener);
+    public void removeOnBufferedProgressChangeListener(OnBufferedProgressChangeListener listener) {
+        mPlayerStateHolder.removeOnBufferedProgressChangeListener(listener);
     }
 
     /**
@@ -1345,7 +1336,7 @@ public class PlayerClient implements Player {
 
         private List<Player.OnPlaybackStateChangeListener> mAllPlaybackStateChangeListener;
         private List<Player.OnStalledChangeListener> mAllStalledChangeListener;
-        private List<Player.OnBufferingPercentChangeListener> mAllBufferingPercentChangeListener;
+        private List<OnBufferedProgressChangeListener> mAllBufferedProgressChangeListener;
         private List<Player.OnPlayingMusicItemChangeListener> mAllPlayingMusicItemChangeListener;
         private List<Player.OnSeekListener> mAllSeekListener;
         private List<Player.OnPlaylistChangeListener> mAllPlaylistChangeListener;
@@ -1362,7 +1353,7 @@ public class PlayerClient implements Player {
 
             mAllPlaybackStateChangeListener = new ArrayList<>();
             mAllStalledChangeListener = new ArrayList<>();
-            mAllBufferingPercentChangeListener = new ArrayList<>();
+            mAllBufferedProgressChangeListener = new ArrayList<>();
             mAllPlayingMusicItemChangeListener = new ArrayList<>();
             mAllSeekListener = new ArrayList<>();
             mAllPlaylistChangeListener = new ArrayList<>();
@@ -1383,7 +1374,7 @@ public class PlayerClient implements Player {
             notifyPlayModeChanged();
             notifyPlayingMusicItemChanged();
             notifyPlaybackStateChanged();
-            notifyOnBufferingPercentChanged();
+            notifyOnBufferedProgressChanged();
 
             if (mPlayerState.isStalled()) {
                 notifyStalledChanged();
@@ -1428,17 +1419,17 @@ public class PlayerClient implements Player {
             mAllStalledChangeListener.remove(listener);
         }
 
-        void addOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
-            if (mAllBufferingPercentChangeListener.contains(listener)) {
+        void addOnBufferedProgressChangeListener(OnBufferedProgressChangeListener listener) {
+            if (mAllBufferedProgressChangeListener.contains(listener)) {
                 return;
             }
 
-            mAllBufferingPercentChangeListener.add(listener);
-            notifyOnBufferingPercentChanged(listener);
+            mAllBufferedProgressChangeListener.add(listener);
+            notifyOnBufferedProgressChanged(listener);
         }
 
-        void removeOnBufferingPercentChangeListener(Player.OnBufferingPercentChangeListener listener) {
-            mAllBufferingPercentChangeListener.remove(listener);
+        void removeOnBufferedProgressChangeListener(OnBufferedProgressChangeListener listener) {
+            mAllBufferedProgressChangeListener.remove(listener);
         }
 
         void addOnPlayingMusicItemChangeListener(Player.OnPlayingMusicItemChangeListener listener) {
@@ -1591,22 +1582,21 @@ public class PlayerClient implements Player {
             }
         }
 
-        private void notifyOnBufferingPercentChanged(Player.OnBufferingPercentChangeListener listener) {
+        private void notifyOnBufferedProgressChanged(OnBufferedProgressChangeListener listener) {
             if (notConnected()) {
                 return;
             }
 
-            listener.onBufferingPercentChanged(mPlayerState.getBufferingPercent(),
-                    mPlayerState.getBufferingPercentUpdateTime());
+            listener.onBufferedProgressChanged(mPlayerState.getBufferedProgress());
         }
 
-        private void notifyOnBufferingPercentChanged() {
+        private void notifyOnBufferedProgressChanged() {
             if (notConnected()) {
                 return;
             }
 
-            for (Player.OnBufferingPercentChangeListener listener : mAllBufferingPercentChangeListener) {
-                notifyOnBufferingPercentChanged(listener);
+            for (OnBufferedProgressChangeListener listener : mAllBufferedProgressChangeListener) {
+                notifyOnBufferedProgressChanged(listener);
             }
         }
 
@@ -1818,11 +1808,10 @@ public class PlayerClient implements Player {
         }
 
         @Override
-        public void onBufferingPercentChanged(int percent, long updateTime) {
-            mPlayerState.setBufferingPercent(percent);
-            mPlayerState.setBufferingPercentUpdateTime(updateTime);
+        public void onBufferedProgressChanged(int bufferedProgress) {
+            mPlayerState.setBufferedProgress(bufferedProgress);
 
-            notifyOnBufferingPercentChanged();
+            notifyOnBufferedProgressChanged();
         }
 
         @Override

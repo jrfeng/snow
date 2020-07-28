@@ -269,14 +269,13 @@ public interface Player extends PlaylistManager.OnModifyPlaylistListener {
     /**
      * 用于监听当前正在播放的音乐的缓冲进度。
      */
-    interface OnBufferingPercentChangeListener {
+    interface OnBufferedProgressChangeListener {
         /**
          * 当缓冲进度发生改变时会回调该方法。
+         *  @param bufferedProgress    缓冲进度，表示百分比，值为 0~100，
          *
-         * @param percent    缓冲进度，表示百分比，值为 0~100，
-         * @param updateTime 缓冲进度的更新时间
          */
-        void onBufferingPercentChanged(int percent, long updateTime);
+        void onBufferedProgressChanged(int bufferedProgress);
     }
 
     /**

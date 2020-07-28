@@ -274,7 +274,7 @@ public abstract class AbstractPlayer implements Player {
         releaseMusicPlayer();
         disposeRetrieveUri();
 
-        notifyBufferingPercentChanged(0, System.currentTimeMillis());
+        notifyBufferedProgressChanged(0);
 
         MusicItem musicItem = mPlayerState.getMusicItem();
         if (musicItem == null) {
@@ -434,8 +434,8 @@ public abstract class AbstractPlayer implements Player {
 
         mOnBufferingUpdateListener = new MusicPlayer.OnBufferingUpdateListener() {
             @Override
-            public void onBufferingUpdate(MusicPlayer mp, int percent) {
-                notifyBufferingPercentChanged(percent, System.currentTimeMillis());
+            public void onBufferingUpdate(MusicPlayer mp, int bufferedProgress) {
+                notifyBufferedProgressChanged(bufferedProgress);
             }
         };
 
@@ -772,14 +772,13 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    private void notifyBufferingPercentChanged(int percent, long updateTime) {
-        mPlayerState.setBufferingPercent(percent);
-        mPlayerState.setBufferingPercentUpdateTime(updateTime);
+    private void notifyBufferedProgressChanged(int bufferedProgress) {
+        mPlayerState.setBufferedProgress(bufferedProgress);
 
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
-                listener.onBufferingPercentChanged(percent, updateTime);
+                listener.onBufferedProgressChanged(bufferedProgress);
             }
         }
     }
@@ -1723,11 +1722,11 @@ public abstract class AbstractPlayer implements Player {
 
             mMusicPlayer.setOnBufferingUpdateListener(new OnBufferingUpdateListener() {
                 @Override
-                public void onBufferingUpdate(final MusicPlayer mp, final int percent) {
+                public void onBufferingUpdate(final MusicPlayer mp, final int bufferedProgress) {
                     runOnMainThread(new Runnable() {
                         @Override
                         public void run() {
-                            listener.onBufferingUpdate(mp, percent);
+                            listener.onBufferingUpdate(mp, bufferedProgress);
                         }
                     });
                 }

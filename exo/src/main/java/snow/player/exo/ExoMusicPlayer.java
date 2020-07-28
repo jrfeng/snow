@@ -47,8 +47,8 @@ public class ExoMusicPlayer implements MusicPlayer {
             @Override
             public void onLoadingChanged(boolean isLoading) {
                 if (mBufferingUpdateListener != null) {
-                    int percent = (int) ((mSimpleExoPlayer.getBufferedPosition() * 1.0) / mSimpleExoPlayer.getDuration()) * 100;
-                    mBufferingUpdateListener.onBufferingUpdate(ExoMusicPlayer.this, percent);
+                    mBufferingUpdateListener.onBufferingUpdate(ExoMusicPlayer.this,
+                            (int) mSimpleExoPlayer.getBufferedPosition());
                 }
             }
 

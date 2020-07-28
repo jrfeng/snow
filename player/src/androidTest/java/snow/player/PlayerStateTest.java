@@ -78,7 +78,7 @@ public class PlayerStateTest {
         final Player.PlayMode playMode = Player.PlayMode.SHUFFLE;
         final Player.PlaybackState playbackState = Player.PlaybackState.PLAYING;
         final int audioSessionId = 12;
-        final int bufferingPercent = 100;
+        final int bufferedProgress = 100;
         final boolean stalled = true;
         final int errorCode = Player.Error.PLAYER_ERROR;
         final String errorMessage = "player error";
@@ -91,7 +91,7 @@ public class PlayerStateTest {
         playerState.setPlayMode(playMode);
         playerState.setPlaybackState(playbackState);
         playerState.setAudioSessionId(audioSessionId);
-        playerState.setBufferedProgress(bufferingPercent);
+        playerState.setBufferedProgress(bufferedProgress);
         playerState.setStalled(stalled);
         playerState.setErrorCode(errorCode);
         playerState.setErrorMessage(errorMessage);
@@ -104,7 +104,7 @@ public class PlayerStateTest {
         other1.setPlayMode(playMode);
         other1.setPlaybackState(playbackState);
         other1.setAudioSessionId(audioSessionId);
-        other1.setBufferedProgress(bufferingPercent);
+        other1.setBufferedProgress(bufferedProgress);
         other1.setStalled(stalled);
         other1.setErrorCode(errorCode);
         other1.setErrorMessage(errorMessage);
@@ -131,7 +131,7 @@ public class PlayerStateTest {
         final Player.PlayMode playMode = Player.PlayMode.SHUFFLE;
         final Player.PlaybackState playbackState = Player.PlaybackState.PLAYING;
         final int audioSessionId = 12;
-        final int bufferingPercent = 100;
+        final int bufferedProgress = 100;
         final boolean stalled = true;
         final int errorCode = Player.Error.PLAYER_ERROR;
         final String errorMessage = "player error";
@@ -144,7 +144,7 @@ public class PlayerStateTest {
         playerState.setPlayMode(playMode);
         playerState.setPlaybackState(playbackState);
         playerState.setAudioSessionId(audioSessionId);
-        playerState.setBufferedProgress(bufferingPercent);
+        playerState.setBufferedProgress(bufferedProgress);
         playerState.setStalled(stalled);
         playerState.setErrorCode(errorCode);
         playerState.setErrorMessage(errorMessage);

@@ -5,7 +5,7 @@ import channel.helper.Channel;
 @Channel
 public interface PlayerStateListener extends Player.OnPlaybackStateChangeListener,
         Player.OnStalledChangeListener,
-        Player.OnBufferingPercentChangeListener,
+        Player.OnBufferedProgressChangeListener,
         Player.OnPlayingMusicItemChangeListener,
         Player.OnSeekListener,
         Player.OnPositionChangeListener,
