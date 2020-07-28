@@ -81,6 +81,7 @@ public abstract class AbstractPlayer implements Player {
 
     private boolean mRecordProgress;
     private Disposable mRecordProgressDisposable;
+    private Disposable mCheckCachedDisposable;
 
     /**
      * @param context      {@link Context} 对象，不能为 null
@@ -1056,12 +1057,51 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void checkNetworkType(boolean onlyWifiNetwork, boolean isWifiNetwork) {
-        if (onlyWifiNetwork && !isWifiNetwork && !isCached(getMusicItem(), mPlayerConfig.getSoundQuality())) {
-            pause();
-            releaseMusicPlayer();
-            notifyError(Error.ONLY_WIFI_NETWORK,
-                    Error.getErrorMessage(mApplicationContext, Error.ONLY_WIFI_NETWORK));
+        disposeCheckCached();
+
+        if (!mNetworkUtil.networkAvailable()) {
+            return;
         }
+
+        mCheckCachedDisposable = playingMusicIsCached()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(checkNetworkTypeConsumer(onlyWifiNetwork, isWifiNetwork));
+    }
+
+    private void disposeCheckCached() {
+        if (mCheckCachedDisposable != null) {
+            mCheckCachedDisposable.dispose();
+            mCheckCachedDisposable = null;
+        }
+    }
+
+    private Single<Boolean> playingMusicIsCached() {
+        return Single.create(new SingleOnSubscribe<Boolean>() {
+            @Override
+            public void subscribe(SingleEmitter<Boolean> emitter) {
+                boolean cached = isCached(getMusicItem(), mPlayerConfig.getSoundQuality());
+                if (emitter.isDisposed()) {
+                    return;
+                }
+
+                emitter.onSuccess(cached);
+            }
+        });
+    }
+
+    private Consumer<Boolean> checkNetworkTypeConsumer(final boolean onlyWifiNetwork, final boolean isWifiNetwork) {
+        return new Consumer<Boolean>() {
+            @Override
+            public void accept(Boolean cached) {
+                if (onlyWifiNetwork && !isWifiNetwork && !cached) {
+                    pause();
+                    releaseMusicPlayer();
+                    notifyError(Error.ONLY_WIFI_NETWORK,
+                            Error.getErrorMessage(mApplicationContext, Error.ONLY_WIFI_NETWORK));
+                }
+            }
+        };
     }
 
     private void reloadPlaylist() {
