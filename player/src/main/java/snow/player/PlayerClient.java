@@ -484,7 +484,7 @@ public class PlayerClient implements Player {
      *
      * @return 播放进度
      */
-    public long getPlayProgress() {
+    public int getPlayProgress() {
         return mPlayerStateHolder.mPlayerState.getPlayProgress();
     }
 
