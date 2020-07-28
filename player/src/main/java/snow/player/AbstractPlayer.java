@@ -533,6 +533,14 @@ public abstract class AbstractPlayer implements Player {
 
         mPreparedAction = null;
         mSeekCompleteAction = null;
+
+        if (mPlayerState.isStalled()) {
+            notifyStalled(false);
+        }
+
+        if (mPlayerState.isSeeking()) {
+            notifySeekComplete(mPlayerState.getPosition());
+        }
     }
 
     /**
@@ -557,7 +565,7 @@ public abstract class AbstractPlayer implements Player {
      * @return 当播放器已经准备完毕时返回 true，否则返回 false。
      */
     public final boolean isPrepared() {
-        return mPrepared;
+        return mMusicPlayer != null && mPrepared;
     }
 
     /**
@@ -802,6 +810,8 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void notifySeeking() {
+        mPlayerState.setSeeking(true);
+
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
@@ -811,6 +821,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void notifySeekComplete(int position) {
+        mPlayerState.setSeeking(false);
         mPlayerState.setPlayProgress(position);
         mPlayerState.setPlayProgressUpdateTime(System.currentTimeMillis());
 
