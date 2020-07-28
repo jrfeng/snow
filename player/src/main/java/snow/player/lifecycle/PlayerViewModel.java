@@ -316,7 +316,8 @@ public class PlayerViewModel extends ViewModel {
     }
 
     private int getPlayProgressSec() {
-        return mPlayerClient.getPlayProgress() / 1000;
+        long realProgress = mPlayerClient.getPlayProgress() + (System.currentTimeMillis() - mPlayerClient.getPlayProgressUpdateTime());
+        return (int) (realProgress / 1000);
     }
 
     private int getBufferedProgressSec() {
