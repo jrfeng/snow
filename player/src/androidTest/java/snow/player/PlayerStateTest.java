@@ -26,7 +26,7 @@ public class PlayerStateTest {
 
         assertEquals(Player.PlaybackState.UNKNOWN, playerState.getPlaybackState());
         assertEquals(0, playerState.getAudioSessionId());
-        assertEquals(0, playerState.getBufferingPercent());
+        assertEquals(0, playerState.getBufferedProgress());
         assertFalse(playerState.isStalled());
         assertEquals(Player.Error.NO_ERROR, playerState.getErrorCode());
         assertNotNull(playerState.getErrorMessage());
@@ -42,8 +42,7 @@ public class PlayerStateTest {
         source.setPlayMode(Player.PlayMode.LOOP);
         source.setPlaybackState(Player.PlaybackState.ERROR);
         source.setAudioSessionId(12);
-        source.setBufferingPercent(100);
-        source.setBufferingPercentUpdateTime(System.currentTimeMillis());
+        source.setBufferedProgress(100);
         source.setStalled(true);
         source.setErrorCode(Player.Error.PLAYER_ERROR);
         source.setErrorMessage("player error");
@@ -80,7 +79,6 @@ public class PlayerStateTest {
         final Player.PlaybackState playbackState = Player.PlaybackState.PLAYING;
         final int audioSessionId = 12;
         final int bufferingPercent = 100;
-        final long bufferingPercentUpdateTime = System.currentTimeMillis();
         final boolean stalled = true;
         final int errorCode = Player.Error.PLAYER_ERROR;
         final String errorMessage = "player error";
@@ -93,8 +91,7 @@ public class PlayerStateTest {
         playerState.setPlayMode(playMode);
         playerState.setPlaybackState(playbackState);
         playerState.setAudioSessionId(audioSessionId);
-        playerState.setBufferingPercent(bufferingPercent);
-        playerState.setBufferingPercentUpdateTime(bufferingPercentUpdateTime);
+        playerState.setBufferedProgress(bufferingPercent);
         playerState.setStalled(stalled);
         playerState.setErrorCode(errorCode);
         playerState.setErrorMessage(errorMessage);
@@ -107,8 +104,7 @@ public class PlayerStateTest {
         other1.setPlayMode(playMode);
         other1.setPlaybackState(playbackState);
         other1.setAudioSessionId(audioSessionId);
-        other1.setBufferingPercent(bufferingPercent);
-        other1.setBufferingPercentUpdateTime(bufferingPercentUpdateTime);
+        other1.setBufferedProgress(bufferingPercent);
         other1.setStalled(stalled);
         other1.setErrorCode(errorCode);
         other1.setErrorMessage(errorMessage);
@@ -136,7 +132,6 @@ public class PlayerStateTest {
         final Player.PlaybackState playbackState = Player.PlaybackState.PLAYING;
         final int audioSessionId = 12;
         final int bufferingPercent = 100;
-        final long bufferingPercentUpdateTime = System.currentTimeMillis();
         final boolean stalled = true;
         final int errorCode = Player.Error.PLAYER_ERROR;
         final String errorMessage = "player error";
@@ -149,8 +144,7 @@ public class PlayerStateTest {
         playerState.setPlayMode(playMode);
         playerState.setPlaybackState(playbackState);
         playerState.setAudioSessionId(audioSessionId);
-        playerState.setBufferingPercent(bufferingPercent);
-        playerState.setBufferingPercentUpdateTime(bufferingPercentUpdateTime);
+        playerState.setBufferedProgress(bufferingPercent);
         playerState.setStalled(stalled);
         playerState.setErrorCode(errorCode);
         playerState.setErrorMessage(errorMessage);
