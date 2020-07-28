@@ -205,6 +205,8 @@ public class PlayerClient implements Player {
 
     /**
      * 断开与播放器的连接。
+     * <p>
+     * 断开连接后，可以调用 {@link #connect()} 或者 {@link #connect(OnConnectCallback)} 方法再次进行连接。
      */
     public void disconnect() {
         if (!isConnected()) {
