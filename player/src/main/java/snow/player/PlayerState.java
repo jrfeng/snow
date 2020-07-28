@@ -26,8 +26,7 @@ public class PlayerState implements Parcelable {
     private long playProgressUpdateTime;
     private Player.PlaybackState playbackState;
     private int audioSessionId;
-    private int bufferingPercent;
-    private long bufferingPercentUpdateTime;
+    private int bufferedProgress;
     private boolean stalled;
     private boolean seeking;
     private int errorCode;
@@ -41,8 +40,7 @@ public class PlayerState implements Parcelable {
 
         playbackState = Player.PlaybackState.UNKNOWN;
         audioSessionId = 0;
-        bufferingPercent = 0;
-        bufferingPercentUpdateTime = 0;
+        bufferedProgress = 0;
         stalled = false;
         seeking = false;
         errorCode = Player.Error.NO_ERROR;
@@ -60,8 +58,7 @@ public class PlayerState implements Parcelable {
 
         playbackState = source.playbackState;
         audioSessionId = source.audioSessionId;
-        bufferingPercent = source.bufferingPercent;
-        bufferingPercentUpdateTime = source.bufferingPercentUpdateTime;
+        bufferedProgress = source.bufferedProgress;
         stalled = source.stalled;
         seeking = source.seeking;
         errorCode = source.errorCode;
@@ -227,39 +224,25 @@ public class PlayerState implements Parcelable {
     /**
      * 获取当前音乐的缓存进度。百分比值，范围为 [0 ~ 100]。
      */
-    public int getBufferingPercent() {
-        return bufferingPercent;
+    public int getBufferedProgress() {
+        return bufferedProgress;
     }
 
     /**
      * 设置当前音乐的缓存进度。百分比值，范围为 [0 ~ 100]。
      */
-    public void setBufferingPercent(int bufferingPercent) {
-        if (bufferingPercent < 0) {
-            this.bufferingPercent = 0;
+    public void setBufferedProgress(int bufferedProgress) {
+        if (bufferedProgress < 0) {
+            this.bufferedProgress = 0;
             return;
         }
 
-        if (bufferingPercent > 100) {
-            this.bufferingPercent = 100;
+        if (bufferedProgress > 100) {
+            this.bufferedProgress = 100;
             return;
         }
 
-        this.bufferingPercent = bufferingPercent;
-    }
-
-    /**
-     * 获取上一次缓存进度的更新时间（单位：毫秒 ms）。
-     */
-    public long getBufferingPercentUpdateTime() {
-        return bufferingPercentUpdateTime;
-    }
-
-    /**
-     * 设置上一次缓存进度的更新时间（单位：毫秒 ms）。
-     */
-    public void setBufferingPercentUpdateTime(long bufferingPercentUpdateTime) {
-        this.bufferingPercentUpdateTime = bufferingPercentUpdateTime;
+        this.bufferedProgress = bufferedProgress;
     }
 
     /**
@@ -355,8 +338,7 @@ public class PlayerState implements Parcelable {
                 && Objects.equal(playMode, other.playMode)
                 && Objects.equal(playbackState, other.playbackState)
                 && Objects.equal(audioSessionId, other.audioSessionId)
-                && Objects.equal(bufferingPercent, other.bufferingPercent)
-                && Objects.equal(bufferingPercentUpdateTime, other.bufferingPercentUpdateTime)
+                && Objects.equal(bufferedProgress, other.bufferedProgress)
                 && Objects.equal(stalled, other.stalled)
                 && Objects.equal(errorCode, other.errorCode)
                 && Objects.equal(errorMessage, other.errorMessage);
@@ -371,8 +353,7 @@ public class PlayerState implements Parcelable {
                 playMode,
                 playbackState,
                 audioSessionId,
-                bufferingPercent,
-                bufferingPercentUpdateTime,
+                bufferedProgress,
                 stalled,
                 errorCode,
                 errorMessage);
@@ -389,8 +370,7 @@ public class PlayerState implements Parcelable {
                 ", playMode=" + playMode +
                 ", playbackState=" + playbackState +
                 ", audioSessionId=" + audioSessionId +
-                ", bufferingPercent=" + bufferingPercent +
-                ", bufferingPercentUpdateTime=" + bufferingPercentUpdateTime +
+                ", bufferingPercent=" + bufferedProgress +
                 ", stalled=" + stalled +
                 ", errorCode=" + errorCode +
                 ", errorMessage='" + errorMessage + '\'' +
@@ -406,8 +386,7 @@ public class PlayerState implements Parcelable {
 
         playbackState = Player.PlaybackState.values()[in.readInt()];
         audioSessionId = in.readInt();
-        bufferingPercent = in.readInt();
-        bufferingPercentUpdateTime = in.readLong();
+        bufferedProgress = in.readInt();
         stalled = in.readByte() != 0;
         errorCode = in.readInt();
         errorMessage = in.readString();
@@ -423,8 +402,7 @@ public class PlayerState implements Parcelable {
 
         dest.writeInt(playbackState.ordinal());
         dest.writeInt(audioSessionId);
-        dest.writeInt(bufferingPercent);
-        dest.writeLong(bufferingPercentUpdateTime);
+        dest.writeInt(bufferedProgress);
         dest.writeByte((byte) (stalled ? 1 : 0));
         dest.writeInt(errorCode);
         dest.writeString(errorMessage);
