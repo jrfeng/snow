@@ -93,7 +93,8 @@ public class ProgressClock {
     }
 
     private void updateProgress(int progressSec/*单位：秒*/) {
-        mCallback.onUpdateProgress(progressSec, mDurationSec);
+        mProgressSec = progressSec;
+        mCallback.onUpdateProgress(mProgressSec, mDurationSec);
     }
 
     /**
