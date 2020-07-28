@@ -779,7 +779,7 @@ public abstract class AbstractPlayer implements Player {
         int bufferedProgress = buffered;
 
         if (isPercent) {
-            bufferedProgress = bufferedProgress * getMusicItemDuration();
+            bufferedProgress = (int) ((buffered / 100.0) * getMusicItemDuration());
         }
 
         mPlayerState.setBufferedProgress(bufferedProgress);
