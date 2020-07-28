@@ -577,6 +577,10 @@ public class PlayerClient implements Player {
         return mPlayerStateHolder.mPlayerState.isStalled();
     }
 
+    public boolean isSeeking() {
+        return mPlayerStateHolder.mPlayerState.isSeeking();
+    }
+
     /**
      * 播放器是否发生了错误。
      */
@@ -1380,6 +1384,14 @@ public class PlayerClient implements Player {
             notifyPlayingMusicItemChanged();
             notifyPlaybackStateChanged();
             notifyOnBufferingPercentChanged();
+
+            if (mPlayerState.isStalled()) {
+                notifyStalledChanged();
+            }
+
+            if (mPlayerState.isSeeking()) {
+                notifySeeking();
+            }
         }
 
         boolean notConnected() {
@@ -1792,11 +1804,13 @@ public class PlayerClient implements Player {
 
         @Override
         public void onSeeking() {
+            mPlayerState.setSeeking(true);
             notifySeeking();
         }
 
         @Override
         public void onSeekComplete(int progress, long updateTime) {
+            mPlayerState.setSeeking(false);
             mPlayerState.setPlayProgress(progress);
             mPlayerState.setPlayProgressUpdateTime(updateTime);
 
