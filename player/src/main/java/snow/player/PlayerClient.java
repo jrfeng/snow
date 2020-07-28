@@ -441,7 +441,7 @@ public class PlayerClient implements Player {
             return;
         }
 
-        mPlaylistManager.insertMusicItem(getPlayingMusicItemPosition() + 1, musicItem);
+        mPlaylistManager.insertMusicItem(getPlayPosition() + 1, musicItem);
     }
 
     /**
@@ -619,7 +619,7 @@ public class PlayerClient implements Player {
      *
      * @return 当前播放列表的播放位置
      */
-    public int getPlayingMusicItemPosition() {
+    public int getPlayPosition() {
         return mPlayerStateHolder.mPlayerState.getPosition();
     }
 
