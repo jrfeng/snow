@@ -267,8 +267,8 @@ public interface Player extends PlaylistManager.OnModifyPlaylistListener {
     interface OnBufferedProgressChangeListener {
         /**
          * 当缓冲进度发生改变时会回调该方法。
-         *  @param bufferedProgress    缓冲进度，表示百分比，值为 0~100，
          *
+         * @param bufferedProgress 缓冲进度，范围为 [0, duration]
          */
         void onBufferedProgressChanged(int bufferedProgress);
     }
