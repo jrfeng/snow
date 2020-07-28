@@ -28,7 +28,6 @@ public class PlayerState implements Parcelable {
     private int audioSessionId;
     private int bufferedProgress;
     private boolean stalled;
-    private boolean seeking;
     private int errorCode;
     private String errorMessage;
 
@@ -42,7 +41,6 @@ public class PlayerState implements Parcelable {
         audioSessionId = 0;
         bufferedProgress = 0;
         stalled = false;
-        seeking = false;
         errorCode = Player.Error.NO_ERROR;
         errorMessage = "";
     }
@@ -60,7 +58,6 @@ public class PlayerState implements Parcelable {
         audioSessionId = source.audioSessionId;
         bufferedProgress = source.bufferedProgress;
         stalled = source.stalled;
-        seeking = source.seeking;
         errorCode = source.errorCode;
         errorMessage = source.errorMessage;
     }
@@ -265,26 +262,6 @@ public class PlayerState implements Parcelable {
      */
     public void setStalled(boolean stalled) {
         this.stalled = stalled;
-    }
-
-    /**
-     * 获取 {@code seeking} 状态。
-     *
-     * @return {@code seeking} 状态
-     */
-    public boolean isSeeking() {
-        return seeking;
-    }
-
-    /**
-     * 设置 {@code seeking} 状态。
-     *
-     * <b>{@code seeking} 状态</b>：播放器的缓冲区中没有足够的数据支持播放器继续播放时的状态。
-     *
-     * @param seeking {@code seeking} 状态
-     */
-    public void setSeeking(boolean seeking) {
-        this.seeking = seeking;
     }
 
     /**
