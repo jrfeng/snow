@@ -50,6 +50,8 @@ public class PlayerViewModel extends ViewModel {
 
     private ProgressClock mProgressClock;
 
+    private boolean mInitialized;
+
     /**
      * 初始化 PlayerStateViewModel
      *
@@ -73,6 +75,8 @@ public class PlayerViewModel extends ViewModel {
         initProgressClock();
 
         addAllListener();
+
+        mInitialized = true;
     }
 
     private void initAllListener() {
@@ -192,9 +196,23 @@ public class PlayerViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
 
-        mPlaylist.release();
-        removeAllListener();
-        mPlayerClient = null;
+        if (mInitialized) {
+            mInitialized = false;
+            mProgressClock.cancel();
+            mPlaylist.release();
+            removeAllListener();
+            mPlayerClient = null;
+        }
+    }
+
+    /**
+     * 是否已完成初始化。
+     *
+     * @return 如果返回 false，则必须先调用 {@link #init(PlayerClient, String, String)} 方法进行初始化后
+     * 才能正常使用当前 {@link PlayerViewModel} 对象
+     */
+    public boolean isInitialized() {
+        return mInitialized;
     }
 
     /**
