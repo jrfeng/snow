@@ -537,10 +537,6 @@ public abstract class AbstractPlayer implements Player {
         if (mPlayerState.isStalled()) {
             notifyStalled(false);
         }
-
-        if (mPlayerState.isSeeking()) {
-            notifySeekComplete(mPlayerState.getPosition());
-        }
     }
 
     /**
@@ -808,19 +804,7 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    private void notifySeeking() {
-        mPlayerState.setSeeking(true);
-
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                listener.onSeeking();
-            }
-        }
-    }
-
     private void notifySeekComplete(int position) {
-        mPlayerState.setSeeking(false);
         mPlayerState.setPlayProgress(position);
         mPlayerState.setPlayProgressUpdateTime(System.currentTimeMillis());
 
@@ -956,7 +940,6 @@ public abstract class AbstractPlayer implements Player {
         }
 
         mSeekCompleteAction = seekCompleteAction;
-        notifySeeking();
         mMusicPlayer.seekTo(progress);
     }
 

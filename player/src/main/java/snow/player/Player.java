@@ -250,12 +250,7 @@ public interface Player extends PlaylistManager.OnModifyPlaylistListener {
     /**
      * 用于监听调整播放进度事件。
      */
-    interface OnSeekListener {
-
-        /**
-         * 该方法会在执行 seek 操作前调用
-         */
-        void onSeeking();
+    interface OnSeekCompleteListener {
 
         /**
          * 该方法会在 seek 操作执行完成时调用。
