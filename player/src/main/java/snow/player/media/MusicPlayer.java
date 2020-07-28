@@ -213,10 +213,11 @@ public interface MusicPlayer {
         /**
          * 该方法会在缓存进度更新时调用。
          *
-         * @param mp               当前音乐播放器。
-         * @param bufferedProgress 缓存已缓存的进度，范围为 [0, duration]
+         * @param mp        当前音乐播放器。
+         * @param buffered  已缓存的进度
+         * @param isPercent 已缓存的进度是否是百分比值
          */
-        void onBufferingUpdate(MusicPlayer mp, int bufferedProgress);
+        void onBufferingUpdate(MusicPlayer mp, int buffered, boolean isPercent);
     }
 
     /**

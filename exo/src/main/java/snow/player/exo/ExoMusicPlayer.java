@@ -48,7 +48,8 @@ public class ExoMusicPlayer implements MusicPlayer {
             public void onLoadingChanged(boolean isLoading) {
                 if (mBufferingUpdateListener != null) {
                     mBufferingUpdateListener.onBufferingUpdate(ExoMusicPlayer.this,
-                            (int) mSimpleExoPlayer.getBufferedPosition());
+                            (int) mSimpleExoPlayer.getBufferedPosition(),
+                            false);
                 }
             }
 

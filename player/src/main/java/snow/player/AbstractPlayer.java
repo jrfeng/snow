@@ -274,8 +274,6 @@ public abstract class AbstractPlayer implements Player {
         releaseMusicPlayer();
         disposeRetrieveUri();
 
-        notifyBufferedProgressChanged(0);
-
         MusicItem musicItem = mPlayerState.getMusicItem();
         if (musicItem == null) {
             return;
@@ -434,8 +432,8 @@ public abstract class AbstractPlayer implements Player {
 
         mOnBufferingUpdateListener = new MusicPlayer.OnBufferingUpdateListener() {
             @Override
-            public void onBufferingUpdate(MusicPlayer mp, int bufferedProgress) {
-                notifyBufferedProgressChanged(bufferedProgress);
+            public void onBufferingUpdate(MusicPlayer mp, int buffered, boolean isPercent) {
+                notifyBufferedChanged(buffered, isPercent);
             }
         };
 
@@ -768,7 +766,22 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    private void notifyBufferedProgressChanged(int bufferedProgress) {
+    private int getMusicItemDuration() {
+        MusicItem musicItem = getMusicItem();
+        if (musicItem == null) {
+            return 0;
+        }
+
+        return musicItem.getDuration();
+    }
+
+    private void notifyBufferedChanged(int buffered, boolean isPercent) {
+        int bufferedProgress = buffered;
+
+        if (isPercent) {
+            bufferedProgress = bufferedProgress * getMusicItemDuration();
+        }
+
         mPlayerState.setBufferedProgress(bufferedProgress);
 
         for (String key : mStateListenerMap.keySet()) {
@@ -1705,11 +1718,11 @@ public abstract class AbstractPlayer implements Player {
 
             mMusicPlayer.setOnBufferingUpdateListener(new OnBufferingUpdateListener() {
                 @Override
-                public void onBufferingUpdate(final MusicPlayer mp, final int bufferedProgress) {
+                public void onBufferingUpdate(final MusicPlayer mp, final int buffered, final boolean isPercent) {
                     runOnMainThread(new Runnable() {
                         @Override
                         public void run() {
-                            listener.onBufferingUpdate(mp, bufferedProgress);
+                            listener.onBufferingUpdate(mp, buffered, isPercent);
                         }
                     });
                 }

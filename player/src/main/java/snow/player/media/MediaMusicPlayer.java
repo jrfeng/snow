@@ -268,7 +268,7 @@ public class MediaMusicPlayer implements MusicPlayer {
         mMediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
             @Override
             public void onBufferingUpdate(MediaPlayer mp, int percent) {
-                listener.onBufferingUpdate(MediaMusicPlayer.this, percent * mp.getDuration());
+                listener.onBufferingUpdate(MediaMusicPlayer.this, percent, true);
             }
         });
     }
