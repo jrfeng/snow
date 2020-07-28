@@ -198,9 +198,9 @@ public class TestMusicPlayer implements MusicPlayer {
         }
     }
 
-    public void notifyBufferingUpdate(int percent) {
+    public void notifyBufferingUpdate(int buffered, boolean isPercent) {
         if (mBufferingUpdateListener != null) {
-            mBufferingUpdateListener.onBufferingUpdate(this, percent);
+            mBufferingUpdateListener.onBufferingUpdate(this, buffered, isPercent);
         }
     }
 
