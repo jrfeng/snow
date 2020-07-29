@@ -61,9 +61,37 @@ import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.playlist.PlaylistManager;
 
-
+/**
+ * 提供了基本的 {@code player service} 实现，用于在后台播放音乐。
+ * <p>
+ * 可以使用 {@link PlayerClient} 类建立与 {@link PlayerService} 连接，并对播放器进行控制。
+ * <p>
+ * {@link PlayerService} 继承了 {@link MediaBrowserServiceCompat} 类，因此也可以使用
+ * {@link MediaBrowserCompat} 类来建立与 {@link PlayerService} 连接，并对播放器进行控制。不过不推荐这么做，
+ * 因为本框架的大量功能都依赖于 {@link PlayerClient} 类，如果不使用 {@link PlayerClient} 类，那么也无法使
+ * 用这些功能。
+ * <p>
+ * 让 {@link PlayerService} 继承 {@link MediaBrowserServiceCompat} 类的本意仅仅是为了兼容
+ * {@code MediaSession} 框架，因此建议开发者应该尽量使用 {@link PlayerClient}，而不是
+ * {@link MediaBrowserCompat}。
+ */
 public class PlayerService extends MediaBrowserServiceCompat implements PlayerManager {
     public static final String DEFAULT_MEDIA_ROOT_ID = "root";
+
+    /**
+     * 如果你直接使用 {@link MediaBrowserCompat} 连接 PlayerService, 你的客户端可以发送该
+     * {@code custom action} 来关闭 PlayerService。PlayerService 在接收到该 {@code custom action} 后
+     * 会发出一个名为 {@link #SESSION_EVENT_ON_SHUTDOWN} 的 {@code session event}，客户端在接收到该
+     * {@code session event} 后应该主动断开与 PlayerService 的连接。当所有客户端断开与 PlayerService 的
+     * 连接后，PlayerService 会自动终止。
+     */
+    public static final String CUSTOM_ACTION_SHUTDOWN = "snow.player.custom_action.shutdown";
+
+    /**
+     * 如果你直接使用 {@link MediaBrowserCompat} 连接 PlayerService, 那么你的客户端应该在接收到该
+     * {@code session event} 时主动断开与 PlayerService 的连接。
+     */
+    public static final String SESSION_EVENT_ON_SHUTDOWN = "snow.player.session_event.on_shutdown";
 
     private static final String NAME_COMPONENT_FACTORY = "component-factory";
 
@@ -576,6 +604,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         mCommandCallbackMap.clear();
+        mMediaSession.sendSessionEvent(SESSION_EVENT_ON_SHUTDOWN, null);
     }
 
     /**
@@ -1056,6 +1085,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @param extras 自定义动作携带的额外数据
      */
     protected void onCustomAction(String action, Bundle extras) {
+        if (CUSTOM_ACTION_SHUTDOWN.equals(action)) {
+            shutdown();
+            return;
+        }
+
         mControllerPipe.dispatch(action, extras);
     }
 
