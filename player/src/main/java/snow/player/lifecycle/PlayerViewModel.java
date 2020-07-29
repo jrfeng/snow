@@ -323,7 +323,7 @@ public class PlayerViewModel extends ViewModel {
      * 当缓冲去没有足够的数据支持播放器继续播放时，该值为 true。
      */
     @NonNull
-    public LiveData<Boolean> isStalled() {
+    public LiveData<Boolean> getStalled() {
         return mStalled;
     }
 
@@ -378,7 +378,7 @@ public class PlayerViewModel extends ViewModel {
      * 获取歌曲的实时播放进度（单位：秒）对应的文本值，例如 @{code 82} 秒对应的文本值为 {@code "01:22"}
      */
     @NonNull
-    public LiveData<String> getTextLivePlayProgress() {
+    public LiveData<String> getTextPlayProgress() {
         return Transformations.map(mPlayProgress, new Function<Integer, String>() {
             @Override
             public String apply(Integer input) {
