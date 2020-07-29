@@ -233,9 +233,15 @@ public class PlayerViewModel extends ViewModel {
 
     /**
      * 获取当前 {@link PlayerViewModel}关联到的 PlayerClient 对象。
+     *
+     * @throws IllegalStateException 如果当前 PlayerViewModel 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public PlayerClient getPlayerClient() {
+    public PlayerClient getPlayerClient() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mPlayerClient;
     }
 
