@@ -2060,7 +2060,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * </ul>
      * <p>
      * 可以重写 {@link #retrieveMusicItemUri(MusicItem, Player.SoundQuality)} 方法根据音质获取不同的播
-     * 放链接。
+     * 放链接。{@link #retrieveMusicItemUri(MusicItem, Player.SoundQuality)} 方法会在异步线程中调用，因
+     * 此可以直接在该方法中访问网络。
      * <p>
      * 你可以重写其中的一个或多个方法来使用自定义的组件，重写后的方法需要使用 {@link Inject} 注解进行标记，否
      * 则会被忽略。
