@@ -24,7 +24,7 @@ public interface PlayerManager {
     void setSoundQuality(@UseOrdinal Player.SoundQuality soundQuality);
 
     /**
-     * 修改音频特性的配置。
+     * 修改音频特效的配置。
      */
     void setAudioEffectConfig(Bundle config);
 
@@ -36,9 +36,9 @@ public interface PlayerManager {
     void setAudioEffectEnabled(boolean enabled);
 
     /**
-     * 设置是否只允许在 WiFi 网络下播放音乐（默认为 true）。
+     * 设置是否只允许在 WiFi 网络下联网（默认为 false）。
      *
-     * @param onlyWifiNetwork 是否只允许在 WiFi 网络下播放音乐
+     * @param onlyWifiNetwork 是否只允许在 WiFi 网络下联网
      */
     void setOnlyWifiNetwork(boolean onlyWifiNetwork);
 
