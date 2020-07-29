@@ -350,12 +350,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /***
-     * 创建一个适用于列表播放器的 {@link RemoteView}，你可以通过覆盖该方法来实现自定义的列表播放器控制器。
+     * 创建一个通知栏控制器，你可以通过覆盖该方法来提供自定义的通知栏控制器。
      *
-     * 该方法默认返回 {@link SimpleRemoteView}，如果你不需要在通知栏中显示列表播放器控制器，可以覆盖
-     * 该方法并返回 null。
+     * 该方法默认返回 {@link SimpleRemoteView}，如果你不需要在通知栏中显示控制器，可以覆盖该方法并返回 null。
      *
-     * @return {@link RemoteView} 对象，返回 null 时将隐藏列表播放器控制器
+     * @return {@link RemoteView} 对象，返回 null 时将隐藏通知栏控制器
      * @see SimpleRemoteView
      * @see MediaRemoteView
      */
@@ -598,7 +597,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 获取列表播放器的播放模式。
+     * 获取播放器的播放模式。
      */
     protected final Player.PlayMode getPlaylistPlayMode() {
         return mPlayerState.getPlayMode();
@@ -632,7 +631,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 获取列表播放器的状态。
+     * 获取播放器的状态。
      */
     protected final PlayerState getPlayerState() {
         return mPlayerState;
@@ -806,6 +805,16 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return new MediaMusicPlayer();
     }
 
+    /**
+     * 获取音乐的播放链接。
+     * <p>
+     * 该方法会在异步线程中执行，因此可以执行各种耗时操作，例如访问网络。
+     *
+     * @param musicItem    要播放的音乐
+     * @param soundQuality 要播放的音乐的音质
+     * @return 音乐的播放链接
+     * @throws Exception 获取音乐播放链接的过程中发生的任何异常
+     */
     protected final Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull Player.SoundQuality soundQuality) throws Exception {
         if (injectMusicItemUri()) {
             return mComponentFactory.retrieveMusicItemUri(musicItem, soundQuality);
@@ -1524,7 +1533,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 获取列表播放器的播放模式。
+         * 获取播放器的播放模式。
          */
         protected final Player.PlayMode getPlaylistPlayMode() {
             return mPlayerService.getPlaylistPlayMode();
@@ -2037,16 +2046,21 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * PlayerService 组件工厂，可以通过重写该类的方法来自定义 PlayerService 的部分组件。
      * <p>
-     * 可自定义的组件：
+     * 子类需要实现 {@link #isCached(MusicItem, Player.SoundQuality)} 方法，该方法用于判断具有特定
+     * {@link snow.player.Player.SoundQuality} 的 {@link MusicItem} 是否已缓存。如果播放器仅用于播放本地
+     * 音乐，则可以直接返回 {@code true}。
+     * <p>
+     * 除此之外，还可以选择性的覆盖以下方法来提供其他部分的自定义组件：
      * <ul>
-     *     <li>音乐播放器：{@link #createMusicPlayer(Context)}</li>
-     *     <li>列表播放器的通知栏控制器：{@link #createRemoteView()}</li>
-     *     <li>音频特性引擎：{@link #createAudioEffectManager()}</li>
-     *     <li>历史记录器：{@link #createHistoryRecorder()}</li>
+     *     <li>{@link #createMusicPlayer(Context)}：音乐播放器</li>
+     *     <li>{@link #createRemoteView()}：通知栏控制器</li>
+     *     <li>{@link #createAudioEffectManager()}：音频特性引擎</li>
+     *     <li>{@link #createHistoryRecorder()}：历史记录器</li>
+     *     <li>{@link #retrieveMusicItemUri(MusicItem, Player.SoundQuality)}：获取歌曲的播放链接</li>
      * </ul>
      * <p>
-     * 此外，还可以重写 {@link #retrieveMusicItemUri(MusicItem, Player.SoundQuality)} 方法根据音质获取
-     * 不同的播放链接。
+     * 可以重写 {@link #retrieveMusicItemUri(MusicItem, Player.SoundQuality)} 方法根据音质获取不同的播
+     * 放链接。
      * <p>
      * 你可以重写其中的一个或多个方法来使用自定义的组件，重写后的方法需要使用 {@link Inject} 注解进行标记，否
      * 则会被忽略。
@@ -2061,7 +2075,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      *     &#64;NonNull
      *     &#64;Override
      *     public MusicPlayer createMusicPlayer(Context context) {
-     *         return new ExoMusicPlayer();
+     *         return new ExoMusicPlayer(context, mediaSourceFactory);
      *     }
      * }
      * </pre>
@@ -2123,9 +2137,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 创建列表播放的通知栏控制器。
+         * 创建通知栏控制器。
          *
-         * @return {@link RemoteView} 对象，可为 null。为 null 时将隐藏列表播放器的通知栏控制器
+         * @return {@link RemoteView} 对象，可为 null。为 null 时将隐藏通知栏控制器
          */
         @Nullable
         public RemoteView createRemoteView() {
