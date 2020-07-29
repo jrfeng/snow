@@ -1,5 +1,7 @@
 package snow.player.lifecycle;
 
+import android.widget.SeekBar;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
@@ -51,6 +53,7 @@ public class PlayerViewModel extends ViewModel {
     private ProgressClock mProgressClock;
 
     private boolean mInitialized;
+    private boolean mDisconnectOnCleared;
 
     /**
      * 初始化 PlayerStateViewModel
@@ -77,6 +80,15 @@ public class PlayerViewModel extends ViewModel {
         addAllListener();
 
         mInitialized = true;
+    }
+
+    /**
+     * 设置是否在 ViewModel 被清理时断开 PlayerClient 的连接。
+     *
+     * @param disconnectOnCleared 如果为 true，则会在 ViewModel 被清理时断开 PlayerClient 的连接
+     */
+    public void setDisconnectOnCleared(boolean disconnectOnCleared) {
+        mDisconnectOnCleared = disconnectOnCleared;
     }
 
     private void initAllListener() {
@@ -196,6 +208,10 @@ public class PlayerViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
 
+        if (mInitialized && mDisconnectOnCleared) {
+            mPlayerClient.disconnect();
+        }
+
         if (mInitialized) {
             mInitialized = false;
             mProgressClock.cancel();
@@ -223,56 +239,91 @@ public class PlayerViewModel extends ViewModel {
         return mPlayerClient;
     }
 
+    /**
+     * 正在播放的歌曲的标题。
+     */
     @NonNull
     public LiveData<String> getTitle() {
         return mTitle;
     }
 
+    /**
+     * 正在播放的歌曲的艺术家（歌手）。
+     */
     @NonNull
     public LiveData<String> getArtist() {
         return mArtist;
     }
 
+    /**
+     * 正在播放的歌曲的图标的 Uri
+     */
     @NonNull
     public LiveData<String> getIconUri() {
         return mIconUri;
     }
 
+    /**
+     * 正在播放的歌曲的持续时间（单位：秒）。
+     */
     @NonNull
     public LiveData<Integer> getDuration() {
         return mDuration;
     }
 
+    /**
+     * 正在播放歌曲的实时播放进度（单位：秒）。
+     */
     @NonNull
     public LiveData<Integer> getLivePlayProgress() {
         return mLivePlayProgress;
     }
 
+    /**
+     * 正在播放歌曲的缓存进度（单位：秒）。
+     */
     @NonNull
     public LiveData<Integer> getBufferedProgress() {
         return mBufferedProgress;
     }
 
+    /**
+     * 正在播放歌曲在列表中的位置。
+     */
     @NonNull
     public LiveData<Integer> getPlayPosition() {
         return mPlayPosition;
     }
 
+    /**
+     * 播放器的播放模式。
+     */
     @NonNull
     public LiveData<Player.PlayMode> getPlayMode() {
         return mPlayMode;
     }
 
+    /**
+     * 播放器的播放状态。
+     */
     @NonNull
     public LiveData<Player.PlaybackState> getPlaybackState() {
         return mPlaybackState;
     }
 
+    /**
+     * 播放器是否处于 stalled 状态。
+     * <p>
+     * 当缓冲去没有足够的数据支持播放器继续播放时，该值为 true。
+     */
     @NonNull
     public LiveData<Boolean> isStalled() {
         return mStalled;
     }
 
+    /**
+     * 是否发生了错误。
+     */
     @NonNull
     public LiveData<Boolean> isError() {
         return Transformations.map(mPlaybackState, new Function<Player.PlaybackState, Boolean>() {
@@ -283,16 +334,30 @@ public class PlayerViewModel extends ViewModel {
         });
     }
 
+    /**
+     * 错误信息，只在发生错误时该值才有意义。
+     */
     @NonNull
     public LiveData<String> getErrorMessage() {
         return mErrorMessage;
     }
 
+    /**
+     * 获取播放列表。
+     * <p>
+     * 需要向 LiveData 至少注册一个观察者，才会在播放列表发生改变时实时更新当前 LiveData 的值。如果当前
+     * LiveData 没有任何观察者，出于性能考虑，不会实时更新当前 LiveData 的值。
+     *
+     * @return 包含当前播放列表的 LiveData 对象
+     */
     @NonNull
     public LiveData<Playlist> getPlaylist() {
         return mPlaylist;
     }
 
+    /**
+     * 获取歌曲的持续时间（单位：秒）对应的文本值，例如 @{code 82} 秒对应的文本值为 {@code "01:22"}
+     */
     @NonNull
     public LiveData<String> getTextDuration() {
         return Transformations.map(mDuration, new Function<Integer, String>() {
@@ -303,6 +368,9 @@ public class PlayerViewModel extends ViewModel {
         });
     }
 
+    /**
+     * 获取歌曲的实时播放进度（单位：秒）对应的文本值，例如 @{code 82} 秒对应的文本值为 {@code "01:22"}
+     */
     @NonNull
     public LiveData<String> getTextLivePlayProgress() {
         return Transformations.map(mLivePlayProgress, new Function<Integer, String>() {
@@ -311,6 +379,192 @@ public class PlayerViewModel extends ViewModel {
                 return ProgressClock.asText(input);
             }
         });
+    }
+
+    /**
+     * 设置播放列表。
+     *
+     * @param playlist 新的播放列表
+     */
+    public void setPlaylist(Playlist playlist) {
+        if (isInitialized()) {
+            mPlayerClient.setPlaylist(playlist);
+        }
+    }
+
+    /**
+     * 设置播放列表，并决定是否立即播放列表的第 1 首音乐。
+     *
+     * @param playlist 新的播放列表
+     * @param play     是否立即播放列表的第 1 首音乐
+     */
+    public void setPlaylist(Playlist playlist, boolean play) {
+        if (isInitialized()) {
+            mPlayerClient.setPlaylist(playlist, play);
+        }
+    }
+
+    /**
+     * 设置播放列表，并决定是否立即播放列表的 position 位置处音乐。
+     *
+     * @param playlist 新的播放列表
+     * @param position 要播放的歌曲的位置
+     * @param play     是否立即播放列表的 position 位置处音乐
+     */
+    public void setPlaylist(Playlist playlist, int position, boolean play) {
+        if (isInitialized()) {
+            mPlayerClient.setPlaylist(playlist, position, play);
+        }
+    }
+
+    /**
+     * 播放
+     */
+    public void play() {
+        if (isInitialized()) {
+            mPlayerClient.play();
+        }
+    }
+
+    /**
+     * 暂停
+     */
+    public void pause() {
+        if (isInitialized()) {
+            mPlayerClient.pause();
+        }
+    }
+
+    /**
+     * 播放/暂停
+     */
+    public void playPause() {
+        if (isInitialized()) {
+            mPlayerClient.playPause();
+        }
+    }
+
+    /**
+     * 播放/暂停 position 位置处的音乐。
+     * <p>
+     * 如果 position 与当前正在播放的音乐的位置是一样的，则暂停播放，否则播放列表中 position 位置处的音乐。
+     */
+    public void playPause(int position) {
+        if (isInitialized()) {
+            mPlayerClient.playPause(position);
+        }
+    }
+
+    /**
+     * 停止
+     */
+    public void stop() {
+        if (isInitialized()) {
+            mPlayerClient.stop();
+        }
+    }
+
+    /**
+     * 上一曲
+     */
+    public void skipToPrevious() {
+        if (isInitialized()) {
+            mPlayerClient.skipToPrevious();
+        }
+    }
+
+    /**
+     * 像以前
+     */
+    public void skipToNext() {
+        if (isInitialized()) {
+            mPlayerClient.skipToNext();
+        }
+    }
+
+    /**
+     * 快进
+     */
+    public void fastForward() {
+        if (isInitialized()) {
+            mPlayerClient.fastForward();
+        }
+    }
+
+    /**
+     * 快退
+     */
+    public void rewind() {
+        if (isInitialized()) {
+            mPlayerClient.rewind();
+        }
+    }
+
+    /**
+     * 设置指定歌曲 “下一次播放”。
+     *
+     * @param musicItem 要设定为 “下一次播放” 的歌曲，如果歌曲已存在播放列表中，则会移动到 “下一曲播放” 的位
+     *                  置，如果歌曲不存在，则插入到 “下一曲播放” 位置
+     */
+    public void setNextPlay(@NonNull MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
+        if (isInitialized()) {
+            mPlayerClient.setNextPlay(musicItem);
+        }
+    }
+
+    /**
+     * 设置播放模式。
+     *
+     * @param playMode 播放模式
+     */
+    public void setPlayMode(@NonNull Player.PlayMode playMode) {
+        Preconditions.checkNotNull(playMode);
+        if (isInitialized()) {
+            mPlayerClient.setPlayMode(playMode);
+        }
+    }
+
+    /**
+     * 调整音乐播放进度。
+     *
+     * @param progress 要调整到的播放进度
+     */
+    public void seekTo(int progress) {
+        if (isInitialized()) {
+            mProgressClock.cancel();
+            mPlayerClient.seekTo(progress);
+        }
+    }
+
+    /**
+     * For DataBinding。
+     * <p>
+     * 如果你启用了 DataBinding，并且使用 SeekBar 来显示和调整播放进度，那么请将 SeekBar 的
+     * {@code android:onStartTrackingTouch} 事件绑定为当前方法。
+     * <p>
+     * 例如：<br>
+     * {@code android:onStartTrackingTouch="@{playerViewModel::onStartTrackingTouch}"}
+     */
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        if (isInitialized()) {
+            mProgressClock.cancel();
+        }
+    }
+
+    /**
+     * For DataBinding。
+     * <p>
+     * 如果你启用了 DataBinding，并且使用 SeekBar 来显示和调整播放进度，那么请将 SeekBar 的
+     * {@code android:onStopTrackingTouch} 事件绑定为当前方法。
+     * <p>
+     * 例如：<br>
+     * {@code android:onStopTrackingTouch="@{playerViewModel::onStopTrackingTouch}"}
+     */
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        if (isInitialized()) {
+            mPlayerClient.seekTo(seekBar.getProgress());
+        }
     }
 
     private void initAllLiveData() {
