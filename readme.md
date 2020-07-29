@@ -28,7 +28,7 @@ dependencies {
 <!-- 用于后台播放 -->
 <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-<!-- 可选，用于播放网络音乐 -->
+<!-- 用于播放网络音乐 -->
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
