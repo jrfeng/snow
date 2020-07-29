@@ -30,7 +30,7 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<String> mArtist;
     private MutableLiveData<String> mIconUri;
     private MutableLiveData<Integer> mDuration;         // 单位：秒
-    private MutableLiveData<Integer> mLivePlayProgress; // 单位：秒
+    private MutableLiveData<Integer> mPlayProgress;     // 单位：秒
     private MutableLiveData<Integer> mBufferedProgress; // 单位：秒
     private MutableLiveData<Integer> mPlayPosition;
     private MutableLiveData<Player.PlayMode> mPlayMode;
@@ -107,7 +107,7 @@ public class PlayerViewModel extends ViewModel {
                 mArtist.setValue(musicItem.getArtist());
                 mIconUri.setValue(musicItem.getIconUri());
                 mDuration.setValue(getDurationSec());
-                mLivePlayProgress.setValue(0);
+                mPlayProgress.setValue(0);
                 mBufferedProgress.setValue(0);
             }
         };
@@ -179,7 +179,7 @@ public class PlayerViewModel extends ViewModel {
         mProgressClock = new ProgressClock(new ProgressClock.Callback() {
             @Override
             public void onUpdateProgress(int progressSec, int durationSec) {
-                mLivePlayProgress.setValue(progressSec);
+                mPlayProgress.setValue(progressSec);
             }
         });
     }
@@ -278,11 +278,11 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 正在播放歌曲的实时播放进度（单位：秒）。
+     * 正在播放歌曲的实时播放进度（单位：秒），支持双向绑定。
      */
     @NonNull
-    public LiveData<Integer> getLivePlayProgress() {
-        return mLivePlayProgress;
+    public MutableLiveData<Integer> getPlayProgress() {
+        return mPlayProgress;
     }
 
     /**
@@ -379,7 +379,7 @@ public class PlayerViewModel extends ViewModel {
      */
     @NonNull
     public LiveData<String> getTextLivePlayProgress() {
-        return Transformations.map(mLivePlayProgress, new Function<Integer, String>() {
+        return Transformations.map(mPlayProgress, new Function<Integer, String>() {
             @Override
             public String apply(Integer input) {
                 return ProgressClock.asText(input);
@@ -578,7 +578,7 @@ public class PlayerViewModel extends ViewModel {
         mArtist = new MutableLiveData<>(mDefaultArtist);
         mIconUri = new MutableLiveData<>(getIconUri(mPlayerClient));
         mDuration = new MutableLiveData<>(getDurationSec());
-        mLivePlayProgress = new MutableLiveData<>(getPlayProgressSec());
+        mPlayProgress = new MutableLiveData<>(getPlayProgressSec());
         mBufferedProgress = new MutableLiveData<>(getBufferedProgressSec());
         mPlayPosition = new MutableLiveData<>(mPlayerClient.getPlayPosition());
         mPlayMode = new MutableLiveData<>(mPlayerClient.getPlayMode());
