@@ -106,6 +106,7 @@ public class PlayerClient implements Player {
 
                             if (mConnectCallback != null) {
                                 mConnectCallback.onConnected(true);
+                                mCommandCallback = null;
                             }
                         } catch (RemoteException e) {
                             mMediaBrowser.disconnect();
@@ -119,6 +120,7 @@ public class PlayerClient implements Player {
 
                         if (mConnectCallback != null) {
                             mConnectCallback.onConnected(false);
+                            mCommandCallback = null;
                         }
                     }
                 }, null);
