@@ -17,9 +17,9 @@ import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
 
 /**
- * 播放器状态 ViewModel。
+ * 播放器 ViewModel，支持 DataBinding。
  * <p>
- * 使用前必须先调用 {@link #init(PlayerClient, String, String)} 方法进行初始化。
+ * <b>注意！使用前必须先调用 {@link #init(PlayerClient, String, String)} 方法进行初始化。</b>
  */
 public class PlayerViewModel extends ViewModel {
     private PlayerClient mPlayerClient;

@@ -23,6 +23,9 @@ public class MediaMusicPlayer implements MusicPlayer {
     private ObjectAnimator mStartVolumeAnimator;
     private ObjectAnimator mPauseVolumeAnimator;
 
+    /**
+     * 创建一个 {@link MediaMusicPlayer} 对象。
+     */
     public MediaMusicPlayer() {
         mMediaPlayer = new MediaPlayer();
         mInvalid = false;
@@ -151,6 +154,11 @@ public class MediaMusicPlayer implements MusicPlayer {
         mMediaPlayer.setVolume(leftVolume, rightVolume);
     }
 
+    /**
+     * 该方法相当于 {@code setVolume(volume, volume)}
+     *
+     * @see #setVolume(float, float)
+     */
     public void setVolume(float volume) {
         setVolume(volume, volume);
     }

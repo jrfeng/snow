@@ -9,11 +9,11 @@ import snow.player.media.MusicItem;
  */
 public interface HistoryRecorder {
     /**
-     * 当正在播放的音乐改变时，会调用该方法。
+     * 当正在播放的音乐改变时会调用该方法。
      * <p>
      * 该方法会在主线程中调用，请不要在该方法中执行耗时操作。
      *
      * @param musicItem 正在播放的音乐
      */
-    void onPlayingMusicItemChanged(@NonNull MusicItem musicItem);
+    void recordHistory(@NonNull MusicItem musicItem);
 }

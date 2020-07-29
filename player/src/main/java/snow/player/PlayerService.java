@@ -666,10 +666,20 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return mPlayerState;
     }
 
+    /**
+     * 当前播放器是否处于 {@link Player.PlaybackState#PREPARING} 状态。
+     *
+     * @return 如果播放器处于 {@link Player.PlaybackState#PREPARING} 状态，则返回 {@code true}
+     */
     public final boolean isPreparingState() {
         return getPlayerState().getPlaybackState() == Player.PlaybackState.PREPARING;
     }
 
+    /**
+     * 当前播放器是否处于 {@code stalled} 状态。
+     *
+     * @return 当缓冲区没有足够的数据支持播放器继续播放时，该方法会返回 {@code true}，否则返回 false
+     */
     public final boolean isStalled() {
         return mPlayer.isStalled();
     }
@@ -1064,7 +1074,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         updateNotificationView();
 
         if (mHistoryRecorder != null && musicItem != null) {
-            mHistoryRecorder.onPlayingMusicItemChanged(musicItem);
+            mHistoryRecorder.recordHistory(musicItem);
         }
     }
 
@@ -1263,7 +1273,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 用于显示通知栏控制器。
+     * 通知栏控制器的基类。
      */
     public static abstract class RemoteView {
         /**
@@ -1558,10 +1568,16 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return text;
         }
 
+        /**
+         * 获取 Context 对象。
+         */
         protected final Context getContext() {
             return mPlayerService;
         }
 
+        /**
+         * 获取当前应用的包名。
+         */
         protected final String getPackageName() {
             return getContext().getPackageName();
         }
@@ -1581,10 +1597,24 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return mPlayerService.getPlaylistExtra();
         }
 
+        /**
+         * 添加自定义动作。
+         *
+         * @param action 自定在动作的名称，请保证该值的唯一性
+         * @param task   要执行的任务。该任务由 PlayerService 在其 onStartCommand 方法中执行，请不要在
+         *               该任务中执行耗时操作
+         * @return 返回一个 PendingIntent 对象，该 PendingIntent 对象用于启动 PlayerService。
+         * PlayerService 会在其 onStartCommand 中查找该 PendingIntent 对应的任务，然后执行这个任务
+         */
         protected final PendingIntent addOnStartCommandAction(@NonNull String action, @NonNull Runnable task) {
             return mPlayerService.addOnStartCommandAction(action, task);
         }
 
+        /**
+         * 移除自定义动作。
+         *
+         * @param action 要移除的自定义动作的名称
+         */
         protected final void removeOnStartCommandAction(@NonNull String action) {
             mPlayerService.removeOnStartCommandAction(action);
         }
@@ -1596,10 +1626,20 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return mPlayerService.isPreparingOrPlayingState();
         }
 
+        /**
+         * 判断播放器当前是否处于 {@link Player.PlaybackState#PREPARING} 状态。
+         *
+         * @return 如果播放器处于 {@link Player.PlaybackState#PREPARING} 状态，则返回 {@code true}
+         */
         public final boolean isPreparingState() {
             return mPlayerService.isPreparingState();
         }
 
+        /**
+         * 判断当前播放器是否处于 {@code stalled} 状态。
+         *
+         * @return 当缓冲区没有足够的数据支持播放器继续播放时，该方法会返回 {@code true}，否则返回 false
+         */
         public final boolean isStalled() {
             return mPlayerService.isStalled();
         }
@@ -1679,7 +1719,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 和实现 {@link #onBuildNotification(NotificationCompat.Builder)} 来对当前 RemoteView 的外观进行定
      * 制。
      * <p>
-     * 更多信息，请参考官方文档： <a href="https://developer.android.google.cn/training/notify-user/expanded?hl=zh-cn#media-style">https://developer.android.google.cn/training/notify-user/expanded?hl=zh-cn#media-style</a>
+     * 更多信息，请参考官方文档： <a target="_blank" href="https://developer.android.google.cn/training/notify-user/expanded#media-style">https://developer.android.google.cn/training/notify-user/expanded#media-style</a>
      */
     public static abstract class MediaRemoteView extends RemoteView {
         @Override
@@ -1738,6 +1778,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     /**
      * {@link RemoteView} 的默认实现，提供了一个自定义的外观。
+     * <p>
+     * 关于创建自定义通知的内容，请查看官方文档：<a target="_blank" href="https://developer.android.google.cn/training/notify-user/custom-notification">https://developer.android.google.cn/training/notify-user/custom-notification</>
      */
     public static class SimpleRemoteView extends RemoteView {
         private static final String ACTION_SKIP_TO_PREVIOUS = "snow.player.action.skip_to_previous";
@@ -1766,10 +1808,16 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             initCustomAction();
         }
 
+        /**
+         * 获取 content view 的布局文件的 id
+         */
         public int getContentViewLayoutId() {
             return R.layout.snow_simple_remote_view;
         }
 
+        /**
+         * 获取 big content view 的布局文件的 id
+         */
         public int getBigContentViewLayoutId() {
             return R.layout.snow_simple_remote_view_big;
         }
@@ -1812,6 +1860,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             addCustomAction(playPause);
         }
 
+        /**
+         * 创建一个 Notification 对象。
+         *
+         * @return Notification 对象，不能为 null
+         */
         @NonNull
         @Override
         protected Notification onCreateNotification() {
@@ -1853,6 +1906,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             remoteViews.setOnClickPendingIntent(viewId, mPendingIntentMap.get(customAction.getActionName()));
         }
 
+        /**
+         * 创建 content view
+         *
+         * @return RemoteViews 对象，不能为 null
+         */
         @NonNull
         public RemoteViews onCreateContentView() {
             RemoteViews contentView = new RemoteViews(getPackageName(), getContentViewLayoutId());
@@ -1868,6 +1926,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return contentView;
         }
 
+        /**
+         * 创建 big content view
+         *
+         * @return RemoteViews 对象，不能为 null
+         */
         @NonNull
         public RemoteViews onCreateBigContentView() {
             RemoteViews bigContentView = new RemoteViews(getPackageName(), getBigContentViewLayoutId());
@@ -2081,8 +2144,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * PlayerService 组件工厂，可以通过重写该类的方法来自定义 PlayerService 的部分组件。
      * <p>
      * 子类需要实现 {@link #isCached(MusicItem, Player.SoundQuality)} 方法，该方法用于判断具有特定
-     * {@link snow.player.Player.SoundQuality} 的 {@link MusicItem} 是否已缓存。如果播放器仅用于播放本地
-     * 音乐，则可以直接返回 {@code true}。
+     * {@link snow.player.Player.SoundQuality} 的 {@link MusicItem} 是否已缓存。该方法会在异步线程中执
+     * 行，因此可以在该方法中执行耗时操作，例如访问本地数据库。如果播放器仅用于播放本地音乐，则可以直接返回 {@code true}。
      * <p>
      * 除此之外，还可以选择性的覆盖以下方法来提供其他部分的自定义组件：
      * <ul>

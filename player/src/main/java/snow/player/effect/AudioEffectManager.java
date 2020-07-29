@@ -8,16 +8,45 @@ import androidx.annotation.NonNull;
  * 用于管理和同步音频特效的配置。
  */
 public interface AudioEffectManager {
+
+    /**
+     * 初始化音频特效的配置。
+     *
+     * @param config 音频特效的配置
+     */
     void init(@NonNull Bundle config);
 
+    /**
+     * 更新音频特效的配置。
+     *
+     * @param config 新的音频特效配置
+     */
     void updateConfig(@NonNull Bundle config);
 
+    /**
+     * 对指定的 {@code audio session id} 应用音频特效。
+     *
+     * @param audioSessionId 要音乐音频特效的 {@code audio session id}
+     */
     void attachAudioEffect(int audioSessionId);
 
+    /**
+     * 移除当前应用的音频特效。
+     */
     void detachAudioEffect();
 
+    /**
+     * 获取音频特效的默认配置。
+     *
+     * @return 音频特效的默认配置，不能为 null
+     */
     @NonNull
     Bundle getDefaultConfig();
 
+    /**
+     * 是否音频特效。
+     * <p>
+     * 你可以在该方法中释放所有不再需要的资源。
+     */
     void release();
 }

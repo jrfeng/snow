@@ -311,13 +311,40 @@ public abstract class PlaylistManager {
         void onFinished(@NonNull Playlist playlist);
     }
 
+    /**
+     * 用于监听播放列表的修改事件。
+     */
     public interface OnModifyPlaylistListener {
+
+        /**
+         * 设置了一个新的播放列表。
+         *
+         * @param position 将播放列表的播放位置设置为 position，不能小于 0
+         * @param play     是否立即播放 position 处的音乐
+         */
         void onNewPlaylist(int position, boolean play);
 
+        /**
+         * 列表中某首歌曲的位置被移动了。
+         *
+         * @param fromPosition 歌曲原来在列表中的位置
+         * @param toPosition   歌曲移动后在列表中的位置
+         */
         void onMusicItemMoved(int fromPosition, int toPosition);
 
+        /**
+         * 往列表中插入了一首新的歌曲。
+         *
+         * @param position  歌曲插入的位置
+         * @param musicItem 插入的歌曲
+         */
         void onMusicItemInserted(int position, MusicItem musicItem);
 
+        /**
+         * 从播放列表中移除了某首歌曲。
+         *
+         * @param musicItem 被移除的歌曲
+         */
         void onMusicItemRemoved(MusicItem musicItem);
     }
 }

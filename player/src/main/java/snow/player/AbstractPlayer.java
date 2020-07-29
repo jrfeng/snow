@@ -39,7 +39,7 @@ import snow.player.playlist.PlaylistManager;
 import snow.player.util.NetworkUtil;
 
 /**
- * 该类实现了 {@link Player} 接口，并实现了其大部分功能。
+ * 该类实现了 {@link Player} 接口，并实现大部分音乐播放器功能。
  */
 public abstract class AbstractPlayer implements Player {
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
@@ -84,9 +84,12 @@ public abstract class AbstractPlayer implements Player {
     private Disposable mCheckCachedDisposable;
 
     /**
-     * @param context      {@link Context} 对象，不能为 null
-     * @param playerConfig {@link PlayerConfig} 对象，保存了播放器的初始配置信息，不能为 null
-     * @param playerState  {@link PlayerState} 对象，保存了播放器的初始状态，不能为 null
+     * 创建一个 {@link AbstractPlayer} 对象。
+     *
+     * @param context         {@link Context} 对象，不能为 null
+     * @param playerConfig    {@link PlayerConfig} 对象，保存了播放器的初始配置信息，不能为 null
+     * @param playerState     {@link PlayerState} 对象，保存了播放器的初始状态，不能为 null
+     * @param playlistManager {@link PlaylistManager} 对象，用于管理播放列表，不能为 null
      */
     public AbstractPlayer(@NonNull Context context,
                           @NonNull PlayerConfig playerConfig,
@@ -1218,6 +1221,11 @@ public abstract class AbstractPlayer implements Player {
         return mPlaylist.getExtra();
     }
 
+    /**
+     * 是否单曲循环播放。
+     *
+     * @return 如果当前模式为 {@link snow.player.Player.PlayMode#LOOP}，则返回 true
+     */
     public boolean isLooping() {
         return mPlayerState.getPlayMode() == PlayMode.LOOP;
     }

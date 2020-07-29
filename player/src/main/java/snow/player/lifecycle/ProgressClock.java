@@ -22,11 +22,21 @@ public class ProgressClock {
     private boolean mLoop;
     private Disposable mDisposable;
 
+    /**
+     * 创建一个 ProgressClock 对象。
+     *
+     * @param callback 回调接口，用于接收 progress 值的更新，不能为 null
+     */
     public ProgressClock(@NonNull Callback callback) {
         Preconditions.checkNotNull(callback);
         mCallback = callback;
     }
 
+    /**
+     * 设置释放循环。
+     *
+     * @param loop 如果为 true，则当计时器时间到时会自动设为 0，并重写开始及时
+     */
     public void setLoop(boolean loop) {
         mLoop = loop;
     }

@@ -40,6 +40,13 @@ public final class MusicItem implements Parcelable {
         this.extra = null;
     }
 
+    /**
+     * 对 {@code source} 进行拷贝。
+     * <p>
+     * 注意！不会对 {@code source} 携带的 {@code Extra} 进行深拷贝。
+     *
+     * @param source 要拷贝的 {@link MusicItem} 对象
+     */
     public MusicItem(MusicItem source) {
         musicId = source.musicId;
         title = source.title;
@@ -53,66 +60,131 @@ public final class MusicItem implements Parcelable {
         }
     }
 
+    /**
+     * 获取歌曲的 music id（NonNull）。
+     *
+     * @return 歌曲的 music id（NonNull）
+     */
     @NonNull
     public String getMusicId() {
         return musicId;
     }
 
+    /**
+     * 设置歌曲的 music id（NonNull）。
+     *
+     * @param musicId 要设置的值（NonNull）
+     */
     public void setMusicId(@NonNull String musicId) {
         Preconditions.checkNotNull(musicId);
         this.musicId = musicId;
     }
 
+    /**
+     * 获取歌曲的标题（NonNull）。
+     *
+     * @return 歌曲的标题（NonNull）
+     */
     @NonNull
     public String getTitle() {
         return title;
     }
 
+    /**
+     * 设置歌曲的标题。
+     *
+     * @param title 要设置的标题（NonNull）
+     */
     public void setTitle(@NonNull String title) {
         Preconditions.checkNotNull(title);
         this.title = title;
     }
 
+    /**
+     * 获取歌曲的艺术家（NonNull）。
+     *
+     * @return 歌曲的艺术家（NonNull）
+     */
     @NonNull
     public String getArtist() {
         return artist;
     }
 
+    /**
+     * 设置歌曲的艺术家（NonNull）。
+     *
+     * @param artist 要设置的艺术家（NonNull）
+     */
     public void setArtist(@NonNull String artist) {
         Preconditions.checkNotNull(artist);
         this.artist = artist;
     }
 
+    /**
+     * 获取歌曲的专辑（NonNull）。
+     *
+     * @return 歌曲的专辑（NonNull）
+     */
     @NonNull
     public String getAlbum() {
         return album;
     }
 
+    /**
+     * 设置歌曲的专辑（NonNull）。
+     *
+     * @param album 要设置的专辑（NonNull）
+     */
     public void setAlbum(@NonNull String album) {
         Preconditions.checkNotNull(album);
         this.album = album;
     }
 
+    /**
+     * 获取歌曲的 Uri（NonNull）
+     *
+     * @return 歌曲的 Uri（NonNull）
+     */
     @NonNull
     public String getUri() {
         return uri;
     }
 
+    /**
+     * 设置歌曲的 Uri（NonNull）。
+     *
+     * @param uri 要设置的 Uri（NonNull）
+     */
     public void setUri(@NonNull String uri) {
         Preconditions.checkNotNull(uri);
         this.uri = uri;
     }
 
+    /**
+     * 获取歌曲图标的 Uri（NonNull）。
+     *
+     * @return 歌曲图标的 Uri（NonNull）
+     */
     @NonNull
     public String getIconUri() {
         return iconUri;
     }
 
+    /**
+     * 设置歌曲图标的 Uri（NonNull）。
+     *
+     * @param iconUri 要设置的图标 Uri（NonNull）
+     */
     public void setIconUri(@NonNull String iconUri) {
         Preconditions.checkNotNull(iconUri);
         this.iconUri = iconUri;
     }
 
+    /**
+     * 获取歌曲的持续时间。
+     *
+     * @return 歌曲的持续时间
+     */
     public int getDuration() {
         return duration;
     }
@@ -131,6 +203,11 @@ public final class MusicItem implements Parcelable {
         this.duration = duration;
     }
 
+    /**
+     * 获取携带的额外数据（Nullable）。
+     *
+     * @return 额外携带的数据（Nullable）
+     */
     @Nullable
     public Bundle getExtra() {
         return extra;
@@ -204,6 +281,9 @@ public final class MusicItem implements Parcelable {
         dest.writeParcelable(extra, 0);
     }
 
+    /**
+     * Parcelable 专用。
+     */
     protected MusicItem(Parcel in) {
         this.musicId = in.readString();
         this.title = in.readString();
