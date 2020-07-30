@@ -569,6 +569,15 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
+     * 停止实时跟新播放进度。
+     */
+    public void cancelProgressClock() {
+        if (isInitialized()) {
+            mProgressClock.cancel();
+        }
+    }
+
+    /**
      * For DataBinding。
      * <p>
      * 如果你启用了 DataBinding，并且使用 SeekBar 来显示和调整播放进度，那么请将 SeekBar 的
@@ -578,9 +587,7 @@ public class PlayerViewModel extends ViewModel {
      * {@code android:onStartTrackingTouch="@{playerViewModel::onStartTrackingTouch}"}
      */
     public void onStartTrackingTouch(SeekBar seekBar) {
-        if (isInitialized()) {
-            mProgressClock.cancel();
-        }
+        cancelProgressClock();
     }
 
     /**
@@ -593,9 +600,7 @@ public class PlayerViewModel extends ViewModel {
      * {@code android:onStopTrackingTouch="@{playerViewModel::onStopTrackingTouch}"}
      */
     public void onStopTrackingTouch(SeekBar seekBar) {
-        if (isInitialized()) {
-            mPlayerClient.seekTo(seekBar.getProgress());
-        }
+        seekTo(seekBar.getProgress());
     }
 
     private void initAllLiveData() {
