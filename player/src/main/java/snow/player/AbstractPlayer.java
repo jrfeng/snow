@@ -583,6 +583,19 @@ public abstract class AbstractPlayer implements Player {
     }
 
     /**
+     * 获取当前播放进度。
+     *
+     * @return 当前播放进度
+     */
+    public final int getPlayProgress() {
+        if (isPrepared()) {
+            return mMusicPlayer.getProgress();
+        }
+
+        return mPlayerState.getPlayProgress();
+    }
+
+    /**
      * 是否已暂停。
      */
     public final boolean isPaused() {

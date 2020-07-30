@@ -578,6 +578,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void syncPlayerState(OnCommandCallback listener) {
+        if (mPlayer.isPlaying()) {
+            mPlayerState.setPlayProgress(mPlayer.getPlayProgress());
+            mPlayerState.setPlayProgressUpdateTime(System.currentTimeMillis());
+        }
+
         listener.syncPlayerState(new PlayerState(mPlayerState));
     }
 
