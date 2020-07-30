@@ -67,6 +67,7 @@ public abstract class AbstractPlayer implements Player {
     private boolean mLoadingPlaylist;
 
     private boolean mPlayOnPrepared;
+    private boolean mPlayOnSeekComplete;
     private Runnable mPreparedAction;
     private Runnable mSeekCompleteAction;
     private Runnable mPlaylistLoadedAction;
@@ -382,14 +383,16 @@ public abstract class AbstractPlayer implements Player {
 
                 notifyPrepared(mp.getAudioSessionId());
 
+                if (mPlayerState.getPlayProgress() > 0) {
+                    mPlayOnPrepared = false;
+                    mPlayOnSeekComplete = true;
+                    seekTo(mPlayerState.getPlayProgress(), mPreparedAction);
+                    return;
+                }
+
                 if (mPlayOnPrepared) {
                     mPlayOnPrepared = false;
                     play();
-                }
-
-                if (mPlayerState.getPlayProgress() > 0) {
-                    seekTo(mPlayerState.getPlayProgress(), mPreparedAction);
-                    return;
                 }
 
                 if (mPreparedAction != null) {
@@ -418,6 +421,11 @@ public abstract class AbstractPlayer implements Player {
                 }
 
                 notifySeekComplete(mp.getProgress());
+
+                if (mPlayOnSeekComplete) {
+                    mPlayOnSeekComplete = false;
+                    play();
+                }
 
                 if (mSeekCompleteAction != null) {
                     mSeekCompleteAction.run();
