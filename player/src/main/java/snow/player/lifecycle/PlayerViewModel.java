@@ -146,7 +146,7 @@ public class PlayerViewModel extends ViewModel {
 
                 switch (playbackState) {
                     case PLAYING:
-                        mProgressClock.start(mPlayerClient.getPlayPosition(),
+                        mProgressClock.start(mPlayerClient.getPlayProgress(),
                                 mPlayerClient.getPlayProgressUpdateTime(),
                                 mPlayerClient.getPlayingMusicItemDuration());
                         break;
