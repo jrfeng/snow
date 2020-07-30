@@ -49,12 +49,12 @@ public abstract class AbstractPlayer implements Player {
     private PlayerState mPlayerState;
     private HashMap<String, PlayerStateListener> mStateListenerMap;
 
-    private MusicPlayer.OnPreparedListener mOnPreparedListener;
-    private MusicPlayer.OnCompletionListener mOnCompletionListener;
-    private MusicPlayer.OnSeekCompleteListener mOnSeekCompleteListener;
-    private MusicPlayer.OnStalledListener mOnStalledListener;
-    private MusicPlayer.OnBufferingUpdateListener mOnBufferingUpdateListener;
-    private MusicPlayer.OnErrorListener mOnErrorListener;
+    private MusicPlayer.OnPreparedListener mPreparedListener;
+    private MusicPlayer.OnCompletionListener mCompletionListener;
+    private MusicPlayer.OnSeekCompleteListener mSeekCompleteListener;
+    private MusicPlayer.OnStalledListener mStalledListener;
+    private MusicPlayer.OnBufferingUpdateListener mBufferingUpdateListener;
+    private MusicPlayer.OnErrorListener mErrorListener;
 
     private AudioFocusHelper mAudioFocusHelper;
     private BecomeNoiseHelper mBecomeNoiseHelper;
@@ -367,7 +367,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void initAllListener() {
-        mOnPreparedListener = new MusicPlayer.OnPreparedListener() {
+        mPreparedListener = new MusicPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MusicPlayer mp) {
                 if (mReleased) {
@@ -399,7 +399,7 @@ public abstract class AbstractPlayer implements Player {
             }
         };
 
-        mOnCompletionListener = new MusicPlayer.OnCompletionListener() {
+        mCompletionListener = new MusicPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MusicPlayer mp) {
                 if (mPlayerState.getPlayMode() == PlayMode.LOOP) {
@@ -410,7 +410,7 @@ public abstract class AbstractPlayer implements Player {
             }
         };
 
-        mOnSeekCompleteListener = new MusicPlayer.OnSeekCompleteListener() {
+        mSeekCompleteListener = new MusicPlayer.OnSeekCompleteListener() {
             @Override
             public void onSeekComplete(MusicPlayer mp) {
                 if (mReleased) {
@@ -426,21 +426,21 @@ public abstract class AbstractPlayer implements Player {
             }
         };
 
-        mOnStalledListener = new MusicPlayer.OnStalledListener() {
+        mStalledListener = new MusicPlayer.OnStalledListener() {
             @Override
             public void onStalled(boolean stalled) {
                 notifyStalled(stalled);
             }
         };
 
-        mOnBufferingUpdateListener = new MusicPlayer.OnBufferingUpdateListener() {
+        mBufferingUpdateListener = new MusicPlayer.OnBufferingUpdateListener() {
             @Override
             public void onBufferingUpdate(MusicPlayer mp, int buffered, boolean isPercent) {
                 notifyBufferedChanged(buffered, isPercent);
             }
         };
 
-        mOnErrorListener = new MusicPlayer.OnErrorListener() {
+        mErrorListener = new MusicPlayer.OnErrorListener() {
             @Override
             public void onError(MusicPlayer mp, int errorCode) {
                 Log.e("MusicPlayer", "errorCode:" + errorCode);
@@ -510,12 +510,12 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void attachListeners(MusicPlayer musicPlayer) {
-        musicPlayer.setOnPreparedListener(mOnPreparedListener);
-        musicPlayer.setOnCompletionListener(mOnCompletionListener);
-        musicPlayer.setOnSeekCompleteListener(mOnSeekCompleteListener);
-        musicPlayer.setOnStalledListener(mOnStalledListener);
-        musicPlayer.setOnBufferingUpdateListener(mOnBufferingUpdateListener);
-        musicPlayer.setOnErrorListener(mOnErrorListener);
+        musicPlayer.setOnPreparedListener(mPreparedListener);
+        musicPlayer.setOnCompletionListener(mCompletionListener);
+        musicPlayer.setOnSeekCompleteListener(mSeekCompleteListener);
+        musicPlayer.setOnStalledListener(mStalledListener);
+        musicPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
+        musicPlayer.setOnErrorListener(mErrorListener);
     }
 
     /**
