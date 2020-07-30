@@ -24,7 +24,7 @@ public class PlayerStateTest {
         assertEquals(0, playerState.getPosition());
         assertEquals(PlayMode.SEQUENTIAL, playerState.getPlayMode());
 
-        assertEquals(Player.PlaybackState.UNKNOWN, playerState.getPlaybackState());
+        assertEquals(PlaybackState.UNKNOWN, playerState.getPlaybackState());
         assertEquals(0, playerState.getAudioSessionId());
         assertEquals(0, playerState.getBufferedProgress());
         assertFalse(playerState.isStalled());
@@ -40,7 +40,7 @@ public class PlayerStateTest {
         source.setMusicItem(new MusicItem());
         source.setPosition(15);
         source.setPlayMode(PlayMode.LOOP);
-        source.setPlaybackState(Player.PlaybackState.ERROR);
+        source.setPlaybackState(PlaybackState.ERROR);
         source.setAudioSessionId(12);
         source.setBufferedProgress(100);
         source.setStalled(true);
@@ -62,7 +62,7 @@ public class PlayerStateTest {
 
         assertEquals(errorCode, playerState.getErrorCode());
 
-        playerState.setPlaybackState(Player.PlaybackState.PLAYING);
+        playerState.setPlaybackState(PlaybackState.PLAYING);
         assertEquals(Player.Error.NO_ERROR, playerState.getErrorCode());
     }
 
@@ -76,7 +76,7 @@ public class PlayerStateTest {
         musicItem.setUri("https://www.test.com/test.mp3");
         final int position = 5;
         final PlayMode playMode = PlayMode.SHUFFLE;
-        final Player.PlaybackState playbackState = Player.PlaybackState.PLAYING;
+        final PlaybackState playbackState = PlaybackState.PLAYING;
         final int audioSessionId = 12;
         final int bufferedProgress = 100;
         final boolean stalled = true;
@@ -129,7 +129,7 @@ public class PlayerStateTest {
         musicItem.setUri("https://www.test.com/test.mp3");
         final int position = 5;
         final PlayMode playMode = PlayMode.SHUFFLE;
-        final Player.PlaybackState playbackState = Player.PlaybackState.PLAYING;
+        final PlaybackState playbackState = PlaybackState.PLAYING;
         final int audioSessionId = 12;
         final int bufferedProgress = 100;
         final boolean stalled = true;

@@ -653,15 +653,15 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 当前是否处于 {@link snow.player.Player.PlaybackState#PLAYING} 状态。
+     * 当前是否处于 {@link PlaybackState#PLAYING} 状态。
      * <p>
      * 该方法与 {@link #isPlaying()} 方法的区别是，{@link #isPlaying()} 方法判断是当前播放器是否正在
-     * 播放音乐，而当前方法判断是当前是否处于 {@link snow.player.Player.PlaybackState#PLAYING} 状态。在
-     * 切换歌曲时，当前会处于 {@link snow.player.Player.PlaybackState#PLAYING} 状态，但此时播放器却没有正
+     * 播放音乐，而当前方法判断是当前是否处于 {@link PlaybackState#PLAYING} 状态。在
+     * 切换歌曲时，当前会处于 {@link PlaybackState#PLAYING} 状态，但此时播放器却没有正
      * 在播放，因为旧的播放器被释放掉了，而新的播放器还没有准备好播放。
      */
     private boolean isPlayingState() {
-        return getPlayerState().getPlaybackState() == Player.PlaybackState.PLAYING;
+        return getPlayerState().getPlaybackState() == PlaybackState.PLAYING;
     }
 
     /**
@@ -672,12 +672,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 当前播放器是否处于 {@link Player.PlaybackState#PREPARING} 状态。
+     * 当前播放器是否处于 {@link PlaybackState#PREPARING} 状态。
      *
-     * @return 如果播放器处于 {@link Player.PlaybackState#PREPARING} 状态，则返回 {@code true}
+     * @return 如果播放器处于 {@link PlaybackState#PREPARING} 状态，则返回 {@code true}
      */
     public final boolean isPreparingState() {
-        return getPlayerState().getPlaybackState() == Player.PlaybackState.PREPARING;
+        return getPlayerState().getPlaybackState() == PlaybackState.PREPARING;
     }
 
     /**
@@ -1530,9 +1530,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 这是一个帮助方法，获取通知栏控制器用于显示的 content text，该方法会根据播放器状态的不同而返回不同
          * 的值。
          * <p>
-         * 例如，在 {@link snow.player.Player.PlaybackState#ERROR} 状态时，会返回一个
+         * 例如，在 {@link PlaybackState#ERROR} 状态时，会返回一个
          * {@code android.R.color.holo_red_dark} 颜色的描述错误信息的 CharSequence 对象；而在
-         * {@link snow.player.Player.PlaybackState#PREPARING} 状态时，会返回一个
+         * {@link PlaybackState#PREPARING} 状态时，会返回一个
          * {@code android.R.color.holo_green_dark} 颜色的值为 “准备中…” 的 CharSequence 对象；而在
          * {@link #isStalled()} 返回 true 时，会返回一个 {@code android.R.color.holo_orange_dark} 颜色
          * 的值为 “缓冲中…” 的 CharSequence 对象。其它状态下会将 {@code defaultValue} 原值返回。
@@ -1632,9 +1632,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 判断播放器当前是否处于 {@link Player.PlaybackState#PREPARING} 状态。
+         * 判断播放器当前是否处于 {@link PlaybackState#PREPARING} 状态。
          *
-         * @return 如果播放器处于 {@link Player.PlaybackState#PREPARING} 状态，则返回 {@code true}
+         * @return 如果播放器处于 {@link PlaybackState#PREPARING} 状态，则返回 {@code true}
          */
         public final boolean isPreparingState() {
             return mPlayerService.isPreparingState();
@@ -2229,7 +2229,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          *
          * @param musicItem    要播放的音乐
          * @param soundQuality 要播放的音乐的音质
-         * @return 音乐的播放链接，为 null 时播放器会转至 {@link snow.player.Player.PlaybackState#ERROR}
+         * @return 音乐的播放链接，为 null 时播放器会转至 {@link PlaybackState#ERROR}
          * 状态
          * @throws Exception 获取音乐播放链接的过程中发生的任何异常
          */

@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModel;
 import com.google.common.base.Preconditions;
 
 import snow.player.PlayMode;
+import snow.player.PlaybackState;
 import snow.player.Player;
 import snow.player.PlayerClient;
 import snow.player.media.MusicItem;
@@ -35,7 +36,7 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<Integer> mBufferedProgress; // 单位：秒
     private MutableLiveData<Integer> mPlayPosition;
     private MutableLiveData<PlayMode> mPlayMode;
-    private MutableLiveData<Player.PlaybackState> mPlaybackState;
+    private MutableLiveData<PlaybackState> mPlaybackState;
     private MutableLiveData<Boolean> mStalled;
     private MutableLiveData<String> mErrorMessage;
     private PlaylistLiveData mPlaylist;
@@ -139,8 +140,8 @@ public class PlayerViewModel extends ViewModel {
 
         mClientPlaybackStateChangeListener = new PlayerClient.OnPlaybackStateChangeListener() {
             @Override
-            public void onPlaybackStateChanged(Player.PlaybackState playbackState) {
-                if (playbackState == Player.PlaybackState.ERROR) {
+            public void onPlaybackStateChanged(PlaybackState playbackState) {
+                if (playbackState == PlaybackState.ERROR) {
                     mErrorMessage.setValue(mPlayerClient.getErrorMessage());
                 }
 
@@ -172,7 +173,7 @@ public class PlayerViewModel extends ViewModel {
         mSeekCompleteListener = new Player.OnSeekCompleteListener() {
             @Override
             public void onSeekComplete(int progress, long updateTime) {
-                if (Player.PlaybackState.PLAYING == mPlaybackState.getValue()) {
+                if (PlaybackState.PLAYING == mPlaybackState.getValue()) {
                     mProgressClock.start(progress, updateTime, mPlayerClient.getPlayingMusicItemDuration());
                 }
             }
@@ -337,7 +338,7 @@ public class PlayerViewModel extends ViewModel {
      * 播放器的播放状态。
      */
     @NonNull
-    public LiveData<Player.PlaybackState> getPlaybackState() {
+    public LiveData<PlaybackState> getPlaybackState() {
         return mPlaybackState;
     }
 
@@ -356,10 +357,10 @@ public class PlayerViewModel extends ViewModel {
      */
     @NonNull
     public LiveData<Boolean> isError() {
-        return Transformations.map(mPlaybackState, new Function<Player.PlaybackState, Boolean>() {
+        return Transformations.map(mPlaybackState, new Function<PlaybackState, Boolean>() {
             @Override
-            public Boolean apply(Player.PlaybackState input) {
-                return input == Player.PlaybackState.ERROR;
+            public Boolean apply(PlaybackState input) {
+                return input == PlaybackState.ERROR;
             }
         });
     }

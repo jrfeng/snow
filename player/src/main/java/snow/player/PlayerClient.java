@@ -588,9 +588,9 @@ public class PlayerClient implements Player {
      * 获取当前播放状态。
      *
      * @return 当前播放状态
-     * @see snow.player.Player.PlaybackState
+     * @see PlaybackState
      */
-    public Player.PlaybackState getPlaybackState() {
+    public PlaybackState getPlaybackState() {
         return mPlayerStateHolder.mPlayerState.getPlaybackState();
     }
 
@@ -1782,14 +1782,14 @@ public class PlayerClient implements Player {
 
         @Override
         public void onPreparing() {
-            mPlayerState.setPlaybackState(Player.PlaybackState.PREPARING);
+            mPlayerState.setPlaybackState(PlaybackState.PREPARING);
 
             notifyPlaybackStateChanged();
         }
 
         @Override
         public void onPrepared(int audioSessionId) {
-            mPlayerState.setPlaybackState(Player.PlaybackState.PREPARED);
+            mPlayerState.setPlaybackState(PlaybackState.PREPARED);
             mPlayerState.setAudioSessionId(audioSessionId);
 
             notifyPlaybackStateChanged();
@@ -1798,7 +1798,7 @@ public class PlayerClient implements Player {
 
         @Override
         public void onPlay(int playProgress, long playProgressUpdateTime) {
-            mPlayerState.setPlaybackState(Player.PlaybackState.PLAYING);
+            mPlayerState.setPlaybackState(PlaybackState.PLAYING);
             mPlayerState.setPlayProgress(playProgress);
             mPlayerState.setPlayProgressUpdateTime(playProgressUpdateTime);
 
@@ -1807,14 +1807,14 @@ public class PlayerClient implements Player {
 
         @Override
         public void onPause() {
-            mPlayerState.setPlaybackState(Player.PlaybackState.PAUSED);
+            mPlayerState.setPlaybackState(PlaybackState.PAUSED);
 
             notifyPlaybackStateChanged();
         }
 
         @Override
         public void onStop() {
-            mPlayerState.setPlaybackState(Player.PlaybackState.STOPPED);
+            mPlayerState.setPlaybackState(PlaybackState.STOPPED);
             resetPlayProgress();
 
             notifyPlaybackStateChanged();
@@ -1828,7 +1828,7 @@ public class PlayerClient implements Player {
         @Override
         public void onError(int errorCode, String errorMessage) {
             resetPlayProgress();
-            mPlayerState.setPlaybackState(Player.PlaybackState.ERROR);
+            mPlayerState.setPlaybackState(PlaybackState.ERROR);
             mPlayerState.setErrorCode(errorCode);
             mPlayerState.setErrorMessage(errorMessage);
 

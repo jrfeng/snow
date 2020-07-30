@@ -24,7 +24,7 @@ public class PlayerState implements Parcelable {
 
     // no persistent
     private long playProgressUpdateTime;
-    private Player.PlaybackState playbackState;
+    private PlaybackState playbackState;
     private int audioSessionId;
     private int bufferedProgress;
     private boolean stalled;
@@ -37,7 +37,7 @@ public class PlayerState implements Parcelable {
         position = 0;
         playMode = PlayMode.SEQUENTIAL;
 
-        playbackState = Player.PlaybackState.UNKNOWN;
+        playbackState = PlaybackState.UNKNOWN;
         audioSessionId = 0;
         bufferedProgress = 0;
         stalled = false;
@@ -168,31 +168,31 @@ public class PlayerState implements Parcelable {
      * 获取播放状态。
      *
      * @return 返回当前播放状态。
-     * @see Player.PlaybackState
+     * @see PlaybackState
      */
-    public Player.PlaybackState getPlaybackState() {
+    public PlaybackState getPlaybackState() {
         return playbackState;
     }
 
     /**
      * 设置播放状态。
      *
-     * @param playbackState 要设置的播放状态。如果该参数的值不是 {@link Player.PlaybackState#ERROR} 则会
+     * @param playbackState 要设置的播放状态。如果该参数的值不是 {@link PlaybackState#ERROR} 则会
      *                      清除错误码（重置为 {@link Player.Error#NO_ERROR}）与错误信息。
-     *                      只能是这些值之一：{@link Player.PlaybackState#UNKNOWN},
-     *                      {@link Player.PlaybackState#PREPARING},
-     *                      {@link Player.PlaybackState#PREPARED},
-     *                      {@link Player.PlaybackState#PLAYING},
-     *                      {@link Player.PlaybackState#PAUSED},
-     *                      {@link Player.PlaybackState#STOPPED},
-     *                      {@link Player.PlaybackState#ERROR}
-     * @see Player.PlaybackState
+     *                      只能是这些值之一：{@link PlaybackState#UNKNOWN},
+     *                      {@link PlaybackState#PREPARING},
+     *                      {@link PlaybackState#PREPARED},
+     *                      {@link PlaybackState#PLAYING},
+     *                      {@link PlaybackState#PAUSED},
+     *                      {@link PlaybackState#STOPPED},
+     *                      {@link PlaybackState#ERROR}
+     * @see PlaybackState
      */
-    public void setPlaybackState(@NonNull Player.PlaybackState playbackState) {
+    public void setPlaybackState(@NonNull PlaybackState playbackState) {
         Preconditions.checkNotNull(playbackState);
         this.playbackState = playbackState;
 
-        if (playbackState != Player.PlaybackState.ERROR) {
+        if (playbackState != PlaybackState.ERROR) {
             errorCode = Player.Error.NO_ERROR;
             errorMessage = "";
         }
@@ -356,7 +356,7 @@ public class PlayerState implements Parcelable {
         position = in.readInt();
         playMode = PlayMode.values()[in.readInt()];
 
-        playbackState = Player.PlaybackState.values()[in.readInt()];
+        playbackState = PlaybackState.values()[in.readInt()];
         audioSessionId = in.readInt();
         bufferedProgress = in.readInt();
         stalled = in.readByte() != 0;
