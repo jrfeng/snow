@@ -48,6 +48,7 @@ public abstract class AbstractPlayer implements Player {
     private Context mApplicationContext;
     private PlayerConfig mPlayerConfig;
     private PlayerState mPlayerState;
+    private PlayerStateHelper mPlayerStateHelper;
     private HashMap<String, PlayerStateListener> mStateListenerMap;
 
     private MusicPlayer.OnPreparedListener mPreparedListener;
@@ -105,6 +106,7 @@ public abstract class AbstractPlayer implements Player {
         mApplicationContext = context.getApplicationContext();
         mPlayerConfig = playerConfig;
         mPlayerState = playerState;
+        mPlayerStateHelper = new PlayerStateHelper(mPlayerState);
         mPlaylistManager = playlistManager;
         mStateListenerMap = new HashMap<>();
         mRecordProgress = true;
@@ -633,11 +635,6 @@ public abstract class AbstractPlayer implements Player {
         return 0;
     }
 
-    private void updatePlayProgress(int progress, long updateTime) {
-        mPlayerState.setPlayProgress(progress);
-        mPlayerState.setPlayProgressUpdateTime(updateTime);
-    }
-
     /**
      * 添加播放器状态监听器。
      *
@@ -663,7 +660,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void notifyPreparing() {
-        mPlayerState.setPlaybackState(PlaybackState.PREPARING);
+        mPlayerStateHelper.onPreparing();
 
         mPreparing = true;
         mPrepared = false;
@@ -679,8 +676,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void notifyPrepared(int audioSessionId) {
-        mPlayerState.setPlaybackState(PlaybackState.PREPARED);
-        mPlayerState.setAudioSessionId(audioSessionId);
+        mPlayerStateHelper.onPrepared(audioSessionId);
 
         mPreparing = false;
         mPrepared = true;
@@ -696,8 +692,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void notifyPlaying(int progress, long updateTime) {
-        mPlayerState.setPlaybackState(PlaybackState.PLAYING);
-        updatePlayProgress(progress, updateTime);
+        mPlayerStateHelper.onPlay(progress, updateTime);
         startRecordProgress();
 
         mAudioFocusHelper.requestAudioFocus(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
@@ -714,11 +709,11 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void notifyPaused() {
-        mPlayerState.setPlaybackState(PlaybackState.PAUSED);
         cancelRecordProgress();
+        mPlayerStateHelper.onPaused();
 
         if (mMusicPlayer != null) {
-            updatePlayProgress(mMusicPlayer.getProgress(), System.currentTimeMillis());
+            mPlayerStateHelper.updatePlayProgress(mMusicPlayer.getProgress(), System.currentTimeMillis());
         }
 
         mAudioFocusHelper.abandonAudioFocus();
@@ -735,9 +730,8 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void notifyStopped() {
-        mPlayerState.setPlaybackState(PlaybackState.STOPPED);
         cancelRecordProgress();
-        updatePlayProgress(0, System.currentTimeMillis());
+        mPlayerStateHelper.onStopped();
 
         mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
@@ -753,7 +747,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void notifyStalled(boolean stalled) {
-        mPlayerState.setStalled(stalled);
+        mPlayerStateHelper.onStalled(stalled);
         if (!stalled && isPlaying()) {
             startRecordProgress();
         } else {
@@ -772,11 +766,7 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyError(int errorCode, String errorMessage) {
         releaseMusicPlayer();
-
-        mPlayerState.setPlaybackState(PlaybackState.ERROR);
-        mPlayerState.setErrorCode(errorCode);
-        mPlayerState.setErrorMessage(errorMessage);
-        updatePlayProgress(0, System.currentTimeMillis());
+        mPlayerStateHelper.onError(errorCode, errorMessage);
 
         mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
@@ -807,7 +797,7 @@ public abstract class AbstractPlayer implements Player {
             bufferedProgress = (int) ((buffered / 100.0) * getMusicItemDuration());
         }
 
-        mPlayerState.setBufferedProgress(bufferedProgress);
+        mPlayerStateHelper.onBufferedChanged(bufferedProgress);
 
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
@@ -825,9 +815,8 @@ public abstract class AbstractPlayer implements Player {
      */
     private void notifyPlayingMusicItemChanged(@Nullable MusicItem musicItem, boolean play) {
         releaseMusicPlayer();
-        updatePlayProgress(0, System.currentTimeMillis());
+        mPlayerStateHelper.onPlayingMusicItemChanged(musicItem, 0);
 
-        mPlayerState.setMusicItem(musicItem);
         onPlayingMusicItemChanged(musicItem);
 
         if (play) {
@@ -842,14 +831,13 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    private void notifySeekComplete(int position) {
-        mPlayerState.setPlayProgress(position);
-        mPlayerState.setPlayProgressUpdateTime(System.currentTimeMillis());
+    private void notifySeekComplete(int playProgress) {
+        mPlayerStateHelper.onSeekComplete(playProgress, System.currentTimeMillis());
 
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
-                listener.onSeekComplete(position, mPlayerState.getPlayProgressUpdateTime());
+                listener.onSeekComplete(playProgress, mPlayerState.getPlayProgressUpdateTime());
             }
         }
     }
@@ -1187,7 +1175,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void notifyPlayingMusicItemPositionChanged(int position) {
-        mPlayerState.setPosition(position);
+        mPlayerStateHelper.onPositionChanged(position);
 
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
@@ -1198,7 +1186,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void notifyPlayModeChanged(PlayMode playMode) {
-        mPlayerState.setPlayMode(playMode);
+        mPlayerStateHelper.onPlayModeChanged(playMode);
 
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
@@ -1209,7 +1197,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void notifyPlaylistChanged(int position) {
-        mPlayerState.setPosition(position);
+        mPlayerStateHelper.onPlaylistChanged(position);
 
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);

@@ -1390,6 +1390,7 @@ public class PlayerClient implements Player {
             Player.OnPlaylistChangeListener,
             Player.OnPlayModeChangeListener {
         private PlayerState mPlayerState;
+        private PlayerStateHelper mPlayerStateHelper;
         private PlaylistManager mPlaylistManager;
         private boolean mNotConnected;
 
@@ -1424,6 +1425,7 @@ public class PlayerClient implements Player {
 
         void setPlayerState(PlayerState playerState) {
             mPlayerState = playerState;
+            mPlayerStateHelper = new PlayerStateHelper(mPlayerState);
 
             if (notConnected()) {
                 return;
@@ -1783,15 +1785,14 @@ public class PlayerClient implements Player {
 
         @Override
         public void onPreparing() {
-            mPlayerState.setPlaybackState(PlaybackState.PREPARING);
+            mPlayerStateHelper.onPreparing();
 
             notifyPlaybackStateChanged();
         }
 
         @Override
         public void onPrepared(int audioSessionId) {
-            mPlayerState.setPlaybackState(PlaybackState.PREPARED);
-            mPlayerState.setAudioSessionId(audioSessionId);
+            mPlayerStateHelper.onPrepared(audioSessionId);
 
             notifyPlaybackStateChanged();
             notifyAudioSessionChanged();
@@ -1799,90 +1800,77 @@ public class PlayerClient implements Player {
 
         @Override
         public void onPlay(int playProgress, long playProgressUpdateTime) {
-            mPlayerState.setPlaybackState(PlaybackState.PLAYING);
-            mPlayerState.setPlayProgress(playProgress);
-            mPlayerState.setPlayProgressUpdateTime(playProgressUpdateTime);
+            mPlayerStateHelper.onPlay(playProgress, playProgressUpdateTime);
 
             notifyPlaybackStateChanged();
         }
 
         @Override
         public void onPause() {
-            mPlayerState.setPlaybackState(PlaybackState.PAUSED);
+            mPlayerStateHelper.onPaused();
 
             notifyPlaybackStateChanged();
         }
 
         @Override
         public void onStop() {
-            mPlayerState.setPlaybackState(PlaybackState.STOPPED);
-            resetPlayProgress();
+            mPlayerStateHelper.onStopped();
 
             notifyPlaybackStateChanged();
         }
 
-        private void resetPlayProgress() {
-            mPlayerState.setPlayProgress(0);
-            mPlayerState.setPlayProgressUpdateTime(System.currentTimeMillis());
-        }
-
         @Override
         public void onError(int errorCode, String errorMessage) {
-            resetPlayProgress();
-            mPlayerState.setPlaybackState(PlaybackState.ERROR);
-            mPlayerState.setErrorCode(errorCode);
-            mPlayerState.setErrorMessage(errorMessage);
+            mPlayerStateHelper.onError(errorCode, errorMessage);
 
             notifyPlaybackStateChanged();
         }
 
         @Override
         public void onSeekComplete(int progress, long updateTime) {
-            mPlayerState.setPlayProgress(progress);
-            mPlayerState.setPlayProgressUpdateTime(updateTime);
+            mPlayerStateHelper.onSeekComplete(progress, updateTime);
 
             notifySeekComplete();
         }
 
         @Override
         public void onBufferedProgressChanged(int bufferedProgress) {
-            mPlayerState.setBufferedProgress(bufferedProgress);
+            mPlayerStateHelper.onBufferedChanged(bufferedProgress);
 
             notifyOnBufferedProgressChanged();
         }
 
         @Override
         public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int playProgress) {
-            mPlayerState.setMusicItem(musicItem);
-            mPlayerState.setPlayProgress(playProgress);
+            mPlayerStateHelper.onPlayingMusicItemChanged(musicItem, playProgress);
 
             notifyPlayingMusicItemChanged();
         }
 
         @Override
         public void onStalledChanged(boolean stalled) {
-            mPlayerState.setStalled(stalled);
+            mPlayerStateHelper.onStalled(stalled);
 
             notifyStalledChanged();
         }
 
         @Override
         public void onPlaylistChanged(PlaylistManager playlistManager, int position) {
-            mPlayerState.setPosition(position);
+            mPlayerStateHelper.onPlaylistChanged(position);
 
             notifyPlaylistChanged();
         }
 
         @Override
         public void onPlayModeChanged(PlayMode playMode) {
-            mPlayerState.setPlayMode(playMode);
+            mPlayerStateHelper.onPlayModeChanged(playMode);
 
             notifyPlayModeChanged();
         }
 
         @Override
         public void onPositionChanged(int position) {
-            mPlayerState.setPosition(position);
+            mPlayerStateHelper.onPositionChanged(position);
 
             notifyPositionChanged();
         }
