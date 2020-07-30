@@ -16,7 +16,7 @@ import snow.player.util.ErrorUtil;
 /**
  * 用于保存基本的播放器状态。
  */
-public class PlayerState implements Parcelable {
+class PlayerState implements Parcelable {
     private int playProgress;
     @Nullable
     private MusicItem musicItem;
