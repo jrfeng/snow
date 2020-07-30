@@ -143,6 +143,8 @@ public class PlayerViewModel extends ViewModel {
             public void onPlaybackStateChanged(PlaybackState playbackState) {
                 if (playbackState == PlaybackState.ERROR) {
                     mErrorMessage.setValue(mPlayerClient.getErrorMessage());
+                } else {
+                    mErrorMessage.setValue("");
                 }
 
                 mPlaybackState.setValue(playbackState);
