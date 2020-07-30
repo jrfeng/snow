@@ -181,8 +181,16 @@ public class PlayerViewModel extends ViewModel {
 
         mStalledChangeListener = new Player.OnStalledChangeListener() {
             @Override
-            public void onStalledChanged(boolean stalled) {
+            public void onStalledChanged(boolean stalled, int playProgress, long updateTime) {
                 mStalled.setValue(stalled);
+                if (stalled) {
+                    mProgressClock.cancel();
+                    return;
+                }
+
+                if (PlaybackState.PLAYING == mPlaybackState.getValue()) {
+                    mProgressClock.start(playProgress, updateTime, mPlayerClient.getPlayingMusicItemDuration());
+                }
             }
         };
 
