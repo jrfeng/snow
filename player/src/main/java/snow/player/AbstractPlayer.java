@@ -1342,6 +1342,10 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
+        if (isPrepared()) {
+            mMusicPlayer.setLooping(playMode == PlayMode.LOOP);
+        }
+
         notifyPlayModeChanged(playMode);
     }
 
