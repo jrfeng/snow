@@ -47,6 +47,7 @@ public class PlayerViewModel extends ViewModel {
     private Player.OnBufferedProgressChangeListener mBufferedProgressChangeListener;
     private Player.OnSeekCompleteListener mSeekCompleteListener;
     private Player.OnStalledChangeListener mStalledChangeListener;
+    private PlayerClient.OnDisconnectListener mDisconnectListener;
 
     private String mDefaultTitle;
     private String mDefaultArtist;
@@ -182,6 +183,15 @@ public class PlayerViewModel extends ViewModel {
                 mStalled.setValue(stalled);
             }
         };
+
+        mDisconnectListener = new PlayerClient.OnDisconnectListener() {
+            @Override
+            public void onDisconnected() {
+                if (isInitialized()) {
+                    mProgressClock.cancel();
+                }
+            }
+        };
     }
 
     private void initProgressClock() {
@@ -202,6 +212,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.addOnBufferedProgressChangeListener(mBufferedProgressChangeListener);
         mPlayerClient.addOnSeekCompleteListener(mSeekCompleteListener);
         mPlayerClient.addOnStalledChangeListener(mStalledChangeListener);
+        mPlayerClient.addOnDisconnectListener(mDisconnectListener);
     }
 
     private void removeAllListener() {
@@ -213,6 +224,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.removeOnBufferedProgressChangeListener(mBufferedProgressChangeListener);
         mPlayerClient.removeOnSeekCompleteListener(mSeekCompleteListener);
         mPlayerClient.removeOnStalledChangeListener(mStalledChangeListener);
+        mPlayerClient.removeOnDisconnectListener(mDisconnectListener);
     }
 
     @Override
