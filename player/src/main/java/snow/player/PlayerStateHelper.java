@@ -39,8 +39,10 @@ class PlayerStateHelper {
         updatePlayProgress(0, System.currentTimeMillis());
     }
 
-    public void onStalled(boolean stalled) {
+    public void onStalled(boolean stalled, int playProgress, long updateTime) {
         mPlayerState.setStalled(stalled);
+        mPlayerState.setPlayProgress(playProgress);
+        mPlayerState.setPlayProgressUpdateTime(updateTime);
     }
 
     public void onError(int errorCode, String errorMessage) {

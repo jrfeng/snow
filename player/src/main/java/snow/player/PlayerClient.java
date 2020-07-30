@@ -1626,7 +1626,9 @@ public class PlayerClient implements Player {
                 return;
             }
 
-            listener.onStalledChanged(mPlayerState.isStalled());
+            listener.onStalledChanged(mPlayerState.isStalled(),
+                    mPlayerState.getPlayProgress(),
+                    mPlayerState.getPlayProgressUpdateTime());
         }
 
         private void notifyStalledChanged() {
@@ -1848,8 +1850,8 @@ public class PlayerClient implements Player {
         }
 
         @Override
-        public void onStalledChanged(boolean stalled) {
-            mPlayerStateHelper.onStalled(stalled);
+        public void onStalledChanged(boolean stalled, int playProgress, long updateTime) {
+            mPlayerStateHelper.onStalled(stalled, playProgress, updateTime);
 
             notifyStalledChanged();
         }

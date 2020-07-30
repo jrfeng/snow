@@ -1,8 +1,5 @@
 package snow.player;
 
-import android.content.Context;
-import android.content.res.Resources;
-
 import androidx.annotation.Nullable;
 
 import channel.helper.Channel;
@@ -127,10 +124,12 @@ public interface Player extends PlaylistManager.OnModifyPlaylistListener {
         /**
          * 当播放器的 stalled 状态发生改变时会回调该方法。
          *
-         * @param stalled 没有足够的缓存数据支撑播放器继续播放时，该参数为 true；当播放器缓存了足够的数据可
-         *                以继续播放时，该参数为 false。
+         * @param stalled      没有足够的缓存数据支撑播放器继续播放时，该参数为 true；当播放器缓存了足够的数据可
+         *                     以继续播放时，该参数为 false。
+         * @param playProgress 当前播放进度
+         * @param updateTime   当前播放进度的更新时间
          */
-        void onStalledChanged(boolean stalled);
+        void onStalledChanged(boolean stalled, int playProgress, long updateTime);
     }
 
     /**
