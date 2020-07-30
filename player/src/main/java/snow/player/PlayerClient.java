@@ -1790,6 +1790,7 @@ public class PlayerClient implements Player {
         @Override
         public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int playProgress) {
             mPlayerState.setMusicItem(musicItem);
+            mPlayerState.setPlayProgress(playProgress);
 
             notifyPlayingMusicItemChanged();
         }
