@@ -430,7 +430,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     @Override
-    public void setSoundQuality(Player.SoundQuality soundQuality) {
+    public void setSoundQuality(SoundQuality soundQuality) {
         if (soundQuality == mPlayerConfig.getSoundQuality()) {
             return;
         }
@@ -819,7 +819,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @return 如果已被缓存，则返回 true，否则返回 false
      */
     @SuppressWarnings("SameReturnValue")
-    protected boolean isCached(MusicItem musicItem, Player.SoundQuality soundQuality) {
+    protected boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
         if (mComponentFactory != null) {
             return mComponentFactory.isCached(musicItem, soundQuality);
         }
@@ -859,7 +859,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @return 音乐的播放链接
      * @throws Exception 获取音乐播放链接的过程中发生的任何异常
      */
-    protected final Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull Player.SoundQuality soundQuality) throws Exception {
+    protected final Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception {
         if (injectMusicItemUri()) {
             return mComponentFactory.retrieveMusicItemUri(musicItem, soundQuality);
         }
@@ -878,7 +878,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @throws Exception 获取音乐播放链接的过程中发生的任何异常
      */
     @SuppressWarnings("RedundantThrows")
-    protected Uri onRetrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull Player.SoundQuality soundQuality) throws Exception {
+    protected Uri onRetrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception {
         return Uri.parse(musicItem.getUri());
     }
 
@@ -2148,8 +2148,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * PlayerService 组件工厂，可以通过重写该类的方法来自定义 PlayerService 的部分组件。
      * <p>
-     * 子类需要实现 {@link #isCached(MusicItem, Player.SoundQuality)} 方法，该方法用于判断具有特定
-     * {@link snow.player.Player.SoundQuality} 的 {@link MusicItem} 是否已缓存。该方法会在异步线程中执
+     * 子类需要实现 {@link #isCached(MusicItem, SoundQuality)} 方法，该方法用于判断具有特定
+     * {@link SoundQuality} 的 {@link MusicItem} 是否已缓存。该方法会在异步线程中执
      * 行，因此可以在该方法中执行耗时操作，例如访问本地数据库。如果播放器仅用于播放本地音乐，则可以直接返回 {@code true}。
      * <p>
      * 除此之外，还可以选择性的覆盖以下方法来提供其他部分的自定义组件：
@@ -2158,11 +2158,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      *     <li>{@link #createRemoteView()}：通知栏控制器</li>
      *     <li>{@link #createAudioEffectManager()}：音频特性引擎</li>
      *     <li>{@link #createHistoryRecorder()}：历史记录器</li>
-     *     <li>{@link #retrieveMusicItemUri(MusicItem, Player.SoundQuality)}：获取歌曲的播放链接</li>
+     *     <li>{@link #retrieveMusicItemUri(MusicItem, SoundQuality)}：获取歌曲的播放链接</li>
      * </ul>
      * <p>
-     * 可以重写 {@link #retrieveMusicItemUri(MusicItem, Player.SoundQuality)} 方法根据音质获取不同的播
-     * 放链接。{@link #retrieveMusicItemUri(MusicItem, Player.SoundQuality)} 方法会在异步线程中调用，因
+     * 可以重写 {@link #retrieveMusicItemUri(MusicItem, SoundQuality)} 方法根据音质获取不同的播
+     * 放链接。{@link #retrieveMusicItemUri(MusicItem, SoundQuality)} 方法会在异步线程中调用，因
      * 此可以直接在该方法中访问网络。
      * <p>
      * 你可以重写其中的一个或多个方法来使用自定义的组件，重写后的方法需要使用 {@link Inject} 注解进行标记，否
@@ -2209,7 +2209,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @param soundQuality 音乐的音质
          * @return 如果已被缓存，则返回 true，否则返回 false
          */
-        public abstract boolean isCached(MusicItem musicItem, Player.SoundQuality soundQuality);
+        public abstract boolean isCached(MusicItem musicItem, SoundQuality soundQuality);
 
         /**
          * 创建一个 {@link MusicPlayer} 对象。
@@ -2235,7 +2235,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          */
         @SuppressWarnings("RedundantThrows")
         @Nullable
-        public Uri retrieveMusicItemUri(MusicItem musicItem, Player.SoundQuality soundQuality) throws Exception {
+        public Uri retrieveMusicItemUri(MusicItem musicItem, SoundQuality soundQuality) throws Exception {
             return null;
         }
 
@@ -2295,7 +2295,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private boolean injectMusicItemUri() {
-        return shouldInject("retrieveMusicItemUri", MusicItem.class, Player.SoundQuality.class);
+        return shouldInject("retrieveMusicItemUri", MusicItem.class, SoundQuality.class);
     }
 
     private boolean injectRemoteView() {

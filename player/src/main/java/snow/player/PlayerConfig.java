@@ -33,23 +33,23 @@ class PlayerConfig {
      * 获取首选音质。
      *
      * @return 当前的首选音质。
-     * @see Player.SoundQuality
+     * @see SoundQuality
      */
     @NonNull
-    public Player.SoundQuality getSoundQuality() {
-        return Player.SoundQuality.values()[mMMKV.decodeInt(KEY_SOUND_QUALITY, 0)];
+    public SoundQuality getSoundQuality() {
+        return SoundQuality.values()[mMMKV.decodeInt(KEY_SOUND_QUALITY, 0)];
     }
 
     /**
      * 设置首选音质。
      *
-     * @param soundQuality 要设置的首选音质。只能是这些值之一：{@link Player.SoundQuality#STANDARD},
-     *                     {@link Player.SoundQuality#LOW},
-     *                     {@link Player.SoundQuality#HIGH},
-     *                     {@link Player.SoundQuality#SUPER}
-     * @see Player.SoundQuality
+     * @param soundQuality 要设置的首选音质。只能是这些值之一：{@link SoundQuality#STANDARD},
+     *                     {@link SoundQuality#LOW},
+     *                     {@link SoundQuality#HIGH},
+     *                     {@link SoundQuality#SUPER}
+     * @see SoundQuality
      */
-    public void setSoundQuality(@NonNull Player.SoundQuality soundQuality) {
+    public void setSoundQuality(@NonNull SoundQuality soundQuality) {
         Preconditions.checkNotNull(soundQuality);
         mMMKV.encode(KEY_SOUND_QUALITY, soundQuality.ordinal());
     }

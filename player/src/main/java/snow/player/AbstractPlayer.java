@@ -145,7 +145,7 @@ public abstract class AbstractPlayer implements Player {
      * @throws Exception 获取音乐播放链接的过程中发生的任何异常
      */
     @Nullable
-    protected abstract Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull Player.SoundQuality soundQuality) throws Exception;
+    protected abstract Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception;
 
     /**
      * 对象指定的 audio session id 应用音频特效。
@@ -1029,7 +1029,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     /**
-     * 通知播放器，当前的 {@link snow.player.Player.SoundQuality} 已改变。
+     * 通知播放器，当前的 {@link SoundQuality} 已改变。
      * <p>
      * 该方法应该在调用与当前播放器管理的 {@link PlayerConfig} 对象的
      * {@link PlayerConfig#setSoundQuality(SoundQuality)} 方法后调用。

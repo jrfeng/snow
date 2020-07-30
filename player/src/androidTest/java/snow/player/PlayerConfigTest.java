@@ -24,7 +24,7 @@ public class PlayerConfigTest {
 
     @Test
     public void setSoundQuality() {
-        final Player.SoundQuality soundQuality = Player.SoundQuality.HIGH;
+        final SoundQuality soundQuality = SoundQuality.HIGH;
 
         mPlayerConfig.setSoundQuality(soundQuality);
         assertEquals(soundQuality, mPlayerConfig.getSoundQuality());

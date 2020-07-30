@@ -292,18 +292,18 @@ public class PlayerClient implements Player {
     }
 
     /**
-     * 设置播放器的首选音质（默认为 {@link Player.SoundQuality#STANDARD}）。
+     * 设置播放器的首选音质（默认为 {@link SoundQuality#STANDARD}）。
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
      *
      * @param soundQuality 要设置的音质，不能为 null
-     * @see Player.SoundQuality#STANDARD
-     * @see Player.SoundQuality#LOW
-     * @see Player.SoundQuality#HIGH
-     * @see Player.SoundQuality#SUPER
+     * @see SoundQuality#STANDARD
+     * @see SoundQuality#LOW
+     * @see SoundQuality#HIGH
+     * @see SoundQuality#SUPER
      * @see #getSoundQuality()
      */
-    public void setSoundQuality(@NonNull Player.SoundQuality soundQuality) {
+    public void setSoundQuality(@NonNull SoundQuality soundQuality) {
         Preconditions.checkNotNull(soundQuality);
         if (!isConnected()) {
             return;
@@ -361,9 +361,9 @@ public class PlayerClient implements Player {
     /**
      * 获取当前播放器的首选音质。
      *
-     * @see #setSoundQuality(Player.SoundQuality)
+     * @see #setSoundQuality(SoundQuality)
      */
-    public Player.SoundQuality getSoundQuality() {
+    public SoundQuality getSoundQuality() {
         return mPlayerConfig.getSoundQuality();
     }
 

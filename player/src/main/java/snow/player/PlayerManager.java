@@ -13,15 +13,15 @@ import channel.helper.UseOrdinal;
 public interface PlayerManager {
 
     /**
-     * 设置播放器的首选音质（默认为 {@link Player.SoundQuality#STANDARD}）。
+     * 设置播放器的首选音质（默认为 {@link SoundQuality#STANDARD}）。
      *
      * @param soundQuality 要设置的音质
-     * @see Player.SoundQuality#STANDARD
-     * @see Player.SoundQuality#LOW
-     * @see Player.SoundQuality#HIGH
-     * @see Player.SoundQuality#SUPER
+     * @see SoundQuality#STANDARD
+     * @see SoundQuality#LOW
+     * @see SoundQuality#HIGH
+     * @see SoundQuality#SUPER
      */
-    void setSoundQuality(@UseOrdinal Player.SoundQuality soundQuality);
+    void setSoundQuality(@UseOrdinal SoundQuality soundQuality);
 
     /**
      * 修改音频特效的配置。
