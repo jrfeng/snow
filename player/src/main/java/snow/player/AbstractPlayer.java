@@ -1245,7 +1245,7 @@ public abstract class AbstractPlayer implements Player {
     /**
      * 是否单曲循环播放。
      *
-     * @return 如果当前模式为 {@link snow.player.Player.PlayMode#LOOP}，则返回 true
+     * @return 如果当前模式为 {@link PlayMode#LOOP}，则返回 true
      */
     public boolean isLooping() {
         return mPlayerState.getPlayMode() == PlayMode.LOOP;

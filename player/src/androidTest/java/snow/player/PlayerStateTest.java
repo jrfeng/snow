@@ -22,7 +22,7 @@ public class PlayerStateTest {
         assertEquals(0, playerState.getPlayProgress());
         assertEquals(0,playerState.getPlayProgressUpdateTime());
         assertEquals(0, playerState.getPosition());
-        assertEquals(Player.PlayMode.SEQUENTIAL, playerState.getPlayMode());
+        assertEquals(PlayMode.SEQUENTIAL, playerState.getPlayMode());
 
         assertEquals(Player.PlaybackState.UNKNOWN, playerState.getPlaybackState());
         assertEquals(0, playerState.getAudioSessionId());
@@ -39,7 +39,7 @@ public class PlayerStateTest {
         source.setPlayProgressUpdateTime(System.currentTimeMillis());
         source.setMusicItem(new MusicItem());
         source.setPosition(15);
-        source.setPlayMode(Player.PlayMode.LOOP);
+        source.setPlayMode(PlayMode.LOOP);
         source.setPlaybackState(Player.PlaybackState.ERROR);
         source.setAudioSessionId(12);
         source.setBufferedProgress(100);
@@ -75,7 +75,7 @@ public class PlayerStateTest {
         musicItem.setArtist("Test Artist");
         musicItem.setUri("https://www.test.com/test.mp3");
         final int position = 5;
-        final Player.PlayMode playMode = Player.PlayMode.SHUFFLE;
+        final PlayMode playMode = PlayMode.SHUFFLE;
         final Player.PlaybackState playbackState = Player.PlaybackState.PLAYING;
         final int audioSessionId = 12;
         final int bufferedProgress = 100;
@@ -128,7 +128,7 @@ public class PlayerStateTest {
         musicItem.setArtist("Test Artist");
         musicItem.setUri("https://www.test.com/test.mp3");
         final int position = 5;
-        final Player.PlayMode playMode = Player.PlayMode.SHUFFLE;
+        final PlayMode playMode = PlayMode.SHUFFLE;
         final Player.PlaybackState playbackState = Player.PlaybackState.PLAYING;
         final int audioSessionId = 12;
         final int bufferedProgress = 100;

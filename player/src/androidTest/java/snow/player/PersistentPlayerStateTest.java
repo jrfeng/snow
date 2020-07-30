@@ -28,7 +28,7 @@ public class PersistentPlayerStateTest {
         musicItem.setArtist("PersistentPlayerStateTest");
         musicItem.setUri("https://www.persistent_test.com/test.mp3");
         final int position = 100;
-        final Player.PlayMode playMode = Player.PlayMode.SHUFFLE;
+        final PlayMode playMode = PlayMode.SHUFFLE;
 
         final String id = "PersistentPlayerStateTest";
         PersistentPlayerState persistentPlayerState = new PersistentPlayerState(getContext(), id);

@@ -633,7 +633,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * 获取播放器的播放模式。
      */
-    protected final Player.PlayMode getPlaylistPlayMode() {
+    protected final PlayMode getPlaylistPlayMode() {
         return mPlayerState.getPlayMode();
     }
 
@@ -1258,22 +1258,22 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         @Override
         public void onSetRepeatMode(int repeatMode) {
             if (repeatMode == PlaybackStateCompat.REPEAT_MODE_ONE) {
-                mPlayer.setPlayMode(Player.PlayMode.LOOP);
+                mPlayer.setPlayMode(PlayMode.LOOP);
                 return;
             }
 
-            mPlayer.setPlayMode(Player.PlayMode.SEQUENTIAL);
+            mPlayer.setPlayMode(PlayMode.SEQUENTIAL);
         }
 
         @Override
         public void onSetShuffleMode(int shuffleMode) {
             if (shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_NONE ||
                     shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_INVALID) {
-                mPlayer.setPlayMode(Player.PlayMode.SEQUENTIAL);
+                mPlayer.setPlayMode(PlayMode.SEQUENTIAL);
                 return;
             }
 
-            mPlayer.setPlayMode(Player.PlayMode.SHUFFLE);
+            mPlayer.setPlayMode(PlayMode.SHUFFLE);
         }
     }
 
@@ -1590,7 +1590,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 获取播放器的播放模式。
          */
-        protected final Player.PlayMode getPlaylistPlayMode() {
+        protected final PlayMode getPlaylistPlayMode() {
             return mPlayerService.getPlaylistPlayMode();
         }
 

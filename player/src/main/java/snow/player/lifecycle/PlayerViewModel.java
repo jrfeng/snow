@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.common.base.Preconditions;
 
+import snow.player.PlayMode;
 import snow.player.Player;
 import snow.player.PlayerClient;
 import snow.player.media.MusicItem;
@@ -33,7 +34,7 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<Integer> mPlayProgress;     // 单位：秒
     private MutableLiveData<Integer> mBufferedProgress; // 单位：秒
     private MutableLiveData<Integer> mPlayPosition;
-    private MutableLiveData<Player.PlayMode> mPlayMode;
+    private MutableLiveData<PlayMode> mPlayMode;
     private MutableLiveData<Player.PlaybackState> mPlaybackState;
     private MutableLiveData<Boolean> mStalled;
     private MutableLiveData<String> mErrorMessage;
@@ -130,9 +131,9 @@ public class PlayerViewModel extends ViewModel {
 
         mPlayModeChangeListener = new Player.OnPlayModeChangeListener() {
             @Override
-            public void onPlayModeChanged(Player.PlayMode playMode) {
+            public void onPlayModeChanged(PlayMode playMode) {
                 mPlayMode.setValue(playMode);
-                mProgressClock.setLoop(playMode == Player.PlayMode.LOOP);
+                mProgressClock.setLoop(playMode == PlayMode.LOOP);
             }
         };
 
@@ -328,7 +329,7 @@ public class PlayerViewModel extends ViewModel {
      * 播放器的播放模式。
      */
     @NonNull
-    public LiveData<Player.PlayMode> getPlayMode() {
+    public LiveData<PlayMode> getPlayMode() {
         return mPlayMode;
     }
 
@@ -547,7 +548,7 @@ public class PlayerViewModel extends ViewModel {
      *
      * @param playMode 播放模式
      */
-    public void setPlayMode(@NonNull Player.PlayMode playMode) {
+    public void setPlayMode(@NonNull PlayMode playMode) {
         Preconditions.checkNotNull(playMode);
         if (isInitialized()) {
             mPlayerClient.setPlayMode(playMode);

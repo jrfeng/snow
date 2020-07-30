@@ -554,10 +554,10 @@ public class PlayerClient implements Player {
     /**
      * 是否单曲循环播放。
      *
-     * @return 当播放模式为 {@link Player.PlayMode#LOOP} 时返回 true，否则返回 false
+     * @return 当播放模式为 {@link PlayMode#LOOP} 时返回 true，否则返回 false
      */
     public boolean isLooping() {
-        return getPlayMode() == Player.PlayMode.LOOP;
+        return getPlayMode() == PlayMode.LOOP;
     }
 
     /**
@@ -659,7 +659,7 @@ public class PlayerClient implements Player {
      *
      * @return 当前播放模式。
      */
-    public Player.PlayMode getPlayMode() {
+    public PlayMode getPlayMode() {
         return mPlayerStateHolder.mPlayerState.getPlayMode();
     }
 
@@ -724,7 +724,7 @@ public class PlayerClient implements Player {
      * @param playMode 播放模式
      */
     @Override
-    public void setPlayMode(@NonNull Player.PlayMode playMode) {
+    public void setPlayMode(@NonNull PlayMode playMode) {
         Preconditions.checkNotNull(playMode);
         if (notConnected()) {
             return;
@@ -1873,7 +1873,7 @@ public class PlayerClient implements Player {
         }
 
         @Override
-        public void onPlayModeChanged(Player.PlayMode playMode) {
+        public void onPlayModeChanged(PlayMode playMode) {
             mPlayerState.setPlayMode(playMode);
 
             notifyPlayModeChanged();

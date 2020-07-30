@@ -76,24 +76,6 @@ public interface Player extends PlaylistManager.OnModifyPlaylistListener {
     void setPlayMode(@UseOrdinal PlayMode playMode);
 
     /**
-     * 播放器的播放模式。
-     */
-    enum PlayMode {
-        /**
-         * 顺序播放。
-         */
-        SEQUENTIAL,
-        /**
-         * 单曲循环。
-         */
-        LOOP,
-        /**
-         * 随机播放。
-         */
-        SHUFFLE
-    }
-
-    /**
      * 播放器的首选音质。
      */
     enum SoundQuality {

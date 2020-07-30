@@ -20,7 +20,7 @@ public class PlayerState implements Parcelable {
     @Nullable
     private MusicItem musicItem;
     private int position;
-    private Player.PlayMode playMode;
+    private PlayMode playMode;
 
     // no persistent
     private long playProgressUpdateTime;
@@ -35,7 +35,7 @@ public class PlayerState implements Parcelable {
         playProgress = 0;
         playProgressUpdateTime = 0;
         position = 0;
-        playMode = Player.PlayMode.SEQUENTIAL;
+        playMode = PlayMode.SEQUENTIAL;
 
         playbackState = Player.PlaybackState.UNKNOWN;
         audioSessionId = 0;
@@ -146,21 +146,21 @@ public class PlayerState implements Parcelable {
      * 获取播放队列的播放模式。
      *
      * @return 播放队列的播放模式。
-     * @see Player.PlayMode
+     * @see PlayMode
      */
-    public Player.PlayMode getPlayMode() {
+    public PlayMode getPlayMode() {
         return playMode;
     }
 
     /**
      * 设置播放队列的播放模式。
      *
-     * @param playMode 播放队列的播放模式。只能是这些值之一：{@link Player.PlayMode#SEQUENTIAL},
-     *                 {@link Player.PlayMode#LOOP},
-     *                 {@link Player.PlayMode#SHUFFLE}
-     * @see Player.PlayMode
+     * @param playMode 播放队列的播放模式。只能是这些值之一：{@link PlayMode#SEQUENTIAL},
+     *                 {@link PlayMode#LOOP},
+     *                 {@link PlayMode#SHUFFLE}
+     * @see PlayMode
      */
-    public void setPlayMode(@NonNull Player.PlayMode playMode) {
+    public void setPlayMode(@NonNull PlayMode playMode) {
         this.playMode = playMode;
     }
 
@@ -354,7 +354,7 @@ public class PlayerState implements Parcelable {
         playProgressUpdateTime = in.readLong();
         musicItem = in.readParcelable(Thread.currentThread().getContextClassLoader());
         position = in.readInt();
-        playMode = Player.PlayMode.values()[in.readInt()];
+        playMode = PlayMode.values()[in.readInt()];
 
         playbackState = Player.PlaybackState.values()[in.readInt()];
         audioSessionId = in.readInt();
