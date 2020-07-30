@@ -61,7 +61,7 @@ public class PlayerClient implements Player {
         initMediaBrowser();
         initPlaylistManager();
         initPlayerStateHolder();
-        initConfigChangeListener();
+        initCommandCallback();
     }
 
     /**
@@ -106,7 +106,7 @@ public class PlayerClient implements Player {
 
                             if (mConnectCallback != null) {
                                 mConnectCallback.onConnected(true);
-                                mCommandCallback = null;
+                                mConnectCallback = null;
                             }
                         } catch (RemoteException e) {
                             mMediaBrowser.disconnect();
@@ -120,7 +120,7 @@ public class PlayerClient implements Player {
 
                         if (mConnectCallback != null) {
                             mConnectCallback.onConnected(false);
-                            mCommandCallback = null;
+                            mConnectCallback = null;
                         }
                     }
                 }, null);
@@ -135,7 +135,7 @@ public class PlayerClient implements Player {
         mPlayerStateHolder = new PlayerStateHolder(mPlaylistManager, mPlayerConfig);
     }
 
-    private void initConfigChangeListener() {
+    private void initCommandCallback() {
         mCommandCallback = new PlayerManager.OnCommandCallback() {
             @Override
             public void onShutdown() {
@@ -558,6 +558,10 @@ public class PlayerClient implements Player {
      */
     public int getBufferedProgress() {
         return mPlayerStateHolder.mPlayerState.getBufferedProgress();
+    }
+
+    public boolean isPlaying() {
+        return mPlayerStateHolder.mPlayerState.getPlaybackState() == PlaybackState.PLAYING;
     }
 
     /**
