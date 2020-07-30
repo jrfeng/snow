@@ -95,7 +95,7 @@ public class PlayerViewModel extends ViewModel {
     private void initAllListener() {
         mPlayingMusicItemChangeListener = new Player.OnPlayingMusicItemChangeListener() {
             @Override
-            public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
+            public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int playProgress) {
                 mProgressClock.cancel();
                 if (musicItem == null) {
                     mTitle.setValue(mDefaultTitle);
@@ -108,7 +108,7 @@ public class PlayerViewModel extends ViewModel {
                 mArtist.setValue(musicItem.getArtist());
                 mIconUri.setValue(musicItem.getIconUri());
                 mDuration.setValue(getDurationSec());
-                mPlayProgress.setValue(0);
+                mPlayProgress.setValue(playProgress / 1000);
                 mBufferedProgress.setValue(0);
             }
         };

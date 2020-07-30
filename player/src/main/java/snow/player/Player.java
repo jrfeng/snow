@@ -308,9 +308,10 @@ public interface Player extends PlaylistManager.OnModifyPlaylistListener {
         /**
          * 当正在播放的音乐被改变时（例如：切换歌曲）会回调该方法。
          *
-         * @param musicItem 当前正在播放的音乐
+         * @param musicItem    当前正在播放的音乐
+         * @param playProgress 歌曲的播放进度
          */
-        void onPlayingMusicItemChanged(@Nullable MusicItem musicItem);
+        void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int playProgress);
     }
 
     /**

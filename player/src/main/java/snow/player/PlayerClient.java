@@ -1603,7 +1603,7 @@ public class PlayerClient implements Player {
                 return;
             }
 
-            listener.onPlayingMusicItemChanged(mPlayerState.getMusicItem());
+            listener.onPlayingMusicItemChanged(mPlayerState.getMusicItem(), mPlayerState.getPlayProgress());
         }
 
         private void notifyPlayingMusicItemChanged() {
@@ -1788,7 +1788,7 @@ public class PlayerClient implements Player {
         }
 
         @Override
-        public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
+        public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int playProgress) {
             mPlayerState.setMusicItem(musicItem);
 
             notifyPlayingMusicItemChanged();

@@ -815,7 +815,7 @@ public abstract class AbstractPlayer implements Player {
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
-                listener.onPlayingMusicItemChanged(musicItem);
+                listener.onPlayingMusicItemChanged(musicItem, mPlayerState.getPlayProgress());
             }
         }
     }
