@@ -150,9 +150,10 @@ public class PlayerViewModel extends ViewModel {
                                 mPlayerClient.getPlayProgressUpdateTime(),
                                 mPlayerClient.getPlayingMusicItemDuration());
                         break;
-                    case PAUSED:    // 注意！case 穿透！
-                    case STOPPED:   // 注意！case 穿透！
-                    case ERROR:     // 注意！case 穿透！
+                    case STOPPED:
+                        mPlayProgress.setValue(0);  // 注意！case 穿透！
+                    case PAUSED:                    // 注意！case 穿透！
+                    case ERROR:                     // 注意！case 穿透！
                         mProgressClock.cancel();
                         break;
                 }
