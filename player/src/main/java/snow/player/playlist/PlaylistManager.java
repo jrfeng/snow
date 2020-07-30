@@ -176,6 +176,14 @@ public abstract class PlaylistManager {
         });
     }
 
+    /**
+     * 往列表中插入了一首新的歌曲。
+     * <p>
+     * 如果播放列表中已包含指定歌曲，则会将它移动到 position 位置，如果不存在，则会将歌曲插入到 position 位置。
+     *
+     * @param position  歌曲插入的位置
+     * @param musicItem 要插入的歌曲，不能为 null
+     */
     public void insertMusicItem(final int position, @NonNull final MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
 
@@ -200,6 +208,12 @@ public abstract class PlaylistManager {
         });
     }
 
+    /**
+     * 移动播放列表中某首歌曲的位置。
+     *
+     * @param fromPosition 歌曲在列表中的位置
+     * @param toPosition   歌曲要移动到的位置。如果 {@code toPosition == fromPosition}，则会忽略本次调用
+     */
     public void moveMusicItem(final int fromPosition, final int toPosition) {
         if (fromPosition == toPosition) {
             return;
@@ -223,6 +237,11 @@ public abstract class PlaylistManager {
         });
     }
 
+    /**
+     * 从播放列表中移除了指定歌曲。
+     *
+     * @param musicItem 要移除的歌曲。如果播放列表中不包含该歌曲，则忽略本次调用
+     */
     public void removeMusicItem(@NonNull final MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
 
