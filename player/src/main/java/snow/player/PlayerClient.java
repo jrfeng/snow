@@ -1759,12 +1759,19 @@ public class PlayerClient implements Player {
         @Override
         public void onStop() {
             mPlayerState.setPlaybackState(Player.PlaybackState.STOPPED);
+            resetPlayProgress();
 
             notifyPlaybackStateChanged();
         }
 
+        private void resetPlayProgress() {
+            mPlayerState.setPlayProgress(0);
+            mPlayerState.setPlayProgressUpdateTime(System.currentTimeMillis());
+        }
+
         @Override
         public void onError(int errorCode, String errorMessage) {
+            resetPlayProgress();
             mPlayerState.setPlaybackState(Player.PlaybackState.ERROR);
             mPlayerState.setErrorCode(errorCode);
             mPlayerState.setErrorMessage(errorMessage);
