@@ -40,6 +40,7 @@ public class PlayerViewModel extends ViewModel {
     private PlaylistLiveData mPlaylist;
 
     private Player.OnPlayingMusicItemChangeListener mPlayingMusicItemChangeListener;
+    private Player.OnPositionChangeListener mPositionChangeListener;
     private Player.OnPlaylistChangeListener mPlaylistChangeListener;
     private Player.OnPlayModeChangeListener mPlayModeChangeListener;
     private PlayerClient.OnPlaybackStateChangeListener mClientPlaybackStateChangeListener;
@@ -112,6 +113,13 @@ public class PlayerViewModel extends ViewModel {
             }
         };
 
+        mPositionChangeListener = new Player.OnPositionChangeListener() {
+            @Override
+            public void onPositionChanged(int position) {
+                mPlayPosition.setValue(position);
+            }
+        };
+
         mPlaylistChangeListener = new Player.OnPlaylistChangeListener() {
             @Override
             public void onPlaylistChanged(PlaylistManager playlistManager, int position) {
@@ -154,7 +162,7 @@ public class PlayerViewModel extends ViewModel {
         mBufferedProgressChangeListener = new Player.OnBufferedProgressChangeListener() {
             @Override
             public void onBufferedProgressChanged(int bufferedProgress) {
-                mBufferedProgress.setValue(bufferedProgress);
+                mBufferedProgress.setValue(getBufferedProgressSec());
             }
         };
 
@@ -186,6 +194,7 @@ public class PlayerViewModel extends ViewModel {
 
     private void addAllListener() {
         mPlayerClient.addOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
+        mPlayerClient.addOnPositionChangeListener(mPositionChangeListener);
         mPlayerClient.addOnPlaylistChangeListener(mPlaylistChangeListener);
         mPlayerClient.addOnPlayModeChangeListener(mPlayModeChangeListener);
         mPlayerClient.addOnPlaybackStateChangeListener(mClientPlaybackStateChangeListener);
@@ -196,6 +205,7 @@ public class PlayerViewModel extends ViewModel {
 
     private void removeAllListener() {
         mPlayerClient.removeOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
+        mPlayerClient.removeOnPositionChangeListener(mPositionChangeListener);
         mPlayerClient.removeOnPlaylistChangeListener(mPlaylistChangeListener);
         mPlayerClient.removeOnPlayModeChangeListener(mPlayModeChangeListener);
         mPlayerClient.removeOnPlaybackStateChangeListener(mClientPlaybackStateChangeListener);
@@ -594,8 +604,12 @@ public class PlayerViewModel extends ViewModel {
     }
 
     private int getPlayProgressSec() {
-        long realProgress = mPlayerClient.getPlayProgress() + (System.currentTimeMillis() - mPlayerClient.getPlayProgressUpdateTime());
-        return (int) (realProgress / 1000);
+        if (mPlayerClient.isPlaying()) {
+            long realProgress = mPlayerClient.getPlayProgress() + (System.currentTimeMillis() - mPlayerClient.getPlayProgressUpdateTime());
+            return (int) (realProgress / 1000);
+        }
+
+        return mPlayerClient.getPlayProgress();
     }
 
     private int getBufferedProgressSec() {
