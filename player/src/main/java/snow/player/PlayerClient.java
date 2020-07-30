@@ -51,12 +51,15 @@ public class PlayerClient implements Player {
     private PlaylistManagerImp mPlaylistManager;
     private PlayerStateHolder mPlayerStateHolder;
 
+    private List<OnDisconnectListener> mAllDisconnectListener;
+
     private PlayerClient(Context context, Class<? extends PlayerService> playerService) {
         mApplicationContext = context.getApplicationContext();
         mPlayerService = playerService;
         mToken = generateToken();
 
         mPlayerConfig = new PlayerConfig(context, mToken);
+        mAllDisconnectListener = new ArrayList<>();
 
         initMediaBrowser();
         initPlaylistManager();
@@ -176,6 +179,10 @@ public class PlayerClient implements Player {
     private void onDisconnected() {
         setConnected(false);
 
+        for (OnDisconnectListener listener : mAllDisconnectListener) {
+            listener.onDisconnected();
+        }
+
         if (isConnected()) {
             mPlayerManager.unregisterPlayerStateListener(mToken);
         }
@@ -226,6 +233,51 @@ public class PlayerClient implements Player {
      */
     public boolean isConnected() {
         return mMediaBrowser.isConnected();
+    }
+
+    /**
+     * 添加一个监听器用来监听 PlayerClient 连接断开事件。
+     *
+     * @param listener 要添加的事件监听器，如果已添加，则会忽略本次调用
+     */
+    public void addOnDisconnectListener(OnDisconnectListener listener) {
+        if (mAllDisconnectListener.contains(listener)) {
+            return;
+        }
+
+        mAllDisconnectListener.add(listener);
+        if (notConnected()) {
+            listener.onDisconnected();
+        }
+    }
+
+    /**
+     * 添加一个监听器用来监听 PlayerClient 连接断开事件。
+     *
+     * @param owner    LifecycleOwner 对象。监听器会在该 LifecycleOwner 对象销毁时自动注销，避免内存泄露
+     * @param listener 要添加的事件监听器，如果已添加，则会忽略本次调用
+     */
+    public void addOnDisconnectListener(LifecycleOwner owner, final OnDisconnectListener listener) {
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnDisconnectListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnDisconnectListener(listener);
+            }
+        }));
+    }
+
+    /**
+     * 移除已添加的 OnDisconnectListener 监听器对象。
+     *
+     * @param listener 要移除的监听器
+     */
+    public void removeOnDisconnectListener(OnDisconnectListener listener) {
+        mAllDisconnectListener.remove(listener);
     }
 
     /**
@@ -1288,6 +1340,10 @@ public class PlayerClient implements Player {
          * @param success 是否连接成功，如果为 true，则表示连接成功，否则为 false
          */
         void onConnected(boolean success);
+    }
+
+    public interface OnDisconnectListener {
+        void onDisconnected();
     }
 
     /**
