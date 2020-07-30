@@ -234,11 +234,6 @@ public class PlayerState implements Parcelable {
             return;
         }
 
-        if (bufferedProgress > 100) {
-            this.bufferedProgress = 100;
-            return;
-        }
-
         this.bufferedProgress = bufferedProgress;
     }
 
