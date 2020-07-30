@@ -60,6 +60,7 @@ import snow.player.media.MediaMusicPlayer;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.playlist.PlaylistManager;
+import snow.player.util.ErrorUtil;
 
 /**
  * 提供了基本的 {@code player service} 实现，用于在后台播放音乐。
@@ -700,7 +701,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 播放器是否发生了错误。
      */
     protected final boolean isError() {
-        return getErrorCode() != Player.Error.NO_ERROR;
+        return getErrorCode() != ErrorUtil.NO_ERROR;
     }
 
     /**
@@ -718,7 +719,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
      */
     protected final String getErrorMessage() {
-        return Player.Error.getErrorMessage(this, getErrorCode());
+        return ErrorUtil.getErrorMessage(this, getErrorCode());
     }
 
     /**

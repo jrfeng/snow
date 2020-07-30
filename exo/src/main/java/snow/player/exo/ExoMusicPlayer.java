@@ -15,6 +15,7 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceFactory;
 
 import snow.player.media.MusicPlayer;
+import snow.player.util.ErrorUtil;
 
 /**
  * 封装了一个 SimpleExoPlayer
@@ -120,11 +121,11 @@ public class ExoMusicPlayer implements MusicPlayer {
     private int toErrorCode(ExoPlaybackException error) {
         switch (error.type) {
             case ExoPlaybackException.TYPE_SOURCE:
-                return snow.player.Player.Error.DATA_LOAD_FAILED;
+                return ErrorUtil.DATA_LOAD_FAILED;
             case ExoPlaybackException.TYPE_REMOTE:
-                return snow.player.Player.Error.NETWORK_ERROR;
+                return ErrorUtil.NETWORK_ERROR;
             default:
-                return snow.player.Player.Error.PLAYER_ERROR;
+                return ErrorUtil.PLAYER_ERROR;
         }
     }
 

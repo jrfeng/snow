@@ -28,6 +28,7 @@ import channel.helper.pipe.MessengerPipe;
 import snow.player.media.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
+import snow.player.util.ErrorUtil;
 
 /**
  * 播放器客户端，用于向播放器发生各种控制命令。
@@ -630,14 +631,14 @@ public class PlayerClient implements Player {
      * 播放器是否发生了错误。
      */
     public boolean isError() {
-        return getErrorCode() != Player.Error.NO_ERROR;
+        return getErrorCode() != ErrorUtil.NO_ERROR;
     }
 
     /**
      * 获取错误码。
      *
-     * @return 错误码。如果播放器没有发生错误，则返回 {@link snow.player.Player.Error#NO_ERROR}
-     * @see snow.player.Player.Error
+     * @return 错误码。如果播放器没有发生错误，则返回 {@link ErrorUtil#NO_ERROR}
+     * @see ErrorUtil
      */
     public int getErrorCode() {
         return mPlayerStateHolder.mPlayerState.getErrorCode();

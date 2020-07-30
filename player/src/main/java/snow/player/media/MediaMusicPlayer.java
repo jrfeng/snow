@@ -7,7 +7,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
 
-import snow.player.Player;
+import snow.player.util.ErrorUtil;
 
 /**
  * 封装了一个 MediaPlayer。
@@ -38,7 +38,7 @@ public class MediaMusicPlayer implements MusicPlayer {
                 setInvalid();
 
                 if (mErrorListener != null) {
-                    mErrorListener.onError(MediaMusicPlayer.this, Player.Error.PLAYER_ERROR);
+                    mErrorListener.onError(MediaMusicPlayer.this, ErrorUtil.PLAYER_ERROR);
                 }
                 return true;
             }

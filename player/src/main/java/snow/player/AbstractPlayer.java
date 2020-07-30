@@ -36,6 +36,7 @@ import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
+import snow.player.util.ErrorUtil;
 import snow.player.util.NetworkUtil;
 
 /**
@@ -213,7 +214,7 @@ public abstract class AbstractPlayer implements Player {
      *
      * @param errorCode    错误码
      * @param errorMessage 错误信息
-     * @see Player.Error
+     * @see ErrorUtil
      */
     protected void onError(int errorCode, String errorMessage) {
     }
@@ -284,7 +285,7 @@ public abstract class AbstractPlayer implements Player {
         }
 
         if (mPlayerConfig.isOnlyWifiNetwork() && !isWiFiNetwork()) {
-            onError(Error.ONLY_WIFI_NETWORK, Error.getErrorMessage(mApplicationContext, Error.ONLY_WIFI_NETWORK));
+            onError(ErrorUtil.ONLY_WIFI_NETWORK, ErrorUtil.getErrorMessage(mApplicationContext, ErrorUtil.ONLY_WIFI_NETWORK));
             return;
         }
 
@@ -341,7 +342,7 @@ public abstract class AbstractPlayer implements Player {
                     onPrepareMusicPlayer(mMusicPlayer, uri);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    notifyError(Error.DATA_LOAD_FAILED, Error.getErrorMessage(mApplicationContext, Error.DATA_LOAD_FAILED));
+                    notifyError(ErrorUtil.DATA_LOAD_FAILED, ErrorUtil.getErrorMessage(mApplicationContext, ErrorUtil.DATA_LOAD_FAILED));
                 }
             }
         };
@@ -358,7 +359,7 @@ public abstract class AbstractPlayer implements Player {
             @Override
             public void accept(Throwable throwable) {
                 throwable.printStackTrace();
-                notifyError(Error.GET_URL_FAILED, Error.getErrorMessage(mApplicationContext, Error.GET_URL_FAILED));
+                notifyError(ErrorUtil.GET_URL_FAILED, ErrorUtil.getErrorMessage(mApplicationContext, ErrorUtil.GET_URL_FAILED));
             }
         };
     }
@@ -453,7 +454,7 @@ public abstract class AbstractPlayer implements Player {
             public void onError(MusicPlayer mp, int errorCode) {
                 Log.e("MusicPlayer", "errorCode:" + errorCode);
 
-                notifyError(errorCode, Error.getErrorMessage(mApplicationContext, errorCode));
+                notifyError(errorCode, ErrorUtil.getErrorMessage(mApplicationContext, errorCode));
             }
         };
     }
@@ -1127,8 +1128,8 @@ public abstract class AbstractPlayer implements Player {
                 if (onlyWifiNetwork && !isWifiNetwork && !cached) {
                     pause();
                     releaseMusicPlayer();
-                    notifyError(Error.ONLY_WIFI_NETWORK,
-                            Error.getErrorMessage(mApplicationContext, Error.ONLY_WIFI_NETWORK));
+                    notifyError(ErrorUtil.ONLY_WIFI_NETWORK,
+                            ErrorUtil.getErrorMessage(mApplicationContext, ErrorUtil.ONLY_WIFI_NETWORK));
                 }
             }
         };
