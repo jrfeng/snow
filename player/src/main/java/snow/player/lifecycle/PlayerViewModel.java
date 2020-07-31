@@ -568,6 +568,9 @@ public class PlayerViewModel extends ViewModel {
 
     /**
      * 调整音乐播放进度（单位：毫秒）。
+     * <p>
+     * 注意！seekTo 方法接收的参数的单位是 <b>毫秒</b>，而 PlayProgress 的单位是 <b>秒</b>。如果使用
+     * PlayProgress 值来调整播放进度，则需要乘以 1000。
      *
      * @param progress 要调整到的播放进度（单位：毫秒）
      */
@@ -610,7 +613,7 @@ public class PlayerViewModel extends ViewModel {
      * {@code android:onStopTrackingTouch="@{playerViewModel::onStopTrackingTouch}"}
      */
     public void onStopTrackingTouch(SeekBar seekBar) {
-        seekTo(seekBar.getProgress());
+        seekTo(seekBar.getProgress() * 1000);
     }
 
     private void initAllLiveData() {
