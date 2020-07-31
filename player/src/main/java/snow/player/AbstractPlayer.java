@@ -607,6 +607,7 @@ public abstract class AbstractPlayer implements Player {
         mPreparing = false;
         mPrepared = false;
         mPlayOnPrepared = false;
+        mPlayOnSeekComplete = false;
 
         mPreparedAction = null;
         mSeekCompleteAction = null;
