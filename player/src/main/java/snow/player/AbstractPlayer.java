@@ -616,13 +616,8 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    /**
-     * 播放器释放处于准备中状态。
-     *
-     * @return 当播放器处于准备中状态时返回 true，否则返回false。
-     */
-    public final boolean isPreparing() {
-        return mPlayerState.getPlaybackState() == PlaybackState.PREPARING;
+    private boolean isPreparing() {
+        return mPreparing;
     }
 
     /**
@@ -633,12 +628,11 @@ public abstract class AbstractPlayer implements Player {
     }
 
     /**
-     * 播放器释放已经准备完毕。
-     *
-     * @return 当播放器已经准备完毕时返回 true，否则返回 false。
+     * 播放器是否已准备完毕，该方法与 PlaybackState.PREPARED 状态是有区别的，它不会应该播放器的状态变成
+     * PlaybackState.PLAYING 而返回 false。
      */
     public final boolean isPrepared() {
-        return mPlayerState.getPlaybackState() == PlaybackState.PREPARED;
+        return mMusicPlayer != null && mPrepared;
     }
 
     /**
@@ -647,7 +641,7 @@ public abstract class AbstractPlayer implements Player {
      * @return 当正在播放时返回 true，否则返回 false。
      */
     public final boolean isPlaying() {
-        return mPlayerState.getPlaybackState() == PlaybackState.PLAYING;
+        return isPrepared() && mMusicPlayer.isPlaying();
     }
 
     /**
@@ -663,25 +657,25 @@ public abstract class AbstractPlayer implements Player {
         return mPlayerState.getPlayProgress();
     }
 
-    /**
-     * 是否已暂停。
-     */
-    public final boolean isPaused() {
+    private boolean isPaused() {
         return mPlayerState.getPlaybackState() == PlaybackState.PAUSED;
     }
 
-    /**
-     * 是否已停止。
-     */
-    public final boolean isStopped() {
+    private boolean isStopped() {
         return mPlayerState.getPlaybackState() == PlaybackState.STOPPED;
     }
 
-    /**
-     * 是否发生了错误。
-     */
-    public final boolean isError() {
+    private boolean isError() {
         return mPlayerState.getPlaybackState() == PlaybackState.ERROR;
+    }
+
+    /**
+     * 获取播放器当前的播放状态。
+     *
+     * @return 播放器当前的播放状态。
+     */
+    public final PlaybackState getPlaybackState() {
+        return mPlayerState.getPlaybackState();
     }
 
     /**
