@@ -53,8 +53,6 @@ dependencies {
 </receiver>
 ```
 
-对于上面的可选部分，如果你的应用程序不打算支持低于 `Android 5.0(API Level 21)` 的 `Android` 版本，可以省略这部分代码。
-
 ## 开始使用
 
 1. 连接到 `PlayerService`：
