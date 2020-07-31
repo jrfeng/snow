@@ -10,6 +10,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -85,6 +88,10 @@ public abstract class AbstractPlayer implements Player {
     private boolean mRecordProgress;
     private Disposable mRecordProgressDisposable;
     private Disposable mCheckCachedDisposable;
+
+    private MediaSessionCompat mMediaSession;
+    private PlaybackStateCompat.Builder mPlaybackStateBuilder;
+    private MediaMetadataCompat.Builder mMediaMetadataBuilder;
 
     /**
      * 创建一个 {@link AbstractPlayer} 对象。
@@ -425,6 +432,13 @@ public abstract class AbstractPlayer implements Player {
 
                 notifySeekComplete(mp.getProgress());
 
+                if (isPlaying()) {
+                    mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
+                    return;
+                } else if (!mPlayOnSeekComplete) {
+                    mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PAUSED));
+                }
+
                 if (mPlayOnSeekComplete) {
                     mPlayOnSeekComplete = false;
                     play();
@@ -520,6 +534,55 @@ public abstract class AbstractPlayer implements Player {
         });
     }
 
+    public final void setMediaSession(MediaSessionCompat mediaSession) {
+        initMediaMetadataBuilder();
+        initPlaybackStateBuilder();
+
+        mMediaSession = mediaSession;
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_NONE));
+        mMediaSession.setMetadata(buildMediaMetadata());
+    }
+
+    private void initPlaybackStateBuilder() {
+        mPlaybackStateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(PlaybackStateCompat.ACTION_PLAY |
+                        PlaybackStateCompat.ACTION_PAUSE |
+                        PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                        PlaybackStateCompat.ACTION_STOP |
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                        PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM |
+                        PlaybackStateCompat.ACTION_SET_REPEAT_MODE |
+                        PlaybackStateCompat.ACTION_SET_SHUFFLE_MODE |
+                        PlaybackStateCompat.ACTION_FAST_FORWARD |
+                        PlaybackStateCompat.ACTION_REWIND |
+                        PlaybackStateCompat.ACTION_SEEK_TO);
+    }
+
+    private void initMediaMetadataBuilder() {
+        mMediaMetadataBuilder = new MediaMetadataCompat.Builder();
+    }
+
+    private PlaybackStateCompat buildPlaybackState(int state) {
+        return mPlaybackStateBuilder.setState(state, getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
+                .build();
+    }
+
+    private MediaMetadataCompat buildMediaMetadata() {
+        MusicItem musicItem = getMusicItem();
+
+        if (musicItem != null) {
+            return mMediaMetadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, musicItem.getTitle())
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicItem.getArtist())
+                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, musicItem.getAlbum())
+                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, musicItem.getIconUri())
+                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, musicItem.getDuration())
+                    .build();
+        }
+
+        return null;
+    }
+
     private void attachListeners(MusicPlayer musicPlayer) {
         musicPlayer.setOnPreparedListener(mPreparedListener);
         musicPlayer.setOnCompletionListener(mCompletionListener);
@@ -592,7 +655,7 @@ public abstract class AbstractPlayer implements Player {
      */
     public final int getPlayProgress() {
         if (isPrepared()) {
-            return mMusicPlayer.getProgress();
+            mPlayerStateHelper.updatePlayProgress(mMusicPlayer.getProgress(), System.currentTimeMillis());
         }
 
         return mPlayerState.getPlayProgress();
@@ -693,6 +756,9 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyPlaying(int progress, long updateTime) {
         mPlayerStateHelper.onPlay(progress, updateTime);
+        mMediaSession.setActive(true);
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
+
         startRecordProgress();
 
         mAudioFocusHelper.requestAudioFocus(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
@@ -710,11 +776,14 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyPaused() {
         cancelRecordProgress();
+
         mPlayerStateHelper.onPaused();
 
-        if (mMusicPlayer != null) {
+        if (isPrepared()) {
             mPlayerStateHelper.updatePlayProgress(mMusicPlayer.getProgress(), System.currentTimeMillis());
         }
+
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PAUSED));
 
         mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
@@ -731,7 +800,10 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyStopped() {
         cancelRecordProgress();
+
         mPlayerStateHelper.onStopped();
+        mMediaSession.setActive(false);
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_STOPPED));
 
         mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
@@ -750,8 +822,10 @@ public abstract class AbstractPlayer implements Player {
         mPlayerStateHelper.onStalled(stalled, playProgress, updateTime);
         if (!stalled && isPlaying()) {
             startRecordProgress();
+            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
         } else {
             cancelRecordProgress();
+            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_BUFFERING));
         }
 
         onStalledChanged(stalled);
@@ -766,7 +840,9 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyError(int errorCode, String errorMessage) {
         releaseMusicPlayer();
+
         mPlayerStateHelper.onError(errorCode, errorMessage);
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_ERROR));
 
         mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
@@ -815,7 +891,9 @@ public abstract class AbstractPlayer implements Player {
      */
     private void notifyPlayingMusicItemChanged(@Nullable MusicItem musicItem, boolean play) {
         releaseMusicPlayer();
+
         mPlayerStateHelper.onPlayingMusicItemChanged(musicItem, 0);
+        mMediaSession.setMetadata(buildMediaMetadata());
 
         onPlayingMusicItemChanged(musicItem);
 
@@ -993,6 +1071,7 @@ public abstract class AbstractPlayer implements Player {
         int progress = Math.min(mMusicPlayer.getDuration(),
                 mMusicPlayer.getProgress() + FORWARD_STEP);
 
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_FAST_FORWARDING));
         seekTo(progress);
     }
 
@@ -1014,6 +1093,7 @@ public abstract class AbstractPlayer implements Player {
 
         int progress = Math.max(0, mMusicPlayer.getProgress() - FORWARD_STEP);
 
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_REWINDING));
         seekTo(progress);
     }
 
@@ -1268,6 +1348,7 @@ public abstract class AbstractPlayer implements Player {
                 break;
         }
 
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT));
         notifyPlayingMusicItemChanged(mPlaylist.get(position), true);
         notifyPlayingMusicItemPositionChanged(position);
     }
@@ -1310,6 +1391,7 @@ public abstract class AbstractPlayer implements Player {
                 break;
         }
 
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS));
         notifyPlayingMusicItemChanged(mPlaylist.get(position), true);
         notifyPlayingMusicItemPositionChanged(position);
     }
@@ -1341,6 +1423,7 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM));
         notifyPlayingMusicItemChanged(mPlaylist.get(position), true);
         notifyPlayingMusicItemPositionChanged(position);
     }

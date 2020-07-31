@@ -16,7 +16,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.media.MediaBrowserCompat;
-import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.SpannableString;
@@ -115,8 +114,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     private Map<String, Runnable> mStartCommandActionMap;
 
     private MediaSessionCompat mMediaSession;
-    private PlaybackStateCompat.Builder mPlaybackStateBuilder;
-    private MediaMetadataCompat.Builder mMediaMetadataBuilder;
 
     private HeadsetHookHelper mHeadsetHookHelper;
 
@@ -292,27 +289,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initMediaSession() {
-        mPlaybackStateBuilder = new PlaybackStateCompat.Builder();
-        mMediaMetadataBuilder = new MediaMetadataCompat.Builder();
-
         mMediaSession = new MediaSessionCompat(this, this.getClass().getName());
-
-        mMediaSession.setPlaybackState(
-                buildPlaybackState(
-                        PlaybackStateCompat.STATE_NONE,
-                        getPlayerState().getPlayProgress(),
-                        System.currentTimeMillis(),
-                        PlaybackStateCompat.ACTION_PLAY |
-                                PlaybackStateCompat.ACTION_PLAY_PAUSE |
-                                PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM |
-                                PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
-                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
-                                PlaybackStateCompat.ACTION_STOP)
-        );
-
-        mMediaSession.setMetadata(getFreshMediaMetadata());
+        mPlayer.setMediaSession(mMediaSession);
         mMediaSession.setCallback(new MediaSessionCallbackImp());
-
         setSessionToken(mMediaSession.getSessionToken());
     }
 
@@ -333,40 +312,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private void initHistoryRecorder() {
         mHistoryRecorder = createHistoryRecorder();
-    }
-
-    private PlaybackStateCompat buildPlaybackState(int state,
-                                                   int position,
-                                                   long updateTime,
-                                                   long actions) {
-        return buildPlaybackState(state, position, updateTime, actions, 0, "");
-    }
-
-    private PlaybackStateCompat buildPlaybackState(int state,
-                                                   int position,
-                                                   long updateTime,
-                                                   long actions,
-                                                   int errorCode,
-                                                   String errorMessage) {
-        return mPlaybackStateBuilder.setState(state, position, 1.0F, updateTime)
-                .setErrorMessage(errorCode, errorMessage)
-                .setActions(actions)
-                .build();
-    }
-
-    private MediaMetadataCompat getFreshMediaMetadata() {
-        MusicItem musicItem = getPlayerState().getMusicItem();
-
-        if (musicItem != null) {
-            return mMediaMetadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, musicItem.getTitle())
-                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicItem.getArtist())
-                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, musicItem.getAlbum())
-                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, musicItem.getIconUri())
-                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, musicItem.getDuration())
-                    .build();
-        }
-
-        return null;
     }
 
     @Nullable
@@ -977,24 +922,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @param updateTime 播放进度的更新时间
      */
     protected void onPlaying(int progress, long updateTime) {
-        mMediaSession.setActive(true);
-
-        PlaybackStateCompat playbackState = buildPlaybackState(
-                PlaybackStateCompat.STATE_PLAYING,
-                progress,
-                updateTime,
-                PlaybackStateCompat.ACTION_PAUSE |
-                        PlaybackStateCompat.ACTION_PLAY_PAUSE |
-                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
-                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
-                        PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM |
-                        PlaybackStateCompat.ACTION_STOP |
-                        PlaybackStateCompat.ACTION_SEEK_TO |
-                        PlaybackStateCompat.ACTION_FAST_FORWARD |
-                        PlaybackStateCompat.ACTION_REWIND);
-
-        mMediaSession.setPlaybackState(playbackState);
-
         updateNotificationView();
     }
 
@@ -1002,22 +929,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 已暂停播放。
      */
     protected void onPaused() {
-        PlaybackStateCompat playbackState = buildPlaybackState(
-                PlaybackStateCompat.STATE_PAUSED,
-                getPlayerState().getPlayProgress(),
-                getPlayerState().getPlayProgressUpdateTime(),
-                PlaybackStateCompat.ACTION_PLAY |
-                        PlaybackStateCompat.ACTION_PLAY_PAUSE |
-                        PlaybackStateCompat.ACTION_STOP |
-                        PlaybackStateCompat.ACTION_SEEK_TO |
-                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
-                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
-                        PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM |
-                        PlaybackStateCompat.ACTION_FAST_FORWARD |
-                        PlaybackStateCompat.ACTION_REWIND);
-
-        mMediaSession.setPlaybackState(playbackState);
-
         updateNotificationView();
     }
 
@@ -1035,19 +946,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 播放器已停止播放。
      */
     protected void onStopped() {
-        mMediaSession.setActive(false);
-
-        PlaybackStateCompat playbackState = buildPlaybackState(
-                PlaybackStateCompat.STATE_STOPPED,
-                0,
-                getPlayerState().getPlayProgressUpdateTime(),
-                PlaybackStateCompat.ACTION_PLAY |
-                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
-                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
-                        PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM);
-
-        mMediaSession.setPlaybackState(playbackState);
-
         updateNotificationView();
     }
 
@@ -1058,25 +956,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @param errorMessage 错误信息
      */
     protected void onError(int errorCode, String errorMessage) {
-        PlaybackStateCompat playbackState = buildPlaybackState(
-                PlaybackStateCompat.STATE_ERROR,
-                0,
-                getPlayerState().getPlayProgressUpdateTime(),
-                PlaybackStateCompat.ACTION_PLAY |
-                        PlaybackStateCompat.ACTION_PLAY_PAUSE |
-                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
-                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
-                        PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM,
-                PlaybackStateCompat.ERROR_CODE_APP_ERROR,
-                errorMessage);
-
-        mMediaSession.setPlaybackState(playbackState);
-
         updateNotificationView();
     }
 
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
-        mMediaSession.setMetadata(getFreshMediaMetadata());
         updateNotificationView();
 
         if (mHistoryRecorder != null && musicItem != null) {
