@@ -616,31 +616,23 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    private boolean isPreparing() {
-        return mPreparing;
-    }
-
     /**
-     * 缓存区是否没有足够的数据继续播放。
+     * MusicPlayer 是否已准备完毕。注意！该方法与 PlaybackState.PREPARED 状态是有区别的，MusicPlayer 只要
+     * 准备完毕，mPrepared 字段就会被设置 true，直到 MusicPlayer 被释放为止。但播放器的状态是会改变的，它会
+     * 在播放时变成 PlaybackState.PLAYING，再暂停时变成 PlaybackState.PAUSED。
      */
-    public final boolean isStalled() {
-        return mPlayerState.isStalled();
-    }
-
-    /**
-     * 播放器是否已准备完毕，该方法与 PlaybackState.PREPARED 状态是有区别的，它不会应该播放器的状态变成
-     * PlaybackState.PLAYING 而返回 false。
-     */
-    public final boolean isPrepared() {
+    private boolean isPrepared() {
         return mMusicPlayer != null && mPrepared;
     }
 
     /**
-     * 是否正在播放。
-     *
-     * @return 当正在播放时返回 true，否则返回 false。
+     * mPreparing 字段用于与 mPrepared 字段搭配使用，其与 PlaybackState.PREPARING 状态区别不大。
      */
-    public final boolean isPlaying() {
+    private boolean isPreparing() {
+        return mPreparing;
+    }
+
+    private boolean isPlaying() {
         return isPrepared() && mMusicPlayer.isPlaying();
     }
 
@@ -657,25 +649,24 @@ public abstract class AbstractPlayer implements Player {
         return mPlayerState.getPlayProgress();
     }
 
-    private boolean isPaused() {
-        return mPlayerState.getPlaybackState() == PlaybackState.PAUSED;
-    }
-
-    private boolean isStopped() {
-        return mPlayerState.getPlaybackState() == PlaybackState.STOPPED;
-    }
-
-    private boolean isError() {
-        return mPlayerState.getPlaybackState() == PlaybackState.ERROR;
-    }
-
     /**
      * 获取播放器当前的播放状态。
      *
      * @return 播放器当前的播放状态。
      */
+    @NonNull
     public final PlaybackState getPlaybackState() {
         return mPlayerState.getPlaybackState();
+    }
+
+    /**
+     * 获取播放器的播放模式。
+     *
+     * @return 播放器的播放模式。
+     */
+    @NonNull
+    public final PlayMode getPlayMode() {
+        return mPlayerState.getPlayMode();
     }
 
     /**
@@ -956,7 +947,7 @@ public abstract class AbstractPlayer implements Player {
 
     @Override
     public void pause() {
-        if (isPaused() | isStopped() | isError()) {
+        if (!isPlaying()) {
             return;
         }
 
@@ -989,7 +980,7 @@ public abstract class AbstractPlayer implements Player {
 
     @Override
     public void stop() {
-        if (isStopped()) {
+        if (getPlaybackState() == PlaybackState.STOPPED) {
             return;
         }
 
@@ -1320,12 +1311,7 @@ public abstract class AbstractPlayer implements Player {
         return mPlaylist.getExtra();
     }
 
-    /**
-     * 是否单曲循环播放。
-     *
-     * @return 如果当前模式为 {@link PlayMode#LOOP}，则返回 true
-     */
-    public boolean isLooping() {
+    private boolean isLooping() {
         return mPlayerState.getPlayMode() == PlayMode.LOOP;
     }
 
