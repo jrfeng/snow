@@ -81,7 +81,7 @@ Playlist playlist = createPlaylist();
 playerClient.setPlaylist(playlist, true);
 ```
 
-**`PlayerClient` 提供了全部的列表播放器功能：**
+**`PlayerClient` 支持的播放器功能：**
 
 * `setPlaylist(Playlist playlist, boolean play)`：设置播放列表
 * `play()`：播放
