@@ -117,7 +117,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private HeadsetHookHelper mHeadsetHookHelper;
 
-    private RemoteView mRemoteView;
+    private NotificationView mNotificationView;
 
     @Nullable
     private AudioEffectManager mAudioEffectManager;
@@ -182,7 +182,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         stopForegroundEx(true);
 
-        mRemoteView.onRelease();
+        mNotificationView.onRelease();
 
         mMediaSession.release();
         mPlayer.release();
@@ -253,20 +253,20 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initRemoteViewManager() {
-        RemoteView remoteView = createRemoteView();
+        NotificationView notificationView = createNotificationView();
 
-        if (remoteView == null) {
+        if (notificationView == null) {
             return;
         }
 
-        remoteView.init(this);
+        notificationView.init(this);
         MusicItem musicItem = getPlayingMusicItem();
 
         if (musicItem != null) {
-            remoteView.setPlayingMusicItem(musicItem);
+            notificationView.setPlayingMusicItem(musicItem);
         }
 
-        mRemoteView = remoteView;
+        mNotificationView = notificationView;
     }
 
     private void initHeadsetHookHelper() {
@@ -315,26 +315,26 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     @Nullable
-    protected final RemoteView createRemoteView() {
-        if (injectRemoteView()) {
-            return mComponentFactory.createRemoteView();
+    protected final NotificationView createNotificationView() {
+        if (injectNotificationView()) {
+            return mComponentFactory.createNotificationView();
         }
 
-        return onCreateRemoteView();
+        return onCreateNotificationView();
     }
 
     /***
      * 创建一个通知栏控制器，你可以通过覆盖该方法来提供自定义的通知栏控制器。
      *
-     * 该方法默认返回 {@link SimpleRemoteView}，如果你不需要在通知栏中显示控制器，可以覆盖该方法并返回 null。
+     * 该方法默认返回 {@link SimpleNotificationView}，如果你不需要在通知栏中显示控制器，可以覆盖该方法并返回 null。
      *
-     * @return {@link RemoteView} 对象，返回 null 时将隐藏通知栏控制器
-     * @see SimpleRemoteView
-     * @see MediaRemoteView
+     * @return {@link NotificationView} 对象，返回 null 时将隐藏通知栏控制器
+     * @see SimpleNotificationView
+     * @see MediaNotificationView
      */
     @Nullable
-    protected RemoteView onCreateRemoteView() {
-        return new SimpleRemoteView();
+    protected NotificationView onCreateNotificationView() {
+        return new SimpleNotificationView();
     }
 
     @Nullable
@@ -671,7 +671,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 要求 Service 更新 NotificationView，如果没有设置 NotificationView，则忽略本次操作。
      */
     protected final void updateNotificationView() {
-        if (noRemoteView()) {
+        if (noNotificationView()) {
             return;
         }
 
@@ -681,7 +681,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return;
         }
 
-        mRemoteView.setPlayingMusicItem(musicItem);
+        mNotificationView.setPlayingMusicItem(musicItem);
 
         if (isPreparingOrPlayingState() && !isForeground()) {
             startForeground();
@@ -695,8 +695,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         updateNotification();
     }
 
-    private boolean noRemoteView() {
-        return mRemoteView == null;
+    private boolean noNotificationView() {
+        return mNotificationView == null;
     }
 
     private boolean isPreparingOrPlayingState() {
@@ -714,7 +714,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 启动前台 Service。
      */
     protected final void startForeground() {
-        if (noRemoteView()) {
+        if (noNotificationView()) {
             return;
         }
 
@@ -738,7 +738,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void updateNotification() {
-        if (noRemoteView()) {
+        if (noNotificationView()) {
             return;
         }
 
@@ -752,7 +752,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     @NonNull
     private Notification createNotification() {
-        return mRemoteView.createNotification();
+        return mNotificationView.createNotification();
     }
 
     /**
@@ -1164,7 +1164,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * 通知栏控制器的基类。
      */
-    public static abstract class RemoteView {
+    public static abstract class NotificationView {
         /**
          * 默认的 channelId 值，值为：{@code "player"}
          */
@@ -1605,12 +1605,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 通知栏控制器，使用 Android 系统提供的样式。通知的样式为：<a href="https://developer.android.google.cn/reference/androidx/media/app/NotificationCompat.MediaStyle?hl=en">NotificationCompat.MediaStyle</a>
      * <p>
      * 可以通过实现 {@link #onBuildMediaStyle(androidx.media.app.NotificationCompat.MediaStyle)} 方法
-     * 和实现 {@link #onBuildNotification(NotificationCompat.Builder)} 来对当前 RemoteView 的外观进行定
+     * 和实现 {@link #onBuildNotification(NotificationCompat.Builder)} 来对当前 NotificationView 的外观进行定
      * 制。
      * <p>
      * 更多信息，请参考官方文档： <a target="_blank" href="https://developer.android.google.cn/training/notify-user/expanded#media-style">https://developer.android.google.cn/training/notify-user/expanded#media-style</a>
      */
-    public static abstract class MediaRemoteView extends RemoteView {
+    public static abstract class MediaNotificationView extends NotificationView {
         @Override
         protected void onInit(Context context) {
             super.onInit(context);
@@ -1666,11 +1666,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * {@link RemoteView} 的默认实现，提供了一个自定义的外观。
+     * {@link NotificationView} 的默认实现，提供了一个自定义的外观。
      * <p>
      * 关于创建自定义通知的内容，请查看官方文档：<a target="_blank" href="https://developer.android.google.cn/training/notify-user/custom-notification">https://developer.android.google.cn/training/notify-user/custom-notification</>
      */
-    public static class SimpleRemoteView extends RemoteView {
+    public static class SimpleNotificationView extends NotificationView {
         private static final String ACTION_SKIP_TO_PREVIOUS = "snow.player.action.skip_to_previous";
         private static final String ACTION_SKIP_TO_NEXT = "snow.player.action.skip_to_next";
         private static final String ACTION_PLAY_PAUSE = "snow.player.action.play_pause";
@@ -1895,7 +1895,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 设置 {@link SimpleRemoteView} 的第一个自定义动作。
+         * 设置 {@link SimpleNotificationView} 的第一个自定义动作。
          *
          * @param iconId 自定义动作的图标
          * @param action 自定义动作触发时要执行的任务
@@ -1907,7 +1907,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 设置 {@link SimpleRemoteView} 的第一个自定义动作。
+         * 设置 {@link SimpleNotificationView} 的第一个自定义动作。
          *
          * @param iconId 自定义动作的图标
          * @param action 自定义动作触发时要执行的任务
@@ -1920,7 +1920,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 用于创建一个可添加到 {@link SimpleRemoteView} 中的自定义动作。
+         * 用于创建一个可添加到 {@link SimpleNotificationView} 中的自定义动作。
          */
         public static final class CustomAction {
             public static final int IGNORE_ICON_ID = 0;
@@ -2039,7 +2039,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 除此之外，还可以选择性的覆盖以下方法来提供其他部分的自定义组件：
      * <ul>
      *     <li>{@link #createMusicPlayer(Context)}：音乐播放器</li>
-     *     <li>{@link #createRemoteView()}：通知栏控制器</li>
+     *     <li>{@link #createNotificationView()}：通知栏控制器</li>
      *     <li>{@link #createAudioEffectManager()}：音频特性引擎</li>
      *     <li>{@link #createHistoryRecorder()}：历史记录器</li>
      *     <li>{@link #retrieveMusicItemUri(MusicItem, SoundQuality)}：获取歌曲的播放链接</li>
@@ -2126,10 +2126,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 创建通知栏控制器。
          *
-         * @return {@link RemoteView} 对象，可为 null。为 null 时将隐藏通知栏控制器
+         * @return {@link NotificationView} 对象，可为 null。为 null 时将隐藏通知栏控制器
          */
         @Nullable
-        public RemoteView createRemoteView() {
+        public NotificationView createNotificationView() {
             return null;
         }
 
@@ -2182,8 +2182,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return shouldInject("retrieveMusicItemUri", MusicItem.class, SoundQuality.class);
     }
 
-    private boolean injectRemoteView() {
-        return shouldInject("createRemoteView");
+    private boolean injectNotificationView() {
+        return shouldInject("createNotificationView");
     }
 
     private boolean injectAudioEffectManager() {
