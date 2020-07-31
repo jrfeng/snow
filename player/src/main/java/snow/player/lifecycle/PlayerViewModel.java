@@ -567,9 +567,9 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 调整音乐播放进度。
+     * 调整音乐播放进度（单位：毫秒）。
      *
-     * @param progress 要调整到的播放进度
+     * @param progress 要调整到的播放进度（单位：毫秒）
      */
     public void seekTo(int progress) {
         if (isInitialized()) {

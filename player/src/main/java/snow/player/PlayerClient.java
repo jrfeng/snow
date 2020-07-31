@@ -791,11 +791,11 @@ public class PlayerClient implements Player {
     }
 
     /**
-     * 调整音乐播放进度。
+     * 调整音乐播放进度（单位：毫秒）。
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
      *
-     * @param progress 要调整到的播放进度
+     * @param progress 要调整到的播放进度（单位：毫秒）
      */
     @Override
     public void seekTo(int progress) {
