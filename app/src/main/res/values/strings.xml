@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">snow</string>
+    <string name="app_name" translatable="false">snow</string>
+    <string name="factory" translatable="false">snow.demo.MyFactory</string>
 </resources>
