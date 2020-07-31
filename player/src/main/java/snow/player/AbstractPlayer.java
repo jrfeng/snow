@@ -123,6 +123,7 @@ public abstract class AbstractPlayer implements Player {
 
         mNetworkUtil.subscribeNetworkState();
         reloadPlaylist();
+        prepareMusicPlayer(false, null);
     }
 
     /**
@@ -394,9 +395,10 @@ public abstract class AbstractPlayer implements Player {
                 notifyPrepared(mp.getAudioSessionId());
 
                 if (mPlayerState.getPlayProgress() > 0) {
+                    mPlayOnSeekComplete = mPlayOnPrepared;
                     mPlayOnPrepared = false;
-                    mPlayOnSeekComplete = true;
                     seekTo(mPlayerState.getPlayProgress(), mPreparedAction);
+                    mPreparedAction = null;
                     return;
                 }
 
@@ -897,16 +899,19 @@ public abstract class AbstractPlayer implements Player {
 
         onPlayingMusicItemChanged(musicItem);
 
-        if (play) {
-            play();
-        }
-
         for (String key : mStateListenerMap.keySet()) {
             PlayerStateListener listener = mStateListenerMap.get(key);
             if (listener != null) {
                 listener.onPlayingMusicItemChanged(musicItem, mPlayerState.getPlayProgress());
             }
         }
+
+        if (play) {
+            play();
+            return;
+        }
+
+        prepareMusicPlayer(false, null);
     }
 
     private void notifySeekComplete(int playProgress) {
