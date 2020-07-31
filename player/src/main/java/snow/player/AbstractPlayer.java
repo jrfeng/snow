@@ -616,18 +616,14 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    /**
-     * MusicPlayer 是否已准备完毕。注意！该方法与 PlaybackState.PREPARED 状态是有区别的，MusicPlayer 只要
-     * 准备完毕，mPrepared 字段就会被设置 true，直到 MusicPlayer 被释放为止。但播放器的状态是会改变的，它会
-     * 在播放时变成 PlaybackState.PLAYING，再暂停时变成 PlaybackState.PAUSED。
-     */
+    // 注意！mPrepared 字段与 PlaybackState.PREPARED 状态是有区别的，MusicPlayer 只要准备完毕，
+    // mPrepared 字段就会被设置 true，直到 MusicPlayer 被释放为止。但播放器的状态是会改变的，它会
+    // 在播放时变成 PlaybackState.PLAYING，再暂停时变成 PlaybackState.PAUSED。
     private boolean isPrepared() {
         return mMusicPlayer != null && mPrepared;
     }
 
-    /**
-     * mPreparing 字段用于与 mPrepared 字段搭配使用，其与 PlaybackState.PREPARING 状态区别不大。
-     */
+    // mPreparing 字段用于与 mPrepared 字段搭配使用，其与 PlaybackState.PREPARING 状态区别不大。
     private boolean isPreparing() {
         return mPreparing;
     }
@@ -667,6 +663,24 @@ public abstract class AbstractPlayer implements Player {
     @NonNull
     public final PlayMode getPlayMode() {
         return mPlayerState.getPlayMode();
+    }
+
+    /**
+     * 当前播放器是否处于 {@code stalled} 状态。
+     *
+     * @return 当缓冲区没有足够的数据支持播放器继续播放时，该方法会返回 {@code true}，否则返回 false
+     */
+    public final boolean isStalled() {
+        return mPlayerState.isStalled();
+    }
+
+    /**
+     * 播放器释放是 “兴奋” 的。
+     *
+     * @return 如果该方法返回 true，则 Service 应该处于前台。
+     */
+    public final boolean isExcited() {
+        return getPlaybackState() == PlaybackState.PLAYING || mPlayOnPrepared;
     }
 
     /**
@@ -870,12 +884,6 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    /**
-     * 通知当前正在播放的音乐以改变（测试用）。
-     *
-     * @param musicItem 本次要播放的音乐
-     * @param play      是否播放歌曲
-     */
     private void notifyPlayingMusicItemChanged(@Nullable MusicItem musicItem, boolean play) {
         releaseMusicPlayer();
 
