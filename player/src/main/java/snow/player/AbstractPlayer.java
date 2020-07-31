@@ -622,7 +622,7 @@ public abstract class AbstractPlayer implements Player {
      * @return 当播放器处于准备中状态时返回 true，否则返回false。
      */
     public final boolean isPreparing() {
-        return mPreparing;
+        return mPlayerState.getPlaybackState() == PlaybackState.PREPARING;
     }
 
     /**
@@ -638,7 +638,7 @@ public abstract class AbstractPlayer implements Player {
      * @return 当播放器已经准备完毕时返回 true，否则返回 false。
      */
     public final boolean isPrepared() {
-        return mMusicPlayer != null && mPrepared;
+        return mPlayerState.getPlaybackState() == PlaybackState.PREPARED;
     }
 
     /**
@@ -647,7 +647,7 @@ public abstract class AbstractPlayer implements Player {
      * @return 当正在播放时返回 true，否则返回 false。
      */
     public final boolean isPlaying() {
-        return isPrepared() && mMusicPlayer.isPlaying();
+        return mPlayerState.getPlaybackState() == PlaybackState.PLAYING;
     }
 
     /**
