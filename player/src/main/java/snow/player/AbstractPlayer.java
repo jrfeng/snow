@@ -1016,7 +1016,17 @@ public abstract class AbstractPlayer implements Player {
 
     @Override
     public void playPause() {
-        if (isPlaying() | isPreparing()) {
+        if (isPreparing()) {
+            mPreparedAction = new Runnable() {
+                @Override
+                public void run() {
+                    playPause();
+                }
+            };
+            return;
+        }
+
+        if (isPlaying()) {
             pause();
         } else {
             play();
