@@ -62,7 +62,7 @@ public class ProgressClock {
         mProgressSec = (int) (realProgress / 1000);
         mDurationSec = duration / 1000;
 
-        if (mProgressSec >= mDurationSec) {
+        if (mProgressSec >= mDurationSec && !mLoop) {
             mCallback.onUpdateProgress(mDurationSec, mDurationSec);
             return;
         }
