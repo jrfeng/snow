@@ -21,11 +21,8 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
-import android.view.View;
-import android.widget.RemoteViews;
 
 import androidx.annotation.DrawableRes;
-import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -37,11 +34,9 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -275,7 +270,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             public void onHeadsetHookClicked(int clickCount) {
                 switch (clickCount) {
                     case 1:
-                        playOrPause();
+                        playPause();
                         break;
                     case 2:
                         skipToNext();
@@ -326,15 +321,13 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /***
      * 创建一个通知栏控制器，你可以通过覆盖该方法来提供自定义的通知栏控制器。
      *
-     * 该方法默认返回 {@link SimpleNotificationView}，如果你不需要在通知栏中显示控制器，可以覆盖该方法并返回 null。
+     * 该方法默认返回 {@link MediaNotificationView}，如果你不需要在通知栏中显示控制器，可以覆盖该方法并返回 null。
      *
      * @return {@link NotificationView} 对象，返回 null 时将隐藏通知栏控制器
-     * @see SimpleNotificationView
-     * @see MediaNotificationView
      */
     @Nullable
     protected NotificationView onCreateNotificationView() {
-        return new SimpleNotificationView();
+        return new MediaNotificationView();
     }
 
     @Nullable
@@ -462,7 +455,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      */
     @Override
     public final void shutdown() {
-        if (isPlaying()) {
+        if (isPlayingState()) {
             pause();
         }
 
@@ -524,7 +517,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void syncPlayerState(OnCommandCallback listener) {
-        if (mPlayer.isPlaying()) {
+        if (isPlayingState()) {
             mPlayerState.setPlayProgress(mPlayer.getPlayProgress());
             mPlayerState.setPlayProgressUpdateTime(System.currentTimeMillis());
         }
@@ -577,9 +570,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 获取播放器的播放模式。
+     * 获取播放队列的播放模式。
+     *
+     * @return 播放队列的播放模式。
+     * @see PlayMode
      */
-    protected final PlayMode getPlaylistPlayMode() {
+    protected final PlayMode getPlayMode() {
         return mPlayerState.getPlayMode();
     }
 
@@ -592,38 +588,17 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 当前是否正在播放音乐。
-     */
-    protected final boolean isPlaying() {
-        return mPlayer.isPlaying();
-    }
-
-    /**
-     * 当前是否处于 {@link PlaybackState#PLAYING} 状态。
-     * <p>
-     * 该方法与 {@link #isPlaying()} 方法的区别是，{@link #isPlaying()} 方法判断是当前播放器是否正在
-     * 播放音乐，而当前方法判断是当前是否处于 {@link PlaybackState#PLAYING} 状态。在
-     * 切换歌曲时，当前会处于 {@link PlaybackState#PLAYING} 状态，但此时播放器却没有正
-     * 在播放，因为旧的播放器被释放掉了，而新的播放器还没有准备好播放。
-     */
-    private boolean isPlayingState() {
-        return getPlayerState().getPlaybackState() == PlaybackState.PLAYING;
-    }
-
-    /**
-     * 获取播放器的状态。
-     */
-    protected final PlayerState getPlayerState() {
-        return mPlayerState;
-    }
-
-    /**
-     * 当前播放器是否处于 {@link PlaybackState#PREPARING} 状态。
+     * 获取播放器当前的播放状态。
      *
-     * @return 如果播放器处于 {@link PlaybackState#PREPARING} 状态，则返回 {@code true}
+     * @return 播放器当前的播放状态。
      */
-    public final boolean isPreparingState() {
-        return getPlayerState().getPlaybackState() == PlaybackState.PREPARING;
+    @NonNull
+    protected final PlaybackState getPlaybackState() {
+        return mPlayer.getPlaybackState();
+    }
+
+    private boolean isPlayingState() {
+        return mPlayer.getPlaybackState() == PlaybackState.PLAYING;
     }
 
     /**
@@ -683,12 +658,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         mNotificationView.setPlayingMusicItem(musicItem);
 
-        if (isPreparingOrPlayingState() && !isForeground()) {
+        if (shouldBeForeground() && !isForeground()) {
             startForeground();
             return;
         }
 
-        if (!isPreparingOrPlayingState() && isForeground()) {
+        if (!shouldBeForeground() && isForeground()) {
             stopForegroundEx(false);
         }
 
@@ -699,8 +674,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return mNotificationView == null;
     }
 
-    private boolean isPreparingOrPlayingState() {
-        return isPreparingState() | isPlayingState();
+    private boolean shouldBeForeground() {
+        return mPlayer.isExcited();
     }
 
     /**
@@ -852,7 +827,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * 播放/暂停。
      */
-    protected final void playOrPause() {
+    protected final void playPause() {
         getPlayer().playPause();
     }
 
@@ -913,6 +888,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @param audioSessionId 播放器的 audio session id
      */
     protected void onPrepared(int audioSessionId) {
+        updateNotificationView();
     }
 
     /**
@@ -1328,8 +1304,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 播放/暂停
          */
-        protected final void playOrPause() {
-            mPlayerService.playOrPause();
+        protected final void playPause() {
+            mPlayerService.playPause();
         }
 
         /**
@@ -1435,7 +1411,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                 textColor = res.getColor(android.R.color.holo_red_dark);
             }
 
-            if (isPreparingState()) {
+            if (isPreparing()) {
                 value = getContext().getString(R.string.snow_preparing);
                 textColor = res.getColor(android.R.color.holo_green_dark);
             }
@@ -1474,8 +1450,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 获取播放器的播放模式。
          */
-        protected final PlayMode getPlaylistPlayMode() {
-            return mPlayerService.getPlaylistPlayMode();
+        protected final PlayMode getPlayMode() {
+            return mPlayerService.getPlayMode();
         }
 
         /**
@@ -1511,8 +1487,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 当前是否正在播放音乐。
          */
-        public final boolean isPreparingOrPlayingState() {
-            return mPlayerService.isPreparingOrPlayingState();
+        public final boolean isPlayingState() {
+            return mPlayerService.isPlayingState();
         }
 
         /**
@@ -1520,8 +1496,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          *
          * @return 如果播放器处于 {@link PlaybackState#PREPARING} 状态，则返回 {@code true}
          */
-        public final boolean isPreparingState() {
-            return mPlayerService.isPreparingState();
+        public final boolean isPreparing() {
+            return mPlayerService.getPlaybackState() == PlaybackState.PREPARING;
         }
 
         /**
@@ -1610,7 +1586,15 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * <p>
      * 更多信息，请参考官方文档： <a target="_blank" href="https://developer.android.google.cn/training/notify-user/expanded#media-style">https://developer.android.google.cn/training/notify-user/expanded#media-style</a>
      */
-    public static abstract class MediaNotificationView extends NotificationView {
+    public static class MediaNotificationView extends NotificationView {
+        private static final String ACTION_SKIP_TO_PREVIOUS = "snow.player.action.SKIP_TO_PREVIOUS";
+        private static final String ACTION_PLAY_PAUSE = "snow.player.action.PLAY_PAUSE";
+        private static final String ACTION_SKIP_TO_NEXT = "snow.player.action.SKIP_TO_NEXT";
+
+        private PendingIntent mSkipToPrevious;
+        private PendingIntent mPlayPause;
+        private PendingIntent mSkipToNext;
+
         @Override
         protected void onInit(Context context) {
             super.onInit(context);
@@ -1619,6 +1603,39 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
             setIconSize(res.getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
             setIconCornerRadius(res.getDimensionPixelSize(R.dimen.snow_notif_icon_corner_radius));
+
+            mSkipToPrevious = addOnStartCommandAction(ACTION_SKIP_TO_PREVIOUS, new Runnable() {
+                @Override
+                public void run() {
+                    skipToPrevious();
+                }
+            });
+
+            mPlayPause = addOnStartCommandAction(ACTION_PLAY_PAUSE, new Runnable() {
+                @Override
+                public void run() {
+                    playPause();
+                }
+            });
+
+            mSkipToNext = addOnStartCommandAction(ACTION_SKIP_TO_NEXT, new Runnable() {
+                @Override
+                public void run() {
+                    skipToNext();
+                }
+            });
+        }
+
+        public final PendingIntent doSkipToPrevious() {
+            return mSkipToPrevious;
+        }
+
+        public final PendingIntent doPlayPause() {
+            return mPlayPause;
+        }
+
+        public final PendingIntent doSkipToNext() {
+            return mSkipToNext;
         }
 
         @NonNull
@@ -1643,10 +1660,14 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
+         * Notification 的 small icon 的资源 id。
+         *
          * @return drawable 资源的 ID
          */
         @DrawableRes
-        protected abstract int getSmallIconId();
+        protected int getSmallIconId() {
+            return R.drawable.snow_ic_notification_small_icon;
+        }
 
         /**
          * 该方法会在创建 {@code NotificationCompat.MediaStyle} 对象期间调用。
@@ -1654,7 +1675,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 可以在该方法中对 {@code NotificationCompat.MediaStyle} 对象进行配置。例如，调用
          * {@code setShowActionsInCompactView (int... actions)} 方法设置要在紧凑的通知视图中显示的操作。
          */
-        protected abstract void onBuildMediaStyle(androidx.media.app.NotificationCompat.MediaStyle mediaStyle);
+        protected void onBuildMediaStyle(androidx.media.app.NotificationCompat.MediaStyle mediaStyle) {
+            mediaStyle.setShowActionsInCompactView(1, 2);
+        }
 
         /**
          * 该方法会在创建 {@code NotificationCompat.Builder} 期间调用。
@@ -1662,370 +1685,16 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 可以在该方法中对 {@code NotificationCompat.Builder} 对象进行配置。例如，调用
          * {@code addAction (int icon, CharSequence title, PendingIntent intent)} 向通知添加操作。
          */
-        protected abstract void onBuildNotification(NotificationCompat.Builder builder);
-    }
+        protected void onBuildNotification(NotificationCompat.Builder builder) {
+            builder.addAction(R.drawable.snow_ic_skip_previous, "skip_to_previous", doSkipToPrevious());
 
-    /**
-     * {@link NotificationView} 的默认实现，提供了一个自定义的外观。
-     * <p>
-     * 关于创建自定义通知的内容，请查看官方文档：<a target="_blank" href="https://developer.android.google.cn/training/notify-user/custom-notification">https://developer.android.google.cn/training/notify-user/custom-notification</>
-     */
-    public static class SimpleNotificationView extends NotificationView {
-        private static final String ACTION_SKIP_TO_PREVIOUS = "snow.player.action.skip_to_previous";
-        private static final String ACTION_SKIP_TO_NEXT = "snow.player.action.skip_to_next";
-        private static final String ACTION_PLAY_PAUSE = "snow.player.action.play_pause";
-        private static final String CUSTOM_ACTION_1 = "snow.player.action.custom_action_1";
-        private static final String CUSTOM_ACTION_2 = "snow.player.action.custom_action_2";
-
-        private PendingIntent mContentIntent;
-
-        private List<CustomAction> mAllCustomAction;
-        private Map<String, PendingIntent> mPendingIntentMap;
-
-        @Override
-        protected void onInit(Context context) {
-            super.onInit(context);
-
-            mAllCustomAction = new ArrayList<>();
-            mPendingIntentMap = new HashMap<>();
-
-            Resources res = context.getResources();
-
-            setIconSize(res.getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
-            setIconCornerRadius(res.getDimensionPixelSize(R.dimen.snow_notif_icon_corner_radius));
-
-            initCustomAction();
-        }
-
-        /**
-         * 获取 content view 的布局文件的 id
-         */
-        public int getContentViewLayoutId() {
-            return R.layout.snow_simple_remote_view;
-        }
-
-        /**
-         * 获取 big content view 的布局文件的 id
-         */
-        public int getBigContentViewLayoutId() {
-            return R.layout.snow_simple_remote_view_big;
-        }
-
-        /**
-         * 是否支持 “上一曲” 功能（默认为 true）。
-         *
-         * @return 如果播放器不支持 “上一曲” 功能，可以返回 false，这样的话会禁用通知栏控制器的 “上一曲” 按钮
-         */
-        protected boolean supportSkipToPrevious() {
-            return true;
-        }
-
-        private void initCustomAction() {
-            if (supportSkipToPrevious()) {
-                addCustomAction(new CustomAction(ACTION_SKIP_TO_PREVIOUS, R.id.snow_notif_skip_to_previous, new Runnable() {
-                    @Override
-                    public void run() {
-                        skipToPrevious();
-                    }
-                }));
+            if (isPlayingState()) {
+                builder.addAction(R.drawable.snow_ic_pause, "pause", doPlayPause());
+            } else {
+                builder.addAction(R.drawable.snow_ic_play, "play", doPlayPause());
             }
 
-            CustomAction skipToNext = new CustomAction(ACTION_SKIP_TO_NEXT, R.id.snow_notif_skip_to_next, new Runnable() {
-                @Override
-                public void run() {
-                    skipToNext();
-                }
-            });
-            skipToNext.setShowOnContentView(true);
-            addCustomAction(skipToNext);
-
-            CustomAction playPause = new CustomAction(ACTION_PLAY_PAUSE, R.id.snow_notif_play_pause, new Runnable() {
-                @Override
-                public void run() {
-                    playOrPause();
-                }
-            });
-            playPause.setShowOnContentView(true);
-            addCustomAction(playPause);
-        }
-
-        /**
-         * 创建一个 Notification 对象。
-         *
-         * @return Notification 对象，不能为 null
-         */
-        @NonNull
-        @Override
-        protected Notification onCreateNotification() {
-            RemoteViews contentView = onCreateContentView();
-            RemoteViews bigContentView = onCreateBigContentView();
-
-            initAllCustomAction(contentView, true);
-            initAllCustomAction(bigContentView, false);
-
-            return new NotificationCompat.Builder(getContext(), getChannelId())
-                    .setSmallIcon(R.drawable.snow_ic_music)
-                    .setStyle(new androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
-                    .setCustomContentView(contentView)
-                    .setCustomBigContentView(bigContentView)
-                    .setContentIntent(getContentIntent())
-                    .build();
-        }
-
-        private void initAllCustomAction(RemoteViews remoteViews, boolean isContentView) {
-            for (CustomAction customAction : mAllCustomAction) {
-                if (isContentView && !customAction.isShowOnContentView()) {
-                    continue;
-                }
-
-                initCustomAction(customAction, remoteViews);
-            }
-        }
-
-        private void initCustomAction(CustomAction customAction, RemoteViews remoteViews) {
-            int viewId = customAction.getViewId();
-            int iconId = customAction.getIconId();
-
-            remoteViews.setViewVisibility(viewId, View.VISIBLE);
-
-            if (iconId != CustomAction.IGNORE_ICON_ID) {
-                remoteViews.setImageViewResource(viewId, iconId);
-            }
-
-            remoteViews.setOnClickPendingIntent(viewId, mPendingIntentMap.get(customAction.getActionName()));
-        }
-
-        /**
-         * 创建 content view
-         *
-         * @return RemoteViews 对象，不能为 null
-         */
-        @NonNull
-        public RemoteViews onCreateContentView() {
-            RemoteViews contentView = new RemoteViews(getPackageName(), getContentViewLayoutId());
-
-            contentView.setImageViewBitmap(R.id.snow_notif_icon, getIcon());
-            contentView.setTextViewText(R.id.snow_notif_title, getContentTitle());
-            contentView.setTextViewText(R.id.snow_notif_text, getContentText(getPlayingMusicItem().getArtist()));
-
-            if (isPreparingOrPlayingState()) {
-                contentView.setInt(R.id.snow_notif_play_pause, "setImageLevel", 1);
-            }
-
-            return contentView;
-        }
-
-        /**
-         * 创建 big content view
-         *
-         * @return RemoteViews 对象，不能为 null
-         */
-        @NonNull
-        public RemoteViews onCreateBigContentView() {
-            RemoteViews bigContentView = new RemoteViews(getPackageName(), getBigContentViewLayoutId());
-
-            bigContentView.setImageViewBitmap(R.id.snow_notif_icon, getIcon());
-            bigContentView.setTextViewText(R.id.snow_notif_title, getContentTitle());
-            bigContentView.setTextViewText(R.id.snow_notif_text, getContentText(getPlayingMusicItem().getArtist()));
-
-            if (isPreparingOrPlayingState()) {
-                bigContentView.setInt(R.id.snow_notif_play_pause, "setImageLevel", 1);
-            }
-
-            return bigContentView;
-        }
-
-        /**
-         * 获取 NotificationView 的 content intent。
-         *
-         * @return 当前 NotificationView 的 content intent，默认为 null
-         */
-        protected final PendingIntent getContentIntent() {
-            return mContentIntent;
-        }
-
-        /**
-         * 设置当前 NotificationView 的 content intent，该 PendingIntent 对象会在通知栏控制器被点击时触发。
-         * <p>
-         * 对该方法的调用会在下次更新通知栏控制器时生效。
-         *
-         * @param pendingIntent 要设置的 content intent，可为 null
-         */
-        protected final void setContentIntent(PendingIntent pendingIntent) {
-            mContentIntent = pendingIntent;
-        }
-
-        /**
-         * 添加自定义动作，不能为 null。
-         * <p>
-         * 如果自定义动作已添加，则会忽略。
-         *
-         * @param customAction 要添加的自定义动作，如果自定义动作已添加，则会忽略
-         * @see CustomAction#equals(Object)
-         */
-        protected final void addCustomAction(@NonNull CustomAction customAction) {
-            Preconditions.checkNotNull(customAction);
-
-            if (mAllCustomAction.contains(customAction)) {
-                return;
-            }
-
-            mAllCustomAction.add(customAction);
-
-            String actionName = customAction.getActionName();
-            mPendingIntentMap.put(actionName, addOnStartCommandAction(actionName, customAction.getAction()));
-        }
-
-        /**
-         * 移除自定义动作。
-         *
-         * @param customAction 要移除的自定义动作
-         */
-        protected final void removeCustomAction(CustomAction customAction) {
-            if (mAllCustomAction.remove(customAction)) {
-                cancelPendingIntent(mPendingIntentMap.remove(customAction.getActionName()));
-                removeOnStartCommandAction(customAction.getActionName());
-            }
-        }
-
-        private void cancelPendingIntent(@Nullable PendingIntent pendingIntent) {
-            if (pendingIntent != null) {
-                pendingIntent.cancel();
-            }
-        }
-
-        /**
-         * 设置 {@link SimpleNotificationView} 的第一个自定义动作。
-         *
-         * @param iconId 自定义动作的图标
-         * @param action 自定义动作触发时要执行的任务
-         */
-        public void setCustomAction1(int iconId, Runnable action) {
-            CustomAction customAction = new CustomAction(CUSTOM_ACTION_1, R.id.snow_notif_custom_action1, action);
-            customAction.setIconId(iconId);
-            addCustomAction(customAction);
-        }
-
-        /**
-         * 设置 {@link SimpleNotificationView} 的第一个自定义动作。
-         *
-         * @param iconId 自定义动作的图标
-         * @param action 自定义动作触发时要执行的任务
-         */
-        public void setCustomAction2(int iconId, Runnable action) {
-            CustomAction customAction = new CustomAction(CUSTOM_ACTION_2, R.id.snow_notif_custom_action2, action);
-            customAction.setIconId(iconId);
-            customAction.setShowOnContentView(true);
-            addCustomAction(customAction);
-        }
-
-        /**
-         * 用于创建一个可添加到 {@link SimpleNotificationView} 中的自定义动作。
-         */
-        public static final class CustomAction {
-            public static final int IGNORE_ICON_ID = 0;
-
-            private String mActionName;
-            private int mViewId;
-            private Runnable mAction;
-
-            private int mIconId;
-            private boolean mShowOnContentView;
-
-            /**
-             * 创建一个自定义动作。
-             *
-             * @param actionName 自定义动作的名称，请保证该值的唯一性，不能为 null
-             * @param viewId     自定义动作要绑定到的 View 的 ID
-             * @param action     自定义动作要执行的操作
-             */
-            public CustomAction(@NonNull String actionName,
-                                @IdRes int viewId,
-                                @NonNull Runnable action) {
-                Preconditions.checkNotNull(actionName);
-                Preconditions.checkNotNull(action);
-
-                mActionName = actionName;
-                mViewId = viewId;
-                mAction = action;
-
-                mIconId = IGNORE_ICON_ID;
-            }
-
-            /**
-             * 获取自定义动作的名称。
-             *
-             * @return 自定义动作的名称
-             */
-            @NonNull
-            public String getActionName() {
-                return mActionName;
-            }
-
-            /**
-             * 获取自定义动作要绑定到的 View 的 ID。
-             *
-             * @return 自定义动作要绑定到的 View 的 ID
-             */
-            @IdRes
-            public int getViewId() {
-                return mViewId;
-            }
-
-            /**
-             * 设置自定义动作的图标的资源 ID。
-             * <p>
-             * 可以在运行时动态修改，将在下次跟新通知时生效。
-             *
-             * @param iconId 自定义动作的新图标的资源 ID
-             */
-            public void setIconId(int iconId) {
-                mIconId = iconId;
-            }
-
-            /**
-             * 设置自定义动作的图标的 ID。
-             */
-            public int getIconId() {
-                return mIconId;
-            }
-
-            /**
-             * 设置是否在 content view（折叠后的视图）中显示当前的自定义动作。
-             */
-            public void setShowOnContentView(boolean show) {
-                mShowOnContentView = show;
-            }
-
-            /**
-             * 判断是否在 content view（折叠后的视图）中显示当前的自定义动作。
-             */
-            public boolean isShowOnContentView() {
-                return mShowOnContentView;
-            }
-
-            /**
-             * 获取当前自定义动作要执行的操作。
-             */
-            public Runnable getAction() {
-                return mAction;
-            }
-
-            /**
-             * 如果两个 {@code CustomAction} 的 {@code actionName} 是一样的，则判定这两个对象相等。
-             */
-            @Override
-            public boolean equals(Object o) {
-                if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-                CustomAction that = (CustomAction) o;
-                return Objects.equal(mActionName, that.mActionName);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hashCode(mActionName);
-            }
+            builder.addAction(R.drawable.snow_ic_skip_next, "skip_to_next", doSkipToNext());
         }
     }
 
