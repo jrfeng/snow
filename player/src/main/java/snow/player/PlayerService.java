@@ -741,7 +741,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      */
     @SuppressWarnings("SameReturnValue")
     protected boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
-        if (mComponentFactory != null) {
+        if (injectIsCached()) {
             return mComponentFactory.isCached(musicItem, soundQuality);
         }
 
@@ -1701,27 +1701,32 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * PlayerService 组件工厂，可以通过重写该类的方法来自定义 PlayerService 的部分组件。
      * <p>
-     * 子类需要实现 {@link #isCached(MusicItem, SoundQuality)} 方法，该方法用于判断具有特定
-     * {@link SoundQuality} 的 {@link MusicItem} 是否已缓存。该方法会在异步线程中执
-     * 行，因此可以在该方法中执行耗时操作，例如访问本地数据库。如果播放器仅用于播放本地音乐，则可以直接返回 {@code true}。
+     * 除了通过继承 {@link PlayerService} 类来对播放器的某些行为进行修改外，还可以通过提供一个
+     * {@link ComponentFactory} 组件工厂来对 {@link PlayerService} 类的部分组件进行定制。
      * <p>
-     * 除此之外，还可以选择性的覆盖以下方法来提供其他部分的自定义组件：
+     * 可以通过覆盖 {@link ComponentFactory} 工厂的以下方法来提供自定义组件：
      * <ul>
      *     <li>{@link #createMusicPlayer(Context)}：音乐播放器</li>
      *     <li>{@link #createNotificationView()}：通知栏控制器</li>
-     *     <li>{@link #createAudioEffectManager()}：音频特性引擎</li>
+     *     <li>{@link #createAudioEffectManager()}：音频特效引擎</li>
      *     <li>{@link #createHistoryRecorder()}：历史记录器</li>
+     *     <li>{@link #isCached(MusicItem, SoundQuality)}：查询具有特定 {@link SoundQuality} 的 {@link MusicItem} 是否已缓存</li>
      *     <li>{@link #retrieveMusicItemUri(MusicItem, SoundQuality)}：获取歌曲的播放链接</li>
      * </ul>
+     * <p>
+     * 你可以重写其中的一个或多个方法来使用自定义的组件，重写后的方法需要使用 {@link Inject} 注解进行标记，否
+     * 则会被忽略。
+     * <p>
+     * 如果你打算播放来自网络的音乐，建议覆盖 {@link #isCached(MusicItem, SoundQuality)} 方法，该方法用于
+     * 判断具有特定 {@link SoundQuality} 的 {@link MusicItem} 是否已缓存。该方法会在异步线程中执行，因此可
+     * 以在该方法中执行耗时操作，例如访问本地数据库。如果播放器仅用于播放本地音乐，则可以覆盖该方法，并直接返回
+     * {@code true} 即可。
      * <p>
      * 可以重写 {@link #retrieveMusicItemUri(MusicItem, SoundQuality)} 方法根据音质获取不同的播
      * 放链接。{@link #retrieveMusicItemUri(MusicItem, SoundQuality)} 方法会在异步线程中调用，因
      * 此可以直接在该方法中访问网络。
      * <p>
-     * 你可以重写其中的一个或多个方法来使用自定义的组件，重写后的方法需要使用 {@link Inject} 注解进行标记，否
-     * 则会被忽略。
-     * <p>
-     * <b>还有就是，你的 {@link ComponentFactory} 实现还必须提供一个默认的无参构造方法。</b>
+     * 还有就是，你的 {@link ComponentFactory} 实现还必须提供一个默认的 <b>无参构造方法</b>。
      * <p>
      * 例：<br>
      * <pre>
@@ -1736,8 +1741,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * }
      * </pre>
      * <p>
-     * 最后，还需要对 {@link ComponentFactory} 进行注册。注册方法为，在 {@code AndroidManifest.xml} 文
-     * 件中对 {@link PlayerService} 进行注册时使用 {@code <meta-date>} 标签进行指定你的
+     * 最后，还需要在 {@code AndroidManifest.xml} 文件中对对 {@link ComponentFactory} 进行注册。
+     * <p>
+     * 注册方法为：在 {@link PlayerService} 进行注册时使用 {@code <meta-date>} 标签进行指定你的
      * {@link ComponentFactory}。其中，{@code <meta-data>} 标签的 {@code android:name} 属性的值为
      * {@code "component-factory"}，{@code android:value} 属性的值为你的 {@link ComponentFactory} 的完
      * 整类名。
@@ -1754,15 +1760,18 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      */
     public static abstract class ComponentFactory {
         /**
-         * 查询具有 soundQuality 音质的 MusicItem 表示的的音乐是否已被缓存。
+         * 查询具有 {@link SoundQuality} 音质的 {@link MusicItem} 是否已被缓存。
          * <p>
-         * 该方法会在异步线程中被调用。
+         * 该方法会在异步线程中被调用。如果播放器仅用于播放本地音乐，则只需覆盖该方法，并直接返回 {@code true}
+         * 即可。
          *
          * @param musicItem    要查询的 MusicItem 对象
          * @param soundQuality 音乐的音质
-         * @return 如果已被缓存，则返回 true，否则返回 false
+         * @return 如果歌曲已被缓存，则返回 true，否则返回 false
          */
-        public abstract boolean isCached(MusicItem musicItem, SoundQuality soundQuality);
+        public boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
+            return false;
+        }
 
         /**
          * 创建一个 {@link MusicPlayer} 对象。
@@ -1841,6 +1850,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         return false;
+    }
+
+    private boolean injectIsCached() {
+        return shouldInject("isCached", MusicItem.class, SoundQuality.class);
     }
 
     private boolean injectMusicPlayer() {
