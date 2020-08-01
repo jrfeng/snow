@@ -38,7 +38,7 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
     private int mCaptureSize = getMinCaptureSize();
     private int mCaptureRate = getMaxCaptureRate();
 
-    // 避免因系统音量大小的改变影响到波形（这个 Equalizer 什么也不会做）
+    // 避免因系统音量大小的改变影响到波形（该 Equalizer 对象什么也不会做）
     private Equalizer mEqualizer;
 
     private byte[] mWaveform;
@@ -122,7 +122,7 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
 
         mVisualizer = new Visualizer(audioSessionId);
         mVisualizer.setCaptureSize(getCaptureSize());
-        onVisualizerCreated(mVisualizer);
+        onCreateVisualizer(mVisualizer);
         mVisualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
             @Override
             public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
@@ -266,7 +266,7 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
     }
 
     /**
-     * LifecyclerOwner 相关的回调方法。
+     * LifecycleOwner 的生命周期回调方法。
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     public void onStop() {
@@ -274,10 +274,10 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
     }
 
     /**
-     * LifecyclerOwner 相关的回调方法。
+     * LifecycleOwner 的生命周期回调方法。
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    public void onDesctroy() {
+    public void onDestroy() {
         release();
     }
 
@@ -321,7 +321,7 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
      * 该方法会在 Visualizer 对象创建后调用, 如果你不满意默认的 Visualizer 配置, 可以重写该方法对
      * Visualizer 进行自定义配置。
      */
-    protected void onVisualizerCreated(@NonNull Visualizer visualizer) {
+    protected void onCreateVisualizer(@NonNull Visualizer visualizer) {
     }
 
     /**
