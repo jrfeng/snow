@@ -1334,23 +1334,29 @@ public class PlayerClient implements Player {
     }
 
     /**
-     * 用于监听播放器连接状态的回调接口。
+     * 用于监听播放器是否连接成功。
      */
     public interface OnConnectCallback {
         /**
          * 该方法会在连接成功或失败时调用。
          *
-         * @param success 是否连接成功，如果为 true，则表示连接成功，否则为 false
+         * @param success 如果为 true，则表示连接成功，否则为 false
          */
         void onConnected(boolean success);
     }
 
+    /**
+     * 用于监听 PlayerClient 的连接断开事件。
+     */
     public interface OnDisconnectListener {
+        /**
+         * 当 PlayerClient 断开连接时，会回调该方法。
+         */
         void onDisconnected();
     }
 
     /**
-     * 用于具体播放器播放状态的改变。
+     * 用于监听播放器播放状态的改变。
      */
     public interface OnPlaybackStateChangeListener {
         /**
