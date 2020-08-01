@@ -730,6 +730,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return mNotificationView.createNotification();
     }
 
+    // 请不要在主线程中调用该方法，因为该方法可能会执行耗时操作
     protected final boolean isCachedEx(MusicItem musicItem, SoundQuality soundQuality) {
         if (injectIsCached()) {
             return mComponentFactory.isCached(musicItem, soundQuality);
@@ -773,16 +774,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return new MediaMusicPlayer();
     }
 
-    /**
-     * 获取音乐的播放链接。
-     * <p>
-     * 该方法会在异步线程中执行，因此可以执行各种耗时操作，例如访问网络。
-     *
-     * @param musicItem    要播放的音乐
-     * @param soundQuality 要播放的音乐的音质
-     * @return 音乐的播放链接
-     * @throws Exception 获取音乐播放链接的过程中发生的任何异常
-     */
+    // 请不要在主线程中调用该方法，因为该方法可能会执行耗时操作
     protected final Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception {
         if (injectMusicItemUri()) {
             return mComponentFactory.retrieveMusicItemUri(musicItem, soundQuality);
