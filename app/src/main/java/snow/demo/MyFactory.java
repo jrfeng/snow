@@ -12,11 +12,6 @@ import snow.player.SoundQuality;
 import snow.player.media.MusicItem;
 
 public class MyFactory extends PlayerService.ComponentFactory {
-    @Override
-    public boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
-        return false;
-    }
-
     @Inject
     @Nullable
     @Override
@@ -25,7 +20,7 @@ public class MyFactory extends PlayerService.ComponentFactory {
             @Override
             public void recordHistory(@NonNull MusicItem musicItem) {
                 // DEBUG
-                Log.d("App", musicItem.toString());
+                Log.d("App", "History: " + musicItem.toString());
             }
         };
     }
