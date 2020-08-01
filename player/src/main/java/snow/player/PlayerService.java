@@ -730,6 +730,14 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return mNotificationView.createNotification();
     }
 
+    protected final boolean isCachedEx(MusicItem musicItem, SoundQuality soundQuality) {
+        if (injectIsCached()) {
+            return mComponentFactory.isCached(musicItem, soundQuality);
+        }
+
+        return isCached(musicItem, soundQuality);
+    }
+
     /**
      * 查询具有 soundQuality 音质的 MusicItem 表示的的音乐是否已被缓存。
      * <p>
@@ -739,12 +747,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @param soundQuality 音乐的音质
      * @return 如果已被缓存，则返回 true，否则返回 false
      */
-    @SuppressWarnings("SameReturnValue")
     protected boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
-        if (injectIsCached()) {
-            return mComponentFactory.isCached(musicItem, soundQuality);
-        }
-
         return false;
     }
 
@@ -979,7 +982,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         protected boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
-            return PlayerService.this.isCached(musicItem, soundQuality);
+            return PlayerService.this.isCachedEx(musicItem, soundQuality);
         }
 
         @NonNull
