@@ -31,7 +31,7 @@ import snow.player.playlist.PlaylistManager;
 import snow.player.util.ErrorUtil;
 
 /**
- * 播放器客户端，用于向播放器发生各种控制命令。
+ * 播放器客户端，用于向播放器发送各种控制命令。
  */
 @SuppressWarnings("unused")
 public class PlayerClient implements Player {
@@ -202,6 +202,8 @@ public class PlayerClient implements Player {
 
     /**
      * 连接播放器
+     *
+     * @param callback 回调接口，用于接收连接结果
      */
     public void connect(OnConnectCallback callback) {
         if (isConnected()) {
@@ -228,7 +230,7 @@ public class PlayerClient implements Player {
     }
 
     /**
-     * 播放器释放已连接。
+     * 判断播放器是否已连接。
      *
      * @return 如果播放器已连接则返回 true，否则返回 false
      */
