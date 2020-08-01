@@ -51,73 +51,55 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
 
     public AbstractWaveView(Context context) {
         super(context);
+        tryInitLifecycleOwner();
     }
 
     public AbstractWaveView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        tryInitLifecycleOwner();
     }
 
     public AbstractWaveView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        tryInitLifecycleOwner();
     }
 
     @RequiresApi(21)
     public AbstractWaveView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        tryInitLifecycleOwner();
     }
 
-    /**
-     * 设置要捕获波形的音频的 AudioSessionId。
-     * <p>
-     * 需要调用 {@link #setEnabled(boolean)} 方法并传入 true 来启动波形捕获功能。
-     * <p>
-     * 如果该 View 嵌入的那个 Activity 具有生命周期感知功能（实现了 LifecyclerOwner 接口）, 那么该类会自动
-     * 在 ON_STOP 事件发生时暂停波形捕获功能, 并在 ON_START 事件发生时重新启动波形捕获功能。否则, 你需要手动
-     * 处理相关的 Activity 生命周期事件。
-     *
-     * @param audioSessionId 正在播放的音频的 AudioSessionId。
-     */
-    public void setAudioSessionId(int audioSessionId) {
+    private void tryInitLifecycleOwner() {
         if (getContext() instanceof LifecycleOwner) {
-            setAudioSessionId(audioSessionId, (LifecycleOwner) getContext());
-            return;
+            setLifecycleOwner((LifecycleOwner) getContext());
         }
-
-        setAudioSessionId(audioSessionId, null);
     }
 
     /**
-     * 设置要捕获波形的音频的 AudioSessionId, 以及相关的 LifecycleOwner。
+     * 设置要捕获波形的音频的 audio session id。
      * <p>
      * 要启动波形捕获功能, 还需要调用 {@link #setEnabled(boolean)} 方法并传入 true。如果波形捕获功能已启动,
      * 那么就不需要再次调用 setEnabled(true)。
      *
-     * @param audioSessionId 正在播放的音频的 AudioSessionId。
-     * @param lifecycleOwner 要监听的 LifecycleOwner。如果该参数不为 null, 那么会在 ON_STOP 事件发生时暂
-     *                       停波形的捕获, 并在 ON_START 事件发生时恢复波形的捕获。并且会在 ON_DESTROY 事
-     *                       件发生时调用 {@link #release()} 方法释放掉占用的资源。如果该参数为 null, 则
-     *                       需要你自己手动处理相关的 Activity 生命周期事件。
+     * @param audioSessionId 正在播放的音频的 audio session id
      */
-    public void setAudioSessionId(int audioSessionId, @Nullable LifecycleOwner lifecycleOwner) {
+    public void setAudioSessionId(int audioSessionId) {
         releaseVisualizer();
 
         if (audioSessionId < 0) {
-            throw new IllegalArgumentException("audio session id must >= 0");
+            Log.w(TAG, "audio session id must >= 0");
+            return;
         }
 
         if (noRecordAudioPermission()) {
-            Log.e(TAG, "need permission: android.permission.RECORD_AUDIO");
+            Log.w(TAG, "need permission: android.permission.RECORD_AUDIO");
             return;
         }
 
-        if (audioSessionId == 0 && noModifyAudioSettingsPermission()) {
-            Log.e(TAG, "audio session id is 0, need permission: android.permission.MODIFY_AUDIO_SETTINGS");
+        if (audioSessionId == 0) {
+            Log.w(TAG, "audio session 0 is deprecated");
             return;
-        }
-
-        if (lifecycleOwner != null) {
-            mLifecycleOwner = lifecycleOwner;
-            initLifecycleObserver();
         }
 
         mVisualizer = new Visualizer(audioSessionId);
@@ -143,6 +125,24 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
         if (mEnable) {
             startVisualizer();
         }
+    }
+
+    /**
+     * 设置关联的 LifecycleOwner 对象。
+     * <p>
+     * {@link AbstractWaveView} 会在 ON_STOP 事件发生时暂停波形的捕获, 并在 ON_START 事件发生时恢复波形的
+     * 捕获。并且会在 ON_DESTROY 事件发生时调用 {@link #release()} 方法释放掉占用的资源。如果
+     * {@link AbstractWaveView} 嵌入的 Activity 是一个 {@code LifecycleOwner}，则会自动调用该方法。如果
+     * Activity 没有实现 {@code LifecycleOwner}，则开发者需要调用该方法，或者自己手动处理相关的 Activity
+     * 生命周期事件。
+     */
+    public void setLifecycleOwner(@NonNull LifecycleOwner lifecycleOwner) {
+        if (mLifecycleOwner != null) {
+            removeLifecycleObserver(mLifecycleOwner);
+        }
+
+        mLifecycleOwner = lifecycleOwner;
+        addLifecycleObserver(lifecycleOwner);
     }
 
     /**
@@ -199,6 +199,8 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
 
     /**
      * 获取当前设置的要捕获的波形数组的大小。
+     *
+     * @see #setCaptureSize(int)
      */
     public final int getCaptureSize() {
         return mCaptureSize;
@@ -207,6 +209,10 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
     /**
      * 设置要捕获的波形数组的大小。该值必须是 {@link #getMinCaptureSize()} 至 {@link #getMaxCaptureSize()}
      * 范围内的 2 的幂。
+     *
+     * @see #getCaptureSize()
+     * @see #getMinCaptureSize()
+     * @see #getMaxCaptureSize()
      */
     public final void setCaptureSize(int captureSize) {
         mCaptureSize = captureSize;
@@ -222,6 +228,8 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
 
     /**
      * 获取当前设置的波形捕获率（默认使用最大的波形捕获率）。
+     *
+     * @see #setCaptureRate(int)
      */
     public final int getCaptureRate() {
         return mCaptureRate;
@@ -231,6 +239,7 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
      * 设置当前的波形捕获率。最大值为 {@link #getMaxCaptureRate()}, 值越大, 捕获波形的频率越快。默认使用最
      * 大的波形捕获率。
      *
+     * @see #getCaptureRate()
      * @see #getMaxCaptureRate()
      */
     public final void setCaptureRate(int captureRate) {
@@ -256,7 +265,7 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
     }
 
     /**
-     * LifecyclerOwner 相关的回调方法。
+     * LifecycleOwner 相关的生命周期回调方法。
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     public void onStart() {
@@ -266,7 +275,7 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
     }
 
     /**
-     * LifecycleOwner 的生命周期回调方法。
+     * LifecycleOwner 相关的生命周期回调方法。
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     public void onStop() {
@@ -274,7 +283,7 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
     }
 
     /**
-     * LifecycleOwner 的生命周期回调方法。
+     * LifecycleOwner 相关的生命周期回调方法。
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     public void onDestroy() {
@@ -288,7 +297,7 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
         super.onDetachedFromWindow();
 
         if (mLifecycleOwner != null) {
-            mLifecycleOwner.getLifecycle().removeObserver(this);
+            removeLifecycleObserver(mLifecycleOwner);
         }
 
         release();
@@ -325,11 +334,11 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
     }
 
     /**
-     * 重写该方法以绘制波形图像。
+     * 绘制波形，子类需要实现该方法来绘制音频波形。
      *
-     * @param canvas       当前的 Canvas 对象。
-     * @param waveform     波形数据。
-     * @param samplingRate 波形的采样率。
+     * @param canvas       当前的 Canvas 对象
+     * @param waveform     波形数据
+     * @param samplingRate 波形的采样率
      */
     protected abstract void onDrawWave(Canvas canvas, @NonNull byte[] waveform, int samplingRate);
 
@@ -339,21 +348,17 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
         return noPermission(Manifest.permission.RECORD_AUDIO);
     }
 
-    private boolean noModifyAudioSettingsPermission() {
-        return noPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS);
-    }
-
     private boolean noPermission(String permission) {
         int result = ActivityCompat.checkSelfPermission(getContext(), permission);
         return result == PackageManager.PERMISSION_DENIED;
     }
 
-    private void initLifecycleObserver() {
-        if (mLifecycleOwner == null) {
-            return;
-        }
+    private void addLifecycleObserver(@NonNull LifecycleOwner owner) {
+        owner.getLifecycle().addObserver(this);
+    }
 
-        mLifecycleOwner.getLifecycle().addObserver(this);
+    private void removeLifecycleObserver(@NonNull LifecycleOwner owner) {
+        owner.getLifecycle().removeObserver(this);
     }
 
     private void startVisualizer() {
