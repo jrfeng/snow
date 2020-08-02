@@ -67,8 +67,6 @@ public abstract class AbstractPlayer implements Player {
 
     private MusicPlayer mMusicPlayer;
 
-    private boolean mPreparing;
-    private boolean mPrepared;
     private boolean mLoadingPlaylist;
 
     private boolean mPlayOnPrepared;
@@ -604,8 +602,7 @@ public abstract class AbstractPlayer implements Player {
             mMusicPlayer = null;
         }
 
-        mPreparing = false;
-        mPrepared = false;
+        mPlayerStateHelper.clearPrepareState();
         mPlayOnPrepared = false;
         mPlayOnSeekComplete = false;
 
@@ -617,16 +614,22 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    // 注意！mPrepared 字段与 PlaybackState.PREPARED 状态是有区别的，MusicPlayer 只要准备完毕，
-    // mPrepared 字段就会被设置 true，直到 MusicPlayer 被释放为止。但播放器的状态是会改变的，它会
-    // 在播放时变成 PlaybackState.PLAYING，再暂停时变成 PlaybackState.PAUSED。
-    private boolean isPrepared() {
-        return mMusicPlayer != null && mPrepared;
+    /**
+     * 播放器当前是否处已准备完毕。
+     *
+     * @return 如果播放器已准备完毕，则返回 true，否则返回 false
+     */
+    public final boolean isPrepared() {
+        return mPlayerState.isPrepared();
     }
 
-    // mPreparing 字段用于与 mPrepared 字段搭配使用，其与 PlaybackState.PREPARING 状态区别不大。
-    private boolean isPreparing() {
-        return mPreparing;
+    /**
+     * 播放器当前是否处正在准备中。
+     *
+     * @return 如果播放器正在准备中，则返回 true，否则返回 false
+     */
+    public final boolean isPreparing() {
+        return mPlayerState.isPreparing();
     }
 
     private boolean isPlaying() {
@@ -676,15 +679,6 @@ public abstract class AbstractPlayer implements Player {
     }
 
     /**
-     * 播放器释放是 “兴奋” 的。
-     *
-     * @return 如果该方法返回 true，则 Service 应该处于前台。
-     */
-    public final boolean isExcited() {
-        return getPlaybackState() == PlaybackState.PLAYING || mPlayOnPrepared;
-    }
-
-    /**
      * 获取当前正在播放的应用的 audio session id。
      * <p>
      * 如果当前没有播放任何音乐，或者播放器还没有准备完毕（{@link #isPrepared()} 返回了 false），则该方法会
@@ -727,9 +721,6 @@ public abstract class AbstractPlayer implements Player {
     private void notifyPreparing() {
         mPlayerStateHelper.onPreparing();
 
-        mPreparing = true;
-        mPrepared = false;
-
         onPreparing();
 
         for (String key : mStateListenerMap.keySet()) {
@@ -742,9 +733,6 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyPrepared(int audioSessionId) {
         mPlayerStateHelper.onPrepared(audioSessionId);
-
-        mPreparing = false;
-        mPrepared = true;
 
         onPrepared(audioSessionId);
 

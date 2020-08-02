@@ -675,7 +675,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private boolean shouldBeForeground() {
-        return mPlayer.isExcited();
+        return mPlayer.getPlaybackState() == PlaybackState.PLAYING;
     }
 
     /**
@@ -1387,7 +1387,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * <p>
          * 例如，在 {@link PlaybackState#ERROR} 状态时，会返回一个
          * {@code android.R.color.holo_red_dark} 颜色的描述错误信息的 CharSequence 对象；而在
-         * {@link PlaybackState#PREPARING} 状态时，会返回一个
+         * {@code preparing} 状态时，会返回一个
          * {@code android.R.color.holo_green_dark} 颜色的值为 “准备中…” 的 CharSequence 对象；而在
          * {@link #isStalled()} 返回 true 时，会返回一个 {@code android.R.color.holo_orange_dark} 颜色
          * 的值为 “缓冲中…” 的 CharSequence 对象。其它状态下会将 {@code defaultValue} 原值返回。
@@ -1487,12 +1487,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 判断播放器当前是否处于 {@link PlaybackState#PREPARING} 状态。
+         * 播放器当前是否处正在准备中。
          *
-         * @return 如果播放器处于 {@link PlaybackState#PREPARING} 状态，则返回 {@code true}
+         * @return 如果播放器正在准备中，则返回 true，否则返回 false
          */
         public final boolean isPreparing() {
-            return mPlayerService.getPlaybackState() == PlaybackState.PREPARING;
+            return mPlayerService.isPreparing();
         }
 
         /**
@@ -1570,6 +1570,24 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         void setNeedReloadIcon(boolean needReloadIcon) {
             mNeedReloadIcon = needReloadIcon;
         }
+    }
+
+    /**
+     * 播放器当前是否处正在准备中。
+     *
+     * @return 如果播放器正在准备中，则返回 true，否则返回 false
+     */
+    public final boolean isPreparing() {
+        return mPlayer.isPreparing();
+    }
+
+    /**
+     * 播放器当前是否处已准备完毕。
+     *
+     * @return 如果播放器已准备完毕，则返回 true，否则返回 false
+     */
+    public final boolean isPrepared() {
+        return mPlayer.isPrepared();
     }
 
     /**

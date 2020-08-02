@@ -630,6 +630,24 @@ public class PlayerClient implements Player {
     }
 
     /**
+     * 播放器是否正在准备中。
+     *
+     * @return 如果播放器正在准备中，则返回 true，否则返回 false
+     */
+    public boolean isPreparing() {
+        return mPlayerStateHolder.mPlayerState.isPreparing();
+    }
+
+    /**
+     * 播放器是否准备完毕。
+     *
+     * @return 如果播放器已准备完毕，则返回 true，否则返回 false
+     */
+    public boolean isPrepared() {
+        return mPlayerStateHolder.mPlayerState.isPrepared();
+    }
+
+    /**
      * 播放器是否发生了错误。
      */
     public boolean isError() {
@@ -917,6 +935,46 @@ public class PlayerClient implements Player {
      */
     public void removeOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
         mPlayerStateHolder.removeOnPlaybackStateChangeListener(listener);
+    }
+
+    /**
+     * 添加一个播放器准备（prepare）状态监听器。
+     *
+     * @param listener 如果监听器已存在，则忽略本次添加
+     */
+    public void addOnPrepareListener(Player.OnPrepareListener listener) {
+        mPlayerStateHolder.addOnPrepareListener(listener);
+    }
+
+    /**
+     * 添加一个播放器准备（prepare）状态监听器。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param owner    LifecycleOwner 对象
+     * @param listener 如果监听器已存在，则忽略本次添加
+     */
+    public void addOnPrepareListener(LifecycleOwner owner, final Player.OnPrepareListener listener) {
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnPrepareListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnPrepareListener(listener);
+            }
+        }));
+    }
+
+    /**
+     * 移除一个播放器准备（prepare）状态监听器。
+     *
+     * @param listener 要移除的监听器
+     */
+    public void removeOnPrepareListener(Player.OnPrepareListener listener) {
+        mPlayerStateHolder.removeOnPrepareListener(listener);
     }
 
     /**
@@ -1403,6 +1461,7 @@ public class PlayerClient implements Player {
         private boolean mNotConnected;
 
         private List<Player.OnPlaybackStateChangeListener> mAllPlaybackStateChangeListener;
+        private List<Player.OnPrepareListener> mAllPrepareListener;
         private List<Player.OnStalledChangeListener> mAllStalledChangeListener;
         private List<OnBufferedProgressChangeListener> mAllBufferedProgressChangeListener;
         private List<Player.OnPlayingMusicItemChangeListener> mAllPlayingMusicItemChangeListener;
@@ -1420,6 +1479,7 @@ public class PlayerClient implements Player {
             mNotConnected = true;
 
             mAllPlaybackStateChangeListener = new ArrayList<>();
+            mAllPrepareListener = new ArrayList<>();
             mAllStalledChangeListener = new ArrayList<>();
             mAllBufferedProgressChangeListener = new ArrayList<>();
             mAllPlayingMusicItemChangeListener = new ArrayList<>();
@@ -1442,6 +1502,7 @@ public class PlayerClient implements Player {
             notifyPlaylistChanged();
             notifyPlayModeChanged();
             notifyPlayingMusicItemChanged();
+            notifyPrepareStateChanged();
             notifyPlaybackStateChanged();
             notifyOnBufferedProgressChanged();
 
@@ -1469,6 +1530,19 @@ public class PlayerClient implements Player {
 
         void removeOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
             mAllPlaybackStateChangeListener.remove(listener);
+        }
+
+        void addOnPrepareListener(Player.OnPrepareListener listener) {
+            if (mAllPrepareListener.contains(listener)) {
+                return;
+            }
+
+            mAllPrepareListener.add(listener);
+            notifyPrepareStateChanged(listener);
+        }
+
+        void removeOnPrepareListener(Player.OnPrepareListener listener) {
+            mAllPrepareListener.remove(listener);
         }
 
         void addOnStalledChangeListener(Player.OnStalledChangeListener listener) {
@@ -1594,12 +1668,6 @@ public class PlayerClient implements Player {
             }
 
             switch (mPlayerState.getPlaybackState()) {
-                case PREPARING:
-                    listener.onPreparing();
-                    break;
-                case PREPARED:
-                    listener.onPrepared(mPlayerState.getAudioSessionId());
-                    break;
                 case PLAYING:
                     listener.onPlay(mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime());
                     break;
@@ -1627,6 +1695,31 @@ public class PlayerClient implements Player {
             }
 
             notifyClientPlaybackStateChanged();
+        }
+
+        private void notifyPrepareStateChanged(Player.OnPrepareListener listener) {
+            if (notConnected()) {
+                return;
+            }
+
+            if (mPlayerState.isPreparing()) {
+                listener.onPreparing();
+                return;
+            }
+
+            if (mPlayerState.isPrepared()) {
+                listener.onPrepared(mPlayerState.getAudioSessionId());
+            }
+        }
+
+        private void notifyPrepareStateChanged() {
+            if (notConnected()) {
+                return;
+            }
+
+            for (Player.OnPrepareListener listener : mAllPrepareListener) {
+                notifyPrepareStateChanged(listener);
+            }
         }
 
         private void notifyStalledChanged(Player.OnStalledChangeListener listener) {
@@ -1797,14 +1890,14 @@ public class PlayerClient implements Player {
         public void onPreparing() {
             mPlayerStateHelper.onPreparing();
 
-            notifyPlaybackStateChanged();
+            notifyPrepareStateChanged();
         }
 
         @Override
         public void onPrepared(int audioSessionId) {
             mPlayerStateHelper.onPrepared(audioSessionId);
 
-            notifyPlaybackStateChanged();
+            notifyPrepareStateChanged();
             notifyAudioSessionChanged();
         }
 

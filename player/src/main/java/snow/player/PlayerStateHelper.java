@@ -17,12 +17,19 @@ class PlayerStateHelper {
     }
 
     public void onPreparing() {
-        mPlayerState.setPlaybackState(PlaybackState.PREPARING);
+        mPlayerState.setPreparing(true);
+        mPlayerState.setPrepared(false);
     }
 
     public void onPrepared(int audioSessionId) {
-        mPlayerState.setPlaybackState(PlaybackState.PREPARED);
+        mPlayerState.setPreparing(false);
+        mPlayerState.setPrepared(true);
         mPlayerState.setAudioSessionId(audioSessionId);
+    }
+
+    public void clearPrepareState() {
+        mPlayerState.setPreparing(false);
+        mPlayerState.setPrepared(false);
     }
 
     public void onPlay(int progress, long updateTime) {
@@ -37,6 +44,7 @@ class PlayerStateHelper {
     public void onStopped() {
         mPlayerState.setPlaybackState(PlaybackState.STOPPED);
         updatePlayProgress(0, System.currentTimeMillis());
+        clearPrepareState();
     }
 
     public void onStalled(boolean stalled, int playProgress, long updateTime) {
@@ -50,6 +58,7 @@ class PlayerStateHelper {
         mPlayerState.setErrorCode(errorCode);
         mPlayerState.setErrorMessage(errorMessage);
         updatePlayProgress(0, System.currentTimeMillis());
+        clearPrepareState();
     }
 
     public void onBufferedChanged(int bufferedProgress) {

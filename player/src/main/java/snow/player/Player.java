@@ -77,18 +77,6 @@ public interface Player extends PlaylistManager.OnModifyPlaylistListener {
      */
     interface OnPlaybackStateChangeListener {
         /**
-         * 当播放器的状态变为 “准备中” 时会回调该方法。
-         */
-        void onPreparing();
-
-        /**
-         * 当播放器的状态变为 “准备完毕” 时会回调该方法。
-         *
-         * @param audioSessionId 当前音乐的 audio session id
-         */
-        void onPrepared(int audioSessionId);
-
-        /**
          * 当播放器的状态变为 “播放中” 时会回调该方法。
          *
          * @param playProgress           当前的播放进度
@@ -113,6 +101,23 @@ public interface Player extends PlaylistManager.OnModifyPlaylistListener {
          * @param errorMessage 错误信息
          */
         void onError(int errorCode, String errorMessage);
+    }
+
+    /**
+     * 用于监听播放器的准备状态。
+     */
+    interface OnPrepareListener {
+        /**
+         * 当播放器的状态变为 “准备中” 时会回调该方法。
+         */
+        void onPreparing();
+
+        /**
+         * 当播放器的状态变为 “准备完毕” 时会回调该方法。
+         *
+         * @param audioSessionId 当前音乐的 audio session id
+         */
+        void onPrepared(int audioSessionId);
     }
 
     /**

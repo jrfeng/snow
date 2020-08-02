@@ -40,7 +40,7 @@ class PlayerState implements Parcelable {
         position = 0;
         playMode = PlayMode.SEQUENTIAL;
 
-        playbackState = PlaybackState.UNKNOWN;
+        playbackState = PlaybackState.NONE;
         preparing = false;
         prepared = false;
         audioSessionId = 0;
@@ -186,13 +186,6 @@ class PlayerState implements Parcelable {
      *
      * @param playbackState 要设置的播放状态。如果该参数的值不是 {@link PlaybackState#ERROR} 则会
      *                      清除错误码（重置为 {@link ErrorUtil#NO_ERROR}）与错误信息。
-     *                      只能是这些值之一：{@link PlaybackState#UNKNOWN},
-     *                      {@link PlaybackState#PREPARING},
-     *                      {@link PlaybackState#PREPARED},
-     *                      {@link PlaybackState#PLAYING},
-     *                      {@link PlaybackState#PAUSED},
-     *                      {@link PlaybackState#STOPPED},
-     *                      {@link PlaybackState#ERROR}
      * @see PlaybackState
      */
     public void setPlaybackState(@NonNull PlaybackState playbackState) {

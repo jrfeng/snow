@@ -38,6 +38,7 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<PlayMode> mPlayMode;
     private MutableLiveData<PlaybackState> mPlaybackState;
     private MutableLiveData<Boolean> mStalled;
+    private MutableLiveData<Boolean> mPreparing;
     private MutableLiveData<String> mErrorMessage;
     private PlaylistLiveData mPlaylist;
 
@@ -49,6 +50,7 @@ public class PlayerViewModel extends ViewModel {
     private Player.OnBufferedProgressChangeListener mBufferedProgressChangeListener;
     private Player.OnSeekCompleteListener mSeekCompleteListener;
     private Player.OnStalledChangeListener mStalledChangeListener;
+    private Player.OnPrepareListener mPrepareListener;
     private PlayerClient.OnDisconnectListener mDisconnectListener;
 
     private String mDefaultTitle;
@@ -156,9 +158,11 @@ public class PlayerViewModel extends ViewModel {
                                 mPlayerClient.getPlayingMusicItemDuration());
                         break;
                     case STOPPED:
+                        mPreparing.setValue(false);
                         mPlayProgress.setValue(0);  // 注意！case 穿透！
                     case PAUSED:                    // 注意！case 穿透！
                     case ERROR:                     // 注意！case 穿透！
+                        mPreparing.setValue(false);
                         mProgressClock.cancel();
                         break;
                 }
@@ -196,6 +200,18 @@ public class PlayerViewModel extends ViewModel {
             }
         };
 
+        mPrepareListener = new Player.OnPrepareListener() {
+            @Override
+            public void onPreparing() {
+                mPreparing.setValue(true);
+            }
+
+            @Override
+            public void onPrepared(int audioSessionId) {
+                mPreparing.setValue(false);
+            }
+        };
+
         mDisconnectListener = new PlayerClient.OnDisconnectListener() {
             @Override
             public void onDisconnected() {
@@ -224,6 +240,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.addOnBufferedProgressChangeListener(mBufferedProgressChangeListener);
         mPlayerClient.addOnSeekCompleteListener(mSeekCompleteListener);
         mPlayerClient.addOnStalledChangeListener(mStalledChangeListener);
+        mPlayerClient.addOnPrepareListener(mPrepareListener);
         mPlayerClient.addOnDisconnectListener(mDisconnectListener);
     }
 
@@ -236,6 +253,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.removeOnBufferedProgressChangeListener(mBufferedProgressChangeListener);
         mPlayerClient.removeOnSeekCompleteListener(mSeekCompleteListener);
         mPlayerClient.removeOnStalledChangeListener(mStalledChangeListener);
+        mPlayerClient.removeOnPrepareListener(mPrepareListener);
         mPlayerClient.removeOnDisconnectListener(mDisconnectListener);
     }
 
@@ -360,6 +378,15 @@ public class PlayerViewModel extends ViewModel {
     @NonNull
     public LiveData<Boolean> getStalled() {
         return mStalled;
+    }
+
+    /**
+     * 播放器是否正在准备中。
+     *
+     * @return 如果播放器正在准备中，则为 true，否则为 false
+     */
+    public LiveData<Boolean> getPreparing() {
+        return mPreparing;
     }
 
     /**
@@ -627,6 +654,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayMode = new MutableLiveData<>(mPlayerClient.getPlayMode());
         mPlaybackState = new MutableLiveData<>(mPlayerClient.getPlaybackState());
         mStalled = new MutableLiveData<>(mPlayerClient.isStalled());
+        mPreparing = new MutableLiveData<>(mPlayerClient.isPreparing());
         mErrorMessage = new MutableLiveData<>(mPlayerClient.getErrorMessage());
         mPlaylist = new PlaylistLiveData();
         mPlaylist.init(mPlayerClient);

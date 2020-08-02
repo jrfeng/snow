@@ -25,7 +25,7 @@ public class PlayerStateTest {
         assertEquals(0, playerState.getPosition());
         assertEquals(PlayMode.SEQUENTIAL, playerState.getPlayMode());
 
-        assertEquals(PlaybackState.UNKNOWN, playerState.getPlaybackState());
+        assertEquals(PlaybackState.NONE, playerState.getPlaybackState());
         assertFalse(playerState.isPreparing());
         assertFalse(playerState.isPrepared());
         assertEquals(0, playerState.getAudioSessionId());

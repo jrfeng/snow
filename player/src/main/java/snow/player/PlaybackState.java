@@ -7,15 +7,7 @@ public enum PlaybackState {
     /**
      * 未知状态。
      */
-    UNKNOWN,
-    /**
-     * 准备中。
-     */
-    PREPARING,
-    /**
-     * 准备完毕。
-     */
-    PREPARED,
+    NONE,
     /**
      * 播放中。
      */
