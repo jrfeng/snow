@@ -26,6 +26,8 @@ class PlayerState implements Parcelable {
     // no persistent
     private long playProgressUpdateTime;
     private PlaybackState playbackState;
+    private boolean preparing;
+    private boolean prepared;
     private int audioSessionId;
     private int bufferedProgress;
     private boolean stalled;
@@ -39,6 +41,8 @@ class PlayerState implements Parcelable {
         playMode = PlayMode.SEQUENTIAL;
 
         playbackState = PlaybackState.UNKNOWN;
+        preparing = false;
+        prepared = false;
         audioSessionId = 0;
         bufferedProgress = 0;
         stalled = false;
@@ -56,6 +60,8 @@ class PlayerState implements Parcelable {
         playMode = source.playMode;
 
         playbackState = source.playbackState;
+        preparing = source.preparing;
+        prepared = source.prepared;
         audioSessionId = source.audioSessionId;
         bufferedProgress = source.bufferedProgress;
         stalled = source.stalled;
@@ -200,6 +206,42 @@ class PlayerState implements Parcelable {
     }
 
     /**
+     * 播放器是否正在准备中。
+     *
+     * @return 如果播放器正在准备中，则返回 true，否则返回 false
+     */
+    public boolean isPreparing() {
+        return preparing;
+    }
+
+    /**
+     * 设置播放器是否正在准备中。
+     *
+     * @param preparing 播放器是否正在准备中
+     */
+    public void setPreparing(boolean preparing) {
+        this.preparing = preparing;
+    }
+
+    /**
+     * 播放器是否准备完毕。
+     *
+     * @return 如果播放器已准备完毕，则返回 true，否则返回 false
+     */
+    public boolean isPrepared() {
+        return prepared;
+    }
+
+    /**
+     * 设置播放器是否准备完毕。
+     *
+     * @param prepared 播放器是否准备完毕
+     */
+    public void setPrepared(boolean prepared) {
+        this.prepared = prepared;
+    }
+
+    /**
      * 获取当前正在播放的音乐的 audio session id。
      * <p>
      * 注意！可能会返回 0 （API 21: {@link android.media.AudioManager#AUDIO_SESSION_ID_GENERATE}），表示当前音乐的
@@ -310,6 +352,8 @@ class PlayerState implements Parcelable {
                 && Objects.equal(position, other.position)
                 && Objects.equal(playMode, other.playMode)
                 && Objects.equal(playbackState, other.playbackState)
+                && Objects.equal(preparing, other.preparing)
+                && Objects.equal(prepared, other.prepared)
                 && Objects.equal(audioSessionId, other.audioSessionId)
                 && Objects.equal(bufferedProgress, other.bufferedProgress)
                 && Objects.equal(stalled, other.stalled)
@@ -325,6 +369,8 @@ class PlayerState implements Parcelable {
                 position,
                 playMode,
                 playbackState,
+                preparing,
+                prepared,
                 audioSessionId,
                 bufferedProgress,
                 stalled,
@@ -342,6 +388,8 @@ class PlayerState implements Parcelable {
                 ", position=" + position +
                 ", playMode=" + playMode +
                 ", playbackState=" + playbackState +
+                ", preparing=" + preparing +
+                ", prepared=" + prepared +
                 ", audioSessionId=" + audioSessionId +
                 ", bufferingPercent=" + bufferedProgress +
                 ", stalled=" + stalled +
@@ -358,6 +406,8 @@ class PlayerState implements Parcelable {
         playMode = PlayMode.values()[in.readInt()];
 
         playbackState = PlaybackState.values()[in.readInt()];
+        preparing = in.readByte() != 0;
+        prepared = in.readByte() != 0;
         audioSessionId = in.readInt();
         bufferedProgress = in.readInt();
         stalled = in.readByte() != 0;
@@ -374,6 +424,8 @@ class PlayerState implements Parcelable {
         dest.writeInt(playMode.ordinal());
 
         dest.writeInt(playbackState.ordinal());
+        dest.writeByte((byte) (preparing ? 1 : 0));
+        dest.writeByte((byte) (prepared ? 1 : 0));
         dest.writeInt(audioSessionId);
         dest.writeInt(bufferedProgress);
         dest.writeByte((byte) (stalled ? 1 : 0));
