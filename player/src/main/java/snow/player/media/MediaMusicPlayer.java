@@ -165,7 +165,7 @@ public class MediaMusicPlayer implements MusicPlayer {
 
     @Override
     public void quiet() {
-        setVolume(0.4F, 0.4F);
+        setVolume(0.2F, 0.2F);
     }
 
     @Override
