@@ -26,6 +26,8 @@ public class PlayerStateTest {
         assertEquals(PlayMode.SEQUENTIAL, playerState.getPlayMode());
 
         assertEquals(PlaybackState.UNKNOWN, playerState.getPlaybackState());
+        assertFalse(playerState.isPreparing());
+        assertFalse(playerState.isPrepared());
         assertEquals(0, playerState.getAudioSessionId());
         assertEquals(0, playerState.getBufferedProgress());
         assertFalse(playerState.isStalled());
@@ -42,6 +44,8 @@ public class PlayerStateTest {
         source.setPosition(15);
         source.setPlayMode(PlayMode.LOOP);
         source.setPlaybackState(PlaybackState.ERROR);
+        source.setPreparing(false);
+        source.setPrepared(true);
         source.setAudioSessionId(12);
         source.setBufferedProgress(100);
         source.setStalled(true);
@@ -78,6 +82,8 @@ public class PlayerStateTest {
         final int position = 5;
         final PlayMode playMode = PlayMode.SHUFFLE;
         final PlaybackState playbackState = PlaybackState.PLAYING;
+        final boolean preparing = false;
+        final boolean prepared = true;
         final int audioSessionId = 12;
         final int bufferedProgress = 100;
         final boolean stalled = true;
@@ -91,6 +97,8 @@ public class PlayerStateTest {
         playerState.setPosition(position);
         playerState.setPlayMode(playMode);
         playerState.setPlaybackState(playbackState);
+        playerState.setPreparing(preparing);
+        playerState.setPrepared(prepared);
         playerState.setAudioSessionId(audioSessionId);
         playerState.setBufferedProgress(bufferedProgress);
         playerState.setStalled(stalled);
@@ -104,6 +112,8 @@ public class PlayerStateTest {
         other1.setPosition(position);
         other1.setPlayMode(playMode);
         other1.setPlaybackState(playbackState);
+        other1.setPreparing(preparing);
+        other1.setPrepared(prepared);
         other1.setAudioSessionId(audioSessionId);
         other1.setBufferedProgress(bufferedProgress);
         other1.setStalled(stalled);
@@ -131,6 +141,8 @@ public class PlayerStateTest {
         final int position = 5;
         final PlayMode playMode = PlayMode.SHUFFLE;
         final PlaybackState playbackState = PlaybackState.PLAYING;
+        final boolean preparing = false;
+        final boolean prepared = true;
         final int audioSessionId = 12;
         final int bufferedProgress = 100;
         final boolean stalled = true;
@@ -144,6 +156,8 @@ public class PlayerStateTest {
         playerState.setPosition(position);
         playerState.setPlayMode(playMode);
         playerState.setPlaybackState(playbackState);
+        playerState.setPreparing(preparing);
+        playerState.setPrepared(prepared);
         playerState.setAudioSessionId(audioSessionId);
         playerState.setBufferedProgress(bufferedProgress);
         playerState.setStalled(stalled);
