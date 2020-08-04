@@ -206,7 +206,8 @@
                 android:max="@{viewModel.duration}"
                 android:onStopTrackingTouch="@{viewModel::onStopTrackingTouch}"
                 android:onStartTrackingTouch="@{viewModel::onStartTrackingTouch}"
-                android:progress="@={viewModel.playProgress}" />
+                android:progress="@={viewModel.playProgress}"
+                android:secondaryProgress="@{viewModel.bufferedProgress}" />
 
             <TextView
                 android:id="@+id/tvMessage"
