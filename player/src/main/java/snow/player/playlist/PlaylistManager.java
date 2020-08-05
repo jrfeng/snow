@@ -60,6 +60,24 @@ public abstract class PlaylistManager {
     }
 
     /**
+     * 创建一个 PlaylistManager 对象。该 PlaylistManager 对象无法修改 Playlist，仅能用于获取 Playlist。
+     * <p>
+     * 也就是说，无法调用 {@link #setPlaylist(Playlist, int, boolean)}、
+     * {@link #insertMusicItem(int, MusicItem)}、{@link #removeMusicItem(MusicItem)}、
+     * {@link #moveMusicItem(int, int)} 方法修改 Playlist。
+     *
+     * @param context    Context 对象
+     * @param playlistId 播放列表的 ID，不能为 null。该 ID 会用于持久化保存播放列表，请保证该 ID 的唯一性。
+     *                   通常使用 {@link snow.player.PlayerService} 的 {@link Class} 对象的
+     *                   {@link Class#getName()} 作为 ID
+     * @return PlaylistManager 对象
+     */
+    public static PlaylistManager newInstance(@NonNull Context context, @NonNull String playlistId) {
+        return new PlaylistManager(context, playlistId) {
+        };
+    }
+
+    /**
      * 判断当前 PlaylistManager 是否是可编辑的。
      *
      * @return 如果当前 PlaylistManager 是可编辑的，则返回 true，否则返回 false。当返回 false 时，
