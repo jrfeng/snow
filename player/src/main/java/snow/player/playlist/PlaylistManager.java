@@ -64,7 +64,7 @@ public abstract class PlaylistManager {
      * <p>
      * 也就是说，无法调用 {@link #setPlaylist(Playlist, int, boolean)}、
      * {@link #insertMusicItem(int, MusicItem)}、{@link #removeMusicItem(MusicItem)}、
-     * {@link #moveMusicItem(int, int)} 方法修改 Playlist。
+     * {@link #moveMusicItem(int, int)} 方法修改 Playlist。即使调用了这些方法也无效。
      *
      * @param context    Context 对象
      * @param playlistId 播放列表的 ID，不能为 null。该 ID 会用于持久化保存播放列表，请保证该 ID 的唯一性。
