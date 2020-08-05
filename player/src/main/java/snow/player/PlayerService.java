@@ -224,8 +224,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initPlaylistManager() {
-        mPlaylistManager = new PlaylistManager(this, mPersistentId) {
-        };
+        mPlaylistManager = PlaylistManager.newInstance(this, mPersistentId);
     }
 
     private void initPlayer() {
