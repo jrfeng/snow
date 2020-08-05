@@ -43,7 +43,7 @@ public abstract class PlaylistManager {
      *
      * @param context    {@link Context} 对象，不能为 null
      * @param playlistId 播放列表的 ID，不能为 null。该 ID 会用于持久化保存播放列表，请保证该 ID 的唯一性。
-     *                   通常使用 {@link snow.player.PlayerService} 的 {@link Class} 对象的
+     *                   默认使用 {@link snow.player.PlayerService} 的 {@link Class} 对象的
      *                   {@link Class#getName()} 作为 ID
      */
     public PlaylistManager(@NonNull Context context, @NonNull String playlistId) {
@@ -68,7 +68,7 @@ public abstract class PlaylistManager {
      *
      * @param context    Context 对象
      * @param playlistId 播放列表的 ID，不能为 null。该 ID 会用于持久化保存播放列表，请保证该 ID 的唯一性。
-     *                   通常使用 {@link snow.player.PlayerService} 的 {@link Class} 对象的
+     *                   默认使用 {@link snow.player.PlayerService} 的 {@link Class} 对象的
      *                   {@link Class#getName()} 作为 ID
      * @return PlaylistManager 对象
      */
