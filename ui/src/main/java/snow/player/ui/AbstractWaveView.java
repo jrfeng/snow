@@ -92,13 +92,13 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
             return;
         }
 
-        if (noRecordAudioPermission()) {
-            Log.w(TAG, "need permission: android.permission.RECORD_AUDIO");
+        if (audioSessionId == 0) {
+            Log.w(TAG, "audio session id 0 is deprecated");
             return;
         }
 
-        if (audioSessionId == 0) {
-            Log.w(TAG, "audio session 0 is deprecated");
+        if (noRecordAudioPermission()) {
+            Log.w(TAG, "need permission: android.permission.RECORD_AUDIO");
             return;
         }
 
@@ -345,12 +345,8 @@ public abstract class AbstractWaveView extends View implements LifecycleObserver
     // **************************************private*****************************************
 
     private boolean noRecordAudioPermission() {
-        return noPermission(Manifest.permission.RECORD_AUDIO);
-    }
-
-    private boolean noPermission(String permission) {
-        int result = ActivityCompat.checkSelfPermission(getContext(), permission);
-        return result == PackageManager.PERMISSION_DENIED;
+        return ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO)
+                == PackageManager.PERMISSION_DENIED;
     }
 
     private void addLifecycleObserver(@NonNull LifecycleOwner owner) {
