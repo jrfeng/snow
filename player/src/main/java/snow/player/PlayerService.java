@@ -1756,6 +1756,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      *     <li>{@link #createHistoryRecorder()}：历史记录器</li>
      *     <li>{@link #isCached(MusicItem, SoundQuality)}：查询具有特定 {@link SoundQuality} 的 {@link MusicItem} 是否已缓存</li>
      *     <li>{@link #retrieveMusicItemUri(MusicItem, SoundQuality)}：获取歌曲的播放链接</li>
+     *     <li>{@link #getCustomActions()}：添加自定义动作</li>
      * </ul>
      * <p>
      * 你可以重写其中的一个或多个方法来使用自定义的组件，重写后的方法需要使用 {@link Inject} 注解进行标记，否
