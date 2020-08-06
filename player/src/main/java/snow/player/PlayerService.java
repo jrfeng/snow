@@ -1878,9 +1878,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 添加自定在动作。
          * <p>
-         * 可以使用 Action 创建一个 Intent 对象来调用启动 PlayerService。PlayerService 会在其
+         * 可以使用 Map 的 key 值创建一个 Intent 对象来调用启动 PlayerService。PlayerService 会在其
          * onStartCommand 方法中检测 Intent 的 Action 是否匹配了一个自定义动作，如果匹配成功，则会执行对应
          * 的 Runnable 对象。
+         * <p>
+         * Map 的 key 的命名方式请遵照 Action 的命名方式：{@code package_name.action.ACTION_NAME}，例如：
+         * {@code snow.player.action.PLAY_PAUSE}。
          *
          * @return 要添加的自定义动作。Map 的 key 是自定义动作的名称，请保证其唯一性；Map 的 value 是
          * Runnable 对象，表示要执行的动作
