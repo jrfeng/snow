@@ -7,8 +7,6 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -46,6 +44,7 @@ import snow.player.util.NetworkUtil;
  * 该类实现了 {@link Player} 接口，并实现大部分音乐播放器功能。
  */
 public abstract class AbstractPlayer implements Player {
+    private static final String TAG = "AbstractPlayer";
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
 
     private Context mApplicationContext;
@@ -91,6 +90,9 @@ public abstract class AbstractPlayer implements Player {
     private PlaybackStateCompat.Builder mPlaybackStateBuilder;
     private MediaMetadataCompat.Builder mMediaMetadataBuilder;
 
+    private PowerManager.WakeLock mWakeLock;
+    private WifiManager.WifiLock mWifiLock;
+
     /**
      * 创建一个 {@link AbstractPlayer} 对象。
      *
@@ -118,6 +120,7 @@ public abstract class AbstractPlayer implements Player {
 
         initAllListener();
         initAllHelper();
+        initWakeLock();
 
         mNetworkUtil.subscribeNetworkState();
         reloadPlaylist();
@@ -242,6 +245,7 @@ public abstract class AbstractPlayer implements Player {
         mReleased = true;
         disposeRetrieveUri();
         releaseMusicPlayer();
+        releaseWakeLock();
 
         mStateListenerMap.clear();
 
@@ -301,7 +305,7 @@ public abstract class AbstractPlayer implements Player {
         mRetrieveUriDisposable = getMusicItemUri(musicItem, mPlayerConfig.getSoundQuality())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(prepare(preparedAction), notifyError());
+                .subscribe(prepare(preparedAction), notifyGetUrlFailed());
     }
 
     private void disposeRetrieveUri() {
@@ -340,7 +344,7 @@ public abstract class AbstractPlayer implements Player {
         return new Consumer<Uri>() {
             @Override
             public void accept(Uri uri) {
-                mMusicPlayer = new MusicPlayerWrapper(mApplicationContext, onCreateMusicPlayer(mApplicationContext));
+                mMusicPlayer = onCreateMusicPlayer(mApplicationContext);
                 attachListeners(mMusicPlayer);
 
                 mPreparedAction = preparedAction;
@@ -362,7 +366,7 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    private Consumer<Throwable> notifyError() {
+    private Consumer<Throwable> notifyGetUrlFailed() {
         return new Consumer<Throwable>() {
             @Override
             public void accept(Throwable throwable) {
@@ -563,6 +567,53 @@ public abstract class AbstractPlayer implements Player {
         mMediaMetadataBuilder = new MediaMetadataCompat.Builder();
     }
 
+    private void initWakeLock() {
+        PowerManager pm = (PowerManager) mApplicationContext.getSystemService(Context.POWER_SERVICE);
+        WifiManager wm = (WifiManager) mApplicationContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        String tag = "snow.player:AbstractPlayer";
+
+        if (pm != null) {
+            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, tag);
+            mWakeLock.setReferenceCounted(false);
+        }
+
+        if (wm != null) {
+            mWifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL, tag);
+            mWifiLock.setReferenceCounted(false);
+        }
+    }
+
+    private void requireWakeLock() {
+        if (wakeLockPermissionDenied()) {
+            Log.w(TAG, "need permission: 'android.permission.WAKE_LOCK'");
+            return;
+        }
+
+        if (mWakeLock != null && !mWakeLock.isHeld()) {
+            mWakeLock.acquire(getMusicItemDuration() + 5_000);
+        }
+
+        if (mWifiLock != null && !mWifiLock.isHeld()) {
+            mWifiLock.acquire();
+        }
+    }
+
+    private boolean wakeLockPermissionDenied() {
+        return PackageManager.PERMISSION_DENIED ==
+                ContextCompat.checkSelfPermission(mApplicationContext, Manifest.permission.WAKE_LOCK);
+    }
+
+    private void releaseWakeLock() {
+        if (mWakeLock != null && mWakeLock.isHeld()) {
+            mWakeLock.release();
+        }
+
+        if (mWifiLock != null && mWifiLock.isHeld()) {
+            mWifiLock.release();
+        }
+    }
+
     private PlaybackStateCompat buildPlaybackState(int state) {
         return mPlaybackStateBuilder.setState(state, getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
                 .build();
@@ -719,6 +770,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void notifyPreparing() {
+        requireWakeLock();
         mPlayerStateHelper.onPreparing();
 
         onPreparing();
@@ -766,6 +818,7 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyPaused() {
         cancelRecordProgress();
+        releaseWakeLock();
 
         mPlayerStateHelper.onPaused();
 
@@ -790,6 +843,7 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyStopped() {
         cancelRecordProgress();
+        releaseWakeLock();
 
         mPlayerStateHelper.onStopped();
         mMediaSession.setActive(false);
@@ -830,6 +884,7 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyError(int errorCode, String errorMessage) {
         releaseMusicPlayer();
+        releaseWakeLock();
 
         mPlayerStateHelper.onError(errorCode, errorMessage);
         mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_ERROR));
@@ -1531,304 +1586,5 @@ public abstract class AbstractPlayer implements Player {
         }
 
         mRecordProgressDisposable.dispose();
-    }
-
-    /**
-     * MusicPlayer 包装器，额外添加了申请 WakeLock 唤醒锁功能。且只会在当前应用程序具有
-     * android.permission.WAKE_LOCK 权限时才会申请 WakeLock 唤醒锁。
-     * <p>
-     * 唤醒锁会在播放时申请，在暂停、停止或者出错时释放。
-     */
-    private static class MusicPlayerWrapper implements MusicPlayer {
-        private static final String TAG = "MusicPlayer";
-
-        private Context mApplicationContext;
-        private MusicPlayer mMusicPlayer;
-        private PowerManager.WakeLock mWakeLock;
-        private WifiManager.WifiLock mWifiLock;
-
-        private OnCompletionListener mCompletionListener;
-        private OnErrorListener mErrorListener;
-
-        private Handler mMainHandler;
-
-        MusicPlayerWrapper(@NonNull Context context, @NonNull MusicPlayer musicPlayer) {
-            Preconditions.checkNotNull(context);
-            Preconditions.checkNotNull(musicPlayer);
-
-            mApplicationContext = context.getApplicationContext();
-            mMusicPlayer = musicPlayer;
-            mMainHandler = new Handler(Looper.getMainLooper());
-
-            initWakeLock(context);
-            initDelegateMusicPlayer();
-        }
-
-        private void initWakeLock(Context context) {
-            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            WifiManager wm = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-
-            String tag = "player:MusicPlayer";
-
-            if (pm != null) {
-                mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, tag);
-                mWakeLock.setReferenceCounted(false);
-            }
-
-            if (wm != null) {
-                mWifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL, tag);
-                mWifiLock.setReferenceCounted(false);
-            }
-        }
-
-        private boolean isMainThread() {
-            return Looper.myLooper() == Looper.getMainLooper();
-        }
-
-        private void runOnMainThread(Runnable task) {
-            if (isMainThread()) {
-                task.run();
-                return;
-            }
-
-            mMainHandler.post(task);
-        }
-
-        private void initDelegateMusicPlayer() {
-            mMusicPlayer.setOnCompletionListener(new OnCompletionListener() {
-                @Override
-                public void onCompletion(final MusicPlayer mp) {
-                    runOnMainThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            releaseWakeLock();
-
-                            if (mCompletionListener != null) {
-                                mCompletionListener.onCompletion(mp);
-                            }
-                        }
-                    });
-                }
-            });
-
-            mMusicPlayer.setOnErrorListener(new OnErrorListener() {
-                @Override
-                public void onError(final MusicPlayer mp, final int errorCode) {
-                    runOnMainThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            releaseWakeLock();
-
-                            if (mErrorListener != null) {
-                                mErrorListener.onError(mp, errorCode);
-                            }
-                        }
-                    });
-                }
-            });
-        }
-
-        private void requireWakeLock() {
-            if (wakeLockPermissionDenied()) {
-                Log.w(TAG, "Forget to request 'android.permission.WAKE_LOCK' permission?");
-                return;
-            }
-
-            if (mWakeLock != null && !mWakeLock.isHeld()) {
-                mWakeLock.acquire(getDuration() + 5_000);
-            }
-
-            if (mWifiLock != null && !mWifiLock.isHeld()) {
-                mWifiLock.acquire();
-            }
-        }
-
-        private boolean wakeLockPermissionDenied() {
-            return PackageManager.PERMISSION_DENIED ==
-                    ContextCompat.checkSelfPermission(mApplicationContext, Manifest.permission.WAKE_LOCK);
-        }
-
-        private void releaseWakeLock() {
-            if (mWakeLock != null && mWakeLock.isHeld()) {
-                mWakeLock.release();
-            }
-
-            if (mWifiLock != null && mWifiLock.isHeld()) {
-                mWifiLock.release();
-            }
-        }
-
-        @Override
-        public void prepare(Uri uri) throws Exception {
-            mMusicPlayer.prepare(uri);
-        }
-
-        @Override
-        public void setLooping(boolean looping) {
-            mMusicPlayer.setLooping(looping);
-        }
-
-        @Override
-        public boolean isLooping() {
-            return mMusicPlayer.isLooping();
-        }
-
-        @Override
-        public boolean isPlaying() {
-            return mMusicPlayer.isPlaying();
-        }
-
-        @Override
-        public int getDuration() {
-            return mMusicPlayer.getDuration();
-        }
-
-        @Override
-        public int getProgress() {
-            return mMusicPlayer.getProgress();
-        }
-
-        @Override
-        public void start() {
-            requireWakeLock();
-            mMusicPlayer.start();
-        }
-
-        @Override
-        public void pause() {
-            releaseWakeLock();
-            mMusicPlayer.pause();
-        }
-
-        @Override
-        public void stop() {
-            releaseWakeLock();
-            mMusicPlayer.stop();
-        }
-
-        @Override
-        public void seekTo(int pos) {
-            mMusicPlayer.seekTo(pos);
-        }
-
-        @Override
-        public void setVolume(float leftVolume, float rightVolume) {
-            mMusicPlayer.setVolume(leftVolume, rightVolume);
-        }
-
-        @Override
-        public void quiet() {
-            mMusicPlayer.quiet();
-        }
-
-        @Override
-        public void dismissQuiet() {
-            mMusicPlayer.dismissQuiet();
-        }
-
-        @Override
-        public void release() {
-            mMusicPlayer.release();
-        }
-
-        @Override
-        public boolean isInvalid() {
-            return mMusicPlayer.isInvalid();
-        }
-
-        @Override
-        public int getAudioSessionId() {
-            return mMusicPlayer.getAudioSessionId();
-        }
-
-        @Override
-        public void setOnPreparedListener(final OnPreparedListener listener) {
-            if (listener == null) {
-                mMusicPlayer.setOnPreparedListener(null);
-                return;
-            }
-
-            mMusicPlayer.setOnPreparedListener(new OnPreparedListener() {
-                @Override
-                public void onPrepared(final MusicPlayer mp) {
-                    runOnMainThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onPrepared(mp);
-                        }
-                    });
-                }
-            });
-        }
-
-        @Override
-        public void setOnCompletionListener(OnCompletionListener listener) {
-            mCompletionListener = listener;
-        }
-
-        @Override
-        public void setOnSeekCompleteListener(final OnSeekCompleteListener listener) {
-            if (listener == null) {
-                mMusicPlayer.setOnSeekCompleteListener(null);
-                return;
-            }
-
-            mMusicPlayer.setOnSeekCompleteListener(new OnSeekCompleteListener() {
-                @Override
-                public void onSeekComplete(final MusicPlayer mp) {
-                    runOnMainThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onSeekComplete(mp);
-                        }
-                    });
-                }
-            });
-        }
-
-        @Override
-        public void setOnStalledListener(final OnStalledListener listener) {
-            if (listener == null) {
-                mMusicPlayer.setOnStalledListener(null);
-                return;
-            }
-
-            mMusicPlayer.setOnStalledListener(new OnStalledListener() {
-                @Override
-                public void onStalled(final boolean stalled) {
-                    runOnMainThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onStalled(stalled);
-                        }
-                    });
-                }
-            });
-        }
-
-        @Override
-        public void setOnBufferingUpdateListener(final OnBufferingUpdateListener listener) {
-            if (listener == null) {
-                mMusicPlayer.setOnBufferingUpdateListener(null);
-                return;
-            }
-
-            mMusicPlayer.setOnBufferingUpdateListener(new OnBufferingUpdateListener() {
-                @Override
-                public void onBufferingUpdate(final MusicPlayer mp, final int buffered, final boolean isPercent) {
-                    runOnMainThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onBufferingUpdate(mp, buffered, isPercent);
-                        }
-                    });
-                }
-            });
-        }
-
-        @Override
-        public void setOnErrorListener(OnErrorListener listener) {
-            mErrorListener = listener;
-        }
     }
 }
