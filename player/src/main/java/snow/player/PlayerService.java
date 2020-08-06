@@ -135,6 +135,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         initComponentFactory();
+        initCustomActions();
         initPlayerConfig();
         initAudioEffectManager();
         initPlayerState();
@@ -212,6 +213,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             e.printStackTrace();
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void initCustomActions() {
+        if (injectCustomActions()) {
+            mStartCommandActionMap.putAll(mComponentFactory.getCustomActions());
         }
     }
 
@@ -1867,6 +1874,21 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         public HistoryRecorder createHistoryRecorder() {
             return null;
         }
+
+        /**
+         * 添加自定在动作。
+         * <p>
+         * 可以使用 Action 创建一个 Intent 对象来调用启动 PlayerService。PlayerService 会在其
+         * onStartCommand 方法中检测 Intent 的 Action 是否匹配了一个自定义动作，如果匹配成功，则会执行对应
+         * 的 Runnable 对象。
+         *
+         * @return 要添加的自定义动作。Map 的 key 是自定义动作的名称，请保证其唯一性；Map 的 value 是
+         * Runnable 对象，表示要执行的动作
+         */
+        @NonNull
+        public Map<String, Runnable> getCustomActions() {
+            return new HashMap<>();
+        }
     }
 
     private boolean isAnnotatedWithInject(Method method) {
@@ -1911,5 +1933,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private boolean injectHistoryRecorder() {
         return shouldInject("createHistoryRecorder");
+    }
+
+    private boolean injectCustomActions() {
+        return shouldInject("getCustomActions");
     }
 }
