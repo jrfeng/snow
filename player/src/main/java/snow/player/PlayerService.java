@@ -1149,6 +1149,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         private Bitmap mIcon;
         private CustomTarget<Bitmap> mTarget;
 
+        @Nullable
+        private PendingIntent mContentIntent;
+
         void init(PlayerService playerService) {
             mPlayerService = playerService;
             mMusicItem = new MusicItem();
@@ -1225,6 +1228,27 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                             mIconCornerRadius[2],
                             mIconCornerRadius[3]))
                     .into(mTarget);
+        }
+
+        /**
+         * 获取通知的 Content Intent 对象。
+         *
+         * @return PendingIntent 对象。该 PendingIntent 对象会被附加到通知上，会在通知本点击时触发（如果
+         * 没有设置 Content Intent，则会返回 null）
+         * @see #setContentIntent(PendingIntent)
+         */
+        @Nullable
+        public final PendingIntent getContentIntent() {
+            return mContentIntent;
+        }
+
+        /**
+         * 设置 Content Intent 对象。
+         *
+         * @param contentIntent PendingIntent 对象，可为 null
+         */
+        public final void setContentIntent(@Nullable PendingIntent contentIntent) {
+            mContentIntent = contentIntent;
         }
 
         private boolean notLocaleMusic() {
@@ -1664,6 +1688,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                     .setLargeIcon(getIcon())
                     .setContentTitle(getContentTitle())
                     .setContentText(getContentText(getPlayingMusicItem().getArtist()))
+                    .setContentIntent(getContentIntent())
                     .setStyle(mediaStyle);
 
             onBuildNotification(builder);
