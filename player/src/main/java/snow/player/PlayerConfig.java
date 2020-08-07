@@ -26,7 +26,7 @@ class PlayerConfig {
         Preconditions.checkNotNull(id);
 
         MMKV.initialize(context);
-        mMMKV = MMKV.mmkvWithID(id, MMKV.MULTI_PROCESS_MODE);
+        mMMKV = MMKV.mmkvWithID("PlayerConfig:" + id, MMKV.MULTI_PROCESS_MODE);
     }
 
     /**

@@ -51,7 +51,7 @@ public abstract class PlaylistManager {
         Preconditions.checkNotNull(playlistId);
 
         MMKV.initialize(context);
-        mMMKV = MMKV.mmkvWithID(playlistId, MMKV.MULTI_PROCESS_MODE);
+        mMMKV = MMKV.mmkvWithID("PlaylistManager:" + playlistId, MMKV.MULTI_PROCESS_MODE);
         mExecutor = Executors.newSingleThreadExecutor();
         mEditable = false;
         mMainHandler = new Handler(Looper.getMainLooper());
