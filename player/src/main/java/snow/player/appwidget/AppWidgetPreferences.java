@@ -3,6 +3,7 @@ package snow.player.appwidget;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.tencent.mmkv.MMKV;
@@ -33,7 +34,7 @@ public class AppWidgetPreferences implements SharedPreferences {
      * @param context Context 对象
      * @param service 关联的 PlayerService 类的 Class 对象
      */
-    public AppWidgetPreferences(Context context, Class<? extends PlayerService> service) {
+    public AppWidgetPreferences(@NonNull Context context, @NonNull Class<? extends PlayerService> service) {
         MMKV.initialize(context);
         mMMKV = MMKV.mmkvWithID("PlayerStateProvider:" + service.getName(), MMKV.MULTI_PROCESS_MODE);
     }
