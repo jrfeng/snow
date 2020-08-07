@@ -106,7 +106,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private NotificationManager mNotificationManager;
 
-    private Map<String, Runnable> mStartCommandActionMap;
+    private Map<String, CustomAction> mAllCustomAction;
 
     private MediaSessionCompat mMediaSession;
 
@@ -130,7 +130,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mPersistentId = getPersistentId();
         mNotificationId = getNotificationId();
         mCommandCallbackMap = new HashMap<>();
-        mStartCommandActionMap = new HashMap<>();
+        mAllCustomAction = new HashMap<>();
 
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -153,12 +153,19 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         MediaButtonReceiver.handleIntent(mMediaSession, intent);
+        handleCustomAction(intent.getAction(), intent.getExtras());
 
-        Runnable task = mStartCommandActionMap.get(intent.getAction());
-        if (task != null) {
-            task.run();
-        }
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    /**
+     * 处理 CustomAction，如果已处理，则返回 true，否则返回 false。
+     */
+    private void handleCustomAction(String action, Bundle extras) {
+        CustomAction customAction = mAllCustomAction.get(action);
+        if (customAction != null) {
+            customAction.doAction(getPlayer(), extras);
+        }
     }
 
     @Nullable
@@ -218,7 +225,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private void initCustomActions() {
         if (injectCustomActions()) {
-            mStartCommandActionMap.putAll(mComponentFactory.getCustomActions());
+            mAllCustomAction.putAll(mComponentFactory.getCustomActions());
         }
     }
 
@@ -276,13 +283,13 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             public void onHeadsetHookClicked(int clickCount) {
                 switch (clickCount) {
                     case 1:
-                        playPause();
+                        getPlayer().playPause();
                         break;
                     case 2:
-                        skipToNext();
+                        getPlayer().skipToNext();
                         break;
                     case 3:
-                        skipToPrevious();
+                        getPlayer().skipToPrevious();
                         break;
                 }
             }
@@ -462,7 +469,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     @Override
     public final void shutdown() {
         if (isPlayingState()) {
-            pause();
+            getPlayer().pause();
         }
 
         notifyOnShutdown();
@@ -495,31 +502,57 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * 添加一个自定义动作。
      * <p>
-     * 该方法会返回一个 PendingIntent 对象，该 PendingIntent 对象会使用指定的 action 启动当前 Service。当
-     * Service 在 {@link #onStartCommand(Intent, int, int)} 方法中检测到该 action 时，会执行其对应的 task。
+     * 自定义动作可通过构造一个具有指定 action 的 Intent 对象并调用 startService 方法触发。
+     * <p>
+     * 例：
+     * <pre>
+     * Intent intent = new Intent(context, PlayerService.class);
+     * intent.setAction(action);
+     * ...
+     * context.startService(intent);
+     * </pre>
+     *
+     * @param action       自定义动作的名称
+     * @param customAction 自定义动作要执行的任务，不能为 null
      */
-    protected final PendingIntent addOnStartCommandAction(@NonNull String action, @NonNull Runnable task) {
-        Preconditions.checkNotNull(action);
-        Preconditions.checkNotNull(task);
-
-        mStartCommandActionMap.put(action, task);
-
-        Context context = getApplicationContext();
-        Intent intent = new Intent(context, this.getClass());
-        intent.setAction(action);
-        return PendingIntent.getService(context, 0, intent, 0);
+    protected final void addCustomAction(@NonNull String action, @NonNull CustomAction customAction) {
+        mAllCustomAction.put(action, customAction);
     }
 
     /**
-     * 移除一个已添加的自定义动作。
-     * <p>
-     * 需要指出的时，当一个自定义动作被移除后，其对应的 PendingIntent 仍然可以用来启动当前 Service，只不过
-     * {@link #onStartCommand(Intent, int, int)} 不会在响应对应的 action。建议在调用该方法后同时取消注册
-     * 时返回的那个 PendingIntent 对象（调用 PendingIntent 的 cancel() 方法进行取消）。
+     * 用于创建触发当前 PlayerService 中的自定义动作的 PendingIntent 对象。
+     *
+     * @param action 自定义动作的名称
+     * @return 可触发自定义动作的 PendingIntent 对象
      */
-    protected final void removeOnStartCommandAction(@NonNull String action) {
-        Preconditions.checkNotNull(action);
-        mStartCommandActionMap.remove(action);
+    protected final PendingIntent getCustomActionPendingIntent(@NonNull String action) {
+        return getCustomActionPendingIntent(action, this, this.getClass());
+    }
+
+    /**
+     * 工具方法，用于创建触发自定义动作的 PendingIntent 对象。
+     *
+     * @param action  自定义动作的名称
+     * @param context Context 对象
+     * @param service 自定义动作关联到的 PlayerService 的 Class 对象
+     * @return 可触发自定义动作的 PendingIntent 对象
+     */
+    public static PendingIntent getCustomActionPendingIntent(@NonNull String action,
+                                                             Context context,
+                                                             Class<? extends PlayerService> service) {
+        Intent intent = new Intent(context, service);
+        intent.setAction(action);
+
+        return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    /**
+     * 移除一个自定义动作。
+     *
+     * @param action 自定义动作的名称
+     */
+    protected final void removeCustomAction(@NonNull String action) {
+        mAllCustomAction.remove(action);
     }
 
     private void syncPlayerState(OnCommandCallback listener) {
@@ -581,7 +614,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @return 播放队列的播放模式。
      * @see PlayMode
      */
-    protected final PlayMode getPlayMode() {
+    public final PlayMode getPlayMode() {
         return mPlayerState.getPlayMode();
     }
 
@@ -589,7 +622,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 获取播放队列携带的额外参数（可为 null）。
      */
     @Nullable
-    protected final Bundle getPlaylistExtra() {
+    public final Bundle getPlaylistExtra() {
         return mPlayer.getPlaylistExtra();
     }
 
@@ -599,7 +632,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @return 播放器当前的播放状态。
      */
     @NonNull
-    protected final PlaybackState getPlaybackState() {
+    public final PlaybackState getPlaybackState() {
         return mPlayer.getPlaybackState();
     }
 
@@ -619,14 +652,14 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * 获取当前正在播放的音乐的 MusicItem 对象。
      */
-    protected final MusicItem getPlayingMusicItem() {
+    public final MusicItem getPlayingMusicItem() {
         return mPlayerState.getMusicItem();
     }
 
     /**
      * 播放器是否发生了错误。
      */
-    protected final boolean isError() {
+    public final boolean isError() {
         return getErrorCode() != ErrorUtil.NO_ERROR;
     }
 
@@ -635,7 +668,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * <p>
      * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
      */
-    protected final int getErrorCode() {
+    public final int getErrorCode() {
         return mPlayerState.getErrorCode();
     }
 
@@ -644,14 +677,14 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * <p>
      * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
      */
-    protected final String getErrorMessage() {
+    public final String getErrorMessage() {
         return ErrorUtil.getErrorMessage(this, getErrorCode());
     }
 
     /**
      * 要求 Service 更新 NotificationView，如果没有设置 NotificationView，则忽略本次操作。
      */
-    protected final void updateNotificationView() {
+    public final void updateNotificationView() {
         if (noNotificationView()) {
             return;
         }
@@ -807,73 +840,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     /**
      * 获取播放器的 Player 对象。可用于对播放器进行控制。
      */
-    protected final Player getPlayer() {
+    @NonNull
+    public final Player getPlayer() {
         return mPlayer;
-    }
-
-    /**
-     * 播放。
-     */
-    protected final void play() {
-        getPlayer().play();
-    }
-
-    /**
-     * 暂停。
-     */
-    protected final void pause() {
-        getPlayer().pause();
-    }
-
-    /**
-     * 播放/暂停。
-     */
-    protected final void playPause() {
-        getPlayer().playPause();
-    }
-
-    /**
-     * 停止。
-     */
-    protected final void stop() {
-        getPlayer().stop();
-    }
-
-    /**
-     * 快进。
-     */
-    protected final void fastForward() {
-        getPlayer().fastForward();
-    }
-
-    /**
-     * 快退。
-     */
-    protected final void rewind() {
-        getPlayer().rewind();
-    }
-
-    /**
-     * 调整音乐播放进度。
-     *
-     * @param progress 要调整到的播放进度
-     */
-    protected final void seekTo(int progress) {
-        getPlayer().seekTo(progress);
-    }
-
-    /**
-     * 下一曲。
-     */
-    protected final void skipToNext() {
-        getPlayer().skipToNext();
-    }
-
-    /**
-     * 上一曲。
-     */
-    protected final void skipToPrevious() {
-        getPlayer().skipToPrevious();
     }
 
     /**
@@ -1073,7 +1042,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         public void onPlay() {
-            PlayerService.this.play();
+            PlayerService.this.getPlayer().play();
         }
 
         @Override
@@ -1083,37 +1052,37 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         public void onPause() {
-            PlayerService.this.pause();
+            PlayerService.this.getPlayer().pause();
         }
 
         @Override
         public void onSkipToNext() {
-            PlayerService.this.skipToNext();
+            PlayerService.this.getPlayer().skipToNext();
         }
 
         @Override
         public void onSkipToPrevious() {
-            PlayerService.this.skipToPrevious();
+            PlayerService.this.getPlayer().skipToPrevious();
         }
 
         @Override
         public void onFastForward() {
-            PlayerService.this.fastForward();
+            PlayerService.this.getPlayer().fastForward();
         }
 
         @Override
         public void onRewind() {
-            PlayerService.this.rewind();
+            PlayerService.this.getPlayer().rewind();
         }
 
         @Override
         public void onStop() {
-            PlayerService.this.stop();
+            PlayerService.this.getPlayer().stop();
         }
 
         @Override
         public void onSeekTo(long pos) {
-            PlayerService.this.seekTo((int) pos);
+            PlayerService.this.getPlayer().seekTo((int) pos);
         }
 
         @Override
@@ -1250,6 +1219,16 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
+         * 获取用于触发自定义动作的 PendingIntent 对象。
+         *
+         * @param action 自定义动作的名称
+         * @return 可触发自定义动作的 PendingIntent 对象
+         */
+        protected final PendingIntent getCustomActionPendingIntent(@NonNull String action) {
+            return mPlayerService.getCustomActionPendingIntent(action);
+        }
+
+        /**
          * 设置 Content Intent 对象。
          *
          * @param contentIntent PendingIntent 对象，可为 null
@@ -1313,28 +1292,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         protected abstract Notification onCreateNotification();
 
         /**
-         * 上一曲
-         */
-        protected final void skipToPrevious() {
-            mPlayerService.skipToPrevious();
-        }
-
-        /**
-         * 下一曲
-         */
-        protected final void skipToNext() {
-            mPlayerService.skipToNext();
-        }
-
-        /**
-         * 播放/暂停
-         */
-        protected final void playPause() {
-            mPlayerService.playPause();
-        }
-
-        /**
-         * 关闭播放器
+         * 关闭播放器。
          */
         protected final void shutdown() {
             mPlayerService.shutdown();
@@ -1490,23 +1448,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 添加自定义动作。
          *
-         * @param action 自定在动作的名称，请保证该值的唯一性
-         * @param task   要执行的任务。该任务由 PlayerService 在其 onStartCommand 方法中执行，请不要在
-         *               该任务中执行耗时操作
-         * @return 返回一个 PendingIntent 对象，该 PendingIntent 对象用于启动 PlayerService。
-         * PlayerService 会在其 onStartCommand 中查找该 PendingIntent 对应的任务，然后执行这个任务
+         * @param action       自定在动作的名称，请保证该值的唯一性
+         * @param customAction 要执行的任务
          */
-        protected final PendingIntent addOnStartCommandAction(@NonNull String action, @NonNull Runnable task) {
-            return mPlayerService.addOnStartCommandAction(action, task);
-        }
-
-        /**
-         * 移除自定义动作。
-         *
-         * @param action 要移除的自定义动作的名称
-         */
-        protected final void removeOnStartCommandAction(@NonNull String action) {
-            mPlayerService.removeOnStartCommandAction(action);
+        protected final void addCustomAction(@NonNull String action, @NonNull CustomAction customAction) {
+            mPlayerService.addCustomAction(action, customAction);
         }
 
         /**
@@ -1647,26 +1593,34 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             setIconSize(res.getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
             setIconCornerRadius(res.getDimensionPixelSize(R.dimen.snow_notif_icon_corner_radius));
 
-            mSkipToPrevious = addOnStartCommandAction(ACTION_SKIP_TO_PREVIOUS, new Runnable() {
+            initAllPendingIntent();
+        }
+
+        private void initAllPendingIntent() {
+            addCustomAction(ACTION_SKIP_TO_PREVIOUS, new CustomAction() {
                 @Override
-                public void run() {
-                    skipToPrevious();
+                public void doAction(@NonNull Player player, @Nullable Bundle extras) {
+                    player.skipToPrevious();
                 }
             });
 
-            mPlayPause = addOnStartCommandAction(ACTION_PLAY_PAUSE, new Runnable() {
+            addCustomAction(ACTION_PLAY_PAUSE, new CustomAction() {
                 @Override
-                public void run() {
-                    playPause();
+                public void doAction(@NonNull Player player, @Nullable Bundle extras) {
+                    player.playPause();
                 }
             });
 
-            mSkipToNext = addOnStartCommandAction(ACTION_SKIP_TO_NEXT, new Runnable() {
+            addCustomAction(ACTION_SKIP_TO_NEXT, new CustomAction() {
                 @Override
-                public void run() {
-                    skipToNext();
+                public void doAction(@NonNull Player player, @Nullable Bundle extras) {
+                    player.skipToNext();
                 }
             });
+
+            mSkipToPrevious = getCustomActionPendingIntent(ACTION_SKIP_TO_PREVIOUS);
+            mPlayPause = getCustomActionPendingIntent(ACTION_PLAY_PAUSE);
+            mSkipToNext = getCustomActionPendingIntent(ACTION_SKIP_TO_NEXT);
         }
 
         public final PendingIntent doSkipToPrevious() {
@@ -1890,7 +1844,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * Runnable 对象，表示要执行的动作
          */
         @NonNull
-        public Map<String, Runnable> getCustomActions() {
+        public Map<String, CustomAction> getCustomActions() {
             return new HashMap<>();
         }
     }
@@ -1941,5 +1895,18 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private boolean injectCustomActions() {
         return shouldInject("getCustomActions");
+    }
+
+    /**
+     * 自定义动作。
+     */
+    public interface CustomAction {
+        /**
+         * 要执行的任务。
+         *
+         * @param player 播放器
+         * @param extras 携带的额外参数。通过调用 Intent.getExtras() 方法获取，可为 null
+         */
+        void doAction(@NonNull Player player, @Nullable Bundle extras);
     }
 }
