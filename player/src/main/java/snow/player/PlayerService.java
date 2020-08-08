@@ -15,6 +15,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -49,6 +50,7 @@ import channel.helper.pipe.CustomActionPipe;
 import channel.helper.pipe.MessengerPipe;
 import media.helper.HeadsetHookHelper;
 
+import snow.player.appwidget.AppWidgetPreferences;
 import snow.player.effect.AudioEffectManager;
 import snow.player.media.MediaMusicPlayer;
 import snow.player.media.MusicItem;
@@ -245,7 +247,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mPlayer = new PlayerImp(this,
                 mPlayerConfig,
                 mPlayerState,
-                mPlaylistManager);
+                mPlaylistManager,
+                new AppWidgetPreferences(this, this.getClass()));
     }
 
     private void initControllerPipe() {
@@ -477,7 +480,18 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     @Override
-    public void registerPlayerStateListener(String token, IBinder listener) {
+    public void registerPlayerStateListener(final String token, IBinder listener) {
+        try {
+            listener.linkToDeath(new IBinder.DeathRecipient() {
+                @Override
+                public void binderDied() {
+                    removeOnCommandCallback(token);
+                }
+            }, 0);
+        } catch (RemoteException e) {
+            return;
+        }
+
         MessengerPipe pipe = new MessengerPipe(listener);
 
         addOnCommandCallback(token, ChannelHelper.newEmitter(OnCommandCallback.class, pipe));
@@ -486,7 +500,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     @Override
     public void unregisterPlayerStateListener(String token) {
-        removeOnConfigChangeListener(token);
+        removeOnCommandCallback(token);
         mPlayer.removeStateListener(token);
     }
 
@@ -572,7 +586,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         syncPlayerState(listener);
     }
 
-    private void removeOnConfigChangeListener(@NonNull String token) {
+    private void removeOnCommandCallback(@NonNull String token) {
         Preconditions.checkNotNull(token);
 
         mCommandCallbackMap.remove(token);
@@ -943,8 +957,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         public PlayerImp(@NonNull Context context,
                          @NonNull PlayerConfig playerConfig,
                          @NonNull PlayerState playlistState,
-                         @NonNull PlaylistManager playlistManager) {
-            super(context, playerConfig, playlistState, playlistManager);
+                         @NonNull PlaylistManager playlistManager,
+                         @Nullable AppWidgetPreferences pref) {
+            super(context, playerConfig, playlistState, playlistManager, pref);
         }
 
         @Override
