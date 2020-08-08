@@ -1029,7 +1029,7 @@ public class PlayerClient implements Player {
      * 如果监听器已添加，则忽略本次调用。
      *
      * @param listener 要添加的监听器
-     * @see OnBufferedProgressChangeListener
+     * @see Player.OnBufferedProgressChangeListener
      */
     public void addOnBufferedProgressChangeListener(OnBufferedProgressChangeListener listener) {
         mPlayerStateHolder.addOnBufferedProgressChangeListener(listener);
@@ -1121,7 +1121,7 @@ public class PlayerClient implements Player {
      * 如果监听器已添加，则忽略本次调用。
      *
      * @param listener 要添加的监听器
-     * @see OnSeekCompleteListener
+     * @see Player.OnSeekCompleteListener
      */
     public void addOnSeekCompleteListener(OnSeekCompleteListener listener) {
         mPlayerStateHolder.addOnSeekCompleteListener(listener);
@@ -1135,7 +1135,7 @@ public class PlayerClient implements Player {
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
      * @param listener 要添加的监听器
-     * @see OnSeekCompleteListener
+     * @see Player.OnSeekCompleteListener
      */
     public void addOnSeekCompleteListener(LifecycleOwner owner,
                                           final OnSeekCompleteListener listener) {

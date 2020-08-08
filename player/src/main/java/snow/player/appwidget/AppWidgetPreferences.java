@@ -25,6 +25,17 @@ import snow.player.media.MusicItem;
  * 默认情况下，AppWidgetPreferences 会在被修改后会发送 {@link #ACTION_PREFERENCE_CHANGED} 广播，广播的
  * Category 为 PlayerService（或者其子类）的完整类名，可以让你的 AppWidgetProvider 监听此广播来同步刷新
  * AppWidget 的 UI。
+ * <p>
+ * 例：
+ * <pre>
+ * &lt;receiver android:name=".MyAppWidgetProvider"&gt;
+ *     ...
+ *     &lt;intent-filter&gt;
+ *         &lt;action android:name="snow.player.appwidget.action.PREFERENCE_CHANGED"/&gt;
+ *         &lt;category android:name="snow.player.PlayerService"/&gt;
+ *     &lt;/intent-filter&gt;
+ * &lt;/receiver&gt;
+ * </pre>
  */
 public class AppWidgetPreferences implements SharedPreferences {
     /**
@@ -212,6 +223,12 @@ public class AppWidgetPreferences implements SharedPreferences {
         mMMKV.registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
     }
 
+    /**
+     * 当前 AppWidgetPreferences 对象关联到的 PlayerService 是否存活。
+     *
+     * @return 如果与当前 AppWidgetPreferences 对象关联的 PlayerService 处于存活状态，则返回 true，否则返
+     * 回 false
+     */
     public boolean isServiceAlive() {
         ActivityManager am = (ActivityManager) mApplicationContext.getSystemService(Context.ACTIVITY_SERVICE);
 
