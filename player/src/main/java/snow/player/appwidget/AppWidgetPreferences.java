@@ -38,6 +38,7 @@ public class AppWidgetPreferences implements SharedPreferences {
     private static final String KEY_PLAY_PROGRESS_UPDATE_TIME = "play_progress_update_time";
     private static final String KEY_PREPARING = "preparing";
     private static final String KEY_STALLED = "stalled";
+    private static final String KEY_ERROR_MESSAGE = "error_message";
 
     private Context mApplicationContext;
     private MMKV mMMKV;
@@ -135,6 +136,10 @@ public class AppWidgetPreferences implements SharedPreferences {
 
     public boolean isStalled() {
         return getBoolean(KEY_STALLED, false);
+    }
+
+    public String getErrorMessage() {
+        return getString(KEY_ERROR_MESSAGE, "");
     }
 
     /**
@@ -265,6 +270,11 @@ public class AppWidgetPreferences implements SharedPreferences {
 
         public Editor setStalled(boolean stalled) {
             return putBoolean(KEY_STALLED, stalled);
+        }
+
+        public Editor setErrorMessage(String errorMessage) {
+            putString(KEY_ERROR_MESSAGE, errorMessage);
+            return this;
         }
     }
 }
