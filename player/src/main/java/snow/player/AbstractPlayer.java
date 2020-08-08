@@ -33,6 +33,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import media.helper.AudioFocusHelper;
 import media.helper.BecomeNoiseHelper;
+import snow.player.appwidget.AppWidgetPreferences;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.playlist.Playlist;
@@ -104,7 +105,8 @@ public abstract class AbstractPlayer implements Player {
     public AbstractPlayer(@NonNull Context context,
                           @NonNull PlayerConfig playerConfig,
                           @NonNull PlayerState playerState,
-                          @NonNull PlaylistManager playlistManager) {
+                          @NonNull PlaylistManager playlistManager,
+                          @Nullable AppWidgetPreferences pref) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerConfig);
         Preconditions.checkNotNull(playerState);
@@ -113,7 +115,7 @@ public abstract class AbstractPlayer implements Player {
         mApplicationContext = context.getApplicationContext();
         mPlayerConfig = playerConfig;
         mPlayerState = playerState;
-        mPlayerStateHelper = new PlayerStateHelper(mPlayerState);
+        mPlayerStateHelper = new PlayerStateHelper(mPlayerState, pref);
         mPlaylistManager = playlistManager;
         mStateListenerMap = new HashMap<>();
         mRecordProgress = true;
