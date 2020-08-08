@@ -5,6 +5,9 @@
       <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
     </configurations>
   </component>
+  <component name="JavadocGenerationManager">
+    <option name="OTHER_OPTIONS" value="-encoding utf-8 -charset utf-8" />
+  </component>
   <component name="NullableNotNullManager">
     <option name="myDefaultNullable" value="org.jetbrains.annotations.Nullable" />
     <option name="myDefaultNotNull" value="android.annotation.NonNull" />
