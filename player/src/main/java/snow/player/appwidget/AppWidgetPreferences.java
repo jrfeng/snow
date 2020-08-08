@@ -1,5 +1,7 @@
 package snow.player.appwidget;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,8 +22,9 @@ import snow.player.media.MusicItem;
 /**
  * 用于 PlayerService 与 AppWidget 之间的状态同步。支持跨进程访问。
  * <p>
- * 默认情况下，AppWidgetPreferences 会在被修改后会发送 {@link #ACTION_PREFERENCE_CHANGED} 广播，可以让
- * 你的 AppWidgetProvider 监听此广播来同步刷新 AppWidget 的 UI。
+ * 默认情况下，AppWidgetPreferences 会在被修改后会发送 {@link #ACTION_PREFERENCE_CHANGED} 广播，广播的
+ * Category 为 PlayerService（或者其子类）的完整类名，可以让你的 AppWidgetProvider 监听此广播来同步刷新
+ * AppWidget 的 UI。
  */
 public class AppWidgetPreferences implements SharedPreferences {
     /**
@@ -41,6 +44,7 @@ public class AppWidgetPreferences implements SharedPreferences {
     private static final String KEY_ERROR_MESSAGE = "error_message";
 
     private Context mApplicationContext;
+    private Class<? extends PlayerService> mService;
     private MMKV mMMKV;
 
     /**
@@ -51,6 +55,7 @@ public class AppWidgetPreferences implements SharedPreferences {
      */
     public AppWidgetPreferences(@NonNull Context context, @NonNull Class<? extends PlayerService> service) {
         mApplicationContext = context.getApplicationContext();
+        mService = service;
 
         MMKV.initialize(context);
         mMMKV = MMKV.mmkvWithID("AppWidgetPreferences:" + service.getName(), MMKV.MULTI_PROCESS_MODE);
@@ -100,44 +105,93 @@ public class AppWidgetPreferences implements SharedPreferences {
 
     @Override
     public Editor edit() {
-        return new Editor(mApplicationContext, mMMKV, false);
+        return new Editor(mApplicationContext, mService.getName(), mMMKV, false);
     }
 
     public Editor edit(boolean noNotify) {
-        return new Editor(mApplicationContext, mMMKV, noNotify);
+        return new Editor(mApplicationContext, mService.getName(), mMMKV, noNotify);
     }
 
+    /**
+     * 获取播放器当前的播放器状态。
+     *
+     * <b>注意！该方法的返回值只在 PlayerService 存活期间有效！可以使用 {@link #isServiceAlive()} 方法判断
+     * PlayerService 是否存活。</b>
+     *
+     * @return 播放器当前的播放器状态
+     */
     @NonNull
     public PlaybackState getPlaybackState() {
         return PlaybackState.values()[getInt(KEY_PLAYBACK_STATE, 0)];
     }
 
+    /**
+     * 获取当前正在播放的歌曲。
+     *
+     * @return 当前正在播放的歌曲，可能为 null
+     */
     @Nullable
     public MusicItem getPlayingMusicItem() {
         return mMMKV.decodeParcelable(KEY_PLAYING_MUSIC_ITEM, MusicItem.class);
     }
 
+    /**
+     * 获取播放器的播放模式。
+     *
+     * @return 播放器的播放模式
+     */
     @NonNull
     public PlayMode getPlayMode() {
         return PlayMode.values()[getInt(KEY_PLAY_MODE, 0)];
     }
 
+    /**
+     * 获取播放器的播放进度。
+     *
+     * @return 播放器的播放进度
+     */
     public int getPlayProgress() {
         return getInt(KEY_PLAY_PROGRESS, 0);
     }
 
+    /**
+     * 获取播放器播放进度的更新时间。
+     *
+     * @return 播放器播放进度的更新时间
+     */
     public long getPlayProgressUpdateTime() {
         return getLong(KEY_PLAY_PROGRESS_UPDATE_TIME, 0);
     }
 
+    /**
+     * 播放器是否正在准备播放。
+     *
+     * <b>注意！该方法的返回值只在 PlayerService 存活期间有效！可以使用 {@link #isServiceAlive()} 方法判断
+     * PlayerService 是否存活。</b>
+     */
     public boolean isPreparing() {
         return getBoolean(KEY_PREPARING, false);
     }
 
+    /**
+     * 播放器是否处于 stalled 状态。
+     * <p>
+     * 当播放器的缓冲区没有足够的数据支持继续播放时，播放器会处于 stalled 状态，此时该方法会返回 true，否则返回
+     * false。
+     *
+     * <b>注意！该方法的返回值只在 PlayerService 存活期间有效！可以使用 {@link #isServiceAlive()} 方法判断
+     * PlayerService 是否存活。</b>
+     */
     public boolean isStalled() {
         return getBoolean(KEY_STALLED, false);
     }
 
+    /**
+     * 获取错误信息。错误信息只在发生错误时才有意义。
+     *
+     * <b>注意！该方法的返回值只在 PlayerService 存活期间有效！可以使用 {@link #isServiceAlive()} 方法判断
+     * PlayerService 是否存活。</b>
+     */
     public String getErrorMessage() {
         return getString(KEY_ERROR_MESSAGE, "");
     }
@@ -158,13 +212,27 @@ public class AppWidgetPreferences implements SharedPreferences {
         mMMKV.registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
     }
 
+    public boolean isServiceAlive() {
+        ActivityManager am = (ActivityManager) mApplicationContext.getSystemService(Context.ACTIVITY_SERVICE);
+
+        for (ActivityManager.RunningServiceInfo serviceInfo : am.getRunningServices(100)) {
+            if (serviceInfo.service.equals(new ComponentName(mApplicationContext, mService))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static class Editor implements SharedPreferences.Editor {
         private Context mApplicationContext;
+        private String mServiceName;
         private MMKV mMMKV;
         private boolean mNoNotify;
 
-        private Editor(Context context, MMKV mmkv, boolean noNotify) {
+        private Editor(Context context, String serviceName, MMKV mmkv, boolean noNotify) {
             mApplicationContext = context;
+            mServiceName = serviceName;
             mMMKV = mmkv;
             mNoNotify = noNotify;
         }
@@ -236,6 +304,7 @@ public class AppWidgetPreferences implements SharedPreferences {
             }
 
             Intent intent = new Intent(ACTION_PREFERENCE_CHANGED);
+            intent.addCategory(mServiceName);
             mApplicationContext.sendBroadcast(intent);
         }
 
