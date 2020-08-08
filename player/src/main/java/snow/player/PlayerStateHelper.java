@@ -31,6 +31,7 @@ class PlayerStateHelper {
         if (mAppWidgetPreferences != null) {
             mAppWidgetPreferences.edit()
                     .setPreparing(true)
+                    .setPlaybackState(mPlayerState.getPlaybackState())
                     .commit();
         }
     }
