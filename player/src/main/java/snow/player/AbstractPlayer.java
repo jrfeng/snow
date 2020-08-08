@@ -409,6 +409,8 @@ public abstract class AbstractPlayer implements Player {
                 if (mPlayOnPrepared) {
                     mPlayOnPrepared = false;
                     play();
+                } else {
+                    notifyPaused();
                 }
 
                 if (mPreparedAction != null) {
@@ -442,6 +444,7 @@ public abstract class AbstractPlayer implements Player {
                     mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
                     return;
                 } else if (!mPlayOnSeekComplete) {
+                    notifyPaused();
                     mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PAUSED));
                 }
 
