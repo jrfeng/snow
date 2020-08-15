@@ -409,7 +409,7 @@ public abstract class AbstractPlayer implements Player {
                 if (mPlayOnPrepared) {
                     mPlayOnPrepared = false;
                     play();
-                } else {
+                } else if (mPreparedAction == null) {
                     notifyPaused();
                 }
 
@@ -442,10 +442,8 @@ public abstract class AbstractPlayer implements Player {
 
                 if (isPlaying()) {
                     mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
-                    return;
                 } else if (!mPlayOnSeekComplete) {
                     notifyPaused();
-                    mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PAUSED));
                 }
 
                 if (mPlayOnSeekComplete) {
@@ -1004,22 +1002,17 @@ public abstract class AbstractPlayer implements Player {
 
     @Override
     public void pause() {
+        if (isPreparing()) {
+            mPlayOnPrepared = false;
+            return;
+        }
+
         if (!isPlaying()) {
             return;
         }
 
         if (mLoadingPlaylist) {
             mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    pause();
-                }
-            };
-            return;
-        }
-
-        if (isPreparing()) {
-            mPreparedAction = new Runnable() {
                 @Override
                 public void run() {
                     pause();
@@ -1058,13 +1051,8 @@ public abstract class AbstractPlayer implements Player {
 
     @Override
     public void playPause() {
-        if (isPreparing()) {
-            mPreparedAction = new Runnable() {
-                @Override
-                public void run() {
-                    playPause();
-                }
-            };
+        if (isPreparing() && mPlayOnPrepared) {
+            pause();
             return;
         }
 
