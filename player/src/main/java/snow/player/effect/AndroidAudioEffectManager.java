@@ -21,7 +21,7 @@ import snow.player.util.AndroidAudioEffectConfigUtil;
  *     <li>PresetReverb：预置混响</li>
  * </ul>
  */
-public class AndroidAudioEffectManager implements AudioEffectManager {
+public final class AndroidAudioEffectManager implements AudioEffectManager {
     public static final int PRIORITY = 1;
 
     private Bundle mConfig;
