@@ -23,7 +23,7 @@ public class AndroidAudioEffectConfigUtil {
      * @param config    Bundle 对象，包含音频特效的配置信息，不能为 null
      * @param equalizer 要恢复配置的 Equalizer 对象，不能为 null
      */
-    public static void restoreSettings(@NonNull Bundle config, @NonNull Equalizer equalizer) {
+    public static void applySettings(@NonNull Bundle config, @NonNull Equalizer equalizer) {
         String settings = config.getString(KEY_SETTING_EQUALIZER);
         if (settings == null || settings.isEmpty()) {
             return;
@@ -42,7 +42,7 @@ public class AndroidAudioEffectConfigUtil {
      * @param config    Bundle 对象，包含音频特效的配置信息，不能为 null
      * @param bassBoost 要恢复配置的 BassBoost 对象，不能为 null
      */
-    public static void restoreSettings(@NonNull Bundle config, @NonNull BassBoost bassBoost) {
+    public static void applySettings(@NonNull Bundle config, @NonNull BassBoost bassBoost) {
         String settings = config.getString(KEY_SETTING_BASS_BOOST);
         if (settings == null || settings.isEmpty()) {
             return;
@@ -61,7 +61,7 @@ public class AndroidAudioEffectConfigUtil {
      * @param config      Bundle 对象，包含音频特效的配置信息，不能为 null
      * @param virtualizer 要恢复配置的 Virtualizer 对象，不能为 null
      */
-    public static void restoreSettings(@NonNull Bundle config, @NonNull Virtualizer virtualizer) {
+    public static void applySettings(@NonNull Bundle config, @NonNull Virtualizer virtualizer) {
         String settings = config.getString(KEY_SETTING_VIRTUALIZER);
         if (settings == null || settings.isEmpty()) {
             return;
@@ -80,7 +80,7 @@ public class AndroidAudioEffectConfigUtil {
      * @param config       Bundle 对象，包含音频特效的配置信息，不能为 null
      * @param presetReverb 要恢复配置的 PresetReverb 对象，不能为 null
      */
-    public static void restoreSettings(@NonNull Bundle config, @NonNull PresetReverb presetReverb) {
+    public static void applySettings(@NonNull Bundle config, @NonNull PresetReverb presetReverb) {
         String settings = config.getString(KEY_SETTING_PRESET_REVERB);
         if (settings == null || settings.isEmpty()) {
             return;
@@ -94,42 +94,42 @@ public class AndroidAudioEffectConfigUtil {
     }
 
     /**
-     * 使用 Equalizer 对象更新音频特效的 Equalizer 配置。
+     * 更新音频特效的 Equalizer 配置。
      *
-     * @param config    Bundle 对象，包含音频特效的配置信息，不能为 null
-     * @param equalizer 用于更新配置的 Equalizer 对象，不能为 null
+     * @param config   Bundle 对象，包含音频特效的配置信息，不能为 null
+     * @param settings 最新的 Equalizer 配置，不能为 null
      */
-    public static void updateSettings(@NonNull Bundle config, @NonNull Equalizer equalizer) {
-        config.putString(KEY_SETTING_EQUALIZER, equalizer.getProperties().toString());
+    public static void updateSettings(@NonNull Bundle config, @NonNull Equalizer.Settings settings) {
+        config.putString(KEY_SETTING_EQUALIZER, settings.toString());
     }
 
     /**
-     * 使用 BassBoost 对象更新音频特效的 BassBoost 配置。
+     * 更新音频特效的 BassBoost 配置。
      *
-     * @param config    Bundle 对象，包含音频特效的配置信息，不能为 null
-     * @param bassBoost 用于更新配置的 BassBoost 对象，不能为 null
+     * @param config   Bundle 对象，包含音频特效的配置信息，不能为 null
+     * @param settings 最新的 BassBoost 配置，不能为 null
      */
-    public static void updateSettings(@NonNull Bundle config, @NonNull BassBoost bassBoost) {
-        config.putString(KEY_SETTING_BASS_BOOST, bassBoost.getProperties().toString());
+    public static void updateSettings(@NonNull Bundle config, @NonNull BassBoost.Settings settings) {
+        config.putString(KEY_SETTING_BASS_BOOST, settings.toString());
     }
 
     /**
-     * 使用 Virtualizer 对象更新音频特效的 Virtualizer 配置。
+     * 更新音频特效的 Virtualizer 配置。
      *
-     * @param config      Bundle 对象，包含音频特效的配置信息，不能为 null
-     * @param virtualizer 用于更新配置的 Virtualizer 对象，不能为 null
+     * @param config   Bundle 对象，包含音频特效的配置信息，不能为 null
+     * @param settings 最新的 Virtualizer 配置，不能为 null
      */
-    public static void updateSettings(@NonNull Bundle config, @NonNull Virtualizer virtualizer) {
-        config.putString(KEY_SETTING_VIRTUALIZER, virtualizer.getProperties().toString());
+    public static void updateSettings(@NonNull Bundle config, @NonNull Virtualizer.Settings settings) {
+        config.putString(KEY_SETTING_VIRTUALIZER, settings.toString());
     }
 
     /**
-     * 使用 PresetReverb 对象更新音频特效的 PresetReverb 配置。
+     * 更新音频特效的 PresetReverb 配置。
      *
-     * @param config       Bundle 对象，包含音频特效的配置信息，不能为 null
-     * @param presetReverb 用于更新配置的 PresetReverb 对象，不能为 null
+     * @param config   Bundle 对象，包含音频特效的配置信息，不能为 null
+     * @param settings 最新的 PresetReverb 配置，不能为 null
      */
-    public static void updateSettings(@NonNull Bundle config, @NonNull PresetReverb presetReverb) {
-        config.putString(KEY_SETTING_PRESET_REVERB, presetReverb.getProperties().toString());
+    public static void updateSettings(@NonNull Bundle config, @NonNull PresetReverb.Settings settings) {
+        config.putString(KEY_SETTING_PRESET_REVERB, settings.toString());
     }
 }
