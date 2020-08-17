@@ -6,6 +6,8 @@ import snow.player.media.MusicItem;
 
 /**
  * 历史记录器，用于记录播放器的播放历史。
+ *
+ * @see PlayerService.ComponentFactory#createHistoryRecorder()
  */
 public interface HistoryRecorder {
     /**

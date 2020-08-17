@@ -13,6 +13,11 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
+/**
+ * 工具类，用于实时刷新播放器的播放进度。
+ *
+ * @see PlayerViewModel
+ */
 public class ProgressClock {
     private Callback mCallback;
 
@@ -132,7 +137,18 @@ public class ProgressClock {
         return String.format(Locale.ENGLISH, "%02d:%02d:%02d", hour, minute, second);
     }
 
+    /**
+     * 回调接口。
+     *
+     * @see ProgressClock
+     */
     public interface Callback {
+        /**
+         * 该方法会在 ProgressClock 的进度更新时调用。
+         *
+         * @param progressSec 当前播放进度（单位：秒）
+         * @param durationSec 歌曲的持续时间（单位：秒）
+         */
         void onUpdateProgress(int progressSec, int durationSec);
     }
 }

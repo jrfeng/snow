@@ -66,13 +66,14 @@ import snow.player.util.ErrorUtil;
  * {@link PlayerService} 继承了 {@link MediaBrowserServiceCompat} 类，因此也可以使用
  * {@link MediaBrowserCompat} 类来建立与 {@link PlayerService} 连接，并对播放器进行控制。不过不推荐这么做，
  * 因为本框架的大量功能都依赖于 {@link PlayerClient} 类，如果不使用 {@link PlayerClient} 类，那么也无法使
- * 用这些功能。
- * <p>
- * 让 {@link PlayerService} 继承 {@link MediaBrowserServiceCompat} 类的本意仅仅是为了兼容
+ * 用这些功能。让 {@link PlayerService} 继承 {@link MediaBrowserServiceCompat} 类的本意仅仅是为了兼容
  * {@code MediaSession} 框架，因此建议开发者应该尽量使用 {@link PlayerClient}，而不是
  * {@link MediaBrowserCompat}。
  */
 public class PlayerService extends MediaBrowserServiceCompat implements PlayerManager {
+    /**
+     * 默认的 root id，值为 `"root"`。
+     */
     public static final String DEFAULT_MEDIA_ROOT_ID = "root";
 
     /**
@@ -1381,8 +1382,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 这是一个帮助方法，获取通知栏控制器用于显示的 content text，该方法会根据播放器状态的不同而返回不同
-         * 的值。
+         * 这是一个帮助方法，用于获取通知栏控制器用于显示的 content text，该方法会根据播放器状态的不同而返回
+         * 不同的 CharSequence 值。
          * <p>
          * 例如，在 {@link PlaybackState#ERROR} 状态时，会返回一个
          * {@code android.R.color.holo_red_dark} 颜色的描述错误信息的 CharSequence 对象；而在
@@ -1578,11 +1579,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 通知栏控制器，使用 Android 系统提供的样式。通知的样式为：<a href="https://developer.android.google.cn/reference/androidx/media/app/NotificationCompat.MediaStyle?hl=en">NotificationCompat.MediaStyle</a>
+     * 通知栏控制器，使用 Android 系统提供的样式。通知的样式为：<a target="_blank" href="https://developer.android.google.cn/reference/androidx/media/app/NotificationCompat.MediaStyle?hl=en">NotificationCompat.MediaStyle</a>
      * <p>
-     * 可以通过实现 {@link #onBuildMediaStyle(androidx.media.app.NotificationCompat.MediaStyle)} 方法
-     * 和实现 {@link #onBuildNotification(NotificationCompat.Builder)} 来对当前 NotificationView 的外观进行定
-     * 制。
+     * 该类是个抽象类，可以通过实现 {@link #onBuildMediaStyle(androidx.media.app.NotificationCompat.MediaStyle)}
+     * 方法和实现 {@link #onBuildNotification(NotificationCompat.Builder)} 来对当前 NotificationView
+     * 的外观进行定制。
      * <p>
      * 更多信息，请参考官方文档： <a target="_blank" href="https://developer.android.google.cn/training/notify-user/expanded#media-style">https://developer.android.google.cn/training/notify-user/expanded#media-style</a>
      */
@@ -1842,17 +1843,22 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 添加自定在动作。
+         * 返回所有要添加的自定义动作。
          * <p>
-         * 可以使用 Map 的 key 值创建一个 Intent 对象来调用启动 PlayerService。PlayerService 会在其
+         * 该方法应该返回一个 Map，该 Map 包含了所有要添加的自定义动作。Map 的 key 是自定义动作的名称，请保证
+         * 其唯一性，并且符合 Android 的 action 格式（例如：{@code snow.player.action.PLAY_PAUSE}）。
+         * <p>
+         * 你可以使用 Map 的 key 值创建一个 Intent 对象来调用启动 PlayerService。PlayerService 会在其
          * onStartCommand 方法中检测 Intent 的 Action 是否匹配了一个自定义动作，如果匹配成功，则会执行对应
-         * 的 Runnable 对象。
+         * 的 CustomAction。
          * <p>
-         * Map 的 key 的命名方式请遵照 Action 的命名方式：{@code package_name.action.ACTION_NAME}，例如：
-         * {@code snow.player.action.PLAY_PAUSE}。
-         *
-         * @return 要添加的自定义动作。Map 的 key 是自定义动作的名称，请保证其唯一性；Map 的 value 是
-         * Runnable 对象，表示要执行的动作
+         * 例：
+         * <pre>
+         * Intent intent = new Intent(context, PlayerService.class);
+         * intent.setAction(key_custom_action);
+         * ...
+         * context.startService(intent);
+         * </pre>
          */
         @NonNull
         public Map<String, CustomAction> getCustomActions() {
@@ -1910,6 +1916,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     /**
      * 自定义动作。
+     *
+     * @see PlayerService#addCustomAction(String, CustomAction)
+     * @see ComponentFactory#getCustomActions()
      */
     public interface CustomAction {
         /**

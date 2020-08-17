@@ -162,7 +162,9 @@ public abstract class AbstractPlayer implements Player {
     protected abstract Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception;
 
     /**
-     * 对象指定的 audio session id 应用音频特效。
+     * 对指定的 audio session id 应用音频特效。
+     * <p>
+     * 子类可以覆盖该方法来对指定的 audio session id 应用音频特效。
      *
      * @param audioSessionId 当前正在播放的音乐的 audio session id。如果为 0，则可以忽略。
      */
@@ -171,6 +173,8 @@ public abstract class AbstractPlayer implements Player {
 
     /**
      * 取消当前的音频特效。
+     * <p>
+     * 子类可以覆盖该方法来取消指定的 audio session id 的音频特效。
      */
     protected void detachAudioEffect() {
     }

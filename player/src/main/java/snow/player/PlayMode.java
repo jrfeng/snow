@@ -2,6 +2,8 @@ package snow.player;
 
 /**
  * 播放器的播放模式。
+ *
+ * @see PlayerClient#setPlayMode(PlayMode)
  */
 public enum PlayMode {
     /**

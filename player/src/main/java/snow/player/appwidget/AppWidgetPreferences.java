@@ -20,7 +20,7 @@ import snow.player.PlayerService;
 import snow.player.media.MusicItem;
 
 /**
- * 用于 PlayerService 与 AppWidget 之间的状态同步。支持跨进程访问。
+ * 用于在 PlayerService 与 AppWidget 之间进行状态同步。支持跨进程访问。
  * <p>
  * 默认情况下，AppWidgetPreferences 会在被修改后会发送 {@link #ACTION_PREFERENCE_CHANGED} 广播，广播的
  * Category 为 PlayerService（或者其子类）的完整类名，可以让你的 AppWidgetProvider 监听此广播来同步刷新

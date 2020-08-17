@@ -426,7 +426,7 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 获取歌曲的持续时间（单位：秒）对应的文本值，例如 @{code 82} 秒对应的文本值为 {@code "01:22"}
+     * 获取歌曲的持续时间（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"
      */
     @NonNull
     public LiveData<String> getTextDuration() {
@@ -439,7 +439,7 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 获取歌曲的实时播放进度（单位：秒）对应的文本值，例如 @{code 82} 秒对应的文本值为 {@code "01:22"}
+     * 获取歌曲的实时播放进度（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"
      */
     @NonNull
     public LiveData<String> getTextPlayProgress() {
@@ -544,7 +544,7 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 像以前
+     * 下一曲。
      */
     public void skipToNext() {
         if (isInitialized()) {
@@ -553,7 +553,7 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 快进
+     * 快进。
      */
     public void fastForward() {
         if (isInitialized()) {
@@ -562,7 +562,7 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 快退
+     * 快退。
      */
     public void rewind() {
         if (isInitialized()) {
@@ -620,7 +620,7 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * For DataBinding。
+     * DataBinding 框架与 SeekBar 专用。
      * <p>
      * 如果你启用了 DataBinding，并且使用 SeekBar 来显示和调整播放进度，那么请将 SeekBar 的
      * {@code android:onStartTrackingTouch} 事件绑定为当前方法。
@@ -633,7 +633,7 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * For DataBinding。
+     * DataBinding 框架与 SeekBar 专用。
      * <p>
      * 如果你启用了 DataBinding，并且使用 SeekBar 来显示和调整播放进度，那么请将 SeekBar 的
      * {@code android:onStopTrackingTouch} 事件绑定为当前方法。

@@ -2,6 +2,8 @@ package snow.player;
 
 /**
  * 播放器的首选音质。
+ *
+ * @see PlayerClient#setSoundQuality(SoundQuality)
  */
 public enum SoundQuality {
     /**

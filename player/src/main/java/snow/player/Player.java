@@ -9,6 +9,8 @@ import snow.player.playlist.PlaylistManager;
 
 /**
  * 该接口定义了音乐播放器的基本功能。
+ *
+ * @see AbstractPlayer
  */
 @Channel
 public interface Player extends PlaylistManager.OnModifyPlaylistListener {

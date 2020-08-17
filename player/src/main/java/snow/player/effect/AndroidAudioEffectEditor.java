@@ -19,7 +19,7 @@ import snow.player.util.AndroidAudioEffectConfigUtil;
 /**
  * 用于编辑和同步音乐播放器的音频特效效果。
  * <p>
- * 当不在需要 {@link AndroidAudioEffectEditor} 对象时，请调用 {@link #release()} 方法释放占用的资源。
+ * 当不再需要 {@link AndroidAudioEffectEditor} 对象时，请调用 {@link #release()} 方法释放占用的资源。
  */
 public final class AndroidAudioEffectEditor {
     private PlayerClient mPlayerClient;

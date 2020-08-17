@@ -11,9 +11,10 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 /**
- * 用于存储与音乐相关的简单数据。
+ * 用于存储与音乐相关的数据。
  * <p>
- * 如果需要存储额外的数据，可以使用 {@link #setExtra(Bundle)} 方法与 {@link #getExtra()} 方法。
+ * 如果需要存储额外的数据，可以使用 {@link #setExtra(Bundle)} 方法与 {@link #getExtra()} 方法。请不要往
+ * MusicItem 中存储大对象，因为这会拖慢 {@link snow.player.Player.OnPlaylistChangeListener} 的响应速度。
  */
 public final class MusicItem implements Parcelable {
     private String musicId;

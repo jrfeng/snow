@@ -612,6 +612,11 @@ public class PlayerClient implements Player {
         return mPlayerStateHolder.mPlayerState.getBufferedProgress();
     }
 
+    /**
+     * 播放器当前是否处于 {@link PlaybackState#PLAYING} 状态。
+     *
+     * @return 如果播放器当前处于 {@link PlaybackState#PLAYING} 状态则返回 true，否则返回 false
+     */
     public boolean isPlaying() {
         return mPlayerStateHolder.mPlayerState.getPlaybackState() == PlaybackState.PLAYING;
     }
@@ -1405,7 +1410,7 @@ public class PlayerClient implements Player {
      */
     public interface OnDisconnectListener {
         /**
-         * 当 PlayerClient 断开连接时，会回调该方法。
+         * 当 PlayerClient 断开连接时会回调该方法。
          */
         void onDisconnected();
     }

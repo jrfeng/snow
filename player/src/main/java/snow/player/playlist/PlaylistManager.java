@@ -344,12 +344,19 @@ public abstract class PlaylistManager {
         });
     }
 
+    /**
+     * {@link #getPlaylistAsync(Callback)} 方法的回调接口。
+     *
+     * @see #getPlaylistAsync(Callback)
+     */
     public interface Callback {
         void onFinished(@NonNull Playlist playlist);
     }
 
     /**
      * 用于监听播放列表的修改事件。
+     *
+     * @see #setOnModifyPlaylistListener(OnModifyPlaylistListener)
      */
     public interface OnModifyPlaylistListener {
 

@@ -36,7 +36,7 @@ public interface AudioEffectManager {
     void detachAudioEffect();
 
     /**
-     * 是否音频特效。
+     * 释放音频特效。
      * <p>
      * 你可以在该方法中释放所有不再需要的资源。
      */

@@ -3,7 +3,9 @@ package snow.player.media;
 import android.net.Uri;
 
 /**
- * 该类定义了音乐播放器的基本功能。可以通过继承该类来实现一个音乐播放器。
+ * 该接口定义了音乐播放器的基本功能。可以通过实现该接口来创建一个自定义的音乐播放器。
+ *
+ * @see MediaMusicPlayer
  */
 public interface MusicPlayer {
 

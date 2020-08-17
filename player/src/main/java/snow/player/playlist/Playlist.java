@@ -19,6 +19,9 @@ import snow.player.media.MusicItem;
 
 /**
  * 用于存储播放队列。
+ *
+ * @see PlaylistManager#setPlaylist(Playlist, int, boolean)
+ * @see snow.player.PlayerClient#setPlaylist(Playlist, int, boolean)
  */
 public final class Playlist implements Iterable<MusicItem>, Parcelable {
     private static final String TAG = "Playlist";
