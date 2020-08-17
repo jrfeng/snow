@@ -97,7 +97,10 @@ playerClient.setPlaylist(playlist, true);
 * `setNextPlay(MusicItem musicItem)`：下一首播放
 * `setPlayMode(PlayMode playMode)`：设置播放模式（共 `3` 种模式：顺序播放、单曲循环、随机播放）
 
-**更多详细介绍，请查看 `Wiki`（编写中...）**
+更多内容，请参考：
+
+* [`API` 文档](https://jrfeng.github.io/snow/)
+* `Wiki`（尚未完成...）
 
 ### ProGuard
 
