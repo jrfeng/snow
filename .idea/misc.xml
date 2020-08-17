@@ -6,6 +6,7 @@
     </configurations>
   </component>
   <component name="JavadocGenerationManager">
+    <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/docs" />
     <option name="OTHER_OPTIONS" value="-encoding utf-8 -charset utf-8" />
   </component>
   <component name="NullableNotNullManager">
