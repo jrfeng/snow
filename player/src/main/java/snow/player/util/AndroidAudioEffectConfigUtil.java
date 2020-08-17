@@ -22,19 +22,17 @@ public class AndroidAudioEffectConfigUtil {
      *
      * @param config    Bundle 对象，包含音频特效的配置信息，不能为 null
      * @param equalizer 要恢复配置的 Equalizer 对象，不能为 null
-     * @return 如果恢复成功，则返回 true；否则返回 false
      */
-    public static boolean restoreSettings(@NonNull Bundle config, @NonNull Equalizer equalizer) {
+    public static void restoreSettings(@NonNull Bundle config, @NonNull Equalizer equalizer) {
         String settings = config.getString(KEY_SETTING_EQUALIZER);
         if (settings == null || settings.isEmpty()) {
-            return false;
+            return;
         }
 
         try {
             equalizer.setProperties(new Equalizer.Settings(settings));
-            return true;
         } catch (IllegalArgumentException | IllegalStateException | UnsupportedOperationException e) {
-            return false;
+            e.printStackTrace();
         }
     }
 
@@ -43,19 +41,17 @@ public class AndroidAudioEffectConfigUtil {
      *
      * @param config    Bundle 对象，包含音频特效的配置信息，不能为 null
      * @param bassBoost 要恢复配置的 BassBoost 对象，不能为 null
-     * @return 如果恢复成功，则返回 true；否则返回 false
      */
-    public static boolean restoreSettings(@NonNull Bundle config, @NonNull BassBoost bassBoost) {
+    public static void restoreSettings(@NonNull Bundle config, @NonNull BassBoost bassBoost) {
         String settings = config.getString(KEY_SETTING_BASS_BOOST);
         if (settings == null || settings.isEmpty()) {
-            return false;
+            return;
         }
 
         try {
             bassBoost.setProperties(new BassBoost.Settings(settings));
-            return true;
         } catch (IllegalArgumentException | IllegalStateException | UnsupportedOperationException e) {
-            return false;
+            e.printStackTrace();
         }
     }
 
@@ -64,19 +60,17 @@ public class AndroidAudioEffectConfigUtil {
      *
      * @param config      Bundle 对象，包含音频特效的配置信息，不能为 null
      * @param virtualizer 要恢复配置的 Virtualizer 对象，不能为 null
-     * @return 如果恢复成功，则返回 true；否则返回 false
      */
-    public static boolean restoreSettings(@NonNull Bundle config, @NonNull Virtualizer virtualizer) {
+    public static void restoreSettings(@NonNull Bundle config, @NonNull Virtualizer virtualizer) {
         String settings = config.getString(KEY_SETTING_VIRTUALIZER);
         if (settings == null || settings.isEmpty()) {
-            return false;
+            return;
         }
 
         try {
             virtualizer.setProperties(new Virtualizer.Settings(settings));
-            return true;
         } catch (IllegalArgumentException | IllegalStateException | UnsupportedOperationException e) {
-            return false;
+            e.printStackTrace();
         }
     }
 
@@ -85,19 +79,17 @@ public class AndroidAudioEffectConfigUtil {
      *
      * @param config       Bundle 对象，包含音频特效的配置信息，不能为 null
      * @param presetReverb 要恢复配置的 PresetReverb 对象，不能为 null
-     * @return 如果恢复成功，则返回 true；否则返回 false
      */
-    public static boolean restoreSettings(@NonNull Bundle config, @NonNull PresetReverb presetReverb) {
+    public static void restoreSettings(@NonNull Bundle config, @NonNull PresetReverb presetReverb) {
         String settings = config.getString(KEY_SETTING_PRESET_REVERB);
         if (settings == null || settings.isEmpty()) {
-            return false;
+            return;
         }
 
         try {
             presetReverb.setProperties(new PresetReverb.Settings(settings));
-            return true;
         } catch (IllegalArgumentException | IllegalStateException | UnsupportedOperationException e) {
-            return false;
+            e.printStackTrace();
         }
     }
 
