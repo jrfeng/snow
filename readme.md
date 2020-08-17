@@ -99,8 +99,8 @@ playerClient.setPlaylist(playlist, true);
 
 更多内容，请参考：
 
-* [`API` 文档](https://jrfeng.github.io/snow/)
-* `Wiki`（尚未完成...）
+* [**API 文档**](https://jrfeng.github.io/snow/)
+* **Wiki**（尚未完成...）
 
 ### ProGuard
 
