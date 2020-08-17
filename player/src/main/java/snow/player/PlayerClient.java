@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import channel.helper.ChannelHelper;
 import channel.helper.DispatcherUtil;
@@ -57,9 +58,9 @@ public class PlayerClient implements Player {
     private PlayerClient(Context context, Class<? extends PlayerService> playerService) {
         mApplicationContext = context.getApplicationContext();
         mPlayerService = playerService;
-        mToken = generateToken();
+        mToken = UUID.randomUUID().toString();
 
-        mPlayerConfig = new PlayerConfig(context, mToken);
+        mPlayerConfig = new PlayerConfig(context, mPlayerService.getName());
         mAllDisconnectListener = new ArrayList<>();
 
         initMediaBrowser();
@@ -91,10 +92,6 @@ public class PlayerClient implements Player {
         PackageManager pm = context.getPackageManager();
         Intent intent = new Intent(context, playerService);
         return pm.resolveService(intent, 0) == null;
-    }
-
-    private String generateToken() {
-        return mPlayerService.getName();
     }
 
     private void initMediaBrowser() {
