@@ -238,44 +238,6 @@ public class AndroidAudioEffectEditor {
     // *********************** Virtualizer ********************
 
     /**
-     * <b>API level 21</b> 检查环绕声效果是否支持通道掩码和虚拟化模式的组合。某些设备的环绕声效果可能仅支持双
-     * 耳处理（例如，仅支持头戴式双耳耳机，参见 {@link Virtualizer#VIRTUALIZATION_MODE_BINAURAL}），有些
-     * 设备则可能支持内置扬声器的跨耳处理（例如，扬声器输出，参见 {@link Virtualizer#VIRTUALIZATION_MODE_TRANSAURAL}）
-     *
-     * @param inputChannelMask   要虚拟化的内容的通道掩码
-     * @param virtualizationMode 进行虚拟化处理的方式，值为两者之一：
-     *                           {@link Virtualizer#VIRTUALIZATION_MODE_BINAURAL}、
-     *                           {@link Virtualizer#VIRTUALIZATION_MODE_TRANSAURAL}
-     * @return 如果支持通道掩码和虚拟化模式的组合，则为 true，否则为 false。指示某个频道掩码不受支持并不一定意
-     * 味着不能使用该频道掩码播放内容，更可能意味着内容将在虚拟化之前进行混合。例如，只支持
-     * <a target="_blank" href="https://developer.android.google.cn/reference/android/media/AudioFormat#CHANNEL_OUT_STEREO">AudioFormat#CHANNEL_OUT_STEREO</a>
-     * 这样的掩码的虚拟化器仍然能够处理带有 <a target="_blank" href="https://developer.android.google.cn/reference/android/media/AudioFormat#CHANNEL_OUT_5POINT1">AudioFormat#CHANNEL_OUT_5POINT1</a>
-     * 掩码的内容，但会先将内容向下混合到立体声，然后再进行虚拟化，而不是单独虚拟化每个频道。
-     */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public boolean vrCanVirtualize(int inputChannelMask, int virtualizationMode)
-            throws IllegalArgumentException, IllegalStateException, UnsupportedOperationException {
-        return mFakeVirtualizer.canVirtualize(inputChannelMask, virtualizationMode);
-    }
-
-    /**
-     * <b>API level 21</b> 强制环绕声效果使用给定的处理模式。必须启用该效果才能应用强制模式。
-     *
-     * @param virtualizationMode 值为三者之一：
-     *                           {@link Virtualizer#VIRTUALIZATION_MODE_BINAURAL}、
-     *                           {@link Virtualizer#VIRTUALIZATION_MODE_TRANSAURAL} 或者
-     *                           {@link Virtualizer#VIRTUALIZATION_MODE_AUTO} 停止强制模式。
-     * @return 如果支持处理模式，并且成功设置了处理模式，或者成功禁用了强制，则为 true，否则为 false。
-     */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public boolean vrForceVirtualizationMode(int virtualizationMode)
-            throws IllegalArgumentException, IllegalStateException, UnsupportedOperationException {
-        boolean result = mFakeVirtualizer.forceVirtualizationMode(virtualizationMode);
-        updateVirtualizerSettings();
-        return result;
-    }
-
-    /**
      * 获取环绕声效果的当前强度。
      *
      * @return 环绕声效果的当前强度。强度的有效范围是 [0，1000]，其中 0 表示最弱的效果，1000 表示最强的效果
@@ -286,32 +248,6 @@ public class AndroidAudioEffectEditor {
     }
 
     /**
-     * <b>API level 21</b> 查询虚拟扬声器角度（方位角和仰角）以结合使用通道掩码和虚拟化模式。如果支持虚拟化
-     * 配置（掩码和模式）（请参阅 {@link #vrCanVirtualize(int, int)}，则返回时数组角度将包含每个虚拟扬声器
-     * 的定义及其相对于侦听器的方位角和仰角。
-     * <p>
-     * 注意，在某些环绕声效果的实现中，角度可能取决于强度。
-     *
-     * @param inputChannelMask   要虚拟化的内容的通道掩码。
-     * @param virtualizationMode 进行虚拟化处理的方式，值为两者之一：
-     *                           {@link Virtualizer#VIRTUALIZATION_MODE_BINAURAL}、
-     *                           {@link Virtualizer#VIRTUALIZATION_MODE_TRANSAURAL}
-     * @param angles             一个非空数组，其长度是通道掩码中通道数的 3 倍。如果该方法指示支持配置，则数组将在返回时包
-     *                           含值的三元组：对于掩码的通道中的每个通道 i：
-     *                           <ul>
-     *                             <li>数组中索引为 3*i 的元素包含扬声器标识（例如 <a target="_blank" href="https://developer.android.google.cn/reference/android/media/AudioFormat#CHANNEL_OUT_FRONT_LEFT">AudioFormat#CHANNEL_OUT_FRONT_LEFT</a>）</li>
-     *                             <li>索引为 3*i+1 的元素包含其相应的方位角，以度表示，其中 0 是听众面对的方向，180 在听众的后面，-90 在她/他的左边，</li>
-     *                             <li>索引为 3*i+2 的元素包含其相应的仰角，其中 +90 直接位于侦听器上方，0 是水平面，-90 直接位于侦听器下方。</li>
-     *                           </ul>
-     * @return 如果支持通道掩码和虚拟化模式的组合，则为 true，否则为 false
-     */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public boolean getVRSpeakerAngles(int inputChannelMask, int virtualizationMode, int[] angles)
-            throws IllegalArgumentException, IllegalStateException, UnsupportedOperationException {
-        return mFakeVirtualizer.getSpeakerAngles(inputChannelMask, virtualizationMode, angles);
-    }
-
-    /**
      * 指示环绕声效果是否支持设置强度。如果此方法返回 false，则仅支持一种强度，并且 {@link #setVRStrength(short)}
      * 方法始终舍入为该值。
      *
@@ -319,20 +255,6 @@ public class AndroidAudioEffectEditor {
      */
     public boolean getVRStrengthSupported() {
         return mFakeVirtualizer.getStrengthSupported();
-    }
-
-    /**
-     * <b>API level 21</b> 返回环绕声效果正在使用的虚拟化模式（如果有）。
-     *
-     * @return 使用的虚拟化模式。如果虚拟化处于不活动状态，则虚拟化模式将为
-     * {@link Virtualizer#VIRTUALIZATION_MODE_OFF}。否则，该值为
-     * {@link Virtualizer#VIRTUALIZATION_MODE_BINAURAL} 或
-     * {@link Virtualizer#VIRTUALIZATION_MODE_TRANSAURAL}。由于未启用效果或当前输出设备与此虚拟化实现不兼
-     * 容，因此虚拟化可能无法激活。
-     */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public int getVRVirtualizationMode() throws IllegalStateException, UnsupportedOperationException {
-        return mFakeVirtualizer.getVirtualizationMode();
     }
 
     /**
