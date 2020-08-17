@@ -11,11 +11,15 @@ import androidx.annotation.NonNull;
 /**
  * 用于获取和修改 Android 音频特效的配置信息。
  */
-public class AndroidAudioEffectConfigUtil {
+public final class AndroidAudioEffectConfigUtil {
     public static final String KEY_SETTING_EQUALIZER = "setting_equalizer";
     public static final String KEY_SETTING_BASS_BOOST = "setting_bass_boost";
     public static final String KEY_SETTING_VIRTUALIZER = "setting_virtualizer";
     public static final String KEY_SETTING_PRESET_REVERB = "setting_preset_reverb";
+
+    private AndroidAudioEffectConfigUtil() {
+        throw new AssertionError();
+    }
 
     /**
      * 从 config 中恢复 Equalizer 的配置。
