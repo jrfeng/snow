@@ -36,14 +36,6 @@ public interface AudioEffectManager {
     void detachAudioEffect();
 
     /**
-     * 获取音频特效的默认配置。
-     *
-     * @return 音频特效的默认配置，不能为 null
-     */
-    @NonNull
-    Bundle getDefaultConfig();
-
-    /**
      * 是否音频特效。
      * <p>
      * 你可以在该方法中释放所有不再需要的资源。

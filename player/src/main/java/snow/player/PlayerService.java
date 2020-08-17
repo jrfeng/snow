@@ -314,10 +314,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         Bundle config = mPlayerConfig.getAudioEffectConfig();
-        if (config.isEmpty()) {
-            config = mAudioEffectManager.getDefaultConfig();
-            mPlayerConfig.setAudioEffectConfig(config);
-        }
         mAudioEffectManager.init(config);
     }
 
