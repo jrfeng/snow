@@ -11,7 +11,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 /**
- * 用于存储于音乐相关的简单数据。
+ * 用于存储与音乐相关的简单数据。
  * <p>
  * 如果需要存储额外的数据，可以使用 {@link #setExtra(Bundle)} 方法与 {@link #getExtra()} 方法。
  */
