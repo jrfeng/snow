@@ -6,11 +6,9 @@ import android.media.audiofx.BassBoost;
 import android.media.audiofx.Equalizer;
 import android.media.audiofx.PresetReverb;
 import android.media.audiofx.Virtualizer;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.google.common.base.Preconditions;
 
@@ -20,8 +18,10 @@ import snow.player.util.AndroidAudioEffectConfigUtil;
 
 /**
  * 用于编辑和同步音乐播放器的音频特效效果。
+ * <p>
+ * 当不在需要 {@link AndroidAudioEffectEditor} 对象时，请调用 {@link #release()} 方法释放占用的资源。
  */
-public class AndroidAudioEffectEditor {
+public final class AndroidAudioEffectEditor {
     private PlayerClient mPlayerClient;
     private Bundle mConfig;
 
@@ -31,6 +31,11 @@ public class AndroidAudioEffectEditor {
     private Virtualizer mFakeVirtualizer;
     private PresetReverb mFakePresetReverb;
 
+    /**
+     * 创建一个 {@link AndroidAudioEffectEditor} 对象。
+     *
+     * @param playerClient {@link PlayerClient} 对象，不能为 null
+     */
     public AndroidAudioEffectEditor(@NonNull PlayerClient playerClient) {
         Preconditions.checkNotNull(playerClient);
         mPlayerClient = playerClient;
@@ -50,7 +55,14 @@ public class AndroidAudioEffectEditor {
         mFakePresetReverb.setEnabled(true);
     }
 
+    /**
+     * 释放占用的资源。
+     */
     public void release() {
+        if (mPlayerClient == null) {
+            return;
+        }
+
         mMediaPlayer.release();
         mFakeEqualizer.release();
         mFakeBassBoost.release();
@@ -317,5 +329,11 @@ public class AndroidAudioEffectEditor {
             default:
                 return res.getString(R.string.snow_preset_unknown);
         }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        release();
+        super.finalize();
     }
 }
