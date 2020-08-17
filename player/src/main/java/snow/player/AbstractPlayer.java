@@ -39,7 +39,7 @@ import snow.player.media.MusicPlayer;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
 import snow.player.util.ErrorUtil;
-import snow.player.util.NetworkUtil;
+import snow.player.helper.NetworkHelper;
 
 /**
  * 该类实现了 {@link Player} 接口，并实现大部分音乐播放器功能。
@@ -63,7 +63,7 @@ public abstract class AbstractPlayer implements Player {
 
     private AudioFocusHelper mAudioFocusHelper;
     private BecomeNoiseHelper mBecomeNoiseHelper;
-    private NetworkUtil mNetworkUtil;
+    private NetworkHelper mNetworkHelper;
 
     private MusicPlayer mMusicPlayer;
 
@@ -124,7 +124,7 @@ public abstract class AbstractPlayer implements Player {
         initAllHelper();
         initWakeLock();
 
-        mNetworkUtil.subscribeNetworkState();
+        mNetworkHelper.subscribeNetworkState();
         reloadPlaylist();
         prepareMusicPlayer(false, null);
     }
@@ -257,11 +257,11 @@ public abstract class AbstractPlayer implements Player {
 
         mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
-        mNetworkUtil.unsubscribeNetworkState();
+        mNetworkHelper.unsubscribeNetworkState();
 
         mAudioFocusHelper = null;
         mBecomeNoiseHelper = null;
-        mNetworkUtil = null;
+        mNetworkHelper = null;
 
         mPreparedAction = null;
         mSeekCompleteAction = null;
@@ -383,7 +383,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private boolean isWiFiNetwork() {
-        return mNetworkUtil.isWifiNetwork();
+        return mNetworkHelper.isWifiNetwork();
     }
 
     private void initAllListener() {
@@ -533,7 +533,7 @@ public abstract class AbstractPlayer implements Player {
             }
         });
 
-        mNetworkUtil = NetworkUtil.newInstance(mApplicationContext, new NetworkUtil.OnNetworkStateChangeListener() {
+        mNetworkHelper = NetworkHelper.newInstance(mApplicationContext, new NetworkHelper.OnNetworkStateChangeListener() {
             @Override
             public void onNetworkStateChanged(boolean connected, boolean wifiNetwork) {
                 if (!isPrepared()) {
@@ -1201,13 +1201,13 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
-        checkNetworkType(mPlayerConfig.isOnlyWifiNetwork(), mNetworkUtil.isWifiNetwork());
+        checkNetworkType(mPlayerConfig.isOnlyWifiNetwork(), mNetworkHelper.isWifiNetwork());
     }
 
     private void checkNetworkType(boolean onlyWifiNetwork, boolean isWifiNetwork) {
         disposeCheckCached();
 
-        if (!mNetworkUtil.networkAvailable()) {
+        if (!mNetworkHelper.networkAvailable()) {
             return;
         }
 

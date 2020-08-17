@@ -1,4 +1,4 @@
-package snow.player.util;
+package snow.player.helper;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,7 +24,7 @@ import java.lang.ref.WeakReference;
  * 功能有限，主要用于辅助实现 “仅 Wifi 播放” 功能。
  */
 @SuppressWarnings("deprecation")
-public class NetworkUtil {
+public class NetworkHelper {
     private Context mApplicationContext;
     private WeakReference<OnNetworkStateChangeListener> mListenerWeakReference;
 
@@ -32,7 +32,7 @@ public class NetworkUtil {
     private BroadcastReceiver mNetworkStateReceiver;
     private ConnectivityManager.NetworkCallback mNetworkCallback;
 
-    private NetworkUtil(Context context, OnNetworkStateChangeListener listener) {
+    private NetworkHelper(Context context, OnNetworkStateChangeListener listener) {
         mApplicationContext = context;
         mListenerWeakReference = new WeakReference<>(listener);
 
@@ -76,17 +76,17 @@ public class NetworkUtil {
     }
 
     /**
-     * 创建一个新的 {@link NetworkUtil} 对象。
+     * 创建一个新的 {@link NetworkHelper} 对象。
      *
      * @param context  {@link Context} 对象，不能为 null
      * @param listener 网络状态监听器，不能为 null
-     * @return {@link NetworkUtil} 对象
+     * @return {@link NetworkHelper} 对象
      */
-    public static NetworkUtil newInstance(@NonNull Context context, @NonNull OnNetworkStateChangeListener listener) {
+    public static NetworkHelper newInstance(@NonNull Context context, @NonNull OnNetworkStateChangeListener listener) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(listener);
 
-        return new NetworkUtil(context, listener);
+        return new NetworkHelper(context, listener);
     }
 
     /**
