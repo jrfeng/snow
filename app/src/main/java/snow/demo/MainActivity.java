@@ -81,20 +81,20 @@ public class MainActivity extends AppCompatActivity {
         MusicItem song1 = new MusicItem();
         song1.setTitle("Song 1");
         song1.setArtist("artist 1");
-        song1.setUri("https://music.163.com/song/media/outer/url?id=33894312");
+        song1.setUri("http://music.163.com/song/media/outer/url?id=33894312");
         song1.setIconUri("http://p2.music.126.net/ZDUo6vF_5ykD6E_08HE1kw==/3385396303317256.jpg");
         song1.setDuration(267232);
 
         MusicItem song2 = new MusicItem();
         song2.setTitle("Song 2");
         song2.setArtist("artist 2");
-        song2.setUri("https://music.163.com/song/media/outer/url?id=1420218751");
+        song2.setUri("http://music.163.com/song/media/outer/url?id=1420218751");
         song2.setDuration(218027);
 
         MusicItem song3 = new MusicItem();
         song3.setTitle("Song 3");
         song3.setArtist("artist 3");
-        song3.setUri("https://music.163.com/song/media/outer/url?id=1452046251");
+        song3.setUri("http://music.163.com/song/media/outer/url?id=1452046251");
         song3.setIconUri("http://p1.music.126.net/o3G7lWrGBQAvSRt3UuApTw==/2002210674180201.jpg");
         song3.setDuration(341787);
 
