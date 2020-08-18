@@ -168,7 +168,7 @@ public class ExoMusicPlayer implements MusicPlayer {
 
     @Override
     public boolean isPlaying() {
-        return mSimpleExoPlayer.isPlaying();
+        return mSimpleExoPlayer.isPlaying() || mSimpleExoPlayer.getPlayWhenReady();
     }
 
     @Override
