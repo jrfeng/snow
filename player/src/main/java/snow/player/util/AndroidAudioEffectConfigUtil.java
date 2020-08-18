@@ -22,7 +22,7 @@ public final class AndroidAudioEffectConfigUtil {
     }
 
     /**
-     * 从 config 中恢复 Equalizer 的配置。
+     * 从 config 中应用 Equalizer 的配置。
      *
      * @param config    Bundle 对象，包含音频特效的配置信息，不能为 null
      * @param equalizer 要恢复配置的 Equalizer 对象，不能为 null
@@ -41,7 +41,7 @@ public final class AndroidAudioEffectConfigUtil {
     }
 
     /**
-     * 从 config 中恢复 BassBoost 的配置。
+     * 从 config 中应用 BassBoost 的配置。
      *
      * @param config    Bundle 对象，包含音频特效的配置信息，不能为 null
      * @param bassBoost 要恢复配置的 BassBoost 对象，不能为 null
@@ -60,7 +60,7 @@ public final class AndroidAudioEffectConfigUtil {
     }
 
     /**
-     * 从 config 中恢复 Virtualizer 的配置。
+     * 从 config 中应用 Virtualizer 的配置。
      *
      * @param config      Bundle 对象，包含音频特效的配置信息，不能为 null
      * @param virtualizer 要恢复配置的 Virtualizer 对象，不能为 null
@@ -79,7 +79,7 @@ public final class AndroidAudioEffectConfigUtil {
     }
 
     /**
-     * 从 config 中恢复 PresetReverb 的配置。
+     * 从 config 中应用 PresetReverb 的配置。
      *
      * @param config       Bundle 对象，包含音频特效的配置信息，不能为 null
      * @param presetReverb 要恢复配置的 PresetReverb 对象，不能为 null

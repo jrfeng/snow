@@ -98,19 +98,22 @@ public abstract class AbstractPlayer implements Player {
      * 创建一个 {@link AbstractPlayer} 对象。
      *
      * @param context         {@link Context} 对象，不能为 null
-     * @param playerConfig    {@link PlayerConfig} 对象，保存了播放器的初始配置信息，不能为 null
-     * @param playerState     {@link PlayerState} 对象，保存了播放器的初始状态，不能为 null
+     * @param playerConfig    {@link PlayerConfig} 对象（本项目的私有类型），保存了播放器的初始配置信息，不能为 null
+     * @param playerState     {@link PlayerState} 对象（本项目的私有类型），保存了播放器的初始状态，不能为 null
      * @param playlistManager {@link PlaylistManager} 对象，用于管理播放列表，不能为 null
+     * @param pref            {@link AppWidgetPreferences} 对象，用于在 PlayerService 与 AppWidget
+     *                        之间进行状态同步，不能为 null
      */
     public AbstractPlayer(@NonNull Context context,
                           @NonNull PlayerConfig playerConfig,
                           @NonNull PlayerState playerState,
                           @NonNull PlaylistManager playlistManager,
-                          @Nullable AppWidgetPreferences pref) {
+                          @NonNull AppWidgetPreferences pref) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerConfig);
         Preconditions.checkNotNull(playerState);
         Preconditions.checkNotNull(playlistManager);
+        Preconditions.checkNotNull(pref);
 
         mApplicationContext = context.getApplicationContext();
         mPlayerConfig = playerConfig;
@@ -209,9 +212,9 @@ public abstract class AbstractPlayer implements Player {
     }
 
     /**
-     * 该方法会在 stalled 暂停改变时调用。
+     * 该方法会在 stalled 状态改变时调用。
      * <p>
-     * 你可以根据该 stalled 参数的值来显示或隐藏缓冲进度条。如果缓冲区没有足够的数据支撑继续播放时，则该参数为
+     * 你可以根据 stalled 参数的值来显示或隐藏缓冲进度条。如果缓冲区没有足够的数据支撑继续播放时，则该参数为
      * true，当缓冲区缓存了足够的数据可以继续播放时，该参数为 false。
      *
      * @param stalled 如果缓冲区没有足够的数据继续播放时，则该参数为 true，当缓冲区缓存了足够的数据可以继续
@@ -272,14 +275,14 @@ public abstract class AbstractPlayer implements Player {
      * 设置是否实时记录播放进度。
      *
      * @param enable 是否实时记录播放进度（默认为 true）。为 true 时，会在播放时每隔 3 秒将歌曲的播放进度记
-     *               录到本地磁盘，这样即使应用被突然终止，下次播放时也能自动恢复到与上次播放相近的播放进度。
+     *               录到本地磁盘，这样即使程序被突然终止，下次播放时也能自动恢复到与上次播放相近的播放进度。
      */
     public final void setRecordProgress(boolean enable) {
         mRecordProgress = enable;
     }
 
     /**
-     * 当前正在播放的音乐。
+     * 获取当前正在播放的音乐。
      *
      * @return 如果没有正在播放的音乐，则返回 null
      */
@@ -737,12 +740,12 @@ public abstract class AbstractPlayer implements Player {
     }
 
     /**
-     * 获取当前正在播放的应用的 audio session id。
+     * 获取当前正在播放的音乐的 audio session id。
      * <p>
      * 如果当前没有播放任何音乐，或者播放器还没有准备完毕（{@link #isPrepared()} 返回了 false），则该方法会
      * 返回 0。
      *
-     * @return 当前正在播放的应用的 audio session id。
+     * @return 当前正在播放的音乐的 audio session id。
      */
     public final int getAudioSessionId() {
         if (isPrepared()) {
@@ -1110,7 +1113,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     /**
-     * 通知播放器，当前的 {@link SoundQuality} 已改变。
+     * 通知播放器当前的 {@link SoundQuality} 已改变。
      * <p>
      * 该方法应该在调用与当前播放器管理的 {@link PlayerConfig} 对象的
      * {@link PlayerConfig#setSoundQuality(SoundQuality)} 方法后调用。
@@ -1135,7 +1138,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     /**
-     * 通知播放器，当前的 {@code audioEffectEnabled} 状态已改变。
+     * 通知播放器当前的 {@code audioEffectEnabled} 状态已改变。
      * <p>
      * 该方法应该在调用与当前播放器管理的 {@link PlayerConfig} 对象的
      * {@link PlayerConfig#setAudioEffectEnabled(boolean)} 方法后调用。
@@ -1154,7 +1157,7 @@ public abstract class AbstractPlayer implements Player {
     }
 
     /**
-     * 通知播放器，当前的 {@code onlyWifiNetwork} 状态已改变。
+     * 通知播放器当前的 {@code onlyWifiNetwork} 状态已改变。
      * <p>
      * 该方法应该在调用与当前播放器管理的 {@link PlayerConfig} 对象的
      * {@link PlayerConfig#setOnlyWifiNetwork(boolean)} 方法后调用。

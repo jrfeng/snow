@@ -955,7 +955,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                          @NonNull PlayerConfig playerConfig,
                          @NonNull PlayerState playlistState,
                          @NonNull PlaylistManager playlistManager,
-                         @Nullable AppWidgetPreferences pref) {
+                         @NonNull AppWidgetPreferences pref) {
             super(context, playerConfig, playlistState, playlistManager, pref);
         }
 

@@ -30,7 +30,9 @@ public interface Player extends PlaylistManager.OnModifyPlaylistListener {
     void stop();
 
     /**
-     * 开始或暂停播放。
+     * 播放/暂停。
+     * <p>
+     * 如果当前没有播放音乐，则开始播放音乐；如果当前正在播放音乐，则暂停播放。
      */
     void playPause();
 
@@ -62,7 +64,9 @@ public interface Player extends PlaylistManager.OnModifyPlaylistListener {
     void skipToPrevious();
 
     /**
-     * 播放队列中 position 位置处的音乐。
+     * 播放/暂停队列中 position 位置处的音乐。
+     * <p>
+     * 如果 position 不等于当前正在播放的音乐的位置，则播放 position 处的音乐；否则暂停播放。
      */
     void playPause(int position);
 
