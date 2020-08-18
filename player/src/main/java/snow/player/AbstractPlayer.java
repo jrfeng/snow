@@ -975,16 +975,6 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
-        if (mLoadingPlaylist) {
-            mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    play();
-                }
-            };
-            return;
-        }
-
         if (isPreparing()) {
             mPreparedAction = new Runnable() {
                 @Override
@@ -1015,16 +1005,6 @@ public abstract class AbstractPlayer implements Player {
             return;
         }
 
-        if (mLoadingPlaylist) {
-            mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    pause();
-                }
-            };
-            return;
-        }
-
         if (isPlaying()) {
             mMusicPlayer.pause();
         }
@@ -1034,14 +1014,7 @@ public abstract class AbstractPlayer implements Player {
 
     @Override
     public void stop() {
-        if (getPlaybackState() == PlaybackState.STOPPED) {
-            return;
-        }
-
-        if (mLoadingPlaylist) {
-            mPlaylistLoadedAction = null;
-            releaseMusicPlayer();
-            notifyStopped();
+        if (getPlaybackState() == PlaybackState.STOPPED || getMusicItem() == null) {
             return;
         }
 
@@ -1068,16 +1041,6 @@ public abstract class AbstractPlayer implements Player {
     }
 
     private void seekTo(final int progress, final Runnable seekCompleteAction) {
-        if (mLoadingPlaylist) {
-            mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    seekTo(progress, seekCompleteAction);
-                }
-            };
-            return;
-        }
-
         if (isPreparing()) {
             mPreparedAction = new Runnable() {
                 @Override
@@ -1487,10 +1450,11 @@ public abstract class AbstractPlayer implements Player {
     }
 
     @Override
-    public void onNewPlaylist(final int position, final boolean play) {
+    public void onNewPlaylist(MusicItem musicItem, final int position, final boolean play) {
         stop();
         notifyPlaylistChanged(position);
-        reloadPlaylist(true, play);
+        notifyPlayingMusicItemChanged(musicItem, play);
+        reloadPlaylist();
     }
 
     @Override

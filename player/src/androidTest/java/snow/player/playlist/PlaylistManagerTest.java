@@ -73,7 +73,7 @@ public class PlaylistManagerTest {
         final CountDownLatch latch = new CountDownLatch(1);
         playlistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter() {
             @Override
-            public void onNewPlaylist(int position, boolean play) {
+            public void onNewPlaylist(MusicItem musicItem, int position, boolean play) {
                 assertEquals(size, playlistManager.getPlaylistSize());
                 assertEquals(playlist, playlistManager.getPlaylist());
                 latch.countDown();
@@ -92,7 +92,7 @@ public class PlaylistManagerTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         mPlaylistManager.setOnModifyPlaylistListener(new OnModifyPlaylistAdapter() {
             @Override
-            public void onNewPlaylist(int position, boolean play) {
+            public void onNewPlaylist(MusicItem musicItem, int position, boolean play) {
                 latch1.countDown();
             }
         });
@@ -172,7 +172,7 @@ public class PlaylistManagerTest {
 
     private static class OnModifyPlaylistAdapter implements PlaylistManager.OnModifyPlaylistListener {
         @Override
-        public void onNewPlaylist(int position, boolean play) {
+        public void onNewPlaylist(MusicItem musicItem, int position, boolean play) {
 
         }
 
