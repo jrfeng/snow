@@ -38,7 +38,8 @@ import snow.player.util.ErrorUtil;
 public class PlayerClient implements Player {
     private Context mApplicationContext;
     private Class<? extends PlayerService> mPlayerService;
-    private String mToken;
+    private String mClientToken;
+    private String mPersistentId;
 
     private MediaBrowserCompat mMediaBrowser;
     private MediaControllerCompat mMediaController;
@@ -58,9 +59,10 @@ public class PlayerClient implements Player {
     private PlayerClient(Context context, Class<? extends PlayerService> playerService) {
         mApplicationContext = context.getApplicationContext();
         mPlayerService = playerService;
-        mToken = UUID.randomUUID().toString();
+        mClientToken = UUID.randomUUID().toString();
+        mPersistentId = mPlayerService.getName();
 
-        mPlayerConfig = new PlayerConfig(context, mPlayerService.getName());
+        mPlayerConfig = new PlayerConfig(context, mPersistentId);
         mAllDisconnectListener = new ArrayList<>();
 
         initMediaBrowser();
@@ -128,7 +130,7 @@ public class PlayerClient implements Player {
     }
 
     private void initPlaylistManager() {
-        mPlaylistManager = new PlaylistManagerImp(mApplicationContext, mToken);
+        mPlaylistManager = new PlaylistManagerImp(mApplicationContext, mPersistentId);
         mPlaylistManager.setOnModifyPlaylistListener(this);
     }
 
@@ -171,7 +173,7 @@ public class PlayerClient implements Player {
         ));
 
         mPlayerManager = ChannelHelper.newEmitter(PlayerManager.class, customActionPipe);
-        mPlayerManager.registerPlayerStateListener(mToken, listenerPipe.getBinder());
+        mPlayerManager.registerPlayerStateListener(mClientToken, listenerPipe.getBinder());
     }
 
     private void onDisconnected() {
@@ -182,7 +184,7 @@ public class PlayerClient implements Player {
         }
 
         if (isConnected()) {
-            mPlayerManager.unregisterPlayerStateListener(mToken);
+            mPlayerManager.unregisterPlayerStateListener(mClientToken);
         }
     }
 
@@ -857,12 +859,12 @@ public class PlayerClient implements Player {
     }
 
     @Override
-    public void onNewPlaylist(int position, boolean play) {
+    public void onNewPlaylist(MusicItem musicItem, int position, boolean play) {
         if (notConnected()) {
             return;
         }
 
-        mPlayer.onNewPlaylist(position, play);
+        mPlayer.onNewPlaylist(musicItem, position, play);
     }
 
     @Override
