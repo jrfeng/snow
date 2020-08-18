@@ -215,6 +215,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
             Class<?> clazz = Class.forName(factoryName);
             mComponentFactory = (ComponentFactory) clazz.newInstance();
+            mComponentFactory.init(getApplicationContext());
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -1725,8 +1726,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      *     <li>{@link #getCustomActions()}：添加自定义动作</li>
      * </ul>
      * <p>
-     * 你可以重写其中的一个或多个方法来使用自定义的组件，重写后的方法需要使用 {@link Inject} 注解进行标记，否
-     * 则会被忽略。
+     * 你可以重写其中的一个或多个方法来使用自定义的组件，重写后的方法需要使用 {@link Inject} 注解进行标记，
+     * 否则会被忽略。另外，你还可以覆盖 {@link #init(Context)} 方法来完成一些初始化工作。
      * <p>
      * 如果你打算播放来自网络的音乐，建议覆盖 {@link #isCached(MusicItem, SoundQuality)} 方法，该方法用于
      * 判断具有特定 {@link SoundQuality} 的 {@link MusicItem} 是否已缓存。该方法会在异步线程中执行，因此可
@@ -1770,6 +1771,14 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 你的 {@link ComponentFactory} 的完整类名。
      */
     public static abstract class ComponentFactory {
+        /**
+         * 初始化 ComponentFactory。你可以覆盖该方法来完成一些初始化工作。
+         *
+         * @param applicationContext 应用程序的 Context 对象
+         */
+        public void init(Context applicationContext) {
+        }
+
         /**
          * 查询具有 {@link SoundQuality} 音质的 {@link MusicItem} 是否已被缓存。
          * <p>
