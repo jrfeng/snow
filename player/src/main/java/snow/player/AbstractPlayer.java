@@ -1045,6 +1045,8 @@ public abstract class AbstractPlayer implements Player {
 
     private void seekTo(final int progress, final Runnable seekCompleteAction) {
         if (isPreparing()) {
+            mPlayOnSeekComplete = mPlayOnPrepared;
+            mPlayOnPrepared = false;
             mPreparedAction = new Runnable() {
                 @Override
                 public void run() {
