@@ -159,10 +159,11 @@ public abstract class PlaylistManager {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
+                final Playlist playlist = getPlaylist();
                 mMainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        callback.onFinished(getPlaylist());
+                        callback.onFinished(playlist);
                     }
                 });
             }
@@ -189,7 +190,8 @@ public abstract class PlaylistManager {
             @Override
             public void run() {
                 save(playlist);
-                notifyOnSetNewPlaylist(Math.max(position, 0), play);
+                int p = Math.max(position, 0);
+                notifyOnSetNewPlaylist(playlist.get(p), p, play);
             }
         });
     }
@@ -300,12 +302,12 @@ public abstract class PlaylistManager {
         mMMKV.encode(KEY_PLAYLIST_TAG, mPlaylistTag);
     }
 
-    private void notifyOnSetNewPlaylist(final int position, final boolean play) {
+    private void notifyOnSetNewPlaylist(final MusicItem musicItem, final int position, final boolean play) {
         mMainHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (mModifyPlaylistListener != null) {
-                    mModifyPlaylistListener.onNewPlaylist(position, play);
+                    mModifyPlaylistListener.onNewPlaylist(musicItem, position, play);
                 }
             }
         });
@@ -363,10 +365,11 @@ public abstract class PlaylistManager {
         /**
          * 设置了一个新的播放列表。
          *
-         * @param position 将播放列表的播放位置设置为 position，不能小于 0
-         * @param play     是否立即播放 position 处的音乐
+         * @param musicItem 要播放的音乐
+         * @param position  要播放的音乐在播放列表中的位置，不能小于 0
+         * @param play      是否播放 position 处的音乐
          */
-        void onNewPlaylist(int position, boolean play);
+        void onNewPlaylist(MusicItem musicItem, int position, boolean play);
 
         /**
          * 列表中某首歌曲的位置被移动了。
