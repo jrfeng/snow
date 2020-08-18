@@ -629,6 +629,12 @@ public abstract class AbstractPlayer implements Player {
                 .build();
     }
 
+    private PlaybackStateCompat buildErrorState(String errorMessage) {
+        return mPlaybackStateBuilder.setState(PlaybackStateCompat.STATE_ERROR, getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
+                .setErrorMessage(PlaybackStateCompat.ERROR_CODE_APP_ERROR, errorMessage)
+                .build();
+    }
+
     private MediaMetadataCompat buildMediaMetadata() {
         MusicItem musicItem = getMusicItem();
 
@@ -897,7 +903,7 @@ public abstract class AbstractPlayer implements Player {
         releaseWakeLock();
 
         mPlayerStateHelper.onError(errorCode, errorMessage);
-        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_ERROR));
+        mMediaSession.setPlaybackState(buildErrorState(errorMessage));
 
         mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
