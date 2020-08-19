@@ -1018,6 +1018,7 @@ public abstract class AbstractPlayer implements Player {
     public void pause() {
         if (isPreparing()) {
             mPlayOnPrepared = false;
+            mPlayOnSeekComplete = false;
             return;
         }
 
