@@ -880,12 +880,15 @@ public abstract class AbstractPlayer implements Player {
 
     private void notifyStalled(boolean stalled, int playProgress, long updateTime) {
         mPlayerStateHelper.onStalled(stalled, playProgress, updateTime);
-        if (!stalled && isPlaying()) {
+
+        if (stalled) {
+            cancelRecordProgress();
+            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_BUFFERING));
+        } else if (isPlaying()) {
             startRecordProgress();
             mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
         } else {
-            cancelRecordProgress();
-            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_BUFFERING));
+            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PAUSED));
         }
 
         onStalledChanged(stalled);
