@@ -468,7 +468,7 @@ public abstract class AbstractPlayer implements Player {
         mStalledListener = new MusicPlayer.OnStalledListener() {
             @Override
             public void onStalled(boolean stalled) {
-                notifyStalled(stalled, mMusicPlayer.getProgress(), System.currentTimeMillis());
+                notifyStalled(stalled);
             }
         };
 
@@ -677,7 +677,7 @@ public abstract class AbstractPlayer implements Player {
         mSeekCompleteAction = null;
 
         if (mPlayerState.isStalled()) {
-            notifyStalled(false, mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime());
+            notifyStalled(false);
         }
     }
 
@@ -878,7 +878,15 @@ public abstract class AbstractPlayer implements Player {
         }
     }
 
-    private void notifyStalled(boolean stalled, int playProgress, long updateTime) {
+    private void notifyStalled(boolean stalled) {
+        int playProgress = mPlayerState.getPlayProgress();
+        long updateTime = mPlayerState.getPlayProgressUpdateTime();
+
+        if (isPlaying()) {
+            playProgress = mMusicPlayer.getProgress();
+            updateTime = System.currentTimeMillis();
+        }
+
         mPlayerStateHelper.onStalled(stalled, playProgress, updateTime);
 
         if (stalled) {
