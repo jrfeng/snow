@@ -14,6 +14,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceFactory;
 
+import snow.player.helper.VolumeEaseHelper;
 import snow.player.media.MusicPlayer;
 import snow.player.util.ErrorUtil;
 
@@ -37,8 +38,21 @@ public class ExoMusicPlayer implements MusicPlayer {
     private boolean mStalled;
     private boolean mInvalid;
 
+    private VolumeEaseHelper mVolumeEaseHelper;
+
     public ExoMusicPlayer(@NonNull Context context, @NonNull MediaSourceFactory mediaSourceFactory) {
         mMediaSourceFactory = mediaSourceFactory;
+        mVolumeEaseHelper = new VolumeEaseHelper(this, new VolumeEaseHelper.Callback() {
+            @Override
+            public void start() {
+                mSimpleExoPlayer.setPlayWhenReady(true);
+            }
+
+            @Override
+            public void pause() {
+                mSimpleExoPlayer.setPlayWhenReady(false);
+            }
+        });
         initEventListener();
         initExoPlayer(context);
     }
@@ -183,16 +197,17 @@ public class ExoMusicPlayer implements MusicPlayer {
 
     @Override
     public void start() {
-        mSimpleExoPlayer.setPlayWhenReady(true);
+        mVolumeEaseHelper.start();
     }
 
     @Override
     public void pause() {
-        mSimpleExoPlayer.setPlayWhenReady(false);
+        mVolumeEaseHelper.pause();
     }
 
     @Override
     public void stop() {
+        mVolumeEaseHelper.cancel();
         mSimpleExoPlayer.stop();
     }
 
@@ -219,6 +234,7 @@ public class ExoMusicPlayer implements MusicPlayer {
     @Override
     public void release() {
         setInvalid();
+        mVolumeEaseHelper.cancel();
         mSimpleExoPlayer.release();
     }
 

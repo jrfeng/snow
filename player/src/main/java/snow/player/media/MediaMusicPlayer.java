@@ -1,12 +1,10 @@
 package snow.player.media;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
 
+import snow.player.helper.VolumeEaseHelper;
 import snow.player.util.ErrorUtil;
 
 /**
@@ -20,8 +18,7 @@ public class MediaMusicPlayer implements MusicPlayer {
 
     private boolean mInvalid;
 
-    private ObjectAnimator mStartVolumeAnimator;
-    private ObjectAnimator mPauseVolumeAnimator;
+    private VolumeEaseHelper mVolumeEaseHelper;
 
     /**
      * 创建一个 {@link MediaMusicPlayer} 对象。
@@ -44,31 +41,14 @@ public class MediaMusicPlayer implements MusicPlayer {
             }
         });
 
-        initVolumeAnimator();
-    }
-
-    private void initVolumeAnimator() {
-        long volumeAnimDuration = 400L;
-
-        mStartVolumeAnimator = ObjectAnimator.ofFloat(this, "volume", 0.0F, 1.0F);
-        mStartVolumeAnimator.setDuration(volumeAnimDuration);
-        mStartVolumeAnimator.addListener(new AnimatorListenerAdapter() {
+        mVolumeEaseHelper = new VolumeEaseHelper(this, new VolumeEaseHelper.Callback() {
             @Override
-            public void onAnimationCancel(Animator animation) {
-                setVolume(1.0F);
-            }
-        });
-
-        mPauseVolumeAnimator = ObjectAnimator.ofFloat(this, "volume", 1.0F, 0.0F);
-        mPauseVolumeAnimator.setDuration(volumeAnimDuration);
-        mPauseVolumeAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                mMediaPlayer.pause();
+            public void start() {
+                mMediaPlayer.start();
             }
 
             @Override
-            public void onAnimationEnd(Animator animation) {
+            public void pause() {
                 mMediaPlayer.pause();
             }
         });
@@ -116,31 +96,17 @@ public class MediaMusicPlayer implements MusicPlayer {
 
     @Override
     public void start() {
-        cancelVolumeAnim();
-        setVolume(0.0F);
-        mMediaPlayer.start();
-        mStartVolumeAnimator.start();
+        mVolumeEaseHelper.start();
     }
 
     @Override
     public void pause() {
-        cancelVolumeAnim();
-        mPauseVolumeAnimator.start();
-    }
-
-    private void cancelVolumeAnim() {
-        if (mStartVolumeAnimator.isStarted()) {
-            mStartVolumeAnimator.cancel();
-        }
-
-        if (mPauseVolumeAnimator.isStarted()) {
-            mPauseVolumeAnimator.cancel();
-        }
+        mVolumeEaseHelper.pause();
     }
 
     @Override
     public void stop() {
-        cancelVolumeAnim();
+        mVolumeEaseHelper.cancel();
         mMediaPlayer.stop();
     }
 
@@ -152,15 +118,6 @@ public class MediaMusicPlayer implements MusicPlayer {
     @Override
     public void setVolume(float leftVolume, float rightVolume) {
         mMediaPlayer.setVolume(leftVolume, rightVolume);
-    }
-
-    /**
-     * 该方法相当于 {@code setVolume(volume, volume)}
-     *
-     * @see #setVolume(float, float)
-     */
-    public void setVolume(float volume) {
-        setVolume(volume, volume);
     }
 
     @Override
@@ -176,7 +133,7 @@ public class MediaMusicPlayer implements MusicPlayer {
     @Override
     public synchronized void release() {
         setInvalid();
-        cancelVolumeAnim();
+        mVolumeEaseHelper.cancel();
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
             mMediaPlayer = null;
