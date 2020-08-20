@@ -19,7 +19,7 @@ import snow.player.media.MusicPlayer;
  *     <li>将 {@link MusicPlayer} 的 {@link MusicPlayer#start()} 与 {@link MusicPlayer#pause()}
  *     方法分别代理给 {@link VolumeEaseHelper} 的 {@link VolumeEaseHelper#start()} 与
  *     {@link VolumeEaseHelper#pause()} 方法，并在 {@link Callback} 中实现真正的
- *     {@link MusicPlayer#start()} 与 {@link MusicPlayer#pause()} 方法。</li>
+ *     {@link MusicPlayer#start()} 与 {@link MusicPlayer#pause()} 逻辑。</li>
  *     <li>最后，分别在 {@link MusicPlayer} 的 {@link MusicPlayer#stop()} 与
  *     {@link MusicPlayer#release()} ()} 方法中调用 {@link VolumeEaseHelper} 对象的
  *     {@link VolumeEaseHelper#cancel()} 方法。</li>
