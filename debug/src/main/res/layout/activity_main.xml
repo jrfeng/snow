@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+
+        <import type="snow.player.PlayMode" />
+
+        <variable
+            name="viewModel"
+            type="snow.player.lifecycle.PlayerViewModel" />
+
+    </data>
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context=".MainActivity"
+        tools:ignore="HardcodedText,ButtonStyle">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp">
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="Title:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{viewModel.title}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="Artist:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{viewModel.artist}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="IconUri:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{viewModel.iconUri}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="Duration:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{String.valueOf(viewModel.duration)}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="TextDuration:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{viewModel.textDuration ?? `00:00`}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="PlayProgress:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{String.valueOf(viewModel.playProgress)}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="TextPlayProgress:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{viewModel.textPlayProgress ?? `00:00`}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="BufferedProgress:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{String.valueOf(viewModel.bufferedProgress)}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="PlayPosition:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{String.valueOf(viewModel.playPosition)}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="PlayMode:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{viewModel.playMode.toString()}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="PlaybackState:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{viewModel.playbackState.toString()}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="Preparing:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{String.valueOf(viewModel.preparing)}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="Stalled:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{String.valueOf(viewModel.stalled)}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="ErrorMessage:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{viewModel.errorMessage}"
+                        android:textColor="@android:color/holo_red_dark" />
+
+                </TableRow>
+
+            </TableLayout>
+
+            <SeekBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:max="@{viewModel.duration}"
+                android:onStopTrackingTouch="@{viewModel::onStopTrackingTouch}"
+                android:onStartTrackingTouch="@{viewModel::onStartTrackingTouch}"
+                android:progress="@={viewModel.playProgress}"
+                android:secondaryProgress="@{viewModel.bufferedProgress}" />
+
+            <TextView
+                android:id="@+id/tvMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnConnect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:text="connect"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btnDisconnect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:text="disconnect"
+                    android:textAllCaps="false" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnSetPlaylist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="setPlaylist"
+                android:textAllCaps="false" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnPlay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.play()}"
+                    android:text="play"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btnPause"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.pause()}"
+                    android:text="pause"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btnPlayPause"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.playPause()}"
+                    android:text="playPause"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btnStop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.stop()}"
+                    android:text="stop"
+                    android:textAllCaps="false" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnSkipToPrevious"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.skipToPrevious()}"
+                    android:text="skipToPrevious"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btnSkipToNext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.skipToNext()}"
+                    android:text="skipToNext"
+                    android:textAllCaps="false" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnFastForward"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.fastForward()}"
+                    android:text="fastForward"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btnRewind"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.rewind()}"
+                    android:text="rewind"
+                    android:textAllCaps="false" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.setPlayMode(PlayMode.SEQUENTIAL)}"
+                    android:text="Sequential"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.setPlayMode(PlayMode.LOOP)}"
+                    android:text="Loop"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.setPlayMode(PlayMode.SHUFFLE)}"
+                    android:text="Shuffle"
+                    android:textAllCaps="false" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</layout>

@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name" translatable="false">debug</string>
+    <string name="factory" translatable="false">snow.player.debug.MyFactory</string>
+</resources>

@@ -1,4 +1,4 @@
-package snow.demo;
+package snow.player.debug;
 
 import android.content.Context;
 import android.util.Log;
