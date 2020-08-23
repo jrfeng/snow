@@ -3,6 +3,7 @@ package snow.player.playlist;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import channel.helper.Channel;
 import snow.player.media.MusicItem;
 
 /**
@@ -55,6 +56,7 @@ public interface PlaylistManager {
     /**
      * 用于监听设置新的播放列表事件。
      */
+    @Channel
     interface OnNewPlaylistListener {
 
         /**

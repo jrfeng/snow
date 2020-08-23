@@ -46,7 +46,7 @@ import snow.player.helper.NetworkHelper;
 /**
  * 该类实现了 {@link Player} 接口，并实现大部分音乐播放器功能。
  */
-abstract class AbstractPlayer implements Player, PlaylistEditor {
+abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistManager.OnNewPlaylistListener {
     private static final String TAG = "AbstractPlayer";
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
 
