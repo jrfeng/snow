@@ -56,7 +56,6 @@ import snow.player.media.MediaMusicPlayer;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.playlist.PlaylistEditor;
-import snow.player.playlist.PlaylistManager;
 import snow.player.util.ErrorUtil;
 
 /**
