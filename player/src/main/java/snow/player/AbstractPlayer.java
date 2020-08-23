@@ -46,7 +46,7 @@ import snow.player.helper.NetworkHelper;
 /**
  * 该类实现了 {@link Player} 接口，并实现大部分音乐播放器功能。
  */
-abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistManager.OnNewPlaylistListener {
+abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.OnNewPlaylistListener {
     private static final String TAG = "AbstractPlayer";
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
 
@@ -1455,6 +1455,13 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistManager
         }
 
         notifyPlayModeChanged(playMode);
+    }
+
+    @Override
+    public void setPlaylist(Playlist playlist, int position, boolean play) {
+        // （忽略）该方法不会被调用
+        // 当前类已通过实现 PlaylistEditor.OnNewPlaylistListener 接口来响应设置新的播放列表事件
+        // 具体请查看当前类的 onNewPlaylist(MusicItem, int, boolean) 方法
     }
 
     @Override

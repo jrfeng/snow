@@ -167,7 +167,7 @@ public class PlayerClient implements Player, PlaylistEditor {
         mPlaylistEditor = ChannelHelper.newEmitter(PlaylistEditor.class, customActionPipe);
 
         mPlaylistManager.setOnNewPlaylistListener(
-                ChannelHelper.newEmitter(PlaylistManager.OnNewPlaylistListener.class, customActionPipe));
+                ChannelHelper.newEmitter(OnNewPlaylistListener.class, customActionPipe));
     }
 
     private void initPlayerManager(CustomActionPipe customActionPipe) {
@@ -467,6 +467,7 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param position 播放列表中要播放的歌曲的位置
      * @param play     是否立即播放 {@code position} 参数指定处的音乐
      */
+    @Override
     public void setPlaylist(@NonNull Playlist playlist, int position, boolean play) {
         Preconditions.checkNotNull(playlist);
         if (!isConnected()) {

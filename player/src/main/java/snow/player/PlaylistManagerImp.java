@@ -21,6 +21,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import snow.player.media.MusicItem;
 import snow.player.playlist.Playlist;
+import snow.player.playlist.PlaylistEditor;
 import snow.player.playlist.PlaylistManager;
 
 /**
@@ -31,7 +32,7 @@ class PlaylistManagerImp implements PlaylistManager {
     private static final String KEY_PLAYLIST = "playlist";
     private static final String KEY_PLAYLIST_SIZE = "playlist_size";
 
-    private OnNewPlaylistListener mNewPlaylistListener;
+    private PlaylistEditor.OnNewPlaylistListener mNewPlaylistListener;
 
     private MMKV mMMKV;
     private boolean mEditable;
@@ -108,7 +109,7 @@ class PlaylistManagerImp implements PlaylistManager {
         });
     }
 
-    public void setOnNewPlaylistListener(@Nullable OnNewPlaylistListener listener) {
+    public void setOnNewPlaylistListener(@Nullable PlaylistEditor.OnNewPlaylistListener listener) {
         mNewPlaylistListener = listener;
     }
 
