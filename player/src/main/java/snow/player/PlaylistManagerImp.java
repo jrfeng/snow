@@ -23,6 +23,9 @@ import snow.player.media.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
 
+/**
+ * 用于获取和设置播放器的播放列表。
+ */
 class PlaylistManagerImp implements PlaylistManager {
     private static final String TAG = "PlaylistManagerImp";
     private static final String KEY_PLAYLIST = "playlist";
@@ -87,8 +90,6 @@ class PlaylistManagerImp implements PlaylistManager {
                 });
     }
 
-    @SuppressLint("CheckResult")
-    @Override
     public void setPlaylist(@NonNull final Playlist playlist, final int position, final boolean play) {
         Preconditions.checkNotNull(playlist);
 
@@ -107,7 +108,6 @@ class PlaylistManagerImp implements PlaylistManager {
         });
     }
 
-    @Override
     public void setOnNewPlaylistListener(@Nullable OnNewPlaylistListener listener) {
         mNewPlaylistListener = listener;
     }

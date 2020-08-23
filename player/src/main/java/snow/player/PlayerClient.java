@@ -52,7 +52,6 @@ public class PlayerClient implements Player, PlaylistEditor {
     private OnConnectCallback mConnectCallback;
 
     private Player mPlayer;
-    private PlaylistManager.OnNewPlaylistListener mNewPlaylistListener;
     private PlaylistEditor mPlaylistEditor;
     private PlaylistManagerImp mPlaylistManager;
     private PlayerStateHolder mPlayerStateHolder;
@@ -166,9 +165,9 @@ public class PlayerClient implements Player, PlaylistEditor {
     private void initCustomActionEmitter(CustomActionPipe customActionPipe) {
         mPlayer = ChannelHelper.newEmitter(Player.class, customActionPipe);
         mPlaylistEditor = ChannelHelper.newEmitter(PlaylistEditor.class, customActionPipe);
-        mNewPlaylistListener = ChannelHelper.newEmitter(PlaylistManager.OnNewPlaylistListener.class, customActionPipe);
 
-        mPlaylistManager.setOnNewPlaylistListener(mNewPlaylistListener);
+        mPlaylistManager.setOnNewPlaylistListener(
+                ChannelHelper.newEmitter(PlaylistManager.OnNewPlaylistListener.class, customActionPipe));
     }
 
     private void initPlayerManager(CustomActionPipe customActionPipe) {

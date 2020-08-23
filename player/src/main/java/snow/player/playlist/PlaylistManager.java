@@ -1,13 +1,12 @@
 package snow.player.playlist;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import channel.helper.Channel;
 import snow.player.media.MusicItem;
 
 /**
- * 用于管理音乐播放器的播放队列。
+ * 用于获取播放器的播放队列。
  */
 public interface PlaylistManager {
 
@@ -24,22 +23,6 @@ public interface PlaylistManager {
      * 以异步的方式获取播放队列。
      */
     void getPlaylist(@NonNull Callback callback);
-
-    /**
-     * 设置新的播放列表，并将播放队列的播放位置设为 position 值，同时设置是否在 prepare 完成后自动播放音乐。
-     *
-     * @param playlist 新的播放列表（不能为 null）
-     * @param position 要设置的播放位置值（小于 0 时，相当于设为 0）
-     * @param play     否在自动播放 position 位置处的音乐
-     */
-    void setPlaylist(@NonNull Playlist playlist, int position, boolean play);
-
-    /**
-     * 设置一个监听器用于监听设置新的播放列表事件
-     *
-     * @param listener 监听器，如果为 null，会清除已设置的监听器
-     */
-    void setOnNewPlaylistListener(@Nullable OnNewPlaylistListener listener);
 
     /**
      * {@link #getPlaylist(Callback)} 方法的回调接口。

@@ -7,6 +7,8 @@ import snow.player.media.MusicItem;
 
 /**
  * 该接口定义了播放列表编辑器的基本功能。
+ *
+ * @see snow.player.PlayerClient
  */
 @Channel
 public interface PlaylistEditor {
@@ -18,6 +20,7 @@ public interface PlaylistEditor {
      * @param position  歌曲插入的位置
      * @param musicItem 要插入的歌曲，不能为 null
      */
+    @SuppressWarnings("NullableProblems")
     void insertMusicItem(int position, @NonNull MusicItem musicItem);
 
     /**
@@ -33,6 +36,7 @@ public interface PlaylistEditor {
      *
      * @param musicItem 要移除的歌曲。如果播放列表中不包含该歌曲，则忽略本次调用
      */
+    @SuppressWarnings("NullableProblems")
     void removeMusicItem(@NonNull MusicItem musicItem);
 
     /**
@@ -41,5 +45,6 @@ public interface PlaylistEditor {
      * @param musicItem 要设定为 “下一次播放” 的歌曲，如果歌曲已存在播放列表中，则会移动到 “下一曲播放” 的位
      *                  置，如果歌曲不存在，则插入到 “下一曲播放” 位置
      */
+    @SuppressWarnings("NullableProblems")
     void setNextPlay(@NonNull MusicItem musicItem);
 }
