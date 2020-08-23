@@ -95,6 +95,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private PowerManager.WakeLock mWakeLock;
     private WifiManager.WifiLock mWifiLock;
 
+    private boolean mConfirmNextPlay;
+
     /**
      * 创建一个 {@link AbstractPlayer} 对象。
      *
@@ -1356,17 +1358,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        int position = mPlayerState.getPosition();
-
-        switch (mPlayerState.getPlayMode()) {
-            case SEQUENTIAL:   // 注意！case 穿透
-            case LOOP:
-                position = getNextPosition(position);
-                break;
-            case SHUFFLE:
-                position = getRandomPosition(position);
-                break;
-        }
+        int position = getNextPosition(mPlayerState.getPosition());
 
         mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT));
         notifyPlayingMusicItemChanged(mPlaylist.get(position), true);
@@ -1374,13 +1366,17 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     }
 
     private int getNextPosition(int currentPosition) {
-        int position = currentPosition + 1;
-
-        if (position >= getPlaylistSize()) {
-            return 0;
+        PlayMode playMode = mPlayerState.getPlayMode();
+        if (mConfirmNextPlay || playMode == PlayMode.SEQUENTIAL || playMode == PlayMode.LOOP) {
+            mConfirmNextPlay = false;
+            int position = currentPosition + 1;
+            if (position >= getPlaylistSize()) {
+                return 0;
+            }
+            return position;
         }
 
-        return position;
+        return getRandomPosition(currentPosition);
     }
 
     @Override
@@ -1399,17 +1395,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        int position = mPlayerState.getPosition();
-
-        switch (mPlayerState.getPlayMode()) {
-            case SEQUENTIAL:   // 注意！case 穿透
-            case LOOP:
-                position = getPreviousPosition(position);
-                break;
-            case SHUFFLE:
-                position = getRandomPosition(position);
-                break;
-        }
+        int position = getPreviousPosition(mPlayerState.getPosition());
 
         mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS));
         notifyPlayingMusicItemChanged(mPlaylist.get(position), true);
@@ -1417,10 +1403,19 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     }
 
     private int getPreviousPosition(int currentPosition) {
-        int position = currentPosition - 1;
+        int position = 0;
 
-        if (position < 0) {
-            return getPlaylistSize() - 1;
+        switch (mPlayerState.getPlayMode()) {
+            case SEQUENTIAL:   // 注意！case 穿透
+            case LOOP:
+                position = currentPosition - 1;
+                if (position < 0) {
+                    return getPlaylistSize() - 1;
+                }
+                break;
+            case SHUFFLE:
+                position = getRandomPosition(currentPosition);
+                break;
         }
 
         return position;
@@ -1627,6 +1622,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void setNextPlay(@NonNull final MusicItem musicItem) {
+        if (musicItem == getMusicItem()) {
+            return;
+        }
+
         if (mLoadingPlaylist) {
             mPlaylistLoadedAction = new Runnable() {
                 @Override
@@ -1638,6 +1637,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         insertMusicItem(mPlayerState.getPosition() + 1, musicItem);
+        mConfirmNextPlay = true;
     }
 
     private void updatePlaylist(List<MusicItem> musicItems) {
