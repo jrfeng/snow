@@ -55,6 +55,7 @@ import snow.player.effect.AudioEffectManager;
 import snow.player.media.MediaMusicPlayer;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
+import snow.player.playlist.PlaylistEditor;
 import snow.player.playlist.PlaylistManager;
 import snow.player.util.ErrorUtil;
 
@@ -99,7 +100,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     private PlayerConfig mPlayerConfig;
     private PlayerState mPlayerState;
 
-    private PlaylistManager mPlaylistManager;
+    private PlaylistManagerImp mPlaylistManager;
     private PlayerImp mPlayer;
     private CustomActionPipe mControllerPipe;
 
@@ -242,7 +243,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initPlaylistManager() {
-        mPlaylistManager = PlaylistManager.newInstance(this, mPersistentId);
+        mPlaylistManager = new PlaylistManagerImp(this, mPersistentId, true);
     }
 
     private void initPlayer() {
@@ -254,14 +255,17 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initControllerPipe() {
-        final Dispatcher playerManagerDispatcher
-                = ChannelHelper.newDispatcher(PlayerManager.class, this);
+        final Dispatcher playerManagerDispatcher =
+                ChannelHelper.newDispatcher(PlayerManager.class, this);
 
         final Dispatcher playerDispatcher =
                 ChannelHelper.newDispatcher(Player.class, mPlayer);
 
+        final Dispatcher playlistEditorDispatcher =
+                ChannelHelper.newDispatcher(PlaylistEditor.class, mPlayer);
+
         mControllerPipe = new CustomActionPipe(
-                DispatcherUtil.merge(playerManagerDispatcher, playerDispatcher)
+                DispatcherUtil.merge(playerManagerDispatcher, playerDispatcher, playlistEditorDispatcher)
         );
     }
 
@@ -955,7 +959,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         public PlayerImp(@NonNull Context context,
                          @NonNull PlayerConfig playerConfig,
                          @NonNull PlayerState playlistState,
-                         @NonNull PlaylistManager playlistManager,
+                         @NonNull PlaylistManagerImp playlistManager,
                          @NonNull AppWidgetPreferences pref) {
             super(context, playerConfig, playlistState, playlistManager, pref);
         }

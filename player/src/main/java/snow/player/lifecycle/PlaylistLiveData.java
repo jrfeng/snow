@@ -74,7 +74,7 @@ public class PlaylistLiveData extends LiveData<Playlist>
     }
 
     private void updatePlaylist(PlaylistManager playlistManager) {
-        playlistManager.getPlaylistAsync(new PlaylistManager.Callback() {
+        playlistManager.getPlaylist(new PlaylistManager.Callback() {
             @Override
             public void onFinished(@NonNull Playlist playlist) {
                 setValue(playlist);

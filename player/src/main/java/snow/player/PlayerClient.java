@@ -28,6 +28,7 @@ import channel.helper.pipe.CustomActionPipe;
 import channel.helper.pipe.MessengerPipe;
 import snow.player.media.MusicItem;
 import snow.player.playlist.Playlist;
+import snow.player.playlist.PlaylistEditor;
 import snow.player.playlist.PlaylistManager;
 import snow.player.util.ErrorUtil;
 
@@ -35,7 +36,7 @@ import snow.player.util.ErrorUtil;
  * 播放器客户端，用于向播放器发送各种控制命令。
  */
 @SuppressWarnings("unused")
-public class PlayerClient implements Player {
+public class PlayerClient implements Player, PlaylistEditor {
     private Context mApplicationContext;
     private Class<? extends PlayerService> mPlayerService;
     private String mClientToken;
@@ -51,6 +52,7 @@ public class PlayerClient implements Player {
     private OnConnectCallback mConnectCallback;
 
     private Player mPlayer;
+    private PlaylistEditor mPlaylistEditor;
     private PlaylistManagerImp mPlaylistManager;
     private PlayerStateHolder mPlayerStateHolder;
 
@@ -130,8 +132,8 @@ public class PlayerClient implements Player {
     }
 
     private void initPlaylistManager() {
-        mPlaylistManager = new PlaylistManagerImp(mApplicationContext, mPersistentId);
-        mPlaylistManager.setOnModifyPlaylistListener(this);
+        mPlaylistManager = new PlaylistManagerImp(mApplicationContext, mPersistentId, false);
+        mPlaylistManager.setOnNewPlaylistListener(this);
     }
 
     private void initPlayerStateHolder() {
@@ -157,12 +159,13 @@ public class PlayerClient implements Player {
 
         // send custom action to MediaSession
         CustomActionPipe customActionPipe = new CustomActionPipe(mediaController.getTransportControls());
-        iniPlayer(customActionPipe);
+        initCustomActionEmitter(customActionPipe);
         initPlayerManager(customActionPipe);
     }
 
-    private void iniPlayer(CustomActionPipe customActionPipe) {
+    private void initCustomActionEmitter(CustomActionPipe customActionPipe) {
         mPlayer = ChannelHelper.newEmitter(Player.class, customActionPipe);
+        mPlaylistEditor = ChannelHelper.newEmitter(PlaylistEditor.class, customActionPipe);
     }
 
     private void initPlayerManager(CustomActionPipe customActionPipe) {
@@ -478,54 +481,7 @@ public class PlayerClient implements Player {
      */
     public void getPlaylistAsync(@NonNull PlaylistManager.Callback callback) {
         Preconditions.checkNotNull(callback);
-        mPlaylistManager.getPlaylistAsync(callback);
-    }
-
-    /**
-     * 设置指定歌曲 “下一次播放”。
-     *
-     * @param musicItem 要设定为 “下一次播放” 的歌曲，如果歌曲已存在播放列表中，则会移动到 “下一曲播放” 的位
-     *                  置，如果歌曲不存在，则插入到 “下一曲播放” 位置
-     */
-    public void setNextPlay(@NonNull MusicItem musicItem) {
-        Preconditions.checkNotNull(musicItem);
-        if (!isConnected()) {
-            return;
-        }
-
-        if (musicItem.equals(getPlayingMusicItem())) {
-            return;
-        }
-
-        mPlaylistManager.insertMusicItem(getPlayPosition() + 1, musicItem);
-    }
-
-    /**
-     * 移动列表中指定歌曲的位置。
-     *
-     * @param fromPosition 要移动的歌曲的位置
-     * @param toPosition   歌曲要移动到的位置
-     */
-    public void moveMusicItem(int fromPosition, int toPosition) {
-        if (!isConnected()) {
-            return;
-        }
-
-        mPlaylistManager.moveMusicItem(fromPosition, toPosition);
-    }
-
-    /**
-     * 从播放列表中移除指定歌曲。
-     *
-     * @param musicItem 要移除的歌曲
-     */
-    public void removeMusicItem(@NonNull MusicItem musicItem) {
-        Preconditions.checkNotNull(musicItem);
-        if (!isConnected()) {
-            return;
-        }
-
-        mPlaylistManager.removeMusicItem(musicItem);
+        mPlaylistManager.getPlaylist(callback);
     }
 
     /**
@@ -865,33 +821,6 @@ public class PlayerClient implements Player {
         }
 
         mPlayer.onNewPlaylist(musicItem, position, play);
-    }
-
-    @Override
-    public void onMusicItemMoved(int fromPosition, int toPosition) {
-        if (notConnected()) {
-            return;
-        }
-
-        mPlayer.onMusicItemMoved(fromPosition, toPosition);
-    }
-
-    @Override
-    public void onMusicItemInserted(int position, MusicItem musicItem) {
-        if (notConnected()) {
-            return;
-        }
-
-        mPlayer.onMusicItemInserted(position, musicItem);
-    }
-
-    @Override
-    public void onMusicItemRemoved(MusicItem musicItem) {
-        if (notConnected()) {
-            return;
-        }
-
-        mPlayer.onMusicItemRemoved(musicItem);
     }
 
     /**
@@ -1395,6 +1324,45 @@ public class PlayerClient implements Player {
         return owner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED;
     }
 
+    @Override
+    public void insertMusicItem(int position, @NonNull MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
+        if (!isConnected()) {
+            return;
+        }
+
+        mPlaylistEditor.insertMusicItem(position, musicItem);
+    }
+
+    @Override
+    public void moveMusicItem(int fromPosition, int toPosition) {
+        if (!isConnected()) {
+            return;
+        }
+
+        mPlaylistEditor.moveMusicItem(fromPosition, toPosition);
+    }
+
+    @Override
+    public void removeMusicItem(@NonNull MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
+        if (!isConnected()) {
+            return;
+        }
+
+        mPlaylistEditor.removeMusicItem(musicItem);
+    }
+
+    @Override
+    public void setNextPlay(@NonNull MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
+        if (!isConnected()) {
+            return;
+        }
+
+        mPlaylistEditor.setNextPlay(musicItem);
+    }
+
     /**
      * 用于监听播放器是否连接成功。
      */
@@ -1441,17 +1409,6 @@ public class PlayerClient implements Player {
          * @param audioSessionId 最新的 audio session id
          */
         void onAudioSessionChanged(int audioSessionId);
-    }
-
-    private static class PlaylistManagerImp extends PlaylistManager {
-        protected PlaylistManagerImp(Context context, String playlistId) {
-            super(context, playlistId);
-        }
-
-        @Override
-        protected void setEditable(boolean editable) {
-            super.setEditable(editable);
-        }
     }
 
     // 用于管理与同步播放器状态

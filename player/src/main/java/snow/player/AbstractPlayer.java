@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat;
 import com.google.common.base.Preconditions;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -37,6 +38,7 @@ import snow.player.appwidget.AppWidgetPreferences;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.playlist.Playlist;
+import snow.player.playlist.PlaylistEditor;
 import snow.player.playlist.PlaylistManager;
 import snow.player.util.ErrorUtil;
 import snow.player.helper.NetworkHelper;
@@ -44,7 +46,7 @@ import snow.player.helper.NetworkHelper;
 /**
  * 该类实现了 {@link Player} 接口，并实现大部分音乐播放器功能。
  */
-public abstract class AbstractPlayer implements Player {
+abstract class AbstractPlayer implements Player, PlaylistEditor {
     private static final String TAG = "AbstractPlayer";
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
 
@@ -75,7 +77,7 @@ public abstract class AbstractPlayer implements Player {
     private Runnable mSeekCompleteAction;
     private Runnable mPlaylistLoadedAction;
 
-    private PlaylistManager mPlaylistManager;
+    private PlaylistManagerImp mPlaylistManager;
     private Playlist mPlaylist;
 
     private Random mRandom;
@@ -83,7 +85,6 @@ public abstract class AbstractPlayer implements Player {
 
     private boolean mReleased;
 
-    private boolean mRecordProgress;
     private Disposable mRecordProgressDisposable;
     private Disposable mCheckCachedDisposable;
 
@@ -98,16 +99,16 @@ public abstract class AbstractPlayer implements Player {
      * 创建一个 {@link AbstractPlayer} 对象。
      *
      * @param context         {@link Context} 对象，不能为 null
-     * @param playerConfig    {@link PlayerConfig} 对象（本项目的私有类型），保存了播放器的初始配置信息，不能为 null
-     * @param playerState     {@link PlayerState} 对象（本项目的私有类型），保存了播放器的初始状态，不能为 null
-     * @param playlistManager {@link PlaylistManager} 对象，用于管理播放列表，不能为 null
+     * @param playerConfig    {@link PlayerConfig} 对象，保存了播放器的初始配置信息，不能为 null
+     * @param playerState     {@link PlayerState} 对象，保存了播放器的初始状态，不能为 null
+     * @param playlistManager {@link PlaylistManagerImp} 对象，用于管理播放列表，不能为 null
      * @param pref            {@link AppWidgetPreferences} 对象，用于在 PlayerService 与 AppWidget
      *                        之间进行状态同步，不能为 null
      */
     public AbstractPlayer(@NonNull Context context,
                           @NonNull PlayerConfig playerConfig,
                           @NonNull PlayerState playerState,
-                          @NonNull PlaylistManager playlistManager,
+                          @NonNull PlaylistManagerImp playlistManager,
                           @NonNull AppWidgetPreferences pref) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerConfig);
@@ -121,7 +122,6 @@ public abstract class AbstractPlayer implements Player {
         mPlayerStateHelper = new PlayerStateHelper(mPlayerState, pref);
         mPlaylistManager = playlistManager;
         mStateListenerMap = new HashMap<>();
-        mRecordProgress = true;
 
         initAllListener();
         initAllHelper();
@@ -269,16 +269,6 @@ public abstract class AbstractPlayer implements Player {
         mPreparedAction = null;
         mSeekCompleteAction = null;
         mPlaylistLoadedAction = null;
-    }
-
-    /**
-     * 设置是否实时记录播放进度。
-     *
-     * @param enable 是否实时记录播放进度（默认为 true）。为 true 时，会在播放时每隔 3 秒将歌曲的播放进度记
-     *               录到本地磁盘，这样即使程序被突然终止，下次播放时也能自动恢复到与上次播放相近的播放进度。
-     */
-    public final void setRecordProgress(boolean enable) {
-        mRecordProgress = enable;
     }
 
     /**
@@ -1244,7 +1234,7 @@ public abstract class AbstractPlayer implements Player {
 
     private void reloadPlaylist(final boolean playingMusicChanged, final boolean play) {
         mLoadingPlaylist = true;
-        mPlaylistManager.getPlaylistAsync(new PlaylistManager.Callback() {
+        mPlaylistManager.getPlaylist(new PlaylistManager.Callback() {
             @Override
             public void onFinished(@NonNull final Playlist playlist) {
                 if (mReleased) {
@@ -1480,8 +1470,7 @@ public abstract class AbstractPlayer implements Player {
         reloadPlaylist();
     }
 
-    @Override
-    public void onMusicItemMoved(int fromPosition, int toPosition) {
+    private void onMusicItemMoved(int fromPosition, int toPosition) {
         int position = mPlayerState.getPosition();
         if (notInRegion(position, fromPosition, toPosition)) {
             notifyPlaylistChanged(position);
@@ -1498,11 +1487,9 @@ public abstract class AbstractPlayer implements Player {
         }
 
         notifyPlaylistChanged(position);
-        reloadPlaylist();
     }
 
-    @Override
-    public void onMusicItemInserted(int position, MusicItem musicItem) {
+    private void onMusicItemInserted(int position) {
         int playingPosition = mPlayerState.getPosition();
 
         if (position <= playingPosition) {
@@ -1510,11 +1497,9 @@ public abstract class AbstractPlayer implements Player {
         }
 
         notifyPlaylistChanged(playingPosition);
-        reloadPlaylist();
     }
 
-    @Override
-    public void onMusicItemRemoved(final MusicItem musicItem) {
+    private void onMusicItemRemoved(final MusicItem musicItem) {
         int removePosition = mPlaylist.indexOf(musicItem);
         if (removePosition < 0) {
             return;
@@ -1538,7 +1523,6 @@ public abstract class AbstractPlayer implements Player {
         }
 
         notifyPlaylistChanged(position);
-        reloadPlaylist();
     }
 
     private boolean notInRegion(int position, int fromPosition, int toPosition) {
@@ -1547,10 +1531,6 @@ public abstract class AbstractPlayer implements Player {
 
     private void startRecordProgress() {
         cancelRecordProgress();
-        if (!mRecordProgress) {
-            return;
-        }
-
         mRecordProgressDisposable = Observable.interval(3, 3, TimeUnit.SECONDS, Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Long>() {
@@ -1571,5 +1551,97 @@ public abstract class AbstractPlayer implements Player {
         }
 
         mRecordProgressDisposable.dispose();
+    }
+
+    @Override
+    public void insertMusicItem(final int position, @NonNull final MusicItem musicItem) {
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
+                @Override
+                public void run() {
+                    insertMusicItem(position, musicItem);
+                }
+            };
+            return;
+        }
+
+        List<MusicItem> musicItems = mPlaylist.getAllMusicItem();
+        if (musicItems.contains(musicItem)) {
+            moveMusicItem(musicItems.indexOf(musicItem), position);
+            return;
+        }
+
+        musicItems.add(position, musicItem);
+
+        updatePlaylist(musicItems);
+        onMusicItemInserted(position);
+    }
+
+    @Override
+    public void moveMusicItem(final int fromPosition, final int toPosition) {
+        if (fromPosition == toPosition) {
+            return;
+        }
+
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
+                @Override
+                public void run() {
+                    moveMusicItem(fromPosition, toPosition);
+                }
+            };
+            return;
+        }
+
+        List<MusicItem> musicItems = mPlaylist.getAllMusicItem();
+
+        MusicItem from = musicItems.remove(fromPosition);
+        musicItems.add(toPosition, from);
+
+        updatePlaylist(musicItems);
+        onMusicItemMoved(fromPosition, toPosition);
+    }
+
+    @Override
+    public void removeMusicItem(@NonNull final MusicItem musicItem) {
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
+                @Override
+                public void run() {
+                    removeMusicItem(musicItem);
+                }
+            };
+            return;
+        }
+
+        List<MusicItem> musicItems = mPlaylist.getAllMusicItem();
+        if (!musicItems.contains(musicItem)) {
+            return;
+        }
+
+        musicItems.remove(musicItem);
+
+        updatePlaylist(musicItems);
+        onMusicItemRemoved(musicItem);
+    }
+
+    @Override
+    public void setNextPlay(@NonNull final MusicItem musicItem) {
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
+                @Override
+                public void run() {
+                    setNextPlay(musicItem);
+                }
+            };
+            return;
+        }
+
+        insertMusicItem(mPlayerState.getPosition() + 1, musicItem);
+    }
+
+    private void updatePlaylist(List<MusicItem> musicItems) {
+        mPlaylist = new Playlist(musicItems);
+        mPlaylistManager.save(mPlaylist, null);
     }
 }

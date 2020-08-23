@@ -13,7 +13,7 @@ import snow.player.playlist.PlaylistManager;
  * @see AbstractPlayer
  */
 @Channel
-public interface Player extends PlaylistManager.OnModifyPlaylistListener {
+public interface Player extends PlaylistManager.OnNewPlaylistListener {
     /**
      * 开始播放。
      */
