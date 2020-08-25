@@ -29,8 +29,11 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
 
     /**
      * 创建一个 {@link Playlist} 对象。
+     * <p>
+     * 建议优先使用 {@link Builder} 来创建 {@link Playlist} 对象。
      *
      * @param items 要添加到播放队列中的 {@link MusicItem} 对象，重复的 {@link MusicItem} 对象会被排除
+     * @see Builder
      */
     public Playlist(@NonNull List<MusicItem> items) {
         this(items, null);
@@ -44,11 +47,11 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
      */
     public Playlist(@NonNull List<MusicItem> items, Bundle extra) {
         Preconditions.checkNotNull(items);
-        mMusicItems = excludeDuplicate(items);
+        mMusicItems = excludeRepeatItem(items);
         mExtra = extra;
     }
 
-    private ArrayList<MusicItem> excludeDuplicate(List<MusicItem> items) {
+    private ArrayList<MusicItem> excludeRepeatItem(List<MusicItem> items) {
         ArrayList<MusicItem> musicItems = new ArrayList<>();
 
         for (MusicItem item : items) {
@@ -208,4 +211,74 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
             return new Playlist[size];
         }
     };
+
+    /**
+     * {@link Playlist} 构建器。
+     */
+    public static final class Builder {
+        private List<MusicItem> mMusicItems;
+        private Bundle mExtra;
+
+        /**
+         * 创建一个 {@link Builder} 构建器对象。
+         */
+        public Builder() {
+            mMusicItems = new ArrayList<>();
+        }
+
+        /**
+         * 添加一首音乐。
+         */
+        public Builder append(@NonNull MusicItem musicItem) {
+            Preconditions.checkNotNull(musicItem);
+            mMusicItems.add(musicItem);
+            return this;
+        }
+
+        /**
+         * 添加多首音乐。
+         */
+        public Builder appendAll(@NonNull List<MusicItem> musicItems) {
+            Preconditions.checkNotNull(musicItems);
+            mMusicItems.addAll(musicItems);
+            return this;
+        }
+
+        /**
+         * 移除一首音乐。
+         */
+        public Builder remove(@NonNull MusicItem musicItem) {
+            Preconditions.checkNotNull(musicItem);
+            mMusicItems.remove(musicItem);
+            return this;
+        }
+
+        /**
+         * 移除多首音乐。
+         */
+        public Builder removeAll(@NonNull List<MusicItem> musicItems) {
+            Preconditions.checkNotNull(musicItems);
+            mMusicItems.removeAll(musicItems);
+            return this;
+        }
+
+        /**
+         * 设置要携带的额外参数，
+         *
+         * @param extra 要携带的额外参数，可为 null
+         */
+        public Builder setExtra(@Nullable Bundle extra) {
+            mExtra = extra;
+            return this;
+        }
+
+        /**
+         * 构造一个 {@link Playlist} 对象。
+         * <p>
+         * 重复的 {@link MusicItem} 项会被在构造 {@link Playlist} 对象时被排除。
+         */
+        public Playlist build() {
+            return new Playlist(mMusicItems, mExtra);
+        }
+    }
 }
