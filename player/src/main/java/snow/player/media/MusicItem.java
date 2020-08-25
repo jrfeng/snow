@@ -15,6 +15,8 @@ import com.google.common.base.Preconditions;
  * <p>
  * 如果需要存储额外的数据，可以使用 {@link #setExtra(Bundle)} 方法与 {@link #getExtra()} 方法。请不要往
  * MusicItem 中存储大对象，因为这会拖慢 {@link snow.player.Player.OnPlaylistChangeListener} 的响应速度。
+ *
+ * @see MusicItemBuilder
  */
 public final class MusicItem implements Parcelable {
     private String musicId;
@@ -28,7 +30,8 @@ public final class MusicItem implements Parcelable {
     private Bundle extra;
 
     /**
-     * 构造一个 MusicItem 对象。
+     * 构造一个 MusicItem 对象。建议使用 {@link MusicItemBuilder} 构造器来创建 {@link MusicItem} 对象，
+     * 而不是使用构造方法。
      */
     public MusicItem() {
         this.musicId = "";
