@@ -4,21 +4,22 @@ import android.net.Uri;
 
 /**
  * 该接口定义了音乐播放器的基本功能。可以通过实现该接口来创建一个自定义的音乐播放器。
+ * <p>
+ * 如何实现自定义的 {@link MusicPlayer}，请参加各方法的文档。文档对如何实现个方法的要求与限制进行了详细介绍。
  *
  * @see MediaMusicPlayer
  */
 public interface MusicPlayer {
 
     /**
-     * 准备当前音乐播放器。
+     * 准备音乐播放器。
      * <p>
      * 该方法会在主线程上执行，如果准备操作是个耗时操作，你应该在异步线程中执行它。
      * <p>
      * 在实现该方法时，建议先检查 {@link #isInvalid()} 状态，如果返回 {@code true}，说明当前
-     * MusicPlayer 已失效，此时因立即从该方法中返回，不应该再调用任何方法。具体做法请参照
-     * {@link MediaMusicPlayer} 的源码。
+     * {@link MusicPlayer} 已失效，此时因立即从该方法中返回，不应该再调用任何方法。
      *
-     * @param uri 要播放的音乐的 URI
+     * @param uri 要播放的音乐的 URI，不能为 null
      */
     void prepare(Uri uri) throws Exception;
 
@@ -38,6 +39,12 @@ public interface MusicPlayer {
 
     /**
      * 判断是否正在播放。
+     * <p>
+     * 该方法的返回值只受 {@link #start()}、{@link #pause()} ()}、{@link #stop()} 或者 error 的影响。
+     * 调用 {@link #start()} 方法后，该方法应该返回 true，并且只在调用 {@link #pause()} ()}、
+     * {@link #stop()} 或者播放器发生了错误时才返回 false。调用了 {@link #start()} 方法后，
+     * 即使缓冲区没有足够的数据支持继续播放，只要没有没有调用 {@link #pause()} ()}、{@link #stop()}
+     * 或者发生错误，该方法就应该返回 true。
      *
      * @return 播放器是否正在播放音乐
      */
@@ -51,7 +58,7 @@ public interface MusicPlayer {
     int getDuration();
 
     /**
-     * 获取音频文件的当前播放进度。
+     * 获取当前的播放进度（单位：毫秒）。
      *
      * @return 音频文件的当前播放进度
      */
@@ -59,56 +66,56 @@ public interface MusicPlayer {
 
     /**
      * 开始播放。
-     * <p>
-     * 该方法对 WakeLock 和 WifiLock 进行了处理，你的音乐播放器实现应该重写该方法以实现开始播放功能。
      */
     void start();
 
     /**
      * 暂停播放。
-     * <p>
-     * 该方法对 WakeLock 和 WifiLock 进行了处理，你的音乐播放器实现应该重写该方法以实现暂停播放功能。
      */
     void pause();
 
     /**
      * 停止播放。
-     * <p>
-     * 该方法对 WakeLock 和 WifiLock 进行了处理，你的音乐播放器实现应该重写该方法以实现停止播放功能。
      */
     void stop();
 
     /**
      * 调整播放器的播放位置。
      *
-     * @param pos 要调整到的播放位置。
+     * @param pos 要调整到的播放位置（单位：毫秒）
      */
     void seekTo(int pos);
 
     /**
-     * 设置音量为当前音量的百分比，范围：0.0 ~ 1.0
+     * 设置音量为当前音量的百分比，范围为 [0.0 ~ 1.0] 的闭区间。
+     * <p>
+     * 如果你的播放器实现不打算支持单独分别设置左右声道的音量，则全部使用 leftVolume 参数的值即可。
      *
-     * @param leftVolume  左声道的音量百分比。
-     * @param rightVolume 右声道的音量百分比。
+     * @param leftVolume  左声道的音量百分比
+     * @param rightVolume 右声道的音量百分比
      */
     void setVolume(float leftVolume, float rightVolume);
 
     /**
      * 临时降低音量。
      * <p>
-     * 音量应该降低到不足以影响到其他应用的音频清晰度。
+     * 音量应该降低到不足以影响到其他应用的音频清晰度，通常为当前音量的 0.2。
+     *
+     * @see #setVolume(float, float)
      */
     void quiet();
 
     /**
      * 从临时降低的音量中恢复原来的音量。
+     *
+     * @see #quiet()
      */
     void dismissQuiet();
 
     /**
-     * 释放音乐播放器。注意！一旦调用该方法，就不能再调用 MusicPlayer 对象的任何方法，否则会发生不可预见的错误。
+     * 释放音乐播放器。
      * <p>
-     * 该方法对 WakeLock 和 WifiLock 进行了处理，你的音乐播放器实现应该重写该方法以释放占用的资源。
+     * 注意！一旦调用该方法，就不能再调用 {@link MusicPlayer} 对象的任何方法，否则会发生不可预见的错误。
      */
     void release();
 
@@ -184,7 +191,7 @@ public interface MusicPlayer {
     }
 
     /**
-     * 用于监听音乐播放器的播放进度是的调整完毕。
+     * 用于监听音乐播放器的播放进度是否调整完毕。
      */
     interface OnSeekCompleteListener {
         /**
@@ -196,7 +203,9 @@ public interface MusicPlayer {
     }
 
     /**
-     * 用于监听事件：进入缓冲区的数据变慢或停止并且缓冲区没有足够的数据继续播放。
+     * 用于监听播放器的 stalled 状态。
+     * <p>
+     * 当进入缓冲区的数据变慢或停止并且缓冲区没有足够的数据支持继续播放时，stalled 状态为 true，否则为 false。
      */
     interface OnStalledListener {
         /**
@@ -209,15 +218,15 @@ public interface MusicPlayer {
     }
 
     /**
-     * 用于监听音乐播放器的缓冲进度。
+     * 用于监听音乐播放器的缓存进度。
      */
     interface OnBufferingUpdateListener {
         /**
          * 该方法会在缓存进度更新时调用。
          *
-         * @param mp        当前音乐播放器。
-         * @param buffered  已缓存的进度
-         * @param isPercent 已缓存的进度是否是百分比值
+         * @param mp        当前音乐播放器
+         * @param buffered  已缓存的进度（单位：毫秒）
+         * @param isPercent 已缓存的进度是否是百分比值，如果缓存进度是百分比值，该参数则应该为 true
          */
         void onBufferingUpdate(MusicPlayer mp, int buffered, boolean isPercent);
     }
@@ -229,11 +238,12 @@ public interface MusicPlayer {
         /**
          * 该方法会在错误发生时被调用。
          * <p>
-         * 注意！当发生错误后，不允许再继续使用当前 MusicPlayer 对象，必须将其释放掉。如果需要继续播放，则
-         * 需要创建一个新的 MusicPlayer 对象。
+         * 注意！发生错误后，不允许再继续使用当前 MusicPlayer 对象，必须将其释放掉。如果需要继续播放，
+         * 建议使用相同的 URI 创建一个新的 MusicPlayer 对象。
          *
-         * @param mp        当前播放器。
-         * @param errorCode 错误码。
+         * @param mp        当前播放器
+         * @param errorCode 错误码
+         * @see snow.player.util.ErrorUtil 提供了部分预定义错误码
          */
         void onError(MusicPlayer mp, int errorCode);
     }
