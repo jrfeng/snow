@@ -28,7 +28,10 @@ import snow.player.media.MusicPlayer;
  * 另外，还可以将 {@link MusicPlayer} 的 {@link MusicPlayer#quiet()} 与
  * {@link MusicPlayer#dismissQuiet()} 方法分别代理给 {@link VolumeEaseHelper} 的
  * {@link VolumeEaseHelper#quiet()} 与 {@link VolumeEaseHelper#dismissQuiet()} 方法，这两个方法对
- * quiet 与 dismissQuiet 逻辑进行了处理，可以节省开发者的时间。
+ * quiet 与 dismissQuiet 逻辑进行了处理。
+ * <p>
+ * 如果你觉得这很繁琐，可以使用 {@link snow.player.media.AbstractMusicPlayer}，该类已对
+ * {@link VolumeEaseHelper} 进行了封装，可以减少模板代码。
  * <p>
  * <b>例：</b>
  * <pre>
