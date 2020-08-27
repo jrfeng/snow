@@ -122,12 +122,12 @@ public class MediaMusicPlayer implements MusicPlayer {
 
     @Override
     public void quiet() {
-        setVolume(0.2F, 0.2F);
+        mVolumeEaseHelper.quiet();
     }
 
     @Override
     public void dismissQuiet() {
-        setVolume(1.0F, 1.0F);
+        mVolumeEaseHelper.dismissQuiet();
     }
 
     @Override
