@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -25,7 +27,7 @@ import java.util.UUID;
 import channel.helper.ChannelHelper;
 import channel.helper.DispatcherUtil;
 import channel.helper.pipe.CustomActionPipe;
-import channel.helper.pipe.MessengerPipe;
+import channel.helper.pipe.SessionEventPipe;
 import snow.player.media.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistEditor;
@@ -44,6 +46,8 @@ public class PlayerClient implements Player, PlaylistEditor {
 
     private MediaBrowserCompat mMediaBrowser;
     private MediaControllerCompat mMediaController;
+    private MediaControllerCompat.Callback mMediaControllerCallback;
+    private SessionEventPipe mSessionEventDispatcher;
 
     private PlayerConfig mPlayerConfig;
     private PlayerManager mPlayerManager;
@@ -71,6 +75,8 @@ public class PlayerClient implements Player, PlaylistEditor {
         initPlaylistManager();
         initPlayerStateHolder();
         initCommandCallback();
+        initSessionEventDispatcher();
+        initMediaControllerCallback();
     }
 
     /**
@@ -107,7 +113,9 @@ public class PlayerClient implements Player, PlaylistEditor {
                         try {
                             mMediaController = new MediaControllerCompat(mApplicationContext, mMediaBrowser.getSessionToken());
 
-                            PlayerClient.this.onConnected(mMediaController);
+                            mMediaController.registerCallback(mMediaControllerCallback, new Handler(Looper.getMainLooper()));
+                            initCustomActionEmitter(mMediaController);
+                            mPlayerManager.syncPlayerState(mClientToken);
 
                             if (mConnectCallback != null) {
                                 mConnectCallback.onConnected(true);
@@ -147,38 +155,43 @@ public class PlayerClient implements Player, PlaylistEditor {
             }
 
             @Override
-            public void syncPlayerState(PlayerState playerState) {
+            public void onSyncPlayerState(@NonNull String clientToken, @NonNull PlayerState playerState) {
+                if (!clientToken.equals(mClientToken)) {
+                    return;
+                }
+
+                setConnected(true);
                 mPlayerStateHolder.setPlayerState(playerState);
             }
         };
     }
 
-    private void onConnected(MediaControllerCompat mediaController) {
-        setConnected(true);
+    private void initCustomActionEmitter(MediaControllerCompat mediaController) {
+        CustomActionPipe customActionEmitter = new CustomActionPipe(mediaController.getTransportControls());
 
-        // send custom action to MediaSession
-        CustomActionPipe customActionPipe = new CustomActionPipe(mediaController.getTransportControls());
-        initCustomActionEmitter(customActionPipe);
-        initPlayerManager(customActionPipe);
-    }
-
-    private void initCustomActionEmitter(CustomActionPipe customActionPipe) {
-        mPlayer = ChannelHelper.newEmitter(Player.class, customActionPipe);
-        mPlaylistEditor = ChannelHelper.newEmitter(PlaylistEditor.class, customActionPipe);
+        mPlayer = ChannelHelper.newEmitter(Player.class, customActionEmitter);
+        mPlaylistEditor = ChannelHelper.newEmitter(PlaylistEditor.class, customActionEmitter);
 
         mPlaylistManager.setOnNewPlaylistListener(
-                ChannelHelper.newEmitter(OnNewPlaylistListener.class, customActionPipe));
+                ChannelHelper.newEmitter(OnNewPlaylistListener.class, customActionEmitter));
+
+        mPlayerManager = ChannelHelper.newEmitter(PlayerManager.class, customActionEmitter);
     }
 
-    private void initPlayerManager(CustomActionPipe customActionPipe) {
-        // listen player state change and other command
-        MessengerPipe listenerPipe = new MessengerPipe(DispatcherUtil.merge(
+    private void initSessionEventDispatcher() {
+        mSessionEventDispatcher = new SessionEventPipe(DispatcherUtil.merge(
                 ChannelHelper.newDispatcher(PlayerManager.OnCommandCallback.class, mCommandCallback),
-                ChannelHelper.newDispatcher(PlayerStateListener.class, getPlayerStateListener())
+                ChannelHelper.newDispatcher(PlayerStateListener.class, mPlayerStateHolder)
         ));
+    }
 
-        mPlayerManager = ChannelHelper.newEmitter(PlayerManager.class, customActionPipe);
-        mPlayerManager.registerPlayerStateListener(mClientToken, listenerPipe.getBinder());
+    private void initMediaControllerCallback() {
+        mMediaControllerCallback = new MediaControllerCompat.Callback() {
+            @Override
+            public void onSessionEvent(String event, Bundle extras) {
+                mSessionEventDispatcher.dispatch(event, extras);
+            }
+        };
     }
 
     private void onDisconnected() {
@@ -186,10 +199,6 @@ public class PlayerClient implements Player, PlaylistEditor {
 
         for (OnDisconnectListener listener : mAllDisconnectListener) {
             listener.onDisconnected();
-        }
-
-        if (isConnected()) {
-            mPlayerManager.unregisterPlayerStateListener(mClientToken);
         }
     }
 
@@ -230,6 +239,7 @@ public class PlayerClient implements Player, PlaylistEditor {
         }
 
         onDisconnected();
+        mMediaController.unregisterCallback(mMediaControllerCallback);
         mMediaBrowser.disconnect();
     }
 
@@ -419,10 +429,6 @@ public class PlayerClient implements Player, PlaylistEditor {
     private void setConnected(boolean connected) {
         mPlaylistManager.setEditable(connected);
         mPlayerStateHolder.setConnected(connected);
-    }
-
-    private PlayerStateListener getPlayerStateListener() {
-        return mPlayerStateHolder;
     }
 
     private boolean notConnected() {
@@ -1444,6 +1450,9 @@ public class PlayerClient implements Player, PlaylistEditor {
             mAllPositionChangeListener = new ArrayList<>();
             mClientAllPlaybackStateChangeListener = new ArrayList<>();
             mAllAudioSessionChangeListener = new ArrayList<>();
+
+            // 避免空指针异常。如果在调用 setPlayerState 方法前接收到了 SessionEvent，则会导致空指针异常
+            mPlayerStateHelper = new PlayerStateHelper(new PlayerState());
         }
 
         void setPlayerState(PlayerState playerState) {

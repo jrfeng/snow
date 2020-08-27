@@ -1,7 +1,8 @@
 package snow.player;
 
 import android.os.Bundle;
-import android.os.IBinder;
+
+import androidx.annotation.NonNull;
 
 import channel.helper.Channel;
 import channel.helper.UseOrdinal;
@@ -48,19 +49,15 @@ public interface PlayerManager {
     void shutdown();
 
     /**
-     * 注册一个播放器状态监听器。
+     * 同步客户端与服务端的状态信息。
+     * <p>
+     * 该方法会在客户端连接成功后调用，以同步客户端与服务端的状态信息。
      *
-     * @param token    监听器的 token。注意！不能为 null，且应该保证唯一性。
-     * @param listener 监听器的 IBinder 对象（不能为 null）。
+     * @param clientToken 客户端的 token。不能为 null，且应该保证该参数的唯一性。该 token 会在
+     *                    {@link OnCommandCallback#onSyncPlayerState(String, PlayerState)} 方法中返回，
+     *                    用于鉴别是否是当前客户端客户端。
      */
-    void registerPlayerStateListener(String token, IBinder listener);
-
-    /**
-     * 取消已注册的播放器状态监听器。
-     *
-     * @param token 已注册的监听器的 token（不能为 null）。如果监听器没有注册或者已经取消注册，那么将忽略此操作。
-     */
-    void unregisterPlayerStateListener(String token);
+    void syncPlayerState(String clientToken);
 
     /**
      * 用于接收服务端发送的命令。
@@ -73,10 +70,12 @@ public interface PlayerManager {
         void onShutdown();
 
         /**
-         * 同步客户端与服务端的播放器状态。
+         * 用于在客户端成功连接后，同步客户端与服务端的状态。
          *
+         * @param clientToken   客户端的 token
          * @param playlistState 列表播放器的状态
          */
-        void syncPlayerState(PlayerState playlistState);
+        @SuppressWarnings("NullableProblems")
+        void onSyncPlayerState(@NonNull String clientToken, @NonNull PlayerState playlistState);
     }
 }

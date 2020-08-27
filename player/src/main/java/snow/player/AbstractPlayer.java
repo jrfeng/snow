@@ -54,7 +54,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
     private PlayerConfig mPlayerConfig;
     private PlayerState mPlayerState;
     private PlayerStateHelper mPlayerStateHelper;
-    private HashMap<String, PlayerStateListener> mStateListenerMap;
+    @Nullable
+    private PlayerStateListener mPlayerStateListener;
 
     private MusicPlayer.OnPreparedListener mPreparedListener;
     private MusicPlayer.OnCompletionListener mCompletionListener;
@@ -123,7 +124,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         mPlayerState = playerState;
         mPlayerStateHelper = new PlayerStateHelper(mPlayerState, pref);
         mPlaylistManager = playlistManager;
-        mStateListenerMap = new HashMap<>();
 
         initAllListener();
         initAllHelper();
@@ -257,8 +257,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         disposeRetrieveUri();
         releaseMusicPlayer();
         releaseWakeLock();
-
-        mStateListenerMap.clear();
 
         mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
@@ -754,27 +752,12 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
     }
 
     /**
-     * 添加播放器状态监听器。
+     * 设置播放器状态监听器。
      *
-     * @param token    监听器的 token（不能为 null），请务必保证该参数的唯一性。
-     * @param listener 监听器（不能为 null）。
+     * @param listener 播放器状态监听器，为 null 时会清除已设置的监听器
      */
-    public final void addStateListener(@NonNull String token, @NonNull PlayerStateListener listener) {
-        Preconditions.checkNotNull(token);
-        Preconditions.checkNotNull(listener);
-
-        mStateListenerMap.put(token, listener);
-    }
-
-    /**
-     * 移除播放器状态监听器。
-     *
-     * @param token 监听器的 token（不能为 null）
-     */
-    public final void removeStateListener(@NonNull String token) {
-        Preconditions.checkNotNull(token);
-
-        mStateListenerMap.remove(token);
+    public final void setPlayerStateListener(@Nullable PlayerStateListener listener) {
+        mPlayerStateListener = listener;
     }
 
     private void notifyPreparing() {
@@ -783,11 +766,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         onPreparing();
 
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                listener.onPreparing();
-            }
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onPreparing();
         }
     }
 
@@ -796,11 +776,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         onPrepared(audioSessionId);
 
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                listener.onPrepared(audioSessionId);
-            }
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onPrepared(audioSessionId);
         }
     }
 
@@ -816,11 +793,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         onPlaying(progress, updateTime);
 
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                listener.onPlay(progress, updateTime);
-            }
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onPlay(progress, updateTime);
         }
     }
 
@@ -841,11 +815,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         onPaused();
 
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                listener.onPause();
-            }
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onPause();
         }
     }
 
@@ -862,11 +833,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         onStopped();
 
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                listener.onStop();
-            }
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onStop();
         }
     }
 
@@ -893,11 +861,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         onStalledChanged(stalled);
 
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                listener.onStalledChanged(stalled, playProgress, updateTime);
-            }
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onStalledChanged(stalled, playProgress, updateTime);
         }
     }
 
@@ -913,11 +878,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         onError(errorCode, errorMessage);
 
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                listener.onError(errorCode, errorMessage);
-            }
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onError(errorCode, errorMessage);
         }
     }
 
@@ -939,11 +901,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         mPlayerStateHelper.onBufferedChanged(bufferedProgress);
 
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                listener.onBufferedProgressChanged(bufferedProgress);
-            }
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onBufferedProgressChanged(bufferedProgress);
         }
     }
 
@@ -955,11 +914,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         onPlayingMusicItemChanged(musicItem);
 
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                listener.onPlayingMusicItemChanged(musicItem, mPlayerState.getPlayProgress());
-            }
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onPlayingMusicItemChanged(musicItem, mPlayerState.getPlayProgress());
         }
 
         if (play) {
@@ -973,11 +929,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
     private void notifySeekComplete(int playProgress) {
         mPlayerStateHelper.onSeekComplete(playProgress, System.currentTimeMillis());
 
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                listener.onSeekComplete(playProgress, mPlayerState.getPlayProgressUpdateTime());
-            }
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onSeekComplete(playProgress, mPlayerState.getPlayProgressUpdateTime());
         }
     }
 
@@ -1284,34 +1237,25 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
     private void notifyPlayingMusicItemPositionChanged(int position) {
         mPlayerStateHelper.onPositionChanged(position);
 
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                listener.onPositionChanged(position);
-            }
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onPositionChanged(position);
         }
     }
 
     private void notifyPlayModeChanged(PlayMode playMode) {
         mPlayerStateHelper.onPlayModeChanged(playMode);
 
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                listener.onPlayModeChanged(playMode);
-            }
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onPlayModeChanged(playMode);
         }
     }
 
     private void notifyPlaylistChanged(int position) {
         mPlayerStateHelper.onPlaylistChanged(position);
 
-        for (String key : mStateListenerMap.keySet()) {
-            PlayerStateListener listener = mStateListenerMap.get(key);
-            if (listener != null) {
-                // 注意！playlistManager 参数为 null，客户端接收到该事件后，应该将其替换为自己的 PlaylistManager 对象
-                listener.onPlaylistChanged(null, position);
-            }
+        if (mPlayerStateListener != null) {
+            // 注意！playlistManager 参数为 null，客户端接收到该事件后，应该将其替换为自己的 PlaylistManager 对象
+            mPlayerStateListener.onPlaylistChanged(null, position);
         }
     }
 

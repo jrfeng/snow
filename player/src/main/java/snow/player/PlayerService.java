@@ -14,8 +14,6 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -47,7 +45,7 @@ import channel.helper.Dispatcher;
 import channel.helper.DispatcherUtil;
 import channel.helper.pipe.CustomActionPipe;
 
-import channel.helper.pipe.MessengerPipe;
+import channel.helper.pipe.SessionEventPipe;
 import media.helper.HeadsetHookHelper;
 
 import snow.player.appwidget.AppWidgetPreferences;
@@ -63,12 +61,11 @@ import snow.player.util.ErrorUtil;
  * <p>
  * 可以使用 {@link PlayerClient} 类建立与 {@link PlayerService} 连接，并对播放器进行控制。
  * <p>
+ * <b>MediaSession 框架：</b><br>
  * {@link PlayerService} 继承了 {@link MediaBrowserServiceCompat} 类，因此也可以使用
  * {@link MediaBrowserCompat} 类来建立与 {@link PlayerService} 连接，并对播放器进行控制。不过不推荐这么做，
- * 因为本框架的大量功能都依赖于 {@link PlayerClient} 类，如果不使用 {@link PlayerClient} 类，那么也无法使
- * 用这些功能。让 {@link PlayerService} 继承 {@link MediaBrowserServiceCompat} 类的本意仅仅是为了兼容
- * {@code MediaSession} 框架，因此建议开发者应该尽量使用 {@link PlayerClient}，而不是
- * {@link MediaBrowserCompat}。
+ * 因为本项目大部的功能都依赖于 {@link PlayerClient} 类，如果不使用 {@link PlayerClient} 类，那么也无法使
+ * 用这些功能。
  */
 public class PlayerService extends MediaBrowserServiceCompat implements PlayerManager {
     /**
@@ -101,9 +98,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private PlaylistManagerImp mPlaylistManager;
     private PlayerImp mPlayer;
-    private CustomActionPipe mControllerPipe;
+    private CustomActionPipe mCustomActionDispatcher;
 
-    private HashMap<String, OnCommandCallback> mCommandCallbackMap;
+    private PlayerManager.OnCommandCallback mCommandCallback;
 
     private boolean mForeground;
 
@@ -132,7 +129,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         mPersistentId = getPersistentId();
         mNotificationId = getNotificationId();
-        mCommandCallbackMap = new HashMap<>();
         mAllCustomAction = new HashMap<>();
 
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -148,6 +144,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         initRemoteViewManager();
         initHeadsetHookHelper();
         initMediaSession();
+        initSessionEventEmitter();
         initHistoryRecorder();
 
         updateNotificationView();
@@ -266,7 +263,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         final Dispatcher onNewPlaylistDispatcher =
                 ChannelHelper.newDispatcher(PlaylistEditor.OnNewPlaylistListener.class, mPlayer);
 
-        mControllerPipe = new CustomActionPipe(DispatcherUtil.merge(playerManagerDispatcher,
+        mCustomActionDispatcher = new CustomActionPipe(DispatcherUtil.merge(playerManagerDispatcher,
                 playerDispatcher,
                 playlistEditorDispatcher,
                 onNewPlaylistDispatcher));
@@ -313,6 +310,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mPlayer.setMediaSession(mMediaSession);
         mMediaSession.setCallback(new MediaSessionCallbackImp());
         setSessionToken(mMediaSession.getSessionToken());
+    }
+
+    private void initSessionEventEmitter() {
+        SessionEventPipe sessionEventEmitter = new SessionEventPipe(mMediaSession);
+        mCommandCallback = ChannelHelper.newEmitter(PlayerManager.OnCommandCallback.class, sessionEventEmitter);
+        mPlayer.setPlayerStateListener(ChannelHelper.newEmitter(PlayerStateListener.class, sessionEventEmitter));
     }
 
     private void initAudioEffectManager() {
@@ -485,28 +488,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     @Override
-    public void registerPlayerStateListener(final String token, IBinder listener) {
-        try {
-            listener.linkToDeath(new IBinder.DeathRecipient() {
-                @Override
-                public void binderDied() {
-                    removeOnCommandCallback(token);
-                }
-            }, 0);
-        } catch (RemoteException e) {
-            return;
-        }
-
-        MessengerPipe pipe = new MessengerPipe(listener);
-
-        addOnCommandCallback(token, ChannelHelper.newEmitter(OnCommandCallback.class, pipe));
-        mPlayer.addStateListener(token, ChannelHelper.newEmitter(PlayerStateListener.class, pipe));
-    }
-
-    @Override
-    public void unregisterPlayerStateListener(String token) {
-        removeOnCommandCallback(token);
-        mPlayer.removeStateListener(token);
+    public void syncPlayerState(final String clientToken) {
+        mCommandCallback.onSyncPlayerState(clientToken, new PlayerState(mPlayerState));
     }
 
     /**
@@ -574,38 +557,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mAllCustomAction.remove(action);
     }
 
-    private void syncPlayerState(OnCommandCallback listener) {
-        if (isPlayingState()) {
-            mPlayerState.setPlayProgress(mPlayer.getPlayProgress());
-            mPlayerState.setPlayProgressUpdateTime(System.currentTimeMillis());
-        }
-
-        listener.syncPlayerState(new PlayerState(mPlayerState));
-    }
-
-    private void addOnCommandCallback(@NonNull String token, @NonNull OnCommandCallback listener) {
-        Preconditions.checkNotNull(token);
-        Preconditions.checkNotNull(listener);
-
-        mCommandCallbackMap.put(token, listener);
-        syncPlayerState(listener);
-    }
-
-    private void removeOnCommandCallback(@NonNull String token) {
-        Preconditions.checkNotNull(token);
-
-        mCommandCallbackMap.remove(token);
-    }
-
     private void notifyOnShutdown() {
-        for (String key : mCommandCallbackMap.keySet()) {
-            OnCommandCallback callback = mCommandCallbackMap.get(key);
-            if (callback != null) {
-                callback.onShutdown();
-            }
-        }
-
-        mCommandCallbackMap.clear();
+        mCommandCallback.onShutdown();
         mMediaSession.sendSessionEvent(SESSION_EVENT_ON_SHUTDOWN, null);
     }
 
@@ -954,7 +907,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return;
         }
 
-        mControllerPipe.dispatch(action, extras);
+        mCustomActionDispatcher.dispatch(action, extras);
     }
 
     private class PlayerImp extends AbstractPlayer {
