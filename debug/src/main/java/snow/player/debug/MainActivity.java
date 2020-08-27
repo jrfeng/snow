@@ -78,12 +78,12 @@ public class MainActivity extends AppCompatActivity {
                 .setIconUri("http://p1.music.126.net/4tTN8CnR7wG4E1cauIPCvQ==/109951163240682406.jpg")
                 .build();
 
-        MusicItem song2 = new MusicItemBuilder(267786, "https://music.163.com/song/media/outer/url?id=4875305")
+        MusicItem song2 = new MusicItemBuilder(267786, "http://music.163.com/song/media/outer/url?id=4875305")
                 .setTitle("终于明白")
                 .setArtist("动力火车")
                 .build();
 
-        MusicItem song3 = new MusicItemBuilder(260946, "https://music.163.com/song/media/outer/url?id=150371")
+        MusicItem song3 = new MusicItemBuilder(260946, "http://music.163.com/song/media/outer/url?id=150371")
                 .setTitle("千年泪")
                 .setArtist("Tank")
                 .setIconUri("http://p2.music.126.net/0543F-ln2Apdiopez_jbsA==/109951163244853571.jpg")
