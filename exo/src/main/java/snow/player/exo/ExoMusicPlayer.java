@@ -223,12 +223,12 @@ public class ExoMusicPlayer implements MusicPlayer {
 
     @Override
     public void quiet() {
-        mSimpleExoPlayer.setVolume(0.2F);
+        mVolumeEaseHelper.quiet();
     }
 
     @Override
     public void dismissQuiet() {
-        mSimpleExoPlayer.setVolume(1.0F);
+        mVolumeEaseHelper.dismissQuiet();
     }
 
     @Override
