@@ -4,21 +4,18 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
 
-import snow.player.helper.VolumeEaseHelper;
 import snow.player.util.ErrorUtil;
 
 /**
  * 封装了一个 MediaPlayer。
  */
-public class MediaMusicPlayer implements MusicPlayer {
+public class MediaMusicPlayer extends AbstractMusicPlayer {
     private static final String TAG = "MediaMusicPlayer";
 
     private MediaPlayer mMediaPlayer;
     private OnErrorListener mErrorListener;
 
     private boolean mInvalid;
-
-    private VolumeEaseHelper mVolumeEaseHelper;
 
     /**
      * 创建一个 {@link MediaMusicPlayer} 对象。
@@ -38,18 +35,6 @@ public class MediaMusicPlayer implements MusicPlayer {
                     mErrorListener.onError(MediaMusicPlayer.this, ErrorUtil.PLAYER_ERROR);
                 }
                 return true;
-            }
-        });
-
-        mVolumeEaseHelper = new VolumeEaseHelper(this, new VolumeEaseHelper.Callback() {
-            @Override
-            public void start() {
-                mMediaPlayer.start();
-            }
-
-            @Override
-            public void pause() {
-                mMediaPlayer.pause();
             }
         });
     }
@@ -95,18 +80,17 @@ public class MediaMusicPlayer implements MusicPlayer {
     }
 
     @Override
-    public void start() {
-        mVolumeEaseHelper.start();
+    public void startEx() {
+        mMediaPlayer.start();
     }
 
     @Override
-    public void pause() {
-        mVolumeEaseHelper.pause();
+    public void pauseEx() {
+        mMediaPlayer.pause();
     }
 
     @Override
-    public void stop() {
-        mVolumeEaseHelper.cancel();
+    public void stopEx() {
         mMediaPlayer.stop();
     }
 
@@ -121,19 +105,8 @@ public class MediaMusicPlayer implements MusicPlayer {
     }
 
     @Override
-    public void quiet() {
-        mVolumeEaseHelper.quiet();
-    }
-
-    @Override
-    public void dismissQuiet() {
-        mVolumeEaseHelper.dismissQuiet();
-    }
-
-    @Override
-    public synchronized void release() {
+    public void releaseEx() {
         setInvalid();
-        mVolumeEaseHelper.cancel();
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
             mMediaPlayer = null;
