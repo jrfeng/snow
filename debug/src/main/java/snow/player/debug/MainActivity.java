@@ -13,13 +13,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 import snow.player.PlayerClient;
 import snow.player.PlayerService;
 import snow.player.debug.databinding.ActivityMainBinding;
 import snow.player.lifecycle.PlayerViewModel;
 import snow.player.media.MusicItem;
+import snow.player.media.MusicItemBuilder;
 import snow.player.playlist.Playlist;
 
 public class MainActivity extends AppCompatActivity {
@@ -73,33 +72,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Playlist createPlaylist() {
-        ArrayList<MusicItem> items = new ArrayList<>();
+        MusicItem song1 = new MusicItemBuilder(313520, "http://music.163.com/song/media/outer/url?id=4875306")
+                .setTitle("逍遥叹")
+                .setArtist("胡歌")
+                .setIconUri("http://p1.music.126.net/4tTN8CnR7wG4E1cauIPCvQ==/109951163240682406.jpg")
+                .build();
 
-        MusicItem song1 = new MusicItem();
-        song1.setTitle("Song 1");
-        song1.setArtist("artist 1");
-        song1.setUri("http://music.163.com/song/media/outer/url?id=33894312");
-        song1.setIconUri("http://p2.music.126.net/ZDUo6vF_5ykD6E_08HE1kw==/3385396303317256.jpg");
-        song1.setDuration(267232);
+        MusicItem song2 = new MusicItemBuilder(267786, "https://music.163.com/song/media/outer/url?id=4875305")
+                .setTitle("终于明白")
+                .setArtist("动力火车")
+                .build();
 
-        MusicItem song2 = new MusicItem();
-        song2.setTitle("Song 2");
-        song2.setArtist("artist 2");
-        song2.setUri("http://music.163.com/song/media/outer/url?id=1420218751");
-        song2.setDuration(218027);
+        MusicItem song3 = new MusicItemBuilder(260946, "https://music.163.com/song/media/outer/url?id=150371")
+                .setTitle("千年泪")
+                .setArtist("Tank")
+                .setIconUri("http://p2.music.126.net/0543F-ln2Apdiopez_jbsA==/109951163244853571.jpg")
+                .build();
 
-        MusicItem song3 = new MusicItem();
-        song3.setTitle("Song 3");
-        song3.setArtist("artist 3");
-        song3.setUri("http://music.163.com/song/media/outer/url?id=1452046251");
-        song3.setIconUri("http://p1.music.126.net/o3G7lWrGBQAvSRt3UuApTw==/2002210674180201.jpg");
-        song3.setDuration(341787);
+        MusicItem song4 = new MusicItemBuilder(265000, "http://music.163.com/song/media/outer/url?id=25638340")
+                .setTitle("此生不换")
+                .setArtist("青鸟飞鱼")
+                .setIconUri("http://p2.music.126.net/UyDVlWWgOn8p8U8uQ_I1xQ==/7934075907687518.jpg")
+                .build();
 
-        items.add(song1);
-        items.add(song2);
-        items.add(song3);
-
-        return new Playlist(items);
+        return new Playlist.Builder()
+                .append(song1)
+                .append(song2)
+                .append(song3)
+                .append(song4)
+                .build();
     }
 
     private void testMediaSession(MediaControllerCompat mediaController) {
