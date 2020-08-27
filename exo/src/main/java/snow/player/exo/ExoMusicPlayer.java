@@ -14,14 +14,13 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceFactory;
 
-import snow.player.helper.VolumeEaseHelper;
-import snow.player.media.MusicPlayer;
+import snow.player.media.AbstractMusicPlayer;
 import snow.player.util.ErrorUtil;
 
 /**
  * 封装了一个 SimpleExoPlayer
  */
-public class ExoMusicPlayer implements MusicPlayer {
+public class ExoMusicPlayer extends AbstractMusicPlayer {
     private static final String TAG = "ExoMusicPlayer";
 
     private MediaSourceFactory mMediaSourceFactory;
@@ -38,21 +37,8 @@ public class ExoMusicPlayer implements MusicPlayer {
     private boolean mStalled;
     private boolean mInvalid;
 
-    private VolumeEaseHelper mVolumeEaseHelper;
-
     public ExoMusicPlayer(@NonNull Context context, @NonNull MediaSourceFactory mediaSourceFactory) {
         mMediaSourceFactory = mediaSourceFactory;
-        mVolumeEaseHelper = new VolumeEaseHelper(this, new VolumeEaseHelper.Callback() {
-            @Override
-            public void start() {
-                mSimpleExoPlayer.setPlayWhenReady(true);
-            }
-
-            @Override
-            public void pause() {
-                mSimpleExoPlayer.setPlayWhenReady(false);
-            }
-        });
         initEventListener();
         initExoPlayer(context);
     }
@@ -196,18 +182,17 @@ public class ExoMusicPlayer implements MusicPlayer {
     }
 
     @Override
-    public void start() {
-        mVolumeEaseHelper.start();
+    public void startEx() {
+        mSimpleExoPlayer.setPlayWhenReady(true);
     }
 
     @Override
-    public void pause() {
-        mVolumeEaseHelper.pause();
+    public void pauseEx() {
+        mSimpleExoPlayer.setPlayWhenReady(false);
     }
 
     @Override
-    public void stop() {
-        mVolumeEaseHelper.cancel();
+    public void stopEx() {
         mSimpleExoPlayer.stop();
     }
 
@@ -222,19 +207,8 @@ public class ExoMusicPlayer implements MusicPlayer {
     }
 
     @Override
-    public void quiet() {
-        mVolumeEaseHelper.quiet();
-    }
-
-    @Override
-    public void dismissQuiet() {
-        mVolumeEaseHelper.dismissQuiet();
-    }
-
-    @Override
-    public void release() {
+    public void releaseEx() {
         setInvalid();
-        mVolumeEaseHelper.cancel();
         mSimpleExoPlayer.release();
     }
 
