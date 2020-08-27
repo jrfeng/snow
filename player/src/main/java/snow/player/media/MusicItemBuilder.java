@@ -23,11 +23,11 @@ public class MusicItemBuilder {
     /**
      * 创建一个 {@link MusicItemBuilder} 构建器。
      *
-     * @param uri      歌曲的播放链接，不能为 null
      * @param duration 歌曲的持续时长（单位：毫秒），不能小于 0
+     * @param uri      歌曲的播放链接，不能为 null
      * @throws IllegalArgumentException 如果歌曲的持续时长小于 0，则会抛出该异常
      */
-    public MusicItemBuilder(@NonNull String uri, int duration) throws IllegalArgumentException {
+    public MusicItemBuilder(int duration, @NonNull String uri) throws IllegalArgumentException {
         Preconditions.checkNotNull(uri);
         if (duration < 0) {
             throw new IllegalArgumentException("duration must >= 0.");
