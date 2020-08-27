@@ -488,7 +488,7 @@ public class PlayerClient implements Player, PlaylistEditor {
      *
      * @param callback 回调接口，该接口的回调方法会在主线程中调用
      */
-    public void getPlaylistAsync(@NonNull PlaylistManager.Callback callback) {
+    public void getPlaylist(@NonNull PlaylistManager.Callback callback) {
         Preconditions.checkNotNull(callback);
         mPlaylistManager.getPlaylist(callback);
     }
