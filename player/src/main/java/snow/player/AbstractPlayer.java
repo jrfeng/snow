@@ -19,7 +19,6 @@ import androidx.core.content.ContextCompat;
 
 import com.google.common.base.Preconditions;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -615,12 +614,12 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
     }
 
     private PlaybackStateCompat buildPlaybackState(int state) {
-        return mPlaybackStateBuilder.setState(state, getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
+        return mPlaybackStateBuilder.setState(state, mPlayerState.getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
                 .build();
     }
 
     private PlaybackStateCompat buildErrorState(String errorMessage) {
-        return mPlaybackStateBuilder.setState(PlaybackStateCompat.STATE_ERROR, getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
+        return mPlaybackStateBuilder.setState(PlaybackStateCompat.STATE_ERROR, mPlayerState.getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
                 .setErrorMessage(PlaybackStateCompat.ERROR_CODE_APP_ERROR, errorMessage)
                 .build();
     }
@@ -691,19 +690,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
     private boolean isPlaying() {
         return isPrepared() && mMusicPlayer.isPlaying();
-    }
-
-    /**
-     * 获取当前播放进度。
-     *
-     * @return 当前播放进度
-     */
-    public final int getPlayProgress() {
-        if (isPrepared()) {
-            mPlayerStateHelper.updatePlayProgress(mMusicPlayer.getProgress(), System.currentTimeMillis());
-        }
-
-        return mPlayerState.getPlayProgress();
     }
 
     /**
@@ -1487,6 +1473,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
                         }
 
                         mPlayerState.setPlayProgress(mMusicPlayer.getProgress());
+                        mPlayerState.setPlayProgressUpdateTime(System.currentTimeMillis());
                     }
                 });
     }
