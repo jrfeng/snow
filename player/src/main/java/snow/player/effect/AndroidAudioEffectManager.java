@@ -22,6 +22,11 @@ import snow.player.util.AndroidAudioEffectConfigUtil;
  * </ul>
  */
 public final class AndroidAudioEffectManager implements AudioEffectManager {
+    /**
+     * 音频特效的优先级。
+     * <p>
+     * 值为：1
+     */
     public static final int PRIORITY = 1;
 
     private Bundle mConfig;

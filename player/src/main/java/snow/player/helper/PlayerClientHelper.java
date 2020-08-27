@@ -9,7 +9,7 @@ import snow.player.PlayerService;
  * {@link PlayerClient} 帮助类，用于避免创建多余的 {@link PlayerClient} 对象。
  * <p>
  * 该帮助类内部维护了一个计数器和一个 {@link PlayerClient} 对象，每当调用一次 {@link #getPlayerClient()}
- * 方法时，计数器会 +1；每当调用 {@link #repay()} 方法一次时，计数器会 -1。当计数器小于等于 0 时，会自动断开
+ * 方法时，计数器会 +1；每当调用一次 {@link #repay()} 方法时，计数器会 -1。当计数器小于等于 0 时，会自动断开
  * 内部的 {@link PlayerClient} 的连接，并释放内部的 {@link PlayerClient} 对象。这样全局只需使用一个
  * {@link PlayerClient} 对象即可。
  * <p>
@@ -39,9 +39,9 @@ public class PlayerClientHelper {
      * 获取 {@link PlayerClientHelper} 内部的 {@link PlayerClient} 对象。如果 {@link PlayerClient} 还
      * 没有连接，则会调用 {@link PlayerClient#connect()} 自动连接。
      *
-     * @return {@link PlayerClientHelper} 内部的 {@link PlayerClient} 对象，并将计数器 +1。如果内部的
-     * {@link PlayerClient} 对象不存在或者已被释放，则会创建一个新的 {@link PlayerClient} 对象，并将计数器
-     * 设为 1
+     * @return 返回 {@link PlayerClientHelper} 内部的 {@link PlayerClient} 对象，并将计数器 +1。
+     * 如果内部的 {@link PlayerClient} 对象不存在或者已被释放，则会创建一个新的 {@link PlayerClient} 对象，
+     * 并将计数器设为 1
      */
     public synchronized PlayerClient getPlayerClient() {
         return getPlayerClient(true);
@@ -52,9 +52,9 @@ public class PlayerClientHelper {
      *
      * @param autoConnect 是否自动连接 {@link PlayerClient}，如果为 true，如果 {@link PlayerClient} 还
      *                    没有连接，则会调用 {@link PlayerClient#connect()} 自动连接
-     * @return {@link PlayerClientHelper} 内部的 {@link PlayerClient} 对象，并将计数器 +1。如果内部的
-     * {@link PlayerClient} 对象不存在或者已被释放，则会创建一个新的 {@link PlayerClient} 对象，并将计数器
-     * 设为 1
+     * @return 返回 {@link PlayerClientHelper} 内部的 {@link PlayerClient} 对象，并将计数器 +1。
+     * 如果内部的 {@link PlayerClient} 对象不存在或者已被释放，则会创建一个新的 {@link PlayerClient} 对象，
+     * 并将计数器设为 1
      */
     public synchronized PlayerClient getPlayerClient(boolean autoConnect) {
         if (mCount <= 0) {

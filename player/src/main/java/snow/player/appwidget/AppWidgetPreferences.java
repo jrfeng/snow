@@ -22,11 +22,11 @@ import snow.player.media.MusicItem;
 /**
  * 用于在 PlayerService 与 AppWidget 之间进行状态同步。支持跨进程访问。
  * <p>
- * 默认情况下，AppWidgetPreferences 会在被修改后会发送 {@link #ACTION_PREFERENCE_CHANGED} 广播，广播的
+ * 默认情况下，AppWidgetPreferences 会在被修改后发送 {@link #ACTION_PREFERENCE_CHANGED} 广播，广播的
  * Category 为 PlayerService（或者其子类）的完整类名，可以让你的 AppWidgetProvider 监听此广播来同步刷新
  * AppWidget 的 UI。
  * <p>
- * 例：
+ * <b>例：</b>
  * <pre>
  * &lt;receiver android:name=".MyAppWidgetProvider"&gt;
  *     ...
@@ -41,7 +41,7 @@ public class AppWidgetPreferences implements SharedPreferences {
     /**
      * PlayerService 会在修改 AppWidgetPreferences 后会发送此广播。
      * <p>
-     * 该常量字符串的值为：{@code "snow.player.appwidget.action.PREFERENCE_CHANGED"}
+     * 值为：{@code "snow.player.appwidget.action.PREFERENCE_CHANGED"}
      */
     public static final String ACTION_PREFERENCE_CHANGED = "snow.player.appwidget.action.PREFERENCE_CHANGED";
 

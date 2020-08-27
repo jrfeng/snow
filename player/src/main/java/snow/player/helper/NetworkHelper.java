@@ -21,7 +21,7 @@ import java.lang.ref.WeakReference;
 /**
  * 用于帮助获取和监听当前的网络状态。
  * <p>
- * 功能有限，主要用于辅助实现 “仅 Wifi 播放” 功能。
+ * 用于帮助实现 “仅 Wifi 网络播放” 功能。
  */
 @SuppressWarnings("deprecation")
 public class NetworkHelper {

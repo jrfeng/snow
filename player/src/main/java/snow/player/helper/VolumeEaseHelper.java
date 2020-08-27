@@ -13,15 +13,15 @@ import snow.player.media.MusicPlayer;
 /**
  * 用于帮助实现 “渐隐播放” 功能。
  * <p>
- * 使用步骤：
+ * <b>使用步骤：</b>
  * <ol>
  *     <li>创建一个 {@link VolumeEaseHelper} 对象</li>
- *     <li>将 {@link MusicPlayer} 的 {@link MusicPlayer#start()} 与 {@link MusicPlayer#pause()}
- *     方法分别代理给 {@link VolumeEaseHelper} 的 {@link VolumeEaseHelper#start()} 与
+ *     <li>将 {@link MusicPlayer#start()} 与 {@link MusicPlayer#pause()} 方法分别代理给
+ *     {@link VolumeEaseHelper} 的 {@link VolumeEaseHelper#start()} 与
  *     {@link VolumeEaseHelper#pause()} 方法，并在 {@link Callback} 中实现真正的
  *     {@link MusicPlayer#start()} 与 {@link MusicPlayer#pause()} 逻辑。</li>
  *     <li>最后，分别在 {@link MusicPlayer} 的 {@link MusicPlayer#stop()} 与
- *     {@link MusicPlayer#release()} ()} 方法中调用 {@link VolumeEaseHelper} 对象的
+ *     {@link MusicPlayer#release()} 方法中调用 {@link VolumeEaseHelper} 对象的
  *     {@link VolumeEaseHelper#cancel()} 方法。</li>
  * </ol>
  * <p>
@@ -29,6 +29,69 @@ import snow.player.media.MusicPlayer;
  * {@link MusicPlayer#dismissQuiet()} 方法分别代理给 {@link VolumeEaseHelper} 的
  * {@link VolumeEaseHelper#quiet()} 与 {@link VolumeEaseHelper#dismissQuiet()} 方法，这两个方法对
  * quiet 与 dismissQuiet 逻辑进行了处理，可以节省开发者的时间。
+ * <p>
+ * <b>例：</b>
+ * <pre>
+ * public class MediaMusicPlayer implements MusicPlayer {
+ *     ...
+ *     private VolumeEaseHelper mVolumeEaseHelper;
+ *
+ *     public MediaMusicPlayer() {
+ *         ...
+ *         mVolumeEaseHelper = new VolumeEaseHelper(this, new VolumeEaseHelper.Callback() {
+ *             &#64;Override
+ *             public void start() {
+ *                 // 在该方法中实现真正的 start  逻辑
+ *                 mMediaPlayer.start();
+ *             }
+ *
+ *             &#64;Override
+ *             public void pause() {
+ *                 // 在该方法中实现真正的 pause 逻辑
+ *                 mMediaPlayer.pause();
+ *             }
+ *         });
+ *     }
+ *
+ *     &#64;Override
+ *     public void start() {
+ *         // 将 start 方法代理给 VolumeEaseHelper 对象的 start 方法
+ *         mVolumeEaseHelper.start();
+ *     }
+ *
+ *     &#64;Override
+ *     public void pause() {
+ *         // 将 pause 方法代理给 VolumeEaseHelper 对象的 pause 方法
+ *         mVolumeEaseHelper.pause();
+ *     }
+ *
+ *     &#64;Override
+ *     public void stop() {
+ *         // 在 stop 方法中调用 VolumeEaseHelper 对象的 cancel 方法
+ *         mVolumeEaseHelper.cancel();
+ *         ...
+ *     }
+ *
+ *     &#64;Override
+ *     public synchronized void release() {
+ *         // 在 release 方法中调用 VolumeEaseHelper 对象的 cancel 方法
+ *         mVolumeEaseHelper.cancel();
+ *         ...
+ *     }
+ *
+ *     &#64;Override
+ *     public void quiet() {
+ *         // 可选：将 quiet 方法代理给 VolumeEaseHelper 对象的 quiet 方法
+ *         mVolumeEaseHelper.quiet();
+ *     }
+ *
+ *     &#64;Override
+ *     public void dismissQuiet() {
+ *         // 可选：将 dismissQuiet 方法代理给 VolumeEaseHelper 对象的 dismissQuiet 方法
+ *         mVolumeEaseHelper.dismissQuiet();
+ *     }
+ * }
+ * </pre>
  */
 public class VolumeEaseHelper {
     private MusicPlayer mMusicPlayer;
