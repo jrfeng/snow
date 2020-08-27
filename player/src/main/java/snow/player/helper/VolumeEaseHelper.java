@@ -24,6 +24,11 @@ import snow.player.media.MusicPlayer;
  *     {@link MusicPlayer#release()} ()} 方法中调用 {@link VolumeEaseHelper} 对象的
  *     {@link VolumeEaseHelper#cancel()} 方法。</li>
  * </ol>
+ * <p>
+ * 另外，还可以将 {@link MusicPlayer} 的 {@link MusicPlayer#quiet()} 与
+ * {@link MusicPlayer#dismissQuiet()} 方法分别代理给 {@link VolumeEaseHelper} 的
+ * {@link VolumeEaseHelper#quiet()} 与 {@link VolumeEaseHelper#dismissQuiet()} 方法，这两个方法对
+ * quiet 与 dismissQuiet 逻辑进行了处理，可以节省开发者的时间。
  */
 public class VolumeEaseHelper {
     private MusicPlayer mMusicPlayer;
@@ -31,6 +36,9 @@ public class VolumeEaseHelper {
 
     private ObjectAnimator mStartVolumeAnimator;
     private ObjectAnimator mPauseVolumeAnimator;
+    private ObjectAnimator mDismissQuietVolumeAnimator;
+
+    private boolean mQuiet;
 
     /**
      * 创建一个 {@link VolumeEaseHelper} 对象。
@@ -57,7 +65,29 @@ public class VolumeEaseHelper {
 
     public void pause() {
         cancel();
+
+        if (mQuiet) {
+            mCallback.pause();
+            return;
+        }
+
         mPauseVolumeAnimator.start();
+    }
+
+    public void quiet() {
+        mQuiet = true;
+        mMusicPlayer.setVolume(0.2F, 0.2F);
+    }
+
+    public void dismissQuiet() {
+        mQuiet = false;
+        if (mPauseVolumeAnimator.isStarted()) {
+            // 避免和 pause 冲突
+            return;
+        }
+
+        cancel();
+        mDismissQuietVolumeAnimator.start();
     }
 
     private void initVolumeAnimator() {
@@ -85,6 +115,15 @@ public class VolumeEaseHelper {
                 mCallback.pause();
             }
         });
+
+        mDismissQuietVolumeAnimator = ObjectAnimator.ofFloat(this, "volume", 0.2F, 1.0F);
+        mDismissQuietVolumeAnimator.setDuration(volumeAnimDuration);
+        mDismissQuietVolumeAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                setVolume(1.0F);
+            }
+        });
     }
 
     /**
@@ -101,6 +140,10 @@ public class VolumeEaseHelper {
 
         if (mPauseVolumeAnimator.isStarted()) {
             mPauseVolumeAnimator.cancel();
+        }
+
+        if (mDismissQuietVolumeAnimator.isStarted()) {
+            mDismissQuietVolumeAnimator.cancel();
         }
     }
 
