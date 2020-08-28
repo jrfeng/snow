@@ -15,27 +15,19 @@ import snow.player.media.MusicPlayer;
  * <p>
  * <b>使用步骤：</b>
  * <ol>
- *     <li>创建一个 {@link VolumeEaseHelper} 对象</li>
+ *     <li>创建一个 {@link VolumeEaseHelper} 对象；</li>
  *     <li>将 {@link MusicPlayer#start()} 与 {@link MusicPlayer#pause()} 方法分别代理给
- *     {@link VolumeEaseHelper} 的 {@link VolumeEaseHelper#start()} 与
- *     {@link VolumeEaseHelper#pause()} 方法，并在 {@link Callback} 中实现真正的
- *     {@link MusicPlayer#start()} 与 {@link MusicPlayer#pause()} 逻辑。</li>
- *     <li>最后，分别在 {@link MusicPlayer} 的 {@link MusicPlayer#stop()} 与
- *     {@link MusicPlayer#release()} 方法中调用 {@link VolumeEaseHelper} 对象的
- *     {@link VolumeEaseHelper#cancel()} 方法。</li>
+ *     {@link #start()} 与 {@link #pause()} 方法，并在
+ *     {@link Callback} 中实现真正的 {@link MusicPlayer#start()} 与 {@link MusicPlayer#pause()} 逻辑；</li>
+ *     <li>（可选）将 {@link MusicPlayer#quiet()} 与 {@link MusicPlayer#dismissQuiet()} 方法分别代理给
+ *     {@link #quiet()} 与 {@link #dismissQuiet()} 方法；</li>
+ *     <li>最后，还需分别在 {@link MusicPlayer#stop()} 与 {@link MusicPlayer#release()} 方法中调用
+ *     {@link #cancel()} 方法，否则会有内存泄露的风险。</li>
  * </ol>
- * <p>
- * 另外，还可以将 {@link MusicPlayer} 的 {@link MusicPlayer#quiet()} 与
- * {@link MusicPlayer#dismissQuiet()} 方法分别代理给 {@link VolumeEaseHelper} 的
- * {@link VolumeEaseHelper#quiet()} 与 {@link VolumeEaseHelper#dismissQuiet()} 方法，这两个方法对
- * quiet 与 dismissQuiet 逻辑进行了处理。
- * <p>
- * 如果你觉得这很繁琐，可以使用 {@link snow.player.media.AbstractMusicPlayer}，该类已对
- * {@link VolumeEaseHelper} 进行了封装，可以减少模板代码。
  * <p>
  * <b>例：</b>
  * <pre>
- * public class MediaMusicPlayer implements MusicPlayer {
+ * public class MyMusicPlayer implements MusicPlayer {
  *     ...
  *     private VolumeEaseHelper mVolumeEaseHelper;
  *
@@ -95,6 +87,11 @@ import snow.player.media.MusicPlayer;
  *     }
  * }
  * </pre>
+ * <p>
+ * 如果你觉得这很繁琐，可以继承 {@link snow.player.media.AbstractMusicPlayer} 类，该类已对
+ * {@link VolumeEaseHelper} 进行了封装，可以减少模板代码。
+ *
+ * @see snow.player.media.AbstractMusicPlayer
  */
 public class VolumeEaseHelper {
     private MusicPlayer mMusicPlayer;

@@ -1670,41 +1670,53 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * PlayerService 组件工厂，可以通过重写该类的方法来自定义 PlayerService 的部分组件。
+     * 可以通过提供一个 {@link ComponentFactory} 工厂来自定义播放器的部分组件。
      * <p>
-     * 除了通过继承 {@link PlayerService} 类来对播放器的某些行为进行修改外，还可以通过提供一个
-     * {@link ComponentFactory} 组件工厂来对 {@link PlayerService} 类的部分组件进行定制。
-     * <p>
-     * 可以通过覆盖 {@link ComponentFactory} 工厂的以下方法来提供自定义组件：
+     * 通过继承并覆盖 {@link ComponentFactory} 类的以下方法来提供自定义组件：
      * <ul>
      *     <li>{@link #createMusicPlayer(Context)}：音乐播放器</li>
      *     <li>{@link #createNotificationView()}：通知栏控制器</li>
-     *     <li>{@link #createAudioEffectManager()}：音频特效引擎</li>
+     *     <li>{@link #createAudioEffectManager()}：音频特效引擎管理器</li>
      *     <li>{@link #createHistoryRecorder()}：历史记录器</li>
      *     <li>{@link #isCached(MusicItem, SoundQuality)}：查询具有特定 {@link SoundQuality} 的 {@link MusicItem} 是否已缓存</li>
      *     <li>{@link #retrieveMusicItemUri(MusicItem, SoundQuality)}：获取歌曲的播放链接</li>
      *     <li>{@link #getCustomActions()}：添加自定义动作</li>
      * </ul>
      * <p>
-     * 你可以重写其中的一个或多个方法来使用自定义的组件，重写后的方法需要使用 {@link Inject} 注解进行标记，
-     * 否则会被忽略。另外，你还可以覆盖 {@link #init(Context)} 方法来完成一些初始化工作。
+     * 可以覆盖上面的一个或多个方法来使用自定义组件，重写后的方法需要使用 {@link Inject} 注解进行标记否则会被忽略。
+     * 另外，还可以覆盖 {@link #init(Context)} 方法来完成一些初始化工作。
      * <p>
      * 如果你打算播放来自网络的音乐，建议覆盖 {@link #isCached(MusicItem, SoundQuality)} 方法，该方法用于
      * 判断具有特定 {@link SoundQuality} 的 {@link MusicItem} 是否已缓存。该方法会在异步线程中执行，因此可
-     * 以在该方法中执行耗时操作，例如访问本地数据库。如果播放器仅用于播放本地音乐，则可以覆盖该方法，并直接返回
-     * {@code true} 即可。
+     * 以在该方法中执行耗时操作，例如访问本地数据库。如果播放器仅用于播放本地音乐，则可以覆盖
+     * {@link #isCached(MusicItem, SoundQuality)} 方法并直接返回 true 即可。
      * <p>
-     * 可以重写 {@link #retrieveMusicItemUri(MusicItem, SoundQuality)} 方法根据音质获取不同的播
-     * 放链接。{@link #retrieveMusicItemUri(MusicItem, SoundQuality)} 方法会在异步线程中调用，因
-     * 此可以直接在该方法中访问网络。
+     * 此外，还可以覆盖 {@link #retrieveMusicItemUri(MusicItem, SoundQuality)} 方法用来根据音质获取不同的播放链接。
+     * 该方法会在异步线程中调用，因此可以直接在该方法中访问网络或数据库。
      * <p>
-     * 还有就是，你的 {@link ComponentFactory} 实现还必须提供一个默认的 <b>无参构造方法</b>。
+     * <b>步骤：</b>
+     * <ol>
+     *     <li>创建一个类并继承 {@link ComponentFactory} 类（该类必须提供一个无参构造方法）；</li>
+     *     <li>（可选）覆盖 {@link #init(Context)} 方法以进行某些初始化操作；</li>
+     *     <li>覆盖 {@link ComponentFactory} 的工厂方法，并使用 {@link Inject} 注解进行标注；</li>
+     *     <li>在 AndroidManifest.xml 文件中对你的 {@link ComponentFactory} 进行注册。</li>
+     * </ol>
      * <p>
-     * 例：<br>
+     * <b>例：</b><br>
      * <pre>
-     * public class MyComponentFactory extends PlayerService.ComponentFactory {
+     * package snow.player.debug;
+     * ...
+     *
+     * public class MyFactory extends PlayerService.ComponentFactory {
      *     ...
-     *     &#64;Inject    // 使用 Inject 注解进行标注
+     *
+     *     &#64;Override
+     *     public void init(Context context) {
+     *         // （可选）进行某些初始化操作
+     *         // 如果没有任何需要执行的初始化操作，则可以不覆盖该方法
+     *     }
+     *
+     *     &#64;Inject    // 使用 &#64;Inject 注解对工厂方法进行标记，否则会被忽略
      *     &#64;NonNull
      *     &#64;Override
      *     public MusicPlayer createMusicPlayer(Context context) {
@@ -1713,22 +1725,22 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * }
      * </pre>
      * <p>
-     * 最后，还需要在 {@code AndroidManifest.xml} 文件中对对 {@link ComponentFactory} 进行注册。
+     * <b>在 AndroidManifest.xml 文件中对 {@link ComponentFactory} 进行注册：</b>
      * <p>
-     * 注册方法为：在 {@link PlayerService} 进行注册时使用 {@code <meta-date>} 标签进行指定你的
-     * {@link ComponentFactory}。其中，{@code <meta-data>} 标签的 {@code android:name} 属性的值为
-     * {@code "component-factory"}，{@code android:value} 属性的值为你的 {@link ComponentFactory} 的完
-     * 整类名。
+     * <b>注册方法</b>：在 &lt;service&gt; 标签中使用 &lt;meta-date&gt; 标签指定你的 {@link ComponentFactory}
+     * 的完整类名。其中，&lt;meta-date&gt; 标签的 {@code android:name} 属性的值为
+     * {@code "component-factory"}，{@code android:value} 属性的值为你的 {@link ComponentFactory}
+     * 的完整类名。
      * <p>
-     * 例：<br>
+     * <b>例：</b><br>
      * <pre>
      * &lt;service android:name="snow.player.PlayerService"&gt;
      *     ...
      *     &lt;meta-data android:name="component-factory" android:value="@string/factory-name"/&gt;
      * &lt;/service&gt;
      * </pre>
-     * 注：上例中 {@code android:value} 的值 {@code "@string/factory-name"} 是一个字符串资源，它的值是
-     * 你的 {@link ComponentFactory} 的完整类名。
+     * 注：上例中 {@code android:value} 的值是 {@code "@string/factory-name"}，这是一个字符串资源，
+     * 该字符串资源的值是你的 {@link ComponentFactory} 的完整类名（例如："snow.player.debug.MyFactory"）。
      */
     public static abstract class ComponentFactory {
         /**
