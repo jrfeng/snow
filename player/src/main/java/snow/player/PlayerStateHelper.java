@@ -14,6 +14,7 @@ class PlayerStateHelper {
         this(playerState, null);
     }
 
+    // 服务端专用
     public PlayerStateHelper(PlayerState playerState, @Nullable AppWidgetPreferences preferences) {
         mPlayerState = playerState;
         mAppWidgetPreferences = preferences;
@@ -110,16 +111,14 @@ class PlayerStateHelper {
         mPlayerState.setPlaybackState(PlaybackState.ERROR);
         mPlayerState.setErrorCode(errorCode);
         mPlayerState.setErrorMessage(errorMessage);
-        long updateTime = System.currentTimeMillis();
-        updatePlayProgress(0, updateTime);
         clearPrepareState();
 
         if (mAppWidgetPreferences != null) {
             mAppWidgetPreferences.edit()
                     .setPlaybackState(PlaybackState.ERROR)
                     .setErrorMessage(errorMessage)
-                    .setPlayProgress(0)
-                    .setPlayProgressUpdateTime(updateTime)
+                    .setPlayProgress(mPlayerState.getPlayProgress())
+                    .setPlayProgressUpdateTime(mPlayerState.getPlayProgressUpdateTime())
                     .setPreparing(false)
                     .commit();
         }
