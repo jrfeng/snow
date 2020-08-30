@@ -3,6 +3,7 @@ package snow.player;
 import androidx.annotation.Nullable;
 
 import snow.player.appwidget.AppWidgetPreferences;
+import snow.player.media.ErrorCode;
 import snow.player.media.MusicItem;
 
 class PlayerStateHelper {
@@ -28,6 +29,12 @@ class PlayerStateHelper {
     public void onPreparing() {
         mPlayerState.setPreparing(true);
         mPlayerState.setPrepared(false);
+
+        if (mPlayerState.getPlaybackState() == PlaybackState.ERROR) {
+            mPlayerState.setPlaybackState(PlaybackState.NONE);
+            mPlayerState.setErrorCode(ErrorCode.NO_ERROR);
+            mPlayerState.setErrorMessage("");
+        }
 
         if (mAppWidgetPreferences != null) {
             mAppWidgetPreferences.edit()
