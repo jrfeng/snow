@@ -124,8 +124,12 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
                 return ErrorUtil.DATA_LOAD_FAILED;
             case ExoPlaybackException.TYPE_REMOTE:
                 return ErrorUtil.NETWORK_ERROR;
-            default:
+            case ExoPlaybackException.TYPE_OUT_OF_MEMORY:
+                return ErrorUtil.OUT_OF_MEMORY;
+            case ExoPlaybackException.TYPE_RENDERER:
                 return ErrorUtil.PLAYER_ERROR;
+            default:
+                return ErrorUtil.UNKNOWN_ERROR;
         }
     }
 
