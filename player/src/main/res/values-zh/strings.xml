@@ -18,4 +18,5 @@
     <string name="snow_preset_plate">声乐板</string>
     <string name="snow_preset_small_room">小房间</string>
     <string name="snow_preset_unknown">未知预设</string>
+    <string name="snow_error_out_of_memory">内存不足</string>
 </resources>

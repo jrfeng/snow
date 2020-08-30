@@ -75,6 +75,10 @@ public final class ErrorUtil {
                 return res.getString(R.string.snow_error_data_load_failed);
             case GET_URL_FAILED:
                 return res.getString(R.string.snow_error_get_url_failed);
+            case OUT_OF_MEMORY:
+                return res.getString(R.string.snow_error_out_of_memory);
+            case UNKNOWN_ERROR:
+                return res.getString(R.string.snow_error_unknown_error);
             default:
                 return res.getString(R.string.snow_error_unknown_error);
         }
