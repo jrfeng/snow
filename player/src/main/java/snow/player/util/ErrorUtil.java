@@ -37,6 +37,14 @@ public final class ErrorUtil {
      * 获取播放链接失败。
      */
     public static final int GET_URL_FAILED = 6;
+    /**
+     * 内存不足。
+     */
+    public static final int OUT_OF_MEMORY = 7;
+    /**
+     * 未知错误。
+     */
+    public static final int UNKNOWN_ERROR = 8;
 
     private ErrorUtil() {
         throw new AssertionError();
