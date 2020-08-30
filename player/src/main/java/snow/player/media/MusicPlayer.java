@@ -243,7 +243,7 @@ public interface MusicPlayer {
          *
          * @param mp        当前播放器
          * @param errorCode 错误码
-         * @see snow.player.util.ErrorUtil 提供了部分预定义错误码
+         * @see ErrorCode 提供了部分预定义错误码
          */
         void onError(MusicPlayer mp, int errorCode);
     }

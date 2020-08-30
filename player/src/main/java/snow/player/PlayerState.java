@@ -11,7 +11,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import snow.player.media.MusicItem;
-import snow.player.util.ErrorUtil;
+import snow.player.media.ErrorCode;
 
 /**
  * 用于保存基本的播放器状态。
@@ -46,7 +46,7 @@ class PlayerState implements Parcelable {
         audioSessionId = 0;
         bufferedProgress = 0;
         stalled = false;
-        errorCode = ErrorUtil.NO_ERROR;
+        errorCode = ErrorCode.NO_ERROR;
         errorMessage = "";
     }
 
@@ -185,7 +185,7 @@ class PlayerState implements Parcelable {
      * 设置播放状态。
      *
      * @param playbackState 要设置的播放状态。如果该参数的值不是 {@link PlaybackState#ERROR} 则会
-     *                      清除错误码（重置为 {@link ErrorUtil#NO_ERROR}）与错误信息。
+     *                      清除错误码（重置为 {@link ErrorCode#NO_ERROR}）与错误信息。
      * @see PlaybackState
      */
     public void setPlaybackState(@NonNull PlaybackState playbackState) {
@@ -193,7 +193,7 @@ class PlayerState implements Parcelable {
         this.playbackState = playbackState;
 
         if (playbackState != PlaybackState.ERROR) {
-            errorCode = ErrorUtil.NO_ERROR;
+            errorCode = ErrorCode.NO_ERROR;
             errorMessage = "";
         }
     }
@@ -296,9 +296,9 @@ class PlayerState implements Parcelable {
     }
 
     /**
-     * 获取错误码。如果没有发生任何错误，则返回 {@link ErrorUtil#NO_ERROR}。
+     * 获取错误码。如果没有发生任何错误，则返回 {@link ErrorCode#NO_ERROR}。
      *
-     * @see ErrorUtil
+     * @see ErrorCode
      */
     public int getErrorCode() {
         return errorCode;
@@ -307,8 +307,8 @@ class PlayerState implements Parcelable {
     /**
      * 设置错误码。
      *
-     * @param errorCode 错误码。预定义错误码，请查看 {@link ErrorUtil} 类。
-     * @see ErrorUtil
+     * @param errorCode 错误码。预定义错误码，请查看 {@link ErrorCode} 类。
+     * @see ErrorCode
      */
     public void setErrorCode(int errorCode) {
         this.errorCode = errorCode;
@@ -325,7 +325,7 @@ class PlayerState implements Parcelable {
      * 设置错误信息（不能为 null）。
      *
      * @param errorMessage 错误信息（不能为 null）。
-     * @see ErrorUtil#getErrorMessage(Context, int)
+     * @see ErrorCode#getErrorMessage(Context, int)
      */
     public void setErrorMessage(@NonNull String errorMessage) {
         Preconditions.checkNotNull(errorMessage);

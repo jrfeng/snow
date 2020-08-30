@@ -5,8 +5,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
-import snow.player.util.ErrorUtil;
-
 /**
  * 封装了一个 MediaPlayer。
  */
@@ -44,22 +42,22 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
             switch (what) {
                 case MediaPlayer.MEDIA_ERROR_UNKNOWN:
-                    return ErrorUtil.UNKNOWN_ERROR;
+                    return ErrorCode.UNKNOWN_ERROR;
                 case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
-                    return ErrorUtil.PLAYER_ERROR;
+                    return ErrorCode.PLAYER_ERROR;
             }
         }
 
         switch (extra) {
             case MediaPlayer.MEDIA_ERROR_IO:            // 注意！case 穿透！
             case MediaPlayer.MEDIA_ERROR_TIMED_OUT:
-                return ErrorUtil.DATA_LOAD_FAILED;
+                return ErrorCode.DATA_LOAD_FAILED;
             case MediaPlayer.MEDIA_ERROR_MALFORMED:     // 注意！case 穿透！
             case MediaPlayer.MEDIA_ERROR_UNSUPPORTED:
             case -2147483648/*低级系统错误*/:
-                return ErrorUtil.PLAYER_ERROR;
+                return ErrorCode.PLAYER_ERROR;
             default:
-                return ErrorUtil.UNKNOWN_ERROR;
+                return ErrorCode.UNKNOWN_ERROR;
         }
     }
 

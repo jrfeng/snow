@@ -32,7 +32,7 @@ import snow.player.media.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistEditor;
 import snow.player.playlist.PlaylistManager;
-import snow.player.util.ErrorUtil;
+import snow.player.media.ErrorCode;
 
 /**
  * 播放器客户端，用于向播放器发送各种控制命令。
@@ -620,14 +620,14 @@ public class PlayerClient implements Player, PlaylistEditor {
      * 播放器是否发生了错误。
      */
     public boolean isError() {
-        return getErrorCode() != ErrorUtil.NO_ERROR;
+        return getErrorCode() != ErrorCode.NO_ERROR;
     }
 
     /**
      * 获取错误码。
      *
-     * @return 错误码。如果播放器没有发生错误，则返回 {@link ErrorUtil#NO_ERROR}
-     * @see ErrorUtil
+     * @return 错误码。如果播放器没有发生错误，则返回 {@link ErrorCode#NO_ERROR}
+     * @see ErrorCode
      */
     public int getErrorCode() {
         return mPlayerStateHolder.mPlayerState.getErrorCode();

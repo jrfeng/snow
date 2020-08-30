@@ -15,7 +15,7 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceFactory;
 
 import snow.player.media.AbstractMusicPlayer;
-import snow.player.util.ErrorUtil;
+import snow.player.media.ErrorCode;
 
 /**
  * 封装了一个 SimpleExoPlayer
@@ -121,15 +121,15 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     private int toErrorCode(ExoPlaybackException error) {
         switch (error.type) {
             case ExoPlaybackException.TYPE_SOURCE:
-                return ErrorUtil.DATA_LOAD_FAILED;
+                return ErrorCode.DATA_LOAD_FAILED;
             case ExoPlaybackException.TYPE_REMOTE:
-                return ErrorUtil.NETWORK_ERROR;
+                return ErrorCode.NETWORK_ERROR;
             case ExoPlaybackException.TYPE_OUT_OF_MEMORY:
-                return ErrorUtil.OUT_OF_MEMORY;
+                return ErrorCode.OUT_OF_MEMORY;
             case ExoPlaybackException.TYPE_RENDERER:
-                return ErrorUtil.PLAYER_ERROR;
+                return ErrorCode.PLAYER_ERROR;
             default:
-                return ErrorUtil.UNKNOWN_ERROR;
+                return ErrorCode.UNKNOWN_ERROR;
         }
     }
 

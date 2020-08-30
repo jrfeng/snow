@@ -1,4 +1,4 @@
-package snow.player.util;
+package snow.player.media;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -8,7 +8,7 @@ import snow.player.R;
 /**
  * 预定义错误码。
  */
-public final class ErrorUtil {
+public final class ErrorCode {
     /**
      * 没有发生任何错误（默认值）。
      */
@@ -46,7 +46,7 @@ public final class ErrorUtil {
      */
     public static final int UNKNOWN_ERROR = 8;
 
-    private ErrorUtil() {
+    private ErrorCode() {
         throw new AssertionError();
     }
 

@@ -9,7 +9,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.runner.RunWith;
 
 import snow.player.media.MusicItem;
-import snow.player.util.ErrorUtil;
+import snow.player.media.ErrorCode;
 
 import static org.junit.Assert.*;
 
@@ -31,7 +31,7 @@ public class PlayerStateTest {
         assertEquals(0, playerState.getAudioSessionId());
         assertEquals(0, playerState.getBufferedProgress());
         assertFalse(playerState.isStalled());
-        assertEquals(ErrorUtil.NO_ERROR, playerState.getErrorCode());
+        assertEquals(ErrorCode.NO_ERROR, playerState.getErrorCode());
         assertNotNull(playerState.getErrorMessage());
     }
 
@@ -49,7 +49,7 @@ public class PlayerStateTest {
         source.setAudioSessionId(12);
         source.setBufferedProgress(100);
         source.setStalled(true);
-        source.setErrorCode(ErrorUtil.PLAYER_ERROR);
+        source.setErrorCode(ErrorCode.PLAYER_ERROR);
         source.setErrorMessage("player error");
 
         PlayerState copy = new PlayerState(source);
@@ -61,14 +61,14 @@ public class PlayerStateTest {
     public void setPlaybackState() {
         PlayerState playerState = new PlayerState();
 
-        final int errorCode = ErrorUtil.PLAYER_ERROR;
+        final int errorCode = ErrorCode.PLAYER_ERROR;
 
         playerState.setErrorCode(errorCode);
 
         assertEquals(errorCode, playerState.getErrorCode());
 
         playerState.setPlaybackState(PlaybackState.PLAYING);
-        assertEquals(ErrorUtil.NO_ERROR, playerState.getErrorCode());
+        assertEquals(ErrorCode.NO_ERROR, playerState.getErrorCode());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class PlayerStateTest {
         final int audioSessionId = 12;
         final int bufferedProgress = 100;
         final boolean stalled = true;
-        final int errorCode = ErrorUtil.PLAYER_ERROR;
+        final int errorCode = ErrorCode.PLAYER_ERROR;
         final String errorMessage = "player error";
 
         PlayerState playerState = new PlayerState();
@@ -146,7 +146,7 @@ public class PlayerStateTest {
         final int audioSessionId = 12;
         final int bufferedProgress = 100;
         final boolean stalled = true;
-        final int errorCode = ErrorUtil.PLAYER_ERROR;
+        final int errorCode = ErrorCode.PLAYER_ERROR;
         final String errorMessage = "player error";
 
         PlayerState playerState = new PlayerState();
