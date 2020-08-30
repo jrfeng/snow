@@ -2,6 +2,7 @@ package snow.player.media;
 
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 
 import snow.player.util.ErrorUtil;
@@ -32,11 +33,34 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
                 setInvalid();
 
                 if (mErrorListener != null) {
-                    mErrorListener.onError(MediaMusicPlayer.this, ErrorUtil.PLAYER_ERROR);
+                    mErrorListener.onError(MediaMusicPlayer.this, toErrorCode(what, extra));
                 }
                 return true;
             }
         });
+    }
+
+    private int toErrorCode(int what, int extra) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            switch (what) {
+                case MediaPlayer.MEDIA_ERROR_UNKNOWN:
+                    return ErrorUtil.UNKNOWN_ERROR;
+                case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
+                    return ErrorUtil.PLAYER_ERROR;
+            }
+        }
+
+        switch (extra) {
+            case MediaPlayer.MEDIA_ERROR_IO:            // 注意！case 穿透！
+            case MediaPlayer.MEDIA_ERROR_TIMED_OUT:
+                return ErrorUtil.DATA_LOAD_FAILED;
+            case MediaPlayer.MEDIA_ERROR_MALFORMED:     // 注意！case 穿透！
+            case MediaPlayer.MEDIA_ERROR_UNSUPPORTED:
+            case -2147483648/*低级系统错误*/:
+                return ErrorUtil.PLAYER_ERROR;
+            default:
+                return ErrorUtil.UNKNOWN_ERROR;
+        }
     }
 
     @Override
