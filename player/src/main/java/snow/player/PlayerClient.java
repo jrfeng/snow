@@ -510,7 +510,7 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     /**
-     * 获取播放进度的更新时间。
+     * 获取播放进度的更新时间。<b>注意！这是基于 SystemClock.elapsedRealtime() 的时间。</b>
      *
      * @return 播放进度的更新时间
      */
