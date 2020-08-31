@@ -1,6 +1,7 @@
 package snow.player;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -13,6 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -131,8 +133,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mNotificationId = getNotificationId();
         mAllCustomAction = new HashMap<>();
 
-        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
+        initNotificationManager();
         initComponentFactory();
         initCustomActions();
         initPlayerConfig();
@@ -194,6 +195,18 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         if (mAudioEffectManager != null) {
             mAudioEffectManager.release();
+        }
+    }
+
+    private void initNotificationManager() {
+        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    NotificationView.CHANNEL_ID,
+                    getString(R.string.snow_notification_channel_name),
+                    NotificationManager.IMPORTANCE_LOW);
+            mNotificationManager.createNotificationChannel(channel);
         }
     }
 
@@ -1085,9 +1098,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      */
     public static abstract class NotificationView {
         /**
-         * 默认的 channelId 值，值为：{@code "player"}
+         * 通知的 channelId 值，值为：{@code "player"}
          */
-        public static final String DEFAULT_CHANNEL_ID = "player";
+        public static final String CHANNEL_ID = "player";
 
         private PlayerService mPlayerService;
         private MusicItem mMusicItem;
@@ -1135,18 +1148,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 该方法会在初次创建 NotificationView 对象时调用，你可以重写该方法来进行一些初始化操作。
          */
         protected void onInit(Context context) {
-        }
-
-        /**
-         * 获取 Notification 的 {@code channelId}，不能为 null。
-         * <p>
-         * 可以覆盖该方法来提供你自己的 {@code channelId}。
-         *
-         * @return channelId，不能为 null。
-         */
-        @NonNull
-        protected String getChannelId() {
-            return DEFAULT_CHANNEL_ID;
         }
 
         /**
@@ -1564,7 +1565,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             Resources res = context.getResources();
 
             setIconSize(res.getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
-            setIconCornerRadius(res.getDimensionPixelSize(R.dimen.snow_notif_icon_corner_radius));
 
             initAllPendingIntent();
         }
@@ -1617,7 +1617,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
             onBuildMediaStyle(mediaStyle);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), getChannelId())
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), CHANNEL_ID)
                     .setSmallIcon(getSmallIconId())
                     .setLargeIcon(getIcon())
                     .setContentTitle(getContentTitle())
