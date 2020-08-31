@@ -22,11 +22,14 @@ dependencies {
 3. 申请权限：
 
 ```xml
-<!-- 用于播放本地音乐 -->
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+<!-- 用于启动前台 Service -->
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
 <!-- 用于后台播放 -->
 <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+<!-- 用于播放本地音乐 -->
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
 <!-- 用于播放网络音乐 -->
 <uses-permission android:name="android.permission.INTERNET" />
@@ -34,7 +37,7 @@ dependencies {
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 ```
 
-**注意！在高于 `Android 6.0(API Level 23)` 的 `Android` 版本中，存储器访问权限 `"android.permission.READ_EXTERNAL_STORAGE"` 需要动态申请。**
+**注意！在大于等于 `Android 6.0(API Level 23)` 的 `Android` 版本中，需要动态申请存储器访问权限：`"android.permission.READ_EXTERNAL_STORAGE"`。**
 
 4. 配置播放器
 
