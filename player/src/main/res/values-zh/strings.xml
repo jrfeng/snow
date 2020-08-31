@@ -19,5 +19,5 @@
     <string name="snow_preset_small_room">小房间</string>
     <string name="snow_preset_unknown">未知预设</string>
     <string name="snow_error_out_of_memory">内存不足</string>
-    <string name="snow_notification_channel_name">播放器通知栏控制器</string>
+    <string name="snow_notification_channel_name">播放器控制器</string>
 </resources>

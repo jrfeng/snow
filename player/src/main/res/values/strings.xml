@@ -22,6 +22,6 @@
     <string name="snow_preset_small_room">Small Room</string>
     <string name="snow_preset_unknown">Unknown Preset</string>
 
-    <string name="snow_notification_channel_name">Player Notification Controller</string>
+    <string name="snow_notification_channel_name">Player Controller</string>
 
 </resources>
