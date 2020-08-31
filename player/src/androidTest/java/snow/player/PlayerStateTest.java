@@ -1,6 +1,7 @@
 package snow.player;
 
 import android.os.Parcel;
+import android.os.SystemClock;
 
 import org.junit.Test;
 
@@ -39,7 +40,7 @@ public class PlayerStateTest {
     public void copyConstructorTest() {
         PlayerState source = new PlayerState();
         source.setPlayProgress(1000);
-        source.setPlayProgressUpdateTime(System.currentTimeMillis());
+        source.setPlayProgressUpdateTime(SystemClock.elapsedRealtime());
         source.setMusicItem(new MusicItem());
         source.setPosition(15);
         source.setPlayMode(PlayMode.LOOP);
@@ -74,7 +75,7 @@ public class PlayerStateTest {
     @Test
     public void equals_hashCode() {
         final int playProgress = 1000;
-        final long playProgressUpdateTime = System.currentTimeMillis();
+        final long playProgressUpdateTime = SystemClock.elapsedRealtime();
         final MusicItem musicItem = new MusicItem();
         musicItem.setTitle("Test Title");
         musicItem.setArtist("Test Artist");
@@ -133,7 +134,7 @@ public class PlayerStateTest {
     @Test
     public void parcelableTest() {
         final int playProgress = 1000;
-        final long playProgressUpdateTime = System.currentTimeMillis();
+        final long playProgressUpdateTime = SystemClock.elapsedRealtime();
         final MusicItem musicItem = new MusicItem();
         musicItem.setTitle("Test Title");
         musicItem.setArtist("Test Artist");
