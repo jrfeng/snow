@@ -1472,8 +1472,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
                             return;
                         }
 
-                        mPlayerState.setPlayProgress(mMusicPlayer.getProgress());
-                        mPlayerState.setPlayProgressUpdateTime(System.currentTimeMillis());
+                        mPlayerStateHelper.updatePlayProgress(mMusicPlayer.getProgress(),System.currentTimeMillis());
                     }
                 });
     }
