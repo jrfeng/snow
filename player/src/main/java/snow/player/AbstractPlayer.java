@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -791,7 +792,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         mPlayerStateHelper.onPaused();
 
         if (isPrepared()) {
-            mPlayerStateHelper.updatePlayProgress(mMusicPlayer.getProgress(), System.currentTimeMillis());
+            mPlayerStateHelper.updatePlayProgress(mMusicPlayer.getProgress(), SystemClock.elapsedRealtime());
         }
 
         mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PAUSED));
@@ -830,7 +831,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         if (isPlaying()) {
             playProgress = mMusicPlayer.getProgress();
-            updateTime = System.currentTimeMillis();
+            updateTime = SystemClock.elapsedRealtime();
         }
 
         mPlayerStateHelper.onStalled(stalled, playProgress, updateTime);
@@ -913,7 +914,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
     }
 
     private void notifySeekComplete(int playProgress) {
-        mPlayerStateHelper.onSeekComplete(playProgress, System.currentTimeMillis());
+        mPlayerStateHelper.onSeekComplete(playProgress, SystemClock.elapsedRealtime());
 
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onSeekComplete(playProgress, mPlayerState.getPlayProgressUpdateTime());
@@ -938,7 +939,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         if (isPrepared()) {
             mMusicPlayer.start();
-            notifyPlaying(mMusicPlayer.getProgress(), System.currentTimeMillis());
+            notifyPlaying(mMusicPlayer.getProgress(), SystemClock.elapsedRealtime());
             return;
         }
 
@@ -1472,7 +1473,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
                             return;
                         }
 
-                        mPlayerStateHelper.updatePlayProgress(mMusicPlayer.getProgress(),System.currentTimeMillis());
+                        mPlayerStateHelper.updatePlayProgress(mMusicPlayer.getProgress(), SystemClock.elapsedRealtime());
                     }
                 });
     }

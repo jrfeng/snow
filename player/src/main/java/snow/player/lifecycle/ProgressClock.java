@@ -1,5 +1,7 @@
 package snow.player.lifecycle;
 
+import android.os.SystemClock;
+
 import androidx.annotation.NonNull;
 
 import com.google.common.base.Preconditions;
@@ -55,7 +57,7 @@ public class ProgressClock {
      * @throws IllegalArgumentException 在 updateTime 大于当前时间时抛出该异常
      */
     public void start(int progress, long updateTime, int duration) throws IllegalArgumentException {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = SystemClock.elapsedRealtime();
         if (updateTime > currentTime) {
             throw new IllegalArgumentException("updateTime is illegal.");
         }
