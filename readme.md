@@ -1,3 +1,5 @@
+Android 音乐播放器框架，实现了常见的列表播放器功能。支持线控播放，自定义播放器（MediaPlayer, ExoPlayer），自定义通知栏控制器，自定义音频特效引擎，记录播放历史，播放器状态自动恢复。
+
 ## 项目配置
 
 1. 将以下代码添加到项目根目录中的 `build.gradle` 中：
@@ -103,7 +105,7 @@ playerClient.setPlaylist(playlist, true);
 更多内容，请参考：
 
 * [**API 文档**](https://jrfeng.github.io/snow/)
-* **Wiki**（尚未完成...）
+* [**Wiki**](https://github.com/jrfeng/snow/wiki)
 
 ### ProGuard
 
