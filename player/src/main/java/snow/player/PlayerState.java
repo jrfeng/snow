@@ -94,7 +94,7 @@ class PlayerState implements Parcelable {
 
 
     /**
-     * 获取上次播放进度的更新时间（单位：毫秒 ms）。
+     * 获取上次播放进度的更新时间（单位：毫秒 ms）。<b>注意！这是基于 SystemClock.elapsedRealtime() 的时间。</b>
      *
      * @return 上次播放进度的更新时间。
      */
@@ -103,7 +103,7 @@ class PlayerState implements Parcelable {
     }
 
     /**
-     * 设置上次播放进度的更新时间。
+     * 设置上次播放进度的更新时间。<b>注意！这是基于 SystemClock.elapsedRealtime() 的时间。</b>
      *
      * @param updateTime 上次播放进度的更新时间。
      */
