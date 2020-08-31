@@ -1623,6 +1623,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                     .setContentTitle(getContentTitle())
                     .setContentText(getContentText(getPlayingMusicItem().getArtist()))
                     .setContentIntent(getContentIntent())
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setStyle(mediaStyle);
 
             onBuildNotification(builder);
