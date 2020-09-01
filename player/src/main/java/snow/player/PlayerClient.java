@@ -1393,8 +1393,10 @@ public class PlayerClient implements Player, PlaylistEditor {
          * 该方法会在播放器的播放状态发生改变时调用。
          *
          * @param playbackState 当前的播放器状态
+         * @param stalled       当前播放器是否处于 stalled 状态。当缓冲区没有足够的数据继续播放时，
+         *                      该参数为 true，否则为 false
          */
-        void onPlaybackStateChanged(PlaybackState playbackState);
+        void onPlaybackStateChanged(PlaybackState playbackState, boolean stalled);
     }
 
     /**
@@ -1829,7 +1831,7 @@ public class PlayerClient implements Player, PlaylistEditor {
                 return;
             }
 
-            listener.onPlaybackStateChanged(mPlayerState.getPlaybackState());
+            listener.onPlaybackStateChanged(mPlayerState.getPlaybackState(), mPlayerState.isStalled());
         }
 
         private void notifyAudioSessionChanged() {

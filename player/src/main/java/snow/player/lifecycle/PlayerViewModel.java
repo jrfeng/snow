@@ -142,7 +142,7 @@ public class PlayerViewModel extends ViewModel {
 
         mClientPlaybackStateChangeListener = new PlayerClient.OnPlaybackStateChangeListener() {
             @Override
-            public void onPlaybackStateChanged(PlaybackState playbackState) {
+            public void onPlaybackStateChanged(PlaybackState playbackState, boolean stalled) {
                 if (playbackState == PlaybackState.ERROR) {
                     mErrorMessage.setValue(mPlayerClient.getErrorMessage());
                 } else {
@@ -153,6 +153,9 @@ public class PlayerViewModel extends ViewModel {
 
                 switch (playbackState) {
                     case PLAYING:
+                        if (stalled) {
+                            return;
+                        }
                         mProgressClock.start(mPlayerClient.getPlayProgress(),
                                 mPlayerClient.getPlayProgressUpdateTime(),
                                 mPlayerClient.getPlayingMusicItemDuration());
