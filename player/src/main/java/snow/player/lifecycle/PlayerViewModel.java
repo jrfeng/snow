@@ -1,5 +1,6 @@
 package snow.player.lifecycle;
 
+import android.os.SystemClock;
 import android.widget.SeekBar;
 
 import androidx.annotation.NonNull;
@@ -671,7 +672,7 @@ public class PlayerViewModel extends ViewModel {
 
     private int getPlayProgressSec() {
         if (mPlayerClient.isPlaying()) {
-            long realProgress = mPlayerClient.getPlayProgress() + (System.currentTimeMillis() - mPlayerClient.getPlayProgressUpdateTime());
+            long realProgress = mPlayerClient.getPlayProgress() + (SystemClock.elapsedRealtime() - mPlayerClient.getPlayProgressUpdateTime());
             return (int) (realProgress / 1000);
         }
 

@@ -1,5 +1,7 @@
 package snow.player;
 
+import android.os.SystemClock;
+
 import androidx.annotation.Nullable;
 
 import snow.player.appwidget.AppWidgetPreferences;
@@ -87,7 +89,7 @@ class PlayerStateHelper {
 
     public void onStopped() {
         mPlayerState.setPlaybackState(PlaybackState.STOPPED);
-        long updateTime = System.currentTimeMillis();
+        long updateTime = SystemClock.elapsedRealtime();
         updatePlayProgress(0, updateTime);
         clearPrepareState();
 
@@ -138,7 +140,7 @@ class PlayerStateHelper {
 
     public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int playProgress) {
         mPlayerState.setMusicItem(musicItem);
-        long updateTime = System.currentTimeMillis();
+        long updateTime = SystemClock.elapsedRealtime();
         updatePlayProgress(playProgress, updateTime);
 
         if (mAppWidgetPreferences != null) {
