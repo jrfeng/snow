@@ -1238,7 +1238,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
-         * 重写该方法创建一个新的 Notification 对象。
+         * 创建一个新的 Notification 对象，不能为 null。
          *
          * @return Notification 对象，不能为 null。
          */
