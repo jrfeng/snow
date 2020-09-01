@@ -1605,7 +1605,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @NonNull
         @Override
-        protected Notification onCreateNotification() {
+        protected final Notification onCreateNotification() {
             androidx.media.app.NotificationCompat.MediaStyle mediaStyle =
                     new androidx.media.app.NotificationCompat.MediaStyle()
                             .setMediaSession(getMediaSession().getSessionToken());
