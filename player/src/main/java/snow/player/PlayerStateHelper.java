@@ -61,7 +61,8 @@ class PlayerStateHelper {
         mPlayerState.setPrepared(false);
     }
 
-    public void onPlay(int progress, long updateTime) {
+    public void onPlay(boolean stalled, int progress, long updateTime) {
+        mPlayerState.setStalled(stalled);
         mPlayerState.setPlaybackState(PlaybackState.PLAYING);
         updatePlayProgress(progress, updateTime);
 

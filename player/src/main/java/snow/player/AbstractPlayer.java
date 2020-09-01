@@ -768,8 +768,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         }
     }
 
-    private void notifyPlaying(int progress, long updateTime) {
-        mPlayerStateHelper.onPlay(progress, updateTime);
+    private void notifyPlaying(boolean stalled, int progress, long updateTime) {
+        mPlayerStateHelper.onPlay(stalled, progress, updateTime);
         mMediaSession.setActive(true);
         mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
 
@@ -781,7 +781,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         onPlaying(progress, updateTime);
 
         if (mPlayerStateListener != null) {
-            mPlayerStateListener.onPlay(progress, updateTime);
+            mPlayerStateListener.onPlay(stalled, progress, updateTime);
         }
     }
 
@@ -939,7 +939,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         if (isPrepared()) {
             mMusicPlayer.start();
-            notifyPlaying(mMusicPlayer.getProgress(), SystemClock.elapsedRealtime());
+            notifyPlaying(mMusicPlayer.isStalled(), mMusicPlayer.getProgress(), SystemClock.elapsedRealtime());
             return;
         }
 

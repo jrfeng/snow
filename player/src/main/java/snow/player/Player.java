@@ -85,10 +85,12 @@ public interface Player {
         /**
          * 当播放器的状态变为 “播放中” 时会回调该方法。
          *
+         * @param stalled                当前播放器是否处于 stalled 状态。当缓冲区没有足够的数据继续播放时，
+         *                               该参数为 true，否则为 false
          * @param playProgress           当前的播放进度
          * @param playProgressUpdateTime 播放进度的更新时间
          */
-        void onPlay(int playProgress, long playProgressUpdateTime);
+        void onPlay(boolean stalled, int playProgress, long playProgressUpdateTime);
 
         /**
          * 当播放器的状态变为 “暂停” 时会回调该方法。
