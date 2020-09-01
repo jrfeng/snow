@@ -38,6 +38,16 @@ public interface MusicPlayer {
     boolean isLooping();
 
     /**
+     * 判断当前播放器是否处于 stalled 状态。
+     * <p>
+     * stalled 状态用于表示当前缓冲区是否有足够的数据继续播放，如果缓冲区没有足够的数据支撑继续播放，
+     * 则该方法会返回 true，如果缓冲区有足够的数据可以继续播放，则返回 false。
+     *
+     * @return 当前播放器是否处于 stalled 状态
+     */
+    boolean isStalled();
+
+    /**
      * 判断是否正在播放。
      * <p>
      * 该方法的返回值只受 {@link #start()}、{@link #pause()} ()}、{@link #stop()} 或者 error 的影响。

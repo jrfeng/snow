@@ -61,7 +61,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
                         onReady();
                         break;
                     case Player.STATE_BUFFERING:
-                        onStalled(true);
+                        setStalled(true);
                         break;
                     case Player.STATE_ENDED:
                         onEnd();
@@ -78,15 +78,8 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
                     mPreparedListener = null;
                 }
 
-                if (mStalled) {
-                    onStalled(false);
-                }
-            }
-
-            private void onStalled(boolean stalled) {
-                mStalled = stalled;
-                if (mStalledListener != null) {
-                    mStalledListener.onStalled(mStalled);
+                if (isStalled()) {
+                    setStalled(false);
                 }
             }
 
@@ -115,6 +108,13 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
                 }
             }
         };
+    }
+
+    private void setStalled(boolean stalled) {
+        mStalled = stalled;
+        if (mStalledListener != null) {
+            mStalledListener.onStalled(mStalled);
+        }
     }
 
     @SuppressLint("SwitchIntDef")
@@ -168,6 +168,11 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     @Override
     public boolean isLooping() {
         return mSimpleExoPlayer.getRepeatMode() == Player.REPEAT_MODE_ONE;
+    }
+
+    @Override
+    public boolean isStalled() {
+        return mStalled;
     }
 
     @Override

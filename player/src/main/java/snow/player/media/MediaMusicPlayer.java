@@ -13,7 +13,9 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
 
     private MediaPlayer mMediaPlayer;
     private OnErrorListener mErrorListener;
+    private OnStalledListener mStalledListener;
 
+    private boolean mStalled;
     private boolean mInvalid;
 
     /**
@@ -34,6 +36,22 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
                     mErrorListener.onError(MediaMusicPlayer.this, toErrorCode(what, extra));
                 }
                 return true;
+            }
+        });
+
+        mMediaPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+            @Override
+            public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                switch (what) {
+                    case MediaPlayer.MEDIA_INFO_BUFFERING_START:
+                        setStalled(true);
+                        return true;
+                    case MediaPlayer.MEDIA_INFO_BUFFERING_END:
+                        setStalled(false);
+                        return true;
+                }
+
+                return false;
             }
         });
     }
@@ -61,6 +79,13 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
         }
     }
 
+    private void setStalled(boolean stalled) {
+        mStalled = stalled;
+        if (mStalledListener != null) {
+            mStalledListener.onStalled(mStalled);
+        }
+    }
+
     @Override
     public void prepare(Uri uri) throws Exception {
         if (isInvalid()) {
@@ -84,6 +109,11 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
     @Override
     public boolean isLooping() {
         return mMediaPlayer.isLooping();
+    }
+
+    @Override
+    public boolean isStalled() {
+        return mStalled;
     }
 
     @Override
@@ -196,26 +226,7 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
 
     @Override
     public void setOnStalledListener(final OnStalledListener listener) {
-        if (listener == null) {
-            mMediaPlayer.setOnInfoListener(null);
-            return;
-        }
-
-        mMediaPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
-            @Override
-            public boolean onInfo(MediaPlayer mp, int what, int extra) {
-                switch (what) {
-                    case MediaPlayer.MEDIA_INFO_BUFFERING_START:
-                        listener.onStalled(true);
-                        return true;
-                    case MediaPlayer.MEDIA_INFO_BUFFERING_END:
-                        listener.onStalled(false);
-                        return true;
-                }
-
-                return false;
-            }
-        });
+        mStalledListener = listener;
     }
 
     @Override
