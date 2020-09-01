@@ -1122,6 +1122,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             mDefaultIcon = getDefaultIcon();
             mIcon = mDefaultIcon;
 
+            setIconSize(playerService.getResources().getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
             setNeedReloadIcon(true);
             onInit(mPlayerService);
 
@@ -1561,7 +1562,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         @Override
         protected void onInit(Context context) {
             initAllPendingIntent();
-            setIconSize(context.getResources().getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
         }
 
         private void initAllPendingIntent() {
