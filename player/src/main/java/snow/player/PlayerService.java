@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -27,6 +28,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.media.MediaBrowserServiceCompat;
 import androidx.media.session.MediaButtonReceiver;
 
@@ -186,8 +188,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         stopForegroundEx(true);
 
-        mNotificationView.onRelease();
-
+        mNotificationView.release();
         mMediaSession.release();
         mPlayer.release();
 
@@ -1109,6 +1110,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         private int[] mIconCornerRadius;    // [topLeft, topRight, bottomRight, bottomLeft]
         private boolean mNeedReloadIcon;
         private Bitmap mIcon;
+        private Bitmap mDefaultIcon;
         private CustomTarget<Bitmap> mTarget;
 
         void init(PlayerService playerService) {
@@ -1116,6 +1118,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             mMusicItem = new MusicItem();
             mIconSize = new int[2];
             mIconCornerRadius = new int[4];
+
+            mDefaultIcon = getDefaultIcon();
+            mIcon = mDefaultIcon;
 
             setNeedReloadIcon(true);
             onInit(mPlayerService);
@@ -1133,12 +1138,13 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             };
         }
 
-        /**
-         * 获取默认图标的资源 ID
-         */
-        @DrawableRes
-        protected int getDefaultIconId() {
-            return R.mipmap.snow_notif_default_icon;
+        private void release() {
+            Glide.with(getContext())
+                    .clear(mTarget);
+            mTarget = null;
+            mIcon = null;
+            mDefaultIcon = null;
+            onRelease();
         }
 
         /**
@@ -1151,8 +1157,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 该方法会在 Service 销毁时调用，可以在该方法中释放占用的资源。
          */
         protected void onRelease() {
-            Glide.with(getContext())
-                    .clear(mTarget);
         }
 
         /**
@@ -1208,7 +1212,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         private RequestBuilder<Bitmap> loadDefaultIcon() {
             return Glide.with(getContext())
                     .asBitmap()
-                    .load(getDefaultIconId())
+                    .load(mDefaultIcon)
                     .transform(new GranularRoundedCorners(mIconCornerRadius[0],
                             mIconCornerRadius[1],
                             mIconCornerRadius[2],
@@ -1240,6 +1244,14 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          */
         @NonNull
         protected abstract Notification onCreateNotification();
+
+        /**
+         * 获取默认图标。
+         *
+         * @return 通知的默认图标，不能为 null
+         */
+        @NonNull
+        protected abstract Bitmap getDefaultIcon();
 
         /**
          * 关闭播放器。
@@ -1533,6 +1545,22 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         private PendingIntent mSkipToPrevious;
         private PendingIntent mPlayPause;
         private PendingIntent mSkipToNext;
+
+        @NonNull
+        @Override
+        protected Bitmap getDefaultIcon() {
+            Context context = getContext();
+            BitmapDrawable drawable = (BitmapDrawable) ResourcesCompat.getDrawable(
+                    context.getResources(),
+                    R.mipmap.snow_notif_default_icon,
+                    context.getTheme());
+
+            if (drawable == null) {
+                throw new NullPointerException();
+            }
+
+            return drawable.getBitmap();
+        }
 
         @Override
         protected void onInit(Context context) {
