@@ -12,9 +12,9 @@ import com.google.common.base.Preconditions;
  */
 public class MusicItemBuilder {
     private String musicId = "";
-    private String title = "";
-    private String artist = "";
-    private String album = "";
+    private String title = "unknown";
+    private String artist = "unknown";
+    private String album = "unknown";
     private String uri;
     private String iconUri = "";
     private int duration;
