@@ -89,7 +89,8 @@ public class MainActivity extends AppCompatActivity {
                 .setIconUri("http://p2.music.126.net/0543F-ln2Apdiopez_jbsA==/109951163244853571.jpg")
                 .build();
 
-        MusicItem song4 = new MusicItemBuilder(265000, "http://music.163.com/song/media/outer/url?id=25638340")
+        // cross-protocol redirects
+        MusicItem song4 = new MusicItemBuilder(265000, "https://music.163.com/song/media/outer/url?id=25638340")
                 .setTitle("此生不换")
                 .setArtist("青鸟飞鱼")
                 .setIconUri("http://p2.music.126.net/UyDVlWWgOn8p8U8uQ_I1xQ==/7934075907687518.jpg")

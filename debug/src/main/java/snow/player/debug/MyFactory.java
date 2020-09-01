@@ -8,6 +8,8 @@ import androidx.annotation.Nullable;
 
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
 import snow.player.HistoryRecorder;
@@ -22,9 +24,18 @@ public class MyFactory extends PlayerService.ComponentFactory {
 
     @Override
     public void init(Context context) {
-        mMediaSourceFactory = new ProgressiveMediaSource.Factory(new DefaultDataSourceFactory(
-                context,
-                Util.getUserAgent(context, context.getPackageName())));
+        DefaultHttpDataSourceFactory httpDataSourceFactory =
+                new DefaultHttpDataSourceFactory(
+                        Util.getUserAgent(context, context.getPackageName()),
+                        null,
+                        DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
+                        DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS,
+                        true);
+
+        DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(
+                context, httpDataSourceFactory);
+
+        mMediaSourceFactory = new ProgressiveMediaSource.Factory(dataSourceFactory);
     }
 
     @Inject
