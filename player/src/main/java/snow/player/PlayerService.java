@@ -1251,7 +1251,19 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @return 通知的默认图标，不能为 null
          */
         @NonNull
-        protected abstract Bitmap getDefaultIcon();
+        protected Bitmap getDefaultIcon() {
+            Context context = getContext();
+            BitmapDrawable drawable = (BitmapDrawable) ResourcesCompat.getDrawable(
+                    context.getResources(),
+                    R.mipmap.snow_notif_default_icon,
+                    context.getTheme());
+
+            if (drawable == null) {
+                throw new NullPointerException();
+            }
+
+            return drawable.getBitmap();
+        }
 
         /**
          * 关闭播放器。
@@ -1546,31 +1558,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         private PendingIntent mPlayPause;
         private PendingIntent mSkipToNext;
 
-        @NonNull
-        @Override
-        protected Bitmap getDefaultIcon() {
-            Context context = getContext();
-            BitmapDrawable drawable = (BitmapDrawable) ResourcesCompat.getDrawable(
-                    context.getResources(),
-                    R.mipmap.snow_notif_default_icon,
-                    context.getTheme());
-
-            if (drawable == null) {
-                throw new NullPointerException();
-            }
-
-            return drawable.getBitmap();
-        }
-
         @Override
         protected void onInit(Context context) {
-            super.onInit(context);
-
-            Resources res = context.getResources();
-
-            setIconSize(res.getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
-
             initAllPendingIntent();
+            setIconSize(context.getResources().getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
         }
 
         private void initAllPendingIntent() {
