@@ -59,7 +59,9 @@ public class ProgressClock {
     public void start(int progress, long updateTime, int duration) throws IllegalArgumentException {
         long currentTime = SystemClock.elapsedRealtime();
         if (updateTime > currentTime) {
-            throw new IllegalArgumentException("updateTime is illegal.");
+            throw new IllegalArgumentException("updateTime is illegal. " +
+                    "updateTime: " + updateTime + ", " +
+                    "currentTime: " + currentTime);
         }
 
         cancel();
