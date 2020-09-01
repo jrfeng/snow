@@ -1854,7 +1854,12 @@ public class PlayerClient implements Player, PlaylistEditor {
 
         @Override
         public void onPreparing() {
+            boolean error = mPlayerState.getPlaybackState() == PlaybackState.ERROR;
             mPlayerStateHelper.onPreparing();
+
+            if (error) {
+                notifyPlaybackStateChanged();
+            }
 
             notifyPrepareStateChanged();
         }
@@ -1911,9 +1916,14 @@ public class PlayerClient implements Player, PlaylistEditor {
 
         @Override
         public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int playProgress) {
+            boolean error = mPlayerState.getPlaybackState() == PlaybackState.ERROR;
             mPlayerStateHelper.onPlayingMusicItemChanged(musicItem, playProgress);
 
             notifyPlayingMusicItemChanged();
+
+            if (error) {
+                notifyPlaybackStateChanged();
+            }
         }
 
         @Override

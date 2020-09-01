@@ -143,6 +143,12 @@ class PlayerStateHelper {
         long updateTime = SystemClock.elapsedRealtime();
         updatePlayProgress(playProgress, updateTime);
 
+        if (mPlayerState.getPlaybackState() == PlaybackState.ERROR) {
+            mPlayerState.setPlaybackState(PlaybackState.NONE);
+            mPlayerState.setErrorCode(ErrorCode.NO_ERROR);
+            mPlayerState.setErrorMessage("");
+        }
+
         if (mAppWidgetPreferences != null) {
             mAppWidgetPreferences.edit()
                     .setPlayingMusicItem(musicItem)
