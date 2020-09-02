@@ -25,6 +25,7 @@ public class MusicItemTest {
         assertNotNull(musicItem.getUri());
         assertNotNull(musicItem.getIconUri());
         assertEquals(0, musicItem.getDuration());
+        assertFalse(musicItem.isForbidSeek());
     }
 
     @Test
@@ -38,6 +39,7 @@ public class MusicItemTest {
         source.setUri("https://www.test.com/test.mp3");
         source.setIconUri("https://www.test.com/icon_test.png");
         source.setDuration(1000);
+        source.setForbidSeek(true);
 
         MusicItem copy = new MusicItem(source);
 
@@ -62,6 +64,7 @@ public class MusicItemTest {
         final String uri = "http://www.text.com/test.mp3";
         final String iconUri = "http://www.text.com/test.png";
         final int duration = 10000;
+        final boolean forbidSeek = true;
 
         MusicItem musicItemA = new MusicItem();
         musicItemA.setMusicId(musicId);
@@ -71,6 +74,7 @@ public class MusicItemTest {
         musicItemA.setUri(uri);
         musicItemA.setIconUri(iconUri);
         musicItemA.setDuration(duration);
+        musicItemA.setForbidSeek(forbidSeek);
 
         MusicItem musicItemB = new MusicItem();
         musicItemB.setMusicId(musicId);
@@ -80,6 +84,7 @@ public class MusicItemTest {
         musicItemB.setUri(uri);
         musicItemB.setIconUri(iconUri);
         musicItemB.setDuration(duration);
+        musicItemB.setForbidSeek(forbidSeek);
 
         assertEquals(musicItemA, musicItemB);
         assertEquals(musicItemA.hashCode(), musicItemB.hashCode());
@@ -96,6 +101,7 @@ public class MusicItemTest {
         musicItem.setUri("https://www.test.com/test.mp3");
         musicItem.setUri("https://www.test.com/icon_test.png");
         musicItem.setDuration(1000);
+        musicItem.setForbidSeek(true);
 
         Parcel parcel = Parcel.obtain();
         musicItem.writeToParcel(parcel, 0);
