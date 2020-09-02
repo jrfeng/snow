@@ -809,7 +809,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      */
     @NonNull
     protected MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull Uri uri) {
-        return new MediaMusicPlayer();
+        return new MediaMusicPlayer(uri);
     }
 
     // 请不要在主线程中调用该方法，因为该方法可能会执行耗时操作
@@ -1677,7 +1677,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @NonNull
         @Override
-        protected final Notification onCreateNotification() {
+        protected Notification onCreateNotification() {
             androidx.media.app.NotificationCompat.MediaStyle mediaStyle =
                     new androidx.media.app.NotificationCompat.MediaStyle()
                             .setMediaSession(getMediaSession().getSessionToken());
@@ -1842,7 +1842,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          */
         @NonNull
         public MusicPlayer createMusicPlayer(@NonNull Context context, @NonNull Uri uri) {
-            return new MediaMusicPlayer();
+            return new MediaMusicPlayer(uri);
         }
 
         /**
