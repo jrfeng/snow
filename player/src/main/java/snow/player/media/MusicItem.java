@@ -26,6 +26,7 @@ public final class MusicItem implements Parcelable {
     private String uri;
     private String iconUri;
     private int duration;
+    private boolean forbidSeek;
     @Nullable
     private Bundle extra;
 
@@ -42,6 +43,7 @@ public final class MusicItem implements Parcelable {
         this.iconUri = "";
         this.duration = 0;
         this.extra = null;
+        forbidSeek = false;
     }
 
     /**
@@ -59,6 +61,7 @@ public final class MusicItem implements Parcelable {
         uri = source.uri;
         iconUri = source.iconUri;
         duration = source.duration;
+        forbidSeek = source.forbidSeek;
         if (source.extra != null) {
             extra = new Bundle(source.extra);
         }
@@ -208,6 +211,26 @@ public final class MusicItem implements Parcelable {
     }
 
     /**
+     * 是否禁用 seekTo 操作。
+     * <p>
+     * 默认为 false，如果该方法返回 true，则会同时禁用 seekTo、fastForward、rewind 操作。
+     *
+     * @return 是否禁用 seekTo 操作
+     */
+    public boolean isForbidSeek() {
+        return forbidSeek;
+    }
+
+    /**
+     * 设置是否禁用 seekTo 操作。
+     *
+     * @param forbidSeek 如果为 true，则会同时禁用 seekTo、fastForward、rewind 操作。
+     */
+    public void setForbidSeek(boolean forbidSeek) {
+        this.forbidSeek = forbidSeek;
+    }
+
+    /**
      * 获取携带的额外数据（Nullable）。
      *
      * @return 额外携带的数据（Nullable）
@@ -238,7 +261,8 @@ public final class MusicItem implements Parcelable {
                 Objects.equal(album, other.album) &&
                 Objects.equal(uri, other.uri) &&
                 Objects.equal(iconUri, other.iconUri) &&
-                Objects.equal(duration, other.duration);
+                Objects.equal(duration, other.duration) &&
+                Objects.equal(forbidSeek, other.forbidSeek);
     }
 
     /**
@@ -252,7 +276,8 @@ public final class MusicItem implements Parcelable {
                 album,
                 uri,
                 iconUri,
-                duration);
+                duration,
+                forbidSeek);
     }
 
     @Override
@@ -265,6 +290,7 @@ public final class MusicItem implements Parcelable {
                 ", uri='" + uri + '\'' +
                 ", iconUri='" + iconUri + '\'' +
                 ", duration=" + duration +
+                ", forbidSeek=" + forbidSeek +
                 '}';
     }
 
@@ -282,6 +308,7 @@ public final class MusicItem implements Parcelable {
         dest.writeString(this.uri);
         dest.writeString(this.iconUri);
         dest.writeInt(this.duration);
+        dest.writeByte((byte) (this.forbidSeek ? 1 : 0));
         dest.writeParcelable(extra, 0);
     }
 
@@ -296,6 +323,7 @@ public final class MusicItem implements Parcelable {
         this.uri = in.readString();
         this.iconUri = in.readString();
         this.duration = in.readInt();
+        this.forbidSeek = in.readByte() == 1;
         this.extra = in.readParcelable(Thread.currentThread().getContextClassLoader());
     }
 
