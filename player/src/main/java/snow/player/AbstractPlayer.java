@@ -151,7 +151,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
      * 你可以重写该方法来返回你自己的 MusicPlayer 实现。
      */
     @NonNull
-    protected abstract MusicPlayer onCreateMusicPlayer(Context context);
+    protected abstract MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull Uri uri);
 
     /**
      * 获取音乐的播放链接。
@@ -164,6 +164,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
      * @throws Exception 获取音乐播放链接的过程中发生的任何异常
      */
     @Nullable
+    // TODO 返回一个 Pair<Uri, String>
     protected abstract Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception;
 
     /**
@@ -343,14 +344,16 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         return new Consumer<Uri>() {
             @Override
             public void accept(Uri uri) {
-                mMusicPlayer = onCreateMusicPlayer(mApplicationContext);
+                mMusicPlayer = onCreateMusicPlayer(mApplicationContext, uri);
                 attachListeners(mMusicPlayer);
 
                 mPreparedAction = preparedAction;
                 notifyPreparing();
 
                 try {
-                    onPrepareMusicPlayer(mMusicPlayer, uri);
+                    if (!mMusicPlayer.isInvalid()) {
+                        mMusicPlayer.prepare(uri);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     notifyError(ErrorCode.DATA_LOAD_FAILED, ErrorCode.getErrorMessage(mApplicationContext, ErrorCode.DATA_LOAD_FAILED));
