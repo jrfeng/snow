@@ -1916,7 +1916,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private boolean injectMusicPlayer() {
-        return shouldInject("createMusicPlayer", Context.class);
+        return shouldInject("createMusicPlayer", Context.class, Uri.class);
     }
 
     private boolean injectMusicItemUri() {
