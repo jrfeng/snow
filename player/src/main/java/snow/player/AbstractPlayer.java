@@ -91,6 +91,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
     private MediaSessionCompat mMediaSession;
     private PlaybackStateCompat.Builder mPlaybackStateBuilder;
+    private PlaybackStateCompat.Builder mForbidSeekPlaybackStateBuilder;
     private MediaMetadataCompat.Builder mMediaMetadataBuilder;
 
     private PowerManager.WakeLock mWakeLock;
@@ -557,6 +558,17 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
                         PlaybackStateCompat.ACTION_FAST_FORWARD |
                         PlaybackStateCompat.ACTION_REWIND |
                         PlaybackStateCompat.ACTION_SEEK_TO);
+
+        mForbidSeekPlaybackStateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(PlaybackStateCompat.ACTION_PLAY |
+                        PlaybackStateCompat.ACTION_PAUSE |
+                        PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                        PlaybackStateCompat.ACTION_STOP |
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT |
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                        PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM |
+                        PlaybackStateCompat.ACTION_SET_REPEAT_MODE |
+                        PlaybackStateCompat.ACTION_SET_SHUFFLE_MODE);
     }
 
     private void initMediaMetadataBuilder() {
@@ -611,11 +623,22 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
     }
 
     private PlaybackStateCompat buildPlaybackState(int state) {
+        if (mPlayerState.isForbidSeek()) {
+            return mForbidSeekPlaybackStateBuilder.setState(state, mPlayerState.getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
+                    .build();
+        }
+
         return mPlaybackStateBuilder.setState(state, mPlayerState.getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
                 .build();
     }
 
     private PlaybackStateCompat buildErrorState(String errorMessage) {
+        if (mPlayerState.isForbidSeek()) {
+            return mForbidSeekPlaybackStateBuilder.setState(PlaybackStateCompat.STATE_ERROR, mPlayerState.getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
+                    .setErrorMessage(PlaybackStateCompat.ERROR_CODE_APP_ERROR, errorMessage)
+                    .build();
+        }
+
         return mPlaybackStateBuilder.setState(PlaybackStateCompat.STATE_ERROR, mPlayerState.getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
                 .setErrorMessage(PlaybackStateCompat.ERROR_CODE_APP_ERROR, errorMessage)
                 .build();
