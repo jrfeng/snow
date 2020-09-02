@@ -24,6 +24,7 @@ import io.reactivex.schedulers.Schedulers;
 public class ProgressClock {
     private static final String TAG = "ProgressClock";
 
+    private boolean mEnabled;
     private Callback mCallback;
 
     private int mProgressSec;       // 单位：秒
@@ -38,8 +39,24 @@ public class ProgressClock {
      * @param callback 回调接口，用于接收 progress 值的更新，不能为 null
      */
     public ProgressClock(@NonNull Callback callback) {
+        this(true, callback);
+    }
+
+    public ProgressClock(boolean enabled, @NonNull Callback callback) {
         Preconditions.checkNotNull(callback);
+        mEnabled = enabled;
         mCallback = callback;
+    }
+
+    public boolean isEnabled() {
+        return mEnabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        mEnabled = enabled;
+        if (!mEnabled) {
+            cancel();
+        }
     }
 
     /**
@@ -60,6 +77,10 @@ public class ProgressClock {
      * @throws IllegalArgumentException 在 updateTime 大于当前时间时抛出该异常
      */
     public void start(int progress, long updateTime, int duration) throws IllegalArgumentException {
+        if (!mEnabled) {
+            return;
+        }
+
         cancel();
 
         if (duration < 1) {
