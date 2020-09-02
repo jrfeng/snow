@@ -120,7 +120,8 @@ public class ProgressClock {
      * 将歌曲的播放进度格式化成一个形如 “00:00” 的字符串，方便在 UI 上显示。
      * <p>
      * 格式化后的字符串的格式为：[时:分:秒]（例如：01:30:45）。如果 “时” 为 0, 则会忽略, 此时的字符串格式
-     * 是：[分:秒]（例如：04:35）。最多支持到 99:59:59, 超出时会截断。
+     * 是：[分:秒]（例如：04:35）。最多支持到 99:59:59, 如果 seconds 参数的值大于等于 359,999(99:59:59) 时，
+     * 会直接返回 99:59:59。
      *
      * @param seconds 歌曲的播放进度，单位：秒
      * @return 返回格式化后的字符串
@@ -130,9 +131,15 @@ public class ProgressClock {
             return "00:00";
         }
 
+        int maxSeconds = (99 * 60 * 60)/*hour*/ + (59 * 60)/*minute*/ + 59/*second*/;
+
+        if (seconds >= maxSeconds) {
+            return "99:59:59";
+        }
+
         int second = seconds % 60;
         int minute = (seconds / 60) % 60;
-        int hour = (seconds / 3600) % 99;
+        int hour = (seconds / 3600);
 
         if (hour <= 0) {
             return String.format(Locale.ENGLISH, "%02d:%02d", minute, second);
