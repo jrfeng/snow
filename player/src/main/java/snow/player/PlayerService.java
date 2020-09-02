@@ -1623,10 +1623,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 更多信息，请参考官方文档： <a target="_blank" href="https://developer.android.google.cn/training/notify-user/expanded#media-style">https://developer.android.google.cn/training/notify-user/expanded#media-style</a>
      */
     public static class MediaNotificationView extends NotificationView {
-        private static final String ACTION_SKIP_TO_PREVIOUS = "snow.player.action.SKIP_TO_PREVIOUS";
-        private static final String ACTION_PLAY_PAUSE = "snow.player.action.PLAY_PAUSE";
-        private static final String ACTION_SKIP_TO_NEXT = "snow.player.action.SKIP_TO_NEXT";
-
         private PendingIntent mSkipToPrevious;
         private PendingIntent mPlayPause;
         private PendingIntent mSkipToNext;
@@ -1637,30 +1633,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         private void initAllPendingIntent() {
-            addCustomAction(ACTION_SKIP_TO_PREVIOUS, new CustomAction() {
-                @Override
-                public void doAction(@NonNull Player player, @Nullable Bundle extras) {
-                    player.skipToPrevious();
-                }
-            });
-
-            addCustomAction(ACTION_PLAY_PAUSE, new CustomAction() {
-                @Override
-                public void doAction(@NonNull Player player, @Nullable Bundle extras) {
-                    player.playPause();
-                }
-            });
-
-            addCustomAction(ACTION_SKIP_TO_NEXT, new CustomAction() {
-                @Override
-                public void doAction(@NonNull Player player, @Nullable Bundle extras) {
-                    player.skipToNext();
-                }
-            });
-
-            mSkipToPrevious = getCustomActionPendingIntent(ACTION_SKIP_TO_PREVIOUS);
-            mPlayPause = getCustomActionPendingIntent(ACTION_PLAY_PAUSE);
-            mSkipToNext = getCustomActionPendingIntent(ACTION_SKIP_TO_NEXT);
+            mSkipToPrevious = MediaButtonReceiver.buildMediaButtonPendingIntent(getContext(), PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
+            mPlayPause = MediaButtonReceiver.buildMediaButtonPendingIntent(getContext(), PlaybackStateCompat.ACTION_PLAY_PAUSE);
+            mSkipToNext = MediaButtonReceiver.buildMediaButtonPendingIntent(getContext(), PlaybackStateCompat.ACTION_SKIP_TO_NEXT);
         }
 
         public final PendingIntent doSkipToPrevious() {
