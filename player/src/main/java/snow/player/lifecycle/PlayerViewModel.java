@@ -64,6 +64,8 @@ public class PlayerViewModel extends ViewModel {
 
     /**
      * 初始化 PlayerStateViewModel
+     * <p>
+     * 默认启用了进度条时钟。
      *
      * @param playerClient  PlayerClient 对象
      * @param defaultTitle  默认标题
@@ -72,6 +74,21 @@ public class PlayerViewModel extends ViewModel {
     public void init(@NonNull PlayerClient playerClient,
                      @NonNull String defaultTitle,
                      @NonNull String defaultArtist) {
+        init(playerClient, defaultTitle, defaultArtist, true);
+    }
+
+    /**
+     * 初始化 PlayerStateViewModel
+     *
+     * @param playerClient        PlayerClient 对象
+     * @param defaultTitle        默认标题
+     * @param defaultArtist       默认艺术家
+     * @param enableProgressClock 是否启用进度条时钟
+     */
+    public void init(@NonNull PlayerClient playerClient,
+                     @NonNull String defaultTitle,
+                     @NonNull String defaultArtist,
+                     boolean enableProgressClock) {
         Preconditions.checkNotNull(playerClient);
         Preconditions.checkNotNull(defaultTitle);
         Preconditions.checkNotNull(defaultArtist);
@@ -82,7 +99,7 @@ public class PlayerViewModel extends ViewModel {
 
         initAllLiveData();
         initAllListener();
-        initProgressClock();
+        initProgressClock(enableProgressClock);
 
         addAllListener();
 
@@ -228,8 +245,8 @@ public class PlayerViewModel extends ViewModel {
         };
     }
 
-    private void initProgressClock() {
-        mProgressClock = new ProgressClock(new ProgressClock.Callback() {
+    private void initProgressClock(boolean enable) {
+        mProgressClock = new ProgressClock(enable, new ProgressClock.Callback() {
             @Override
             public void onUpdateProgress(int progressSec, int durationSec) {
                 mPlayProgress.setValue(progressSec);

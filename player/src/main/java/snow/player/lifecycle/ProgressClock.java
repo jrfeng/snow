@@ -35,23 +35,50 @@ public class ProgressClock {
 
     /**
      * 创建一个 ProgressClock 对象。
+     * <p>
+     * 默认处于启用状态。{@link #isEnabled()} 方法会返回 true。如果没有处于启用状态（{@link #isEnabled()}
+     * 方法返回 true），则会忽略对 {@link #start(int, long, int)} 方法的调用。
      *
      * @param callback 回调接口，用于接收 progress 值的更新，不能为 null
+     * @see #isEnabled()
+     * @see #setEnabled(boolean)
      */
     public ProgressClock(@NonNull Callback callback) {
         this(true, callback);
     }
 
+    /**
+     * 创建一个 ProgressClock 对象。
+     *
+     * @param enabled  是否启用了进度条时钟。如果为 false，则会忽略对 {@link #start(int, long, int)} 方法的调用。
+     * @param callback 回调接口，用于接收 progress 值的更新，不能为 null
+     * @see #isEnabled()
+     * @see #setEnabled(boolean)
+     */
     public ProgressClock(boolean enabled, @NonNull Callback callback) {
         Preconditions.checkNotNull(callback);
         mEnabled = enabled;
         mCallback = callback;
     }
 
+    /**
+     * 判断是否启用了进度条时钟。
+     * <p>
+     * 如果返回 false，则会忽略对 {@link #start(int, long, int)} 方法的调用
+     *
+     * @return 是否启用了进度条时钟
+     */
     public boolean isEnabled() {
         return mEnabled;
     }
 
+    /**
+     * 设置是否启用进度条时钟。
+     * <p>
+     * 如果参数为 false，则会忽略对 {@link #start(int, long, int)} 方法的调用。
+     *
+     * @param enabled 是否启用进度条时钟
+     */
     public void setEnabled(boolean enabled) {
         mEnabled = enabled;
         if (!mEnabled) {
