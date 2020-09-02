@@ -175,4 +175,27 @@ public class PlayerStateTest {
 
         assertEquals(playerState, other);
     }
+
+    @Test
+    public void isForbidSeek() {
+        PlayerState playerState = new PlayerState();
+
+        playerState.setMusicItem(null);
+
+        // assert
+        assertTrue(playerState.isForbidSeek());
+
+        MusicItem musicItem = new MusicItem();
+        playerState.setMusicItem(musicItem);
+
+        musicItem.setForbidSeek(true);
+
+        // assert
+        assertEquals(playerState.isForbidSeek(), musicItem.isForbidSeek());
+
+        musicItem.setForbidSeek(false);
+
+        // assert
+        assertEquals(playerState.isForbidSeek(), musicItem.isForbidSeek());
+    }
 }
