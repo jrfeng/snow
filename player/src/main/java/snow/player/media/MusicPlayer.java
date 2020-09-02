@@ -1,7 +1,5 @@
 package snow.player.media;
 
-import android.net.Uri;
-
 /**
  * 该接口定义了音乐播放器的基本功能。可以通过实现该接口来创建一个自定义的音乐播放器。
  * <p>
@@ -19,9 +17,8 @@ public interface MusicPlayer {
      * 在实现该方法时，建议先检查 {@link #isInvalid()} 状态，如果返回 {@code true}，说明当前
      * {@link MusicPlayer} 已失效，此时因立即从该方法中返回，不应该再调用任何方法。
      *
-     * @param uri 要播放的音乐的 URI，不能为 null
      */
-    void prepare(Uri uri) throws Exception;
+    void prepare() throws Exception;
 
     /**
      * 设置是否循环播放。

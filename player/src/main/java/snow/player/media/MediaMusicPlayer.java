@@ -11,7 +11,9 @@ import android.util.Log;
 public class MediaMusicPlayer extends AbstractMusicPlayer {
     private static final String TAG = "MediaMusicPlayer";
 
+    private Uri mUri;
     private MediaPlayer mMediaPlayer;
+
     private OnErrorListener mErrorListener;
     private OnStalledListener mStalledListener;
 
@@ -21,7 +23,8 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
     /**
      * 创建一个 {@link MediaMusicPlayer} 对象。
      */
-    public MediaMusicPlayer() {
+    public MediaMusicPlayer(Uri uri) {
+        mUri = uri;
         mMediaPlayer = new MediaPlayer();
         mInvalid = false;
 
@@ -87,13 +90,13 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
     }
 
     @Override
-    public void prepare(Uri uri) throws Exception {
+    public void prepare() throws Exception {
         if (isInvalid()) {
             return;
         }
 
         try {
-            mMediaPlayer.setDataSource(uri.toString());
+            mMediaPlayer.setDataSource(mUri.toString());
             mMediaPlayer.prepareAsync();
         } catch (Exception e) {
             setInvalid();

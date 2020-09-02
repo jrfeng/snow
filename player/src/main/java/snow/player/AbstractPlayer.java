@@ -164,7 +164,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
      * @throws Exception 获取音乐播放链接的过程中发生的任何异常
      */
     @Nullable
-    // TODO 返回一个 Pair<Uri, String>
     protected abstract Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception;
 
     /**
@@ -352,7 +351,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
                 try {
                     if (!mMusicPlayer.isInvalid()) {
-                        mMusicPlayer.prepare(uri);
+                        mMusicPlayer.prepare();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -360,12 +359,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
                 }
             }
         };
-    }
-
-    private void onPrepareMusicPlayer(MusicPlayer musicPlayer, Uri uri) throws Exception {
-        if (!musicPlayer.isInvalid()) {
-            musicPlayer.prepare(uri);
-        }
     }
 
     private Consumer<Throwable> notifyGetUrlFailed() {

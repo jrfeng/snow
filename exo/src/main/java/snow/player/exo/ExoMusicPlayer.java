@@ -24,6 +24,8 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     private static final String TAG = "ExoMusicPlayer";
 
     private MediaSourceFactory mMediaSourceFactory;
+    private Uri mUri;
+
     private SimpleExoPlayer mSimpleExoPlayer;
     private Player.EventListener mEventListener;
 
@@ -37,8 +39,9 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     private boolean mStalled;
     private boolean mInvalid;
 
-    public ExoMusicPlayer(@NonNull Context context, @NonNull MediaSourceFactory mediaSourceFactory) {
+    public ExoMusicPlayer(@NonNull Context context, @NonNull MediaSourceFactory mediaSourceFactory, @NonNull Uri uri) {
         mMediaSourceFactory = mediaSourceFactory;
+        mUri = uri;
         initEventListener();
         initExoPlayer(context);
     }
@@ -141,13 +144,13 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     }
 
     @Override
-    public void prepare(Uri uri) {
+    public void prepare() {
         if (isInvalid()) {
             return;
         }
 
         try {
-            MediaSource mediaSource = mMediaSourceFactory.createMediaSource(uri);
+            MediaSource mediaSource = mMediaSourceFactory.createMediaSource(mUri);
             mSimpleExoPlayer.prepare(mediaSource);
         } catch (Exception e) {
             setInvalid();
