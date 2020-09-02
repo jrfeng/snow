@@ -1,6 +1,7 @@
 package snow.player.lifecycle;
 
 import android.os.SystemClock;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -21,6 +22,8 @@ import io.reactivex.schedulers.Schedulers;
  * @see PlayerViewModel
  */
 public class ProgressClock {
+    private static final String TAG = "ProgressClock";
+
     private Callback mCallback;
 
     private int mProgressSec;       // 单位：秒
@@ -57,14 +60,20 @@ public class ProgressClock {
      * @throws IllegalArgumentException 在 updateTime 大于当前时间时抛出该异常
      */
     public void start(int progress, long updateTime, int duration) throws IllegalArgumentException {
-        long currentTime = SystemClock.elapsedRealtime();
-        if (updateTime > currentTime) {
-            throw new IllegalArgumentException("updateTime is illegal. " +
-                    "updateTime: " + updateTime + ", " +
-                    "currentTime: " + currentTime);
+        cancel();
+
+        if (duration < 1) {
+            mCallback.onUpdateProgress(0, 0);
+            return;
         }
 
-        cancel();
+        long currentTime = SystemClock.elapsedRealtime();
+        if (updateTime > currentTime) {
+            updateTime = currentTime;
+            Log.w(TAG, "updateTime > currentTime. " +
+                    "updateTime=" + updateTime + ", " +
+                    "currentTime=" + currentTime);
+        }
 
         long realProgress = progress + (currentTime - updateTime);
 
