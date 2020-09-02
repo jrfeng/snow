@@ -435,9 +435,9 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
                     return;
                 }
 
-                notifySeekComplete(mp.getProgress());
+                notifySeekComplete(mp.getProgress(), SystemClock.elapsedRealtime(), mp.isStalled());
 
-                if (isPlaying()) {
+                if (isPlaying() && !mp.isStalled()) {
                     mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
                 } else if (!mPlayOnSeekComplete) {
                     notifyPaused();
@@ -771,7 +771,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
     private void notifyPlaying(boolean stalled, int progress, long updateTime) {
         mPlayerStateHelper.onPlay(stalled, progress, updateTime);
         mMediaSession.setActive(true);
-        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
+
+        if (!stalled) {
+            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
+        }
 
         startRecordProgress();
 
@@ -913,11 +916,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         prepareMusicPlayer(false, null);
     }
 
-    private void notifySeekComplete(int playProgress) {
-        mPlayerStateHelper.onSeekComplete(playProgress, SystemClock.elapsedRealtime());
+    private void notifySeekComplete(int playProgress, long updateTime, boolean stalled) {
+        mPlayerStateHelper.onSeekComplete(playProgress, updateTime, stalled);
 
         if (mPlayerStateListener != null) {
-            mPlayerStateListener.onSeekComplete(playProgress, mPlayerState.getPlayProgressUpdateTime());
+            mPlayerStateListener.onSeekComplete(playProgress, updateTime, stalled);
         }
     }
 

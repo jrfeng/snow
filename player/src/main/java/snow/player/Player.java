@@ -155,8 +155,10 @@ public interface Player {
          *
          * @param progress   当前的播放进度
          * @param updateTime 当前播放进度的更新时间
+         * @param stalled    当前播放器是否处于 stalled 状态。当缓冲区没有足够的数据继续播放时，
+         *                   该参数为 true，否则为 false
          */
-        void onSeekComplete(int progress, long updateTime);
+        void onSeekComplete(int progress, long updateTime, boolean stalled);
     }
 
     /**

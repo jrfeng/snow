@@ -73,6 +73,7 @@ class PlayerStateHelper {
                     .setPlaybackState(PlaybackState.PLAYING)
                     .setPlayProgress(progress)
                     .setPlayProgressUpdateTime(updateTime)
+                    .setStalled(stalled)
                     .commit();
         }
     }
@@ -158,13 +159,15 @@ class PlayerStateHelper {
         }
     }
 
-    public void onSeekComplete(int playProgress, long updateTime) {
+    public void onSeekComplete(int playProgress, long updateTime, boolean stalled) {
         updatePlayProgress(playProgress, updateTime);
+        mPlayerState.setStalled(stalled);
 
         if (mAppWidgetPreferences != null) {
             mAppWidgetPreferences.edit()
                     .setPlayProgress(playProgress)
                     .setPlayProgressUpdateTime(updateTime)
+                    .setStalled(stalled)
                     .commit();
         }
     }

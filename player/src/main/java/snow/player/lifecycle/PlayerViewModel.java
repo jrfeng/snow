@@ -182,10 +182,10 @@ public class PlayerViewModel extends ViewModel {
 
         mSeekCompleteListener = new Player.OnSeekCompleteListener() {
             @Override
-            public void onSeekComplete(int progress, long updateTime) {
+            public void onSeekComplete(int progress, long updateTime, boolean stalled) {
                 mPlayProgress.setValue(progress / 1000);
 
-                if (PlaybackState.PLAYING == mPlaybackState.getValue()) {
+                if (PlaybackState.PLAYING == mPlaybackState.getValue() && !stalled) {
                     mProgressClock.start(progress, updateTime, mPlayerClient.getPlayingMusicItemDuration());
                 }
             }

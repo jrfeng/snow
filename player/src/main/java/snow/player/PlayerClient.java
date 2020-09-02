@@ -1749,7 +1749,7 @@ public class PlayerClient implements Player, PlaylistEditor {
                 return;
             }
 
-            listener.onSeekComplete(mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime());
+            listener.onSeekComplete(mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime(), mPlayerState.isStalled());
         }
 
         private void notifySeekComplete() {
@@ -1901,8 +1901,8 @@ public class PlayerClient implements Player, PlaylistEditor {
         }
 
         @Override
-        public void onSeekComplete(int progress, long updateTime) {
-            mPlayerStateHelper.onSeekComplete(progress, updateTime);
+        public void onSeekComplete(int progress, long updateTime, boolean stalled) {
+            mPlayerStateHelper.onSeekComplete(progress, updateTime, stalled);
 
             notifySeekComplete();
         }
