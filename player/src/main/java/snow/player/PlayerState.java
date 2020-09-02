@@ -332,6 +332,21 @@ class PlayerState implements Parcelable {
         this.errorMessage = errorMessage;
     }
 
+    /**
+     * 是否禁用 seekTo 操作。
+     * <p>
+     * 如果该方法返回 true，则会同时禁用 seekTo、fastForward、rewind 操作。
+     *
+     * @return 是否禁用 seekTo 操作。
+     */
+    public boolean isForbidSeek() {
+        if (musicItem == null) {
+            return true;
+        }
+
+        return musicItem.isForbidSeek();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
