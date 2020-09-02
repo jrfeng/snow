@@ -124,8 +124,9 @@ public class MusicItemBuilder {
      *
      * @param forbidSeek 如果为 true，则会同时禁用 seekTo、fastForward、rewind 操作。
      */
-    public void setForbidSeek(boolean forbidSeek) {
+    public MusicItemBuilder setForbidSeek(boolean forbidSeek) {
         this.forbidSeek = forbidSeek;
+        return this;
     }
 
     /**
