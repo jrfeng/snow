@@ -12,12 +12,13 @@ import com.google.common.base.Preconditions;
  */
 public class MusicItemBuilder {
     private String musicId = "";
-    private String title = "unknown";
-    private String artist = "unknown";
-    private String album = "unknown";
+    private String title = "Unknown";
+    private String artist = "Unknown";
+    private String album = "Unknown";
     private String uri;
     private String iconUri = "";
     private int duration;
+    private boolean forbidSeek = false;
     private Bundle extra;
 
     /**
@@ -119,6 +120,15 @@ public class MusicItemBuilder {
     }
 
     /**
+     * 设置是否禁用 seekTo 操作。
+     *
+     * @param forbidSeek 如果为 true，则会同时禁用 seekTo、fastForward、rewind 操作。
+     */
+    public void setForbidSeek(boolean forbidSeek) {
+        this.forbidSeek = forbidSeek;
+    }
+
+    /**
      * 设置 MusicItem 携带的额外数据。
      */
     public MusicItemBuilder setExtra(@Nullable Bundle extra) {
@@ -136,6 +146,7 @@ public class MusicItemBuilder {
         musicItem.setUri(uri);
         musicItem.setIconUri(iconUri);
         musicItem.setDuration(duration);
+        musicItem.setForbidSeek(forbidSeek);
         musicItem.setExtra(extra);
 
         return musicItem;
