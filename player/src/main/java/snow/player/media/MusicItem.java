@@ -215,7 +215,7 @@ public final class MusicItem implements Parcelable {
      * <p>
      * 默认为 false，如果该方法返回 true，则会同时禁用 seekTo、fastForward、rewind 操作。
      *
-     * @return 是否禁用 seekTo 操作
+     * @return 是否禁用了所有的 seek 操作
      * @see #setForbidSeek(boolean)
      */
     public boolean isForbidSeek() {
