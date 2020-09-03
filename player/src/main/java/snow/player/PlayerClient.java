@@ -1653,7 +1653,7 @@ public class PlayerClient implements Player, PlaylistEditor {
                     listener.onPlay(mPlayerState.isStalled(), mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime());
                     break;
                 case PAUSED:
-                    listener.onPause();
+                    listener.onPause(mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime());
                     break;
                 case STOPPED:
                     listener.onStop();
@@ -1895,8 +1895,8 @@ public class PlayerClient implements Player, PlaylistEditor {
         }
 
         @Override
-        public void onPause() {
-            mPlayerStateHelper.onPaused();
+        public void onPause(int playProgress, long updateTime) {
+            mPlayerStateHelper.onPaused(playProgress, updateTime);
 
             notifyPlaybackStateChanged();
         }

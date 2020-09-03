@@ -94,8 +94,11 @@ public interface Player {
 
         /**
          * 当播放器的状态变为 “暂停” 时会回调该方法。
+         *
+         * @param playProgress 当前的播放进度
+         * @param updateTime   播放进度的更新时间
          */
-        void onPause();
+        void onPause(int playProgress, long updateTime);
 
         /**
          * 当播放器的状态变为 “停止” 时会回调该方法。

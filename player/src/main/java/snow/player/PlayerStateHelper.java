@@ -78,8 +78,10 @@ class PlayerStateHelper {
         }
     }
 
-    public void onPaused() {
+    public void onPaused(int playProgress, long updateTime) {
         mPlayerState.setPlaybackState(PlaybackState.PAUSED);
+        mPlayerState.setPlayProgress(playProgress);
+        mPlayerState.setPlayProgressUpdateTime(updateTime);
 
         if (mAppWidgetPreferences != null) {
             mAppWidgetPreferences.edit()

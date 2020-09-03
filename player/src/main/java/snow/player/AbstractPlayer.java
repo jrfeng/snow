@@ -811,11 +811,15 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         cancelRecordProgress();
         releaseWakeLock();
 
-        mPlayerStateHelper.onPaused();
+        int playProgress = mPlayerState.getPlayProgress();
+        long updateTime = mPlayerState.getPlayProgressUpdateTime();
 
         if (isPrepared()) {
-            mPlayerStateHelper.updatePlayProgress(mMusicPlayer.getProgress(), SystemClock.elapsedRealtime());
+            playProgress = mMusicPlayer.getProgress();
+            updateTime = SystemClock.elapsedRealtime();
         }
+
+        mPlayerStateHelper.onPaused(playProgress, updateTime);
 
         mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PAUSED));
 
@@ -825,7 +829,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         onPaused();
 
         if (mPlayerStateListener != null) {
-            mPlayerStateListener.onPause();
+            mPlayerStateListener.onPause(playProgress, updateTime);
         }
     }
 
