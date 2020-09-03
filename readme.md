@@ -1,5 +1,12 @@
 Android 音乐播放器框架，实现了常见的列表播放器功能。支持线控播放，自定义播放器（MediaPlayer, ExoPlayer），自定义通知栏控制器，自定义音频特效引擎，记录播放历史，播放器状态自动恢复。
 
+**文档：**
+
+* [**快速上手**](./wiki/1.快速上手)
+* [**自定义播放器组件**](./wiki/2.自定义播放器组件)
+* [**自定义通知栏控制器**](./wiki/3.自定义通知栏控制器)
+* [**使用 ExoPlayer**](./wiki/4.使用-ExoPlayer)
+
 ## 项目配置
 
 1. 将以下代码添加到项目根目录中的 `build.gradle` 中：
@@ -17,7 +24,7 @@ allprojects {
 
 ```gradle
 dependencies {
-    implementation 'com.github.jrfeng.snow:player:1.0-alpha5'
+    implementation 'com.github.jrfeng.snow:player:1.0-alpha6'
 }
 ```
 
@@ -80,26 +87,34 @@ playerClient.connect(new PlayerClient.OnConnectCallback() {
 
 ```java
 private Playlist createPlaylist() {
-    MusicItem song1 = new MusicItemBuilder(313520, "http://music.163.com/song/media/outer/url?id=4875306")
+    MusicItem song1 = new MusicItem.Builder()
             .setTitle("逍遥叹")
             .setArtist("胡歌")
+            .setDuration(313520)
+            .setUri("http://music.163.com/song/media/outer/url?id=4875306")
             .setIconUri("http://p1.music.126.net/4tTN8CnR7wG4E1cauIPCvQ==/109951163240682406.jpg")
             .build();
 
-    MusicItem song2 = new MusicItemBuilder(267786, "http://music.163.com/song/media/outer/url?id=4875305")
+    MusicItem song2 = new MusicItem.Builder()
             .setTitle("终于明白")
             .setArtist("动力火车")
+            .setDuration(267786)
+            .setUri("http://music.163.com/song/media/outer/url?id=4875305")
             .build();
 
-    MusicItem song3 = new MusicItemBuilder(260946, "http://music.163.com/song/media/outer/url?id=150371")
+    MusicItem song3 = new MusicItem.Builder()
             .setTitle("千年泪")
             .setArtist("Tank")
+            .setDuration(260946)
+            .setUri("http://music.163.com/song/media/outer/url?id=150371")
             .setIconUri("http://p2.music.126.net/0543F-ln2Apdiopez_jbsA==/109951163244853571.jpg")
             .build();
 
-    MusicItem song4 = new MusicItemBuilder(265000, "http://music.163.com/song/media/outer/url?id=25638340")
+    MusicItem song4 = new MusicItem.Builder()
             .setTitle("此生不换")
             .setArtist("青鸟飞鱼")
+            .setDuration(265000)
+            .setUri("http://music.163.com/song/media/outer/url?id=25638340")
             .setIconUri("http://p2.music.126.net/UyDVlWWgOn8p8U8uQ_I1xQ==/7934075907687518.jpg")
             .build();
 
