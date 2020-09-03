@@ -62,8 +62,6 @@ public class PlayerViewModel extends ViewModel {
     private boolean mInitialized;
     private boolean mDisconnectOnCleared;
 
-    private int mLastPlayProgress;
-
     /**
      * 初始化 PlayerStateViewModel
      * <p>
@@ -653,10 +651,6 @@ public class PlayerViewModel extends ViewModel {
      */
     public void onStartTrackingTouch(SeekBar seekBar) {
         cancelProgressClock();
-
-        if (isInitialized() && mPlayProgress.getValue() != null) {
-            mLastPlayProgress = mPlayProgress.getValue();
-        }
     }
 
     /**
@@ -683,7 +677,7 @@ public class PlayerViewModel extends ViewModel {
 
     private void restorePlayProgress() {
         if (!mPlayerClient.isPlaying() || mPlayerClient.isStalled()) {
-            mPlayProgress.setValue(mLastPlayProgress);
+            mPlayProgress.setValue(mPlayerClient.getPlayProgress() / 1000);
             return;
         }
 
