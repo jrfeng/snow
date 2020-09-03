@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onConnected(boolean success) {
                         tvMessage.setText("connect: " + success);
-                        if (success) {
+                        if (success && mPlayerClient.getMediaController() != null) {
                             testMediaSession(mPlayerClient.getMediaController());
                         }
                     }
@@ -91,9 +91,11 @@ public class MainActivity extends AppCompatActivity {
 
         // cross-protocol redirects
         MusicItem song4 = new MusicItemBuilder(265000, "https://music.163.com/song/media/outer/url?id=25638340")
-                .setTitle("此生不换")
+                .setTitle("此生不换[Forbid Seek]")
                 .setArtist("青鸟飞鱼")
                 .setIconUri("http://p2.music.126.net/UyDVlWWgOn8p8U8uQ_I1xQ==/7934075907687518.jpg")
+                // forbid seek
+                .setForbidSeek(true)
                 .build();
 
         return new Playlist.Builder()
