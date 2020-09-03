@@ -1017,7 +1017,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
     private void seekTo(final int progress, final Runnable seekCompleteAction) {
         if (mPlayerState.isForbidSeek()) {
-            forbidSeek(seekCompleteAction);
             return;
         }
 
@@ -1039,24 +1038,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         mSeekCompleteAction = seekCompleteAction;
         mMusicPlayer.seekTo(progress);
-    }
-
-    private void forbidSeek(Runnable seekCompleteAction) {
-        if (seekCompleteAction != null) {
-            seekCompleteAction.run();
-        }
-
-        int playProgress = mPlayerState.getPlayProgress();
-        long updateTime = mPlayerState.getPlayProgressUpdateTime();
-        boolean stalled = mPlayerState.isStalled();
-
-        if (isPrepared()) {
-            playProgress = mMusicPlayer.getProgress();
-            updateTime = SystemClock.elapsedRealtime();
-            stalled = mMusicPlayer.isStalled();
-        }
-
-        notifySeekComplete(playProgress, updateTime, stalled);
     }
 
     @Override
