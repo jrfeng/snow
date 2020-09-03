@@ -18,7 +18,6 @@ import snow.player.PlayerService;
 import snow.player.debug.databinding.ActivityMainBinding;
 import snow.player.lifecycle.PlayerViewModel;
 import snow.player.media.MusicItem;
-import snow.player.media.MusicItemBuilder;
 import snow.player.playlist.Playlist;
 
 public class MainActivity extends AppCompatActivity {
@@ -43,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mPlayerClient = PlayerClient.newInstance(this, PlayerService.class);
-        playerViewModel.init(mPlayerClient, "Unknown", "Unknown");
+        playerViewModel.init(this, mPlayerClient);
         playerViewModel.setDisconnectOnCleared(true);
     }
 
@@ -72,27 +71,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Playlist createPlaylist() {
-        MusicItem song1 = new MusicItemBuilder(313520, "http://music.163.com/song/media/outer/url?id=4875306")
+        MusicItem song1 = new MusicItem.Builder()
                 .setTitle("逍遥叹")
                 .setArtist("胡歌")
+                .setDuration(313520)
+                .setUri("http://music.163.com/song/media/outer/url?id=4875306")
                 .setIconUri("http://p1.music.126.net/4tTN8CnR7wG4E1cauIPCvQ==/109951163240682406.jpg")
                 .build();
 
-        MusicItem song2 = new MusicItemBuilder(267786, "http://music.163.com/song/media/outer/url?id=4875305")
+        MusicItem song2 = new MusicItem.Builder()
                 .setTitle("终于明白")
                 .setArtist("动力火车")
+                .setDuration(267786)
+                .setUri("http://music.163.com/song/media/outer/url?id=4875305")
                 .build();
 
-        MusicItem song3 = new MusicItemBuilder(260946, "http://music.163.com/song/media/outer/url?id=150371")
+        MusicItem song3 = new MusicItem.Builder()
                 .setTitle("千年泪")
                 .setArtist("Tank")
+                .setDuration(260946)
+                .setUri("http://music.163.com/song/media/outer/url?id=150371")
                 .setIconUri("http://p2.music.126.net/0543F-ln2Apdiopez_jbsA==/109951163244853571.jpg")
                 .build();
 
-        // cross-protocol redirects
-        MusicItem song4 = new MusicItemBuilder(265000, "https://music.163.com/song/media/outer/url?id=25638340")
+        MusicItem song4 = new MusicItem.Builder()
                 .setTitle("此生不换[Forbid Seek]")
                 .setArtist("青鸟飞鱼")
+                .setDuration(265000)
+                // cross-protocol redirects
+                .setUri("https://music.163.com/song/media/outer/url?id=25638340")
                 .setIconUri("http://p2.music.126.net/UyDVlWWgOn8p8U8uQ_I1xQ==/7934075907687518.jpg")
                 // forbid seek
                 .setForbidSeek(true)
