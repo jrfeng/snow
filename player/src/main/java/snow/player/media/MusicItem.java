@@ -211,20 +211,25 @@ public final class MusicItem implements Parcelable {
     }
 
     /**
-     * 是否禁用 seekTo 操作。
+     * 判断是否禁用了所有的 seek 操作。
      * <p>
      * 默认为 false，如果该方法返回 true，则会同时禁用 seekTo、fastForward、rewind 操作。
      *
      * @return 是否禁用 seekTo 操作
+     * @see #setForbidSeek(boolean)
      */
     public boolean isForbidSeek() {
         return forbidSeek;
     }
 
     /**
-     * 设置是否禁用 seekTo 操作。
+     * 设置是否禁用所有的 seek 操作。
+     * <p>
+     * 如果设为 true，则会同时禁用 seekTo、fastForward、rewind 操作。如果你的音频文件是一个直播流（Live Stream），
+     * 建议禁用所有的 seek 操作。
      *
      * @param forbidSeek 如果为 true，则会同时禁用 seekTo、fastForward、rewind 操作。
+     * @see #isForbidSeek()
      */
     public void setForbidSeek(boolean forbidSeek) {
         this.forbidSeek = forbidSeek;

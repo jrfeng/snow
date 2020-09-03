@@ -17,6 +17,11 @@ import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
 import okhttp3.TlsVersion;
 
+/**
+ * OkHttp 工具，用于在大于等于 API level 16 小于 API level 22 的 Android 版本中启用 TLS v1.2。
+ * <p>
+ * 要使用此工具，你的项目需要添加对 OKHttp 的依赖，本项目不对外提供 OkHttp 依赖。
+ */
 public class OkHttpUtil {
     public static void enableTls12OnPreLollipop(OkHttpClient.Builder builder) {
         if (Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT < 22) {
@@ -46,6 +51,7 @@ public class OkHttpUtil {
      * <p/>
      * For some reason, android supports TLS v1.2 from API 16, but enables it by
      * default only from API 20.
+     *
      * @link https://developer.android.com/reference/javax/net/ssl/SSLSocket.html
      * @see SSLSocketFactory
      */
