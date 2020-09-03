@@ -39,6 +39,11 @@ class PersistentPlayerState extends PlayerState {
     public void setPlayProgress(int playProgress) {
         super.setPlayProgress(playProgress);
 
+        if (isForbidSeek()) {
+            mMMKV.encode(KEY_PLAY_PROGRESS, 0);
+            return;
+        }
+
         mMMKV.encode(KEY_PLAY_PROGRESS, playProgress);
     }
 
