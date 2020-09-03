@@ -1,5 +1,6 @@
 package snow.player.lifecycle;
 
+import android.content.Context;
 import android.os.SystemClock;
 import android.widget.SeekBar;
 
@@ -17,6 +18,7 @@ import snow.player.PlayMode;
 import snow.player.PlaybackState;
 import snow.player.Player;
 import snow.player.PlayerClient;
+import snow.player.R;
 import snow.player.media.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
@@ -61,6 +63,36 @@ public class PlayerViewModel extends ViewModel {
 
     private boolean mInitialized;
     private boolean mDisconnectOnCleared;
+
+    /**
+     * 初始化 PlayerStateViewModel
+     * <p>
+     * 默认启用了进度条时钟。
+     *
+     * @param playerClient  PlayerClient 对象
+     */
+    public void init(@NonNull Context context, @NonNull PlayerClient playerClient) {
+        Preconditions.checkNotNull(context);
+        init(playerClient,
+                context.getString(R.string.snow_music_item_unknown_title),
+                context.getString(R.string.snow_music_item_unknown_artist),
+                true);
+    }
+
+    /**
+     * 初始化 PlayerStateViewModel
+     * <p>
+     * 默认启用了进度条时钟。
+     *
+     * @param playerClient  PlayerClient 对象
+     */
+    public void init(@NonNull Context context, @NonNull PlayerClient playerClient, boolean enableProgressClock) {
+        Preconditions.checkNotNull(context);
+        init(playerClient,
+                context.getString(R.string.snow_music_item_unknown_title),
+                context.getString(R.string.snow_music_item_unknown_artist),
+                enableProgressClock);
+    }
 
     /**
      * 初始化 PlayerStateViewModel
