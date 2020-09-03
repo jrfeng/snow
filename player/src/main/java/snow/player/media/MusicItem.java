@@ -1,5 +1,6 @@
 package snow.player.media;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -10,13 +11,15 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
+import snow.player.R;
+
 /**
  * 用于存储与音乐相关的数据。
  * <p>
  * 如果需要存储额外的数据，可以使用 {@link #setExtra(Bundle)} 方法与 {@link #getExtra()} 方法。请不要往
  * MusicItem 中存储大对象，因为这会拖慢 {@link snow.player.Player.OnPlaylistChangeListener} 的响应速度。
  *
- * @see MusicItemBuilder
+ * @see Builder
  */
 public final class MusicItem implements Parcelable {
     private String musicId;
@@ -31,7 +34,7 @@ public final class MusicItem implements Parcelable {
     private Bundle extra;
 
     /**
-     * 构造一个 MusicItem 对象。建议使用 {@link MusicItemBuilder} 构造器来创建 {@link MusicItem} 对象，
+     * 构造一个 MusicItem 对象。建议使用 {@link Builder} 构造器来创建 {@link MusicItem} 对象，
      * 而不是使用构造方法。
      */
     public MusicItem() {
@@ -343,4 +346,143 @@ public final class MusicItem implements Parcelable {
             return new MusicItem[size];
         }
     };
+
+    /**
+     * 用于构建 {@link MusicItem} 对象。
+     */
+    public static class Builder {
+        private String musicId = "";
+        private String title = "Unknown";
+        private String artist = "Unknown";
+        private String album = "Unknown";
+        private String uri;
+        private String iconUri = "";
+        private int duration;
+        private boolean forbidSeek = false;
+        private Bundle extra;
+
+        public Builder() {
+        }
+
+        public Builder(@NonNull Context context) {
+            Preconditions.checkNotNull(context);
+            this.title = context.getString(R.string.snow_music_item_unknown_title);
+            this.artist = context.getString(R.string.snow_music_item_unknown_artist);
+        }
+
+        /**
+         * 设置歌曲的 music id（NonNull）。
+         *
+         * @param musicId 要设置的值（NonNull）
+         */
+        public Builder setMusicId(@NonNull String musicId) {
+            Preconditions.checkNotNull(musicId);
+            this.musicId = musicId;
+            return this;
+        }
+
+        /**
+         * 设置歌曲的标题。
+         *
+         * @param title 要设置的标题（NonNull）
+         */
+        public Builder setTitle(@NonNull String title) {
+            Preconditions.checkNotNull(title);
+            this.title = title;
+            return this;
+        }
+
+        /**
+         * 设置歌曲的艺术家（NonNull）。
+         *
+         * @param artist 要设置的艺术家（NonNull）
+         */
+        public Builder setArtist(@NonNull String artist) {
+            Preconditions.checkNotNull(artist);
+            this.artist = artist;
+            return this;
+        }
+
+        /**
+         * 设置歌曲的专辑（NonNull）。
+         *
+         * @param album 要设置的专辑（NonNull）
+         */
+        public Builder setAlbum(@NonNull String album) {
+            Preconditions.checkNotNull(album);
+            this.album = album;
+            return this;
+        }
+
+        /**
+         * 设置歌曲的 Uri（NonNull）。
+         *
+         * @param uri 要设置的 Uri（NonNull）
+         */
+        public Builder setUri(@NonNull String uri) {
+            Preconditions.checkNotNull(uri);
+            this.uri = uri;
+            return this;
+        }
+
+        /**
+         * 设置歌曲图标的 Uri（NonNull）。
+         *
+         * @param iconUri 要设置的图标 Uri（NonNull）
+         */
+        public Builder setIconUri(@NonNull String iconUri) {
+            Preconditions.checkNotNull(iconUri);
+            this.iconUri = iconUri;
+            return this;
+        }
+
+        /**
+         * 设置歌曲的持续时间（播放时长）。
+         *
+         * @param duration 歌曲的持续时间，小于 0 时，duration 的值将被设置为 0
+         */
+        public Builder setDuration(int duration) throws IllegalArgumentException {
+            if (duration < 0) {
+                this.duration = 0;
+                return this;
+            }
+
+            this.duration = duration;
+            return this;
+        }
+
+        /**
+         * 设置是否禁用 seekTo 操作。
+         *
+         * @param forbidSeek 如果为 true，则会同时禁用 seekTo、fastForward、rewind 操作。
+         */
+        public Builder setForbidSeek(boolean forbidSeek) {
+            this.forbidSeek = forbidSeek;
+            return this;
+        }
+
+        /**
+         * 设置 MusicItem 携带的额外数据。
+         */
+        public Builder setExtra(@Nullable Bundle extra) {
+            this.extra = extra;
+            return this;
+        }
+
+        public MusicItem build() {
+            MusicItem musicItem = new MusicItem();
+
+            musicItem.setMusicId(musicId);
+            musicItem.setTitle(title);
+            musicItem.setArtist(artist);
+            musicItem.setAlbum(album);
+            musicItem.setUri(uri);
+            musicItem.setIconUri(iconUri);
+            musicItem.setDuration(duration);
+            musicItem.setForbidSeek(forbidSeek);
+            musicItem.setExtra(extra);
+
+            return musicItem;
+        }
+    }
 }
