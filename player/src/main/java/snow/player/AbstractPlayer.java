@@ -1509,6 +1509,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
     private void startRecordProgress() {
         cancelRecordProgress();
+
+        if (mPlayerState.isForbidSeek()) {
+            return;
+        }
+
         mRecordProgressDisposable = Observable.interval(3, 3, TimeUnit.SECONDS, Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Long>() {
