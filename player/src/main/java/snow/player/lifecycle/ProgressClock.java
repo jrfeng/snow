@@ -21,7 +21,7 @@ import io.reactivex.schedulers.Schedulers;
  *
  * @see PlayerViewModel
  */
-public class ProgressClock {
+class ProgressClock {
     private static final String TAG = "ProgressClock";
 
     private boolean mEnabled;
@@ -104,10 +104,6 @@ public class ProgressClock {
      * @throws IllegalArgumentException 在 updateTime 大于当前时间时抛出该异常
      */
     public void start(int progress, long updateTime, int duration) throws IllegalArgumentException {
-        if (!mEnabled) {
-            return;
-        }
-
         cancel();
 
         if (duration < 1) {
@@ -127,6 +123,11 @@ public class ProgressClock {
 
         mProgressSec = (int) (realProgress / 1000);
         mDurationSec = duration / 1000;
+
+        if (!mEnabled) {
+            mCallback.onUpdateProgress(mProgressSec, mDurationSec);
+            return;
+        }
 
         if (mProgressSec >= mDurationSec && !mLoop) {
             mCallback.onUpdateProgress(mDurationSec, mDurationSec);
