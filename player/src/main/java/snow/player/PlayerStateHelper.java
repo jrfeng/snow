@@ -106,8 +106,7 @@ class PlayerStateHelper {
 
     public void onStalled(boolean stalled, int playProgress, long updateTime) {
         mPlayerState.setStalled(stalled);
-        mPlayerState.setPlayProgress(playProgress);
-        mPlayerState.setPlayProgressUpdateTime(updateTime);
+        updatePlayProgress(playProgress, updateTime);
 
         if (mAppWidgetPreferences != null) {
             mAppWidgetPreferences.edit()
