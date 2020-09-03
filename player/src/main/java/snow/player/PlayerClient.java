@@ -501,7 +501,7 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     /**
-     * 获取播放进度。
+     * 获取播放进度（单位：毫秒）。
      *
      * @return 播放进度
      */
@@ -793,6 +793,21 @@ public class PlayerClient implements Player, PlaylistEditor {
         }
 
         mPlayer.seekTo(progress);
+    }
+
+    /**
+     * 判断是否禁用了所有的 seek 操作。
+     * <p>
+     * 默认为 false，如果该方法返回 true，则会同时禁用 seekTo、fastForward、rewind 操作。
+     *
+     * @return 是否禁用了所有的 seek 操作
+     */
+    public boolean isForbidSeek() {
+        if (notConnected()) {
+            return false;
+        }
+
+        return mPlayerStateHolder.mPlayerState.isForbidSeek();
     }
 
     /**
