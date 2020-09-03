@@ -22,6 +22,9 @@
     <string name="snow_preset_small_room">Small Room</string>
     <string name="snow_preset_unknown">Unknown Preset</string>
 
+    <string name="snow_music_item_unknown_title">Unknown Title</string>
+    <string name="snow_music_item_unknown_artist">Unknown Artist</string>
+
     <string name="snow_notification_channel_name">Player Controller</string>
 
 </resources>

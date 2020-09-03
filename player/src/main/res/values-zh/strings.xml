@@ -20,4 +20,6 @@
     <string name="snow_preset_unknown">未知预设</string>
     <string name="snow_error_out_of_memory">内存不足</string>
     <string name="snow_notification_channel_name">播放器控制器</string>
+    <string name="snow_music_item_unknown_title">未知歌曲</string>
+    <string name="snow_music_item_unknown_artist">未知歌手</string>
 </resources>
