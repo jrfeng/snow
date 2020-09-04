@@ -213,6 +213,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                     NotificationView.CHANNEL_ID,
                     getString(R.string.snow_notification_channel_name),
                     NotificationManager.IMPORTANCE_LOW);
+            channel.setShowBadge(false);
             mNotificationManager.createNotificationChannel(channel);
         }
     }
