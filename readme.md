@@ -1,3 +1,8 @@
+[![GitHub](https://img.shields.io/github/license/jrfeng/snow)](./license)
+[![](https://jitpack.io/v/jrfeng/snow.svg)](https://jitpack.io/#jrfeng/snow)
+[![GitHub issues](https://img.shields.io/github/issues/jrfeng/snow)](https://github.com/jrfeng/snow/issues)
+[![GitHub closed issues](https://img.shields.io/github/issues-closed/jrfeng/snow)](https://github.com/jrfeng/snow/issues?q=is%3Aissue+is%3Aclosed)
+
 Android 音乐播放器框架。支持自定义播放器（MediaPlayer, ExoPlayer），自定义通知栏控制器，自定义音频特效引擎，线控播放（Headset clicks），记录播放历史，播放器状态自动恢复。
 
 **文档：**
