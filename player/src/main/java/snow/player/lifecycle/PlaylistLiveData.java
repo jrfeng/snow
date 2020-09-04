@@ -16,7 +16,12 @@ import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
 
 /**
- * 用于监听 {@link PlayerClient} 对象的播放列表。
+ * 用于监听 {@link PlayerClient} 的播放列表。
+ * <p>
+ * {@link PlaylistLiveData} 是惰性的，它只会在 onActive 时开始监听 {@link PlayerClient} 的播放列表，
+ * 并且会在 onInactive 时自动取消对 {@link PlayerClient} 的播放列表的监听。
+ * <p>
+ * 最后，当你不再需要 {@link PlaylistLiveData} 时，应该调用 {@link #release()} 方法将其释放。
  */
 public class PlaylistLiveData extends LiveData<Playlist>
         implements Player.OnPlaylistChangeListener {
