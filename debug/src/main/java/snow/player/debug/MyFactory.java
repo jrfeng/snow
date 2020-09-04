@@ -2,8 +2,6 @@ package snow.player.debug;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -19,6 +17,7 @@ import okhttp3.OkHttpClient;
 import snow.player.Inject;
 import snow.player.PlayerService;
 import snow.player.exo.ExoMusicPlayer;
+import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.util.OkHttpUtil;
 
@@ -51,7 +50,7 @@ public class MyFactory extends PlayerService.ComponentFactory {
     @Inject
     @NonNull
     @Override
-    public MusicPlayer createMusicPlayer(@NonNull Context context, @NonNull Uri uri) {
+    public MusicPlayer createMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
         String path = uri.getLastPathSegment();
 
         if (path != null && path.endsWith(".m3u8")) {
