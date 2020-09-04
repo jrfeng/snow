@@ -152,7 +152,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
      * 你可以重写该方法来返回你自己的 MusicPlayer 实现。
      */
     @NonNull
-    protected abstract MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull Uri uri);
+    protected abstract MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri);
 
     /**
      * 获取音乐的播放链接。
@@ -305,7 +305,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         mRetrieveUriDisposable = getMusicItemUri(musicItem, mPlayerConfig.getSoundQuality())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(prepare(preparedAction), notifyGetUrlFailed());
+                .subscribe(prepare(musicItem, preparedAction), notifyGetUrlFailed());
     }
 
     private void disposeRetrieveUri() {
@@ -340,11 +340,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         });
     }
 
-    private Consumer<Uri> prepare(final @Nullable Runnable preparedAction) {
+    private Consumer<Uri> prepare(@NonNull final MusicItem musicItem, @Nullable final Runnable preparedAction) {
         return new Consumer<Uri>() {
             @Override
             public void accept(Uri uri) {
-                mMusicPlayer = onCreateMusicPlayer(mApplicationContext, uri);
+                mMusicPlayer = onCreateMusicPlayer(mApplicationContext, musicItem, uri);
                 attachListeners(mMusicPlayer);
 
                 mPreparedAction = preparedAction;

@@ -784,9 +784,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     @NonNull
-    protected final MusicPlayer createMusicPlayer(@NonNull Context context, @NonNull Uri uri) {
+    protected final MusicPlayer createMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
         if (injectMusicPlayer()) {
-            return mComponentFactory.createMusicPlayer(context, uri);
+            return mComponentFactory.createMusicPlayer(context, musicItem, uri);
         }
 
         return onCreateMusicPlayer(this, uri);
@@ -968,8 +968,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @NonNull
         @Override
-        protected MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull Uri uri) {
-            return PlayerService.this.createMusicPlayer(context, uri);
+        protected MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
+            return PlayerService.this.createMusicPlayer(context, musicItem, uri);
         }
 
         @Nullable
@@ -1745,7 +1745,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * <p>
      * 通过继承并覆盖 {@link ComponentFactory} 类的以下方法来提供自定义组件：
      * <ul>
-     *     <li>{@link #createMusicPlayer(Context, Uri)}：音乐播放器</li>
+     *     <li>{@link #createMusicPlayer(Context, MusicItem, Uri)}：音乐播放器</li>
      *     <li>{@link #createNotificationView()}：通知栏控制器</li>
      *     <li>{@link #createAudioEffectManager()}：音频特效引擎管理器</li>
      *     <li>{@link #createHistoryRecorder()}：历史记录器</li>
@@ -1839,12 +1839,13 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 创建一个 {@link MusicPlayer} 对象。
          *
-         * @param context Context 对象
-         * @param uri     播放器将要播放的歌曲的 URI
+         * @param context   Context 对象
+         * @param musicItem 播放器将要播放的歌曲
+         * @param uri       播放器将要播放的歌曲的 URI
          * @return {@link MusicPlayer} 对象，，不能为 null
          */
         @NonNull
-        public MusicPlayer createMusicPlayer(@NonNull Context context, @NonNull Uri uri) {
+        public MusicPlayer createMusicPlayer(@NonNull Context context, MusicItem musicItem, @NonNull Uri uri) {
             return new MediaMusicPlayer(uri);
         }
 
@@ -1944,7 +1945,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private boolean injectMusicPlayer() {
-        return shouldInject("createMusicPlayer", Context.class, Uri.class);
+        return shouldInject("createMusicPlayer", Context.class, MusicItem.class, Uri.class);
     }
 
     private boolean injectMusicItemUri() {
