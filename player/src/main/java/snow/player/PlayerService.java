@@ -841,7 +841,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * 正在准备播放器。
      */
     protected void onPreparing() {
-        updateNotificationView();
+        if (noNotificationView()) {
+            return;
+        }
+        mNotificationView.onPreparing();
     }
 
     /**
@@ -850,7 +853,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @param audioSessionId 播放器的 audio session id
      */
     protected void onPrepared(int audioSessionId) {
-        updateNotificationView();
+        if (noNotificationView()) {
+            return;
+        }
+        mNotificationView.onPrepared();
     }
 
     /**
@@ -860,14 +866,20 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @param updateTime 播放进度的更新时间
      */
     protected void onPlaying(int progress, long updateTime) {
-        updateNotificationView();
+        if (noNotificationView()) {
+            return;
+        }
+        mNotificationView.onPlaying();
     }
 
     /**
      * 已暂停播放。
      */
     protected void onPaused() {
-        updateNotificationView();
+        if (noNotificationView()) {
+            return;
+        }
+        mNotificationView.onPaused();
     }
 
     /**
@@ -877,14 +889,20 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      *                否则为 false
      */
     protected void onStalledChanged(boolean stalled) {
-        updateNotificationView();
+        if (noNotificationView()) {
+            return;
+        }
+        mNotificationView.onStalledChanged(stalled);
     }
 
     /**
      * 播放器已停止播放。
      */
     protected void onStopped() {
-        updateNotificationView();
+        if (noNotificationView()) {
+            return;
+        }
+        mNotificationView.onStopped();
     }
 
     /**
@@ -894,7 +912,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @param errorMessage 错误信息
      */
     protected void onError(int errorCode, String errorMessage) {
-        updateNotificationView();
+        if (noNotificationView()) {
+            return;
+        }
+        mNotificationView.onError(errorCode, errorMessage);
     }
 
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
@@ -1182,6 +1203,61 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 该方法会在 Service 销毁时调用，可以在该方法中释放占用的资源。
          */
         protected void onRelease() {
+        }
+
+        /**
+         * 正在准备播放器。
+         */
+        protected void onPreparing() {
+            invalidate();
+        }
+
+        /**
+         * 播放器准备完毕。
+         */
+        protected void onPrepared() {
+            invalidate();
+        }
+
+        /**
+         * 播放器开始播放。
+         */
+        protected void onPlaying() {
+            invalidate();
+        }
+
+        /**
+         * 已暂停播放。
+         */
+        protected void onPaused() {
+            invalidate();
+        }
+
+        /**
+         * 播放器的 {@code stalled} 状态发生了改变。
+         *
+         * @param stalled 播放器的 {@code stalled} 状态。当缓冲区中没有足够的数据支持继续播放时，该参数为 true，
+         *                否则为 false
+         */
+        protected void onStalledChanged(boolean stalled) {
+            invalidate();
+        }
+
+        /**
+         * 播放器已停止播放。
+         */
+        protected void onStopped() {
+            invalidate();
+        }
+
+        /**
+         * 播放器发生了错误。
+         *
+         * @param errorCode    错误码
+         * @param errorMessage 错误信息
+         */
+        protected void onError(int errorCode, String errorMessage) {
+            invalidate();
         }
 
         /**
