@@ -3,7 +3,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/jrfeng/snow)](https://github.com/jrfeng/snow/issues)
 [![GitHub closed issues](https://img.shields.io/github/issues-closed/jrfeng/snow)](https://github.com/jrfeng/snow/issues?q=is%3Aissue+is%3Aclosed)
 
-[中文](./readme_zh.md)
+[**中文**](./readme_zh.md)
 
 Android audio service library. Support custom music player(MediaPlayer, ExoPlayer), custom Notification, custom audio effect engine, headset clicks, record playback historical, player status automatic recovery on restart.
 
@@ -145,7 +145,7 @@ playerClient.setPlaylist(playlist, true);
 
 ```
 
-**`PlayerClient` 支持的播放器功能：**
+**`PlayerClient` common methods:**
 
 * `setPlaylist(Playlist playlist, boolean play)`
 * `play()`
