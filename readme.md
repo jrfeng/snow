@@ -5,7 +5,7 @@
 
 [**中文**](./readme_zh.md)
 
-Android music player framework. Support custom music player(MediaPlayer, ExoPlayer), custom Notification, custom audio effect engine, headset clicks, record playback history, player status automatic recovery on restart.
+Android music player framework. Support custom music player(MediaPlayer, ExoPlayer), custom Notification, custom audio effect engine, headset clicks, playback history, player status automatic recovery on restart.
 
 **Document:**
 
