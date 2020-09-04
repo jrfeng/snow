@@ -27,6 +27,7 @@ public class PlaylistLiveData extends LiveData<Playlist>
         implements Player.OnPlaylistChangeListener {
     private static final String TAG = "PlaylistLiveData";
     private PlayerClient mPlayerClient;
+    private boolean mActived;
 
     public PlaylistLiveData() {
         super(new Playlist(new ArrayList<MusicItem>()));
@@ -40,6 +41,10 @@ public class PlaylistLiveData extends LiveData<Playlist>
     public void init(@NonNull PlayerClient playerClient) {
         Preconditions.checkNotNull(playerClient);
         mPlayerClient = playerClient;
+
+        if (mActived) {
+            observePlaylist();
+        }
     }
 
     /**
@@ -56,17 +61,18 @@ public class PlaylistLiveData extends LiveData<Playlist>
 
     @Override
     protected void onActive() {
+        mActived = true;
         if (notInit()) {
             Log.e(TAG, "PlaylistLiveData not init.");
             return;
         }
 
-        mPlayerClient.addOnPlaylistChangeListener(this);
-        updatePlaylist(mPlayerClient.getPlaylistManager());
+        observePlaylist();
     }
 
     @Override
     protected void onInactive() {
+        mActived = false;
         if (notInit()) {
             return;
         }
@@ -76,6 +82,11 @@ public class PlaylistLiveData extends LiveData<Playlist>
     @Override
     public void onPlaylistChanged(PlaylistManager playlistManager, int position) {
         updatePlaylist(playlistManager);
+    }
+
+    private void observePlaylist() {
+        mPlayerClient.addOnPlaylistChangeListener(this);
+        updatePlaylist(mPlayerClient.getPlaylistManager());
     }
 
     private void updatePlaylist(PlaylistManager playlistManager) {
