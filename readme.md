@@ -5,7 +5,7 @@
 
 [中文](./readme_zh.md)
 
-Android audio service library. Support custom music player(MediaPlayer, ExoPlayer), custom Notification, custom audio effect engine, record playback historical, player status automatic recovery on restart.
+Android audio service library. Support custom music player(MediaPlayer, ExoPlayer), custom Notification, custom audio effect engine, headset clicks, record playback historical, player status automatic recovery on restart.
 
 **Document:**
 
