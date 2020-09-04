@@ -22,7 +22,12 @@ import okhttp3.TlsVersion;
  * <p>
  * 要使用此工具，你的项目需要添加对 OKHttp 的依赖，本项目不对外提供 OkHttp 依赖。
  */
-public class OkHttpUtil {
+public final class OkHttpUtil {
+
+    private OkHttpUtil() {
+        throw new AssertionError();
+    }
+
     public static void enableTls12OnPreLollipop(OkHttpClient.Builder builder) {
         if (Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT < 22) {
             try {
