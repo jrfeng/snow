@@ -31,7 +31,7 @@ allprojects {
 
 ```gradle
 dependencies {
-    implementation 'com.github.jrfeng.snow:player:x.x.x'
+    implementation 'com.github.jrfeng.snow:player:0.1.7'
 }
 ```
 
