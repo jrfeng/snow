@@ -27,7 +27,7 @@ allprojects {
 }
 ```
 
-2. Add a dependency in the `build.gradle` file of your app module. [![](https://jitpack.io/v/jrfeng/snow.svg)](https://jitpack.io/#jrfeng/snow)
+2. Add a dependency in the `build.gradle` file of your app module.
 
 ```gradle
 dependencies {

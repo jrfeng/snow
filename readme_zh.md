@@ -27,7 +27,7 @@ allprojects {
 }
 ```
 
-2. 将以下代码添加到模块的依赖中：[![](https://jitpack.io/v/jrfeng/snow.svg)](https://jitpack.io/#jrfeng/snow)
+2. 将以下代码添加到模块的依赖中：
 
 ```gradle
 dependencies {
