@@ -1846,7 +1846,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @return {@link MusicPlayer} 对象，，不能为 null
          */
         @NonNull
-        public MusicPlayer createMusicPlayer(@NonNull Context context, MusicItem musicItem, @NonNull Uri uri) {
+        public MusicPlayer createMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
             return new MediaMusicPlayer(uri);
         }
 
