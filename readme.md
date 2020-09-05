@@ -161,7 +161,7 @@ playerClient.setPlaylist(playlist, true);
 * `setNextPlay(MusicItem musicItem)`
 * `setPlayMode(PlayMode playMode)`
 
-**More Content:**
+**More:**
 
 * [**Wiki**](https://github.com/jrfeng/snow/wiki)
 * [**API Doc**](https://jrfeng.github.io/snow-doc/)
