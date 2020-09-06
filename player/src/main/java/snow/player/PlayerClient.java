@@ -1453,7 +1453,7 @@ public class PlayerClient implements Player, PlaylistEditor {
 
         PlayerStateHolder(PlaylistManager playlistManager, PlayerConfig playerConfig) {
             mPlaylistManager = playlistManager;
-            mPlayerState = new PlayerState();
+            initPlayerState(new PlayerState());
             mNotConnected = true;
 
             mAllPlaybackStateChangeListener = new ArrayList<>();
@@ -1467,14 +1467,10 @@ public class PlayerClient implements Player, PlaylistEditor {
             mAllPositionChangeListener = new ArrayList<>();
             mClientAllPlaybackStateChangeListener = new ArrayList<>();
             mAllAudioSessionChangeListener = new ArrayList<>();
-
-            // 避免空指针异常。如果在调用 setPlayerState 方法前接收到了 SessionEvent，则会导致空指针异常
-            mPlayerStateHelper = new PlayerStateHelper(new PlayerState());
         }
 
         void setPlayerState(PlayerState playerState) {
-            mPlayerState = playerState;
-            mPlayerStateHelper = new PlayerStateHelper(mPlayerState);
+            initPlayerState(playerState);
 
             if (notConnected()) {
                 return;
@@ -1490,6 +1486,11 @@ public class PlayerClient implements Player, PlaylistEditor {
             if (mPlayerState.isStalled()) {
                 notifyStalledChanged();
             }
+        }
+
+        void initPlayerState(PlayerState playerState) {
+            mPlayerState = playerState;
+            mPlayerStateHelper = new PlayerStateHelper(mPlayerState);
         }
 
         boolean notConnected() {
