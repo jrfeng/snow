@@ -24,6 +24,7 @@
 
     <string name="snow_music_item_unknown_title">Unknown Title</string>
     <string name="snow_music_item_unknown_artist">Unknown Artist</string>
+    <string name="snow_music_item_unknown_album">Unknown Album</string>
 
     <string name="snow_notification_channel_name">Player Controller</string>
 

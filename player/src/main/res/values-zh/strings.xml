@@ -22,4 +22,5 @@
     <string name="snow_notification_channel_name">播放器控制器</string>
     <string name="snow_music_item_unknown_title">未知歌曲</string>
     <string name="snow_music_item_unknown_artist">未知歌手</string>
+    <string name="snow_music_item_unknown_album">未知专辑</string>
 </resources>
