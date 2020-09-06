@@ -6,12 +6,15 @@ import android.util.Log;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
@@ -29,11 +32,25 @@ public final class OkHttpUtil {
     }
 
     public static void enableTls12OnPreLollipop(OkHttpClient.Builder builder) {
+        enableTls12OnPreLollipop(builder, false);
+    }
+
+    /**
+     * Warning! Trust all certificate is unsafe!
+     */
+    public static void enableTls12OnPreLollipop(OkHttpClient.Builder builder, boolean trustAllCertificate) {
         if (Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT < 22) {
             try {
                 SSLContext sc = SSLContext.getInstance("TLSv1.2");
-                sc.init(null, null, null);
-                builder.sslSocketFactory(new Tls12SocketFactory(sc.getSocketFactory()));
+
+                if (trustAllCertificate) {
+                    TrustManager[] trustAllCerts = getUnsafeTrustManager();
+                    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+                    builder.sslSocketFactory(new Tls12SocketFactory(sc.getSocketFactory()), (X509TrustManager) trustAllCerts[0]);
+                } else {
+                    sc.init(null, null, null);
+                    builder.sslSocketFactory(new Tls12SocketFactory(sc.getSocketFactory()));
+                }
 
                 ConnectionSpec cs = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
                         .tlsVersions(TlsVersion.TLS_1_2)
@@ -46,9 +63,26 @@ public final class OkHttpUtil {
 
                 builder.connectionSpecs(specs);
             } catch (Exception exc) {
-                Log.e("OkHttpTLSCompat", "Error while setting TLS 1.2", exc);
+                Log.e("OkHttpUtil", "Error while setting TLS 1.2", exc);
             }
         }
+    }
+
+    /**
+     * Warning! This is unsafe!
+     */
+    private static TrustManager[] getUnsafeTrustManager() {
+        return new TrustManager[]{new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new java.security.cert.X509Certificate[]{};
+            }
+
+            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+            }
+
+            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+            }
+        }};
     }
 
     /**
