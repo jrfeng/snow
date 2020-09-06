@@ -352,9 +352,9 @@ public final class MusicItem implements Parcelable {
      */
     public static class Builder {
         private String musicId = "";
-        private String title = "Unknown";
-        private String artist = "Unknown";
-        private String album = "Unknown";
+        private String title = "";
+        private String artist = "";
+        private String album = "";
         private String uri;
         private String iconUri = "";
         private int duration;
@@ -368,6 +368,7 @@ public final class MusicItem implements Parcelable {
             Preconditions.checkNotNull(context);
             this.title = context.getString(R.string.snow_music_item_unknown_title);
             this.artist = context.getString(R.string.snow_music_item_unknown_artist);
+            this.album = context.getString(R.string.snow_music_item_unknown_album);
         }
 
         /**
