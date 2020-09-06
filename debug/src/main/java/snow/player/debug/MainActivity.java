@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         MusicItem song1 = new MusicItem.Builder()
                 .setTitle("逍遥叹")
                 .setArtist("胡歌")
+                .setAlbum("仙剑奇侠传")
                 .setDuration(313520)
                 .setUri("http://music.163.com/song/media/outer/url?id=4875306")
                 .setIconUri("http://p1.music.126.net/4tTN8CnR7wG4E1cauIPCvQ==/109951163240682406.jpg")
@@ -88,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
 
         MusicItem song3 = new MusicItem.Builder()
                 .setTitle("千年泪")
-                .setArtist("Tank")
                 .setDuration(260946)
                 .setUri("http://music.163.com/song/media/outer/url?id=150371")
                 .setIconUri("http://p2.music.126.net/0543F-ln2Apdiopez_jbsA==/109951163244853571.jpg")
