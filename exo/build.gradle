@@ -38,4 +38,6 @@ dependencies {
 
     // exoplayer-core
     api 'com.google.android.exoplayer:exoplayer-core:2.11.7'
+    // extension-okhttp
+    api 'com.google.android.exoplayer:extension-okhttp:2.11.7'
 }

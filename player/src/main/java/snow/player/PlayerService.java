@@ -34,19 +34,15 @@ import androidx.media.session.MediaButtonReceiver;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.integration.okhttp3.OkHttpUrlLoader;
-import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.common.base.Preconditions;
 
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import channel.helper.ChannelHelper;
 import channel.helper.Dispatcher;
@@ -56,7 +52,6 @@ import channel.helper.pipe.CustomActionPipe;
 import channel.helper.pipe.SessionEventPipe;
 import media.helper.HeadsetHookHelper;
 
-import okhttp3.OkHttpClient;
 import snow.player.appwidget.AppWidgetPreferences;
 import snow.player.effect.AudioEffectManager;
 import snow.player.media.MediaMusicPlayer;
@@ -64,7 +59,6 @@ import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.playlist.PlaylistEditor;
 import snow.player.media.ErrorCode;
-import snow.player.util.OkHttpUtil;
 
 /**
  * 提供了基本的 {@code player service} 实现，用于在后台播放音乐。
@@ -1152,7 +1146,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
             setIconSize(playerService.getResources().getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
             setNeedReloadIcon(true);
-            initGlide();
             onInit(mPlayerService);
 
             mTarget = new CustomTarget<Bitmap>(mIconSize[0], mIconSize[1]) {
@@ -1167,22 +1160,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                 }
             };
 
-        }
-
-        private void initGlide() {
-            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
-                    .followRedirects(true)
-                    .followSslRedirects(true)
-                    .retryOnConnectionFailure(true)
-                    .connectTimeout(5, TimeUnit.SECONDS)
-                    .readTimeout(5, TimeUnit.SECONDS);
-
-            OkHttpUtil.enableTls12OnPreLollipop(clientBuilder);
-
-            OkHttpUrlLoader.Factory factory = new OkHttpUrlLoader.Factory(clientBuilder.build());
-            Glide.get(mPlayerService)
-                    .getRegistry()
-                    .replace(GlideUrl.class, InputStream.class, factory);
         }
 
         private void release() {

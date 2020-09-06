@@ -19,7 +19,7 @@ import snow.player.PlayerService;
 import snow.player.exo.ExoMusicPlayer;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
-import snow.player.util.OkHttpUtil;
+import snow.player.exo.util.OkHttpUtil;
 
 public class MyFactory extends PlayerService.ComponentFactory {
     private ProgressiveMediaSource.Factory mProgressiveMediaSourceFactory;
