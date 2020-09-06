@@ -59,6 +59,7 @@ import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
 import snow.player.playlist.PlaylistEditor;
 import snow.player.media.ErrorCode;
+import snow.player.util.MusicItemUtil;
 
 /**
  * 提供了基本的 {@code player service} 实现，用于在后台播放音乐。
@@ -1419,7 +1420,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 获取通知栏控制器的 content title
          */
         protected final CharSequence getContentTitle() {
-            return getPlayingMusicItem().getTitle();
+            return MusicItemUtil.getTitle(getContext(), getPlayingMusicItem());
         }
 
         /**
@@ -1669,7 +1670,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                     .setSmallIcon(getSmallIconId())
                     .setLargeIcon(getIcon())
                     .setContentTitle(getContentTitle())
-                    .setContentText(getContentText(getPlayingMusicItem().getArtist()))
+                    .setContentText(getContentText(MusicItemUtil.getArtist(getContext(), getPlayingMusicItem())))
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setPriority(NotificationCompat.PRIORITY_LOW)
                     .setShowWhen(false)
