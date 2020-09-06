@@ -3,20 +3,20 @@
 [![GitHub issues](https://img.shields.io/github/issues/jrfeng/snow)](https://github.com/jrfeng/snow/issues)
 [![GitHub closed issues](https://img.shields.io/github/issues-closed/jrfeng/snow)](https://github.com/jrfeng/snow/issues?q=is%3Aissue+is%3Aclosed)
 
-[**中文**](./readme_zh.md)
+[**English**](./readme_en.md)
 
-Android music player framework. Support custom music player(MediaPlayer, ExoPlayer), custom Notification, custom audio effect engine, headset clicks, playback history, player status automatic recovery on restart.
+Android 音乐播放器框架。支持自定义播放器（MediaPlayer, ExoPlayer），自定义通知栏控制器，自定义音频特效引擎，线控播放（Headset clicks），记录播放历史，播放器状态自动恢复。
 
-**Document:**
+**文档：**
 
-* [**Getting Started**](https://github.com/jrfeng/snow/wiki/1.%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B)
-* [**Custom Player Component**](https://github.com/jrfeng/snow/wiki/2.%E8%87%AA%E5%AE%9A%E4%B9%89%E6%92%AD%E6%94%BE%E5%99%A8%E7%BB%84%E4%BB%B6)
-* [**Custom Notification**](https://github.com/jrfeng/snow/wiki/3.%E8%87%AA%E5%AE%9A%E4%B9%89%E9%80%9A%E7%9F%A5%E6%A0%8F%E6%8E%A7%E5%88%B6%E5%99%A8)
-* [**Use ExoPlayer**](https://github.com/jrfeng/snow/wiki/4.%E4%BD%BF%E7%94%A8-ExoPlayer)
+* [**快速上手**](https://github.com/jrfeng/snow/wiki/1.%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B)
+* [**自定义播放器组件**](https://github.com/jrfeng/snow/wiki/2.%E8%87%AA%E5%AE%9A%E4%B9%89%E6%92%AD%E6%94%BE%E5%99%A8%E7%BB%84%E4%BB%B6)
+* [**自定义通知栏控制器**](https://github.com/jrfeng/snow/wiki/3.%E8%87%AA%E5%AE%9A%E4%B9%89%E9%80%9A%E7%9F%A5%E6%A0%8F%E6%8E%A7%E5%88%B6%E5%99%A8)
+* [**使用 ExoPlayer**](https://github.com/jrfeng/snow/wiki/4.%E4%BD%BF%E7%94%A8-ExoPlayer)
 
-## Add dependency
+## 项目配置
 
-1. Make sure you have the jitpack repositories included in the `build.gradle` file in the root of your project.
+1. 将以下代码添加到项目根目录中的 `build.gradle` 中：
 
 ```gradle
 allprojects {
@@ -27,7 +27,7 @@ allprojects {
 }
 ```
 
-2. Add a dependency in the `build.gradle` file of your app module.
+2. 将以下代码添加到模块的依赖中：
 
 ```gradle
 dependencies {
@@ -35,27 +35,27 @@ dependencies {
 }
 ```
 
-3. Request permission.
+3. 申请权限：
 
 ```xml
-<!-- for start foreground service -->
+<!-- 用于启动前台 Service -->
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
-<!-- for play in the background -->
+<!-- 用于后台播放 -->
 <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-<!-- for play local music -->
+<!-- 用于播放本地音乐 -->
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
-<!-- for play network music -->
+<!-- 用于播放网络音乐 -->
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 ```
 
-**Note: Android 6.0 (API level 23) need request `android.permission.READ_EXTERNAL_STORAGE` permission at runtime.**
+**注意！在大于等于 `Android 6.0(API Level 23)` 的 `Android` 版本中，需要动态申请存储器访问权限：`"android.permission.READ_EXTERNAL_STORAGE"`。**
 
-4. Config PlayerService.
+4. 配置播放器
 
 ```xml
 <service android:name="snow.player.PlayerService">
@@ -72,15 +72,15 @@ dependencies {
 </receiver>
 ```
 
-## Getting Started
+## 开始使用
 
-1. Connect to `PlayerService`.
+1. 连接到 `PlayerService`：
 
 ```java
-// create a PlayerClient instance
+// 创建一个 PlayerClient 对象
 PlayerClient playerClient = PlayerClient.newInstance(context, PlayerService.class);
 
-// connect to PlayerService
+// 连接到 PlayerService
 playerClient.connect(new PlayerClient.OnConnectCallback() {
     @Override
     public void onConnected(boolean success) {
@@ -90,7 +90,7 @@ playerClient.connect(new PlayerClient.OnConnectCallback() {
 });
 ```
 
-3. Create a Playlist.
+3. 创建一个播放列表
 
 ```java
 private Playlist createPlaylist() {
@@ -134,34 +134,34 @@ private Playlist createPlaylist() {
 }
 ```
 
-4. Set playlist and start playing music.
+4. 设置播放列表并播放音乐
 
 ```java
-// create a Playlist instance.
+// 创建播放列表
 Playlist playlist = createPlaylist();
 
-// set playlist and start playing music
+// 设置播放列表，并播放音乐
 playerClient.setPlaylist(playlist, true);
 
 ```
 
-**`PlayerClient` common methods:**
+**`PlayerClient` 支持的播放器功能：**
 
-* `setPlaylist(Playlist playlist, boolean play)`
-* `play()`
-* `pause()`
-* `playPause()`
-* `playPause(int position)`
-* `stop()`
-* `seekTo(int progress)`
-* `skipToPrevious()`
-* `skipToNext()`
-* `fastForward()`
-* `rewind()`
-* `setNextPlay(MusicItem musicItem)`
-* `setPlayMode(PlayMode playMode)`
+* `setPlaylist(Playlist playlist, boolean play)`：设置播放列表
+* `play()`：播放
+* `pause()`：暂停
+* `playPause()`：播放/暂停
+* `playPause(int position)`：播放/暂停列表中指定位置处的音乐
+* `stop()`：停止
+* `seekTo(int progress)`：调整播放位置
+* `skipToPrevious()`：上一曲
+* `skipToNext()`：下一曲
+* `fastForward()`：快进
+* `rewind()`：快退
+* `setNextPlay(MusicItem musicItem)`：下一首播放
+* `setPlayMode(PlayMode playMode)`：设置播放模式（共 `3` 种模式：顺序播放、单曲循环、随机播放）
 
-**More:**
+更多内容，请参考：
 
 * [**Wiki**](https://github.com/jrfeng/snow/wiki)
 * [**API Doc**](https://jrfeng.github.io/snow-doc/)
