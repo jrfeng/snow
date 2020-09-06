@@ -22,6 +22,7 @@ import snow.player.R;
 import snow.player.media.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
+import snow.player.util.MusicItemUtil;
 
 /**
  * 播放器 ViewModel，支持 DataBinding。
@@ -163,9 +164,9 @@ public class PlayerViewModel extends ViewModel {
                     return;
                 }
 
-                mTitle.setValue(getMusicTitle(musicItem));
-                mArtist.setValue(getMusicArtist(musicItem));
-                mAlbum.setValue(getMusicAlbum(musicItem));
+                mTitle.setValue(MusicItemUtil.getTitle(musicItem, mDefaultTitle));
+                mArtist.setValue(MusicItemUtil.getArtist(musicItem, mDefaultArtist));
+                mAlbum.setValue(MusicItemUtil.getAlbum(musicItem, mDefaultAlbum));
 
                 mIconUri.setValue(musicItem.getIconUri());
                 mDuration.setValue(getDurationSec());
@@ -772,35 +773,5 @@ public class PlayerViewModel extends ViewModel {
         }
 
         return musicItem.getIconUri();
-    }
-
-    private String getMusicTitle(@NonNull MusicItem musicItem) {
-        String title = musicItem.getTitle();
-
-        if (title.isEmpty()) {
-            return mDefaultTitle;
-        }
-
-        return title;
-    }
-
-    private String getMusicArtist(@NonNull MusicItem musicItem) {
-        String artist = musicItem.getArtist();
-
-        if (artist.isEmpty()) {
-            return mDefaultArtist;
-        }
-
-        return artist;
-    }
-
-    private String getMusicAlbum(@NonNull MusicItem musicItem) {
-        String album = musicItem.getAlbum();
-
-        if (album.isEmpty()) {
-            return mDefaultAlbum;
-        }
-
-        return album;
     }
 }
