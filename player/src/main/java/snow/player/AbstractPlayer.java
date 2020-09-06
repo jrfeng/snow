@@ -434,12 +434,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
                 notifySeekComplete(mp.getProgress(), SystemClock.elapsedRealtime(), mp.isStalled());
 
-                if (isPlaying() && !mp.isStalled()) {
-                    mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
-                } else if (!mPlayOnSeekComplete) {
-                    notifyPaused();
-                }
-
                 if (mPlayOnSeekComplete) {
                     mPlayOnSeekComplete = false;
                     play();
@@ -944,6 +938,15 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onSeekComplete(playProgress, updateTime, stalled);
+        }
+
+        if (!isPlaying()) {
+            notifyPaused();
+            return;
+        }
+
+        if (!stalled) {
+            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
         }
     }
 
