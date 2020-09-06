@@ -26,13 +26,14 @@ import snow.player.playlist.PlaylistManager;
 /**
  * 播放器 ViewModel，支持 DataBinding。
  * <p>
- * <b>注意！使用前必须先调用 {@link #init(PlayerClient, String, String)} 方法进行初始化。</b>
+ * <b>注意！使用前必须先调用 {@link #init(Context, PlayerClient)} 方法进行初始化。</b>
  */
 public class PlayerViewModel extends ViewModel {
     private PlayerClient mPlayerClient;
 
     private MutableLiveData<String> mTitle;
     private MutableLiveData<String> mArtist;
+    private MutableLiveData<String> mAlbum;
     private MutableLiveData<String> mIconUri;
     private MutableLiveData<Integer> mDuration;         // 单位：秒
     private MutableLiveData<Integer> mPlayProgress;     // 单位：秒
@@ -58,6 +59,7 @@ public class PlayerViewModel extends ViewModel {
 
     private String mDefaultTitle;
     private String mDefaultArtist;
+    private String mDefaultAlbum;
 
     private ProgressClock mProgressClock;
 
@@ -69,14 +71,11 @@ public class PlayerViewModel extends ViewModel {
      * <p>
      * 默认启用了进度条时钟。
      *
-     * @param playerClient  PlayerClient 对象
+     * @param playerClient PlayerClient 对象
      */
     public void init(@NonNull Context context, @NonNull PlayerClient playerClient) {
         Preconditions.checkNotNull(context);
-        init(playerClient,
-                context.getString(R.string.snow_music_item_unknown_title),
-                context.getString(R.string.snow_music_item_unknown_artist),
-                true);
+        init(context, playerClient, true);
     }
 
     /**
@@ -84,13 +83,14 @@ public class PlayerViewModel extends ViewModel {
      * <p>
      * 默认启用了进度条时钟。
      *
-     * @param playerClient  PlayerClient 对象
+     * @param playerClient PlayerClient 对象
      */
     public void init(@NonNull Context context, @NonNull PlayerClient playerClient, boolean enableProgressClock) {
         Preconditions.checkNotNull(context);
         init(playerClient,
                 context.getString(R.string.snow_music_item_unknown_title),
                 context.getString(R.string.snow_music_item_unknown_artist),
+                context.getString(R.string.snow_music_item_unknown_album),
                 enableProgressClock);
     }
 
@@ -105,8 +105,9 @@ public class PlayerViewModel extends ViewModel {
      */
     public void init(@NonNull PlayerClient playerClient,
                      @NonNull String defaultTitle,
-                     @NonNull String defaultArtist) {
-        init(playerClient, defaultTitle, defaultArtist, true);
+                     @NonNull String defaultArtist,
+                     @NonNull String defaultAlbum) {
+        init(playerClient, defaultTitle, defaultArtist, defaultAlbum, true);
     }
 
     /**
@@ -120,6 +121,7 @@ public class PlayerViewModel extends ViewModel {
     public void init(@NonNull PlayerClient playerClient,
                      @NonNull String defaultTitle,
                      @NonNull String defaultArtist,
+                     @NonNull String defaultAlbum,
                      boolean enableProgressClock) {
         Preconditions.checkNotNull(playerClient);
         Preconditions.checkNotNull(defaultTitle);
@@ -128,6 +130,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient = playerClient;
         mDefaultTitle = defaultTitle;
         mDefaultArtist = defaultArtist;
+        mDefaultAlbum = defaultAlbum;
 
         initAllLiveData();
         initAllListener();
@@ -155,12 +158,15 @@ public class PlayerViewModel extends ViewModel {
                 if (musicItem == null) {
                     mTitle.setValue(mDefaultTitle);
                     mArtist.setValue(mDefaultArtist);
+                    mAlbum.setValue(mDefaultAlbum);
                     mIconUri.setValue("");
                     return;
                 }
 
-                mTitle.setValue(musicItem.getTitle());
-                mArtist.setValue(musicItem.getArtist());
+                mTitle.setValue(getMusicTitle(musicItem));
+                mArtist.setValue(getMusicArtist(musicItem));
+                mAlbum.setValue(getMusicAlbum(musicItem));
+
                 mIconUri.setValue(musicItem.getIconUri());
                 mDuration.setValue(getDurationSec());
                 mPlayProgress.setValue(playProgress / 1000);
@@ -332,7 +338,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 是否已完成初始化。
      *
-     * @return 如果返回 false，则必须先调用 {@link #init(PlayerClient, String, String)} 方法进行初始化后
+     * @return 如果返回 false，则必须先调用 {@link #init(Context, PlayerClient)} 方法进行初始化后
      * 才能正常使用当前 {@link PlayerViewModel} 对象
      */
     public boolean isInitialized() {
@@ -367,6 +373,14 @@ public class PlayerViewModel extends ViewModel {
     @NonNull
     public LiveData<String> getArtist() {
         return mArtist;
+    }
+
+    /**
+     * 正在播放的歌曲所属的专辑。
+     */
+    @NonNull
+    public LiveData<String> getAlbum() {
+        return mAlbum;
     }
 
     /**
@@ -719,6 +733,7 @@ public class PlayerViewModel extends ViewModel {
     private void initAllLiveData() {
         mTitle = new MutableLiveData<>(mDefaultTitle);
         mArtist = new MutableLiveData<>(mDefaultArtist);
+        mAlbum = new MutableLiveData<>(mDefaultAlbum);
         mIconUri = new MutableLiveData<>(getIconUri(mPlayerClient));
         mDuration = new MutableLiveData<>(getDurationSec());
         mPlayProgress = new MutableLiveData<>(getPlayProgressSec());
@@ -757,5 +772,35 @@ public class PlayerViewModel extends ViewModel {
         }
 
         return musicItem.getIconUri();
+    }
+
+    private String getMusicTitle(@NonNull MusicItem musicItem) {
+        String title = musicItem.getTitle();
+
+        if (title.isEmpty()) {
+            return mDefaultTitle;
+        }
+
+        return title;
+    }
+
+    private String getMusicArtist(@NonNull MusicItem musicItem) {
+        String artist = musicItem.getArtist();
+
+        if (artist.isEmpty()) {
+            return mDefaultArtist;
+        }
+
+        return artist;
+    }
+
+    private String getMusicAlbum(@NonNull MusicItem musicItem) {
+        String album = musicItem.getAlbum();
+
+        if (album.isEmpty()) {
+            return mDefaultAlbum;
+        }
+
+        return album;
     }
 }
