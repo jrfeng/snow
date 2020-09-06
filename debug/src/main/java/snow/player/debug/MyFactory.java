@@ -35,7 +35,7 @@ public class MyFactory extends PlayerService.ComponentFactory {
                 .writeTimeout(20, TimeUnit.SECONDS)
                 .readTimeout(20, TimeUnit.SECONDS);
 
-        OkHttpUtil.enableTls12OnPreLollipop(builder);
+        OkHttpUtil.enableTls12OnPreLollipop(builder, true);
 
         OkHttpDataSourceFactory httpDataSourceFactory =
                 new OkHttpDataSourceFactory(builder.build(), Util.getUserAgent(context, context.getPackageName()));
