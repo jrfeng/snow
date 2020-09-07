@@ -1329,6 +1329,15 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         notifyPlayingMusicItemPositionChanged(position);
     }
 
+    @Override
+    public void skipToPosition(int position) {
+        if (position == mPlayerState.getPosition()) {
+            return;
+        }
+
+        playPause(position);
+    }
+
     private int getNextPosition(int currentPosition) {
         PlayMode playMode = mPlayerState.getPlayMode();
         if (mConfirmNextPlay || playMode == PlayMode.SEQUENTIAL || playMode == PlayMode.LOOP) {

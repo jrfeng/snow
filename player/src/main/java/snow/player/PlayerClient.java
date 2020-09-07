@@ -691,6 +691,22 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     /**
+     * 播放 position 处的音乐，如果播放列表中 position 处的音乐是当前正在播放的音乐，则忽略本次调用。
+     * <p>
+     * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
+     *
+     * @param position 要播放的音乐的 position 值（从 0 开始计算）。
+     */
+    @Override
+    public void skipToPosition(int position) {
+        if (notConnected()) {
+            return;
+        }
+
+        mPlayer.skipToPosition(position);
+    }
+
+    /**
      * 播放或暂停播放列表中指定索引处的音乐。
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。

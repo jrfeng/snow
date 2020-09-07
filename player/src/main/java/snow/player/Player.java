@@ -54,7 +54,7 @@ public interface Player {
     void rewind();
 
     /**
-     * 下一首音乐。
+     * 下一曲。
      */
     void skipToNext();
 
@@ -64,9 +64,22 @@ public interface Player {
     void skipToPrevious();
 
     /**
+     * 播放 position 处的音乐，如果播放列表中 position 处的音乐是当前正在播放的音乐，则忽略本次调用。
+     * <p>
+     * 该方法与 {@link #playPause(int)} 方法的区别是，如果 position 参数等于当前正在播放的音乐的位置，
+     * {@link #playPause(int)} 方法会暂停播放，而当前方法则是忽略本次调用。
+     *
+     * @param position 要播放的音乐的 position 值（从 0 开始计算）。
+     */
+    void skipToPosition(int position);
+
+    /**
      * 播放/暂停队列中 position 位置处的音乐。
      * <p>
      * 如果 position 不等于当前正在播放的音乐的位置，则播放 position 处的音乐；否则暂停播放。
+     * <p>
+     * 该方法与 {@link #skipToPosition(int)} 方法的区别是，如果 position 参数等于当前正在播放的音乐的位置，
+     * {@link #skipToPosition(int)} 方法则会忽略调用，而当前方法则是会暂停播放。
      */
     void playPause(int position);
 

@@ -1108,7 +1108,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         public void onSkipToQueueItem(long id) {
-            mPlayer.playPause((int) id);
+            mPlayer.skipToPosition((int) id);
         }
 
         @Override
