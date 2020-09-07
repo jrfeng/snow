@@ -13,11 +13,11 @@ import snow.player.PlayerService;
  * 内部的 {@link PlayerClient} 的连接，并释放内部的 {@link PlayerClient} 对象。这样就可以在多个所有者之间共享同一个
  * {@link PlayerClient} 对象。
  * <p>
- * 可以为你的 Application 类增加一个 {@link PlayerClientRc} 成员，程序的其他部分可以通过这个
- * {@link PlayerClientRc} 成员共享同一个 {@link PlayerClient} 对象，这样的话全局只需使用一个
+ * 可以为你的 Application 类增加一个 {@link PlayerClientHelper} 成员，程序的其他部分可以通过这个
+ * {@link PlayerClientHelper} 成员共享同一个 {@link PlayerClient} 对象，这样的话全局只需使用一个
  * {@link PlayerClient} 对象即可。
  */
-public class PlayerClientRc {
+public class PlayerClientHelper {
     private Context mApplicationContext;
     private Class<? extends PlayerService> mPlayerService;
 
@@ -25,21 +25,21 @@ public class PlayerClientRc {
     private int mCount;
 
     /**
-     * 创建一个 {@link PlayerClientRc} 对象。
+     * 创建一个 {@link PlayerClientHelper} 对象。
      *
      * @param context       Context 对象
      * @param playerService PlayerService 或者其子类的 Class 对象
      */
-    public PlayerClientRc(Context context, Class<? extends PlayerService> playerService) {
+    public PlayerClientHelper(Context context, Class<? extends PlayerService> playerService) {
         mApplicationContext = context.getApplicationContext();
         mPlayerService = playerService;
     }
 
     /**
-     * 获取 {@link PlayerClientRc} 内部的 {@link PlayerClient} 对象。如果 {@link PlayerClient} 还
+     * 获取 {@link PlayerClientHelper} 内部的 {@link PlayerClient} 对象。如果 {@link PlayerClient} 还
      * 没有连接，则会调用 {@link PlayerClient#connect()} 自动连接。
      *
-     * @return 返回 {@link PlayerClientRc} 内部的 {@link PlayerClient} 对象，并将计数器 +1。
+     * @return 返回 {@link PlayerClientHelper} 内部的 {@link PlayerClient} 对象，并将计数器 +1。
      * 如果内部的 {@link PlayerClient} 对象不存在或者已被释放，则会创建一个新的 {@link PlayerClient} 对象，
      * 并将计数器设为 1
      */
@@ -48,11 +48,11 @@ public class PlayerClientRc {
     }
 
     /**
-     * 获取 {@link PlayerClientRc} 内部的 {@link PlayerClient} 对象。
+     * 获取 {@link PlayerClientHelper} 内部的 {@link PlayerClient} 对象。
      *
      * @param autoConnect 是否自动连接 {@link PlayerClient}，如果为 true，如果 {@link PlayerClient} 还
      *                    没有连接，则会调用 {@link PlayerClient#connect()} 自动连接
-     * @return 返回 {@link PlayerClientRc} 内部的 {@link PlayerClient} 对象，并将计数器 +1。
+     * @return 返回 {@link PlayerClientHelper} 内部的 {@link PlayerClient} 对象，并将计数器 +1。
      * 如果内部的 {@link PlayerClient} 对象不存在或者已被释放，则会创建一个新的 {@link PlayerClient} 对象，
      * 并将计数器设为 1
      */
