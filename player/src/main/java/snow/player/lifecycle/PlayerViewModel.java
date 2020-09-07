@@ -19,6 +19,7 @@ import snow.player.PlaybackState;
 import snow.player.Player;
 import snow.player.PlayerClient;
 import snow.player.R;
+import snow.player.helper.PlayerClientRc;
 import snow.player.media.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
@@ -30,6 +31,7 @@ import snow.player.util.MusicItemUtil;
  * <b>注意！使用前必须先调用 {@link #init(Context, PlayerClient)} 方法进行初始化。</b>
  */
 public class PlayerViewModel extends ViewModel {
+    private PlayerClientRc mPlayerClientRc;
     private PlayerClient mPlayerClient;
 
     private MutableLiveData<String> mTitle;
@@ -65,7 +67,7 @@ public class PlayerViewModel extends ViewModel {
     private ProgressClock mProgressClock;
 
     private boolean mInitialized;
-    private boolean mDisconnectOnCleared;
+    private boolean mAutoDisconnect;
 
     /**
      * 初始化 PlayerStateViewModel
@@ -127,6 +129,7 @@ public class PlayerViewModel extends ViewModel {
         Preconditions.checkNotNull(playerClient);
         Preconditions.checkNotNull(defaultTitle);
         Preconditions.checkNotNull(defaultArtist);
+        Preconditions.checkNotNull(defaultAlbum);
 
         mPlayerClient = playerClient;
         mDefaultTitle = defaultTitle;
@@ -142,13 +145,52 @@ public class PlayerViewModel extends ViewModel {
         mInitialized = true;
     }
 
+    public void init(@NonNull Context context, @NonNull PlayerClientRc playerClientRc) {
+        init(context, playerClientRc, true);
+    }
+
+    public void init(@NonNull Context context, @NonNull PlayerClientRc playerClientRc, boolean enableProgressClock) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(playerClientRc);
+
+        init(playerClientRc,
+                context.getString(R.string.snow_music_item_unknown_title),
+                context.getString(R.string.snow_music_item_unknown_artist),
+                context.getString(R.string.snow_music_item_unknown_album),
+                enableProgressClock);
+    }
+
+    public void init(@NonNull PlayerClientRc playerClientRc,
+                     @NonNull String defaultTitle,
+                     @NonNull String defaultArtist,
+                     @NonNull String defaultAlbum) {
+        init(playerClientRc, defaultTitle, defaultArtist, defaultAlbum, true);
+    }
+
+    public void init(@NonNull PlayerClientRc playerClientRc,
+                     @NonNull String defaultTitle,
+                     @NonNull String defaultArtist,
+                     @NonNull String defaultAlbum,
+                     boolean enableProgressClock) {
+        Preconditions.checkNotNull(playerClientRc);
+        Preconditions.checkNotNull(defaultTitle);
+        Preconditions.checkNotNull(defaultArtist);
+        Preconditions.checkNotNull(defaultAlbum);
+
+        mPlayerClientRc = playerClientRc;
+        init(mPlayerClientRc.getPlayerClient(), defaultTitle, defaultArtist, defaultAlbum, enableProgressClock);
+    }
+
     /**
-     * 设置是否在 ViewModel 被清理时断开 PlayerClient 的连接。
+     * 设置是否在 ViewModel 被清理时自动断开 PlayerClient 的连接。
+     * <p>
+     * 该方法对使用 {@link PlayerClientRc} 初始化的 {@link PlayerViewModel} 无效，
+     * 例如 {@link #init(PlayerClientRc, String, String, String, boolean)}。
      *
-     * @param disconnectOnCleared 如果为 true，则会在 ViewModel 被清理时断开 PlayerClient 的连接
+     * @param autoDisconnect 如果为 true，则会在 ViewModel 被清理时自动断开 PlayerClient 的连接
      */
-    public void setDisconnectOnCleared(boolean disconnectOnCleared) {
-        mDisconnectOnCleared = disconnectOnCleared;
+    public void setAutoDisconnect(boolean autoDisconnect) {
+        mAutoDisconnect = autoDisconnect;
     }
 
     private void initAllListener() {
@@ -323,17 +365,23 @@ public class PlayerViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
 
-        if (mInitialized && mDisconnectOnCleared) {
+        if (!mInitialized) {
+            return;
+        }
+
+        mInitialized = false;
+        mProgressClock.cancel();
+        mPlaylist.release();
+        removeAllListener();
+
+        if (mPlayerClientRc != null) {
+            mPlayerClientRc.repay();
+        } else if (mAutoDisconnect) {
             mPlayerClient.disconnect();
         }
 
-        if (mInitialized) {
-            mInitialized = false;
-            mProgressClock.cancel();
-            mPlaylist.release();
-            removeAllListener();
-            mPlayerClient = null;
-        }
+        mPlayerClientRc = null;
+        mPlayerClient = null;
     }
 
     /**

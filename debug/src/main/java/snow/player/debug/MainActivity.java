@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         mPlayerClient = PlayerClient.newInstance(this, PlayerService.class);
         playerViewModel.init(this, mPlayerClient);
-        playerViewModel.setDisconnectOnCleared(true);
+        playerViewModel.setAutoDisconnect(true);
     }
 
     @SuppressLint("SetTextI18n")
