@@ -10,11 +10,12 @@ import snow.player.PlayerService;
  * <p>
  * 该帮助类内部维护了一个引用计数器和一个 {@link PlayerClient} 对象，每当调用一次 {@link #getPlayerClient()}
  * 方法时，计数器会 +1；每当调用一次 {@link #repay()} 方法时，计数器会 -1。当计数器小于等于 0 时，会自动断开
- * 内部的 {@link PlayerClient} 的连接，并释放内部的 {@link PlayerClient} 对象。这样全局只需使用一个
- * {@link PlayerClient} 对象即可。
+ * 内部的 {@link PlayerClient} 的连接，并释放内部的 {@link PlayerClient} 对象。这样就可以在多个所有者之间共享同一个
+ * {@link PlayerClient} 对象。
  * <p>
  * 可以为你的 Application 类增加一个 {@link PlayerClientRc} 成员，程序的其他部分可以通过这个
- * {@link PlayerClientRc} 成员共享同一个 {@link PlayerClient} 对象。
+ * {@link PlayerClientRc} 成员共享同一个 {@link PlayerClient} 对象，这样的话全局只需使用一个
+ * {@link PlayerClient} 对象即可。
  */
 public class PlayerClientRc {
     private Context mApplicationContext;
@@ -76,6 +77,10 @@ public class PlayerClientRc {
      * {@link PlayerClient} 的连接，并释放掉内部的 {@link PlayerClient} 对象。
      */
     public synchronized void repay() {
+        if (mCount <= 0) {
+            return;
+        }
+
         mCount -= 1;
         if (mCount <= 0) {
             mPlayerClient.disconnect();
