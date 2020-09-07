@@ -157,7 +157,7 @@ public class VolumeEaseHelper {
         long volumeAnimDuration = 400L;
 
         mStartVolumeAnimator = ObjectAnimator.ofFloat(this, "volume", 0.0F, 1.0F);
-        mStartVolumeAnimator.setDuration(volumeAnimDuration);
+        mStartVolumeAnimator.setDuration(1000L);
         mStartVolumeAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationCancel(Animator animation) {
