@@ -28,7 +28,7 @@ import snow.player.util.MusicItemUtil;
 /**
  * 播放器 ViewModel，支持 DataBinding。
  * <p>
- * <b>注意！使用前必须先调用 {@link #init(Context, PlayerClient)} 方法进行初始化。</b>
+ * <b>注意！使用前必须先调用 {@link PlayerViewModel} 对象的任意一个 init 方法进行初始化。</b>
  */
 public class PlayerViewModel extends ViewModel {
     private PlayerClientRc mPlayerClientRc;
