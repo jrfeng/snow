@@ -70,26 +70,37 @@ public class PlayerViewModel extends ViewModel {
     private boolean mAutoDisconnect;
 
     /**
-     * 初始化 PlayerStateViewModel
+     * 初始化 {@link PlayerViewModel} 对象。
      * <p>
-     * 默认启用了进度条时钟。
+     * 默认启用了进度条时钟（用于实时更新播放进度）。
+     * <p>
+     * 默认标题为 "未知标题"；默认歌手为 "未知歌手"；默认专辑为 "未知专辑"。这些默认值会在正在播放的
+     * {@link MusicItem} 对应的字段为空时展示。
      *
-     * @param playerClient PlayerClient 对象
+     * @param context      Context 对象，不能为 null
+     * @param playerClient PlayerClient 对象，不能为 null
      */
     public void init(@NonNull Context context, @NonNull PlayerClient playerClient) {
         Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(playerClient);
+
         init(context, playerClient, true);
     }
 
     /**
-     * 初始化 PlayerStateViewModel
+     * 初始化 {@link PlayerViewModel} 对象。
      * <p>
-     * 默认启用了进度条时钟。
+     * 默认标题为 "未知标题"；默认歌手为 "未知歌手"；默认专辑为 "未知专辑"。这些默认值会在正在播放的
+     * {@link MusicItem} 对应的字段为空时展示。
      *
-     * @param playerClient PlayerClient 对象
+     * @param context             Context 对象，不能为 null
+     * @param playerClient        PlayerClient 对象，不能为 null
+     * @param enableProgressClock 是否启用进度条时钟（用于实时更新播放进度）
      */
     public void init(@NonNull Context context, @NonNull PlayerClient playerClient, boolean enableProgressClock) {
         Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(playerClient);
+
         init(playerClient,
                 context.getString(R.string.snow_music_item_unknown_title),
                 context.getString(R.string.snow_music_item_unknown_artist),
@@ -98,28 +109,35 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 初始化 PlayerStateViewModel
+     * 初始化 {@link PlayerViewModel} 对象。
      * <p>
-     * 默认启用了进度条时钟。
+     * 默认启用了进度条时钟（用于实时更新播放进度）。
      *
-     * @param playerClient  PlayerClient 对象
-     * @param defaultTitle  默认标题
-     * @param defaultArtist 默认艺术家
+     * @param playerClient  PlayerClient 对象，不能为 null
+     * @param defaultTitle  默认标题，会在正在播放的歌曲的标题为空时展示，不能为 null
+     * @param defaultArtist 默认艺术家，会在正在播放的歌曲的艺术家为空时展示，不能为 null
+     * @param defaultAlbum  默认专辑，会在正在播放的歌曲的专辑为空时展示，不能为 null
      */
     public void init(@NonNull PlayerClient playerClient,
                      @NonNull String defaultTitle,
                      @NonNull String defaultArtist,
                      @NonNull String defaultAlbum) {
+        Preconditions.checkNotNull(playerClient);
+        Preconditions.checkNotNull(defaultTitle);
+        Preconditions.checkNotNull(defaultArtist);
+        Preconditions.checkNotNull(defaultAlbum);
+
         init(playerClient, defaultTitle, defaultArtist, defaultAlbum, true);
     }
 
     /**
-     * 初始化 PlayerStateViewModel
+     * 初始化 {@link PlayerViewModel} 对象。
      *
-     * @param playerClient        PlayerClient 对象
-     * @param defaultTitle        默认标题
-     * @param defaultArtist       默认艺术家
-     * @param enableProgressClock 是否启用进度条时钟
+     * @param playerClient        PlayerClient 对象，不能为 null
+     * @param defaultTitle        默认标题，会在正在播放的歌曲的标题为空时展示，不能为 null
+     * @param defaultArtist       默认艺术家，会在正在播放的歌曲的艺术家为空时展示，不能为 null
+     * @param defaultAlbum        默认专辑，会在正在播放的歌曲的专辑为空时展示，不能为 null
+     * @param enableProgressClock 是否启用进度条时钟（用于实时更新播放进度）
      */
     public void init(@NonNull PlayerClient playerClient,
                      @NonNull String defaultTitle,
@@ -145,10 +163,34 @@ public class PlayerViewModel extends ViewModel {
         mInitialized = true;
     }
 
+    /**
+     * 初始化 {@link PlayerViewModel} 对象。
+     * <p>
+     * 默认启动了进度条时钟（用于实时更新播放进度）。
+     * <p>
+     * 默认标题为 "未知标题"；默认歌手为 "未知歌手"；默认专辑为 "未知专辑"。这些默认值会在正在播放的
+     * {@link MusicItem} 对应的字段为空（empty）时展示。
+     *
+     * @param context        Context 对象，不能为 null
+     * @param playerClientRc {@link PlayerClientRc} 对象，不能为 null
+     */
     public void init(@NonNull Context context, @NonNull PlayerClientRc playerClientRc) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(playerClientRc);
+
         init(context, playerClientRc, true);
     }
 
+    /**
+     * 初始化 {@link PlayerViewModel} 对象。
+     * <p>
+     * 默认标题为 "未知标题"；默认歌手为 "未知歌手"；默认专辑为 "未知专辑"。这些默认值会在正在播放的
+     * {@link MusicItem} 对应的字段为空时展示。
+     *
+     * @param context             Context 对象，不能为 null
+     * @param playerClientRc      {@link PlayerClientRc} 对象，不能为 null
+     * @param enableProgressClock 是否启用进度条时钟（用于实时更新播放进度）
+     */
     public void init(@NonNull Context context, @NonNull PlayerClientRc playerClientRc, boolean enableProgressClock) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerClientRc);
@@ -160,13 +202,37 @@ public class PlayerViewModel extends ViewModel {
                 enableProgressClock);
     }
 
+    /**
+     * 初始化 {@link PlayerViewModel} 对象。
+     * <p>
+     * 默认启用了进度条时钟（用于实时更新播放进度）。
+     *
+     * @param playerClientRc {@link PlayerClientRc} 对象，不能为 null
+     * @param defaultTitle   默认标题，会在正在播放的歌曲的标题为空时展示，不能为 null
+     * @param defaultArtist  默认艺术家，会在正在播放的歌曲的艺术家为空时展示，不能为 null
+     * @param defaultAlbum   默认专辑，会在正在播放的歌曲的专辑为空时展示，不能为 null
+     */
     public void init(@NonNull PlayerClientRc playerClientRc,
                      @NonNull String defaultTitle,
                      @NonNull String defaultArtist,
                      @NonNull String defaultAlbum) {
+        Preconditions.checkNotNull(playerClientRc);
+        Preconditions.checkNotNull(defaultTitle);
+        Preconditions.checkNotNull(defaultArtist);
+        Preconditions.checkNotNull(defaultAlbum);
+
         init(playerClientRc, defaultTitle, defaultArtist, defaultAlbum, true);
     }
 
+    /**
+     * 初始化 {@link PlayerViewModel} 对象。
+     *
+     * @param playerClientRc      {@link PlayerClientRc} 对象，不能为 null
+     * @param defaultTitle        默认标题，会在正在播放的歌曲的标题为空时展示，不能为 null
+     * @param defaultArtist       默认艺术家，会在正在播放的歌曲的艺术家为空时展示，不能为 null
+     * @param defaultAlbum        默认专辑，会在正在播放的歌曲的专辑为空时展示，不能为 null
+     * @param enableProgressClock 是否启用进度条时钟（用于实时更新播放进度）
+     */
     public void init(@NonNull PlayerClientRc playerClientRc,
                      @NonNull String defaultTitle,
                      @NonNull String defaultArtist,
