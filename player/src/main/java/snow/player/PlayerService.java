@@ -324,7 +324,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     private void initMediaSession() {
         mMediaSession = new MediaSessionCompat(this, this.getClass().getName());
         mPlayer.setMediaSession(mMediaSession);
-        mMediaSession.setCallback(new MediaSessionCallbackImp());
+
+        mMediaSession.setCallback(onCreateMediaSessionCallback());
+
         setSessionToken(mMediaSession.getSessionToken());
     }
 
@@ -347,6 +349,20 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private void initHistoryRecorder() {
         mHistoryRecorder = createHistoryRecorder();
+    }
+
+    /**
+     * 创建一个 {@link MediaSessionCallback} 对象。
+     * <p>
+     * 如果你需要对 MediaSession 框架的 MediaSessionCompat.Callback 进行定制，则可以覆盖该方法并返回一个
+     * {@link MediaSessionCallback} 对象。{@link MediaSessionCallback} 类继承了
+     * MediaSessionCompat.Callback 类。
+     *
+     * @see MediaSessionCallback
+     */
+    @NonNull
+    protected MediaSessionCallback onCreateMediaSessionCallback() {
+        return new MediaSessionCallback(this);
     }
 
     @Nullable
@@ -1035,10 +1051,45 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
     }
 
-    private class MediaSessionCallbackImp extends MediaSessionCompat.Callback {
+    /**
+     * 该类继承了 MediaSessionCompat.Callback 类，如果你需要对 MediaSession 框架的
+     * 的 MediaSessionCompat.Callback 进行定制，则可以覆盖 {@link #onCreateMediaSessionCallback()} 方法，
+     * 并返回一个自定义的 {@link MediaSessionCallback} 实现。
+     * <p>
+     * 注意！在覆盖 {@link MediaSessionCallback} 的方法时，使用 {@code super.xxx} 回调超类被覆盖的方法，
+     * 因为 {@link PlayerService} 的部分功能依赖这些方法。如果没有使用 {@code super.xxx}
+     * 回调超类被覆盖的方法，则这部分功能将无法正常工作。
+     *
+     * @see #onCreateMediaSessionCallback()
+     */
+    public static class MediaSessionCallback extends MediaSessionCompat.Callback {
+        private PlayerService mPlayerService;
+        private Player mPlayer;
+
+        public MediaSessionCallback(@NonNull PlayerService playerService) {
+            Preconditions.checkNotNull(playerService);
+            mPlayerService = playerService;
+            mPlayer = mPlayerService.getPlayer();
+        }
+
+        /**
+         * 获取当前 {@link MediaSessionCallback} 关联到的 {@link PlayerService} 对象。
+         */
+        @NonNull
+        public PlayerService getPlayerService() {
+            return mPlayerService;
+        }
+
+        /**
+         * 获取播放器的 {@link Player} 对象。用于对播放器进行控制。
+         */
+        public Player getPlayer() {
+            return mPlayer;
+        }
+
         @Override
         public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
-            if (PlayerService.this.onMediaButtonEvent(mediaButtonEvent)) {
+            if (mPlayerService.onMediaButtonEvent(mediaButtonEvent)) {
                 return true;
             }
 
@@ -1047,12 +1098,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         public void onCustomAction(String action, Bundle extras) {
-            PlayerService.this.onCustomAction(action, extras);
+            mPlayerService.onCustomAction(action, extras);
         }
 
         @Override
         public void onPlay() {
-            PlayerService.this.getPlayer().play();
+            mPlayer.play();
         }
 
         @Override
@@ -1062,37 +1113,37 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         public void onPause() {
-            PlayerService.this.getPlayer().pause();
+            mPlayer.pause();
         }
 
         @Override
         public void onSkipToNext() {
-            PlayerService.this.getPlayer().skipToNext();
+            mPlayer.skipToNext();
         }
 
         @Override
         public void onSkipToPrevious() {
-            PlayerService.this.getPlayer().skipToPrevious();
+            mPlayer.skipToPrevious();
         }
 
         @Override
         public void onFastForward() {
-            PlayerService.this.getPlayer().fastForward();
+            mPlayer.fastForward();
         }
 
         @Override
         public void onRewind() {
-            PlayerService.this.getPlayer().rewind();
+            mPlayer.rewind();
         }
 
         @Override
         public void onStop() {
-            PlayerService.this.getPlayer().stop();
+            mPlayer.stop();
         }
 
         @Override
         public void onSeekTo(long pos) {
-            PlayerService.this.getPlayer().seekTo((int) pos);
+            mPlayer.seekTo((int) pos);
         }
 
         @Override
@@ -1963,4 +2014,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          */
         void doAction(@NonNull Player player, @Nullable Bundle extras);
     }
+
+
 }
