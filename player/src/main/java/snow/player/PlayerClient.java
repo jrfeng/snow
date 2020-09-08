@@ -1991,7 +1991,7 @@ public class PlayerClient implements Player, PlaylistEditor {
 
         @Override
         public void onPositionChanged(int position) {
-            mPlayerStateHelper.onPositionChanged(position);
+            mPlayerStateHelper.onPlayPositionChanged(position);
 
             notifyPositionChanged();
         }

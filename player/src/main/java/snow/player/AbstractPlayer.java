@@ -1257,7 +1257,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
     }
 
     private void notifyPlayingMusicItemPositionChanged(int position) {
-        mPlayerStateHelper.onPositionChanged(position);
+        mPlayerStateHelper.onPlayPositionChanged(position);
 
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onPositionChanged(position);
@@ -1463,7 +1463,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
             playPosition += 1;
         }
 
-        mPlayerStateHelper.onPositionChanged(playPosition);
+        mPlayerStateHelper.onPlayPositionChanged(playPosition);
     }
 
     private void onMusicItemInserted(int position) {
@@ -1473,7 +1473,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
             playPosition += 1;
         }
 
-        mPlayerStateHelper.onPositionChanged(playPosition);
+        mPlayerStateHelper.onPlayPositionChanged(playPosition);
     }
 
     private void onMusicItemRemoved(int removePosition) {
@@ -1485,7 +1485,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
             playPosition = getNextPosition(playPosition - 1);
         }
 
-        mPlayerStateHelper.onPositionChanged(playPosition);
+        mPlayerStateHelper.onPlayPositionChanged(playPosition);
     }
 
     private boolean notInRegion(int position, int fromPosition, int toPosition) {

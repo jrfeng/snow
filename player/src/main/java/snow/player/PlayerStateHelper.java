@@ -189,7 +189,7 @@ class PlayerStateHelper {
         }
     }
 
-    public void onPositionChanged(int position) {
+    public void onPlayPositionChanged(int position) {
         mPlayerState.setPlayPosition(position);
     }
 }
