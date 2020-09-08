@@ -269,6 +269,9 @@ public class PlayerViewModel extends ViewModel {
                     mArtist.setValue(mDefaultArtist);
                     mAlbum.setValue(mDefaultAlbum);
                     mIconUri.setValue("");
+                    mDuration.setValue(0);
+                    mPlayProgress.setValue(0);
+                    mBufferedProgress.setValue(0);
                     return;
                 }
 
