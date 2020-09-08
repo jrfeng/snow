@@ -650,7 +650,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
                     .build();
         }
 
-        return null;
+        return new MediaMetadataCompat.Builder().build();
     }
 
     private void attachListeners(MusicPlayer musicPlayer) {
@@ -924,6 +924,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onPlayingMusicItemChanged(musicItem, mPlayerState.getPlayProgress());
         }
+
+        notifyBufferedChanged(0, false);
 
         if (play) {
             play();
@@ -1446,58 +1448,44 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
     }
 
     private void onMusicItemMoved(int fromPosition, int toPosition) {
-        int position = mPlayerState.getPosition();
-        if (notInRegion(position, fromPosition, toPosition)) {
-            notifyPlaylistChanged(position);
+        int playPosition = mPlayerState.getPosition();
+        if (notInRegion(playPosition, fromPosition, toPosition)) {
+            notifyPlaylistChanged(playPosition);
             reloadPlaylist();
             return;
         }
 
-        if (fromPosition < position) {
-            position -= 1;
-        } else if (fromPosition == position) {
-            position = toPosition;
+        if (fromPosition < playPosition) {
+            playPosition -= 1;
+        } else if (fromPosition == playPosition) {
+            playPosition = toPosition;
         } else {
-            position += 1;
+            playPosition += 1;
         }
 
-        notifyPlaylistChanged(position);
+        mPlayerStateHelper.onPositionChanged(playPosition);
     }
 
     private void onMusicItemInserted(int position) {
-        int playingPosition = mPlayerState.getPosition();
+        int playPosition = mPlayerState.getPosition();
 
-        if (position <= playingPosition) {
-            playingPosition += 1;
+        if (position <= playPosition) {
+            playPosition += 1;
         }
 
-        notifyPlaylistChanged(playingPosition);
+        mPlayerStateHelper.onPositionChanged(playPosition);
     }
 
-    private void onMusicItemRemoved(final MusicItem musicItem) {
-        int removePosition = mPlaylist.indexOf(musicItem);
-        if (removePosition < 0) {
-            return;
+    private void onMusicItemRemoved(int removePosition) {
+        int playPosition = mPlayerState.getPosition();
+
+        if (removePosition < playPosition) {
+            playPosition -= 1;
+        } else if (removePosition == playPosition) {
+            playPosition = getNextPosition(playPosition - 1);
         }
 
-        if (getPlaylistSize() < 1) {
-            notifyPlaylistChanged(-1);
-            reloadPlaylist(true, false);
-            return;
-        }
-
-        int position = mPlayerState.getPosition();
-
-        if (removePosition < position) {
-            position -= 1;
-        } else if (removePosition == position) {
-            position = getNextPosition(position - 1);
-            notifyPlayingMusicItemPositionChanged(position);
-            reloadPlaylist(true, isPlaying());
-            return;
-        }
-
-        notifyPlaylistChanged(position);
+        mPlayerStateHelper.onPositionChanged(playPosition);
     }
 
     private boolean notInRegion(int position, int fromPosition, int toPosition) {
@@ -1553,8 +1541,13 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         musicItems.add(position, musicItem);
 
-        updatePlaylist(musicItems);
         onMusicItemInserted(position);
+        updatePlaylist(musicItems, new Runnable() {
+            @Override
+            public void run() {
+                notifyPlaylistChanged(mPlayerState.getPosition());
+            }
+        });
     }
 
     @Override
@@ -1578,13 +1571,19 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
             return;
         }
 
+        int position = Math.min(toPosition, mPlaylist.size() - 1);
         List<MusicItem> musicItems = mPlaylist.getAllMusicItem();
 
         MusicItem from = musicItems.remove(fromPosition);
-        musicItems.add(toPosition, from);
+        musicItems.add(position, from);
 
-        updatePlaylist(musicItems);
-        onMusicItemMoved(fromPosition, toPosition);
+        onMusicItemMoved(fromPosition, position);
+        updatePlaylist(musicItems, new Runnable() {
+            @Override
+            public void run() {
+                notifyPlaylistChanged(mPlayerState.getPosition());
+            }
+        });
     }
 
     @Override
@@ -1604,10 +1603,28 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
             return;
         }
 
+        final int index = musicItems.indexOf(musicItem);
+        final int playPosition = mPlayerState.getPosition();
+
         musicItems.remove(musicItem);
 
-        updatePlaylist(musicItems);
-        onMusicItemRemoved(musicItem);
+        onMusicItemRemoved(index);
+        updatePlaylist(musicItems, new Runnable() {
+            @Override
+            public void run() {
+                notifyPlaylistChanged(mPlayerState.getPosition());
+
+                if (mPlaylist.size() < 1) {
+                    notifyPlayingMusicItemChanged(null, false);
+                    notifyStopped();
+                    return;
+                }
+
+                if (index == playPosition) {
+                    notifyPlayingMusicItemChanged(mPlaylist.get(playPosition), isPlaying());
+                }
+            }
+        });
     }
 
     @Override
@@ -1630,8 +1647,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         mConfirmNextPlay = true;
     }
 
-    private void updatePlaylist(List<MusicItem> musicItems) {
+    private void updatePlaylist(List<MusicItem> musicItems, Runnable doOnSaved) {
         mPlaylist = new Playlist(musicItems);
-        mPlaylistManager.save(mPlaylist, null);
+        mPlaylistManager.save(mPlaylist, doOnSaved);
     }
 }
