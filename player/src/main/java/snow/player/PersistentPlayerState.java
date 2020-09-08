@@ -16,7 +16,7 @@ import snow.player.media.MusicItem;
 class PersistentPlayerState extends PlayerState {
     private static final String KEY_PLAY_PROGRESS = "play_progress";
     private static final String KEY_MUSIC_ITEM = "music_item";
-    private static final String KEY_POSITION = "position";
+    private static final String KEY_PLAY_POSITION = "position";
     private static final String KEY_PLAY_MODE = "play_mode";
 
     private MMKV mMMKV;
@@ -31,7 +31,7 @@ class PersistentPlayerState extends PlayerState {
 
         super.setPlayProgress(mMMKV.decodeInt(KEY_PLAY_PROGRESS, 0));
         super.setMusicItem(mMMKV.decodeParcelable(KEY_MUSIC_ITEM, MusicItem.class));
-        super.setPlayPosition(mMMKV.decodeInt(KEY_POSITION, 0));
+        super.setPlayPosition(mMMKV.decodeInt(KEY_PLAY_POSITION, 0));
         super.setPlayMode(PlayMode.values()[mMMKV.decodeInt(KEY_PLAY_MODE, 0)]);
     }
 
@@ -63,7 +63,7 @@ class PersistentPlayerState extends PlayerState {
     public void setPlayPosition(int playPosition) {
         super.setPlayPosition(playPosition);
 
-        mMMKV.encode(KEY_POSITION, playPosition);
+        mMMKV.encode(KEY_PLAY_POSITION, playPosition);
     }
 
     @Override
