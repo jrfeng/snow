@@ -1732,6 +1732,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setPriority(NotificationCompat.PRIORITY_LOW)
                     .setShowWhen(false)
+                    .setAutoCancel(false)
                     .setStyle(mediaStyle);
 
             onBuildNotification(builder);
