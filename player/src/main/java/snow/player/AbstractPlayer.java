@@ -1206,10 +1206,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
     }
 
     private void reloadPlaylist() {
-        reloadPlaylist(false, false);
-    }
-
-    private void reloadPlaylist(final boolean playingMusicChanged, final boolean play) {
         mLoadingPlaylist = true;
         mPlaylistManager.getPlaylist(new PlaylistManager.Callback() {
             @Override
@@ -1220,15 +1216,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
                 mPlaylist = playlist;
                 mLoadingPlaylist = false;
-
-                if (playingMusicChanged) {
-                    MusicItem musicItem = null;
-                    if (mPlaylist.size() > 0) {
-                        musicItem = mPlaylist.get(mPlayerState.getPlayPosition());
-                    }
-
-                    notifyPlayingMusicItemChanged(musicItem, play);
-                }
 
                 if (mPlaylistLoadedAction != null) {
                     mPlaylistLoadedAction.run();
@@ -1451,7 +1438,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         int playPosition = mPlayerState.getPlayPosition();
         if (notInRegion(playPosition, fromPosition, toPosition)) {
             notifyPlaylistChanged(playPosition);
-            reloadPlaylist();
             return;
         }
 
