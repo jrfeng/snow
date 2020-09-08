@@ -1081,6 +1081,13 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
+         * 获取播放器的 MediaSessionCompat 对象。
+         */
+        public MediaSessionCompat getMediaSession() {
+            return mPlayerService.getMediaSession();
+        }
+
+        /**
          * 获取播放器的 {@link Player} 对象。用于对播放器进行控制。
          */
         public Player getPlayer() {
