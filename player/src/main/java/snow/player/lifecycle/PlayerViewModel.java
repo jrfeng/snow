@@ -271,7 +271,6 @@ public class PlayerViewModel extends ViewModel {
                     mIconUri.setValue("");
                     mDuration.setValue(0);
                     mPlayProgress.setValue(0);
-                    mBufferedProgress.setValue(0);
                     return;
                 }
 
@@ -282,7 +281,6 @@ public class PlayerViewModel extends ViewModel {
                 mIconUri.setValue(musicItem.getIconUri());
                 mDuration.setValue(getDurationSec());
                 mPlayProgress.setValue(playProgress / 1000);
-                mBufferedProgress.setValue(0);
             }
         };
 
