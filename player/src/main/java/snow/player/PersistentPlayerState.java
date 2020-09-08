@@ -31,7 +31,7 @@ class PersistentPlayerState extends PlayerState {
 
         super.setPlayProgress(mMMKV.decodeInt(KEY_PLAY_PROGRESS, 0));
         super.setMusicItem(mMMKV.decodeParcelable(KEY_MUSIC_ITEM, MusicItem.class));
-        super.setPosition(mMMKV.decodeInt(KEY_POSITION, 0));
+        super.setPlayPosition(mMMKV.decodeInt(KEY_POSITION, 0));
         super.setPlayMode(PlayMode.values()[mMMKV.decodeInt(KEY_PLAY_MODE, 0)]);
     }
 
@@ -60,10 +60,10 @@ class PersistentPlayerState extends PlayerState {
     }
 
     @Override
-    public void setPosition(int position) {
-        super.setPosition(position);
+    public void setPlayPosition(int playPosition) {
+        super.setPlayPosition(playPosition);
 
-        mMMKV.encode(KEY_POSITION, position);
+        mMMKV.encode(KEY_POSITION, playPosition);
     }
 
     @Override

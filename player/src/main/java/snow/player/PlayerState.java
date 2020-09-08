@@ -20,7 +20,7 @@ class PlayerState implements Parcelable {
     private int playProgress;
     @Nullable
     private MusicItem musicItem;
-    private int position;
+    private int playPosition;
     private PlayMode playMode;
 
     // no persistent
@@ -37,7 +37,7 @@ class PlayerState implements Parcelable {
     public PlayerState() {
         playProgress = 0;
         playProgressUpdateTime = 0;
-        position = 0;
+        playPosition = 0;
         playMode = PlayMode.SEQUENTIAL;
 
         playbackState = PlaybackState.NONE;
@@ -56,7 +56,7 @@ class PlayerState implements Parcelable {
         if (source.musicItem != null) {
             musicItem = new MusicItem(source.musicItem);
         }
-        position = source.position;
+        playPosition = source.playPosition;
         playMode = source.playMode;
 
         playbackState = source.playbackState;
@@ -131,22 +131,22 @@ class PlayerState implements Parcelable {
      *
      * @return 播放队列的播放位置。
      */
-    public int getPosition() {
-        return position;
+    public int getPlayPosition() {
+        return playPosition;
     }
 
     /**
      * 设置播放队列的播放位置。
      *
-     * @param position 播放队列的播放位置（小于 0 时相当于设置为 0）。
+     * @param playPosition 播放队列的播放位置（小于 0 时相当于设置为 0）。
      */
-    public void setPosition(int position) {
-        if (position < 0) {
-            this.position = 0;
+    public void setPlayPosition(int playPosition) {
+        if (playPosition < 0) {
+            this.playPosition = 0;
             return;
         }
 
-        this.position = position;
+        this.playPosition = playPosition;
     }
 
     /**
@@ -357,7 +357,7 @@ class PlayerState implements Parcelable {
         return Objects.equal(playProgress, other.playProgress)
                 && Objects.equal(playProgressUpdateTime, other.playProgressUpdateTime)
                 && Objects.equal(musicItem, other.musicItem)
-                && Objects.equal(position, other.position)
+                && Objects.equal(playPosition, other.playPosition)
                 && Objects.equal(playMode, other.playMode)
                 && Objects.equal(playbackState, other.playbackState)
                 && Objects.equal(preparing, other.preparing)
@@ -374,7 +374,7 @@ class PlayerState implements Parcelable {
         return Objects.hashCode(playProgress,
                 playProgressUpdateTime,
                 musicItem,
-                position,
+                playPosition,
                 playMode,
                 playbackState,
                 preparing,
@@ -393,7 +393,7 @@ class PlayerState implements Parcelable {
                 "playProgress=" + playProgress +
                 ", playProgressUpdateTime=" + playProgressUpdateTime +
                 ", musicItem=" + musicItem +
-                ", position=" + position +
+                ", playPosition=" + playPosition +
                 ", playMode=" + playMode +
                 ", playbackState=" + playbackState +
                 ", preparing=" + preparing +
@@ -410,7 +410,7 @@ class PlayerState implements Parcelable {
         playProgress = in.readInt();
         playProgressUpdateTime = in.readLong();
         musicItem = in.readParcelable(Thread.currentThread().getContextClassLoader());
-        position = in.readInt();
+        playPosition = in.readInt();
         playMode = PlayMode.values()[in.readInt()];
 
         playbackState = PlaybackState.values()[in.readInt()];
@@ -428,7 +428,7 @@ class PlayerState implements Parcelable {
         dest.writeInt(playProgress);
         dest.writeLong(playProgressUpdateTime);
         dest.writeParcelable(musicItem, flags);
-        dest.writeInt(position);
+        dest.writeInt(playPosition);
         dest.writeInt(playMode.ordinal());
 
         dest.writeInt(playbackState.ordinal());

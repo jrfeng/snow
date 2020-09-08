@@ -34,13 +34,13 @@ public class PersistentPlayerStateTest {
         PersistentPlayerState persistentPlayerState = new PersistentPlayerState(getContext(), id);
         persistentPlayerState.setPlayProgress(playProgress);
         persistentPlayerState.setMusicItem(musicItem);
-        persistentPlayerState.setPosition(position);
+        persistentPlayerState.setPlayPosition(position);
         persistentPlayerState.setPlayMode(playMode);
 
         PersistentPlayerState other = new PersistentPlayerState(getContext(), id);
         assertEquals(playProgress, other.getPlayProgress());
         assertEquals(musicItem, other.getMusicItem());
-        assertEquals(position, other.getPosition());
+        assertEquals(position, other.getPlayPosition());
         assertEquals(playMode, other.getPlayMode());
     }
 }

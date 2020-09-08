@@ -176,7 +176,7 @@ class PlayerStateHelper {
     }
 
     public void onPlaylistChanged(int position) {
-        mPlayerState.setPosition(position);
+        mPlayerState.setPlayPosition(position);
     }
 
     public void onPlayModeChanged(PlayMode playMode) {
@@ -190,6 +190,6 @@ class PlayerStateHelper {
     }
 
     public void onPositionChanged(int position) {
-        mPlayerState.setPosition(position);
+        mPlayerState.setPlayPosition(position);
     }
 }

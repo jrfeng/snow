@@ -23,7 +23,7 @@ public class PlayerStateTest {
 
         assertEquals(0, playerState.getPlayProgress());
         assertEquals(0,playerState.getPlayProgressUpdateTime());
-        assertEquals(0, playerState.getPosition());
+        assertEquals(0, playerState.getPlayPosition());
         assertEquals(PlayMode.SEQUENTIAL, playerState.getPlayMode());
 
         assertEquals(PlaybackState.NONE, playerState.getPlaybackState());
@@ -42,7 +42,7 @@ public class PlayerStateTest {
         source.setPlayProgress(1000);
         source.setPlayProgressUpdateTime(SystemClock.elapsedRealtime());
         source.setMusicItem(new MusicItem());
-        source.setPosition(15);
+        source.setPlayPosition(15);
         source.setPlayMode(PlayMode.LOOP);
         source.setPlaybackState(PlaybackState.ERROR);
         source.setPreparing(false);
@@ -95,7 +95,7 @@ public class PlayerStateTest {
         playerState.setPlayProgress(playProgress);
         playerState.setPlayProgressUpdateTime(playProgressUpdateTime);
         playerState.setMusicItem(musicItem);
-        playerState.setPosition(position);
+        playerState.setPlayPosition(position);
         playerState.setPlayMode(playMode);
         playerState.setPlaybackState(playbackState);
         playerState.setPreparing(preparing);
@@ -110,7 +110,7 @@ public class PlayerStateTest {
         other1.setPlayProgress(playProgress);
         other1.setPlayProgressUpdateTime(playProgressUpdateTime);
         other1.setMusicItem(musicItem);
-        other1.setPosition(position);
+        other1.setPlayPosition(position);
         other1.setPlayMode(playMode);
         other1.setPlaybackState(playbackState);
         other1.setPreparing(preparing);
@@ -154,7 +154,7 @@ public class PlayerStateTest {
         playerState.setPlayProgress(playProgress);
         playerState.setPlayProgressUpdateTime(playProgressUpdateTime);
         playerState.setMusicItem(musicItem);
-        playerState.setPosition(position);
+        playerState.setPlayPosition(position);
         playerState.setPlayMode(playMode);
         playerState.setPlaybackState(playbackState);
         playerState.setPreparing(preparing);

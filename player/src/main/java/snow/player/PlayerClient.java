@@ -659,7 +659,7 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @return 当前播放列表的播放位置
      */
     public int getPlayPosition() {
-        return mPlayerStateHolder.mPlayerState.getPosition();
+        return mPlayerStateHolder.mPlayerState.getPlayPosition();
     }
 
     /**
@@ -1809,7 +1809,7 @@ public class PlayerClient implements Player, PlaylistEditor {
                 return;
             }
 
-            listener.onPlaylistChanged(mPlaylistManager, mPlayerState.getPosition());
+            listener.onPlaylistChanged(mPlaylistManager, mPlayerState.getPlayPosition());
         }
 
         private void notifyPlaylistChanged() {
@@ -1845,7 +1845,7 @@ public class PlayerClient implements Player, PlaylistEditor {
                 return;
             }
 
-            listener.onPositionChanged(mPlayerState.getPosition());
+            listener.onPositionChanged(mPlayerState.getPlayPosition());
         }
 
         private void notifyPositionChanged() {
