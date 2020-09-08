@@ -1243,14 +1243,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
         return getRandomPosition(exclude);
     }
 
-    private void notifyPlayPositionChanged(int position) {
-        mPlayerStateHelper.onPlayPositionChanged(position);
-
-        if (mPlayerStateListener != null) {
-            mPlayerStateListener.onPositionChanged(position);
-        }
-    }
-
     private void notifyPlayModeChanged(PlayMode playMode) {
         mPlayerStateHelper.onPlayModeChanged(playMode);
 
@@ -1266,8 +1258,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
             // 注意！playlistManager 参数为 null，客户端接收到该事件后，应该将其替换为自己的 PlaylistManager 对象
             mPlayerStateListener.onPlaylistChanged(null, position);
         }
-
-        notifyPlayPositionChanged(position);
     }
 
     /**
@@ -1317,7 +1307,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT));
         notifyPlayingMusicItemChanged(mPlaylist.get(position), position, true);
-        notifyPlayPositionChanged(position);
     }
 
     @Override
@@ -1363,7 +1352,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS));
         notifyPlayingMusicItemChanged(mPlaylist.get(position), position, true);
-        notifyPlayPositionChanged(position);
     }
 
     private int getPreviousPosition(int currentPosition) {
@@ -1404,7 +1392,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
         mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM));
         notifyPlayingMusicItemChanged(mPlaylist.get(position), position, true);
-        notifyPlayPositionChanged(position);
     }
 
     @Override
@@ -1451,7 +1438,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
             playPosition += 1;
         }
 
-        mPlayerStateHelper.onPlayPositionChanged(playPosition);
+        mPlayerState.setPlayPosition(playPosition);
     }
 
     private void onMusicItemInserted(int position) {
@@ -1461,7 +1448,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
             playPosition += 1;
         }
 
-        mPlayerStateHelper.onPlayPositionChanged(playPosition);
+        mPlayerState.setPlayPosition(playPosition);
     }
 
     private void onMusicItemRemoved(int removePosition, int playPosition) {
@@ -1471,7 +1458,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
             playPosition = getNextPosition(playPosition - 1);
         }
 
-        mPlayerStateHelper.onPlayPositionChanged(playPosition);
+        mPlayerState.setPlayPosition(playPosition);
     }
 
     private boolean notInRegion(int position, int fromPosition, int toPosition) {

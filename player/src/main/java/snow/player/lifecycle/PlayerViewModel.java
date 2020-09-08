@@ -50,7 +50,6 @@ public class PlayerViewModel extends ViewModel {
     private PlaylistLiveData mPlaylist;
 
     private Player.OnPlayingMusicItemChangeListener mPlayingMusicItemChangeListener;
-    private Player.OnPositionChangeListener mPositionChangeListener;
     private Player.OnPlaylistChangeListener mPlaylistChangeListener;
     private Player.OnPlayModeChangeListener mPlayModeChangeListener;
     private PlayerClient.OnPlaybackStateChangeListener mClientPlaybackStateChangeListener;
@@ -286,13 +285,6 @@ public class PlayerViewModel extends ViewModel {
             }
         };
 
-        mPositionChangeListener = new Player.OnPositionChangeListener() {
-            @Override
-            public void onPositionChanged(int position) {
-                mPlayPosition.setValue(position);
-            }
-        };
-
         mPlaylistChangeListener = new Player.OnPlaylistChangeListener() {
             @Override
             public void onPlaylistChanged(PlaylistManager playlistManager, int position) {
@@ -406,7 +398,6 @@ public class PlayerViewModel extends ViewModel {
 
     private void addAllListener() {
         mPlayerClient.addOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
-        mPlayerClient.addOnPositionChangeListener(mPositionChangeListener);
         mPlayerClient.addOnPlaylistChangeListener(mPlaylistChangeListener);
         mPlayerClient.addOnPlayModeChangeListener(mPlayModeChangeListener);
         mPlayerClient.addOnPlaybackStateChangeListener(mClientPlaybackStateChangeListener);
@@ -419,7 +410,6 @@ public class PlayerViewModel extends ViewModel {
 
     private void removeAllListener() {
         mPlayerClient.removeOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
-        mPlayerClient.removeOnPositionChangeListener(mPositionChangeListener);
         mPlayerClient.removeOnPlaylistChangeListener(mPlaylistChangeListener);
         mPlayerClient.removeOnPlayModeChangeListener(mPlayModeChangeListener);
         mPlayerClient.removeOnPlaybackStateChangeListener(mClientPlaybackStateChangeListener);

@@ -1218,52 +1218,6 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     /**
-     * 添加一个监听播放列表播放位置改变事件的监听器。
-     * <p>
-     * 如果监听器已添加，则忽略本次调用。
-     *
-     * @param listener 要添加的监听器
-     * @see Player.OnPositionChangeListener
-     */
-    public void addOnPositionChangeListener(Player.OnPositionChangeListener listener) {
-        mPlayerStateHolder.addOnPositionChangeListener(listener);
-    }
-
-    /**
-     * 添加一个监听播放列表播放位置改变事件的监听器。
-     * <p>
-     * 如果监听器已添加，则忽略本次调用。
-     * <p>
-     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
-     *
-     * @param listener 要添加的监听器
-     * @see Player.OnPositionChangeListener
-     */
-    public void addOnPositionChangeListener(LifecycleOwner owner,
-                                            final Player.OnPositionChangeListener listener) {
-        if (isDestroyed(owner)) {
-            return;
-        }
-
-        addOnPositionChangeListener(listener);
-        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
-            @Override
-            public void run() {
-                removeOnPositionChangeListener(listener);
-            }
-        }));
-    }
-
-    /**
-     * 移除一个监听播放列表播放位置改变事件的监听器。
-     *
-     * @param listener 要移除的监听器
-     */
-    public void removeOnPositionChangeListener(Player.OnPositionChangeListener listener) {
-        mPlayerStateHolder.removeOnPositionChangeListener(listener);
-    }
-
-    /**
      * 监听播放器状态。
      * <p>
      * 如果监听器已添加，则忽略本次调用。
@@ -1456,7 +1410,6 @@ public class PlayerClient implements Player, PlaylistEditor {
 
     // 用于管理与同步播放器状态
     private static class PlayerStateHolder implements PlayerStateListener,
-            Player.OnPositionChangeListener,
             Player.OnPlaylistChangeListener,
             Player.OnPlayModeChangeListener {
         private PlayerState mPlayerState;
@@ -1472,7 +1425,6 @@ public class PlayerClient implements Player, PlaylistEditor {
         private List<OnSeekCompleteListener> mAllSeekListener;
         private List<Player.OnPlaylistChangeListener> mAllPlaylistChangeListener;
         private List<Player.OnPlayModeChangeListener> mAllPlayModeChangeListener;
-        private List<Player.OnPositionChangeListener> mAllPositionChangeListener;
 
         private List<PlayerClient.OnPlaybackStateChangeListener> mClientAllPlaybackStateChangeListener;
         private List<PlayerClient.OnAudioSessionChangeListener> mAllAudioSessionChangeListener;
@@ -1490,7 +1442,6 @@ public class PlayerClient implements Player, PlaylistEditor {
             mAllSeekListener = new ArrayList<>();
             mAllPlaylistChangeListener = new ArrayList<>();
             mAllPlayModeChangeListener = new ArrayList<>();
-            mAllPositionChangeListener = new ArrayList<>();
             mClientAllPlaybackStateChangeListener = new ArrayList<>();
             mAllAudioSessionChangeListener = new ArrayList<>();
         }
@@ -1629,19 +1580,6 @@ public class PlayerClient implements Player, PlaylistEditor {
 
         void removeOnPlayModeChangeListener(Player.OnPlayModeChangeListener listener) {
             mAllPlayModeChangeListener.remove(listener);
-        }
-
-        void addOnPositionChangeListener(Player.OnPositionChangeListener listener) {
-            if (mAllPositionChangeListener.contains(listener)) {
-                return;
-            }
-
-            mAllPositionChangeListener.add(listener);
-            notifyPositionChanged(listener);
-        }
-
-        void removeOnPositionChangeListener(Player.OnPositionChangeListener listener) {
-            mAllPositionChangeListener.remove(listener);
         }
 
         void addOnPlaybackStateChangeListener(OnPlaybackStateChangeListener listener) {
@@ -1840,24 +1778,6 @@ public class PlayerClient implements Player, PlaylistEditor {
             }
         }
 
-        private void notifyPositionChanged(Player.OnPositionChangeListener listener) {
-            if (notConnected()) {
-                return;
-            }
-
-            listener.onPositionChanged(mPlayerState.getPlayPosition());
-        }
-
-        private void notifyPositionChanged() {
-            if (notConnected()) {
-                return;
-            }
-
-            for (Player.OnPositionChangeListener listener : mAllPositionChangeListener) {
-                notifyPositionChanged(listener);
-            }
-        }
-
         private void notifyClientPlaybackStateChanged() {
             if (notConnected()) {
                 return;
@@ -1987,13 +1907,6 @@ public class PlayerClient implements Player, PlaylistEditor {
             mPlayerStateHelper.onPlayModeChanged(playMode);
 
             notifyPlayModeChanged();
-        }
-
-        @Override
-        public void onPositionChanged(int position) {
-            mPlayerStateHelper.onPlayPositionChanged(position);
-
-            notifyPositionChanged();
         }
     }
 

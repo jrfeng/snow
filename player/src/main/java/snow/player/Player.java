@@ -232,16 +232,4 @@ public interface Player {
          */
         void onPlayModeChanged(@UseOrdinal PlayMode playMode);
     }
-
-    /**
-     * 用于监听当前正在播放的音乐的位置（position）改变事件。
-     */
-    interface OnPositionChangeListener {
-        /**
-         * 当正在播放的音乐的位置（position）发生改变时会调用该方法。
-         *
-         * @param position 当前正在播放的音乐的新位置
-         */
-        void onPositionChanged(int position);
-    }
 }

@@ -9,7 +9,6 @@ public interface PlayerStateListener extends Player.OnPlaybackStateChangeListene
         Player.OnBufferedProgressChangeListener,
         Player.OnPlayingMusicItemChangeListener,
         Player.OnSeekCompleteListener,
-        Player.OnPositionChangeListener,
         Player.OnPlaylistChangeListener,
         Player.OnPlayModeChangeListener {
 

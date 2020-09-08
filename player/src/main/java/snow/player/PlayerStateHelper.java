@@ -189,8 +189,4 @@ class PlayerStateHelper {
                     .commit();
         }
     }
-
-    public void onPlayPositionChanged(int position) {
-        mPlayerState.setPlayPosition(position);
-    }
 }
