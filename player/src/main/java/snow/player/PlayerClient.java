@@ -1366,6 +1366,16 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     @Override
+    public void appendMusicItem(@NonNull MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
+        if (!isConnected()) {
+            return;
+        }
+
+        mPlaylistEditor.appendMusicItem(musicItem);
+    }
+
+    @Override
     public void moveMusicItem(int fromPosition, int toPosition) {
         if (!isConnected()) {
             return;

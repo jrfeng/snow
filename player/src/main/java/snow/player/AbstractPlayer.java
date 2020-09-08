@@ -1558,6 +1558,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
     }
 
     @Override
+    public void appendMusicItem(@NonNull MusicItem musicItem) {
+        insertMusicItem(getPlaylistSize(), musicItem);
+    }
+
+    @Override
     public void moveMusicItem(final int fromPosition, final int toPosition) {
         if (fromPosition == toPosition) {
             return;

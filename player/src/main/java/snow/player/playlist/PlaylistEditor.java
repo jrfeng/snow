@@ -24,6 +24,16 @@ public interface PlaylistEditor {
     void insertMusicItem(int position, @NonNull MusicItem musicItem);
 
     /**
+     * 往播放列表的末尾添加一首歌曲。
+     * <p>
+     * 如果播放列表中已包含指定歌曲，则会将它移动到播放列表的末尾位置，如果不存在，则会将歌曲添加到播放列表的末尾。
+     *
+     * @param musicItem 要添加播放列表末尾的歌曲，不能为 null
+     */
+    @SuppressWarnings("NullableProblems")
+    void appendMusicItem(@NonNull MusicItem musicItem);
+
+    /**
      * 移动播放列表中某首歌曲的位置。
      *
      * @param fromPosition 歌曲在列表中的位置
