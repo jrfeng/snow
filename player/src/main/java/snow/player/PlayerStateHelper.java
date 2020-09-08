@@ -140,8 +140,9 @@ class PlayerStateHelper {
         mPlayerState.setBufferedProgress(bufferedProgress);
     }
 
-    public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int playProgress) {
+    public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int position, int playProgress) {
         mPlayerState.setMusicItem(musicItem);
+        mPlayerState.setPlayPosition(position);
         mPlayerState.setBufferedProgress(0);
 
         long updateTime = SystemClock.elapsedRealtime();

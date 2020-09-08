@@ -197,9 +197,10 @@ public interface Player {
          * 当正在播放的音乐被改变时（例如：切换歌曲）会回调该方法。
          *
          * @param musicItem    当前正在播放的音乐
+         * @param position     歌曲在播放列表中的位置
          * @param playProgress 歌曲的播放进度
          */
-        void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int playProgress);
+        void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int position, int playProgress);
     }
 
     /**

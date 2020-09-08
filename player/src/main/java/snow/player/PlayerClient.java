@@ -1773,7 +1773,7 @@ public class PlayerClient implements Player, PlaylistEditor {
                 return;
             }
 
-            listener.onPlayingMusicItemChanged(mPlayerState.getMusicItem(), mPlayerState.getPlayProgress());
+            listener.onPlayingMusicItemChanged(mPlayerState.getMusicItem(), mPlayerState.getPlayPosition(), mPlayerState.getPlayProgress());
         }
 
         private void notifyPlayingMusicItemChanged() {
@@ -1957,9 +1957,9 @@ public class PlayerClient implements Player, PlaylistEditor {
         }
 
         @Override
-        public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int playProgress) {
+        public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int position, int playProgress) {
             boolean error = mPlayerState.getPlaybackState() == PlaybackState.ERROR;
-            mPlayerStateHelper.onPlayingMusicItemChanged(musicItem, playProgress);
+            mPlayerStateHelper.onPlayingMusicItemChanged(musicItem, position, playProgress);
 
             notifyPlayingMusicItemChanged();
 

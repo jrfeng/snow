@@ -262,8 +262,10 @@ public class PlayerViewModel extends ViewModel {
     private void initAllListener() {
         mPlayingMusicItemChangeListener = new Player.OnPlayingMusicItemChangeListener() {
             @Override
-            public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int playProgress) {
+            public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int position, int playProgress) {
                 mProgressClock.cancel();
+                mPlayPosition.setValue(position);
+
                 if (musicItem == null) {
                     mTitle.setValue(mDefaultTitle);
                     mArtist.setValue(mDefaultArtist);
