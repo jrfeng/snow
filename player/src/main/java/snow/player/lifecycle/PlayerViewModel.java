@@ -57,7 +57,7 @@ public class PlayerViewModel extends ViewModel {
     private Player.OnSeekCompleteListener mSeekCompleteListener;
     private Player.OnStalledChangeListener mStalledChangeListener;
     private Player.OnPrepareListener mPrepareListener;
-    private PlayerClient.OnDisconnectListener mDisconnectListener;
+    private PlayerClient.OnConnectStateChangeListener mConnectStateChangeListener;
 
     private String mDefaultTitle;
     private String mDefaultArtist;
@@ -377,10 +377,10 @@ public class PlayerViewModel extends ViewModel {
             }
         };
 
-        mDisconnectListener = new PlayerClient.OnDisconnectListener() {
+        mConnectStateChangeListener = new PlayerClient.OnConnectStateChangeListener() {
             @Override
-            public void onDisconnected() {
-                if (isInitialized()) {
+            public void onConnectStateChanged(boolean connected) {
+                if (isInitialized() && !connected) {
                     mProgressClock.cancel();
                 }
             }
@@ -405,7 +405,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.addOnSeekCompleteListener(mSeekCompleteListener);
         mPlayerClient.addOnStalledChangeListener(mStalledChangeListener);
         mPlayerClient.addOnPrepareListener(mPrepareListener);
-        mPlayerClient.addOnDisconnectListener(mDisconnectListener);
+        mPlayerClient.addOnConnectStateChangeListener(mConnectStateChangeListener);
     }
 
     private void removeAllListener() {
@@ -417,7 +417,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.removeOnSeekCompleteListener(mSeekCompleteListener);
         mPlayerClient.removeOnStalledChangeListener(mStalledChangeListener);
         mPlayerClient.removeOnPrepareListener(mPrepareListener);
-        mPlayerClient.removeOnDisconnectListener(mDisconnectListener);
+        mPlayerClient.removeOnConnectStateChangeListener(mConnectStateChangeListener);
     }
 
     @Override

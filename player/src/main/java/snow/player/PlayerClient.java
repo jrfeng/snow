@@ -60,7 +60,7 @@ public class PlayerClient implements Player, PlaylistEditor {
     private PlaylistManagerImp mPlaylistManager;
     private PlayerStateHolder mPlayerStateHolder;
 
-    private List<OnDisconnectListener> mAllDisconnectListener;
+    private List<OnConnectStateChangeListener> mAllConnectStateChangeListener;
 
     private PlayerClient(Context context, Class<? extends PlayerService> playerService) {
         mApplicationContext = context.getApplicationContext();
@@ -69,7 +69,7 @@ public class PlayerClient implements Player, PlaylistEditor {
         mPersistentId = mPlayerService.getName();
 
         mPlayerConfig = new PlayerConfig(context, mPersistentId);
-        mAllDisconnectListener = new ArrayList<>();
+        mAllConnectStateChangeListener = new ArrayList<>();
 
         initMediaBrowser();
         initPlaylistManager();
@@ -162,6 +162,7 @@ public class PlayerClient implements Player, PlaylistEditor {
 
                 setConnected(true);
                 mPlayerStateHolder.setPlayerState(playerState);
+                notifyConnectStateChanged(true);
             }
         };
     }
@@ -196,9 +197,12 @@ public class PlayerClient implements Player, PlaylistEditor {
 
     private void onDisconnected() {
         setConnected(false);
+        notifyConnectStateChanged(false);
+    }
 
-        for (OnDisconnectListener listener : mAllDisconnectListener) {
-            listener.onDisconnected();
+    private void notifyConnectStateChanged(boolean connected) {
+        for (OnConnectStateChangeListener listener : mAllConnectStateChangeListener) {
+            listener.onConnectStateChanged(connected);
         }
     }
 
@@ -257,44 +261,42 @@ public class PlayerClient implements Player, PlaylistEditor {
      *
      * @param listener 要添加的事件监听器，如果已添加，则会忽略本次调用
      */
-    public void addOnDisconnectListener(OnDisconnectListener listener) {
-        if (mAllDisconnectListener.contains(listener)) {
+    public void addOnConnectStateChangeListener(OnConnectStateChangeListener listener) {
+        if (mAllConnectStateChangeListener.contains(listener)) {
             return;
         }
 
-        mAllDisconnectListener.add(listener);
-        if (notConnected()) {
-            listener.onDisconnected();
-        }
+        mAllConnectStateChangeListener.add(listener);
+        listener.onConnectStateChanged(isConnected());
     }
 
     /**
-     * 添加一个监听器用来监听 PlayerClient 连接断开事件。
+     * 添加一个 {@link OnConnectStateChangeListener} 监听器用来监听 {@link PlayerClient} 的连接成功与断开连接事件。
      *
      * @param owner    LifecycleOwner 对象。监听器会在该 LifecycleOwner 对象销毁时自动注销，避免内存泄露
      * @param listener 要添加的事件监听器，如果已添加，则会忽略本次调用
      */
-    public void addOnDisconnectListener(LifecycleOwner owner, final OnDisconnectListener listener) {
+    public void addOnConnectStateChangeListener(LifecycleOwner owner, final OnConnectStateChangeListener listener) {
         if (isDestroyed(owner)) {
             return;
         }
 
-        addOnDisconnectListener(listener);
+        addOnConnectStateChangeListener(listener);
         owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
             @Override
             public void run() {
-                removeOnDisconnectListener(listener);
+                removeOnConnectStateChangeListener(listener);
             }
         }));
     }
 
     /**
-     * 移除已添加的 OnDisconnectListener 监听器对象。
+     * 移除已添加的 {@link OnConnectStateChangeListener} 监听器对象。
      *
      * @param listener 要移除的监听器
      */
-    public void removeOnDisconnectListener(OnDisconnectListener listener) {
-        mAllDisconnectListener.remove(listener);
+    public void removeOnConnectStateChangeListener(OnConnectStateChangeListener listener) {
+        mAllConnectStateChangeListener.remove(listener);
     }
 
     /**
@@ -1371,13 +1373,15 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     /**
-     * 用于监听 PlayerClient 的连接断开事件。
+     * 用于监听 PlayerClient 的连接成功与断开连接事件。
      */
-    public interface OnDisconnectListener {
+    public interface OnConnectStateChangeListener {
         /**
-         * 当 PlayerClient 断开连接时会回调该方法。
+         * 当 PlayerClient 连接成功或者断开连接时会回调该方法。
+         *
+         * @param connected 是否已连接
          */
-        void onDisconnected();
+        void onConnectStateChanged(boolean connected);
     }
 
     /**
