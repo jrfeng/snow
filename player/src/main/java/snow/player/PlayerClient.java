@@ -37,7 +37,6 @@ import snow.player.media.ErrorCode;
 /**
  * 播放器客户端，用于向播放器发送各种控制命令。
  */
-@SuppressWarnings("unused")
 public class PlayerClient implements Player, PlaylistEditor {
     private Context mApplicationContext;
     private Class<? extends PlayerService> mPlayerService;
@@ -144,7 +143,7 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     private void initPlayerStateHolder() {
-        mPlayerStateHolder = new PlayerStateHolder(mPlaylistManager, mPlayerConfig);
+        mPlayerStateHolder = new PlayerStateHolder(mPlaylistManager);
     }
 
     private void initCommandCallback() {
@@ -1433,7 +1432,7 @@ public class PlayerClient implements Player, PlaylistEditor {
         private List<PlayerClient.OnPlaybackStateChangeListener> mClientAllPlaybackStateChangeListener;
         private List<PlayerClient.OnAudioSessionChangeListener> mAllAudioSessionChangeListener;
 
-        PlayerStateHolder(PlaylistManager playlistManager, PlayerConfig playerConfig) {
+        PlayerStateHolder(PlaylistManager playlistManager) {
             mPlaylistManager = playlistManager;
             initPlayerState(new PlayerState());
             mNotConnected = true;
