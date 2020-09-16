@@ -1409,18 +1409,29 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
     }
 
     @Override
-    public void setPlaylist(Playlist playlist, int position, boolean play) {
-        // （忽略）该方法不会被调用
-        // 当前类已通过实现 PlaylistEditor.OnNewPlaylistListener 接口来响应设置新的播放列表事件
-        // 具体请查看当前类的 onNewPlaylist(MusicItem, int, boolean) 方法
+    public void setPlaylist(Playlist playlist, final int position, final boolean play) {
+        // PlayerService 专用。如果你需要在 PlayerService 中设置播放列表，则可以使用该方法
+        final MusicItem musicItem = playlist.get(position);
+        updatePlaylist(playlist.getAllMusicItem(), new Runnable() {
+            @Override
+            public void run() {
+                onNewPlaylist(musicItem, position, play, false);
+            }
+        });
     }
 
     @Override
-    public void onNewPlaylist(MusicItem musicItem, final int position, final boolean play) {
+    public void onNewPlaylist(MusicItem musicItem, int position, boolean play) {
+        onNewPlaylist(musicItem, position, play, true);
+    }
+
+    private void onNewPlaylist(MusicItem musicItem, final int position, final boolean play, boolean reloadPlaylist) {
         stop();
         notifyPlaylistChanged(position);
         notifyPlayingMusicItemChanged(musicItem, position, play);
-        reloadPlaylist();
+        if (reloadPlaylist) {
+            reloadPlaylist();
+        }
     }
 
     private void onMusicItemMoved(int fromPosition, int toPosition) {
