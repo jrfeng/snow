@@ -57,6 +57,7 @@ import snow.player.effect.AudioEffectManager;
 import snow.player.media.MediaMusicPlayer;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
+import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistEditor;
 import snow.player.media.ErrorCode;
 import snow.player.util.MusicItemUtil;
@@ -753,6 +754,36 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     protected final void stopForegroundEx(boolean removeNotification) {
         mForeground = false;
         stopForeground(removeNotification);
+    }
+
+    /**
+     * 设置一个新的播放列表。
+     *
+     * @param playlist 播放列表（不能为 null）
+     */
+    public final void setPlaylist(@NonNull Playlist playlist) {
+        setPlaylist(playlist, 0, false);
+    }
+
+    /**
+     * 设置一个新的播放列表。
+     *
+     * @param playlist 播放列表（不能为 null）
+     * @param play     是否立即播放列表中的第一首音乐
+     */
+    public final void setPlaylist(@NonNull Playlist playlist, boolean play) {
+        setPlaylist(playlist, 0, play);
+    }
+
+    /**
+     * 设置一个新的播放列表。
+     *
+     * @param playlist 播放列表（不能为 null）
+     * @param position 播放列表中要播放的歌曲的位置
+     * @param play     是否立即播放 {@code position} 参数指定处的音乐
+     */
+    public final void setPlaylist(@NonNull Playlist playlist, final int position, final boolean play) {
+        mPlayer.setPlaylist(playlist, position, play);
     }
 
     private void updateNotification() {
