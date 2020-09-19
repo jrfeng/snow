@@ -375,10 +375,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         mPlayerConfig.setSoundQuality(soundQuality);
-        notifySoundQualityChanged();
-    }
-
-    private void notifySoundQualityChanged() {
         mPlayer.notifySoundQualityChanged();
     }
 
