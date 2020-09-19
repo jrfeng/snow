@@ -1211,7 +1211,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @param action 自定义动作的名称
          * @return 可触发自定义动作的 PendingIntent 对象
          */
-        protected final PendingIntent getCustomActionPendingIntent(@NonNull String action) {
+        public final PendingIntent getCustomActionPendingIntent(@NonNull String action) {
             return mPlayerService.getCustomActionPendingIntent(action);
         }
 
