@@ -143,16 +143,17 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         initAudioEffectManager();
         initPlayerState();
         initPlaylistManager();
+        initNotificationView();
         initPlayer();
         initCustomActionDispatcher();
-        initNotificationView();
         initHeadsetHookHelper();
         initMediaSession();
         initSessionEventEmitter();
         initHistoryRecorder();
 
-
-        updateNotificationView();
+        if (mNotificationView != null && mNotificationView.isNotifyOnCreate()) {
+            updateNotificationView();
+        }
     }
 
     @Override
@@ -263,11 +264,14 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initPlayer() {
+        boolean prepare = mNotificationView != null && mNotificationView.isNotifyOnCreate();
+
         mPlayer = new PlayerImp(this,
                 mPlayerConfig,
                 mPlayerState,
                 mPlaylistManager,
-                new AppWidgetPreferences(this, this.getClass()));
+                new AppWidgetPreferences(this, this.getClass()),
+                prepare);
     }
 
     private void initCustomActionDispatcher() {
@@ -868,6 +872,19 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return mPlayer;
     }
 
+    private void onStopped() {
+        if (noNotificationView()) {
+            return;
+        }
+
+        if (mNotificationView.isKeepOnStopped()) {
+            updateNotificationView();
+            return;
+        }
+
+        stopForegroundEx(true);
+    }
+
     private void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
         if (mHistoryRecorder != null && musicItem != null) {
             mHistoryRecorder.recordHistory(musicItem);
@@ -905,8 +922,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                          @NonNull PlayerConfig playerConfig,
                          @NonNull PlayerState playlistState,
                          @NonNull PlaylistManagerImp playlistManager,
-                         @NonNull AppWidgetPreferences pref) {
-            super(context, playerConfig, playlistState, playlistManager, pref);
+                         @NonNull AppWidgetPreferences pref,
+                         boolean prepare) {
+            super(context, playerConfig, playlistState, playlistManager, pref, prepare);
         }
 
         @Override
@@ -959,7 +977,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         @Override
         protected void onStopped() {
             super.onStopped();
-            PlayerService.this.updateNotificationView();
+            PlayerService.this.onStopped();
         }
 
         @Override
@@ -1366,18 +1384,30 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             mIconCornerRadius[3] = bottomLeft;
         }
 
+        /**
+         * 设置是否在 {@link PlayerService} 创建后立即显示通知栏控制器（默认为 false）。
+         */
         public void setNotifyOnCreate(boolean notifyOnCreate) {
             mNotifyOnCreate = notifyOnCreate;
         }
 
+        /**
+         * 判断是否在 {@link PlayerService} 创建后立即显示通知栏控制器（默认为 false）。
+         */
         public boolean isNotifyOnCreate() {
             return mNotifyOnCreate;
         }
 
+        /**
+         * 设置是否在停止播放后依然保留通知栏控制器（默认为 false）。
+         */
         public void setKeepOnStopped(boolean keepOnStopped) {
             mKeepOnStopped = keepOnStopped;
         }
 
+        /**
+         * 判断是否在停止播放后依然保留通知栏控制器（默认为 false）。
+         */
         public boolean isKeepOnStopped() {
             return mKeepOnStopped;
         }
