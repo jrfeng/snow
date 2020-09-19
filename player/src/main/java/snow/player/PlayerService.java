@@ -145,7 +145,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         initPlaylistManager();
         initPlayer();
         initCustomActionDispatcher();
-        initRemoteViewManager();
+        initNotificationView();
         initHeadsetHookHelper();
         initMediaSession();
         initSessionEventEmitter();
@@ -289,7 +289,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                 onNewPlaylistDispatcher));
     }
 
-    private void initRemoteViewManager() {
+    private void initNotificationView() {
         NotificationView notificationView = createNotificationView();
 
         if (notificationView == null) {
