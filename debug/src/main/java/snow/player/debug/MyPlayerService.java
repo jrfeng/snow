@@ -14,19 +14,20 @@ import com.google.android.exoplayer2.util.Util;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
-import snow.player.Inject;
 import snow.player.PlayerService;
 import snow.player.exo.ExoMusicPlayer;
+import snow.player.exo.util.OkHttpUtil;
 import snow.player.media.MusicItem;
 import snow.player.media.MusicPlayer;
-import snow.player.exo.util.OkHttpUtil;
 
-public class MyFactory extends PlayerService.ComponentFactory {
+public class MyPlayerService extends PlayerService {
     private ProgressiveMediaSource.Factory mProgressiveMediaSourceFactory;
     private HlsMediaSource.Factory mHlsMediaSourceFactory;
 
     @Override
-    public void init(Context context) {
+    public void onCreate() {
+        super.onCreate();
+
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .followRedirects(true)
                 .followSslRedirects(true)
@@ -38,19 +39,18 @@ public class MyFactory extends PlayerService.ComponentFactory {
         OkHttpUtil.enableTls12OnPreLollipop(builder, true);
 
         OkHttpDataSourceFactory httpDataSourceFactory =
-                new OkHttpDataSourceFactory(builder.build(), Util.getUserAgent(context, context.getPackageName()));
+                new OkHttpDataSourceFactory(builder.build(), Util.getUserAgent(this, this.getPackageName()));
 
         DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(
-                context, httpDataSourceFactory);
+                this, httpDataSourceFactory);
 
         mProgressiveMediaSourceFactory = new ProgressiveMediaSource.Factory(dataSourceFactory);
         mHlsMediaSourceFactory = new HlsMediaSource.Factory(dataSourceFactory);
     }
 
-    @Inject
     @NonNull
     @Override
-    public MusicPlayer createMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
+    protected MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
         String path = uri.getLastPathSegment();
 
         if (path != null && path.endsWith(".m3u8")) {

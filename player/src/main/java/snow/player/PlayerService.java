@@ -123,8 +123,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     @Nullable
     private AudioEffectManager mAudioEffectManager;
 
-    private ComponentFactory mComponentFactory;
-
     @Nullable
     private HistoryRecorder mHistoryRecorder;
 
@@ -137,8 +135,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         mAllCustomAction = new HashMap<>();
 
         initNotificationManager();
-        initComponentFactory();
-        initCustomActions();
         initPlayerConfig();
         initAudioEffectManager();
         initPlayerState();
@@ -218,39 +214,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
     }
 
-    private void initComponentFactory() {
-        try {
-            ComponentName service = new ComponentName(this, this.getClass());
-            ServiceInfo serviceInfo = getPackageManager().getServiceInfo(service, PackageManager.GET_META_DATA);
-            if (serviceInfo.metaData == null) {
-                return;
-            }
-
-            String factoryName = serviceInfo.metaData.getString(NAME_COMPONENT_FACTORY);
-            if (factoryName == null) {
-                return;
-            }
-
-            Class<?> clazz = Class.forName(factoryName);
-            mComponentFactory = (ComponentFactory) clazz.newInstance();
-            mComponentFactory.init(getApplicationContext());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void initCustomActions() {
-        if (injectCustomActions()) {
-            mAllCustomAction.putAll(mComponentFactory.getCustomActions());
-        }
-    }
-
     private void initPlayerConfig() {
         mPlayerConfig = new PlayerConfig(this, mPersistentId);
     }
@@ -294,7 +257,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initNotificationView() {
-        NotificationView notificationView = createNotificationView();
+        NotificationView notificationView = onCreateNotificationView();
 
         if (notificationView == null) {
             return;
@@ -345,7 +308,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initAudioEffectManager() {
-        mAudioEffectManager = createAudioEffectManager();
+        mAudioEffectManager = onCreateAudioEffectManager();
 
         if (mAudioEffectManager == null) {
             return;
@@ -356,7 +319,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     private void initHistoryRecorder() {
-        mHistoryRecorder = createHistoryRecorder();
+        mHistoryRecorder = onCreateHistoryRecorder();
     }
 
     /**
@@ -373,15 +336,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return new MediaSessionCallback(this);
     }
 
-    @Nullable
-    protected final NotificationView createNotificationView() {
-        if (injectNotificationView()) {
-            return mComponentFactory.createNotificationView();
-        }
-
-        return onCreateNotificationView();
-    }
-
     /***
      * 创建一个通知栏控制器，你可以通过覆盖该方法来提供自定义的通知栏控制器。
      *
@@ -394,15 +348,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return new MediaNotificationView();
     }
 
-    @Nullable
-    protected final AudioEffectManager createAudioEffectManager() {
-        if (injectAudioEffectManager()) {
-            return mComponentFactory.createAudioEffectManager();
-        }
-
-        return onCreateAudioEffectManager();
-    }
-
     /**
      * 创建音频特效引擎。
      *
@@ -411,15 +356,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     @Nullable
     protected AudioEffectManager onCreateAudioEffectManager() {
         return null;
-    }
-
-    @Nullable
-    protected final HistoryRecorder createHistoryRecorder() {
-        if (injectHistoryRecorder()) {
-            return mComponentFactory.createHistoryRecorder();
-        }
-
-        return onCreateHistoryRecorder();
     }
 
     /**
@@ -796,15 +732,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                 mNotificationView.createNotification());
     }
 
-    // 请不要在主线程中调用该方法，因为该方法可能会执行耗时操作
-    protected final boolean isCachedEx(MusicItem musicItem, SoundQuality soundQuality) {
-        if (injectIsCached()) {
-            return mComponentFactory.isCached(musicItem, soundQuality);
-        }
-
-        return isCached(musicItem, soundQuality);
-    }
-
     /**
      * 查询具有 soundQuality 音质的 MusicItem 表示的的音乐是否已被缓存。
      * <p>
@@ -818,15 +745,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return false;
     }
 
-    @NonNull
-    protected final MusicPlayer createMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
-        if (injectMusicPlayer()) {
-            return mComponentFactory.createMusicPlayer(context, musicItem, uri);
-        }
-
-        return onCreateMusicPlayer(this, uri);
-    }
-
     /**
      * 该方法会在创建 MusicPlayer 对象时调用。
      * <p>
@@ -836,17 +754,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      * @return 音乐播放器（不能为 null）
      */
     @NonNull
-    protected MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull Uri uri) {
+    protected MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
         return new MediaMusicPlayer(uri);
-    }
-
-    // 请不要在主线程中调用该方法，因为该方法可能会执行耗时操作
-    protected final Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception {
-        if (injectMusicItemUri()) {
-            return mComponentFactory.retrieveMusicItemUri(musicItem, soundQuality);
-        }
-
-        return onRetrieveMusicItemUri(musicItem, soundQuality);
     }
 
     /**
@@ -929,19 +838,19 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @Override
         protected boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
-            return PlayerService.this.isCachedEx(musicItem, soundQuality);
+            return PlayerService.this.isCached(musicItem, soundQuality);
         }
 
         @NonNull
         @Override
         protected MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
-            return PlayerService.this.createMusicPlayer(context, musicItem, uri);
+            return PlayerService.this.onCreateMusicPlayer(context, musicItem, uri);
         }
 
         @Nullable
         @Override
         protected Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception {
-            return PlayerService.this.retrieveMusicItemUri(musicItem, soundQuality);
+            return PlayerService.this.onRetrieveMusicItemUri(musicItem, soundQuality);
         }
 
         @Override
@@ -1755,238 +1664,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 可以通过提供一个 {@link ComponentFactory} 工厂来自定义播放器的部分组件。
-     * <p>
-     * 通过继承并覆盖 {@link ComponentFactory} 类的以下方法来提供自定义组件：
-     * <ul>
-     *     <li>{@link #createMusicPlayer(Context, MusicItem, Uri)}：音乐播放器</li>
-     *     <li>{@link #createNotificationView()}：通知栏控制器</li>
-     *     <li>{@link #createAudioEffectManager()}：音频特效引擎管理器</li>
-     *     <li>{@link #createHistoryRecorder()}：历史记录器</li>
-     *     <li>{@link #isCached(MusicItem, SoundQuality)}：查询具有特定 {@link SoundQuality} 的 {@link MusicItem} 是否已缓存</li>
-     *     <li>{@link #retrieveMusicItemUri(MusicItem, SoundQuality)}：获取歌曲的播放链接</li>
-     *     <li>{@link #getCustomActions()}：添加自定义动作</li>
-     * </ul>
-     * <p>
-     * 可以覆盖上面的一个或多个方法来使用自定义组件，重写后的方法需要使用 {@link Inject} 注解进行标记否则会被忽略。
-     * 另外，还可以覆盖 {@link #init(Context)} 方法来完成一些初始化工作。
-     * <p>
-     * 如果你打算播放来自网络的音乐，建议覆盖 {@link #isCached(MusicItem, SoundQuality)} 方法，该方法用于
-     * 判断具有特定 {@link SoundQuality} 的 {@link MusicItem} 是否已缓存。该方法会在异步线程中执行，因此可
-     * 以在该方法中执行耗时操作，例如访问本地数据库。如果播放器仅用于播放本地音乐，则可以覆盖
-     * {@link #isCached(MusicItem, SoundQuality)} 方法并直接返回 true 即可。
-     * <p>
-     * 此外，还可以覆盖 {@link #retrieveMusicItemUri(MusicItem, SoundQuality)} 方法用来根据音质获取不同的播放链接。
-     * 该方法会在异步线程中调用，因此可以直接在该方法中访问网络或数据库。
-     * <p>
-     * <b>步骤：</b>
-     * <ol>
-     *     <li>创建一个类并继承 {@link ComponentFactory} 类（该类必须提供一个无参构造方法）；</li>
-     *     <li>（可选）覆盖 {@link #init(Context)} 方法以进行某些初始化操作；</li>
-     *     <li>覆盖 {@link ComponentFactory} 的工厂方法，并使用 {@link Inject} 注解进行标注；</li>
-     *     <li>在 AndroidManifest.xml 文件中对你的 {@link ComponentFactory} 进行注册。</li>
-     * </ol>
-     * <p>
-     * <b>例：</b><br>
-     * <pre>
-     * package snow.player.debug;
-     * ...
-     *
-     * public class MyFactory extends PlayerService.ComponentFactory {
-     *     ...
-     *
-     *     &#64;Override
-     *     public void init(Context context) {
-     *         // （可选）进行某些初始化操作
-     *         // 如果没有任何需要执行的初始化操作，则可以不覆盖该方法
-     *     }
-     *
-     *     &#64;Inject    // 使用 &#64;Inject 注解对工厂方法进行标记，否则会被忽略
-     *     &#64;NonNull
-     *     &#64;Override
-     *     public MusicPlayer createMusicPlayer(Context context) {
-     *         return new ExoMusicPlayer(context, mediaSourceFactory);
-     *     }
-     * }
-     * </pre>
-     * <p>
-     * <b>在 AndroidManifest.xml 文件中对 {@link ComponentFactory} 进行注册：</b>
-     * <p>
-     * <b>注册方法</b>：在 &lt;service&gt; 标签中使用 &lt;meta-date&gt; 标签指定你的 {@link ComponentFactory}
-     * 的完整类名。其中，&lt;meta-date&gt; 标签的 {@code android:name} 属性的值为
-     * {@code "component-factory"}，{@code android:value} 属性的值为你的 {@link ComponentFactory}
-     * 的完整类名。
-     * <p>
-     * <b>例：</b><br>
-     * <pre>
-     * &lt;service android:name="snow.player.PlayerService"&gt;
-     *     ...
-     *     &lt;meta-data android:name="component-factory" android:value="@string/factory-name"/&gt;
-     * &lt;/service&gt;
-     * </pre>
-     * 注：上例中 {@code android:value} 的值是 {@code "@string/factory-name"}，这是一个字符串资源，
-     * 该字符串资源的值是你的 {@link ComponentFactory} 的完整类名（例如："snow.player.debug.MyFactory"）。
-     */
-    public static abstract class ComponentFactory {
-        /**
-         * 初始化 ComponentFactory。你可以覆盖该方法来完成一些初始化工作。
-         *
-         * @param applicationContext 应用程序的 Context 对象
-         */
-        public void init(Context applicationContext) {
-        }
-
-        /**
-         * 查询具有 {@link SoundQuality} 音质的 {@link MusicItem} 是否已被缓存。
-         * <p>
-         * 该方法会在异步线程中被调用。如果播放器仅用于播放本地音乐，则只需覆盖该方法，并直接返回 {@code true}
-         * 即可。
-         *
-         * @param musicItem    要查询的 MusicItem 对象
-         * @param soundQuality 音乐的音质
-         * @return 如果歌曲已被缓存，则返回 true，否则返回 false
-         */
-        public boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
-            return false;
-        }
-
-        /**
-         * 创建一个 {@link MusicPlayer} 对象。
-         *
-         * @param context   Context 对象
-         * @param musicItem 播放器将要播放的歌曲
-         * @param uri       播放器将要播放的歌曲的 URI
-         * @return {@link MusicPlayer} 对象，，不能为 null
-         */
-        @NonNull
-        public MusicPlayer createMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
-            return new MediaMusicPlayer(uri);
-        }
-
-        /**
-         * 获取音乐的播放链接。
-         * <p>
-         * 该方法会在异步线程中执行，因此可以在该方法中执行耗时操作，例如访问网络。
-         *
-         * @param musicItem    要播放的音乐
-         * @param soundQuality 要播放的音乐的音质
-         * @return 音乐的播放链接，为 null 时播放器会转至 {@link PlaybackState#ERROR}
-         * 状态
-         * @throws Exception 获取音乐播放链接的过程中发生的任何异常
-         */
-        @SuppressWarnings("RedundantThrows")
-        @Nullable
-        public Uri retrieveMusicItemUri(MusicItem musicItem, SoundQuality soundQuality) throws Exception {
-            return null;
-        }
-
-        /**
-         * 创建通知栏控制器。
-         *
-         * @return {@link NotificationView} 对象，可为 null。为 null 时将隐藏通知栏控制器
-         */
-        @Nullable
-        public NotificationView createNotificationView() {
-            return null;
-        }
-
-        /**
-         * 创建音频特效引擎。
-         *
-         * @return {@link AudioEffectManager} 对象，为 null 时会关闭音频特效
-         */
-        @Nullable
-        public AudioEffectManager createAudioEffectManager() {
-            return null;
-        }
-
-        /**
-         * 创建历史记录器，用于记录播放器的播放历史。
-         *
-         * @return 如果返回 null，则不会记录播放器的播放历史
-         */
-        @Nullable
-        public HistoryRecorder createHistoryRecorder() {
-            return null;
-        }
-
-        /**
-         * 返回所有要添加的自定义动作。
-         * <p>
-         * 该方法应该返回一个 Map，该 Map 包含了所有要添加的自定义动作。Map 的 key 是自定义动作的名称，请保证
-         * 其唯一性，并且符合 Android 的 action 格式（例如：{@code snow.player.action.PLAY_PAUSE}）。
-         * <p>
-         * 你可以使用 Map 的 key 值创建一个 Intent 对象来调用启动 PlayerService。PlayerService 会在其
-         * onStartCommand 方法中检测 Intent 的 Action 是否匹配了一个自定义动作，如果匹配成功，则会执行对应
-         * 的 CustomAction。
-         * <p>
-         * 例：
-         * <pre>
-         * Intent intent = new Intent(context, PlayerService.class);
-         * intent.setAction(key_custom_action);
-         * ...
-         * context.startService(intent);
-         * </pre>
-         */
-        @NonNull
-        public Map<String, CustomAction> getCustomActions() {
-            return new HashMap<>();
-        }
-    }
-
-    private boolean isAnnotatedWithInject(Method method) {
-        return method.isAnnotationPresent(Inject.class);
-    }
-
-    private boolean shouldInject(String methodName, Class<?>... parameterTypes) {
-        if (mComponentFactory == null) {
-            return false;
-        }
-
-        try {
-            Method method = mComponentFactory.getClass()
-                    .getMethod(methodName, parameterTypes);
-            return isAnnotatedWithInject(method);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    private boolean injectIsCached() {
-        return shouldInject("isCached", MusicItem.class, SoundQuality.class);
-    }
-
-    private boolean injectMusicPlayer() {
-        return shouldInject("createMusicPlayer", Context.class, MusicItem.class, Uri.class);
-    }
-
-    private boolean injectMusicItemUri() {
-        return shouldInject("retrieveMusicItemUri", MusicItem.class, SoundQuality.class);
-    }
-
-    private boolean injectNotificationView() {
-        return shouldInject("createNotificationView");
-    }
-
-    private boolean injectAudioEffectManager() {
-        return shouldInject("createAudioEffectManager");
-    }
-
-    private boolean injectHistoryRecorder() {
-        return shouldInject("createHistoryRecorder");
-    }
-
-    private boolean injectCustomActions() {
-        return shouldInject("getCustomActions");
-    }
-
-    /**
      * 自定义动作。
      *
      * @see PlayerService#addCustomAction(String, CustomAction)
-     * @see ComponentFactory#getCustomActions()
      */
     public interface CustomAction {
         /**

@@ -24,8 +24,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name="snow.player.PlayerService">
-            <meta-data android:name="component-factory" android:value="@string/factory"/>
+        <service android:name=".MyPlayerService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
                 <action android:name="android.intent.action.MEDIA_BUTTON" />

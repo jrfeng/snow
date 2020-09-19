@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        mPlayerClient = PlayerClient.newInstance(this, PlayerService.class);
+        mPlayerClient = PlayerClient.newInstance(this, MyPlayerService.class);
         playerViewModel.init(this, mPlayerClient);
         playerViewModel.setAutoDisconnect(true);
     }
