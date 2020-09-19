@@ -144,12 +144,13 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         initPlayerState();
         initPlaylistManager();
         initPlayer();
-        initControllerPipe();
+        initCustomActionDispatcher();
         initRemoteViewManager();
         initHeadsetHookHelper();
         initMediaSession();
         initSessionEventEmitter();
         initHistoryRecorder();
+
 
         updateNotificationView();
     }
@@ -269,7 +270,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
                 new AppWidgetPreferences(this, this.getClass()));
     }
 
-    private void initControllerPipe() {
+    private void initCustomActionDispatcher() {
         final Dispatcher playerManagerDispatcher =
                 ChannelHelper.newDispatcher(PlayerManager.class, this);
 
@@ -1363,6 +1364,22 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             mIconCornerRadius[1] = topRight;
             mIconCornerRadius[2] = bottomRight;
             mIconCornerRadius[3] = bottomLeft;
+        }
+
+        public void setNotifyOnCreate(boolean notifyOnCreate) {
+            mNotifyOnCreate = notifyOnCreate;
+        }
+
+        public boolean isNotifyOnCreate() {
+            return mNotifyOnCreate;
+        }
+
+        public void setKeepOnStopped(boolean keepOnStopped) {
+            mKeepOnStopped = keepOnStopped;
+        }
+
+        public boolean isKeepOnStopped() {
+            return mKeepOnStopped;
         }
 
         /**
