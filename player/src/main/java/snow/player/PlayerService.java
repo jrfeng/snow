@@ -737,7 +737,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         mForeground = true;
-        startForeground(mNotificationView.getNotificationId(), createNotification());
+        startForeground(mNotificationView.getNotificationId(),
+                mNotificationView.createNotification());
     }
 
     /**
@@ -790,13 +791,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return;
         }
 
-        mNotificationManager.notify(mNotificationView.getNotificationId(), createNotification());
-    }
-
-    @NonNull
-    private Notification createNotification() {
-        assert mNotificationView != null;
-        return mNotificationView.createNotification();
+        mNotificationManager.notify(mNotificationView.getNotificationId(),
+                mNotificationView.createNotification());
     }
 
     // 请不要在主线程中调用该方法，因为该方法可能会执行耗时操作
