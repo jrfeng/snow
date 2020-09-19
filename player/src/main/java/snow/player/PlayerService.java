@@ -97,7 +97,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     private static final String NAME_COMPONENT_FACTORY = "component-factory";
 
     private String mPersistentId;
-    private int mNotificationId;
 
     private PlayerConfig mPlayerConfig;
     private PlayerState mPlayerState;
@@ -118,6 +117,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
     private HeadsetHookHelper mHeadsetHookHelper;
 
+    @Nullable
     private NotificationView mNotificationView;
 
     @Nullable
@@ -134,7 +134,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         startService(new Intent(this, this.getClass()));
 
         mPersistentId = getPersistentId();
-        mNotificationId = getNotificationId();
         mAllCustomAction = new HashMap<>();
 
         initNotificationManager();
@@ -188,9 +187,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     public void onDestroy() {
         super.onDestroy();
 
-        stopForegroundEx(true);
+        if (!noNotificationView()) {
+            stopForegroundEx(true);
+            mNotificationView.release();
+            mNotificationManager.cancel(mNotificationView.getNotificationId());
+        }
 
-        mNotificationView.release();
         mMediaSession.release();
         mPlayer.release();
 
@@ -606,14 +608,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
-     * 获取 Notification 的 ID（默认返回 1）。
-     */
-    @SuppressWarnings("SameReturnValue")
-    protected int getNotificationId() {
-        return 1;
-    }
-
-    /**
      * 获取播放队列的播放模式。
      *
      * @return 播放队列的播放模式。
@@ -743,7 +737,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         mForeground = true;
-        startForeground(mNotificationId, createNotification());
+        startForeground(mNotificationView.getNotificationId(), createNotification());
     }
 
     /**
@@ -796,11 +790,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             return;
         }
 
-        mNotificationManager.notify(mNotificationId, createNotification());
+        mNotificationManager.notify(mNotificationView.getNotificationId(), createNotification());
     }
 
     @NonNull
     private Notification createNotification() {
+        assert mNotificationView != null;
         return mNotificationView.createNotification();
     }
 
@@ -1225,6 +1220,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         private Bitmap mDefaultIcon;
         private CustomTarget<Bitmap> mTarget;
 
+        private boolean mReleased;
+
         void init(PlayerService playerService) {
             mPlayerService = playerService;
             mMusicItem = new MusicItem();
@@ -1253,6 +1250,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         private void release() {
+            mReleased = true;
             Glide.with(getContext())
                     .clear(mTarget);
             mTarget = null;
@@ -1413,6 +1411,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          */
         @NonNull
         protected abstract Notification onCreateNotification();
+
+        /**
+         * 返回 Notification 的 ID。
+         */
+        protected abstract int getNotificationId();
 
         /**
          * 获取默认图标。
@@ -1648,6 +1651,15 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
+         * 检查 {@link NotificationView} 是否已被释放。
+         *
+         * @return 如果已被释放，则返回 true，此时不应该再调用 {@link NotificationView} 的任何方法。
+         */
+        public final boolean isReleased() {
+            return mReleased;
+        }
+
+        /**
          * 获取错误信息。
          * <p>
          * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
@@ -1661,6 +1673,10 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 要求 Service 更新 NotificationView，如果没有设置 NotificationView，则忽略本次操作。
          */
         public final void invalidate() {
+            if (mReleased) {
+                return;
+            }
+
             mPlayerService.updateNotificationView();
         }
 
@@ -1769,6 +1785,11 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
             onBuildNotification(builder);
 
             return builder.build();
+        }
+
+        @Override
+        protected int getNotificationId() {
+            return 1024;
         }
 
         /**
