@@ -243,13 +243,9 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         final Dispatcher playlistEditorDispatcher =
                 ChannelHelper.newDispatcher(PlaylistEditor.class, mPlayer);
 
-        final Dispatcher onNewPlaylistDispatcher =
-                ChannelHelper.newDispatcher(PlaylistEditor.OnNewPlaylistListener.class, mPlayer);
-
         mCustomActionDispatcher = new CustomActionPipe(DispatcherUtil.merge(playerManagerDispatcher,
                 playerDispatcher,
-                playlistEditorDispatcher,
-                onNewPlaylistDispatcher));
+                playlistEditorDispatcher));
     }
 
     private void initNotificationView() {

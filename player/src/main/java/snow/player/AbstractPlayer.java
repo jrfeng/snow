@@ -46,7 +46,7 @@ import snow.player.helper.NetworkHelper;
 /**
  * 该类实现了 {@link Player} 接口，并实现大部分音乐播放器功能。
  */
-abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.OnNewPlaylistListener {
+abstract class AbstractPlayer implements Player, PlaylistEditor {
     private static final String TAG = "AbstractPlayer";
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
 
@@ -1414,28 +1414,15 @@ abstract class AbstractPlayer implements Player, PlaylistEditor, PlaylistEditor.
 
     @Override
     public void setPlaylist(Playlist playlist, final int position, final boolean play) {
-        // PlayerService 专用。如果你需要在 PlayerService 中设置播放列表，则可以使用该方法
         final MusicItem musicItem = playlist.get(position);
         updatePlaylist(playlist.getAllMusicItem(), new Runnable() {
             @Override
             public void run() {
-                onNewPlaylist(musicItem, position, play, false);
+                stop();
+                notifyPlaylistChanged(position);
+                notifyPlayingMusicItemChanged(musicItem, position, play);
             }
         });
-    }
-
-    @Override
-    public void onNewPlaylist(MusicItem musicItem, int position, boolean play) {
-        onNewPlaylist(musicItem, position, play, true);
-    }
-
-    private void onNewPlaylist(MusicItem musicItem, final int position, final boolean play, boolean reloadPlaylist) {
-        stop();
-        notifyPlaylistChanged(position);
-        notifyPlayingMusicItemChanged(musicItem, position, play);
-        if (reloadPlaylist) {
-            reloadPlaylist();
-        }
     }
 
     private void onMusicItemMoved(int fromPosition, int toPosition) {

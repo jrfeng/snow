@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaControllerCompat;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -171,9 +172,6 @@ public class PlayerClient implements Player, PlaylistEditor {
 
         mPlayer = ChannelHelper.newEmitter(Player.class, customActionEmitter);
         mPlaylistEditor = ChannelHelper.newEmitter(PlaylistEditor.class, customActionEmitter);
-
-        mPlaylistManager.setOnNewPlaylistListener(
-                ChannelHelper.newEmitter(OnNewPlaylistListener.class, customActionEmitter));
 
         mPlayerManager = ChannelHelper.newEmitter(PlayerManager.class, customActionEmitter);
     }
@@ -486,7 +484,7 @@ public class PlayerClient implements Player, PlaylistEditor {
             return;
         }
 
-        mPlaylistManager.setPlaylist(playlist, position, play);
+        mPlaylistEditor.setPlaylist(playlist, position, play);
     }
 
     /**

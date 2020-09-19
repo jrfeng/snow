@@ -32,8 +32,6 @@ class PlaylistManagerImp implements PlaylistManager {
     private static final String KEY_PLAYLIST = "playlist";
     private static final String KEY_PLAYLIST_SIZE = "playlist_size";
 
-    private PlaylistEditor.OnNewPlaylistListener mNewPlaylistListener;
-
     private MMKV mMMKV;
     private boolean mEditable;
 
@@ -91,28 +89,6 @@ class PlaylistManagerImp implements PlaylistManager {
                 });
     }
 
-    public void setPlaylist(@NonNull final Playlist playlist, final int position, final boolean play) {
-        Preconditions.checkNotNull(playlist);
-
-        if (!isEditable()) {
-            Log.w(TAG, "Playlist not editable.");
-            return;
-        }
-
-        save(playlist, new Runnable() {
-            @Override
-            public void run() {
-                int p = Math.max(position, 0);
-                p = Math.min(p, playlist.size() - 1);
-                notifyOnNewPlaylist(playlist.get(p), p, play);
-            }
-        });
-    }
-
-    public void setOnNewPlaylistListener(@Nullable PlaylistEditor.OnNewPlaylistListener listener) {
-        mNewPlaylistListener = listener;
-    }
-
     /**
      * 将 Playlist 持久化保存到本地。该方法会异步执行。
      */
@@ -150,12 +126,6 @@ class PlaylistManagerImp implements PlaylistManager {
     private void disposeLastSave() {
         if (mSaveDisposable != null && !mSaveDisposable.isDisposed()) {
             mSaveDisposable.dispose();
-        }
-    }
-
-    private void notifyOnNewPlaylist(final MusicItem musicItem, final int position, final boolean play) {
-        if (mNewPlaylistListener != null) {
-            mNewPlaylistListener.onNewPlaylist(musicItem, position, play);
         }
     }
 }
