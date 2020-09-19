@@ -473,10 +473,15 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param playlist 播放列表（不能为 null）
      * @param position 播放列表中要播放的歌曲的位置
      * @param play     是否立即播放 {@code position} 参数指定处的音乐
+     * @throws IllegalArgumentException 如果 position 的值小于 0，则抛出该异常
      */
     @Override
-    public void setPlaylist(@NonNull Playlist playlist, int position, boolean play) {
+    public void setPlaylist(@NonNull Playlist playlist, int position, boolean play) throws IllegalArgumentException {
         Preconditions.checkNotNull(playlist);
+        if (position < 0) {
+            throw new IllegalArgumentException("position must >= 0.");
+        }
+
         if (!isConnected()) {
             return;
         }
@@ -697,9 +702,14 @@ public class PlayerClient implements Player, PlaylistEditor {
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
      *
      * @param position 要播放的音乐的 position 值（从 0 开始计算）。
+     * @throws IllegalArgumentException 如果 position 值小于 0，则会抛出该异常。
      */
     @Override
-    public void skipToPosition(int position) {
+    public void skipToPosition(int position) throws IllegalArgumentException {
+        if (position < 0) {
+            throw new IllegalArgumentException("position music >= 0");
+        }
+
         if (notConnected()) {
             return;
         }
@@ -713,9 +723,14 @@ public class PlayerClient implements Player, PlaylistEditor {
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
      *
      * @param position 目标位置。
+     * @throws IllegalArgumentException 如果 position 的值小于 0，则会抛出该异常。
      */
     @Override
-    public void playPause(int position) {
+    public void playPause(int position) throws IllegalArgumentException {
+        if (position < 0) {
+            throw new IllegalArgumentException("position music >= 0");
+        }
+
         if (notConnected()) {
             return;
         }
@@ -1310,8 +1325,20 @@ public class PlayerClient implements Player, PlaylistEditor {
         return owner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED;
     }
 
+    /**
+     * 往列表中插入了一首新的歌曲。
+     * <p>
+     * 如果播放列表中已包含指定歌曲，则会将它移动到 position 位置，如果不存在，则会将歌曲插入到 position 位置。
+     *
+     * @param position  歌曲插入的位置
+     * @param musicItem 要插入的歌曲，不能为 null
+     * @throws IllegalArgumentException 如果 position 的值小于 0，则抛出该异常
+     */
     @Override
-    public void insertMusicItem(int position, @NonNull MusicItem musicItem) {
+    public void insertMusicItem(int position, @NonNull MusicItem musicItem) throws IllegalArgumentException {
+        if (position < 0) {
+            throw new IllegalArgumentException("position must >= 0.");
+        }
         Preconditions.checkNotNull(musicItem);
         if (!isConnected()) {
             return;
