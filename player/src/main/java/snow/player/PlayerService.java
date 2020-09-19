@@ -514,7 +514,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
      */
     @Override
     public final void shutdown() {
-        if (isPlayingState()) {
+        if (mPlayer.getPlaybackState() == PlaybackState.PLAYING) {
             getPlayer().pause();
         }
 
@@ -633,10 +633,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     @NonNull
     public final PlaybackState getPlaybackState() {
         return mPlayer.getPlaybackState();
-    }
-
-    private boolean isPlayingState() {
-        return mPlayer.getPlaybackState() == PlaybackState.PLAYING;
     }
 
     /**
@@ -871,90 +867,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         return mPlayer;
     }
 
-    /**
-     * 正在准备播放器。
-     */
-    protected void onPreparing() {
-        if (noNotificationView()) {
-            return;
-        }
-        mNotificationView.onPreparing();
-    }
-
-    /**
-     * 播放器准备完毕。
-     *
-     * @param audioSessionId 播放器的 audio session id
-     */
-    protected void onPrepared(int audioSessionId) {
-        if (noNotificationView()) {
-            return;
-        }
-        mNotificationView.onPrepared();
-    }
-
-    /**
-     * 播放器开始播放。
-     *
-     * @param progress   播放进度
-     * @param updateTime 播放进度的更新时间
-     */
-    protected void onPlaying(int progress, long updateTime) {
-        if (noNotificationView()) {
-            return;
-        }
-        mNotificationView.onPlaying();
-    }
-
-    /**
-     * 已暂停播放。
-     */
-    protected void onPaused() {
-        if (noNotificationView()) {
-            return;
-        }
-        mNotificationView.onPaused();
-    }
-
-    /**
-     * 播放器的 {@code stalled} 状态发生了改变。
-     *
-     * @param stalled 播放器的 {@code stalled} 状态。当缓冲区中没有足够的数据支持继续播放时，该参数为 true，
-     *                否则为 false
-     */
-    protected void onStalledChanged(boolean stalled) {
-        if (noNotificationView()) {
-            return;
-        }
-        mNotificationView.onStalledChanged(stalled);
-    }
-
-    /**
-     * 播放器已停止播放。
-     */
-    protected void onStopped() {
-        if (noNotificationView()) {
-            return;
-        }
-        mNotificationView.onStopped();
-    }
-
-    /**
-     * 播放器发生了错误。
-     *
-     * @param errorCode    错误码
-     * @param errorMessage 错误信息
-     */
-    protected void onError(int errorCode, String errorMessage) {
-        if (noNotificationView()) {
-            return;
-        }
-        mNotificationView.onError(errorCode, errorMessage);
-    }
-
-    protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
-        updateNotificationView();
-
+    private void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
         if (mHistoryRecorder != null && musicItem != null) {
             mHistoryRecorder.recordHistory(musicItem);
         }
@@ -1015,48 +928,49 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         @Override
         protected void onPreparing() {
             super.onPreparing();
-            PlayerService.this.onPreparing();
+            PlayerService.this.updateNotificationView();
         }
 
         @Override
         protected void onPrepared(int audioSessionId) {
             super.onPrepared(audioSessionId);
-            PlayerService.this.onPrepared(audioSessionId);
+            PlayerService.this.updateNotificationView();
         }
 
         @Override
         protected void onPlaying(int progress, long updateTime) {
             super.onPlaying(progress, updateTime);
-            PlayerService.this.onPlaying(progress, updateTime);
+            PlayerService.this.updateNotificationView();
         }
 
         @Override
         protected void onPaused() {
             super.onPaused();
-            PlayerService.this.onPaused();
+            PlayerService.this.updateNotificationView();
         }
 
         @Override
         protected void onStalledChanged(boolean stalled) {
             super.onStalledChanged(stalled);
-            PlayerService.this.onStalledChanged(stalled);
+            PlayerService.this.updateNotificationView();
         }
 
         @Override
         protected void onStopped() {
             super.onStopped();
-            PlayerService.this.onStopped();
+            PlayerService.this.updateNotificationView();
         }
 
         @Override
         protected void onError(int errorCode, String errorMessage) {
             super.onError(errorCode, errorMessage);
-            PlayerService.this.onError(errorCode, errorMessage);
+            PlayerService.this.updateNotificationView();
         }
 
         @Override
         protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
             super.onPlayingMusicItemChanged(musicItem);
+            PlayerService.this.updateNotificationView();
             PlayerService.this.onPlayingMusicItemChanged(musicItem);
         }
 
@@ -1216,6 +1130,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         private Bitmap mDefaultIcon;
         private CustomTarget<Bitmap> mTarget;
 
+        private boolean mNotifyOnCreate;
+        private boolean mKeepOnStopped;
         private boolean mReleased;
 
         void init(PlayerService playerService) {
@@ -1265,61 +1181,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 该方法会在 Service 销毁时调用，可以在该方法中释放占用的资源。
          */
         protected void onRelease() {
-        }
-
-        /**
-         * 正在准备播放器。
-         */
-        protected void onPreparing() {
-            invalidate();
-        }
-
-        /**
-         * 播放器准备完毕。
-         */
-        protected void onPrepared() {
-            invalidate();
-        }
-
-        /**
-         * 播放器开始播放。
-         */
-        protected void onPlaying() {
-            invalidate();
-        }
-
-        /**
-         * 已暂停播放。
-         */
-        protected void onPaused() {
-            invalidate();
-        }
-
-        /**
-         * 播放器的 {@code stalled} 状态发生了改变。
-         *
-         * @param stalled 播放器的 {@code stalled} 状态。当缓冲区中没有足够的数据支持继续播放时，该参数为 true，
-         *                否则为 false
-         */
-        protected void onStalledChanged(boolean stalled) {
-            invalidate();
-        }
-
-        /**
-         * 播放器已停止播放。
-         */
-        protected void onStopped() {
-            invalidate();
-        }
-
-        /**
-         * 播放器发生了错误。
-         *
-         * @param errorCode    错误码
-         * @param errorMessage 错误信息
-         */
-        protected void onError(int errorCode, String errorMessage) {
-            invalidate();
         }
 
         /**
@@ -1406,12 +1267,12 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @return Notification 对象，不能为 null。
          */
         @NonNull
-        protected abstract Notification onCreateNotification();
+        public abstract Notification onCreateNotification();
 
         /**
          * 返回 Notification 的 ID。
          */
-        protected abstract int getNotificationId();
+        public abstract int getNotificationId();
 
         /**
          * 获取默认图标。
@@ -1419,7 +1280,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @return 通知的默认图标，不能为 null
          */
         @NonNull
-        protected Bitmap getDefaultIcon() {
+        public Bitmap getDefaultIcon() {
             Context context = getContext();
             BitmapDrawable drawable = (BitmapDrawable) ResourcesCompat.getDrawable(
                     context.getResources(),
@@ -1436,14 +1297,14 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 关闭播放器。
          */
-        protected final void shutdown() {
+        public final void shutdown() {
             mPlayerService.shutdown();
         }
 
         /**
          * 获取当前通知栏控制器的图标。
          */
-        protected final Bitmap getIcon() {
+        public final Bitmap getIcon() {
             return mIcon;
         }
 
@@ -1452,7 +1313,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * <p>
          * 调用该方法后会自动更新通知栏控制器，以应用最新设置的图标。
          */
-        protected final void setIcon(@NonNull Bitmap icon) {
+        public final void setIcon(@NonNull Bitmap icon) {
             mIcon = icon;
             invalidate();
         }
@@ -1462,7 +1323,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * <p>
          * 建议子类覆盖 {@link #onInit(Context)} 方法，并在该方法中完成图标尺寸的设置。
          */
-        protected final void setIconSize(int size) {
+        public final void setIconSize(int size) {
             setIconSize(size, size);
         }
 
@@ -1471,7 +1332,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * <p>
          * 建议子类覆盖 {@link #onInit(Context)} 方法，并在该方法中完成图标宽高尺寸的设置。
          */
-        protected final void setIconSize(int width, int height) {
+        public final void setIconSize(int width, int height) {
             mIconSize[0] = width;
             mIconSize[1] = height;
         }
@@ -1483,7 +1344,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          *
          * @param radius 图标圆角的半径
          */
-        protected final void setIconCornerRadius(int radius) {
+        public final void setIconCornerRadius(int radius) {
             setIconCornerRadius(radius, radius, radius, radius);
         }
 
@@ -1497,7 +1358,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @param bottomLeft  左下角圆角半径
          * @param bottomRight 右下角圆角半径
          */
-        protected final void setIconCornerRadius(int topLeft, int topRight, int bottomRight, int bottomLeft) {
+        public final void setIconCornerRadius(int topLeft, int topRight, int bottomRight, int bottomLeft) {
             mIconCornerRadius[0] = topLeft;
             mIconCornerRadius[1] = topRight;
             mIconCornerRadius[2] = bottomRight;
@@ -1507,7 +1368,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 获取通知栏控制器的 content title
          */
-        protected final CharSequence getContentTitle() {
+        public final CharSequence getContentTitle() {
             return MusicItemUtil.getTitle(getContext(), getPlayingMusicItem());
         }
 
@@ -1525,7 +1386,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @param contentText context text 的值，如果播放器处于正常播放器状态，该方法会将这个值原样返回，
          *                    如果播放器正在缓冲，或发生了错误，则将返回一个提示字符串
          */
-        protected final CharSequence getContentText(String contentText) {
+        public final CharSequence getContentText(String contentText) {
             String value = contentText;
             int textColor = 0;
 
@@ -1561,21 +1422,21 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 获取 Context 对象。
          */
-        protected final Context getContext() {
+        public final Context getContext() {
             return mPlayerService;
         }
 
         /**
          * 获取当前应用的包名。
          */
-        protected final String getPackageName() {
+        public final String getPackageName() {
             return getContext().getPackageName();
         }
 
         /**
          * 获取播放器的播放模式。
          */
-        protected final PlayMode getPlayMode() {
+        public final PlayMode getPlayMode() {
             return mPlayerService.getPlayMode();
         }
 
@@ -1583,7 +1444,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * 获取播放队列携带的额外参数（可为 null）。
          */
         @Nullable
-        protected final Bundle getPlaylistExtra() {
+        public final Bundle getPlaylistExtra() {
             return mPlayerService.getPlaylistExtra();
         }
 
@@ -1593,15 +1454,8 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @param action       自定在动作的名称，请保证该值的唯一性
          * @param customAction 要执行的任务
          */
-        protected final void addCustomAction(@NonNull String action, @NonNull CustomAction customAction) {
+        public final void addCustomAction(@NonNull String action, @NonNull CustomAction customAction) {
             mPlayerService.addCustomAction(action, customAction);
-        }
-
-        /**
-         * 当前是否正在播放音乐。
-         */
-        public final boolean isPlayingState() {
-            return mPlayerService.isPlayingState();
         }
 
         /**
@@ -1614,12 +1468,64 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         /**
+         * 播放器是否已准备完毕。
+         *
+         * @return 播放器是否已准备完毕。
+         */
+        public final boolean isPrepared() {
+            return mPlayerService.isPrepared();
+        }
+
+        /**
          * 判断当前播放器是否处于 {@code stalled} 状态。
          *
          * @return 当缓冲区没有足够的数据支持播放器继续播放时，该方法会返回 {@code true}，否则返回 false
          */
         public final boolean isStalled() {
             return mPlayerService.isStalled();
+        }
+
+        /**
+         * 获取播放器的播放状态。
+         *
+         * @return 播放器的播放状态
+         */
+        @NonNull
+        public final PlaybackState getPlaybackState() {
+            return mPlayerService.getPlaybackState();
+        }
+
+        /**
+         * 当前是否正在播放音乐。
+         */
+        public final boolean isPlayingState() {
+            return getPlaybackState() == PlaybackState.PLAYING;
+        }
+
+        /**
+         * 播放器是否发生了错误。
+         */
+        public final boolean isError() {
+            return getPlaybackState() == PlaybackState.ERROR;
+        }
+
+        /**
+         * 获取错误信息。
+         * <p>
+         * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
+         */
+        @NonNull
+        public final String getErrorMessage() {
+            return mPlayerService.getErrorMessage();
+        }
+
+        /**
+         * 检查 {@link NotificationView} 是否已被释放。
+         *
+         * @return 如果已被释放，则返回 true，此时不应该再调用 {@link NotificationView} 的任何方法。
+         */
+        public final boolean isReleased() {
+            return mReleased;
         }
 
         /**
@@ -1637,32 +1543,6 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          */
         public final MediaSessionCompat getMediaSession() {
             return mPlayerService.getMediaSession();
-        }
-
-        /**
-         * 播放器是否发生了错误。
-         */
-        public final boolean isError() {
-            return mPlayerService.isError();
-        }
-
-        /**
-         * 检查 {@link NotificationView} 是否已被释放。
-         *
-         * @return 如果已被释放，则返回 true，此时不应该再调用 {@link NotificationView} 的任何方法。
-         */
-        public final boolean isReleased() {
-            return mReleased;
-        }
-
-        /**
-         * 获取错误信息。
-         * <p>
-         * 该方法的返回值仅在发生错误（{@link #isError()} 方法返回 true）时才有意义。
-         */
-        @NonNull
-        public final String getErrorMessage() {
-            return mPlayerService.getErrorMessage();
         }
 
         /**
@@ -1760,7 +1640,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
 
         @NonNull
         @Override
-        protected Notification onCreateNotification() {
+        public Notification onCreateNotification() {
             androidx.media.app.NotificationCompat.MediaStyle mediaStyle =
                     new androidx.media.app.NotificationCompat.MediaStyle()
                             .setMediaSession(getMediaSession().getSessionToken());
@@ -1784,7 +1664,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         @Override
-        protected int getNotificationId() {
+        public int getNotificationId() {
             return 1024;
         }
 
@@ -1794,7 +1674,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
          * @return drawable 资源的 ID
          */
         @DrawableRes
-        protected int getSmallIconId() {
+        public int getSmallIconId() {
             return R.drawable.snow_ic_notification_small_icon;
         }
 
