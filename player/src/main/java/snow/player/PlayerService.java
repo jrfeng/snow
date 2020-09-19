@@ -69,6 +69,7 @@ import snow.player.util.MusicItemUtil;
  * 因为本项目大部的功能都依赖于 {@link PlayerClient} 类，如果不使用 {@link PlayerClient} 类，那么也无法使
  * 用这些功能。
  */
+@SuppressWarnings("SameReturnValue")
 public class PlayerService extends MediaBrowserServiceCompat implements PlayerManager {
     /**
      * 默认的 root id，值为 `"root"`。
@@ -1096,6 +1097,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         /**
          * 该方法会在 Service 销毁时调用，可以在该方法中释放占用的资源。
          */
+        @SuppressWarnings("EmptyMethod")
         protected void onRelease() {
         }
 

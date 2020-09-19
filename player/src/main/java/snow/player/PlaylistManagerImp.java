@@ -2,10 +2,8 @@ package snow.player;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
@@ -21,7 +19,6 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
-import snow.player.playlist.PlaylistEditor;
 import snow.player.playlist.PlaylistManager;
 
 /**
@@ -67,6 +64,7 @@ class PlaylistManagerImp implements PlaylistManager {
         return mMMKV.decodeInt(KEY_PLAYLIST_SIZE, 0);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     @Override
     public void getPlaylist(@NonNull final Callback callback) {
