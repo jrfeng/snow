@@ -17,8 +17,8 @@ import okhttp3.OkHttpClient;
 import snow.player.PlayerService;
 import snow.player.exo.ExoMusicPlayer;
 import snow.player.exo.util.OkHttpUtil;
-import snow.player.media.MusicItem;
-import snow.player.media.MusicPlayer;
+import snow.player.audio.MusicItem;
+import snow.player.audio.MusicPlayer;
 
 public class MyPlayerService extends PlayerService {
     private ProgressiveMediaSource.Factory mProgressiveMediaSourceFactory;

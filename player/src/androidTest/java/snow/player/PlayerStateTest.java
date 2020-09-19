@@ -9,8 +9,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.runner.RunWith;
 
-import snow.player.media.MusicItem;
-import snow.player.media.ErrorCode;
+import snow.player.audio.MusicItem;
+import snow.player.audio.ErrorCode;
 
 import static org.junit.Assert.*;
 

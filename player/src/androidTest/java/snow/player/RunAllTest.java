@@ -3,7 +3,7 @@ package snow.player;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import snow.player.media.MusicItemTest;
+import snow.player.audio.MusicItemTest;
 import snow.player.playlist.PlaylistTest;
 
 @Suite.SuiteClasses({

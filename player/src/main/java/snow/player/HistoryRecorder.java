@@ -2,7 +2,7 @@ package snow.player;
 
 import androidx.annotation.NonNull;
 
-import snow.player.media.MusicItem;
+import snow.player.audio.MusicItem;
 
 /**
  * 历史记录器，用于记录播放器的播放历史。

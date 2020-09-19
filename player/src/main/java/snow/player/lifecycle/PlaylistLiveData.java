@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 import snow.player.Player;
 import snow.player.PlayerClient;
-import snow.player.media.MusicItem;
+import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
 

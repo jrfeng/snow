@@ -14,10 +14,9 @@ import android.view.View;
 import android.widget.TextView;
 
 import snow.player.PlayerClient;
-import snow.player.PlayerService;
 import snow.player.debug.databinding.ActivityMainBinding;
 import snow.player.lifecycle.PlayerViewModel;
-import snow.player.media.MusicItem;
+import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
 
 public class MainActivity extends AppCompatActivity {

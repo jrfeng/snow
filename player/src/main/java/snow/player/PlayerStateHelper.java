@@ -5,8 +5,8 @@ import android.os.SystemClock;
 import androidx.annotation.Nullable;
 
 import snow.player.appwidget.AppWidgetPreferences;
-import snow.player.media.ErrorCode;
-import snow.player.media.MusicItem;
+import snow.player.audio.ErrorCode;
+import snow.player.audio.MusicItem;
 
 class PlayerStateHelper {
     private PlayerState mPlayerState;

@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
 
-import snow.player.media.MusicItem;
+import snow.player.audio.MusicItem;
 
 /**
  * 用于对播放器的部分关键状态进行持久化。

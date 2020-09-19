@@ -4,11 +4,8 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -39,7 +36,6 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.common.base.Preconditions;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,12 +50,12 @@ import media.helper.HeadsetHookHelper;
 
 import snow.player.appwidget.AppWidgetPreferences;
 import snow.player.effect.AudioEffectManager;
-import snow.player.media.MediaMusicPlayer;
-import snow.player.media.MusicItem;
-import snow.player.media.MusicPlayer;
+import snow.player.audio.MediaMusicPlayer;
+import snow.player.audio.MusicItem;
+import snow.player.audio.MusicPlayer;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistEditor;
-import snow.player.media.ErrorCode;
+import snow.player.audio.ErrorCode;
 import snow.player.util.MusicItemUtil;
 
 /**

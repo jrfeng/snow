@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import com.google.common.base.Preconditions;
 
 import snow.player.R;
-import snow.player.media.MusicItem;
+import snow.player.audio.MusicItem;
 
 /**
  * 用于帮助获取 {@link MusicItem} 的 title, artist, album 值。

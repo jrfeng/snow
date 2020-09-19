@@ -3,7 +3,7 @@ package snow.player.playlist;
 import androidx.annotation.NonNull;
 
 import channel.helper.Channel;
-import snow.player.media.MusicItem;
+import snow.player.audio.MusicItem;
 
 /**
  * 该接口定义了播放列表编辑器的基本功能。

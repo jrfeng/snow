@@ -1,4 +1,4 @@
-package snow.player.media;
+package snow.player.audio;
 
 /**
  * 该接口定义了音乐播放器的基本功能。可以通过实现该接口来创建一个自定义的音乐播放器。

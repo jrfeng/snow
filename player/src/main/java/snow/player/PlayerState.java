@@ -10,8 +10,8 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
-import snow.player.media.MusicItem;
-import snow.player.media.ErrorCode;
+import snow.player.audio.MusicItem;
+import snow.player.audio.ErrorCode;
 
 /**
  * 用于保存基本的播放器状态。

@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 
 import com.google.common.base.Preconditions;
 
-import snow.player.media.MusicPlayer;
+import snow.player.audio.MusicPlayer;
 
 /**
  * 用于帮助实现 “渐隐播放” 功能。
@@ -88,10 +88,10 @@ import snow.player.media.MusicPlayer;
  * }
  * </pre>
  * <p>
- * 如果你觉得这很繁琐，可以继承 {@link snow.player.media.AbstractMusicPlayer} 类，该类已对
+ * 如果你觉得这很繁琐，可以继承 {@link snow.player.audio.AbstractMusicPlayer} 类，该类已对
  * {@link VolumeEaseHelper} 进行了封装，可以减少模板代码。
  *
- * @see snow.player.media.AbstractMusicPlayer
+ * @see snow.player.audio.AbstractMusicPlayer
  */
 public class VolumeEaseHelper {
     private MusicPlayer mMusicPlayer;

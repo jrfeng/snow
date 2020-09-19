@@ -17,7 +17,7 @@ import java.util.Set;
 import snow.player.PlayMode;
 import snow.player.PlaybackState;
 import snow.player.PlayerService;
-import snow.player.media.MusicItem;
+import snow.player.audio.MusicItem;
 
 /**
  * 用于在 PlayerService 与 AppWidget 之间进行状态同步。支持跨进程访问。

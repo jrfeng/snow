@@ -28,11 +28,11 @@ import channel.helper.ChannelHelper;
 import channel.helper.DispatcherUtil;
 import channel.helper.pipe.CustomActionPipe;
 import channel.helper.pipe.SessionEventPipe;
-import snow.player.media.MusicItem;
+import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistEditor;
 import snow.player.playlist.PlaylistManager;
-import snow.player.media.ErrorCode;
+import snow.player.audio.ErrorCode;
 
 /**
  * 播放器客户端，用于向播放器发送各种控制命令。

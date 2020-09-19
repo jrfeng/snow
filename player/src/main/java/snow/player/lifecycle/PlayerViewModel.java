@@ -20,7 +20,7 @@ import snow.player.Player;
 import snow.player.PlayerClient;
 import snow.player.R;
 import snow.player.helper.PlayerClientHelper;
-import snow.player.media.MusicItem;
+import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
 import snow.player.util.MusicItemUtil;

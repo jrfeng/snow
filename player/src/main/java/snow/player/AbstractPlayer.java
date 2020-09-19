@@ -35,12 +35,12 @@ import io.reactivex.schedulers.Schedulers;
 import media.helper.AudioFocusHelper;
 import media.helper.BecomeNoiseHelper;
 import snow.player.appwidget.AppWidgetPreferences;
-import snow.player.media.MusicItem;
-import snow.player.media.MusicPlayer;
+import snow.player.audio.MusicItem;
+import snow.player.audio.MusicPlayer;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistEditor;
 import snow.player.playlist.PlaylistManager;
-import snow.player.media.ErrorCode;
+import snow.player.audio.ErrorCode;
 import snow.player.helper.NetworkHelper;
 
 /**

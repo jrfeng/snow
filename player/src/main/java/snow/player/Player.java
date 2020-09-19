@@ -4,7 +4,7 @@ import androidx.annotation.Nullable;
 
 import channel.helper.Channel;
 import channel.helper.UseOrdinal;
-import snow.player.media.MusicItem;
+import snow.player.audio.MusicItem;
 import snow.player.playlist.PlaylistManager;
 
 /**

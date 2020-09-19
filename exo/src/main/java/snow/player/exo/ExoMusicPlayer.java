@@ -14,8 +14,8 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceFactory;
 
-import snow.player.media.AbstractMusicPlayer;
-import snow.player.media.ErrorCode;
+import snow.player.audio.AbstractMusicPlayer;
+import snow.player.audio.ErrorCode;
 
 /**
  * 封装了一个 SimpleExoPlayer
