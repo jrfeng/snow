@@ -1724,6 +1724,9 @@ public class PlayerService extends MediaBrowserServiceCompat
          * <p>
          * 可以在该方法中对 {@code NotificationCompat.Builder} 对象进行配置。例如，调用
          * {@code addAction (int icon, CharSequence title, PendingIntent intent)} 向通知添加操作。
+         * <p>
+         * 该方法中使用 addAction 方法添加了三个按钮：上一曲、播放/暂停、下一曲。如果你不需要这三个按钮，
+         * 则你在覆盖该方法时可以不回调超类方法。
          */
         protected void onBuildNotification(NotificationCompat.Builder builder) {
             builder.addAction(R.drawable.snow_ic_skip_previous, "skip_to_previous", doSkipToPrevious());
