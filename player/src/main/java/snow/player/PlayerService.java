@@ -316,6 +316,15 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     /**
+     * 设置 MediaSessionCompat 的 Flags。
+     * <p>
+     * 相当于调用 MediaSessionCompat 的 setFlags(int) 方法。
+     */
+    protected void setMediaSessionFlags(int flags) {
+        mMediaSession.setFlags(flags);
+    }
+
+    /**
      * 创建一个 {@link MediaSessionCallback} 对象。
      * <p>
      * 如果你需要对 MediaSession 框架的 MediaSessionCompat.Callback 进行定制，则可以覆盖该方法并返回一个
