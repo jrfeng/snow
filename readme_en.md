@@ -165,12 +165,6 @@ playerClient.setPlaylist(playlist, true);
 * [**Wiki**](https://github.com/jrfeng/snow/wiki)
 * [**API Doc**](https://jrfeng.github.io/snow-doc/)
 
-### ProGuard
-
-```txt
--keep public class * extends snow.player.PlayerService$ComponentFactory { *; }
-```
-
 ## LICENSE
 
 ```txt
