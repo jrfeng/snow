@@ -139,7 +139,7 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     private void initPlaylistManager() {
-        mPlaylistManager = new PlaylistManagerImp(mApplicationContext, mPersistentId, false);
+        mPlaylistManager = new PlaylistManagerImp(mApplicationContext, mPersistentId);
     }
 
     private void initPlayerStateHolder() {
@@ -425,7 +425,6 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     private void setConnected(boolean connected) {
-        mPlaylistManager.setEditable(connected);
         mPlayerStateHolder.setConnected(connected);
     }
 

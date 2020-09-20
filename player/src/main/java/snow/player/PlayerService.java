@@ -220,7 +220,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void initPlaylistManager() {
-        mPlaylistManager = new PlaylistManagerImp(this, mPersistentId, true);
+        mPlaylistManager = new PlaylistManagerImp(this, mPersistentId);
     }
 
     private void initPlayer() {
