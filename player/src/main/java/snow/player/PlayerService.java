@@ -56,6 +56,7 @@ import snow.player.audio.MusicPlayer;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistEditor;
 import snow.player.audio.ErrorCode;
+import snow.player.playlist.PlaylistManager;
 import snow.player.util.MusicItemUtil;
 
 /**
@@ -70,7 +71,8 @@ import snow.player.util.MusicItemUtil;
  * 用这些功能。
  */
 @SuppressWarnings("SameReturnValue")
-public class PlayerService extends MediaBrowserServiceCompat implements PlayerManager {
+public class PlayerService extends MediaBrowserServiceCompat
+        implements PlayerManager, PlaylistManager, PlaylistEditor {
     /**
      * 默认的 root id，值为 `"root"`。
      */
@@ -697,13 +699,77 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
     }
 
     /**
+     * 往列表中插入了一首新的歌曲。
+     * <p>
+     * 如果播放列表中已包含指定歌曲，则会将它移动到 position 位置，如果不存在，则会将歌曲插入到 position 位置。
+     *
+     * @param position  歌曲插入的位置
+     * @param musicItem 要插入的歌曲，不能为 null
+     * @throws IllegalArgumentException 如果 position 的值小于 0，则抛出该异常
+     */
+    @Override
+    public void insertMusicItem(int position, @NonNull MusicItem musicItem) throws IllegalArgumentException {
+        if (position < 0) {
+            throw new IllegalArgumentException("position must >= 0.");
+        }
+        Preconditions.checkNotNull(musicItem);
+        mPlayer.insertMusicItem(position, musicItem);
+    }
+
+    @Override
+    public void appendMusicItem(@NonNull MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
+        mPlayer.appendMusicItem(musicItem);
+    }
+
+    /**
+     * 移动播放列表中某首歌曲的位置。
+     *
+     * @param fromPosition 歌曲在列表中的位置
+     * @param toPosition   歌曲要移动到的位置。如果 {@code toPosition == fromPosition}，则会忽略本次调用
+     * @throws IllegalArgumentException 如果 fromPosition 或者 toPosition 参数小于 0，则抛出该异常
+     */
+    @Override
+    public void moveMusicItem(int fromPosition, int toPosition) throws IllegalArgumentException {
+        if (fromPosition < 0) {
+            throw new IllegalArgumentException("fromPosition must >= 0.");
+        }
+
+        if (toPosition < 0) {
+            throw new IllegalArgumentException("toPosition must >= 0.");
+        }
+
+        mPlayer.moveMusicItem(fromPosition, toPosition);
+    }
+
+    @Override
+    public void removeMusicItem(@NonNull MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
+        mPlayer.removeMusicItem(musicItem);
+    }
+
+    @Override
+    public void setNextPlay(@NonNull MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
+        mPlayer.setNextPlay(musicItem);
+    }
+
+    /**
      * 设置一个新的播放列表。
      *
      * @param playlist 播放列表（不能为 null）
      * @param position 播放列表中要播放的歌曲的位置
      * @param play     是否立即播放 {@code position} 参数指定处的音乐
+     * @throws IllegalArgumentException 如果 position 参数小于 0，则会抛出该异常
      */
-    public final void setPlaylist(@NonNull Playlist playlist, final int position, final boolean play) {
+    @Override
+    public final void setPlaylist(@NonNull Playlist playlist, final int position, final boolean play)
+            throws IllegalArgumentException {
+        Preconditions.checkNotNull(playlist);
+        if (position < 0) {
+            throw new IllegalArgumentException("position must >= 0.");
+        }
+
         mPlayer.setPlaylist(playlist, position, play);
     }
 
@@ -783,10 +849,19 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         stopForegroundEx(true);
     }
 
-    private void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
+    private void playingMusicItemChanged(@Nullable MusicItem musicItem) {
         if (mHistoryRecorder != null && musicItem != null) {
             mHistoryRecorder.recordHistory(musicItem);
         }
+        onPlayingMusicItemChanged(musicItem);
+    }
+
+    /**
+     * 正在播放的音乐发生了改变（例如，切换播放的歌曲）。
+     *
+     * @param musicItem 当前正在播放的歌曲
+     */
+    protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
     }
 
     /**
@@ -812,6 +887,16 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         }
 
         mCustomActionDispatcher.dispatch(action, extras);
+    }
+
+    @Override
+    public int getPlaylistSize() {
+        return 0;
+    }
+
+    @Override
+    public void getPlaylist(@NonNull Callback callback) {
+
     }
 
     private class PlayerImp extends AbstractPlayer {
@@ -888,7 +973,7 @@ public class PlayerService extends MediaBrowserServiceCompat implements PlayerMa
         protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
             super.onPlayingMusicItemChanged(musicItem);
             PlayerService.this.updateNotificationView();
-            PlayerService.this.onPlayingMusicItemChanged(musicItem);
+            PlayerService.this.playingMusicItemChanged(musicItem);
         }
 
         @Override
