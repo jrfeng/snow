@@ -93,8 +93,6 @@ public class PlayerService extends MediaBrowserServiceCompat
      */
     public static final String SESSION_EVENT_ON_SHUTDOWN = "snow.player.session_event.on_shutdown";
 
-    private static final String NAME_COMPONENT_FACTORY = "component-factory";
-
     private String mPersistentId;
 
     private PlayerConfig mPlayerConfig;
