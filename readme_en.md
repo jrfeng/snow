@@ -1,5 +1,4 @@
 [![GitHub](https://img.shields.io/github/license/jrfeng/snow)](./license)
-[![](https://jitpack.io/v/jrfeng/snow.svg)](https://jitpack.io/#jrfeng/snow)
 [![GitHub issues](https://img.shields.io/github/issues/jrfeng/snow)](https://github.com/jrfeng/snow/issues)
 [![GitHub closed issues](https://img.shields.io/github/issues-closed/jrfeng/snow)](https://github.com/jrfeng/snow/issues?q=is%3Aissue+is%3Aclosed)
 
@@ -27,11 +26,11 @@ allprojects {
 }
 ```
 
-2. Add a dependency in the `build.gradle` file of your app module.
+2. Add a dependency in the `build.gradle` file of your app module([last version](https://github.com/jrfeng/snow/releases)).
 
 ```gradle
 dependencies {
-    implementation 'com.github.jrfeng.snow:player:0.1.9'
+    implementation 'com.github.jrfeng.snow:player:0.1.11'
 }
 ```
 
