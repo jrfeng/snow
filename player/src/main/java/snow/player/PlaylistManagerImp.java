@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
@@ -22,16 +23,13 @@ import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
 
 /**
- * 用于获取和设置播放器的播放列表。
+ * 用于获取和持久化保存播放器的播放列表。
  */
 class PlaylistManagerImp implements PlaylistManager {
-    private static final String TAG = "PlaylistManagerImp";
     private static final String KEY_PLAYLIST = "playlist";
     private static final String KEY_PLAYLIST_SIZE = "playlist_size";
 
     private MMKV mMMKV;
-    private boolean mEditable;
-
     private Disposable mSaveDisposable;
 
     /**
@@ -42,21 +40,12 @@ class PlaylistManagerImp implements PlaylistManager {
      *                   默认使用 {@link snow.player.PlayerService} 的 {@link Class} 对象的
      *                   {@link Class#getName()} 作为 ID
      */
-    PlaylistManagerImp(@NonNull Context context, @NonNull String playlistId, boolean editable) {
+    PlaylistManagerImp(@NonNull Context context, @NonNull String playlistId) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playlistId);
 
         MMKV.initialize(context);
         mMMKV = MMKV.mmkvWithID("PlaylistManager:" + playlistId, MMKV.MULTI_PROCESS_MODE);
-        mEditable = editable;
-    }
-
-    public boolean isEditable() {
-        return mEditable;
-    }
-
-    public void setEditable(boolean editable) {
-        mEditable = editable;
     }
 
     @Override
@@ -88,9 +77,14 @@ class PlaylistManagerImp implements PlaylistManager {
     }
 
     /**
-     * 将 Playlist 持久化保存到本地。该方法会异步执行。
+     * 将 Playlist 持久化保存到本地存储器。该方法会异步执行。
+     * <p>
+     * 如果在播放列表保存完成前再次调用了该方法，则会取消上次的保存，然后执行本次的保存。
+     *
+     * @param playlist  要保存到本地存储器的播放列表
+     * @param doOnSaved 保持完成后要执行的动作，会在主线程上执行
      */
-    public void save(@NonNull final Playlist playlist, final Runnable doOnSaved) {
+    public void save(@NonNull final Playlist playlist, @Nullable final Runnable doOnSaved) {
         Preconditions.checkNotNull(playlist);
 
         disposeLastSave();
