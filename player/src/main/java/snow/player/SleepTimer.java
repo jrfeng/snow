@@ -4,6 +4,11 @@ import channel.helper.Channel;
 
 /**
  * 睡眠定时器。
+ *
+ * @see PlayerClient#startSleepTimer(long)
+ * @see PlayerClient#cancelSleepTimer()
+ * @see PlayerClient#addOnSleepTimerStateChangeListener(OnStateChangeListener)
+ * @see PlayerClient#removeOnSleepTimerStateChangeListener(OnStateChangeListener)
  */
 @Channel
 public interface SleepTimer {
@@ -20,7 +25,7 @@ public interface SleepTimer {
     void cancel();
 
     /**
-     * 用于监听随眠定时器的暂停改变。
+     * 用于监听睡眠定时器的状态改变。
      * <p>
      * 当启动或者取消睡眠定时器时，该监听器会被调用。
      */
