@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import snow.player.PlayerClient;
+import snow.player.SleepTimer;
 import snow.player.debug.databinding.ActivityMainBinding;
 import snow.player.lifecycle.PlayerViewModel;
 import snow.player.audio.MusicItem;
@@ -43,6 +44,19 @@ public class MainActivity extends AppCompatActivity {
         mPlayerClient = PlayerClient.newInstance(this, MyPlayerService.class);
         playerViewModel.init(this, mPlayerClient);
         playerViewModel.setAutoDisconnect(true);
+
+        mPlayerClient.addOnSleepTimerStateChangeListener(this, new SleepTimer.OnStateChangeListener() {
+            @Override
+            public void onStarted(long time, long startTime) {
+                Log.d("App", "onStarted {time:" + time + ", startTime:" + startTime + "}");
+                Log.d("App", "currentTimeMillis:" + System.currentTimeMillis());
+            }
+
+            @Override
+            public void onCancelled() {
+                Log.d("App", "onCancelled");
+            }
+        });
     }
 
     @SuppressLint("SetTextI18n")
@@ -65,6 +79,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.btnSetPlaylist:
                 mPlayerClient.setPlaylist(createPlaylist());
+                break;
+            case R.id.btnStartSleepTimer:
+                mPlayerClient.startSleepTimer(10_000);
                 break;
         }
     }
