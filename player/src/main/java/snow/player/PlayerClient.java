@@ -708,6 +708,18 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     /**
+     * 获取睡眠定时器的时间到时要执行的操作。
+     * <p>
+     * 该方法的返回值只在睡眠定时器启动（{@link #isSleepTimerStarted()} 返回 true）时才有意义。
+     *
+     * @return 睡眠定时器的时间到时要执行的操作（默认为 {@link snow.player.SleepTimer.TimeoutAction#PAUSE}）
+     */
+    @NonNull
+    public SleepTimer.TimeoutAction getTimeoutAction() {
+        return mPlayerStateHolder.mPlayerState.getTimeoutAction();
+    }
+
+    /**
      * 下一曲。
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
@@ -916,15 +928,27 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常
      */
     public void startSleepTimer(long time) throws IllegalArgumentException {
+        startSleepTimer(time, SleepTimer.TimeoutAction.PAUSE);
+    }
+
+    /**
+     * 启动睡眠定时器。
+     *
+     * @param time   睡眠时间（单位：毫秒）。播放器会在经过 time 时间后暂停播放。
+     * @param action 定时器的的时间到时要执行的操作。
+     * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常
+     */
+    public void startSleepTimer(long time, @NonNull SleepTimer.TimeoutAction action) throws IllegalArgumentException {
         if (time < 0) {
             throw new IllegalArgumentException("time music >= 0");
         }
+        Preconditions.checkNotNull(action);
 
         if (notConnected()) {
             return;
         }
 
-        mSleepTimer.start(time);
+        mSleepTimer.start(time, action);
     }
 
     /**
@@ -2054,7 +2078,10 @@ public class PlayerClient implements Player, PlaylistEditor {
             }
 
             if (mPlayerState.isSleepTimerStarted()) {
-                listener.onStarted(mPlayerState.getSleepTimerTime(), mPlayerState.getSleepTimerStartTime());
+                listener.onStarted(
+                        mPlayerState.getSleepTimerTime(),
+                        mPlayerState.getSleepTimerStartTime(),
+                        mPlayerState.getTimeoutAction());
             } else {
                 listener.onCancelled();
             }
@@ -2156,8 +2183,8 @@ public class PlayerClient implements Player, PlaylistEditor {
         }
 
         @Override
-        public void onStarted(long time, long startTime) {
-            mPlayerStateHelper.onStartSleepTimer(time, startTime);
+        public void onStarted(long time, long startTime, SleepTimer.TimeoutAction action) {
+            mPlayerStateHelper.onStartSleepTimer(time, startTime, action);
             notifySleepTimerStateChanged();
         }
 

@@ -37,6 +37,7 @@ public class PlayerStateTest {
         assertFalse(playerState.isSleepTimerStarted());
         assertEquals(0, playerState.getSleepTimerTime());
         assertEquals(0, playerState.getSleepTimerStartTime());
+        assertEquals(SleepTimer.TimeoutAction.PAUSE, playerState.getTimeoutAction());
     }
 
     @Test
@@ -58,6 +59,7 @@ public class PlayerStateTest {
         source.setSleepTimerStarted(true);
         source.setSleepTimerTime(60_000);
         source.setSleepTimerStartTime(System.currentTimeMillis());
+        source.setTimeoutAction(SleepTimer.TimeoutAction.STOP);
 
         PlayerState copy = new PlayerState(source);
 
@@ -99,6 +101,7 @@ public class PlayerStateTest {
         final boolean sleepTimerStarted = true;
         final long sleepTimerTime = 60_000;
         final long sleepTimerStartTime = System.currentTimeMillis();
+        final SleepTimer.TimeoutAction timeoutAction = SleepTimer.TimeoutAction.STOP;
 
         PlayerState playerState = new PlayerState();
         playerState.setPlayProgress(playProgress);
@@ -117,6 +120,7 @@ public class PlayerStateTest {
         playerState.setSleepTimerStarted(sleepTimerStarted);
         playerState.setSleepTimerTime(sleepTimerTime);
         playerState.setSleepTimerStartTime(sleepTimerStartTime);
+        playerState.setTimeoutAction(timeoutAction);
 
         PlayerState other1 = new PlayerState();
         other1.setPlayProgress(playProgress);
@@ -135,6 +139,7 @@ public class PlayerStateTest {
         other1.setSleepTimerStarted(sleepTimerStarted);
         other1.setSleepTimerTime(sleepTimerTime);
         other1.setSleepTimerStartTime(sleepTimerStartTime);
+        other1.setTimeoutAction(timeoutAction);
 
         assertEquals(playerState, other1);
         assertEquals(playerState.hashCode(), other1.hashCode());
@@ -167,6 +172,7 @@ public class PlayerStateTest {
         final boolean sleepTimerStarted = true;
         final long sleepTimerTime = 60_000;
         final long sleepTimerStartTime = System.currentTimeMillis();
+        final SleepTimer.TimeoutAction timeoutAction = SleepTimer.TimeoutAction.STOP;
 
         PlayerState playerState = new PlayerState();
         playerState.setPlayProgress(playProgress);
@@ -185,6 +191,7 @@ public class PlayerStateTest {
         playerState.setSleepTimerStarted(sleepTimerStarted);
         playerState.setSleepTimerTime(sleepTimerTime);
         playerState.setSleepTimerStartTime(sleepTimerStartTime);
+        playerState.setTimeoutAction(timeoutAction);
 
         Parcel parcel = Parcel.obtain();
 

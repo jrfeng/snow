@@ -36,6 +36,7 @@ class PlayerState implements Parcelable {
     private boolean sleepTimerStarted;
     private long sleepTimerTime;
     private long sleepTimerStartTime;
+    private SleepTimer.TimeoutAction timeoutAction;
 
     public PlayerState() {
         playProgress = 0;
@@ -54,6 +55,7 @@ class PlayerState implements Parcelable {
         sleepTimerStarted = false;
         sleepTimerTime = 0;
         sleepTimerStartTime = 0;
+        timeoutAction = SleepTimer.TimeoutAction.PAUSE;
     }
 
     public PlayerState(PlayerState source) {
@@ -76,6 +78,7 @@ class PlayerState implements Parcelable {
         sleepTimerStarted = source.sleepTimerStarted;
         sleepTimerTime = source.sleepTimerTime;
         sleepTimerStartTime = source.sleepTimerStartTime;
+        timeoutAction = source.timeoutAction;
     }
 
     /**
@@ -356,28 +359,69 @@ class PlayerState implements Parcelable {
         return musicItem.isForbidSeek();
     }
 
+    /**
+     * 判断是否已经启动了睡眠定时器。
+     *
+     * @return 如果已经启动了睡眠定时器，则返回 true，否则返回 false
+     */
     public boolean isSleepTimerStarted() {
         return sleepTimerStarted;
     }
 
+    /**
+     * 设置是否启动了睡眠定时器。
+     */
     public void setSleepTimerStarted(boolean sleepTimerStarted) {
         this.sleepTimerStarted = sleepTimerStarted;
     }
 
+    /**
+     * 获取睡眠定时器的定时时间。
+     */
     public long getSleepTimerTime() {
         return sleepTimerTime;
     }
 
+    /**
+     * 设置睡眠定时器的定时时间。
+     */
     public void setSleepTimerTime(long time) {
         this.sleepTimerTime = time;
     }
 
+    /**
+     * 获取睡眠定时器的启动时间。
+     */
     public long getSleepTimerStartTime() {
         return sleepTimerStartTime;
     }
 
+    /**
+     * 设置睡眠定时器的启动时间。
+     */
     public void setSleepTimerStartTime(long sleepTimerStartTime) {
         this.sleepTimerStartTime = sleepTimerStartTime;
+    }
+
+    /**
+     * 获取睡眠定时器的时间到时要执行的操作。
+     *
+     * @see snow.player.SleepTimer.TimeoutAction
+     */
+    @NonNull
+    public SleepTimer.TimeoutAction getTimeoutAction() {
+        return timeoutAction;
+    }
+
+    /**
+     * 设置睡眠定时器的时间到时要执行的操作。
+     *
+     * @param action 睡眠定时器的时间到时要执行的操作，不能为 null
+     * @see snow.player.SleepTimer.TimeoutAction
+     */
+    public void setTimeoutAction(@NonNull SleepTimer.TimeoutAction action) {
+        Preconditions.checkNotNull(timeoutAction);
+        this.timeoutAction = action;
     }
 
     @Override
@@ -402,7 +446,8 @@ class PlayerState implements Parcelable {
                 && Objects.equal(errorMessage, other.errorMessage)
                 && Objects.equal(sleepTimerStarted, other.sleepTimerStarted)
                 && Objects.equal(sleepTimerTime, other.sleepTimerTime)
-                && Objects.equal(sleepTimerStartTime, other.sleepTimerStartTime);
+                && Objects.equal(sleepTimerStartTime, other.sleepTimerStartTime)
+                && Objects.equal(timeoutAction, other.timeoutAction);
     }
 
     @Override
@@ -422,7 +467,8 @@ class PlayerState implements Parcelable {
                 errorMessage,
                 sleepTimerStarted,
                 sleepTimerTime,
-                sleepTimerStartTime);
+                sleepTimerStartTime,
+                timeoutAction);
     }
 
     @NonNull
@@ -445,6 +491,7 @@ class PlayerState implements Parcelable {
                 ", sleepTimerStarted=" + sleepTimerStarted +
                 ", sleepTimerTime=" + sleepTimerTime +
                 ", sleepTimerStartTime=" + sleepTimerStartTime +
+                ", timeoutAction=" + timeoutAction +
                 '}';
     }
 
@@ -466,6 +513,7 @@ class PlayerState implements Parcelable {
         sleepTimerStarted = in.readByte() != 0;
         sleepTimerTime = in.readLong();
         sleepTimerStartTime = in.readLong();
+        timeoutAction = SleepTimer.TimeoutAction.values()[in.readInt()];
     }
 
     @Override
@@ -487,6 +535,7 @@ class PlayerState implements Parcelable {
         dest.writeByte((byte) (sleepTimerStarted ? 1 : 0));
         dest.writeLong(sleepTimerTime);
         dest.writeLong(sleepTimerStartTime);
+        dest.writeInt(timeoutAction.ordinal());
     }
 
     @Override

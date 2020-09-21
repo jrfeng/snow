@@ -929,14 +929,16 @@ public class PlayerService extends MediaBrowserServiceCompat
     /**
      * 启动睡眠定时器。
      *
-     * @param time 睡眠时间（单位：毫秒）。播放器会在经过 time 时间后暂停播放。
+     * @param time   睡眠时间（单位：毫秒）。播放器会在经过 time 时间后暂停播放。
+     * @param action 定时器的的时间到时要执行的操作。
      * @throws IllegalArgumentException 如果 time 小于 0，则抛出该异常。
      */
     @Override
-    public void start(long time) throws IllegalArgumentException {
+    public void start(long time, @NonNull final TimeoutAction action) throws IllegalArgumentException {
         if (time < 0) {
             throw new IllegalArgumentException("time must >= 0");
         }
+        Preconditions.checkNotNull(action);
 
         cancelSleepTimer(false);
 
@@ -954,13 +956,23 @@ public class PlayerService extends MediaBrowserServiceCompat
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) {
-                        PlayerService.this.getPlayer().pause();
+                        switch (action) {
+                            case PAUSE:
+                                PlayerService.this.getPlayer().pause();
+                                break;
+                            case STOP:
+                                PlayerService.this.getPlayer().stop();
+                                break;
+                            case SHUTDOWN:
+                                PlayerService.this.shutdown();
+                                break;
+                        }
                     }
                 });
 
         long startTime = System.currentTimeMillis();
-        mPlayerStateHelper.onStartSleepTimer(time, startTime);
-        mSleepTimerStateChangedListener.onStarted(time, startTime);
+        mPlayerStateHelper.onStartSleepTimer(time, startTime, action);
+        mSleepTimerStateChangedListener.onStarted(time, startTime, action);
     }
 
     /**
