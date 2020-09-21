@@ -7,8 +7,8 @@ import channel.helper.Channel;
  *
  * @see PlayerClient#startSleepTimer(long)
  * @see PlayerClient#cancelSleepTimer()
- * @see PlayerClient#addOnSleepTimerStateChangeListener(OnStateChangeListener)
- * @see PlayerClient#removeOnSleepTimerStateChangeListener(OnStateChangeListener)
+ * @see PlayerClient#addOnSleepTimerStateChangeListener(SleepTimer.OnStateChangeListener)
+ * @see PlayerClient#removeOnSleepTimerStateChangeListener(SleepTimer.OnStateChangeListener)
  */
 @Channel
 public interface SleepTimer {
