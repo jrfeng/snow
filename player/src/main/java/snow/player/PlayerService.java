@@ -940,6 +940,10 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         cancelSleepTimer(false);
 
+        if (getPlayingMusicItem() == null) {
+            return;
+        }
+
         if (time == 0) {
             getPlayer().pause();
             return;
@@ -956,7 +960,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         long startTime = System.currentTimeMillis();
         mPlayerStateHelper.onStartSleepTimer(time, startTime);
-        mSleepTimerStateChangedListener.onTimerStarted(time, startTime);
+        mSleepTimerStateChangedListener.onStarted(time, startTime);
     }
 
     /**
@@ -974,7 +978,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         if (notify) {
-            mSleepTimerStateChangedListener.onTimerCancelled();
+            mSleepTimerStateChangedListener.onCancelled();
         }
     }
 

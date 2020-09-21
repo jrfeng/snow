@@ -2054,9 +2054,9 @@ public class PlayerClient implements Player, PlaylistEditor {
             }
 
             if (mPlayerState.isSleepTimerStarted()) {
-                listener.onTimerStarted(mPlayerState.getSleepTimerTime(), mPlayerState.getSleepTimerStartTime());
+                listener.onStarted(mPlayerState.getSleepTimerTime(), mPlayerState.getSleepTimerStartTime());
             } else {
-                listener.onTimerCancelled();
+                listener.onCancelled();
             }
         }
 
@@ -2156,13 +2156,13 @@ public class PlayerClient implements Player, PlaylistEditor {
         }
 
         @Override
-        public void onTimerStarted(long time, long startTime) {
+        public void onStarted(long time, long startTime) {
             mPlayerStateHelper.onStartSleepTimer(time, startTime);
             notifySleepTimerStateChanged();
         }
 
         @Override
-        public void onTimerCancelled() {
+        public void onCancelled() {
             mPlayerStateHelper.onCancelSleepTimer();
             notifySleepTimerStateChanged();
         }

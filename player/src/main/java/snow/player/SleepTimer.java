@@ -36,13 +36,13 @@ public interface SleepTimer {
          *                  减去 startTime 即可知道睡眠定时器已经走过的时间。
          * @see #start(long)
          */
-        void onTimerStarted(long time, long startTime);
+        void onStarted(long time, long startTime);
 
         /**
          * 当睡眠定时器被取消时会调用该方法。
          *
          * @see #cancel()
          */
-        void onTimerCancelled();
+        void onCancelled();
     }
 }
