@@ -39,6 +39,7 @@ import com.google.common.base.Preconditions;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import channel.helper.ChannelHelper;
 import channel.helper.Dispatcher;
@@ -46,6 +47,10 @@ import channel.helper.DispatcherUtil;
 import channel.helper.pipe.CustomActionPipe;
 
 import channel.helper.pipe.SessionEventPipe;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import media.helper.HeadsetHookHelper;
 
 import snow.player.appwidget.AppWidgetPreferences;
@@ -72,7 +77,7 @@ import snow.player.util.MusicItemUtil;
  */
 @SuppressWarnings("SameReturnValue")
 public class PlayerService extends MediaBrowserServiceCompat
-        implements PlayerManager, PlaylistManager, PlaylistEditor {
+        implements PlayerManager, PlaylistManager, PlaylistEditor, SleepTimer {
     /**
      * 默认的 root id，值为 `"root"`。
      */
@@ -122,6 +127,10 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     @Nullable
     private HistoryRecorder mHistoryRecorder;
+
+    private OnStateChangeListener mSleepTimerStateChangedListener;
+    private Disposable mSleepTimerDisposable;
+    private PlayerStateHelper mPlayerStateHelper;
 
     @Override
     public void onCreate() {
@@ -217,6 +226,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private void initPlayerState() {
         mPlayerState = new PersistentPlayerState(this, mPersistentId);
+        mPlayerStateHelper = new PlayerStateHelper(mPlayerState);
     }
 
     private void initPlaylistManager() {
@@ -244,9 +254,16 @@ public class PlayerService extends MediaBrowserServiceCompat
         final Dispatcher playlistEditorDispatcher =
                 ChannelHelper.newDispatcher(PlaylistEditor.class, mPlayer);
 
-        mCustomActionDispatcher = new CustomActionPipe(DispatcherUtil.merge(playerManagerDispatcher,
-                playerDispatcher,
-                playlistEditorDispatcher));
+        final Dispatcher sleepTimerDispatcher =
+                ChannelHelper.newDispatcher(SleepTimer.class, this);
+
+        mCustomActionDispatcher = new CustomActionPipe(
+                DispatcherUtil.merge(
+                        playerManagerDispatcher,
+                        playerDispatcher,
+                        playlistEditorDispatcher,
+                        sleepTimerDispatcher
+                ));
     }
 
     private void initNotificationView() {
@@ -298,6 +315,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         SessionEventPipe sessionEventEmitter = new SessionEventPipe(mMediaSession);
         mCommandCallback = ChannelHelper.newEmitter(PlayerManager.OnCommandCallback.class, sessionEventEmitter);
         mPlayer.setPlayerStateListener(ChannelHelper.newEmitter(PlayerStateListener.class, sessionEventEmitter));
+        mSleepTimerStateChangedListener = ChannelHelper.newEmitter(OnStateChangeListener.class, sessionEventEmitter);
     }
 
     private void initAudioEffectManager() {
@@ -532,6 +550,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void notifyOnShutdown() {
+        cancelSleepTimer(true);
         mCommandCallback.onShutdown();
         mMediaSession.sendSessionEvent(SESSION_EVENT_ON_SHUTDOWN, null);
     }
@@ -898,12 +917,65 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     @Override
     public int getPlaylistSize() {
-        return 0;
+        return mPlayer.getPlaylistSize();
     }
 
     @Override
     public void getPlaylist(@NonNull Callback callback) {
+        Preconditions.checkNotNull(callback);
+        mPlaylistManager.getPlaylist(callback);
+    }
 
+    /**
+     * 启动睡眠定时器。
+     *
+     * @param time 睡眠时间（单位：毫秒）。播放器会在经过 time 时间后暂停播放。
+     * @throws IllegalArgumentException 如果 time 小于 0，则抛出该异常。
+     */
+    @Override
+    public void start(long time) throws IllegalArgumentException {
+        if (time < 0) {
+            throw new IllegalArgumentException("time must >= 0");
+        }
+
+        cancelSleepTimer(false);
+
+        if (time == 0) {
+            getPlayer().pause();
+            return;
+        }
+
+        mSleepTimerDisposable = Observable.timer(time, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long aLong) {
+                        PlayerService.this.getPlayer().pause();
+                    }
+                });
+
+        long startTime = System.currentTimeMillis();
+        mPlayerStateHelper.onStartSleepTimer(time, startTime);
+        mSleepTimerStateChangedListener.onTimerStarted(time, startTime);
+    }
+
+    /**
+     * 取消睡眠定时器。
+     */
+    @Override
+    public void cancel() {
+        mPlayerStateHelper.onCancelSleepTimer();
+        cancelSleepTimer(true);
+    }
+
+    private void cancelSleepTimer(boolean notify) {
+        if (mSleepTimerDisposable == null || mSleepTimerDisposable.isDisposed()) {
+            return;
+        }
+
+        if (notify) {
+            mSleepTimerStateChangedListener.onTimerCancelled();
+        }
     }
 
     private class PlayerImp extends AbstractPlayer {

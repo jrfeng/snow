@@ -189,4 +189,14 @@ class PlayerStateHelper {
                     .commit();
         }
     }
+
+    public void onStartSleepTimer(long time, long startTime) {
+        mPlayerState.setSleepTimerStarted(true);
+        mPlayerState.setSleepTimerTime(time);
+        mPlayerState.setSleepTimerStartTime(startTime);
+    }
+
+    public void onCancelSleepTimer() {
+        mPlayerState.setSleepTimerStarted(false);
+    }
 }

@@ -51,6 +51,7 @@ public class PlayerClient implements Player, PlaylistEditor {
     private PlayerConfig mPlayerConfig;
     private PlayerManager mPlayerManager;
     private PlayerManager.OnCommandCallback mCommandCallback;
+    private SleepTimer mSleepTimer;
 
     private OnConnectCallback mConnectCallback;
 
@@ -173,12 +174,15 @@ public class PlayerClient implements Player, PlaylistEditor {
         mPlaylistEditor = ChannelHelper.newEmitter(PlaylistEditor.class, customActionEmitter);
 
         mPlayerManager = ChannelHelper.newEmitter(PlayerManager.class, customActionEmitter);
+
+        mSleepTimer = ChannelHelper.newEmitter(SleepTimer.class, customActionEmitter);
     }
 
     private void initSessionEventDispatcher() {
         mSessionEventDispatcher = new SessionEventPipe(DispatcherUtil.merge(
                 ChannelHelper.newDispatcher(PlayerManager.OnCommandCallback.class, mCommandCallback),
-                ChannelHelper.newDispatcher(PlayerStateListener.class, mPlayerStateHolder)
+                ChannelHelper.newDispatcher(PlayerStateListener.class, mPlayerStateHolder),
+                ChannelHelper.newDispatcher(SleepTimer.OnStateChangeListener.class, mPlayerStateHolder)
         ));
     }
 
@@ -257,7 +261,9 @@ public class PlayerClient implements Player, PlaylistEditor {
      *
      * @param listener 要添加的事件监听器，如果已添加，则会忽略本次调用
      */
-    public void addOnConnectStateChangeListener(OnConnectStateChangeListener listener) {
+    public void addOnConnectStateChangeListener(@NonNull OnConnectStateChangeListener listener) {
+        Preconditions.checkNotNull(listener);
+
         if (mAllConnectStateChangeListener.contains(listener)) {
             return;
         }
@@ -272,7 +278,11 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param owner    LifecycleOwner 对象。监听器会在该 LifecycleOwner 对象销毁时自动注销，避免内存泄露
      * @param listener 要添加的事件监听器，如果已添加，则会忽略本次调用
      */
-    public void addOnConnectStateChangeListener(LifecycleOwner owner, final OnConnectStateChangeListener listener) {
+    public void addOnConnectStateChangeListener(@NonNull LifecycleOwner owner,
+                                                @NonNull final OnConnectStateChangeListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
         if (isDestroyed(owner)) {
             return;
         }
@@ -665,6 +675,39 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     /**
+     * 查询睡眠定时器是否已启动。
+     *
+     * @return 睡眠定时器是否已启动，如果已启动则返回 true，否则返回 false
+     */
+    public boolean isSleepTimerStarted() {
+        return mPlayerStateHolder.mPlayerState.isSleepTimerStarted();
+    }
+
+    /**
+     * 获取睡眠定时器的定时时间。
+     * <p>
+     * 该方法的返回值只在睡眠定时器启动（{@link #isSleepTimerStarted()} 返回 true）时才有意义。
+     *
+     * @return 睡眠定时器的定时时间。该方法的返回值只在睡眠定时器启动（{@link #isSleepTimerStarted()} 返回 true）时才有意义。
+     */
+    public long getSleepTimerTime() {
+        return mPlayerStateHolder.mPlayerState.getSleepTimerTime();
+    }
+
+    /**
+     * 获取睡眠定时器的启动时间。
+     * <p>
+     * 该方法的返回值只在睡眠定时器启动（{@link #isSleepTimerStarted()} 返回 true）时才有意义。
+     * <p>
+     * 使用当前的 System.currentTimeMillis() 减去这个时间，即可知道睡眠定时器已经走过的时间。
+     *
+     * @return 睡眠定时器的启动时间。该方法的返回值只在睡眠定时器启动（{@link #isSleepTimerStarted()} 返回 true）时才有意义。
+     */
+    public long getSleepTimerStartedTime() {
+        return mPlayerStateHolder.mPlayerState.getSleepTimerStartTime();
+    }
+
+    /**
      * 下一曲。
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
@@ -867,6 +910,35 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     /**
+     * 启动睡眠定时器。
+     *
+     * @param time 睡眠时间（单位：毫秒）。播放器会在经过 time 时间后暂停播放。
+     * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常
+     */
+    public void startSleepTimer(long time) throws IllegalArgumentException {
+        if (time < 0) {
+            throw new IllegalArgumentException("time music >= 0");
+        }
+
+        if (notConnected()) {
+            return;
+        }
+
+        mSleepTimer.start(time);
+    }
+
+    /**
+     * 取消睡眠定时器。
+     */
+    public void cancelSleepTimer() {
+        if (notConnected()) {
+            return;
+        }
+
+        mSleepTimer.cancel();
+    }
+
+    /**
      * 添加一个播放器播放状态监听器。
      * <p>
      * 如果监听器已添加，则忽略本次调用。
@@ -874,7 +946,8 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param listener 播放器播放状态监听器
      * @see Player.OnPlaybackStateChangeListener
      */
-    public void addOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
+    public void addOnPlaybackStateChangeListener(@NonNull Player.OnPlaybackStateChangeListener listener) {
+        Preconditions.checkNotNull(listener);
         mPlayerStateHolder.addOnPlaybackStateChangeListener(listener);
     }
 
@@ -889,8 +962,11 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param listener 播放器播放状态监听器
      * @see Player.OnPlaybackStateChangeListener
      */
-    public void addOnPlaybackStateChangeListener(LifecycleOwner owner,
-                                                 final Player.OnPlaybackStateChangeListener listener) {
+    public void addOnPlaybackStateChangeListener(@NonNull LifecycleOwner owner,
+                                                 @NonNull final Player.OnPlaybackStateChangeListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
         if (isDestroyed(owner)) {
             return;
         }
@@ -918,7 +994,8 @@ public class PlayerClient implements Player, PlaylistEditor {
      *
      * @param listener 如果监听器已存在，则忽略本次添加
      */
-    public void addOnPrepareListener(Player.OnPrepareListener listener) {
+    public void addOnPrepareListener(@NonNull Player.OnPrepareListener listener) {
+        Preconditions.checkNotNull(listener);
         mPlayerStateHolder.addOnPrepareListener(listener);
     }
 
@@ -930,7 +1007,10 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param owner    LifecycleOwner 对象
      * @param listener 如果监听器已存在，则忽略本次添加
      */
-    public void addOnPrepareListener(LifecycleOwner owner, final Player.OnPrepareListener listener) {
+    public void addOnPrepareListener(@NonNull LifecycleOwner owner, @NonNull final Player.OnPrepareListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
         if (isDestroyed(owner)) {
             return;
         }
@@ -961,7 +1041,8 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param listener 要添加的监听器
      * @see Player.OnStalledChangeListener
      */
-    public void addOnStalledChangeListener(Player.OnStalledChangeListener listener) {
+    public void addOnStalledChangeListener(@NonNull Player.OnStalledChangeListener listener) {
+        Preconditions.checkNotNull(listener);
         mPlayerStateHolder.addOnStalledChangeListener(listener);
     }
 
@@ -975,8 +1056,11 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param listener 要添加的监听器
      * @see Player.OnStalledChangeListener
      */
-    public void addOnStalledChangeListener(LifecycleOwner owner,
-                                           final Player.OnStalledChangeListener listener) {
+    public void addOnStalledChangeListener(@NonNull LifecycleOwner owner,
+                                           @NonNull final Player.OnStalledChangeListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
         if (isDestroyed(owner)) {
             return;
         }
@@ -1007,7 +1091,8 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param listener 要添加的监听器
      * @see Player.OnBufferedProgressChangeListener
      */
-    public void addOnBufferedProgressChangeListener(OnBufferedProgressChangeListener listener) {
+    public void addOnBufferedProgressChangeListener(@NonNull OnBufferedProgressChangeListener listener) {
+        Preconditions.checkNotNull(listener);
         mPlayerStateHolder.addOnBufferedProgressChangeListener(listener);
     }
 
@@ -1021,8 +1106,11 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param owner    LifecycleOwner 对象
      * @param listener 要添加的监听器
      */
-    public void addOnBufferedProgressChangeListener(LifecycleOwner owner,
-                                                    final OnBufferedProgressChangeListener listener) {
+    public void addOnBufferedProgressChangeListener(@NonNull LifecycleOwner owner,
+                                                    @NonNull final OnBufferedProgressChangeListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
         if (isDestroyed(owner)) {
             return;
         }
@@ -1053,7 +1141,8 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param listener 要添加的监听器
      * @see Player.OnPlayingMusicItemChangeListener
      */
-    public void addOnPlayingMusicItemChangeListener(Player.OnPlayingMusicItemChangeListener listener) {
+    public void addOnPlayingMusicItemChangeListener(@NonNull Player.OnPlayingMusicItemChangeListener listener) {
+        Preconditions.checkNotNull(listener);
         mPlayerStateHolder.addOnPlayingMusicItemChangeListener(listener);
     }
 
@@ -1067,8 +1156,11 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param listener 要添加的监听器
      * @see Player.OnPlayingMusicItemChangeListener
      */
-    public void addOnPlayingMusicItemChangeListener(LifecycleOwner owner,
-                                                    final Player.OnPlayingMusicItemChangeListener listener) {
+    public void addOnPlayingMusicItemChangeListener(@NonNull LifecycleOwner owner,
+                                                    @NonNull final Player.OnPlayingMusicItemChangeListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
         if (isDestroyed(owner)) {
             return;
         }
@@ -1099,7 +1191,8 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param listener 要添加的监听器
      * @see Player.OnSeekCompleteListener
      */
-    public void addOnSeekCompleteListener(OnSeekCompleteListener listener) {
+    public void addOnSeekCompleteListener(@NonNull OnSeekCompleteListener listener) {
+        Preconditions.checkNotNull(listener);
         mPlayerStateHolder.addOnSeekCompleteListener(listener);
     }
 
@@ -1113,8 +1206,11 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param listener 要添加的监听器
      * @see Player.OnSeekCompleteListener
      */
-    public void addOnSeekCompleteListener(LifecycleOwner owner,
-                                          final OnSeekCompleteListener listener) {
+    public void addOnSeekCompleteListener(@NonNull LifecycleOwner owner,
+                                          @NonNull final OnSeekCompleteListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
         if (isDestroyed(owner)) {
             return;
         }
@@ -1145,7 +1241,8 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param listener 要添加的监听器
      * @see Player.OnPlaylistChangeListener
      */
-    public void addOnPlaylistChangeListener(Player.OnPlaylistChangeListener listener) {
+    public void addOnPlaylistChangeListener(@NonNull Player.OnPlaylistChangeListener listener) {
+        Preconditions.checkNotNull(listener);
         mPlayerStateHolder.addOnPlaylistChangeListener(listener);
     }
 
@@ -1159,8 +1256,11 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param listener 要添加的监听器
      * @see Player.OnPlaylistChangeListener
      */
-    public void addOnPlaylistChangeListener(LifecycleOwner owner,
-                                            final Player.OnPlaylistChangeListener listener) {
+    public void addOnPlaylistChangeListener(@NonNull LifecycleOwner owner,
+                                            @NonNull final Player.OnPlaylistChangeListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
         if (isDestroyed(owner)) {
             return;
         }
@@ -1191,7 +1291,8 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param listener 要添加的监听器
      * @see Player.OnPlayModeChangeListener
      */
-    public void addOnPlayModeChangeListener(Player.OnPlayModeChangeListener listener) {
+    public void addOnPlayModeChangeListener(@NonNull Player.OnPlayModeChangeListener listener) {
+        Preconditions.checkNotNull(listener);
         mPlayerStateHolder.addOnPlayModeChangeListener(listener);
     }
 
@@ -1205,8 +1306,11 @@ public class PlayerClient implements Player, PlaylistEditor {
      * @param listener 要添加的监听器
      * @see Player.OnPlayModeChangeListener
      */
-    public void addOnPlayModeChangeListener(LifecycleOwner owner,
-                                            final Player.OnPlayModeChangeListener listener) {
+    public void addOnPlayModeChangeListener(@NonNull LifecycleOwner owner,
+                                            @NonNull final Player.OnPlayModeChangeListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
         if (isDestroyed(owner)) {
             return;
         }
@@ -1236,7 +1340,8 @@ public class PlayerClient implements Player, PlaylistEditor {
      *
      * @param listener 要添加的监听器
      */
-    public void addOnPlaybackStateChangeListener(OnPlaybackStateChangeListener listener) {
+    public void addOnPlaybackStateChangeListener(@NonNull OnPlaybackStateChangeListener listener) {
+        Preconditions.checkNotNull(listener);
         mPlayerStateHolder.addOnPlaybackStateChangeListener(listener);
     }
 
@@ -1249,8 +1354,11 @@ public class PlayerClient implements Player, PlaylistEditor {
      *
      * @param listener 要添加的监听器
      */
-    public void addOnPlaybackStateChangeListener(LifecycleOwner owner,
-                                                 final OnPlaybackStateChangeListener listener) {
+    public void addOnPlaybackStateChangeListener(@NonNull LifecycleOwner owner,
+                                                 @NonNull final OnPlaybackStateChangeListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
         if (isDestroyed(owner)) {
             return;
         }
@@ -1280,7 +1388,9 @@ public class PlayerClient implements Player, PlaylistEditor {
      *
      * @param listener 要添加的监听器
      */
-    public void addOnAudioSessionChangeListener(OnAudioSessionChangeListener listener) {
+    public void addOnAudioSessionChangeListener(@NonNull OnAudioSessionChangeListener listener) {
+        Preconditions.checkNotNull(listener);
+
         mPlayerStateHolder.addOnAudioSessionChangeListener(listener);
     }
 
@@ -1293,8 +1403,11 @@ public class PlayerClient implements Player, PlaylistEditor {
      *
      * @param listener 要添加的监听器
      */
-    public void addOnAudioSessionChangeListener(LifecycleOwner owner,
-                                                final OnAudioSessionChangeListener listener) {
+    public void addOnAudioSessionChangeListener(@NonNull LifecycleOwner owner,
+                                                @NonNull final OnAudioSessionChangeListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
         if (isDestroyed(owner)) {
             return;
         }
@@ -1315,6 +1428,54 @@ public class PlayerClient implements Player, PlaylistEditor {
      */
     public void removeOnAudioSessionChangeListener(OnAudioSessionChangeListener listener) {
         mPlayerStateHolder.removeOnAudioSessionChangeListener(listener);
+    }
+
+    /**
+     * 监听睡眠定时器的状态。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 要添加的监听器
+     */
+    public void addOnSleepTimerStateChangeListener(@NonNull SleepTimer.OnStateChangeListener listener) {
+        Preconditions.checkNotNull(listener);
+        mPlayerStateHolder.addOnSleepTimerStateChangeListener(listener);
+    }
+
+    /**
+     * 监听睡眠定时器的状态。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param listener 要添加的监听器
+     */
+    public void addOnSleepTimerStateChangeListener(@NonNull LifecycleOwner owner,
+                                                   @NonNull final SleepTimer.OnStateChangeListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnSleepTimerStateChangeListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnSleepTimerStateChangeListener(listener);
+            }
+        }));
+    }
+
+    /**
+     * 移除已注册的睡眠定时器状态监听器。
+     *
+     * @param listener 要移除的监听器
+     */
+    public void removeOnSleepTimerStateChangeListener(SleepTimer.OnStateChangeListener listener) {
+        mPlayerStateHolder.removeOnSleepTimerStateChangeListener(listener);
     }
 
     private boolean isDestroyed(LifecycleOwner owner) {
@@ -1452,7 +1613,8 @@ public class PlayerClient implements Player, PlaylistEditor {
     // 用于管理与同步播放器状态
     private static class PlayerStateHolder implements PlayerStateListener,
             Player.OnPlaylistChangeListener,
-            Player.OnPlayModeChangeListener {
+            Player.OnPlayModeChangeListener,
+            SleepTimer.OnStateChangeListener {
         private PlayerState mPlayerState;
         private PlayerStateHelper mPlayerStateHelper;
         private PlaylistManager mPlaylistManager;
@@ -1469,6 +1631,7 @@ public class PlayerClient implements Player, PlaylistEditor {
 
         private List<PlayerClient.OnPlaybackStateChangeListener> mClientAllPlaybackStateChangeListener;
         private List<PlayerClient.OnAudioSessionChangeListener> mAllAudioSessionChangeListener;
+        private List<SleepTimer.OnStateChangeListener> mAllSleepTimerStateChangeListener;
 
         PlayerStateHolder(PlaylistManager playlistManager) {
             mPlaylistManager = playlistManager;
@@ -1485,6 +1648,7 @@ public class PlayerClient implements Player, PlaylistEditor {
             mAllPlayModeChangeListener = new ArrayList<>();
             mClientAllPlaybackStateChangeListener = new ArrayList<>();
             mAllAudioSessionChangeListener = new ArrayList<>();
+            mAllSleepTimerStateChangeListener = new ArrayList<>();
         }
 
         void setPlayerState(PlayerState playerState) {
@@ -1503,6 +1667,10 @@ public class PlayerClient implements Player, PlaylistEditor {
 
             if (mPlayerState.isStalled()) {
                 notifyStalledChanged();
+            }
+
+            if (mPlayerState.isSleepTimerStarted()) {
+                notifySleepTimerStateChanged();
             }
         }
 
@@ -1647,6 +1815,21 @@ public class PlayerClient implements Player, PlaylistEditor {
 
         void removeOnAudioSessionChangeListener(OnAudioSessionChangeListener listener) {
             mAllAudioSessionChangeListener.remove(listener);
+        }
+
+        void addOnSleepTimerStateChangeListener(SleepTimer.OnStateChangeListener listener) {
+            if (mAllSleepTimerStateChangeListener.contains(listener)) {
+                return;
+            }
+
+            mAllSleepTimerStateChangeListener.add(listener);
+            if (mPlayerState.isSleepTimerStarted()) {
+                notifySleepTimerStateChanged(listener);
+            }
+        }
+
+        void removeOnSleepTimerStateChangeListener(SleepTimer.OnStateChangeListener listener) {
+            mAllSleepTimerStateChangeListener.remove(listener);
         }
 
         private void notifyPlaybackStateChanged(Player.OnPlaybackStateChangeListener listener) {
@@ -1855,6 +2038,28 @@ public class PlayerClient implements Player, PlaylistEditor {
             listener.onAudioSessionChanged(mPlayerState.getAudioSessionId());
         }
 
+        private void notifySleepTimerStateChanged() {
+            if (notConnected()) {
+                return;
+            }
+
+            for (SleepTimer.OnStateChangeListener listener : mAllSleepTimerStateChangeListener) {
+                notifySleepTimerStateChanged(listener);
+            }
+        }
+
+        private void notifySleepTimerStateChanged(SleepTimer.OnStateChangeListener listener) {
+            if (notConnected()) {
+                return;
+            }
+
+            if (mPlayerState.isSleepTimerStarted()) {
+                listener.onTimerStarted(mPlayerState.getSleepTimerTime(), mPlayerState.getSleepTimerStartTime());
+            } else {
+                listener.onTimerCancelled();
+            }
+        }
+
         @Override
         public void onPreparing() {
             boolean error = mPlayerState.getPlaybackState() == PlaybackState.ERROR;
@@ -1948,6 +2153,18 @@ public class PlayerClient implements Player, PlaylistEditor {
             mPlayerStateHelper.onPlayModeChanged(playMode);
 
             notifyPlayModeChanged();
+        }
+
+        @Override
+        public void onTimerStarted(long time, long startTime) {
+            mPlayerStateHelper.onStartSleepTimer(time, startTime);
+            notifySleepTimerStateChanged();
+        }
+
+        @Override
+        public void onTimerCancelled() {
+            mPlayerStateHelper.onCancelSleepTimer();
+            notifySleepTimerStateChanged();
         }
     }
 

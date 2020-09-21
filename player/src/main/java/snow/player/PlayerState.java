@@ -33,6 +33,9 @@ class PlayerState implements Parcelable {
     private boolean stalled;
     private int errorCode;
     private String errorMessage;
+    private boolean sleepTimerStarted;
+    private long sleepTimerTime;
+    private long sleepTimerStartTime;
 
     public PlayerState() {
         playProgress = 0;
@@ -48,6 +51,9 @@ class PlayerState implements Parcelable {
         stalled = false;
         errorCode = ErrorCode.NO_ERROR;
         errorMessage = "";
+        sleepTimerStarted = false;
+        sleepTimerTime = 0;
+        sleepTimerStartTime = 0;
     }
 
     public PlayerState(PlayerState source) {
@@ -67,6 +73,9 @@ class PlayerState implements Parcelable {
         stalled = source.stalled;
         errorCode = source.errorCode;
         errorMessage = source.errorMessage;
+        sleepTimerStarted = source.sleepTimerStarted;
+        sleepTimerTime = source.sleepTimerTime;
+        sleepTimerStartTime = source.sleepTimerStartTime;
     }
 
     /**
@@ -347,6 +356,30 @@ class PlayerState implements Parcelable {
         return musicItem.isForbidSeek();
     }
 
+    public boolean isSleepTimerStarted() {
+        return sleepTimerStarted;
+    }
+
+    public void setSleepTimerStarted(boolean sleepTimerStarted) {
+        this.sleepTimerStarted = sleepTimerStarted;
+    }
+
+    public long getSleepTimerTime() {
+        return sleepTimerTime;
+    }
+
+    public void setSleepTimerTime(long time) {
+        this.sleepTimerTime = time;
+    }
+
+    public long getSleepTimerStartTime() {
+        return sleepTimerStartTime;
+    }
+
+    public void setSleepTimerStartTime(long sleepTimerStartTime) {
+        this.sleepTimerStartTime = sleepTimerStartTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -366,7 +399,10 @@ class PlayerState implements Parcelable {
                 && Objects.equal(bufferedProgress, other.bufferedProgress)
                 && Objects.equal(stalled, other.stalled)
                 && Objects.equal(errorCode, other.errorCode)
-                && Objects.equal(errorMessage, other.errorMessage);
+                && Objects.equal(errorMessage, other.errorMessage)
+                && Objects.equal(sleepTimerStarted, other.sleepTimerStarted)
+                && Objects.equal(sleepTimerTime, other.sleepTimerTime)
+                && Objects.equal(sleepTimerStartTime, other.sleepTimerStartTime);
     }
 
     @Override
@@ -383,7 +419,10 @@ class PlayerState implements Parcelable {
                 bufferedProgress,
                 stalled,
                 errorCode,
-                errorMessage);
+                errorMessage,
+                sleepTimerStarted,
+                sleepTimerTime,
+                sleepTimerStartTime);
     }
 
     @NonNull
@@ -403,6 +442,9 @@ class PlayerState implements Parcelable {
                 ", stalled=" + stalled +
                 ", errorCode=" + errorCode +
                 ", errorMessage='" + errorMessage + '\'' +
+                ", sleepTimerStarted=" + sleepTimerStarted +
+                ", sleepTimerTime=" + sleepTimerTime +
+                ", sleepTimerStartTime=" + sleepTimerStartTime +
                 '}';
     }
 
@@ -421,6 +463,9 @@ class PlayerState implements Parcelable {
         stalled = in.readByte() != 0;
         errorCode = in.readInt();
         errorMessage = in.readString();
+        sleepTimerStarted = in.readByte() != 0;
+        sleepTimerTime = in.readLong();
+        sleepTimerStartTime = in.readLong();
     }
 
     @Override
@@ -439,6 +484,9 @@ class PlayerState implements Parcelable {
         dest.writeByte((byte) (stalled ? 1 : 0));
         dest.writeInt(errorCode);
         dest.writeString(errorMessage);
+        dest.writeByte((byte) (sleepTimerStarted ? 1 : 0));
+        dest.writeLong(sleepTimerTime);
+        dest.writeLong(sleepTimerStartTime);
     }
 
     @Override

@@ -22,7 +22,7 @@ public class PlayerStateTest {
         PlayerState playerState = new PlayerState();
 
         assertEquals(0, playerState.getPlayProgress());
-        assertEquals(0,playerState.getPlayProgressUpdateTime());
+        assertEquals(0, playerState.getPlayProgressUpdateTime());
         assertEquals(0, playerState.getPlayPosition());
         assertEquals(PlayMode.SEQUENTIAL, playerState.getPlayMode());
 
@@ -34,6 +34,9 @@ public class PlayerStateTest {
         assertFalse(playerState.isStalled());
         assertEquals(ErrorCode.NO_ERROR, playerState.getErrorCode());
         assertNotNull(playerState.getErrorMessage());
+        assertFalse(playerState.isSleepTimerStarted());
+        assertEquals(0, playerState.getSleepTimerTime());
+        assertEquals(0, playerState.getSleepTimerStartTime());
     }
 
     @Test
@@ -52,6 +55,9 @@ public class PlayerStateTest {
         source.setStalled(true);
         source.setErrorCode(ErrorCode.PLAYER_ERROR);
         source.setErrorMessage("player error");
+        source.setSleepTimerStarted(true);
+        source.setSleepTimerTime(60_000);
+        source.setSleepTimerStartTime(System.currentTimeMillis());
 
         PlayerState copy = new PlayerState(source);
 
@@ -90,6 +96,9 @@ public class PlayerStateTest {
         final boolean stalled = true;
         final int errorCode = ErrorCode.PLAYER_ERROR;
         final String errorMessage = "player error";
+        final boolean sleepTimerStarted = true;
+        final long sleepTimerTime = 60_000;
+        final long sleepTimerStartTime = System.currentTimeMillis();
 
         PlayerState playerState = new PlayerState();
         playerState.setPlayProgress(playProgress);
@@ -105,6 +114,9 @@ public class PlayerStateTest {
         playerState.setStalled(stalled);
         playerState.setErrorCode(errorCode);
         playerState.setErrorMessage(errorMessage);
+        playerState.setSleepTimerStarted(sleepTimerStarted);
+        playerState.setSleepTimerTime(sleepTimerTime);
+        playerState.setSleepTimerStartTime(sleepTimerStartTime);
 
         PlayerState other1 = new PlayerState();
         other1.setPlayProgress(playProgress);
@@ -120,6 +132,9 @@ public class PlayerStateTest {
         other1.setStalled(stalled);
         other1.setErrorCode(errorCode);
         other1.setErrorMessage(errorMessage);
+        other1.setSleepTimerStarted(sleepTimerStarted);
+        other1.setSleepTimerTime(sleepTimerTime);
+        other1.setSleepTimerStartTime(sleepTimerStartTime);
 
         assertEquals(playerState, other1);
         assertEquals(playerState.hashCode(), other1.hashCode());
@@ -149,6 +164,9 @@ public class PlayerStateTest {
         final boolean stalled = true;
         final int errorCode = ErrorCode.PLAYER_ERROR;
         final String errorMessage = "player error";
+        final boolean sleepTimerStarted = true;
+        final long sleepTimerTime = 60_000;
+        final long sleepTimerStartTime = System.currentTimeMillis();
 
         PlayerState playerState = new PlayerState();
         playerState.setPlayProgress(playProgress);
@@ -164,6 +182,9 @@ public class PlayerStateTest {
         playerState.setStalled(stalled);
         playerState.setErrorCode(errorCode);
         playerState.setErrorMessage(errorMessage);
+        playerState.setSleepTimerStarted(sleepTimerStarted);
+        playerState.setSleepTimerTime(sleepTimerTime);
+        playerState.setSleepTimerStartTime(sleepTimerStartTime);
 
         Parcel parcel = Parcel.obtain();
 
