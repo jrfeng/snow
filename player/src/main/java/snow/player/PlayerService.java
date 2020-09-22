@@ -168,9 +168,6 @@ public class PlayerService extends MediaBrowserServiceCompat
         return super.onStartCommand(intent, flags, startId);
     }
 
-    /**
-     * 处理 CustomAction，如果已处理，则返回 true，否则返回 false。
-     */
     private void handleCustomAction(String action, Bundle extras) {
         CustomAction customAction = mAllCustomAction.get(action);
         if (customAction != null) {
