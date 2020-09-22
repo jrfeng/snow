@@ -160,8 +160,10 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        MediaButtonReceiver.handleIntent(mMediaSession, intent);
-        handleCustomAction(intent.getAction(), intent.getExtras());
+        if(intent != null) {
+            MediaButtonReceiver.handleIntent(mMediaSession, intent);
+            handleCustomAction(intent.getAction(), intent.getExtras());
+        }
 
         return super.onStartCommand(intent, flags, startId);
     }
