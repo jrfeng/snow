@@ -3,10 +3,13 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-  <group android:scaleX="1.2375"
-      android:scaleY="1.2375"
-      android:translateX="24.3"
-      android:translateY="24.3">
+  <group android:scaleX="1.1925"
+      android:scaleY="1.1925"
+      android:translateX="25.38"
+      android:translateY="25.38">
+    <path
+        android:pathData="M39.34,36.74H36.51V35.32h2.83m0,4.25H36.51V38.16h2.83m4.25,-4.25h-2a4.29,4.29 0,0 0,-1.29 -1.39l1.15,-1.15 -1,-1L38.93,31.9a4.73,4.73 0,0 0,-1 -0.12,4.47 4.47,0 0,0 -1,0.12l-1.55,-1.53 -1,1 1.15,1.15a4.37,4.37 0,0 0,-1.28 1.39h-2v1.41h1.48a4.25,4.25 0,0 0,-0.06 0.71v0.71H32.26v1.42h1.42v0.7a4.08,4.08 0,0 0,0.06 0.71H32.26V41h2a4.25,4.25 0,0 0,7.35 0h2V39.57H42.11a5.36,5.36 0,0 0,0.06 -0.71v-0.7h1.42V36.74H42.17V36a5.67,5.67 0,0 0,-0.06 -0.71h1.48Z"
+        android:fillColor="#ff9800"/>
     <path
         android:pathData="M27.75,16.5H31.5a3.75,3.75 0,0 0,3.75 -3.75h0A3.75,3.75 0,0 0,31.5 9h0a3.75,3.75 0,0 0,-3.75 3.75V31.5a7.5,7.5 0,0 1,-7.5 7.5h0a7.5,7.5 0,0 1,-7.5 -7.5h0a7.5,7.5 0,0 1,7.5 -7.5h15"
         android:strokeWidth="4"
