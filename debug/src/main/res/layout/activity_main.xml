@@ -233,6 +233,18 @@
 
                 </TableRow>
 
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="connected:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{String.valueOf(viewModel.connected)}" />
+
+                </TableRow>
+
             </TableLayout>
 
             <SeekBar
@@ -244,11 +256,6 @@
                 android:onStartTrackingTouch="@{viewModel::onStartTrackingTouch}"
                 android:progress="@={viewModel.playProgress}"
                 android:secondaryProgress="@{viewModel.bufferedProgress}" />
-
-            <TextView
-                android:id="@+id/tvMessage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -269,6 +276,14 @@
                     android:layout_height="wrap_content"
                     android:onClick="onClick"
                     android:text="disconnect"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btnShutdown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:text="shutdown"
                     android:textAllCaps="false" />
 
             </LinearLayout>

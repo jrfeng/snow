@@ -23,7 +23,6 @@ import snow.player.playlist.Playlist;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
-    private TextView tvMessage;
     private PlayerClient mPlayerClient;
 
     @Override
@@ -31,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         binding.setLifecycleOwner(this);
-        tvMessage = binding.tvMessage;
 
         PlayerViewModel playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
         binding.setViewModel(playerViewModel);
@@ -66,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
                 mPlayerClient.connect(new PlayerClient.OnConnectCallback() {
                     @Override
                     public void onConnected(boolean success) {
-                        tvMessage.setText("connect: " + success);
                         if (success && mPlayerClient.getMediaController() != null) {
                             testMediaSession(mPlayerClient.getMediaController());
                         }
@@ -75,7 +72,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.btnDisconnect:
                 mPlayerClient.disconnect();
-                tvMessage.setText("disconnect");
+                break;
+            case R.id.btnShutdown:
+                mPlayerClient.shutdown();
                 break;
             case R.id.btnSetPlaylist:
                 mPlayerClient.setPlaylist(createPlaylist());
