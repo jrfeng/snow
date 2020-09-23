@@ -550,7 +550,8 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void notifyOnShutdown() {
-        notifySleepTimerEnd(true);
+        disposeLastSleepTimer();
+        notifySleepTimerEnd();
         mCommandCallback.onShutdown();
         mMediaSession.sendSessionEvent(SESSION_EVENT_ON_SHUTDOWN, null);
     }
@@ -940,7 +941,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
         Preconditions.checkNotNull(action);
 
-        notifySleepTimerEnd(false);
+        disposeLastSleepTimer();
 
         if (getPlayingMusicItem() == null) {
             return;
@@ -967,7 +968,7 @@ public class PlayerService extends MediaBrowserServiceCompat
                                 PlayerService.this.shutdown();
                                 break;
                         }
-                        notifySleepTimerEnd(true);
+                        notifySleepTimerEnd();
                     }
                 });
 
@@ -981,19 +982,21 @@ public class PlayerService extends MediaBrowserServiceCompat
      */
     @Override
     public void cancel() {
-        notifySleepTimerEnd(true);
+        disposeLastSleepTimer();
+        notifySleepTimerEnd();
     }
 
-    private void notifySleepTimerEnd(boolean notify) {
+    private void disposeLastSleepTimer() {
         if (mSleepTimerDisposable == null || mSleepTimerDisposable.isDisposed()) {
             return;
         }
 
-        mPlayerStateHelper.onSleepTimerEnd();
+        mSleepTimerDisposable.dispose();
+    }
 
-        if (notify) {
-            mSleepTimerStateChangedListener.onEnd();
-        }
+    private void notifySleepTimerEnd() {
+        mPlayerStateHelper.onSleepTimerEnd();
+        mSleepTimerStateChangedListener.onEnd();
     }
 
     private class PlayerImp extends AbstractPlayer {
