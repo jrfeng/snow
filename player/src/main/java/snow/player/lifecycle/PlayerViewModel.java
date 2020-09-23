@@ -870,6 +870,24 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
+     * 启动睡眠定时器。
+     */
+    public void startSleepTimer(long time) {
+        if (isInitialized()) {
+            mPlayerClient.startSleepTimer(time);
+        }
+    }
+
+    /**
+     * 启动睡眠定时器。
+     */
+    public void startSleepTimer(long time, SleepTimer.TimeoutAction action) {
+        if (isInitialized()) {
+            mPlayerClient.startSleepTimer(time, action);
+        }
+    }
+
+    /**
      * 取消睡眠定时器。
      */
     public void cancelSleepTimer() {
