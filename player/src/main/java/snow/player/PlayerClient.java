@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 
@@ -705,6 +706,21 @@ public class PlayerClient implements Player, PlaylistEditor {
      */
     public long getSleepTimerStartedTime() {
         return mPlayerStateHolder.mPlayerState.getSleepTimerStartTime();
+    }
+
+    /**
+     * 获取睡眠定时器已经走过的时间。
+     * <p>
+     * 该方法的返回值只在睡眠定时器启动（{@link #isSleepTimerStarted()} 返回 true）时才有意义。
+     *
+     * @return 睡眠定时器已经走过的时间。
+     */
+    public long getSleepTimerElapsedTime() {
+        if (isSleepTimerStarted()) {
+            return SystemClock.elapsedRealtime() - getSleepTimerTime();
+        }
+
+        return 0;
     }
 
     /**
