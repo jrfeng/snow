@@ -403,6 +403,7 @@ public class PlayerViewModel extends ViewModel {
             public void onConnectStateChanged(boolean connected) {
                 if (isInitialized() && !connected) {
                     mProgressClock.cancel();
+                    mSleepTimerProgressClock.cancel();
                 }
             }
         };
@@ -461,6 +462,7 @@ public class PlayerViewModel extends ViewModel {
 
         mInitialized = false;
         mProgressClock.cancel();
+        mSleepTimerProgressClock.cancel();
         mPlaylist.release();
         removeAllListener();
 
@@ -864,6 +866,15 @@ public class PlayerViewModel extends ViewModel {
     public void cancelProgressClock() {
         if (isInitialized()) {
             mProgressClock.cancel();
+        }
+    }
+
+    /**
+     * 取消睡眠定时器。
+     */
+    public void cancelSleepTimer() {
+        if (isInitialized()) {
+            mPlayerClient.cancelSleepTimer();
         }
     }
 
