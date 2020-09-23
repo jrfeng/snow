@@ -49,6 +49,7 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<PlayMode> mPlayMode;
     private MutableLiveData<PlaybackState> mPlaybackState;
     private MutableLiveData<Boolean> mStalled;
+    private MutableLiveData<Boolean> mConnected;
     private MutableLiveData<Boolean> mPreparing;
     private MutableLiveData<String> mErrorMessage;
     private PlaylistLiveData mPlaylist;
@@ -401,6 +402,8 @@ public class PlayerViewModel extends ViewModel {
         mConnectStateChangeListener = new PlayerClient.OnConnectStateChangeListener() {
             @Override
             public void onConnectStateChanged(boolean connected) {
+                mConnected.setValue(connected);
+
                 if (isInitialized() && !connected) {
                     mProgressClock.cancel();
                     mSleepTimerProgressClock.cancel();
@@ -588,6 +591,15 @@ public class PlayerViewModel extends ViewModel {
     @NonNull
     public LiveData<Boolean> getStalled() {
         return mStalled;
+    }
+
+    /**
+     * 获取客户端的连接结果。
+     *
+     * @return 客户端的连接结果，如果已成功连接，则返回 true，否则返回 false
+     */
+    public MutableLiveData<Boolean> getConnected() {
+        return mConnected;
     }
 
     /**
@@ -961,6 +973,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayMode = new MutableLiveData<>(mPlayerClient.getPlayMode());
         mPlaybackState = new MutableLiveData<>(mPlayerClient.getPlaybackState());
         mStalled = new MutableLiveData<>(mPlayerClient.isStalled());
+        mConnected = new MutableLiveData<>(mPlayerClient.isConnected());
         mPreparing = new MutableLiveData<>(mPlayerClient.isPreparing());
         mErrorMessage = new MutableLiveData<>(mPlayerClient.getErrorMessage());
         mPlaylist = new PlaylistLiveData();
