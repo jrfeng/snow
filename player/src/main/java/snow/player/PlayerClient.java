@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -122,7 +121,7 @@ public class PlayerClient implements Player, PlaylistEditor {
                                 mConnectCallback.onConnected(true);
                                 mConnectCallback = null;
                             }
-                        } catch (RemoteException e) {
+                        } catch (Exception e) {
                             mMediaBrowser.disconnect();
                             onConnectionFailed();
                         }
