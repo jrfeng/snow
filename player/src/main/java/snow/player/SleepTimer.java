@@ -39,7 +39,7 @@ public interface SleepTimer {
          * 使用当前的 System.currentTimeMillis() 减去 startTime 即可知道睡眠定时器已经走过的时间。
          *
          * @param time      睡眠定时器的定时时间
-         * @param startTime 睡眠定时器的启动时间。使用当前的 System.currentTimeMillis()
+         * @param startTime 睡眠定时器的启动时间。使用当前的 SystemClock.elapsedRealtime()
          *                  减去 startTime 即可知道睡眠定时器已经走过的时间。
          * @param action    定时器的的时间到时要执行的操作。
          * @see #start(long, TimeoutAction)
