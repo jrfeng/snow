@@ -871,8 +871,11 @@ public class PlayerViewModel extends ViewModel {
 
     /**
      * 启动睡眠定时器。
+     *
+     * @param time 睡眠时间（单位：毫秒）。播放器会在经过 time 时间后暂停播放。
+     * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常
      */
-    public void startSleepTimer(long time) {
+    public void startSleepTimer(long time) throws IllegalArgumentException {
         if (isInitialized()) {
             mPlayerClient.startSleepTimer(time);
         }
@@ -880,8 +883,12 @@ public class PlayerViewModel extends ViewModel {
 
     /**
      * 启动睡眠定时器。
+     *
+     * @param time   睡眠时间（单位：毫秒）。播放器会在经过 time 时间后暂停播放。
+     * @param action 定时器的的时间到时要执行的操作。
+     * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常
      */
-    public void startSleepTimer(long time, SleepTimer.TimeoutAction action) {
+    public void startSleepTimer(long time, SleepTimer.TimeoutAction action) throws IllegalArgumentException {
         if (isInitialized()) {
             mPlayerClient.startSleepTimer(time, action);
         }
