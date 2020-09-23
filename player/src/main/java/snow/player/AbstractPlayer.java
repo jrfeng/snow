@@ -396,7 +396,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
                 notifyPrepared(mp.getAudioSessionId());
 
-                if (mPlayerState.getPlayProgress() > 0) {
+                if (!mPlayerState.isForbidSeek() && mPlayerState.getPlayProgress() > 0) {
                     mPlayOnSeekComplete = mPlayOnPrepared;
                     mPlayOnPrepared = false;
                     seekTo(mPlayerState.getPlayProgress(), mPreparedAction);
