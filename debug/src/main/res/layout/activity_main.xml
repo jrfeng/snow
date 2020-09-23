@@ -140,6 +140,30 @@
 
                     <TextView
                         android:layout_column="0"
+                        android:text="SleepTimerTime:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{viewModel.textSleepTimerTime}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="SleepTimerProgress:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{viewModel.textSleepTimerProgress}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
                         android:text="PlayPosition:" />
 
                     <TextView
@@ -266,7 +290,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:onClick="onClick"
-                    android:text="startSleepTimer: [10 seconds]"
+                    android:text="startSleepTimer: [20 seconds]"
                     android:textAllCaps="false" />
 
             </LinearLayout>

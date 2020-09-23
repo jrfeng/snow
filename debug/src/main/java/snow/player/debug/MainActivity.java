@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onStarted(long time, long startTime, SleepTimer.TimeoutAction action) {
                 Log.d("App", "onStarted {time:" + time + ", startTime:" + startTime + ", timeoutAction:" + action + "}");
-                Log.d("App", "currentTimeMillis:" + System.currentTimeMillis());
+                Log.d("App", "elapsedTime:" + mPlayerClient.getSleepTimerElapsedTime());
             }
 
             @Override
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
                 mPlayerClient.setPlaylist(createPlaylist());
                 break;
             case R.id.btnStartSleepTimer:
-                mPlayerClient.startSleepTimer(10_000);
+                mPlayerClient.startSleepTimer(20_000);
                 break;
         }
     }
