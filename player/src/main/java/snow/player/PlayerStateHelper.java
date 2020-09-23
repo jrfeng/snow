@@ -199,5 +199,7 @@ class PlayerStateHelper {
 
     public void onCancelSleepTimer() {
         mPlayerState.setSleepTimerStarted(false);
+        mPlayerState.setSleepTimerTime(0);
+        mPlayerState.setSleepTimerStartTime(0);
     }
 }
