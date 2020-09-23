@@ -23,6 +23,7 @@ import snow.player.helper.PlayerClientHelper;
 import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
+import snow.player.util.ProgressClock;
 import snow.player.util.MusicItemUtil;
 
 /**
@@ -388,12 +389,13 @@ public class PlayerViewModel extends ViewModel {
     }
 
     private void initProgressClock(boolean enable) {
-        mProgressClock = new ProgressClock(enable, new ProgressClock.Callback() {
+        mProgressClock = new ProgressClock(new ProgressClock.Callback() {
             @Override
             public void onUpdateProgress(int progressSec, int durationSec) {
                 mPlayProgress.setValue(progressSec);
             }
         });
+        mProgressClock.setEnabled(enable);
     }
 
     private void addAllListener() {

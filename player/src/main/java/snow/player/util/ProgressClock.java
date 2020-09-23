@@ -1,4 +1,4 @@
-package snow.player.lifecycle;
+package snow.player.util;
 
 import android.os.SystemClock;
 import android.util.Log;
@@ -17,13 +17,12 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 /**
- * 工具类，用于实时刷新播放器的播放进度。
- *
- * @see PlayerViewModel
+ * 进度条时钟，支持倒计时。
  */
-class ProgressClock {
+public class ProgressClock {
     private static final String TAG = "ProgressClock";
 
+    private boolean mCountDown;
     private boolean mEnabled;
     private Callback mCallback;
 
@@ -36,28 +35,28 @@ class ProgressClock {
     /**
      * 创建一个 ProgressClock 对象。
      * <p>
-     * 默认处于启用状态。{@link #isEnabled()} 方法会返回 true。如果没有处于启用状态（{@link #isEnabled()}
-     * 方法返回 true），则会忽略对 {@link #start(int, long, int)} 方法的调用。
+     * 默认处于启用状态，非倒计时。
      *
      * @param callback 回调接口，用于接收 progress 值的更新，不能为 null
      * @see #isEnabled()
      * @see #setEnabled(boolean)
      */
     public ProgressClock(@NonNull Callback callback) {
-        this(true, callback);
+        this(false, callback);
     }
 
     /**
      * 创建一个 ProgressClock 对象。
      *
-     * @param enabled  是否启用了进度条时钟。如果为 false，则会忽略对 {@link #start(int, long, int)} 方法的调用。
-     * @param callback 回调接口，用于接收 progress 值的更新，不能为 null
+     * @param countDown 是否是倒计时
+     * @param callback  回调接口，用于接收 progress 值的更新，不能为 null
      * @see #isEnabled()
      * @see #setEnabled(boolean)
      */
-    public ProgressClock(boolean enabled, @NonNull Callback callback) {
+    public ProgressClock(boolean countDown, @NonNull Callback callback) {
         Preconditions.checkNotNull(callback);
-        mEnabled = enabled;
+        mEnabled = true;
+        mCountDown = countDown;
         mCallback = callback;
     }
 
@@ -70,6 +69,15 @@ class ProgressClock {
      */
     public boolean isEnabled() {
         return mEnabled;
+    }
+
+    /**
+     * 是否是倒计时时钟。
+     *
+     * @return 是否是倒计时时钟，如果是则返回 true，否则返回 false
+     */
+    public boolean isCountDown() {
+        return mCountDown;
     }
 
     /**
@@ -142,7 +150,11 @@ class ProgressClock {
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) {
-                        updateProgress();
+                        if (mCountDown) {
+                            decrease();
+                        } else {
+                            increase();
+                        }
                     }
                 });
     }
@@ -154,7 +166,7 @@ class ProgressClock {
         }
     }
 
-    private void updateProgress() {
+    private void increase() {
         int newProgress = mProgressSec + 1;
 
         if (mLoop && newProgress > mDurationSec) {
@@ -162,7 +174,22 @@ class ProgressClock {
             return;
         }
 
-        if (!mLoop && newProgress >= mDurationSec) {
+        if (!mLoop && (newProgress >= mDurationSec)) {
+            cancel();
+        }
+
+        updateProgress(newProgress);
+    }
+
+    private void decrease() {
+        int newProgress = mProgressSec - 1;
+
+        if (mLoop && (newProgress < 0)) {
+            updateProgress(mDurationSec);
+            return;
+        }
+
+        if (!mLoop && newProgress <= 0) {
             cancel();
         }
 
