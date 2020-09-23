@@ -133,6 +133,9 @@ public class PlayerService extends MediaBrowserServiceCompat
     private Disposable mSleepTimerDisposable;
     private PlayerStateHelper mPlayerStateHelper;
 
+    private int mMaxIDLEMinutes = -1;
+    private Disposable mIDLETimerDisposable;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -157,11 +160,13 @@ public class PlayerService extends MediaBrowserServiceCompat
         if (mNotificationView != null && mNotificationView.isNotifyOnCreate()) {
             updateNotificationView();
         }
+
+        startIDLETimer();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent != null) {
+        if (intent != null) {
             MediaButtonReceiver.handleIntent(mMediaSession, intent);
             handleCustomAction(intent.getAction(), intent.getExtras());
         }
@@ -196,6 +201,8 @@ public class PlayerService extends MediaBrowserServiceCompat
             mNotificationView.release();
             mNotificationManager.cancel(mNotificationView.getNotificationId());
         }
+
+        cancelIDLETimer();
 
         mMediaSession.release();
         mPlayer.release();
@@ -482,6 +489,45 @@ public class PlayerService extends MediaBrowserServiceCompat
     @Override
     public void syncPlayerState(final String clientToken) {
         mCommandCallback.onSyncPlayerState(clientToken, new PlayerState(mPlayerState));
+    }
+
+    /**
+     * 设置当播放器处于空闲状态（暂停或者停止后）的 {@link PlayerService} 最大存活时间。
+     * <p>
+     * 当播放器处于空闲状态（暂停或者停止）的时间超出 minutes 分钟后将自动终止 {@link PlayerService}。
+     * 将 minutes 设置为小于等于 0 时将关闭此功能（即使播放器处于空闲状态，也不会自动终止 {@link PlayerService}）。
+     * <p>
+     * 默认未启用该功能。
+     *
+     * @param minutes 最大的空闲时间，设置为小于等于 0 时将关闭此功能（即使播放器处于空闲状态，也不会自动终止 {@link PlayerService}）。
+     */
+    public final void setMaxIDLETime(int minutes) {
+        mMaxIDLEMinutes = minutes;
+        if (minutes <= 0) {
+            cancelIDLETimer();
+        }
+    }
+
+    private void startIDLETimer() {
+        cancelIDLETimer();
+        if (mMaxIDLEMinutes <= 0) {
+            return;
+        }
+
+        mIDLETimerDisposable = Observable.timer(mMaxIDLEMinutes, TimeUnit.MINUTES)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long aLong) {
+                        shutdown();
+                    }
+                });
+    }
+
+    private void cancelIDLETimer() {
+        if (mIDLETimerDisposable != null && !mIDLETimerDisposable.isDisposed()) {
+            mIDLETimerDisposable.dispose();
+        }
     }
 
     /**
@@ -1030,6 +1076,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         protected void onPreparing() {
             super.onPreparing();
             PlayerService.this.updateNotificationView();
+            PlayerService.this.cancelIDLETimer();
         }
 
         @Override
@@ -1042,12 +1089,14 @@ public class PlayerService extends MediaBrowserServiceCompat
         protected void onPlaying(int progress, long updateTime) {
             super.onPlaying(progress, updateTime);
             PlayerService.this.updateNotificationView();
+            PlayerService.this.cancelIDLETimer();
         }
 
         @Override
         protected void onPaused() {
             super.onPaused();
             PlayerService.this.updateNotificationView();
+            PlayerService.this.startIDLETimer();
         }
 
         @Override
@@ -1060,6 +1109,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         protected void onStopped() {
             super.onStopped();
             PlayerService.this.onStopped();
+            PlayerService.this.startIDLETimer();
         }
 
         @Override
