@@ -507,8 +507,24 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
+        startIDLETimer();
+    }
+
+    private void startIDLETimer() {
+        cancelIDLETimer();
+        if (mMaxIDLEMinutes <= 0) {
+            return;
+        }
+
         if (isIDLE()) {
-            startIDLETimer();
+            mIDLETimerDisposable = Observable.timer(mMaxIDLEMinutes, TimeUnit.MINUTES)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Consumer<Long>() {
+                        @Override
+                        public void accept(Long aLong) {
+                            shutdown();
+                        }
+                    });
         }
     }
 
@@ -522,22 +538,6 @@ public class PlayerService extends MediaBrowserServiceCompat
         return (playbackState == PlaybackState.NONE)
                 || (playbackState == PlaybackState.PAUSED)
                 || (playbackState == PlaybackState.STOPPED);
-    }
-
-    private void startIDLETimer() {
-        cancelIDLETimer();
-        if (mMaxIDLEMinutes <= 0) {
-            return;
-        }
-
-        mIDLETimerDisposable = Observable.timer(mMaxIDLEMinutes, TimeUnit.MINUTES)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Long>() {
-                    @Override
-                    public void accept(Long aLong) {
-                        shutdown();
-                    }
-                });
     }
 
     private void cancelIDLETimer() {
