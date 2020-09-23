@@ -602,7 +602,9 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void notifyOnShutdown() {
-        cancel();
+        if (mPlayerState.isSleepTimerStarted()) {
+            cancel();
+        }
         mCommandCallback.onShutdown();
         mMediaSession.sendSessionEvent(SESSION_EVENT_ON_SHUTDOWN, null);
     }
