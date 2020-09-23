@@ -28,6 +28,8 @@ public class MyPlayerService extends PlayerService {
     public void onCreate() {
         super.onCreate();
 
+        setMaxIDLETime(10);
+
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .followRedirects(true)
                 .followSslRedirects(true)
