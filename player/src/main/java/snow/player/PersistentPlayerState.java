@@ -29,10 +29,16 @@ class PersistentPlayerState extends PlayerState {
 
         mMMKV = MMKV.mmkvWithID("PlayerState:" + id);
 
-        super.setPlayProgress(mMMKV.decodeInt(KEY_PLAY_PROGRESS, 0));
         super.setMusicItem(mMMKV.decodeParcelable(KEY_MUSIC_ITEM, MusicItem.class));
         super.setPlayPosition(mMMKV.decodeInt(KEY_PLAY_POSITION, 0));
         super.setPlayMode(PlayMode.values()[mMMKV.decodeInt(KEY_PLAY_MODE, 0)]);
+
+        if (isForbidSeek()) {
+            super.setPlayProgress(0);
+            return;
+        }
+
+        super.setPlayProgress(mMMKV.decodeInt(KEY_PLAY_PROGRESS, 0));
     }
 
     @Override
