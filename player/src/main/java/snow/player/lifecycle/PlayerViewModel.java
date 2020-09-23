@@ -19,6 +19,7 @@ import snow.player.PlaybackState;
 import snow.player.Player;
 import snow.player.PlayerClient;
 import snow.player.R;
+import snow.player.SleepTimer;
 import snow.player.helper.PlayerClientHelper;
 import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
@@ -39,9 +40,11 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<String> mArtist;
     private MutableLiveData<String> mAlbum;
     private MutableLiveData<String> mIconUri;
-    private MutableLiveData<Integer> mDuration;         // 单位：秒
-    private MutableLiveData<Integer> mPlayProgress;     // 单位：秒
-    private MutableLiveData<Integer> mBufferedProgress; // 单位：秒
+    private MutableLiveData<Integer> mDuration;             // 单位：秒
+    private MutableLiveData<Integer> mPlayProgress;         // 单位：秒
+    private MutableLiveData<Integer> mBufferedProgress;     // 单位：秒
+    private MutableLiveData<Integer> mSleepTimerTime;       // 单位：秒
+    private MutableLiveData<Integer> mSleepTimerProgress;   // 单位：秒
     private MutableLiveData<Integer> mPlayPosition;
     private MutableLiveData<PlayMode> mPlayMode;
     private MutableLiveData<PlaybackState> mPlaybackState;
@@ -55,6 +58,7 @@ public class PlayerViewModel extends ViewModel {
     private Player.OnPlayModeChangeListener mPlayModeChangeListener;
     private PlayerClient.OnPlaybackStateChangeListener mClientPlaybackStateChangeListener;
     private Player.OnBufferedProgressChangeListener mBufferedProgressChangeListener;
+    private SleepTimer.OnStateChangeListener mSleepTimerStateChangeListener;
     private Player.OnSeekCompleteListener mSeekCompleteListener;
     private Player.OnStalledChangeListener mStalledChangeListener;
     private Player.OnPrepareListener mPrepareListener;
@@ -65,6 +69,7 @@ public class PlayerViewModel extends ViewModel {
     private String mDefaultAlbum;
 
     private ProgressClock mProgressClock;
+    private ProgressClock mSleepTimerProgressClock;
 
     private boolean mInitialized;
     private boolean mAutoDisconnect;
@@ -156,7 +161,7 @@ public class PlayerViewModel extends ViewModel {
 
         initAllLiveData();
         initAllListener();
-        initProgressClock(enableProgressClock);
+        initAllProgressClock(enableProgressClock);
 
         addAllListener();
 
@@ -171,7 +176,7 @@ public class PlayerViewModel extends ViewModel {
      * 默认标题为 "未知标题"；默认歌手为 "未知歌手"；默认专辑为 "未知专辑"。这些默认值会在正在播放的
      * {@link MusicItem} 对应的字段为空（empty）时展示。
      *
-     * @param context        Context 对象，不能为 null
+     * @param context            Context 对象，不能为 null
      * @param playerClientHelper {@link PlayerClientHelper} 对象，不能为 null
      */
     public void init(@NonNull Context context, @NonNull PlayerClientHelper playerClientHelper) {
@@ -188,7 +193,7 @@ public class PlayerViewModel extends ViewModel {
      * {@link MusicItem} 对应的字段为空时展示。
      *
      * @param context             Context 对象，不能为 null
-     * @param playerClientHelper      {@link PlayerClientHelper} 对象，不能为 null
+     * @param playerClientHelper  {@link PlayerClientHelper} 对象，不能为 null
      * @param enableProgressClock 是否启用进度条时钟（用于实时更新播放进度）
      */
     public void init(@NonNull Context context, @NonNull PlayerClientHelper playerClientHelper, boolean enableProgressClock) {
@@ -208,9 +213,9 @@ public class PlayerViewModel extends ViewModel {
      * 默认启用了进度条时钟（用于实时更新播放进度）。
      *
      * @param playerClientHelper {@link PlayerClientHelper} 对象，不能为 null
-     * @param defaultTitle   默认标题，会在正在播放的歌曲的标题为空时展示，不能为 null
-     * @param defaultArtist  默认艺术家，会在正在播放的歌曲的艺术家为空时展示，不能为 null
-     * @param defaultAlbum   默认专辑，会在正在播放的歌曲的专辑为空时展示，不能为 null
+     * @param defaultTitle       默认标题，会在正在播放的歌曲的标题为空时展示，不能为 null
+     * @param defaultArtist      默认艺术家，会在正在播放的歌曲的艺术家为空时展示，不能为 null
+     * @param defaultAlbum       默认专辑，会在正在播放的歌曲的专辑为空时展示，不能为 null
      */
     public void init(@NonNull PlayerClientHelper playerClientHelper,
                      @NonNull String defaultTitle,
@@ -227,7 +232,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 初始化 {@link PlayerViewModel} 对象。
      *
-     * @param playerClientHelper      {@link PlayerClientHelper} 对象，不能为 null
+     * @param playerClientHelper  {@link PlayerClientHelper} 对象，不能为 null
      * @param defaultTitle        默认标题，会在正在播放的歌曲的标题为空时展示，不能为 null
      * @param defaultArtist       默认艺术家，会在正在播放的歌曲的艺术家为空时展示，不能为 null
      * @param defaultAlbum        默认专辑，会在正在播放的歌曲的专辑为空时展示，不能为 null
@@ -340,6 +345,21 @@ public class PlayerViewModel extends ViewModel {
             }
         };
 
+        mSleepTimerStateChangeListener = new SleepTimer.OnStateChangeListener() {
+            @Override
+            public void onStarted(long time, long startTime, SleepTimer.TimeoutAction action) {
+                mSleepTimerTime.setValue((int) (time / 1000));
+                mSleepTimerProgressClock.start(0, startTime, (int) time);
+            }
+
+            @Override
+            public void onCancelled() {
+                mSleepTimerProgressClock.cancel();
+                mSleepTimerTime.setValue(0);
+                mSleepTimerProgress.setValue(0);
+            }
+        };
+
         mSeekCompleteListener = new Player.OnSeekCompleteListener() {
             @Override
             public void onSeekComplete(int progress, long updateTime, boolean stalled) {
@@ -388,7 +408,7 @@ public class PlayerViewModel extends ViewModel {
         };
     }
 
-    private void initProgressClock(boolean enable) {
+    private void initAllProgressClock(boolean enable) {
         mProgressClock = new ProgressClock(new ProgressClock.Callback() {
             @Override
             public void onUpdateProgress(int progressSec, int durationSec) {
@@ -396,6 +416,13 @@ public class PlayerViewModel extends ViewModel {
             }
         });
         mProgressClock.setEnabled(enable);
+
+        mSleepTimerProgressClock = new ProgressClock(true, new ProgressClock.Callback() {
+            @Override
+            public void onUpdateProgress(int progressSec, int durationSec) {
+                mSleepTimerProgress.setValue(progressSec);
+            }
+        });
     }
 
     private void addAllListener() {
@@ -404,6 +431,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.addOnPlayModeChangeListener(mPlayModeChangeListener);
         mPlayerClient.addOnPlaybackStateChangeListener(mClientPlaybackStateChangeListener);
         mPlayerClient.addOnBufferedProgressChangeListener(mBufferedProgressChangeListener);
+        mPlayerClient.addOnSleepTimerStateChangeListener(mSleepTimerStateChangeListener);
         mPlayerClient.addOnSeekCompleteListener(mSeekCompleteListener);
         mPlayerClient.addOnStalledChangeListener(mStalledChangeListener);
         mPlayerClient.addOnPrepareListener(mPrepareListener);
@@ -416,6 +444,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.removeOnPlayModeChangeListener(mPlayModeChangeListener);
         mPlayerClient.removeOnPlaybackStateChangeListener(mClientPlaybackStateChangeListener);
         mPlayerClient.removeOnBufferedProgressChangeListener(mBufferedProgressChangeListener);
+        mPlayerClient.removeOnSleepTimerStateChangeListener(mSleepTimerStateChangeListener);
         mPlayerClient.removeOnSeekCompleteListener(mSeekCompleteListener);
         mPlayerClient.removeOnStalledChangeListener(mStalledChangeListener);
         mPlayerClient.removeOnPrepareListener(mPrepareListener);
@@ -621,6 +650,48 @@ public class PlayerViewModel extends ViewModel {
     @NonNull
     public LiveData<String> getTextPlayProgress() {
         return Transformations.map(mPlayProgress, new Function<Integer, String>() {
+            @Override
+            public String apply(Integer input) {
+                return ProgressClock.asText(input);
+            }
+        });
+    }
+
+    /**
+     * 获取睡眠定时器的时长（单位：秒）。
+     */
+    public LiveData<Integer> getSleepTimerTime() {
+        return mSleepTimerTime;
+    }
+
+    /**
+     * 获取睡眠定时器的时长（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"
+     */
+    public LiveData<String> getTextSleepTimerTime() {
+        return Transformations.map(mSleepTimerTime, new Function<Integer, String>() {
+            @Override
+            public String apply(Integer input) {
+                return ProgressClock.asText(input);
+            }
+        });
+    }
+
+    /**
+     * 获取睡眠定时器进度（单位：秒）。
+     * <p>
+     * 睡眠定时器的进度是个倒计时。
+     */
+    public LiveData<Integer> getSleepTimerProgress() {
+        return mSleepTimerProgress;
+    }
+
+    /**
+     * 获取睡眠定时器进度（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"
+     * <p>
+     * 睡眠定时器的进度是个倒计时。
+     */
+    public LiveData<String> getTextSleepTimerProgress() {
+        return Transformations.map(mSleepTimerProgress, new Function<Integer, String>() {
             @Override
             public String apply(Integer input) {
                 return ProgressClock.asText(input);
@@ -848,6 +919,8 @@ public class PlayerViewModel extends ViewModel {
         mDuration = new MutableLiveData<>(getDurationSec());
         mPlayProgress = new MutableLiveData<>(getPlayProgressSec());
         mBufferedProgress = new MutableLiveData<>(getBufferedProgressSec());
+        mSleepTimerTime = new MutableLiveData<>((int) (mPlayerClient.getSleepTimerTime() / 1000));
+        mSleepTimerProgress = new MutableLiveData<>((int) (mPlayerClient.getSleepTimerElapsedTime() / 1000));
         mPlayPosition = new MutableLiveData<>(mPlayerClient.getPlayPosition());
         mPlayMode = new MutableLiveData<>(mPlayerClient.getPlayMode());
         mPlaybackState = new MutableLiveData<>(mPlayerClient.getPlaybackState());
