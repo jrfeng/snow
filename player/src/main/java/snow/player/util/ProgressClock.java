@@ -104,7 +104,7 @@ public class ProgressClock {
     }
 
     /**
-     * 启动定时器。
+     * 启动定时器。<b>注意！所有时间都是基于 {@code SystemClock.elapsedRealtime()} 的。</b>
      *
      * @param progress   歌曲的播放进度（单位：毫秒）
      * @param updateTime 歌曲播放进度的更新时间（单位：毫秒）
