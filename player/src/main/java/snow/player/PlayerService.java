@@ -550,7 +550,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void notifyOnShutdown() {
-        cancelSleepTimer(true);
+        notifySleepTimerEnd(true);
         mCommandCallback.onShutdown();
         mMediaSession.sendSessionEvent(SESSION_EVENT_ON_SHUTDOWN, null);
     }
@@ -940,7 +940,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
         Preconditions.checkNotNull(action);
 
-        cancelSleepTimer(false);
+        notifySleepTimerEnd(false);
 
         if (getPlayingMusicItem() == null) {
             return;
@@ -967,12 +967,13 @@ public class PlayerService extends MediaBrowserServiceCompat
                                 PlayerService.this.shutdown();
                                 break;
                         }
+                        notifySleepTimerEnd(true);
                     }
                 });
 
         long startTime = SystemClock.elapsedRealtime();
-        mPlayerStateHelper.onStartSleepTimer(time, startTime, action);
-        mSleepTimerStateChangedListener.onStarted(time, startTime, action);
+        mPlayerStateHelper.onSleepTimerStart(time, startTime, action);
+        mSleepTimerStateChangedListener.onStart(time, startTime, action);
     }
 
     /**
@@ -980,17 +981,18 @@ public class PlayerService extends MediaBrowserServiceCompat
      */
     @Override
     public void cancel() {
-        mPlayerStateHelper.onCancelSleepTimer();
-        cancelSleepTimer(true);
+        notifySleepTimerEnd(true);
     }
 
-    private void cancelSleepTimer(boolean notify) {
+    private void notifySleepTimerEnd(boolean notify) {
         if (mSleepTimerDisposable == null || mSleepTimerDisposable.isDisposed()) {
             return;
         }
 
+        mPlayerStateHelper.onSleepTimerEnd();
+
         if (notify) {
-            mSleepTimerStateChangedListener.onCancelled();
+            mSleepTimerStateChangedListener.onEnd();
         }
     }
 

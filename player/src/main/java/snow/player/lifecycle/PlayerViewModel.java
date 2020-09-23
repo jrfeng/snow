@@ -347,13 +347,13 @@ public class PlayerViewModel extends ViewModel {
 
         mSleepTimerStateChangeListener = new SleepTimer.OnStateChangeListener() {
             @Override
-            public void onStarted(long time, long startTime, SleepTimer.TimeoutAction action) {
+            public void onStart(long time, long startTime, SleepTimer.TimeoutAction action) {
                 mSleepTimerTime.setValue((int) (time / 1000));
                 mSleepTimerProgressClock.start(0, startTime, (int) time);
             }
 
             @Override
-            public void onCancelled() {
+            public void onEnd() {
                 mSleepTimerProgressClock.cancel();
                 mSleepTimerTime.setValue(0);
                 mSleepTimerProgress.setValue(0);

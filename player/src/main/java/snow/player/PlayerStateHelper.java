@@ -190,14 +190,14 @@ class PlayerStateHelper {
         }
     }
 
-    public void onStartSleepTimer(long time, long startTime, SleepTimer.TimeoutAction action) {
+    public void onSleepTimerStart(long time, long startTime, SleepTimer.TimeoutAction action) {
         mPlayerState.setSleepTimerStarted(true);
         mPlayerState.setSleepTimerTime(time);
         mPlayerState.setSleepTimerStartTime(startTime);
         mPlayerState.setTimeoutAction(action);
     }
 
-    public void onCancelSleepTimer() {
+    public void onSleepTimerEnd() {
         mPlayerState.setSleepTimerStarted(false);
         mPlayerState.setSleepTimerTime(0);
         mPlayerState.setSleepTimerStartTime(0);

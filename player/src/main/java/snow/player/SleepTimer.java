@@ -44,14 +44,14 @@ public interface SleepTimer {
          * @param action    定时器的的时间到时要执行的操作。
          * @see #start(long, TimeoutAction)
          */
-        void onStarted(long time, long startTime, @UseOrdinal TimeoutAction action);
+        void onStart(long time, long startTime, @UseOrdinal TimeoutAction action);
 
         /**
-         * 当睡眠定时器被取消时会调用该方法。
+         * 当睡眠定时器正常终止或者被取消时会调用该方法。
          *
          * @see #cancel()
          */
-        void onCancelled();
+        void onEnd();
     }
 
     /**
