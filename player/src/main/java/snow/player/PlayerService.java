@@ -492,7 +492,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     /**
-     * 设置播放器处于空闲状态（暂停或者停止后）的 {@link PlayerService} 最大存活时间。
+     * 设置 {@link PlayerService} 处于空闲状态（暂停或者停止后）的最大存活时间。
      * <p>
      * 当播放器处于空闲状态（暂停或者停止）的时间超出 minutes 分钟后将自动终止 {@link PlayerService}。
      * 将 minutes 设置为小于等于 0 时将关闭此功能（即使播放器处于空闲状态，也不会自动终止 {@link PlayerService}）。
