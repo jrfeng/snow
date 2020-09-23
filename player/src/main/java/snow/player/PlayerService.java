@@ -501,9 +501,27 @@ public class PlayerService extends MediaBrowserServiceCompat
      */
     public final void setMaxIDLETime(int minutes) {
         mMaxIDLEMinutes = minutes;
+
         if (minutes <= 0) {
             cancelIDLETimer();
+            return;
         }
+
+        if (isIDLE()) {
+            startIDLETimer();
+        }
+    }
+
+    private boolean isIDLE() {
+        if (isPreparing() || isStalled()) {
+            return false;
+        }
+
+        PlaybackState playbackState = getPlaybackState();
+
+        return (playbackState == PlaybackState.NONE)
+                || (playbackState == PlaybackState.PAUSED)
+                || (playbackState == PlaybackState.STOPPED);
     }
 
     private void startIDLETimer() {
