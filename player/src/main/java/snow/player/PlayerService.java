@@ -160,8 +160,6 @@ public class PlayerService extends MediaBrowserServiceCompat
         if (mNotificationView != null && mNotificationView.isNotifyOnCreate()) {
             updateNotificationView();
         }
-
-        startIDLETimer();
     }
 
     @Override
