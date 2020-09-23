@@ -512,32 +512,22 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private void startIDLETimer() {
         cancelIDLETimer();
-        if (mMaxIDLEMinutes <= 0) {
+        if (mMaxIDLEMinutes <= 0 || notIDLE()) {
             return;
         }
 
-        if (isIDLE()) {
-            mIDLETimerDisposable = Observable.timer(mMaxIDLEMinutes, TimeUnit.MINUTES)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Consumer<Long>() {
-                        @Override
-                        public void accept(Long aLong) {
-                            shutdown();
-                        }
-                    });
-        }
+        mIDLETimerDisposable = Observable.timer(mMaxIDLEMinutes, TimeUnit.MINUTES)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(Long aLong) {
+                        shutdown();
+                    }
+                });
     }
 
-    private boolean isIDLE() {
-        if (isPreparing() || isStalled()) {
-            return false;
-        }
-
-        PlaybackState playbackState = getPlaybackState();
-
-        return (playbackState == PlaybackState.NONE)
-                || (playbackState == PlaybackState.PAUSED)
-                || (playbackState == PlaybackState.STOPPED);
+    private boolean notIDLE() {
+        return (isPreparing() || isStalled()) || (getPlaybackState() == PlaybackState.PLAYING);
     }
 
     private void cancelIDLETimer() {
