@@ -285,14 +285,6 @@
                     android:text="setPlaylist"
                     android:textAllCaps="false" />
 
-                <Button
-                    android:id="@+id/btnStartSleepTimer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:onClick="onClick"
-                    android:text="startSleepTimer: [20 seconds]"
-                    android:textAllCaps="false" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -403,6 +395,28 @@
                     android:layout_height="wrap_content"
                     android:onClick="@{() -> viewModel.setPlayMode(PlayMode.SHUFFLE)}"
                     android:text="Shuffle"
+                    android:textAllCaps="false" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/btnStartSleepTimer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.startSleepTimer(20_000)}"
+                    android:text="startSleepTimer: [20s]"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btnCancelSleepTimer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.cancelSleepTimer()}"
+                    android:text="cancelSleepTimer"
                     android:textAllCaps="false" />
 
             </LinearLayout>

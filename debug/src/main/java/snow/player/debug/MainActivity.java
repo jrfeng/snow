@@ -80,9 +80,6 @@ public class MainActivity extends AppCompatActivity {
             case R.id.btnSetPlaylist:
                 mPlayerClient.setPlaylist(createPlaylist());
                 break;
-            case R.id.btnStartSleepTimer:
-                mPlayerClient.startSleepTimer(20_000);
-                break;
         }
     }
 
