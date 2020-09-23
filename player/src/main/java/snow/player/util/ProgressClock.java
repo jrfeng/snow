@@ -129,7 +129,11 @@ public class ProgressClock {
 
         long realProgress = progress + (currentTime - updateTime);
 
-        mProgressSec = (int) (realProgress / 1000);
+        if (mCountDown) {
+            mProgressSec = (int) Math.ceil((duration - realProgress) / 1000.0);
+        } else {
+            mProgressSec = (int) (realProgress / 1000);
+        }
         mDurationSec = duration / 1000;
 
         if (!mEnabled) {
@@ -137,13 +141,14 @@ public class ProgressClock {
             return;
         }
 
-        if (mProgressSec >= mDurationSec && !mLoop) {
+        if (!mLoop && isTimeout()) {
             mCallback.onUpdateProgress(mDurationSec, mDurationSec);
             return;
         }
 
-        long delay = 1000 - (realProgress % 1000);
+        updateProgress(mProgressSec);
 
+        long delay = 1000 - (realProgress % 1000);
         mDisposable = Observable.interval(delay, 1000, TimeUnit.MILLISECONDS)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -157,6 +162,14 @@ public class ProgressClock {
                         }
                     }
                 });
+    }
+
+    private boolean isTimeout() {
+        if (mCountDown) {
+            return mProgressSec <= 0;
+        }
+
+        return mProgressSec >= mDurationSec;
     }
 
     public void cancel() {
