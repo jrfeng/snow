@@ -49,11 +49,11 @@ public interface MusicPlayer {
     /**
      * 判断播放器是否正在播放。
      * <p>
-     * 该方法的返回值只受 {@link #start()}、{@link #pause()} ()}、{@link #stop()}、发生错误或者 {@link #release()} 的影响。
+     * 该方法的返回值只受 {@link #start()}、{@link #pause()}、{@link #stop()}、发生错误或者 {@link #release()} 的影响。
      * 调用 {@link #start()} 方法后，该方法应该返回 true，并且只在调用 {@link #pause()}、
      * {@link #stop()}、播放器发生错误或者调用了 {@link #release()} 方法时才返回 false。
      * 调用了 {@link #start()} 方法后，即使缓冲区没有足够的数据支持继续播放，只要没有没有调用
-     * {@link #pause()} ()}、{@link #stop()}、发生错误或者调用 {@link #release()} 方法，
+     * {@link #pause()}、{@link #stop()}、发生错误或者调用 {@link #release()} 方法，
      * 该方法就应该返回 true，即使当前缓冲区没有足够的数据，播放器正在缓冲。
      *
      * @return 播放器是否正在播放音乐
