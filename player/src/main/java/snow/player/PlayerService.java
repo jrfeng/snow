@@ -500,6 +500,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             getPlayer().pause();
         }
 
+        stopSelf();
         notifyOnShutdown();
         dismissKeepServiceAlive();
     }
