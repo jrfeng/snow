@@ -4,8 +4,10 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -14,6 +16,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -136,13 +139,17 @@ public class PlayerService extends MediaBrowserServiceCompat
     private int mMaxIDLEMinutes = -1;
     private Disposable mIDLETimerDisposable;
 
+    private Intent mKeepAliveIntent;
+    private KeepAliveConnection mKeepAliveConnection;
+
     @Override
     public void onCreate() {
         super.onCreate();
-        startService(new Intent(this, this.getClass()));
 
         mPersistentId = getPersistentId();
         mAllCustomAction = new HashMap<>();
+        mKeepAliveIntent = new Intent(this, this.getClass());
+        mKeepAliveConnection = new KeepAliveConnection();
 
         initNotificationManager();
         initPlayerConfig();
@@ -156,6 +163,10 @@ public class PlayerService extends MediaBrowserServiceCompat
         initMediaSession();
         initSessionEventEmitter();
         initHistoryRecorder();
+
+        if (mNotificationView != null) {
+            keepServiceAlive();
+        }
 
         if (mNotificationView != null && mNotificationView.isNotifyOnCreate()) {
             updateNotificationView();
@@ -210,6 +221,15 @@ public class PlayerService extends MediaBrowserServiceCompat
         if (mAudioEffectManager != null) {
             mAudioEffectManager.release();
         }
+    }
+
+    // 避免因所有客户端都断开连接而导致 Service 终止
+    private void keepServiceAlive() {
+        bindService(mKeepAliveIntent, mKeepAliveConnection, BIND_AUTO_CREATE);
+    }
+
+    private void dismissKeepServiceAlive() {
+        unbindService(mKeepAliveConnection);
     }
 
     private void initNotificationManager() {
@@ -481,7 +501,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         notifyOnShutdown();
-        stopSelf();
+        dismissKeepServiceAlive();
     }
 
     @Override
@@ -1913,5 +1933,16 @@ public class PlayerService extends MediaBrowserServiceCompat
         void doAction(@NonNull Player player, @Nullable Bundle extras);
     }
 
+    // 避免因所有客户端都断开连接而导致 Service 终止
+    private static class KeepAliveConnection implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // ignore
+        }
 
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // ignore
+        }
+    }
 }
