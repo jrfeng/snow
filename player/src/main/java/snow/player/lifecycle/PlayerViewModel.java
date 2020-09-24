@@ -52,6 +52,7 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<Boolean> mConnected;
     private MutableLiveData<Boolean> mPreparing;
     private MutableLiveData<String> mErrorMessage;
+    private MutableLiveData<MusicItem> mPlayingMusicItem;
     private PlaylistLiveData mPlaylist;
 
     private Player.OnPlayingMusicItemChangeListener mPlayingMusicItemChangeListener;
@@ -271,6 +272,7 @@ public class PlayerViewModel extends ViewModel {
             public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int position, int playProgress) {
                 mProgressClock.cancel();
                 mPlayPosition.setValue(position);
+                mPlayingMusicItem.setValue(musicItem);
 
                 if (musicItem == null) {
                     mTitle.setValue(mDefaultTitle);
@@ -633,6 +635,16 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
+     * 获取当前只在播放的音乐。
+     *
+     * @return 返回当前只在播放的音乐。如果播放列表为空，或者还没有建立连接，则当前只在播放的音乐可能为 null
+     */
+    @NonNull
+    public LiveData<MusicItem> getPlayingMusicItem() {
+        return mPlayingMusicItem;
+    }
+
+    /**
      * 获取播放列表。
      * <p>
      * 需要向 LiveData 至少注册一个观察者，才会在播放列表发生改变时实时更新当前 LiveData 的值。如果当前
@@ -976,6 +988,7 @@ public class PlayerViewModel extends ViewModel {
         mConnected = new MutableLiveData<>(mPlayerClient.isConnected());
         mPreparing = new MutableLiveData<>(mPlayerClient.isPreparing());
         mErrorMessage = new MutableLiveData<>(mPlayerClient.getErrorMessage());
+        mPlayingMusicItem = new MutableLiveData<>(mPlayerClient.getPlayingMusicItem());
         mPlaylist = new PlaylistLiveData();
         mPlaylist.init(mPlayerClient);
     }
