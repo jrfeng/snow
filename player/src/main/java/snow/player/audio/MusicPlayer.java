@@ -1,9 +1,9 @@
 package snow.player.audio;
 
 /**
- * 该接口定义了音乐播放器的基本功能。可以通过实现该接口来创建一个自定义的音乐播放器。
+ * 该接口定义了音乐播放器的基本功能，开发者可以通过实现该接口来创建一个自定义的音乐播放器。
  * <p>
- * 如何实现自定义的 {@link MusicPlayer}，请参加各方法的文档。文档对如何实现个方法的要求与限制进行了详细介绍。
+ * 关于如何实现自定义的音乐播放器，请参考 {@link MusicPlayer} 各方法的文档。文档对如何实现各方法的要求与限制进行了详细介绍。
  *
  * @see MediaMusicPlayer
  */
@@ -16,14 +16,16 @@ public interface MusicPlayer {
      * <p>
      * 在实现该方法时，建议先检查 {@link #isInvalid()} 状态，如果返回 {@code true}，说明当前
      * {@link MusicPlayer} 已失效，此时因立即从该方法中返回，不应该再调用任何方法。
-     *
      */
     void prepare() throws Exception;
 
     /**
      * 设置是否循环播放。
+     * <p>
+     * 如果播放器处于循环播放状态，则应返回 true，否则返回 false。对于新创建的 {@link MusicPlayer} 对象来说，
+     * 该方法默认返回 false。
      *
-     * @param looping 是否循环播放（默认为 false）。
+     * @param looping 是否循环播放（默认返回 false）。
      */
     void setLooping(boolean looping);
 
@@ -45,13 +47,14 @@ public interface MusicPlayer {
     boolean isStalled();
 
     /**
-     * 判断是否正在播放。
+     * 判断播放器是否正在播放。
      * <p>
-     * 该方法的返回值只受 {@link #start()}、{@link #pause()} ()}、{@link #stop()} 或者 error 的影响。
-     * 调用 {@link #start()} 方法后，该方法应该返回 true，并且只在调用 {@link #pause()} ()}、
-     * {@link #stop()} 或者播放器发生了错误时才返回 false。调用了 {@link #start()} 方法后，
-     * 即使缓冲区没有足够的数据支持继续播放，只要没有没有调用 {@link #pause()} ()}、{@link #stop()}
-     * 或者发生错误，该方法就应该返回 true。
+     * 该方法的返回值只受 {@link #start()}、{@link #pause()} ()}、{@link #stop()}、发生错误或者 {@link #release()} 的影响。
+     * 调用 {@link #start()} 方法后，该方法应该返回 true，并且只在调用 {@link #pause()}、
+     * {@link #stop()}、播放器发生错误或者调用了 {@link #release()} 方法时才返回 false。
+     * 调用了 {@link #start()} 方法后，即使缓冲区没有足够的数据支持继续播放，只要没有没有调用
+     * {@link #pause()} ()}、{@link #stop()}、发生错误或者调用 {@link #release()} 方法，
+     * 该方法就应该返回 true，即使当前缓冲区没有足够的数据，播放器正在缓冲。
      *
      * @return 播放器是否正在播放音乐
      */
@@ -67,7 +70,7 @@ public interface MusicPlayer {
     /**
      * 获取当前的播放进度（单位：毫秒）。
      *
-     * @return 音频文件的当前播放进度
+     * @return 返回当前的播放进度（单位：毫秒）
      */
     int getProgress();
 
@@ -87,7 +90,7 @@ public interface MusicPlayer {
     void stop();
 
     /**
-     * 调整播放器的播放位置。
+     * 调整播放器的播放进度。
      *
      * @param pos 要调整到的播放位置（单位：毫秒）
      */
@@ -98,8 +101,8 @@ public interface MusicPlayer {
      * <p>
      * 如果你的播放器实现不打算支持单独分别设置左右声道的音量，则全部使用 leftVolume 参数的值即可。
      *
-     * @param leftVolume  左声道的音量百分比
-     * @param rightVolume 右声道的音量百分比
+     * @param leftVolume  左声道的音量百分比（范围为 [0.0 ~ 1.0] 的闭区间）
+     * @param rightVolume 右声道的音量百分比（范围为 [0.0 ~ 1.0] 的闭区间）
      */
     void setVolume(float leftVolume, float rightVolume);
 
@@ -108,7 +111,7 @@ public interface MusicPlayer {
      * <p>
      * 音量应该降低到不足以影响到其他应用的音频清晰度，通常为当前音量的 0.2。
      *
-     * @see #setVolume(float, float)
+     * @see #dismissQuiet()
      */
     void quiet();
 
@@ -123,6 +126,9 @@ public interface MusicPlayer {
      * 释放音乐播放器。
      * <p>
      * 注意！一旦调用该方法，就不能再调用 {@link MusicPlayer} 对象的任何方法，否则会发生不可预见的错误。
+     * <p>
+     * 调用该方法后应该立即释放你的音乐播放器（释放占用的内存，断开网络连接）。此时 {@link #isInvalid()}
+     * 方法应该返回 true，{@link #isPlaying()} 方法与 {@link #isStalled()} 方法应该返回 false。
      */
     void release();
 
@@ -232,7 +238,7 @@ public interface MusicPlayer {
          * 该方法会在缓存进度更新时调用。
          *
          * @param mp        当前音乐播放器
-         * @param buffered  已缓存的进度（单位：毫秒）
+         * @param buffered  已缓存的进度（毫秒或者是一个 [0 ~ 100] 的百分比值）
          * @param isPercent 已缓存的进度是否是百分比值，如果缓存进度是百分比值，该参数则应该为 true
          */
         void onBufferingUpdate(MusicPlayer mp, int buffered, boolean isPercent);
@@ -245,8 +251,7 @@ public interface MusicPlayer {
         /**
          * 该方法会在错误发生时被调用。
          * <p>
-         * 注意！发生错误后，不允许再继续使用当前 MusicPlayer 对象，必须将其释放掉。如果需要继续播放，
-         * 建议使用相同的 URI 创建一个新的 MusicPlayer 对象。
+         * 发生错误后，当前 {@link MusicPlayer} 不会再被使用，你可以释放播放器占用的资源。
          *
          * @param mp        当前播放器
          * @param errorCode 错误码
