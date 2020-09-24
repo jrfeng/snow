@@ -492,9 +492,9 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 获取当前 {@link PlayerViewModel}关联到的 PlayerClient 对象。
+     * 获取当前 {@link PlayerViewModel}关联到的 {@link PlayerClient} 对象。
      *
-     * @throws IllegalStateException 如果当前 PlayerViewModel 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
     public PlayerClient getPlayerClient() throws IllegalStateException {
@@ -507,81 +507,141 @@ public class PlayerViewModel extends ViewModel {
 
     /**
      * 正在播放的歌曲的标题。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<String> getTitle() {
+    public LiveData<String> getTitle() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mTitle;
     }
 
     /**
      * 正在播放的歌曲的艺术家（歌手）。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<String> getArtist() {
+    public LiveData<String> getArtist() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mArtist;
     }
 
     /**
      * 正在播放的歌曲所属的专辑。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<String> getAlbum() {
+    public LiveData<String> getAlbum() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mAlbum;
     }
 
     /**
      * 正在播放的歌曲的图标的 Uri
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<String> getIconUri() {
+    public LiveData<String> getIconUri() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mIconUri;
     }
 
     /**
      * 正在播放的歌曲的持续时间（单位：秒）。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<Integer> getDuration() {
+    public LiveData<Integer> getDuration() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mDuration;
     }
 
     /**
      * 正在播放歌曲的实时播放进度（单位：秒），支持双向绑定。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public MutableLiveData<Integer> getPlayProgress() {
+    public MutableLiveData<Integer> getPlayProgress() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mPlayProgress;
     }
 
     /**
      * 正在播放歌曲的缓存进度（单位：秒）。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<Integer> getBufferedProgress() {
+    public LiveData<Integer> getBufferedProgress() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mBufferedProgress;
     }
 
     /**
      * 正在播放歌曲在列表中的位置。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<Integer> getPlayPosition() {
+    public LiveData<Integer> getPlayPosition() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mPlayPosition;
     }
 
     /**
      * 播放器的播放模式。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<PlayMode> getPlayMode() {
+    public LiveData<PlayMode> getPlayMode() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mPlayMode;
     }
 
     /**
      * 播放器的播放状态。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<PlaybackState> getPlaybackState() {
+    public LiveData<PlaybackState> getPlaybackState() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mPlaybackState;
     }
 
@@ -589,9 +649,15 @@ public class PlayerViewModel extends ViewModel {
      * 播放器是否处于 stalled 状态。
      * <p>
      * 当缓冲去没有足够的数据支持播放器继续播放时，该值为 true。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<Boolean> getStalled() {
+    public LiveData<Boolean> getStalled() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mStalled;
     }
 
@@ -599,8 +665,13 @@ public class PlayerViewModel extends ViewModel {
      * 获取客户端的连接结果。
      *
      * @return 客户端的连接结果，如果已成功连接，则返回 true，否则返回 false
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
-    public MutableLiveData<Boolean> getConnected() {
+    public MutableLiveData<Boolean> getConnected() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mConnected;
     }
 
@@ -608,16 +679,27 @@ public class PlayerViewModel extends ViewModel {
      * 播放器是否正在准备中。
      *
      * @return 如果播放器正在准备中，则为 true，否则为 false
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
-    public LiveData<Boolean> getPreparing() {
+    public LiveData<Boolean> getPreparing() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mPreparing;
     }
 
     /**
      * 是否发生了错误。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<Boolean> isError() {
+    public LiveData<Boolean> isError() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return Transformations.map(mPlaybackState, new Function<PlaybackState, Boolean>() {
             @Override
             public Boolean apply(PlaybackState input) {
@@ -628,9 +710,15 @@ public class PlayerViewModel extends ViewModel {
 
     /**
      * 错误信息，只在发生错误时该值才有意义。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<String> getErrorMessage() {
+    public LiveData<String> getErrorMessage() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mErrorMessage;
     }
 
@@ -638,9 +726,14 @@ public class PlayerViewModel extends ViewModel {
      * 获取当前只在播放的音乐。
      *
      * @return 返回当前只在播放的音乐。如果播放列表为空，或者还没有建立连接，则当前只在播放的音乐可能为 null
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<MusicItem> getPlayingMusicItem() {
+    public LiveData<MusicItem> getPlayingMusicItem() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mPlayingMusicItem;
     }
 
@@ -651,17 +744,28 @@ public class PlayerViewModel extends ViewModel {
      * LiveData 没有任何观察者，出于性能考虑，不会实时更新当前 LiveData 的值。
      *
      * @return 包含当前播放列表的 LiveData 对象
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<Playlist> getPlaylist() {
+    public LiveData<Playlist> getPlaylist() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mPlaylist;
     }
 
     /**
      * 获取歌曲的持续时间（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<String> getTextDuration() {
+    public LiveData<String> getTextDuration() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return Transformations.map(mDuration, new Function<Integer, String>() {
             @Override
             public String apply(Integer input) {
@@ -672,9 +776,15 @@ public class PlayerViewModel extends ViewModel {
 
     /**
      * 获取歌曲的实时播放进度（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
     @NonNull
-    public LiveData<String> getTextPlayProgress() {
+    public LiveData<String> getTextPlayProgress() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return Transformations.map(mPlayProgress, new Function<Integer, String>() {
             @Override
             public String apply(Integer input) {
@@ -685,15 +795,27 @@ public class PlayerViewModel extends ViewModel {
 
     /**
      * 获取睡眠定时器的时长（单位：秒）。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
-    public LiveData<Integer> getSleepTimerTime() {
+    public LiveData<Integer> getSleepTimerTime() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mSleepTimerTime;
     }
 
     /**
      * 获取睡眠定时器的时长（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
-    public LiveData<String> getTextSleepTimerTime() {
+    public LiveData<String> getTextSleepTimerTime() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return Transformations.map(mSleepTimerTime, new Function<Integer, String>() {
             @Override
             public String apply(Integer input) {
@@ -706,8 +828,14 @@ public class PlayerViewModel extends ViewModel {
      * 获取睡眠定时器进度（单位：秒）。
      * <p>
      * 睡眠定时器的进度是个倒计时。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
-    public LiveData<Integer> getSleepTimerProgress() {
+    public LiveData<Integer> getSleepTimerProgress() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return mSleepTimerProgress;
     }
 
@@ -715,8 +843,14 @@ public class PlayerViewModel extends ViewModel {
      * 获取睡眠定时器进度（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"
      * <p>
      * 睡眠定时器的进度是个倒计时。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
-    public LiveData<String> getTextSleepTimerProgress() {
+    public LiveData<String> getTextSleepTimerProgress() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
         return Transformations.map(mSleepTimerProgress, new Function<Integer, String>() {
             @Override
             public String apply(Integer input) {
