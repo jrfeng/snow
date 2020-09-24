@@ -116,11 +116,6 @@ public class PlayerClient implements Player, PlaylistEditor {
                             mMediaController.registerCallback(mMediaControllerCallback, new Handler(Looper.getMainLooper()));
                             initCustomActionEmitter(mMediaController);
                             mPlayerManager.syncPlayerState(mClientToken);
-
-                            if (mConnectCallback != null) {
-                                mConnectCallback.onConnected(true);
-                                mConnectCallback = null;
-                            }
                         } catch (Exception e) {
                             mMediaBrowser.disconnect();
                             onConnectionFailed();
@@ -162,6 +157,12 @@ public class PlayerClient implements Player, PlaylistEditor {
 
                 setConnected(true);
                 mPlayerStateHolder.setPlayerState(playerState);
+
+                if (mConnectCallback != null) {
+                    mConnectCallback.onConnected(true);
+                    mConnectCallback = null;
+                }
+
                 notifyConnectStateChanged(true);
             }
         };
