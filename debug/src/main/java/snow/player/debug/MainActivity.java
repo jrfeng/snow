@@ -1,5 +1,6 @@
 package snow.player.debug;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import snow.player.Player;
 import snow.player.PlayerClient;
 import snow.player.SleepTimer;
 import snow.player.debug.databinding.ActivityMainBinding;
@@ -42,6 +44,14 @@ public class MainActivity extends AppCompatActivity {
         mPlayerClient = PlayerClient.newInstance(this, MyPlayerService.class);
         playerViewModel.init(this, mPlayerClient);
         playerViewModel.setAutoDisconnect(true);
+
+        mPlayerClient.addOnPlayingMusicItemChangeListener(this, new Player.OnPlayingMusicItemChangeListener() {
+            @Override
+            public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int position, int playProgress) {
+                // DEBUG
+                Log.d(TAG, "onPlayingMusicItemChanged: " + musicItem);
+            }
+        });
 
         mPlayerClient.addOnSleepTimerStateChangeListener(this, new SleepTimer.OnStateChangeListener() {
             @Override
