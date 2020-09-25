@@ -543,7 +543,7 @@ public class PlayerClient implements Player, PlaylistEditor {
     /**
      * 获取当前正在播放的音乐。
      *
-     * @return 当前正在播放的音乐。如果播放列表为空，或者 {@link PlayerClient} 还没有连接，则返回 null
+     * @return 当前正在播放的音乐。如果当前没有任何播放的音乐（播放列表为空，或者还没有建立连接），则返回 null
      */
     @Nullable
     public MusicItem getPlayingMusicItem() {
@@ -553,7 +553,7 @@ public class PlayerClient implements Player, PlaylistEditor {
     /**
      * 获取当前正在播放的音乐的持续时间。
      *
-     * @return 当前正在播放的音乐的持续时间，如果当前没有任何播放的音乐，则返回 0
+     * @return 当前正在播放的音乐的持续时间。如果当前没有任何播放的音乐（播放列表为空，或者还没有建立连接），则返回 0
      */
     public int getPlayingMusicItemDuration() {
         MusicItem musicItem = getPlayingMusicItem();
