@@ -4,7 +4,7 @@
 
 [**中文**](./readme.md)
 
-Android music player framework. Support custom music player(MediaPlayer, ExoPlayer), custom Notification, custom audio effect engine, headset clicks, playback history, player status automatic recovery on restart.
+Android music player framework. Support custom music player(MediaPlayer, ExoPlayer), custom Notification, custom audio effect engine, headset clicks, sleep timer, playback history, player status automatic recovery on restart.
 
 **Document:**
 
@@ -30,7 +30,7 @@ allprojects {
 
 ```gradle
 dependencies {
-    implementation 'com.github.jrfeng.snow:player:0.1.11'
+    implementation 'com.github.jrfeng.snow:player:0.1.17'
 }
 ```
 

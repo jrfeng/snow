@@ -4,7 +4,7 @@
 
 [**English**](./readme_en.md)
 
-Android 音乐播放器框架。支持自定义播放器（MediaPlayer, ExoPlayer），自定义通知栏控制器，自定义音频特效引擎，线控播放（Headset clicks），记录播放历史，播放器状态自动恢复。
+Android 音乐播放器框架。支持自定义播放器（MediaPlayer, ExoPlayer），自定义通知栏控制器，自定义音频特效引擎，线控播放（Headset clicks），睡眠定时器，记录播放历史，播放器状态自动恢复。
 
 **文档：**
 
@@ -30,7 +30,7 @@ allprojects {
 
 ```gradle
 dependencies {
-    implementation 'com.github.jrfeng.snow:player:0.1.11'
+    implementation 'com.github.jrfeng.snow:player:0.1.17'
 }
 ```
 
