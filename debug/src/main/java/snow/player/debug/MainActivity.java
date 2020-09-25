@@ -67,6 +67,9 @@ public class MainActivity extends AppCompatActivity {
                         if (success && mPlayerClient.getMediaController() != null) {
                             testMediaSession(mPlayerClient.getMediaController());
                         }
+
+                        // DEBUG
+                        Log.d(TAG, "OnConnectCallback: PlayingMusicItem: " + mPlayerClient.getPlayingMusicItem());
                     }
                 });
                 break;
