@@ -988,7 +988,11 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
-        mCustomActionDispatcher.dispatch(action, extras);
+        if (mCustomActionDispatcher.dispatch(action, extras)) {
+            return;
+        }
+
+        handleCustomAction(action, extras);
     }
 
     @Override
