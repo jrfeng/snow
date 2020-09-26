@@ -95,13 +95,13 @@ public class PlayerService extends MediaBrowserServiceCompat
      * {@code session event} 后应该主动断开与 PlayerService 的连接。当所有客户端断开与 PlayerService 的
      * 连接后，PlayerService 会自动终止。
      */
-    public static final String CUSTOM_ACTION_SHUTDOWN = "snow.player.custom_action.shutdown";
+    public static final String CUSTOM_ACTION_SHUTDOWN = "snow.player.custom_action.SHUTDOWN";
 
     /**
      * 如果你直接使用 {@link MediaBrowserCompat} 连接 PlayerService, 那么你的客户端应该在接收到该
      * {@code session event} 时主动断开与 PlayerService 的连接。
      */
-    public static final String SESSION_EVENT_ON_SHUTDOWN = "snow.player.session_event.on_shutdown";
+    public static final String SESSION_EVENT_ON_SHUTDOWN = "snow.player.session_event.ON_SHUTDOWN";
 
     private String mPersistentId;
 
