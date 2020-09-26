@@ -795,7 +795,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         startRecordProgress();
 
-        mAudioFocusHelper.requestAudioFocus(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         mBecomeNoiseHelper.registerBecomeNoiseReceiver();
 
         onPlaying(progress, updateTime);
@@ -969,6 +968,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                     play();
                 }
             };
+            return;
+        }
+
+        int result = mAudioFocusHelper.requestAudioFocus(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        if (result == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
             return;
         }
 
