@@ -787,7 +787,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     private void notifyPlaying(boolean stalled, int progress, long updateTime) {
         mPlayerStateHelper.onPlay(stalled, progress, updateTime);
-        mMediaSession.setActive(true);
 
         if (!stalled) {
             mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
@@ -976,6 +975,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
+        mMediaSession.setActive(true);
         if (isPrepared()) {
             mMusicPlayer.start();
             notifyPlaying(mMusicPlayer.isStalled(), mMusicPlayer.getProgress(), SystemClock.elapsedRealtime());
