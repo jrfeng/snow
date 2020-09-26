@@ -538,8 +538,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         initPlaybackStateBuilder();
 
         mMediaSession = mediaSession;
-        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_NONE));
-        mMediaSession.setMetadata(buildMediaMetadata());
+
+        if (getMusicItem() != null) {
+            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PAUSED));
+            mMediaSession.setMetadata(buildMediaMetadata());
+        }
     }
 
     private void initPlaybackStateBuilder() {
@@ -917,6 +920,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         releaseMusicPlayer();
 
         mPlayerStateHelper.onPlayingMusicItemChanged(musicItem, position, 0);
+
+        if (musicItem == null) {
+            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_NONE));
+        }
         mMediaSession.setMetadata(buildMediaMetadata());
 
         onPlayingMusicItemChanged(musicItem);
@@ -944,11 +951,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         if (!isPlaying() && !mPlayOnSeekComplete) {
             notifyPaused();
-            return;
-        }
-
-        if (!stalled) {
-            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
         }
     }
 
