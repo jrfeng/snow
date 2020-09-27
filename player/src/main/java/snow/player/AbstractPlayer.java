@@ -822,7 +822,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PAUSED));
 
-        mAudioFocusHelper.abandonAudioFocus();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
 
         onPaused();
