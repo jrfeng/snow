@@ -313,17 +313,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         mHeadsetHookHelper = new HeadsetHookHelper(new HeadsetHookHelper.OnHeadsetHookClickListener() {
             @Override
             public void onHeadsetHookClicked(int clickCount) {
-                switch (clickCount) {
-                    case 1:
-                        getPlayer().playPause();
-                        break;
-                    case 2:
-                        getPlayer().skipToNext();
-                        break;
-                    case 3:
-                        getPlayer().skipToPrevious();
-                        break;
-                }
+                PlayerService.this.onHeadsetHookClicked(clickCount);
             }
         });
     }
@@ -442,6 +432,34 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         mAudioEffectManager.updateConfig(config);
         mPlayerConfig.setAudioEffectConfig(config);
+    }
+
+    /**
+     * 当耳机上的按钮被点击时会调用该方法。
+     * <p>
+     * 该方法的默认行为：<br>
+     * <il>
+     * <li>连续点击 1 次：播放/暂停</li>
+     * <li>连续点击 2 次：下一曲</li>
+     * <li>连续点击 3 次：上一曲</li>
+     * </il>
+     * <p>
+     * 你可以覆盖该方法来自定义耳机按钮被点击时的行为。
+     *
+     * @param clickCount 按钮被连续点击的次数。
+     */
+    protected void onHeadsetHookClicked(int clickCount) {
+        switch (clickCount) {
+            case 1:
+                getPlayer().playPause();
+                break;
+            case 2:
+                getPlayer().skipToNext();
+                break;
+            case 3:
+                getPlayer().skipToPrevious();
+                break;
+        }
     }
 
     private boolean noAudioEffectManager() {
