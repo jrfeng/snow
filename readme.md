@@ -2,7 +2,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/jrfeng/snow)](https://github.com/jrfeng/snow/issues)
 [![GitHub closed issues](https://img.shields.io/github/issues-closed/jrfeng/snow)](https://github.com/jrfeng/snow/issues?q=is%3Aissue+is%3Aclosed)
 
-[**中文**](./readme.md)
+[**中文**](./readme_zh.md)
 
 Android music player library. Support custom music player(MediaPlayer, ExoPlayer), custom Notification, custom audio effect engine, headset clicks, sleep timer, playback history, player status automatic recovery on restart.
 
