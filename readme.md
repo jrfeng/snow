@@ -4,7 +4,17 @@
 
 [**中文**](./readme_zh.md)
 
-Android music player library. Support custom music player(MediaPlayer, ExoPlayer), custom Notification, custom audio effect engine, headset clicks, sleep timer, playback history, player status automatic recovery on restart.
+Android music player library. 
+
+**Support:**
+
+* Custom music player(MediaPlayer, ExoPlayer)
+* Custom Notification
+* Custom audio effect engine
+* Headset clicks
+* Sleep timer
+* Playback history
+* Player status automatic recovery on restart
 
 **Document:**
 
