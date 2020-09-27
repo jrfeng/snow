@@ -438,11 +438,11 @@ public class PlayerService extends MediaBrowserServiceCompat
      * 当耳机上的按钮被点击时会调用该方法。
      * <p>
      * 该方法的默认行为：<br>
-     * <il>
+     * <ul>
      * <li>连续点击 1 次：播放/暂停</li>
      * <li>连续点击 2 次：下一曲</li>
      * <li>连续点击 3 次：上一曲</li>
-     * </il>
+     * </ul>
      * <p>
      * 你可以覆盖该方法来自定义耳机按钮被点击时的行为。
      *
