@@ -588,7 +588,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         if (wm != null) {
-            mWifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL, tag);
+            mWifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, tag);
             mWifiLock.setReferenceCounted(false);
         }
     }
