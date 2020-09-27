@@ -19,7 +19,7 @@ Android music player library.
 **Document:**
 
 * [**Getting Started**](https://github.com/jrfeng/snow/wiki/[EN]-1.Getting-Started)
-* [**Custom Player Component**](https://github.com/jrfeng/snow/wiki/[EN]-2.Custom-Player-Component)
+* [**Custom PlayerService**](https://github.com/jrfeng/snow/wiki/[EN]-2.Custom-PlayerService)
 * [**Custom Notification**](https://github.com/jrfeng/snow/wiki/[EN]-3.Custom-Notification)
 * [**Use ExoPlayer**](https://github.com/jrfeng/snow/wiki/[EN]-4.Use-ExoPlayer)
 
