@@ -4,14 +4,14 @@
 
 [**中文**](./readme.md)
 
-Android music player framework. Support custom music player(MediaPlayer, ExoPlayer), custom Notification, custom audio effect engine, headset clicks, sleep timer, playback history, player status automatic recovery on restart.
+Android music player library. Support custom music player(MediaPlayer, ExoPlayer), custom Notification, custom audio effect engine, headset clicks, sleep timer, playback history, player status automatic recovery on restart.
 
 **Document:**
 
-* [**Getting Started**](https://github.com/jrfeng/snow/wiki/1.%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B)
-* [**Custom Player Component**](https://github.com/jrfeng/snow/wiki/2.%E8%87%AA%E5%AE%9A%E4%B9%89%E6%92%AD%E6%94%BE%E5%99%A8%E7%BB%84%E4%BB%B6)
-* [**Custom Notification**](https://github.com/jrfeng/snow/wiki/3.%E8%87%AA%E5%AE%9A%E4%B9%89%E9%80%9A%E7%9F%A5%E6%A0%8F%E6%8E%A7%E5%88%B6%E5%99%A8)
-* [**Use ExoPlayer**](https://github.com/jrfeng/snow/wiki/4.%E4%BD%BF%E7%94%A8-ExoPlayer)
+* [**Getting Started**](https://github.com/jrfeng/snow/wiki/[EN]-1.Getting-Started)
+* [**Custom Player Component**](https://github.com/jrfeng/snow/wiki/[EN]-2.Custom-Player-Component)
+* [**Custom Notification**](https://github.com/jrfeng/snow/wiki/[EN]-3.Custom-Notification)
+* [**Use ExoPlayer**](https://github.com/jrfeng/snow/wiki/[EN]-4.Use-ExoPlayer)
 
 ## Add dependency
 
