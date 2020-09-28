@@ -1012,7 +1012,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (requestAudioFocusFailed()) {
+        if (notAllowPlay()) {
             return;
         }
 
@@ -1026,10 +1026,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         prepareMusicPlayer(true, null);
     }
 
-    private boolean requestAudioFocusFailed() {
+    private boolean notAllowPlay() {
         if (mPlayerConfig.isIgnoreAudioFocus()) {
             mPhoneCallStateHelper.registerCallStateListener();
-            return false;
+            return !mPhoneCallStateHelper.isCallIDLE();
         }
 
         return AudioManager.AUDIOFOCUS_REQUEST_FAILED ==
@@ -1222,7 +1222,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (isPlaying() && requestAudioFocusFailed()) {
+        if (isPlaying() && notAllowPlay()) {
             pause();
         }
     }
