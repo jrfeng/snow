@@ -47,6 +47,13 @@ public final class PhoneCallStateHelper {
     }
 
     /**
+     * 是否没有任何来电。
+     */
+    public boolean isCallIDLE() {
+        return mTelephonyManager.getCallState() == TelephonyManager.CALL_STATE_IDLE;
+    }
+
+    /**
      * 注册监听器。如果已经注册，则忽略本次调用。
      */
     public void registerCallStateListener() {
