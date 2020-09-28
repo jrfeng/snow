@@ -29,6 +29,7 @@ public class MyPlayerService extends PlayerService {
         super.onCreate();
 
         setMaxIDLETime(10);
+        setIgnoreAudioFocus(false);
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .followRedirects(true)
