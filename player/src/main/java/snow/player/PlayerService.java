@@ -564,6 +564,15 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     /**
+     * 是否忽略音频焦点。
+     *
+     * @return 是否忽略音频焦点。
+     */
+    public boolean isIgnoreAudioFocus() {
+        return mPlayerConfig.isIgnoreAudioFocus();
+    }
+
+    /**
      * 设置 {@link PlayerService} 处于空闲状态（暂停或者停止后）的最大存活时间。
      * <p>
      * 当播放器处于空闲状态（暂停或者停止）的时间超出 minutes 分钟后将自动终止 {@link PlayerService}。
