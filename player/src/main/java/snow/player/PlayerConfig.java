@@ -18,6 +18,7 @@ class PlayerConfig {
     private static final String KEY_AUDIO_EFFECT_CONFIG = "audio_effect_config";
     private static final String KEY_AUDIO_EFFECT_ENABLED = "audio_effect_enabled";
     private static final String KEY_ONLY_WIFI_NETWORK = "only_wifi_network";
+    private static final String KEY_IGNORE_AUDIO_FOCUS = "ignore_audio_focus";
 
     private MMKV mMMKV;
 
@@ -106,5 +107,23 @@ class PlayerConfig {
      */
     public void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
         mMMKV.encode(KEY_ONLY_WIFI_NETWORK, onlyWifiNetwork);
+    }
+
+    /**
+     * 是否忽略音频焦点。
+     *
+     * @return 是否忽略音频焦点。
+     */
+    public boolean isIgnoreAudioFocus() {
+        return mMMKV.decodeBool(KEY_IGNORE_AUDIO_FOCUS, false);
+    }
+
+    /**
+     * 设置是否忽略音频焦点。
+     *
+     * @param ignoreAudioFocus 是否忽略音频焦点。如果为 true，则播放器会忽略音频焦点的获取与丢失。
+     */
+    public void setIgnoreAudioFocus(boolean ignoreAudioFocus) {
+        mMMKV.encode(KEY_IGNORE_AUDIO_FOCUS, ignoreAudioFocus);
     }
 }
