@@ -478,7 +478,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     private void initAllHelper() {
         mAudioFocusHelper = new AudioFocusHelper(mApplicationContext, new AudioFocusHelper.OnAudioFocusChangeListener() {
-            private boolean playing;
+            private boolean mPlayingState;
 
             @Override
             public void onLoss() {
@@ -487,21 +487,21 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
             @Override
             public void onLossTransient() {
-                playing = isPlaying();
+                mPlayingState = isPlayingState();
                 pause();
             }
 
             @Override
             public void onLossTransientCanDuck() {
-                playing = isPlaying();
-                if (playing) {
+                mPlayingState = isPlayingState();
+                if (mPlayingState) {
                     mMusicPlayer.quiet();
                 }
             }
 
             @Override
             public void onGain(boolean lossTransient, boolean lossTransientCanDuck) {
-                if (!playing) {
+                if (!mPlayingState) {
                     return;
                 }
 
@@ -517,33 +517,33 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         });
 
         mPhoneCallStateHelper = new PhoneCallStateHelper(mApplicationContext, new PhoneCallStateHelper.OnStateChangeListener() {
-            private boolean playing;
+            private boolean mPlayingState;
 
             @Override
             public void onIDLE() {
-                if (playing) {
-                    playing = false;
+                if (mPlayingState) {
+                    mPlayingState = false;
                     play();
                 }
             }
 
             @Override
             public void onRinging() {
-                if (playing) {
+                if (mPlayingState) {
                     return;
                 }
 
-                playing = isPlaying();
+                mPlayingState = isPlayingState();
                 pause();
             }
 
             @Override
             public void onOffHook() {
-                if (playing) {
+                if (mPlayingState) {
                     return;
                 }
 
-                playing = isPlaying();
+                mPlayingState = isPlayingState();
                 pause();
             }
         });
@@ -745,6 +745,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     private boolean isPlaying() {
         return isPrepared() && mMusicPlayer.isPlaying();
+    }
+
+    private boolean isPlayingState() {
+        return getPlaybackState() == PlaybackState.PLAYING;
     }
 
     /**
