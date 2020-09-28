@@ -361,7 +361,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent != null) {
-                    handleCustomAction(intent.getStringExtra(CUSTOM_ACTION_NAME), intent.getExtras());
+                    onCustomAction(intent.getStringExtra(CUSTOM_ACTION_NAME), intent.getExtras());
                 }
             }
         };
