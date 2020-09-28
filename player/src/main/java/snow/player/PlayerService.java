@@ -146,6 +146,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private Intent mKeepAliveIntent;
     private KeepAliveConnection mKeepAliveConnection;
+    private boolean mKeepServiceAlive;
 
     private BroadcastReceiver mCustomActionReceiver;
 
@@ -172,9 +173,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         initHistoryRecorder();
         initCustomActionReceiver();
 
-        if (mNotificationView != null) {
-            keepServiceAlive();
-        }
+        keepServiceAlive();
 
         if (mNotificationView != null && mNotificationView.isNotifyOnCreate()) {
             updateNotificationView();
@@ -233,11 +232,19 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     // 避免因所有客户端都断开连接而导致 Service 终止
     private void keepServiceAlive() {
+        if (mKeepServiceAlive) {
+            return;
+        }
+
+        mKeepServiceAlive = true;
         bindService(mKeepAliveIntent, mKeepAliveConnection, BIND_AUTO_CREATE);
     }
 
     private void dismissKeepServiceAlive() {
-        unbindService(mKeepAliveConnection);
+        if (mKeepServiceAlive) {
+            mKeepServiceAlive = false;
+            unbindService(mKeepAliveConnection);
+        }
     }
 
     private void initNotificationManager() {
