@@ -4,9 +4,11 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -103,6 +105,8 @@ public class PlayerService extends MediaBrowserServiceCompat
      */
     public static final String SESSION_EVENT_ON_SHUTDOWN = "snow.player.session_event.ON_SHUTDOWN";
 
+    private static final String CUSTOM_ACTION_NAME = "snow.player.action.ACTION_NAME";
+
     private String mPersistentId;
 
     private PlayerConfig mPlayerConfig;
@@ -143,6 +147,8 @@ public class PlayerService extends MediaBrowserServiceCompat
     private Intent mKeepAliveIntent;
     private KeepAliveConnection mKeepAliveConnection;
 
+    private BroadcastReceiver mCustomActionReceiver;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -164,6 +170,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         initMediaSession();
         initSessionEventEmitter();
         initHistoryRecorder();
+        initCustomActionReceiver();
 
         if (mNotificationView != null) {
             keepServiceAlive();
@@ -214,6 +221,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         cancelIDLETimer();
 
+        unregisterReceiver(mCustomActionReceiver);
         mMediaSession.release();
         mPlayer.release();
 
@@ -347,6 +355,20 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private void initHistoryRecorder() {
         mHistoryRecorder = onCreateHistoryRecorder();
+    }
+
+    private void initCustomActionReceiver() {
+        mCustomActionReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent != null) {
+                    handleCustomAction(intent.getStringExtra(CUSTOM_ACTION_NAME), intent.getExtras());
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter(this.getClass().getName());
+        registerReceiver(mCustomActionReceiver, filter);
     }
 
     /**
@@ -606,30 +628,36 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     /**
-     * 用于创建触发当前 PlayerService 中的自定义动作的 PendingIntent 对象。
+     * 构建一个用于触发当前 PlayerService 的自定义动作的广播 Intent。
+     * <p>
+     * 如果需要携带额外的参数，则可以在构建好 Intent 对象后，将这些额外参数存入到 Intent 中即可。
      *
-     * @param action 自定义动作的名称
-     * @return 可触发自定义动作的 PendingIntent 对象
+     * @param actionName 当前 PlayerService 的自定义动作的名称，不能为 null。
+     * @return 广播 Intent。使用这个 Intent 对象发送广播即可触发对应的自定义动作。
      */
-    protected final PendingIntent getCustomActionPendingIntent(@NonNull String action) {
-        return getCustomActionPendingIntent(action, this, this.getClass());
+    public Intent buildCustomActionIntent(@NonNull String actionName) {
+        Preconditions.checkNotNull(actionName);
+        return buildCustomActionIntent(actionName, this.getClass());
     }
 
     /**
-     * 工具方法，用于创建触发自定义动作的 PendingIntent 对象。
+     * 构建一个用于触发自定义动作的广播 Intent。
+     * <p>
+     * 如果需要携带额外的参数，则可以在构建好 Intent 对象后，将这些额外参数存入到 Intent 中即可。
      *
-     * @param action  自定义动作的名称
-     * @param context Context 对象
-     * @param service 自定义动作关联到的 PlayerService 的 Class 对象
-     * @return 可触发自定义动作的 PendingIntent 对象
+     * @param actionName 自定义动作的名称，不能为 null。
+     * @param service    自定义动作关联到的那个 PlayerService 的 Class 对象。
+     * @return 广播 Intent。使用这个 Intent 对象发送广播即可触发对应的自定义动作。
      */
-    public static PendingIntent getCustomActionPendingIntent(@NonNull String action,
-                                                             Context context,
-                                                             Class<? extends PlayerService> service) {
-        Intent intent = new Intent(context, service);
-        intent.setAction(action);
+    public static Intent buildCustomActionIntent(@NonNull String actionName,
+                                                 @NonNull Class<? extends PlayerService> service) {
+        Preconditions.checkNotNull(actionName);
+        Preconditions.checkNotNull(service);
 
-        return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(service.getName());
+        intent.putExtra(CUSTOM_ACTION_NAME, actionName);
+
+        return intent;
     }
 
     /**
@@ -1337,6 +1365,8 @@ public class PlayerService extends MediaBrowserServiceCompat
         private boolean mKeepOnStopped;
         private boolean mReleased;
 
+        private int mPendingIntentRequestCode;
+
         void init(PlayerService playerService) {
             mPlayerService = playerService;
             mMusicItem = new MusicItem();
@@ -1410,13 +1440,22 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         /**
-         * 获取用于触发自定义动作的 PendingIntent 对象。
+         * 构建一个可附件到通知控件上的 PendingIntent 自定义动作。
          *
-         * @param action 自定义动作的名称
-         * @return 可触发自定义动作的 PendingIntent 对象
+         * @param actionName   自定义动作名称。
+         * @param customAction 自定义动作被触发时要执行的任务。
+         * @return PendingIntent 对象
          */
-        public final PendingIntent getCustomActionPendingIntent(@NonNull String action) {
-            return mPlayerService.getCustomActionPendingIntent(action);
+        public final PendingIntent buildCustomAction(String actionName, CustomAction customAction) {
+            addCustomAction(actionName, customAction);
+
+            mPendingIntentRequestCode += 1;
+
+            Intent intent = mPlayerService.buildCustomActionIntent(actionName);
+            return PendingIntent.getBroadcast(getContext(),
+                    mPendingIntentRequestCode,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
         private boolean notLocaleMusic() {
@@ -1843,6 +1882,10 @@ public class PlayerService extends MediaBrowserServiceCompat
      * 更多信息，请参考官方文档： <a target="_blank" href="https://developer.android.google.cn/training/notify-user/expanded#media-style">https://developer.android.google.cn/training/notify-user/expanded#media-style</a>
      */
     public static class MediaNotificationView extends NotificationView {
+        private static final String ACTION_SKIP_TO_PREVIOUS = "__skip_to_previous";
+        private static final String ACTION_PLAY_PAUSE = "__play_pause";
+        private static final String ACTION_SKIP_TO_NEXT = "__skip_to_next";
+
         private PendingIntent mSkipToPrevious;
         private PendingIntent mPlayPause;
         private PendingIntent mSkipToNext;
@@ -1853,9 +1896,26 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         private void initAllPendingIntent() {
-            mSkipToPrevious = MediaButtonReceiver.buildMediaButtonPendingIntent(getContext(), PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
-            mPlayPause = MediaButtonReceiver.buildMediaButtonPendingIntent(getContext(), PlaybackStateCompat.ACTION_PLAY_PAUSE);
-            mSkipToNext = MediaButtonReceiver.buildMediaButtonPendingIntent(getContext(), PlaybackStateCompat.ACTION_SKIP_TO_NEXT);
+            mSkipToPrevious = buildCustomAction(ACTION_SKIP_TO_PREVIOUS, new CustomAction() {
+                @Override
+                public void doAction(@NonNull Player player, @Nullable Bundle extras) {
+                    player.skipToPrevious();
+                }
+            });
+
+            mPlayPause = buildCustomAction(ACTION_PLAY_PAUSE, new CustomAction() {
+                @Override
+                public void doAction(@NonNull Player player, @Nullable Bundle extras) {
+                    player.playPause();
+                }
+            });
+
+            mSkipToNext = buildCustomAction(ACTION_SKIP_TO_NEXT, new CustomAction() {
+                @Override
+                public void doAction(@NonNull Player player, @Nullable Bundle extras) {
+                    player.skipToNext();
+                }
+            });
         }
 
         public final PendingIntent doSkipToPrevious() {
