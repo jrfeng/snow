@@ -37,6 +37,7 @@ import media.helper.BecomeNoiseHelper;
 import snow.player.appwidget.AppWidgetPreferences;
 import snow.player.audio.MusicItem;
 import snow.player.audio.MusicPlayer;
+import snow.player.helper.PhoneCallStateHelper;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistEditor;
 import snow.player.playlist.PlaylistManager;
@@ -65,6 +66,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private MusicPlayer.OnErrorListener mErrorListener;
 
     private AudioFocusHelper mAudioFocusHelper;
+    private PhoneCallStateHelper mPhoneCallStateHelper;
     private BecomeNoiseHelper mBecomeNoiseHelper;
     private NetworkHelper mNetworkHelper;
 
@@ -514,6 +516,38 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             }
         });
 
+        mPhoneCallStateHelper = new PhoneCallStateHelper(mApplicationContext, new PhoneCallStateHelper.OnStateChangeListener() {
+            private boolean playing;
+
+            @Override
+            public void onIDLE() {
+                if (playing) {
+                    playing = false;
+                    play();
+                }
+            }
+
+            @Override
+            public void onRinging() {
+                if (playing) {
+                    return;
+                }
+
+                playing = isPlaying();
+                pause();
+            }
+
+            @Override
+            public void onOffHook() {
+                if (playing) {
+                    return;
+                }
+
+                playing = isPlaying();
+                pause();
+            }
+        });
+
         mBecomeNoiseHelper = new BecomeNoiseHelper(mApplicationContext, new BecomeNoiseHelper.OnBecomeNoiseListener() {
             @Override
             public void onBecomeNoise() {
@@ -840,6 +874,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_STOPPED));
 
         mAudioFocusHelper.abandonAudioFocus();
+        mPhoneCallStateHelper.unregisterCallStateListener();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
 
         onStopped();
@@ -973,8 +1008,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        int result = mAudioFocusHelper.requestAudioFocus(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-        if (result == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
+        if (requestAudioFocusFailed()) {
             return;
         }
 
@@ -986,6 +1020,16 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         prepareMusicPlayer(true, null);
+    }
+
+    private boolean requestAudioFocusFailed() {
+        if (mPlayerConfig.isIgnoreAudioFocus()) {
+            mPhoneCallStateHelper.registerCallStateListener();
+            return false;
+        }
+
+        return AudioManager.AUDIOFOCUS_REQUEST_FAILED ==
+                mAudioFocusHelper.requestAudioFocus(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
     }
 
     @Override
@@ -1166,6 +1210,17 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         checkNetworkType(mPlayerConfig.isOnlyWifiNetwork(), mNetworkHelper.isWifiNetwork());
+    }
+
+    public void notifyIgnoreAudioFocusChanged() {
+        if (mPlayerConfig.isIgnoreAudioFocus()) {
+            mAudioFocusHelper.abandonAudioFocus();
+            return;
+        }
+
+        if (isPlaying() && requestAudioFocusFailed()) {
+            pause();
+        }
     }
 
     private void checkNetworkType(boolean onlyWifiNetwork, boolean isWifiNetwork) {

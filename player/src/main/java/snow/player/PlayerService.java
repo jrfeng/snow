@@ -522,11 +522,17 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         mPlayerConfig.setOnlyWifiNetwork(onlyWifiNetwork);
-        notifyOnlyWifiNetworkChanged();
+        mPlayer.notifyOnlyWifiNetworkChanged();
     }
 
-    private void notifyOnlyWifiNetworkChanged() {
-        mPlayer.notifyOnlyWifiNetworkChanged();
+    @Override
+    public void setIgnoreAudioFocus(boolean ignoreAudioFocus) {
+        if (ignoreAudioFocus == mPlayerConfig.isIgnoreAudioFocus()) {
+            return;
+        }
+
+        mPlayerConfig.setIgnoreAudioFocus(ignoreAudioFocus);
+        mPlayer.notifyIgnoreAudioFocusChanged();
     }
 
     /**

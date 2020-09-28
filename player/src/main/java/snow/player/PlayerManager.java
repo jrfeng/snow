@@ -44,6 +44,13 @@ public interface PlayerManager {
     void setOnlyWifiNetwork(boolean onlyWifiNetwork);
 
     /**
+     * 设置是否忽略音频焦点。
+     *
+     * @param ignoreAudioFocus 是否忽略音频焦点。如果为 true，则播放器会忽略音频焦点的获取与丢失。
+     */
+    void setIgnoreAudioFocus(boolean ignoreAudioFocus);
+
+    /**
      * 关闭播放器并终止 Service。
      */
     void shutdown();

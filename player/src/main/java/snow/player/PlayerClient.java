@@ -385,6 +385,19 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     /**
+     * 设置是否忽略音频焦点。
+     *
+     * @param ignoreAudioFocus 是否忽略音频焦点。如果为 true，则播放器会忽略音频焦点的获取与丢失。
+     */
+    public void setIgnoreAudioFocus(boolean ignoreAudioFocus) {
+        if (!isConnected()) {
+            return;
+        }
+
+        mPlayerManager.setIgnoreAudioFocus(ignoreAudioFocus);
+    }
+
+    /**
      * 获取当前播放器的首选音质。
      *
      * @see #setSoundQuality(SoundQuality)
@@ -421,6 +434,15 @@ public class PlayerClient implements Player, PlaylistEditor {
      */
     public boolean isOnlyWifiNetwork() {
         return mPlayerConfig.isOnlyWifiNetwork();
+    }
+
+    /**
+     * 是否忽略音频焦点。
+     *
+     * @return 是否忽略音频焦点。
+     */
+    public boolean isIgnoreAudioFocus() {
+        return mPlayerConfig.isIgnoreAudioFocus();
     }
 
     /**
