@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import com.google.common.base.Preconditions;
 
 /**
- * 监听手机来电暂停。
+ * 监听手机来电状态。
  */
 public final class PhoneCallStateHelper {
     private TelephonyManager mTelephonyManager;
