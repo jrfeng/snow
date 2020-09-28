@@ -482,6 +482,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
             @Override
             public void onLoss() {
+                mPlayingState = false;
                 pause();
             }
 
@@ -902,7 +903,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         if (stalled) {
             cancelRecordProgress();
             mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_BUFFERING));
-        } else if (isPlaying() || mPlayOnPrepared) {
+        } else if (isPlayingState() || mPlayOnPrepared) {
             startRecordProgress();
             mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
         }
