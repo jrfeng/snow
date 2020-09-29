@@ -576,9 +576,14 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mMediaSession = mediaSession;
 
         if (getMusicItem() != null) {
+            mPlayerState.setPlaybackState(PlaybackState.PAUSED);
             mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PAUSED));
-            mMediaSession.setMetadata(buildMediaMetadata());
+        } else {
+            mPlayerState.setPlaybackState(PlaybackState.NONE);
+            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_NONE));
         }
+
+        mMediaSession.setMetadata(buildMediaMetadata());
     }
 
     private void initPlaybackStateBuilder() {
