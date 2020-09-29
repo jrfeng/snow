@@ -905,23 +905,33 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         mPlayerStateHelper.onStalled(stalled, playProgress, updateTime);
-
-        if (stalled) {
-            cancelRecordProgress();
-            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_BUFFERING));
-        } else if (isPlayingState() || mPlayOnPrepared) {
-            startRecordProgress();
-            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
-        }
-
-        if (!stalled && getPlaybackState() == PlaybackState.PAUSED) {
-            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PAUSED));
-        }
-
+        updateMediaSessionPlaybackState(stalled);
         onStalledChanged(stalled);
 
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onStalledChanged(stalled, playProgress, updateTime);
+        }
+    }
+
+    private void updateMediaSessionPlaybackState(boolean stalled) {
+        if (stalled) {
+            cancelRecordProgress();
+            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_BUFFERING));
+            return;
+        }
+
+        if (mPlayOnPrepared || mPlayOnSeekComplete) {
+            return;
+        }
+
+        switch (getPlaybackState()) {
+            case PLAYING:
+                startRecordProgress();
+                mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
+                break;
+            case PAUSED:
+                mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PAUSED));
+                break;
         }
     }
 
