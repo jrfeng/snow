@@ -24,6 +24,9 @@ import snow.player.playlist.Playlist;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    private TextView tvMediaSessionTitle;
+    private TextView tvMediaSessionArtist;
+    private TextView tvMediaSessionState;
 
     private PlayerClient mPlayerClient;
 
@@ -35,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
 
         PlayerViewModel playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
         binding.setViewModel(playerViewModel);
+
+        tvMediaSessionTitle = binding.tvMediaSessionTitle;
+        tvMediaSessionArtist = binding.tvMediaSessionArtist;
+        tvMediaSessionState = binding.tvMediaSessionState;
 
         if (playerViewModel.isInitialized()) {
             mPlayerClient = playerViewModel.getPlayerClient();
@@ -139,55 +146,72 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void testMediaSession(MediaControllerCompat mediaController) {
+        MediaMetadataCompat metadata = mediaController.getMetadata();
+        PlaybackStateCompat playbackState = mediaController.getPlaybackState();
+
+        tvMediaSessionTitle.setText(getStringValue(metadata, MediaMetadataCompat.METADATA_KEY_TITLE));
+        tvMediaSessionArtist.setText(getStringValue(metadata, MediaMetadataCompat.METADATA_KEY_ARTIST));
+        tvMediaSessionState.setText(getStateString(playbackState));
+
         mediaController.registerCallback(new MediaControllerCompat.Callback() {
             @Override
             public void onPlaybackStateChanged(PlaybackStateCompat state) {
-                switch (state.getState()) {
-                    case PlaybackStateCompat.STATE_NONE:
-                        Log.d(TAG, "STATE_NONE");
-                        break;
-                    case PlaybackStateCompat.STATE_PLAYING:
-                        Log.d(TAG, "STATE_PLAYING");
-                        break;
-                    case PlaybackStateCompat.STATE_PAUSED:
-                        Log.d(TAG, "STATE_PAUSED");
-                        break;
-                    case PlaybackStateCompat.STATE_STOPPED:
-                        Log.d(TAG, "STATE_STOPPED");
-                        break;
-                    case PlaybackStateCompat.STATE_ERROR:
-                        Log.d(TAG, "STATE_ERROR: " + state.getErrorMessage());
-                        break;
-                    case PlaybackStateCompat.STATE_FAST_FORWARDING:
-                        Log.d(TAG, "STATE_FAST_FORWARDING");
-                        break;
-                    case PlaybackStateCompat.STATE_REWINDING:
-                        Log.d(TAG, "STATE_REWINDING");
-                        break;
-                    case PlaybackStateCompat.STATE_BUFFERING:
-                        Log.d(TAG, "STATE_BUFFERING");
-                        break;
-                    case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT:
-                        Log.d(TAG, "STATE_SKIPPING_TO_NEXT");
-                        break;
-                    case PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS:
-                        Log.d(TAG, "STATE_SKIPPING_TO_PREVIOUS");
-                        break;
-                    case PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM:
-                        Log.d(TAG, "STATE_SKIPPING_TO_QUEUE_ITEM");
-                        break;
-                    case PlaybackStateCompat.STATE_CONNECTING:
-                        Log.d(TAG, "STATE_CONNECTING");
-                        break;
-                }
+                String stateString = getStateString(state);
+                Log.d(TAG, stateString);
+                tvMediaSessionState.setText(stateString);
             }
 
             @Override
             public void onMetadataChanged(MediaMetadataCompat metadata) {
-                // DEBUG
+                tvMediaSessionTitle.setText(getStringValue(metadata, MediaMetadataCompat.METADATA_KEY_TITLE));
+                tvMediaSessionArtist.setText(getStringValue(metadata, MediaMetadataCompat.METADATA_KEY_ARTIST));
+
                 Log.d(TAG, "Metadata: " + metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
             }
         });
+    }
+
+    private String getStringValue(MediaMetadataCompat metadata, String key) {
+        if (metadata == null) {
+            return "Unknown";
+        }
+
+        String value = metadata.getString(key);
+        if (value == null || value.isEmpty()) {
+            return "Unknown";
+        }
+
+        return value;
+    }
+
+    private String getStateString(PlaybackStateCompat state) {
+        switch (state.getState()) {
+            case PlaybackStateCompat.STATE_PLAYING:
+                return "STATE_PLAYING";
+            case PlaybackStateCompat.STATE_PAUSED:
+                return "STATE_PAUSED";
+            case PlaybackStateCompat.STATE_STOPPED:
+                return "STATE_STOPPED";
+            case PlaybackStateCompat.STATE_ERROR:
+                return "STATE_ERROR";
+            case PlaybackStateCompat.STATE_FAST_FORWARDING:
+                return "STATE_FAST_FORWARDING";
+            case PlaybackStateCompat.STATE_REWINDING:
+                return "STATE_REWINDING";
+            case PlaybackStateCompat.STATE_BUFFERING:
+                return "STATE_BUFFERING";
+            case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT:
+                return "STATE_SKIPPING_TO_NEXT";
+            case PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS:
+                return "STATE_SKIPPING_TO_PREVIOUS";
+            case PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM:
+                return "STATE_SKIPPING_TO_QUEUE_ITEM";
+            case PlaybackStateCompat.STATE_CONNECTING:
+                return "STATE_CONNECTING";
+            case PlaybackStateCompat.STATE_NONE:
+            default:
+                return "STATE_NONE";
+        }
     }
 }
 

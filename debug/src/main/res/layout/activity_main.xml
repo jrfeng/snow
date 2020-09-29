@@ -32,6 +32,18 @@
 
                     <TextView
                         android:layout_column="0"
+                        android:text="Connected:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{String.valueOf(viewModel.connected),default=`false`}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
                         android:text="Title:" />
 
                     <TextView
@@ -237,11 +249,38 @@
 
                     <TextView
                         android:layout_column="0"
-                        android:text="connected:" />
+                        android:text="MediaSession.Title:" />
 
                     <TextView
+                        android:id="@+id/tvMediaSessionTitle"
                         android:layout_column="1"
-                        android:text="@{String.valueOf(viewModel.connected)}" />
+                        android:text="" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="MediaSession.Artist:" />
+
+                    <TextView
+                        android:id="@+id/tvMediaSessionArtist"
+                        android:layout_column="1"
+                        android:text="" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="MediaSession.State:" />
+
+                    <TextView
+                        android:id="@+id/tvMediaSessionState"
+                        android:layout_column="1"
+                        android:text="STATE_NONE" />
 
                 </TableRow>
 
