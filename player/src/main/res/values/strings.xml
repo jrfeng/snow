@@ -12,15 +12,6 @@
 
     <string name="snow_preparing">Preparing…</string>
     <string name="snow_buffering">Buffering…</string>
-    
-    <string name="snow_preset_none">None</string>
-    <string name="snow_preset_large_hall">Large Hall</string>
-    <string name="snow_preset_large_room">Large Room</string>
-    <string name="snow_preset_medium_hall">Medium Hall</string>
-    <string name="snow_preset_medium_room">Medium Room</string>
-    <string name="snow_preset_plate">Plate</string>
-    <string name="snow_preset_small_room">Small Room</string>
-    <string name="snow_preset_unknown">Unknown Preset</string>
 
     <string name="snow_music_item_unknown_title">Unknown Title</string>
     <string name="snow_music_item_unknown_artist">Unknown Artist</string>
