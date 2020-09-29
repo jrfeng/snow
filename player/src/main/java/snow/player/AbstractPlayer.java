@@ -1015,7 +1015,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (notAllowPlay()) {
+        if (requestAudioFocusFailed()) {
             return;
         }
 
@@ -1027,16 +1027,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         prepareMusicPlayer(true, null);
-    }
-
-    private boolean notAllowPlay() {
-        if (mPlayerConfig.isIgnoreAudioFocus()) {
-            mPhoneCallStateHelper.registerCallStateListener();
-            return !mPhoneCallStateHelper.isCallIDLE();
-        }
-
-        return AudioManager.AUDIOFOCUS_REQUEST_FAILED ==
-                mAudioFocusHelper.requestAudioFocus(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
     }
 
     @Override
@@ -1220,14 +1210,20 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     }
 
     public void notifyIgnoreAudioFocusChanged() {
-        if (mPlayerConfig.isIgnoreAudioFocus()) {
-            mAudioFocusHelper.abandonAudioFocus();
-            return;
-        }
-
-        if (isPlaying() && notAllowPlay()) {
+        if (requestAudioFocusFailed() && (isPlayingState() || mPlayOnPrepared)) {
             pause();
         }
+    }
+
+    private boolean requestAudioFocusFailed() {
+        if (mPlayerConfig.isIgnoreAudioFocus()) {
+            mAudioFocusHelper.abandonAudioFocus();
+            mPhoneCallStateHelper.registerCallStateListener();
+            return !mPhoneCallStateHelper.isCallIDLE();
+        }
+
+        return AudioManager.AUDIOFOCUS_REQUEST_FAILED ==
+                mAudioFocusHelper.requestAudioFocus(AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
     }
 
     private void checkNetworkType(boolean onlyWifiNetwork, boolean isWifiNetwork) {
