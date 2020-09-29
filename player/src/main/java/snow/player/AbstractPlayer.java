@@ -479,31 +479,31 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     private void initAllHelper() {
         mAudioFocusHelper = new AudioFocusHelper(mApplicationContext, new AudioFocusHelper.OnAudioFocusChangeListener() {
-            private boolean mPlayingState;
+            private boolean mResumePlay;
 
             @Override
             public void onLoss() {
-                mPlayingState = false;
+                mResumePlay = false;
                 pause();
             }
 
             @Override
             public void onLossTransient() {
-                mPlayingState = isPlayingState();
+                mResumePlay = isPlayingState();
                 pause();
             }
 
             @Override
             public void onLossTransientCanDuck() {
-                mPlayingState = isPlayingState();
-                if (mPlayingState) {
+                mResumePlay = isPlayingState();
+                if (mResumePlay) {
                     mMusicPlayer.quiet();
                 }
             }
 
             @Override
             public void onGain(boolean lossTransient, boolean lossTransientCanDuck) {
-                if (!mPlayingState) {
+                if (!mResumePlay) {
                     return;
                 }
 
@@ -519,33 +519,33 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         });
 
         mPhoneCallStateHelper = new PhoneCallStateHelper(mApplicationContext, new PhoneCallStateHelper.OnStateChangeListener() {
-            private boolean mPlayingState;
+            private boolean mResumePlay;
 
             @Override
             public void onIDLE() {
-                if (mPlayingState) {
-                    mPlayingState = false;
+                if (mResumePlay) {
+                    mResumePlay = false;
                     play();
                 }
             }
 
             @Override
             public void onRinging() {
-                if (mPlayingState) {
+                if (mResumePlay) {
                     return;
                 }
 
-                mPlayingState = isPlayingState();
+                mResumePlay = isPlayingState();
                 pause();
             }
 
             @Override
             public void onOffHook() {
-                if (mPlayingState) {
+                if (mResumePlay) {
                     return;
                 }
 
-                mPlayingState = isPlayingState();
+                mResumePlay = isPlayingState();
                 pause();
             }
         });
