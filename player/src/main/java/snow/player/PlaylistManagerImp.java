@@ -29,7 +29,7 @@ class PlaylistManagerImp implements PlaylistManager {
     private static final String KEY_PLAYLIST = "playlist";
     private static final String KEY_PLAYLIST_SIZE = "playlist_size";
 
-    private MMKV mMMKV;
+    private final MMKV mMMKV;
     private Disposable mSaveDisposable;
 
     /**

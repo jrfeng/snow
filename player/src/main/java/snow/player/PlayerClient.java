@@ -38,17 +38,17 @@ import snow.player.audio.ErrorCode;
  * 播放器客户端，用于向播放器发送各种控制命令。
  */
 public class PlayerClient implements Player, PlaylistEditor {
-    private Context mApplicationContext;
-    private Class<? extends PlayerService> mPlayerService;
-    private String mClientToken;
-    private String mPersistentId;
+    private final Context mApplicationContext;
+    private final Class<? extends PlayerService> mPlayerService;
+    private final String mClientToken;
+    private final String mPersistentId;
 
     private MediaBrowserCompat mMediaBrowser;
     private MediaControllerCompat mMediaController;
     private MediaControllerCompat.Callback mMediaControllerCallback;
     private SessionEventPipe mSessionEventDispatcher;
 
-    private PlayerConfig mPlayerConfig;
+    private final PlayerConfig mPlayerConfig;
     private PlayerManager mPlayerManager;
     private PlayerManager.OnCommandCallback mCommandCallback;
     private SleepTimer mSleepTimer;
@@ -60,7 +60,7 @@ public class PlayerClient implements Player, PlaylistEditor {
     private PlaylistManagerImp mPlaylistManager;
     private PlayerStateHolder mPlayerStateHolder;
 
-    private List<OnConnectStateChangeListener> mAllConnectStateChangeListener;
+    private final List<OnConnectStateChangeListener> mAllConnectStateChangeListener;
 
     private PlayerClient(Context context, Class<? extends PlayerService> playerService) {
         mApplicationContext = context.getApplicationContext();
@@ -1679,21 +1679,21 @@ public class PlayerClient implements Player, PlaylistEditor {
             SleepTimer.OnStateChangeListener {
         private PlayerState mPlayerState;
         private PlayerStateHelper mPlayerStateHelper;
-        private PlaylistManager mPlaylistManager;
+        private final PlaylistManager mPlaylistManager;
         private boolean mNotConnected;
 
-        private List<Player.OnPlaybackStateChangeListener> mAllPlaybackStateChangeListener;
-        private List<Player.OnPrepareListener> mAllPrepareListener;
-        private List<Player.OnStalledChangeListener> mAllStalledChangeListener;
-        private List<OnBufferedProgressChangeListener> mAllBufferedProgressChangeListener;
-        private List<Player.OnPlayingMusicItemChangeListener> mAllPlayingMusicItemChangeListener;
-        private List<OnSeekCompleteListener> mAllSeekListener;
-        private List<Player.OnPlaylistChangeListener> mAllPlaylistChangeListener;
-        private List<Player.OnPlayModeChangeListener> mAllPlayModeChangeListener;
+        private final List<Player.OnPlaybackStateChangeListener> mAllPlaybackStateChangeListener;
+        private final List<Player.OnPrepareListener> mAllPrepareListener;
+        private final List<Player.OnStalledChangeListener> mAllStalledChangeListener;
+        private final List<OnBufferedProgressChangeListener> mAllBufferedProgressChangeListener;
+        private final List<Player.OnPlayingMusicItemChangeListener> mAllPlayingMusicItemChangeListener;
+        private final List<OnSeekCompleteListener> mAllSeekListener;
+        private final List<Player.OnPlaylistChangeListener> mAllPlaylistChangeListener;
+        private final List<Player.OnPlayModeChangeListener> mAllPlayModeChangeListener;
 
-        private List<PlayerClient.OnPlaybackStateChangeListener> mClientAllPlaybackStateChangeListener;
-        private List<PlayerClient.OnAudioSessionChangeListener> mAllAudioSessionChangeListener;
-        private List<SleepTimer.OnStateChangeListener> mAllSleepTimerStateChangeListener;
+        private final List<PlayerClient.OnPlaybackStateChangeListener> mClientAllPlaybackStateChangeListener;
+        private final List<PlayerClient.OnAudioSessionChangeListener> mAllAudioSessionChangeListener;
+        private final List<SleepTimer.OnStateChangeListener> mAllSleepTimerStateChangeListener;
 
         PlayerStateHolder(PlaylistManager playlistManager) {
             mPlaylistManager = playlistManager;
@@ -2234,7 +2234,7 @@ public class PlayerClient implements Player, PlaylistEditor {
     }
 
     private static class DestroyObserver implements LifecycleObserver {
-        private Runnable mOnDestroyAction;
+        private final Runnable mOnDestroyAction;
 
         DestroyObserver(@NonNull Runnable action) {
             Preconditions.checkNotNull(action);

@@ -12,9 +12,9 @@ import com.google.common.base.Preconditions;
  * 监听手机来电状态。
  */
 public final class PhoneCallStateHelper {
-    private TelephonyManager mTelephonyManager;
-    private PhoneStateListener mPhoneStateListener;
-    private OnStateChangeListener mCallStateListener;
+    private final TelephonyManager mTelephonyManager;
+    private final PhoneStateListener mPhoneStateListener;
+    private final OnStateChangeListener mCallStateListener;
     private boolean mRegistered;
 
     /**

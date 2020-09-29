@@ -18,8 +18,8 @@ import snow.player.PlayerService;
  * {@link PlayerClient} 对象即可。
  */
 public class PlayerClientHelper {
-    private Context mApplicationContext;
-    private Class<? extends PlayerService> mPlayerService;
+    private final Context mApplicationContext;
+    private final Class<? extends PlayerService> mPlayerService;
 
     private PlayerClient mPlayerClient;
     private int mCount;

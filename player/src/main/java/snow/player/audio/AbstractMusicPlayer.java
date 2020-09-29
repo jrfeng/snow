@@ -6,7 +6,7 @@ import snow.player.helper.VolumeEaseHelper;
  * 该类已经对 {@link VolumeEaseHelper} 进行了封装，用于减少模板代码。
  */
 public abstract class AbstractMusicPlayer implements MusicPlayer {
-    private VolumeEaseHelper mVolumeEaseHelper;
+    private final VolumeEaseHelper mVolumeEaseHelper;
 
     public AbstractMusicPlayer() {
         mVolumeEaseHelper = new VolumeEaseHelper(this, new VolumeEaseHelper.Callback() {

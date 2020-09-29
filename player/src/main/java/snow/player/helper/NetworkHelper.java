@@ -25,11 +25,11 @@ import java.lang.ref.WeakReference;
  */
 @SuppressWarnings("deprecation")
 public class NetworkHelper {
-    private Context mApplicationContext;
-    private WeakReference<OnNetworkStateChangeListener> mListenerWeakReference;
+    private final Context mApplicationContext;
+    private final WeakReference<OnNetworkStateChangeListener> mListenerWeakReference;
 
-    private ConnectivityManager mConnectivityManager;
-    private BroadcastReceiver mNetworkStateReceiver;
+    private final ConnectivityManager mConnectivityManager;
+    private final BroadcastReceiver mNetworkStateReceiver;
     private ConnectivityManager.NetworkCallback mNetworkCallback;
 
     private NetworkHelper(Context context, OnNetworkStateChangeListener listener) {

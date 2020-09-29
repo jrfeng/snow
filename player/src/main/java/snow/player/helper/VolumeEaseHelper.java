@@ -94,8 +94,8 @@ import snow.player.audio.MusicPlayer;
  * @see snow.player.audio.AbstractMusicPlayer
  */
 public class VolumeEaseHelper {
-    private MusicPlayer mMusicPlayer;
-    private Callback mCallback;
+    private final MusicPlayer mMusicPlayer;
+    private final Callback mCallback;
 
     private ObjectAnimator mStartVolumeAnimator;
     private ObjectAnimator mPauseVolumeAnimator;

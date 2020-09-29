@@ -20,7 +20,7 @@ class PlayerConfig {
     private static final String KEY_ONLY_WIFI_NETWORK = "only_wifi_network";
     private static final String KEY_IGNORE_AUDIO_FOCUS = "ignore_audio_focus";
 
-    private MMKV mMMKV;
+    private final MMKV mMMKV;
 
     public PlayerConfig(@NonNull Context context, @NonNull String id) {
         Preconditions.checkNotNull(context);

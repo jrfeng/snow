@@ -19,7 +19,7 @@ class PersistentPlayerState extends PlayerState {
     private static final String KEY_PLAY_POSITION = "position";
     private static final String KEY_PLAY_MODE = "play_mode";
 
-    private MMKV mMMKV;
+    private final MMKV mMMKV;
 
     public PersistentPlayerState(@NonNull Context context, @NonNull String id) {
         Preconditions.checkNotNull(context);

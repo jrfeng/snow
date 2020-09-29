@@ -1251,8 +1251,8 @@ public class PlayerService extends MediaBrowserServiceCompat
      * @see #onCreateMediaSessionCallback()
      */
     public static class MediaSessionCallback extends MediaSessionCompat.Callback {
-        private PlayerService mPlayerService;
-        private Player mPlayer;
+        private final PlayerService mPlayerService;
+        private final Player mPlayer;
 
         public MediaSessionCallback(@NonNull PlayerService playerService) {
             Preconditions.checkNotNull(playerService);

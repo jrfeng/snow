@@ -54,9 +54,9 @@ public class AppWidgetPreferences implements SharedPreferences {
     private static final String KEY_STALLED = "stalled";
     private static final String KEY_ERROR_MESSAGE = "error_message";
 
-    private Context mApplicationContext;
-    private Class<? extends PlayerService> mService;
-    private MMKV mMMKV;
+    private final Context mApplicationContext;
+    private final Class<? extends PlayerService> mService;
+    private final MMKV mMMKV;
 
     /**
      * 创建一个 AppWidgetPreferences 对象。
@@ -242,10 +242,10 @@ public class AppWidgetPreferences implements SharedPreferences {
     }
 
     public static class Editor implements SharedPreferences.Editor {
-        private Context mApplicationContext;
-        private String mServiceName;
-        private MMKV mMMKV;
-        private boolean mNoNotify;
+        private final Context mApplicationContext;
+        private final String mServiceName;
+        private final MMKV mMMKV;
+        private final boolean mNoNotify;
 
         private Editor(Context context, String serviceName, MMKV mmkv, boolean noNotify) {
             mApplicationContext = context;

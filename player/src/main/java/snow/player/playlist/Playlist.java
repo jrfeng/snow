@@ -24,8 +24,8 @@ import snow.player.audio.MusicItem;
  */
 public final class Playlist implements Iterable<MusicItem>, Parcelable {
     private static final String TAG = "Playlist";
-    private ArrayList<MusicItem> mMusicItems;
-    private Bundle mExtra;
+    private final ArrayList<MusicItem> mMusicItems;
+    private final Bundle mExtra;
 
     /**
      * 创建一个 {@link Playlist} 对象。
@@ -114,7 +114,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
     @Override
     public Iterator<MusicItem> iterator() {
         return new Iterator<MusicItem>() {
-            private Iterator<MusicItem> iterator = mMusicItems.iterator();
+            private final Iterator<MusicItem> iterator = mMusicItems.iterator();
 
             @Override
             public boolean hasNext() {
@@ -216,7 +216,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
      * {@link Playlist} 构建器。
      */
     public static final class Builder {
-        private List<MusicItem> mMusicItems;
+        private final List<MusicItem> mMusicItems;
         private Bundle mExtra;
 
         /**

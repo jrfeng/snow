@@ -9,9 +9,9 @@ import snow.player.audio.ErrorCode;
 import snow.player.audio.MusicItem;
 
 class PlayerStateHelper {
-    private PlayerState mPlayerState;
+    private final PlayerState mPlayerState;
     @Nullable
-    private AppWidgetPreferences mAppWidgetPreferences;
+    private final AppWidgetPreferences mAppWidgetPreferences;
 
     public PlayerStateHelper(PlayerState playerState) {
         this(playerState, null);

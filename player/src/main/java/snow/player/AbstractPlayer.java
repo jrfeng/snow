@@ -51,10 +51,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private static final String TAG = "AbstractPlayer";
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
 
-    private Context mApplicationContext;
-    private PlayerConfig mPlayerConfig;
-    private PlayerState mPlayerState;
-    private PlayerStateHelper mPlayerStateHelper;
+    private final Context mApplicationContext;
+    private final PlayerConfig mPlayerConfig;
+    private final PlayerState mPlayerState;
+    private final PlayerStateHelper mPlayerStateHelper;
     @Nullable
     private PlayerStateListener mPlayerStateListener;
 
@@ -80,7 +80,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private Runnable mSeekCompleteAction;
     private Runnable mPlaylistLoadedAction;
 
-    private PlaylistManagerImp mPlaylistManager;
+    private final PlaylistManagerImp mPlaylistManager;
     private Playlist mPlaylist;
 
     private Random mRandom;
@@ -560,7 +560,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mNetworkHelper = NetworkHelper.newInstance(mApplicationContext, new NetworkHelper.OnNetworkStateChangeListener() {
             @Override
             public void onNetworkStateChanged(boolean connected, boolean wifiNetwork) {
-                if (!isPrepared()) {
+                if (!isPrepared() || !connected) {
                     return;
                 }
 

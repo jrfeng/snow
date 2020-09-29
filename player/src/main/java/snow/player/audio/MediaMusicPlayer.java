@@ -11,7 +11,7 @@ import android.util.Log;
 public class MediaMusicPlayer extends AbstractMusicPlayer {
     private static final String TAG = "MediaMusicPlayer";
 
-    private Uri mUri;
+    private final Uri mUri;
     private MediaPlayer mMediaPlayer;
 
     private OnErrorListener mErrorListener;

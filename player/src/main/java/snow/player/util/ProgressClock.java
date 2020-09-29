@@ -22,9 +22,9 @@ import io.reactivex.schedulers.Schedulers;
 public class ProgressClock {
     private static final String TAG = "ProgressClock";
 
-    private boolean mCountDown;
+    private final boolean mCountDown;
     private boolean mEnabled;
-    private Callback mCallback;
+    private final Callback mCallback;
 
     private int mProgressSec;       // 单位：秒
     private int mDurationSec;       // 单位：秒
