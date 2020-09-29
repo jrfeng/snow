@@ -1065,7 +1065,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void stop() {
-        if (getPlaybackState() == PlaybackState.STOPPED || getMusicItem() == null) {
+        if (getPlaybackState() == PlaybackState.STOPPED) {
             return;
         }
 
