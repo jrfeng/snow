@@ -69,12 +69,10 @@ public final class PhoneCallStateHelper {
      * 取消已注册的监听器。如果还没有注册，则忽略本次调用。
      */
     public void unregisterCallStateListener() {
-        if (!mRegistered) {
-            return;
+        if (mRegistered) {
+            mRegistered = false;
+            mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
-
-        mRegistered = false;
-        mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
     }
 
     /**
