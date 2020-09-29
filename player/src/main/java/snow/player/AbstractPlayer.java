@@ -266,6 +266,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         releaseWakeLock();
 
         mAudioFocusHelper.abandonAudioFocus();
+        mPhoneCallStateHelper.unregisterCallStateListener();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
         mNetworkHelper.unsubscribeNetworkState();
 
@@ -927,6 +928,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mMediaSession.setPlaybackState(buildErrorState(errorMessage));
 
         mAudioFocusHelper.abandonAudioFocus();
+        mPhoneCallStateHelper.unregisterCallStateListener();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
 
         onError(errorCode, errorMessage);
