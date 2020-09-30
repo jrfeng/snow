@@ -11,5 +11,8 @@ public interface PlayerStateListener extends Player.OnPlaybackStateChangeListene
         Player.OnSeekCompleteListener,
         Player.OnPlaylistChangeListener,
         Player.OnPlayModeChangeListener {
-
+    /**
+     * 当服务端准备关闭时会回调该方法，此时客户端应主动断开与服务端的连接。
+     */
+    void onShutdown();
 }

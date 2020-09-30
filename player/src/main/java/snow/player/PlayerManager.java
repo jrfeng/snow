@@ -54,35 +54,4 @@ public interface PlayerManager {
      * 关闭播放器并终止 Service。
      */
     void shutdown();
-
-    /**
-     * 同步客户端与服务端的状态信息。
-     * <p>
-     * 该方法会在客户端连接成功后调用，以同步客户端与服务端的状态信息。
-     *
-     * @param clientToken 客户端的 token。不能为 null，且应该保证该参数的唯一性。该 token 会在
-     *                    {@link OnCommandCallback#onSyncPlayerState(String, PlayerState)} 方法中返回，
-     *                    用于鉴别是否是当前客户端客户端。
-     */
-    void syncPlayerState(String clientToken);
-
-    /**
-     * 用于接收服务端发送的命令。
-     */
-    @Channel
-    interface OnCommandCallback {
-        /**
-         * 当服务端准备关闭时会回调该方法，此时客户端应主动断开与服务端的连接。
-         */
-        void onShutdown();
-
-        /**
-         * 用于在客户端成功连接后，同步客户端与服务端的状态。
-         *
-         * @param clientToken   客户端的 token
-         * @param playlistState 列表播放器的状态
-         */
-        @SuppressWarnings("NullableProblems")
-        void onSyncPlayerState(@NonNull String clientToken, @NonNull PlayerState playlistState);
-    }
 }

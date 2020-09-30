@@ -37,7 +37,7 @@ import snow.player.audio.ErrorCode;
 /**
  * 播放器客户端，用于向播放器发送各种控制命令。
  */
-public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
+public class PlayerClient implements Player, PlayerManager, PlaylistEditor, PlaylistManager {
     private final Context mApplicationContext;
     private final Class<? extends PlayerService> mPlayerService;
     private final String mClientToken;
@@ -50,7 +50,8 @@ public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
 
     private final PlayerConfig mPlayerConfig;
     private PlayerManager mPlayerManager;
-    private PlayerManager.OnCommandCallback mCommandCallback;
+    private PlayerStateSynchronizer mPlayerStateSynchronizer;
+    private PlayerStateSynchronizer.OnSyncPlayerStateListener mSyncPlayerStateListener;
     private SleepTimer mSleepTimer;
 
     private OnConnectCallback mConnectCallback;
@@ -115,7 +116,7 @@ public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
 
                             mMediaController.registerCallback(mMediaControllerCallback, new Handler(Looper.getMainLooper()));
                             initCustomActionEmitter(mMediaController);
-                            mPlayerManager.syncPlayerState(mClientToken);
+                            mPlayerStateSynchronizer.syncPlayerState(mClientToken);
                         } catch (Exception e) {
                             mMediaBrowser.disconnect();
                             onConnectionFailed();
@@ -143,12 +144,7 @@ public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
     }
 
     private void initCommandCallback() {
-        mCommandCallback = new PlayerManager.OnCommandCallback() {
-            @Override
-            public void onShutdown() {
-                disconnect();
-            }
-
+        mSyncPlayerStateListener = new PlayerStateSynchronizer.OnSyncPlayerStateListener() {
             @Override
             public void onSyncPlayerState(@NonNull String clientToken, @NonNull PlayerState playerState) {
                 if (!clientToken.equals(mClientToken)) {
@@ -175,13 +171,14 @@ public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
         mPlaylistEditor = ChannelHelper.newEmitter(PlaylistEditor.class, customActionEmitter);
 
         mPlayerManager = ChannelHelper.newEmitter(PlayerManager.class, customActionEmitter);
+        mPlayerStateSynchronizer = ChannelHelper.newEmitter(PlayerStateSynchronizer.class, customActionEmitter);
 
         mSleepTimer = ChannelHelper.newEmitter(SleepTimer.class, customActionEmitter);
     }
 
     private void initSessionEventDispatcher() {
         mSessionEventDispatcher = new SessionEventPipe(DispatcherUtil.merge(
-                ChannelHelper.newDispatcher(PlayerManager.OnCommandCallback.class, mCommandCallback),
+                ChannelHelper.newDispatcher(PlayerStateSynchronizer.OnSyncPlayerStateListener.class, mSyncPlayerStateListener),
                 ChannelHelper.newDispatcher(PlayerStateListener.class, mPlayerStateHolder),
                 ChannelHelper.newDispatcher(SleepTimer.OnStateChangeListener.class, mPlayerStateHolder)
         ));
@@ -329,6 +326,7 @@ public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
      * @see SoundQuality#SUPER
      * @see #getSoundQuality()
      */
+    @Override
     public void setSoundQuality(@NonNull SoundQuality soundQuality) {
         Preconditions.checkNotNull(soundQuality);
         if (!isConnected()) {
@@ -343,6 +341,7 @@ public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
      *
      * @param config 要设置的音频特效配置，不能为 null
      */
+    @Override
     public void setAudioEffectConfig(@NonNull Bundle config) {
         Preconditions.checkNotNull(config);
         if (!isConnected()) {
@@ -360,6 +359,7 @@ public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
      * @param enabled 是否启用音频特效
      * @see #isAudioEffectEnabled()
      */
+    @Override
     public void setAudioEffectEnabled(boolean enabled) {
         if (!isConnected()) {
             return;
@@ -376,6 +376,7 @@ public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
      * @param onlyWifiNetwork 是否只允许在 WiFi 网络下播放音乐
      * @see #isOnlyWifiNetwork()
      */
+    @Override
     public void setOnlyWifiNetwork(boolean onlyWifiNetwork) {
         if (!isConnected()) {
             return;
@@ -389,6 +390,7 @@ public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
      *
      * @param ignoreAudioFocus 是否忽略音频焦点。如果为 true，则播放器会忽略音频焦点的获取与丢失。
      */
+    @Override
     public void setIgnoreAudioFocus(boolean ignoreAudioFocus) {
         if (!isConnected()) {
             return;
@@ -451,6 +453,7 @@ public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
      * 调用该方法后，后台的播放器会自动关闭，并断开所有客户端的连接。通常不建议客户端调用此方法，如果客户端需要
      * 断开与播放器的连接，注意 {@link #disconnect()} 方法即可。
      */
+    @Override
     public void shutdown() {
         if (isConnected()) {
             mPlayerManager.shutdown();
@@ -1677,7 +1680,7 @@ public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
     }
 
     // 用于管理与同步播放器状态
-    private static class PlayerStateHolder implements PlayerStateListener,
+    private class PlayerStateHolder implements PlayerStateListener,
             Player.OnPlaylistChangeListener,
             Player.OnPlayModeChangeListener,
             SleepTimer.OnStateChangeListener {
@@ -2234,6 +2237,11 @@ public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
         public void onEnd() {
             mPlayerStateHelper.onSleepTimerEnd();
             notifySleepTimerStateChanged();
+        }
+
+        @Override
+        public void onShutdown() {
+            disconnect();
         }
     }
 

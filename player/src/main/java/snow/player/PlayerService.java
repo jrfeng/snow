@@ -84,7 +84,7 @@ import snow.player.util.MusicItemUtil;
  */
 @SuppressWarnings("SameReturnValue")
 public class PlayerService extends MediaBrowserServiceCompat
-        implements PlayerManager, PlaylistManager, PlaylistEditor, SleepTimer {
+        implements PlayerManager, PlaylistManager, PlaylistEditor, SleepTimer, PlayerStateSynchronizer {
     /**
      * 默认的 root id，值为 `"root"`。
      */
@@ -116,7 +116,8 @@ public class PlayerService extends MediaBrowserServiceCompat
     private PlayerImp mPlayer;
     private CustomActionPipe mCustomActionDispatcher;
 
-    private PlayerManager.OnCommandCallback mCommandCallback;
+    private PlayerStateListener mPlayerStateListener;
+    private PlayerStateSynchronizer.OnSyncPlayerStateListener mSyncPlayerStateListener;
 
     private boolean mForeground;
 
@@ -343,8 +344,10 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private void initSessionEventEmitter() {
         SessionEventPipe sessionEventEmitter = new SessionEventPipe(mMediaSession);
-        mCommandCallback = ChannelHelper.newEmitter(PlayerManager.OnCommandCallback.class, sessionEventEmitter);
-        mPlayer.setPlayerStateListener(ChannelHelper.newEmitter(PlayerStateListener.class, sessionEventEmitter));
+        mPlayerStateListener = ChannelHelper.newEmitter(PlayerStateListener.class, sessionEventEmitter);
+        mSyncPlayerStateListener = ChannelHelper.newEmitter(PlayerStateSynchronizer.OnSyncPlayerStateListener.class, sessionEventEmitter);
+
+        mPlayer.setPlayerStateListener(mPlayerStateListener);
         mSleepTimerStateChangedListener = ChannelHelper.newEmitter(OnStateChangeListener.class, sessionEventEmitter);
     }
 
@@ -560,7 +563,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     @Override
     public void syncPlayerState(final String clientToken) {
-        mCommandCallback.onSyncPlayerState(clientToken, new PlayerState(mPlayerState));
+        mSyncPlayerStateListener.onSyncPlayerState(clientToken, new PlayerState(mPlayerState));
     }
 
     /**
@@ -694,7 +697,8 @@ public class PlayerService extends MediaBrowserServiceCompat
         if (mPlayerState.isSleepTimerStarted()) {
             cancel();
         }
-        mCommandCallback.onShutdown();
+
+        mPlayerStateListener.onShutdown();
         mMediaSession.sendSessionEvent(SESSION_EVENT_ON_SHUTDOWN, null);
     }
 
