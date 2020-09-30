@@ -84,7 +84,7 @@ import snow.player.util.MusicItemUtil;
  */
 @SuppressWarnings("SameReturnValue")
 public class PlayerService extends MediaBrowserServiceCompat
-        implements PlayerManager, PlaylistManager, PlaylistEditor, SleepTimer, PlayerStateSynchronizer {
+        implements PlayerStateSynchronizer, PlayerManager, PlaylistManager, PlaylistEditor, SleepTimer {
     /**
      * 默认的 root id，值为 `"root"`。
      */
@@ -699,7 +699,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private void notifyOnShutdown() {
         if (mPlayerState.isSleepTimerStarted()) {
-            cancel();
+            cancelSleepTimer();
         }
 
         mPlayerStateListener.onShutdown();
@@ -1099,7 +1099,7 @@ public class PlayerService extends MediaBrowserServiceCompat
      * @throws IllegalArgumentException 如果 time 小于 0，则抛出该异常。
      */
     @Override
-    public void start(long time, @NonNull final TimeoutAction action) throws IllegalArgumentException {
+    public void startSleepTimer(long time, @NonNull final TimeoutAction action) throws IllegalArgumentException {
         if (time < 0) {
             throw new IllegalArgumentException("time must >= 0");
         }
@@ -1138,14 +1138,14 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         long startTime = SystemClock.elapsedRealtime();
         mPlayerStateHelper.onSleepTimerStart(time, startTime, action);
-        mSleepTimerStateChangedListener.onStart(time, startTime, action);
+        mSleepTimerStateChangedListener.onTimerStart(time, startTime, action);
     }
 
     /**
      * 取消睡眠定时器。
      */
     @Override
-    public void cancel() {
+    public void cancelSleepTimer() {
         disposeLastSleepTimer();
         notifySleepTimerEnd();
     }
@@ -1160,7 +1160,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private void notifySleepTimerEnd() {
         mPlayerStateHelper.onSleepTimerEnd();
-        mSleepTimerStateChangedListener.onEnd();
+        mSleepTimerStateChangedListener.onTimerEnd();
     }
 
     private class PlayerImp extends AbstractPlayer {

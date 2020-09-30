@@ -19,12 +19,12 @@ public interface SleepTimer {
      * @param time   定时器的定时时间（单位：毫秒）。播放器会在经过 time 时间后暂停播放。
      * @param action 定时器的的时间到时要执行的操作。
      */
-    void start(long time, @UseOrdinal TimeoutAction action);
+    void startSleepTimer(long time, @UseOrdinal TimeoutAction action);
 
     /**
      * 取消睡眠定时器。
      */
-    void cancel();
+    void cancelSleepTimer();
 
     /**
      * 用于监听睡眠定时器的状态改变。
@@ -42,16 +42,16 @@ public interface SleepTimer {
          * @param startTime 睡眠定时器的启动时间。使用当前的 SystemClock.elapsedRealtime()
          *                  减去 startTime 即可知道睡眠定时器已经走过的时间。
          * @param action    定时器的的时间到时要执行的操作。
-         * @see #start(long, TimeoutAction)
+         * @see #startSleepTimer(long, TimeoutAction)
          */
-        void onStart(long time, long startTime, @UseOrdinal TimeoutAction action);
+        void onTimerStart(long time, long startTime, @UseOrdinal TimeoutAction action);
 
         /**
          * 当睡眠定时器正常终止或者被取消时会调用该方法。
          *
-         * @see #cancel()
+         * @see #cancelSleepTimer()
          */
-        void onEnd();
+        void onTimerEnd();
     }
 
     /**

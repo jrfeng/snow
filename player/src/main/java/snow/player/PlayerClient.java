@@ -37,7 +37,7 @@ import snow.player.audio.ErrorCode;
 /**
  * 播放器客户端，用于向播放器发送各种控制命令。
  */
-public class PlayerClient implements Player, PlayerManager, PlaylistEditor, PlaylistManager {
+public class PlayerClient implements Player, PlayerManager, PlaylistManager, PlaylistEditor, SleepTimer {
     private final Context mApplicationContext;
     private final Class<? extends PlayerService> mPlayerService;
     private final String mClientToken;
@@ -983,6 +983,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistEditor, Play
      * @param action 定时器的的时间到时要执行的操作。
      * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常
      */
+    @Override
     public void startSleepTimer(long time, @NonNull SleepTimer.TimeoutAction action) throws IllegalArgumentException {
         if (time < 0) {
             throw new IllegalArgumentException("time music >= 0");
@@ -993,18 +994,19 @@ public class PlayerClient implements Player, PlayerManager, PlaylistEditor, Play
             return;
         }
 
-        mSleepTimer.start(time, action);
+        mSleepTimer.startSleepTimer(time, action);
     }
 
     /**
      * 取消睡眠定时器。
      */
+    @Override
     public void cancelSleepTimer() {
         if (notConnected()) {
             return;
         }
 
-        mSleepTimer.cancel();
+        mSleepTimer.cancelSleepTimer();
     }
 
     /**
@@ -2123,12 +2125,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistEditor, Play
             }
 
             if (mPlayerState.isSleepTimerStarted()) {
-                listener.onStart(
+                listener.onTimerStart(
                         mPlayerState.getSleepTimerTime(),
                         mPlayerState.getSleepTimerStartTime(),
                         mPlayerState.getTimeoutAction());
             } else {
-                listener.onEnd();
+                listener.onTimerEnd();
             }
         }
 
@@ -2228,13 +2230,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistEditor, Play
         }
 
         @Override
-        public void onStart(long time, long startTime, SleepTimer.TimeoutAction action) {
+        public void onTimerStart(long time, long startTime, SleepTimer.TimeoutAction action) {
             mPlayerStateHelper.onSleepTimerStart(time, startTime, action);
             notifySleepTimerStateChanged();
         }
 
         @Override
-        public void onEnd() {
+        public void onTimerEnd() {
             mPlayerStateHelper.onSleepTimerEnd();
             notifySleepTimerStateChanged();
         }

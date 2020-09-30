@@ -62,13 +62,13 @@ public class MainActivity extends AppCompatActivity {
 
         mPlayerClient.addOnSleepTimerStateChangeListener(this, new SleepTimer.OnStateChangeListener() {
             @Override
-            public void onStart(long time, long startTime, SleepTimer.TimeoutAction action) {
+            public void onTimerStart(long time, long startTime, SleepTimer.TimeoutAction action) {
                 Log.d(TAG, "onStarted {time:" + time + ", startTime:" + startTime + ", timeoutAction:" + action + "}");
                 Log.d(TAG, "elapsedTime:" + mPlayerClient.getSleepTimerElapsedTime());
             }
 
             @Override
-            public void onEnd() {
+            public void onTimerEnd() {
                 Log.d(TAG, "onEnd");
             }
         });
