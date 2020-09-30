@@ -62,7 +62,7 @@ class PlaylistManagerImp implements PlaylistManager {
 
     @Override
     public boolean isPlaylistEditable() {
-        return mMMKV.decodeBool(KEY_EDITABLE, false);
+        return mMMKV.decodeBool(KEY_EDITABLE, true);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
