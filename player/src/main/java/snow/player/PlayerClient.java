@@ -62,7 +62,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     private Player mPlayer;
     private PlaylistEditor mPlaylistEditor;
     private PlaylistManagerImp mPlaylistManager;
-    private PlayerStateHolder mPlayerStateHolder;
+    private PlayerStateListenerImpl mPlayerStateListener;
 
     private final List<Player.OnPlaybackStateChangeListener> mAllPlaybackStateChangeListener;
     private final List<Player.OnPrepareListener> mAllPrepareListener;
@@ -169,7 +169,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     private void initPlayerStateHolder() {
-        mPlayerStateHolder = new PlayerStateHolder();
+        mPlayerStateListener = new PlayerStateListenerImpl();
     }
 
     private void initCommandCallback() {
@@ -208,8 +208,8 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     private void initSessionEventDispatcher() {
         mSessionEventDispatcher = new SessionEventPipe(DispatcherUtil.merge(
                 ChannelHelper.newDispatcher(PlayerStateSynchronizer.OnSyncPlayerStateListener.class, mSyncPlayerStateListener),
-                ChannelHelper.newDispatcher(PlayerStateListener.class, mPlayerStateHolder),
-                ChannelHelper.newDispatcher(SleepTimer.OnStateChangeListener.class, mPlayerStateHolder)
+                ChannelHelper.newDispatcher(PlayerStateListener.class, mPlayerStateListener),
+                ChannelHelper.newDispatcher(SleepTimer.OnStateChangeListener.class, mPlayerStateListener)
         ));
     }
 
@@ -2030,7 +2030,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     // 用于管理与同步播放器状态
-    private class PlayerStateHolder implements PlayerStateListener, SleepTimer.OnStateChangeListener {
+    private class PlayerStateListenerImpl implements PlayerStateListener, SleepTimer.OnStateChangeListener {
 
         @Override
         public void onPreparing() {
