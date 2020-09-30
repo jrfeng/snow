@@ -1035,25 +1035,16 @@ public class PlayerService extends MediaBrowserServiceCompat
         stopForegroundEx(true);
     }
 
-    private void playingMusicItemChanged(@Nullable MusicItem musicItem) {
+    private void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
         if (mHistoryRecorder != null && musicItem != null) {
             mHistoryRecorder.recordHistory(musicItem);
         }
-        onPlayingMusicItemChanged(musicItem);
-    }
-
-    /**
-     * 正在播放的音乐发生了改变（例如，切换播放的歌曲）。
-     *
-     * @param musicItem 当前正在播放的歌曲
-     */
-    protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
     }
 
     /**
      * 该方法会在媒体按钮被触发时调用。
      *
-     * @param mediaButtonEvent 被触发的每天按钮
+     * @param mediaButtonEvent 被触发的媒体按钮
      * @return 是否已处理该媒体按钮事件，如果已处理，则应该返回 true，否则返回 false
      */
     protected boolean onMediaButtonEvent(Intent mediaButtonEvent) {
@@ -1250,7 +1241,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
             super.onPlayingMusicItemChanged(musicItem);
             PlayerService.this.updateNotificationView();
-            PlayerService.this.playingMusicItemChanged(musicItem);
+            PlayerService.this.onPlayingMusicItemChanged(musicItem);
         }
 
         @Override
