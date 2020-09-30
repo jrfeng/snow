@@ -794,7 +794,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         MusicItem musicItem = getPlayingMusicItem();
-        if (musicItem == null) {
+        if (musicItem == null || shouldClearNotification()) {
             stopForegroundEx(true);
             return;
         }
@@ -811,6 +811,15 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         updateNotification();
+    }
+
+    private boolean shouldClearNotification() {
+        if (mNotificationView == null) {
+            return true;
+        }
+
+        return mPlayerState.getPlaybackState() == PlaybackState.STOPPED &&
+                !mNotificationView.isKeepOnStopped();
     }
 
     private boolean noNotificationView() {
