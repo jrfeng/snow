@@ -25,8 +25,7 @@
         </activity>
 
         <service
-            android:name=".MyPlayerService"
-            android:process=":player">
+            android:name=".MyPlayerService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
