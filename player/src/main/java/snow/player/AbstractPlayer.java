@@ -996,10 +996,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         if (play) {
             play();
-            return;
         }
-
-        prepareMusicPlayer(false, null);
     }
 
     private void notifySeekComplete(int playProgress, long updateTime, boolean stalled) {
