@@ -61,6 +61,19 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     private PlaylistManagerImp mPlaylistManager;
     private PlayerStateHolder mPlayerStateHolder;
 
+    private final List<Player.OnPlaybackStateChangeListener> mAllPlaybackStateChangeListener;
+    private final List<Player.OnPrepareListener> mAllPrepareListener;
+    private final List<Player.OnStalledChangeListener> mAllStalledChangeListener;
+    private final List<OnBufferedProgressChangeListener> mAllBufferedProgressChangeListener;
+    private final List<Player.OnPlayingMusicItemChangeListener> mAllPlayingMusicItemChangeListener;
+    private final List<OnSeekCompleteListener> mAllSeekListener;
+    private final List<Player.OnPlaylistChangeListener> mAllPlaylistChangeListener;
+    private final List<Player.OnPlayModeChangeListener> mAllPlayModeChangeListener;
+
+    private final List<PlayerClient.OnPlaybackStateChangeListener> mClientAllPlaybackStateChangeListener;
+    private final List<PlayerClient.OnAudioSessionChangeListener> mAllAudioSessionChangeListener;
+    private final List<SleepTimer.OnStateChangeListener> mAllSleepTimerStateChangeListener;
+
     private final List<OnConnectStateChangeListener> mAllConnectStateChangeListener;
 
     private PlayerClient(Context context, Class<? extends PlayerService> playerService) {
@@ -70,6 +83,18 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         mPersistentId = mPlayerService.getName();
 
         mPlayerConfig = new PlayerConfig(context, mPersistentId);
+
+        mAllPlaybackStateChangeListener = new ArrayList<>();
+        mAllPrepareListener = new ArrayList<>();
+        mAllStalledChangeListener = new ArrayList<>();
+        mAllBufferedProgressChangeListener = new ArrayList<>();
+        mAllPlayingMusicItemChangeListener = new ArrayList<>();
+        mAllSeekListener = new ArrayList<>();
+        mAllPlaylistChangeListener = new ArrayList<>();
+        mAllPlayModeChangeListener = new ArrayList<>();
+        mClientAllPlaybackStateChangeListener = new ArrayList<>();
+        mAllAudioSessionChangeListener = new ArrayList<>();
+        mAllSleepTimerStateChangeListener = new ArrayList<>();
         mAllConnectStateChangeListener = new ArrayList<>();
 
         initMediaBrowser();
@@ -140,7 +165,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     private void initPlayerStateHolder() {
-        mPlayerStateHolder = new PlayerStateHolder(mPlaylistManager);
+        mPlayerStateHolder = new PlayerStateHolder();
     }
 
     private void initCommandCallback() {
@@ -151,7 +176,6 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
                     return;
                 }
 
-                setConnected(true);
                 mPlayerStateHolder.setPlayerState(playerState);
 
                 if (mConnectCallback != null) {
@@ -160,6 +184,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
                 }
 
                 notifyConnectStateChanged(true);
+                mPlayerStateHolder.notifySticky();
             }
         };
     }
@@ -194,7 +219,6 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     private void onDisconnected() {
-        setConnected(false);
         notifyConnectStateChanged(false);
     }
 
@@ -458,10 +482,6 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         if (isConnected()) {
             mPlayerManager.shutdown();
         }
-    }
-
-    private void setConnected(boolean connected) {
-        mPlayerStateHolder.setConnected(connected);
     }
 
     private boolean notConnected() {
@@ -1682,49 +1702,19 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     // 用于管理与同步播放器状态
-    private class PlayerStateHolder implements PlayerStateListener,
-            Player.OnPlaylistChangeListener,
-            Player.OnPlayModeChangeListener,
-            SleepTimer.OnStateChangeListener {
+    private class PlayerStateHolder implements PlayerStateListener, SleepTimer.OnStateChangeListener {
         private PlayerState mPlayerState;
         private PlayerStateHelper mPlayerStateHelper;
-        private final PlaylistManager mPlaylistManager;
-        private boolean mNotConnected;
 
-        private final List<Player.OnPlaybackStateChangeListener> mAllPlaybackStateChangeListener;
-        private final List<Player.OnPrepareListener> mAllPrepareListener;
-        private final List<Player.OnStalledChangeListener> mAllStalledChangeListener;
-        private final List<OnBufferedProgressChangeListener> mAllBufferedProgressChangeListener;
-        private final List<Player.OnPlayingMusicItemChangeListener> mAllPlayingMusicItemChangeListener;
-        private final List<OnSeekCompleteListener> mAllSeekListener;
-        private final List<Player.OnPlaylistChangeListener> mAllPlaylistChangeListener;
-        private final List<Player.OnPlayModeChangeListener> mAllPlayModeChangeListener;
-
-        private final List<PlayerClient.OnPlaybackStateChangeListener> mClientAllPlaybackStateChangeListener;
-        private final List<PlayerClient.OnAudioSessionChangeListener> mAllAudioSessionChangeListener;
-        private final List<SleepTimer.OnStateChangeListener> mAllSleepTimerStateChangeListener;
-
-        PlayerStateHolder(PlaylistManager playlistManager) {
-            mPlaylistManager = playlistManager;
+        PlayerStateHolder() {
             initPlayerState(new PlayerState());
-            mNotConnected = true;
-
-            mAllPlaybackStateChangeListener = new ArrayList<>();
-            mAllPrepareListener = new ArrayList<>();
-            mAllStalledChangeListener = new ArrayList<>();
-            mAllBufferedProgressChangeListener = new ArrayList<>();
-            mAllPlayingMusicItemChangeListener = new ArrayList<>();
-            mAllSeekListener = new ArrayList<>();
-            mAllPlaylistChangeListener = new ArrayList<>();
-            mAllPlayModeChangeListener = new ArrayList<>();
-            mClientAllPlaybackStateChangeListener = new ArrayList<>();
-            mAllAudioSessionChangeListener = new ArrayList<>();
-            mAllSleepTimerStateChangeListener = new ArrayList<>();
         }
 
         void setPlayerState(PlayerState playerState) {
             initPlayerState(playerState);
+        }
 
+        void notifySticky() {
             if (notConnected()) {
                 return;
             }
@@ -1748,14 +1738,6 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         void initPlayerState(PlayerState playerState) {
             mPlayerState = playerState;
             mPlayerStateHelper = new PlayerStateHelper(mPlayerState);
-        }
-
-        boolean notConnected() {
-            return mNotConnected;
-        }
-
-        void setConnected(boolean connected) {
-            mNotConnected = !connected;
         }
 
         void addOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
