@@ -171,7 +171,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
     }
 
     public Bundle getExtra() {
-        return new Bundle(mExtra);
+        return mExtra;
     }
 
     /**
