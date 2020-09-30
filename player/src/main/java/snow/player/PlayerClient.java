@@ -56,6 +56,9 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
 
     private OnConnectCallback mConnectCallback;
 
+    private PlayerState mPlayerState;
+    private PlayerStateHelper mPlayerStateHelper;
+
     private Player mPlayer;
     private PlaylistEditor mPlaylistEditor;
     private PlaylistManagerImp mPlaylistManager;
@@ -103,6 +106,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         initCommandCallback();
         initSessionEventDispatcher();
         initMediaControllerCallback();
+        initPlayerState(new PlayerState());
     }
 
     /**
@@ -176,7 +180,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
                     return;
                 }
 
-                mPlayerStateHolder.setPlayerState(playerState);
+                initPlayerState(playerState);
 
                 if (mConnectCallback != null) {
                     mConnectCallback.onConnected(true);
@@ -184,7 +188,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
                 }
 
                 notifyConnectStateChanged(true);
-                mPlayerStateHolder.notifySticky();
+                notifySticky();
             }
         };
     }
@@ -568,7 +572,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @return 播放进度
      */
     public int getPlayProgress() {
-        return mPlayerStateHolder.mPlayerState.getPlayProgress();
+        return mPlayerState.getPlayProgress();
     }
 
     /**
@@ -577,7 +581,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @return 播放进度的更新时间
      */
     public long getPlayProgressUpdateTime() {
-        return mPlayerStateHolder.mPlayerState.getPlayProgressUpdateTime();
+        return mPlayerState.getPlayProgressUpdateTime();
     }
 
     /**
@@ -596,7 +600,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     @Nullable
     public MusicItem getPlayingMusicItem() {
-        return mPlayerStateHolder.mPlayerState.getMusicItem();
+        return mPlayerState.getMusicItem();
     }
 
     /**
@@ -620,7 +624,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @see PlaybackState
      */
     public PlaybackState getPlaybackState() {
-        return mPlayerStateHolder.mPlayerState.getPlaybackState();
+        return mPlayerState.getPlaybackState();
     }
 
     /**
@@ -629,7 +633,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @return 如果 audio session id 不可用，则返回 0
      */
     public int getAudioSessionId() {
-        return mPlayerStateHolder.mPlayerState.getAudioSessionId();
+        return mPlayerState.getAudioSessionId();
     }
 
     /**
@@ -638,7 +642,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @return 当前缓存进度，使用整数表示的百分比值，范围为 [0, 100]
      */
     public int getBufferedProgress() {
-        return mPlayerStateHolder.mPlayerState.getBufferedProgress();
+        return mPlayerState.getBufferedProgress();
     }
 
     /**
@@ -647,7 +651,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @return 如果播放器当前处于 {@link PlaybackState#PLAYING} 状态则返回 true，否则返回 false
      */
     public boolean isPlaying() {
-        return mPlayerStateHolder.mPlayerState.getPlaybackState() == PlaybackState.PLAYING;
+        return mPlayerState.getPlaybackState() == PlaybackState.PLAYING;
     }
 
     /**
@@ -657,7 +661,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * 方法会返回 true，如果缓冲区有足够的数据可以继续播放，则返回 false。
      */
     public boolean isStalled() {
-        return mPlayerStateHolder.mPlayerState.isStalled();
+        return mPlayerState.isStalled();
     }
 
     /**
@@ -666,7 +670,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @return 如果播放器正在准备中，则返回 true，否则返回 false
      */
     public boolean isPreparing() {
-        return mPlayerStateHolder.mPlayerState.isPreparing();
+        return mPlayerState.isPreparing();
     }
 
     /**
@@ -675,7 +679,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @return 如果播放器已准备完毕，则返回 true，否则返回 false
      */
     public boolean isPrepared() {
-        return mPlayerStateHolder.mPlayerState.isPrepared();
+        return mPlayerState.isPrepared();
     }
 
     /**
@@ -692,7 +696,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @see ErrorCode
      */
     public int getErrorCode() {
-        return mPlayerStateHolder.mPlayerState.getErrorCode();
+        return mPlayerState.getErrorCode();
     }
 
     /**
@@ -703,7 +707,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @see #getErrorCode()
      */
     public String getErrorMessage() {
-        return mPlayerStateHolder.mPlayerState.getErrorMessage();
+        return mPlayerState.getErrorMessage();
     }
 
     /**
@@ -712,7 +716,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @return 当前播放模式。
      */
     public PlayMode getPlayMode() {
-        return mPlayerStateHolder.mPlayerState.getPlayMode();
+        return mPlayerState.getPlayMode();
     }
 
     /**
@@ -721,7 +725,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @return 当前播放列表的播放位置
      */
     public int getPlayPosition() {
-        return mPlayerStateHolder.mPlayerState.getPlayPosition();
+        return mPlayerState.getPlayPosition();
     }
 
     /**
@@ -730,7 +734,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @return 睡眠定时器是否已启动，如果已启动则返回 true，否则返回 false
      */
     public boolean isSleepTimerStarted() {
-        return mPlayerStateHolder.mPlayerState.isSleepTimerStarted();
+        return mPlayerState.isSleepTimerStarted();
     }
 
     /**
@@ -741,7 +745,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @return 睡眠定时器的定时时间。该方法的返回值只在睡眠定时器启动（{@link #isSleepTimerStarted()} 返回 true）时才有意义。
      */
     public long getSleepTimerTime() {
-        return mPlayerStateHolder.mPlayerState.getSleepTimerTime();
+        return mPlayerState.getSleepTimerTime();
     }
 
     /**
@@ -754,7 +758,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @return 睡眠定时器的启动时间。该方法的返回值只在睡眠定时器启动（{@link #isSleepTimerStarted()} 返回 true）时才有意义。
      */
     public long getSleepTimerStartedTime() {
-        return mPlayerStateHolder.mPlayerState.getSleepTimerStartTime();
+        return mPlayerState.getSleepTimerStartTime();
     }
 
     /**
@@ -781,7 +785,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     @NonNull
     public SleepTimer.TimeoutAction getTimeoutAction() {
-        return mPlayerStateHolder.mPlayerState.getTimeoutAction();
+        return mPlayerState.getTimeoutAction();
     }
 
     /**
@@ -955,7 +959,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
             return false;
         }
 
-        return mPlayerStateHolder.mPlayerState.isForbidSeek();
+        return mPlayerState.isForbidSeek();
     }
 
     /**
@@ -1039,7 +1043,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public void addOnPlaybackStateChangeListener(@NonNull Player.OnPlaybackStateChangeListener listener) {
         Preconditions.checkNotNull(listener);
-        mPlayerStateHolder.addOnPlaybackStateChangeListener(listener);
+
+        if (mAllPlaybackStateChangeListener.contains(listener)) {
+            return;
+        }
+
+        mAllPlaybackStateChangeListener.add(listener);
+        notifyPlaybackStateChanged(listener);
     }
 
     /**
@@ -1077,7 +1087,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @param listener 要移除的监听器。
      */
     public void removeOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
-        mPlayerStateHolder.removeOnPlaybackStateChangeListener(listener);
+        mAllPlaybackStateChangeListener.remove(listener);
     }
 
     /**
@@ -1087,7 +1097,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public void addOnPrepareListener(@NonNull Player.OnPrepareListener listener) {
         Preconditions.checkNotNull(listener);
-        mPlayerStateHolder.addOnPrepareListener(listener);
+
+        if (mAllPrepareListener.contains(listener)) {
+            return;
+        }
+
+        mAllPrepareListener.add(listener);
+        notifyPrepareStateChanged(listener);
     }
 
     /**
@@ -1121,7 +1137,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @param listener 要移除的监听器
      */
     public void removeOnPrepareListener(Player.OnPrepareListener listener) {
-        mPlayerStateHolder.removeOnPrepareListener(listener);
+        mAllPrepareListener.remove(listener);
     }
 
     /**
@@ -1134,7 +1150,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public void addOnStalledChangeListener(@NonNull Player.OnStalledChangeListener listener) {
         Preconditions.checkNotNull(listener);
-        mPlayerStateHolder.addOnStalledChangeListener(listener);
+
+        if (mAllStalledChangeListener.contains(listener)) {
+            return;
+        }
+
+        mAllStalledChangeListener.add(listener);
+        notifyStalledChanged(listener);
     }
 
     /**
@@ -1171,7 +1193,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @param listener 要移除的监听器。
      */
     public void removeOnStalledChangeListener(Player.OnStalledChangeListener listener) {
-        mPlayerStateHolder.removeOnStalledChangeListener(listener);
+        mAllStalledChangeListener.remove(listener);
     }
 
     /**
@@ -1184,7 +1206,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public void addOnBufferedProgressChangeListener(@NonNull OnBufferedProgressChangeListener listener) {
         Preconditions.checkNotNull(listener);
-        mPlayerStateHolder.addOnBufferedProgressChangeListener(listener);
+
+        if (mAllBufferedProgressChangeListener.contains(listener)) {
+            return;
+        }
+
+        mAllBufferedProgressChangeListener.add(listener);
+        notifyOnBufferedProgressChanged(listener);
     }
 
     /**
@@ -1221,7 +1249,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @param listener 要移除的监听器
      */
     public void removeOnBufferedProgressChangeListener(OnBufferedProgressChangeListener listener) {
-        mPlayerStateHolder.removeOnBufferedProgressChangeListener(listener);
+        mAllBufferedProgressChangeListener.remove(listener);
     }
 
     /**
@@ -1234,7 +1262,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public void addOnPlayingMusicItemChangeListener(@NonNull Player.OnPlayingMusicItemChangeListener listener) {
         Preconditions.checkNotNull(listener);
-        mPlayerStateHolder.addOnPlayingMusicItemChangeListener(listener);
+
+        if (mAllPlayingMusicItemChangeListener.contains(listener)) {
+            return;
+        }
+
+        mAllPlayingMusicItemChangeListener.add(listener);
+        notifyPlayingMusicItemChanged(listener);
     }
 
     /**
@@ -1271,7 +1305,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @param listener 要移除的监听器
      */
     public void removeOnPlayingMusicItemChangeListener(Player.OnPlayingMusicItemChangeListener listener) {
-        mPlayerStateHolder.removeOnPlayingMusicItemChangeListener(listener);
+        mAllPlayingMusicItemChangeListener.remove(listener);
     }
 
     /**
@@ -1284,7 +1318,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public void addOnSeekCompleteListener(@NonNull OnSeekCompleteListener listener) {
         Preconditions.checkNotNull(listener);
-        mPlayerStateHolder.addOnSeekCompleteListener(listener);
+
+        if (mAllSeekListener.contains(listener)) {
+            return;
+        }
+
+        mAllSeekListener.add(listener);
+        notifySeekComplete(listener);
     }
 
     /**
@@ -1321,7 +1361,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @param listener 要移除的监听器
      */
     public void removeOnSeekCompleteListener(OnSeekCompleteListener listener) {
-        mPlayerStateHolder.removeOnSeekCompleteListener(listener);
+        mAllSeekListener.remove(listener);
     }
 
     /**
@@ -1334,7 +1374,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public void addOnPlaylistChangeListener(@NonNull Player.OnPlaylistChangeListener listener) {
         Preconditions.checkNotNull(listener);
-        mPlayerStateHolder.addOnPlaylistChangeListener(listener);
+
+        if (mAllPlaylistChangeListener.contains(listener)) {
+            return;
+        }
+
+        mAllPlaylistChangeListener.add(listener);
+        notifyPlaylistChanged(listener);
     }
 
     /**
@@ -1371,7 +1417,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @param listener 要移除的监听器
      */
     public void removeOnPlaylistChangeListener(Player.OnPlaylistChangeListener listener) {
-        mPlayerStateHolder.removeOnPlaylistChangeListener(listener);
+        mAllPlaylistChangeListener.remove(listener);
     }
 
     /**
@@ -1384,7 +1430,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public void addOnPlayModeChangeListener(@NonNull Player.OnPlayModeChangeListener listener) {
         Preconditions.checkNotNull(listener);
-        mPlayerStateHolder.addOnPlayModeChangeListener(listener);
+
+        if (mAllPlayModeChangeListener.contains(listener)) {
+            return;
+        }
+
+        mAllPlayModeChangeListener.add(listener);
+        notifyPlayModeChanged();
     }
 
     /**
@@ -1421,7 +1473,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @param listener 要移除的事件监听器
      */
     public void removeOnPlayModeChangeListener(Player.OnPlayModeChangeListener listener) {
-        mPlayerStateHolder.removeOnPlayModeChangeListener(listener);
+        mAllPlayModeChangeListener.remove(listener);
     }
 
     /**
@@ -1433,7 +1485,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public void addOnPlaybackStateChangeListener(@NonNull OnPlaybackStateChangeListener listener) {
         Preconditions.checkNotNull(listener);
-        mPlayerStateHolder.addOnPlaybackStateChangeListener(listener);
+
+        if (mClientAllPlaybackStateChangeListener.contains(listener)) {
+            return;
+        }
+
+        mClientAllPlaybackStateChangeListener.add(listener);
+        notifyClientPlaybackStateChanged(listener);
     }
 
     /**
@@ -1469,7 +1527,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @param listener 要移除的监听器
      */
     public void removeOnPlaybackStateChangeListener(OnPlaybackStateChangeListener listener) {
-        mPlayerStateHolder.removeOnPlaybackStateChangeListener(listener);
+        mClientAllPlaybackStateChangeListener.remove(listener);
     }
 
     /**
@@ -1482,7 +1540,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     public void addOnAudioSessionChangeListener(@NonNull OnAudioSessionChangeListener listener) {
         Preconditions.checkNotNull(listener);
 
-        mPlayerStateHolder.addOnAudioSessionChangeListener(listener);
+        if (mAllAudioSessionChangeListener.contains(listener)) {
+            return;
+        }
+
+        mAllAudioSessionChangeListener.add(listener);
+        notifyAudioSessionChanged(listener);
     }
 
     /**
@@ -1518,7 +1581,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @param listener 要移除的监听器
      */
     public void removeOnAudioSessionChangeListener(OnAudioSessionChangeListener listener) {
-        mPlayerStateHolder.removeOnAudioSessionChangeListener(listener);
+        mAllAudioSessionChangeListener.remove(listener);
     }
 
     /**
@@ -1530,7 +1593,15 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public void addOnSleepTimerStateChangeListener(@NonNull SleepTimer.OnStateChangeListener listener) {
         Preconditions.checkNotNull(listener);
-        mPlayerStateHolder.addOnSleepTimerStateChangeListener(listener);
+
+        if (mAllSleepTimerStateChangeListener.contains(listener)) {
+            return;
+        }
+
+        mAllSleepTimerStateChangeListener.add(listener);
+        if (mPlayerState.isSleepTimerStarted()) {
+            notifySleepTimerStateChanged(listener);
+        }
     }
 
     /**
@@ -1566,7 +1637,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @param listener 要移除的监听器
      */
     public void removeOnSleepTimerStateChangeListener(SleepTimer.OnStateChangeListener listener) {
-        mPlayerStateHolder.removeOnSleepTimerStateChangeListener(listener);
+        mAllSleepTimerStateChangeListener.remove(listener);
     }
 
     private boolean isDestroyed(LifecycleOwner owner) {
@@ -1701,420 +1772,265 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         void onAudioSessionChanged(int audioSessionId);
     }
 
-    // 用于管理与同步播放器状态
-    private class PlayerStateHolder implements PlayerStateListener, SleepTimer.OnStateChangeListener {
-        private PlayerState mPlayerState;
-        private PlayerStateHelper mPlayerStateHelper;
-
-        PlayerStateHolder() {
-            initPlayerState(new PlayerState());
+    private void notifySticky() {
+        if (notConnected()) {
+            return;
         }
 
-        void setPlayerState(PlayerState playerState) {
-            initPlayerState(playerState);
+        notifyPlaylistChanged();
+        notifyPlayModeChanged();
+        notifyPlayingMusicItemChanged();
+        notifyPrepareStateChanged();
+        notifyPlaybackStateChanged();
+        notifyOnBufferedProgressChanged();
+
+        if (mPlayerState.isStalled()) {
+            notifyStalledChanged();
         }
 
-        void notifySticky() {
-            if (notConnected()) {
-                return;
-            }
+        if (mPlayerState.isSleepTimerStarted()) {
+            notifySleepTimerStateChanged();
+        }
+    }
 
-            notifyPlaylistChanged();
-            notifyPlayModeChanged();
-            notifyPlayingMusicItemChanged();
-            notifyPrepareStateChanged();
-            notifyPlaybackStateChanged();
-            notifyOnBufferedProgressChanged();
+    void initPlayerState(PlayerState playerState) {
+        mPlayerState = playerState;
+        mPlayerStateHelper = new PlayerStateHelper(mPlayerState);
+    }
 
-            if (mPlayerState.isStalled()) {
-                notifyStalledChanged();
-            }
-
-            if (mPlayerState.isSleepTimerStarted()) {
-                notifySleepTimerStateChanged();
-            }
+    private void notifyPlaybackStateChanged(Player.OnPlaybackStateChangeListener listener) {
+        if (notConnected()) {
+            return;
         }
 
-        void initPlayerState(PlayerState playerState) {
-            mPlayerState = playerState;
-            mPlayerStateHelper = new PlayerStateHelper(mPlayerState);
+        switch (mPlayerState.getPlaybackState()) {
+            case PLAYING:
+                listener.onPlay(mPlayerState.isStalled(), mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime());
+                break;
+            case PAUSED:
+                listener.onPause(mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime());
+                break;
+            case STOPPED:
+                listener.onStop();
+                break;
+            case ERROR:
+                listener.onError(mPlayerState.getErrorCode(), mPlayerState.getErrorMessage());
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void notifyPlaybackStateChanged() {
+        if (notConnected()) {
+            return;
         }
 
-        void addOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
-            if (mAllPlaybackStateChangeListener.contains(listener)) {
-                return;
-            }
-
-            mAllPlaybackStateChangeListener.add(listener);
+        for (Player.OnPlaybackStateChangeListener listener : mAllPlaybackStateChangeListener) {
             notifyPlaybackStateChanged(listener);
         }
 
-        void removeOnPlaybackStateChangeListener(Player.OnPlaybackStateChangeListener listener) {
-            mAllPlaybackStateChangeListener.remove(listener);
+        notifyClientPlaybackStateChanged();
+    }
+
+    private void notifyPrepareStateChanged(Player.OnPrepareListener listener) {
+        if (notConnected()) {
+            return;
         }
 
-        void addOnPrepareListener(Player.OnPrepareListener listener) {
-            if (mAllPrepareListener.contains(listener)) {
-                return;
-            }
+        if (mPlayerState.isPreparing()) {
+            listener.onPreparing();
+            return;
+        }
 
-            mAllPrepareListener.add(listener);
+        if (mPlayerState.isPrepared()) {
+            listener.onPrepared(mPlayerState.getAudioSessionId());
+        }
+    }
+
+    private void notifyPrepareStateChanged() {
+        if (notConnected()) {
+            return;
+        }
+
+        for (Player.OnPrepareListener listener : mAllPrepareListener) {
             notifyPrepareStateChanged(listener);
         }
+    }
 
-        void removeOnPrepareListener(Player.OnPrepareListener listener) {
-            mAllPrepareListener.remove(listener);
+    private void notifyStalledChanged(Player.OnStalledChangeListener listener) {
+        if (notConnected()) {
+            return;
         }
 
-        void addOnStalledChangeListener(Player.OnStalledChangeListener listener) {
-            if (mAllStalledChangeListener.contains(listener)) {
-                return;
-            }
+        listener.onStalledChanged(mPlayerState.isStalled(),
+                mPlayerState.getPlayProgress(),
+                mPlayerState.getPlayProgressUpdateTime());
+    }
 
-            mAllStalledChangeListener.add(listener);
+    private void notifyStalledChanged() {
+        if (notConnected()) {
+            return;
+        }
+
+        for (Player.OnStalledChangeListener listener : mAllStalledChangeListener) {
             notifyStalledChanged(listener);
         }
+    }
 
-        void removeOnStalledChangeListener(Player.OnStalledChangeListener listener) {
-            mAllStalledChangeListener.remove(listener);
+    private void notifyOnBufferedProgressChanged(OnBufferedProgressChangeListener listener) {
+        if (notConnected()) {
+            return;
         }
 
-        void addOnBufferedProgressChangeListener(OnBufferedProgressChangeListener listener) {
-            if (mAllBufferedProgressChangeListener.contains(listener)) {
-                return;
-            }
+        listener.onBufferedProgressChanged(mPlayerState.getBufferedProgress());
+    }
 
-            mAllBufferedProgressChangeListener.add(listener);
+    private void notifyOnBufferedProgressChanged() {
+        if (notConnected()) {
+            return;
+        }
+
+        for (OnBufferedProgressChangeListener listener : mAllBufferedProgressChangeListener) {
             notifyOnBufferedProgressChanged(listener);
         }
+    }
 
-        void removeOnBufferedProgressChangeListener(OnBufferedProgressChangeListener listener) {
-            mAllBufferedProgressChangeListener.remove(listener);
+    private void notifyPlayingMusicItemChanged(Player.OnPlayingMusicItemChangeListener listener) {
+        if (notConnected()) {
+            return;
         }
 
-        void addOnPlayingMusicItemChangeListener(Player.OnPlayingMusicItemChangeListener listener) {
-            if (mAllPlayingMusicItemChangeListener.contains(listener)) {
-                return;
-            }
+        listener.onPlayingMusicItemChanged(mPlayerState.getMusicItem(), mPlayerState.getPlayPosition(), mPlayerState.getPlayProgress());
+    }
 
-            mAllPlayingMusicItemChangeListener.add(listener);
+    private void notifyPlayingMusicItemChanged() {
+        if (notConnected()) {
+            return;
+        }
+
+        for (Player.OnPlayingMusicItemChangeListener listener : mAllPlayingMusicItemChangeListener) {
             notifyPlayingMusicItemChanged(listener);
         }
+    }
 
-        void removeOnPlayingMusicItemChangeListener(Player.OnPlayingMusicItemChangeListener listener) {
-            mAllPlayingMusicItemChangeListener.remove(listener);
+    private void notifySeekComplete(OnSeekCompleteListener listener) {
+        if (notConnected()) {
+            return;
         }
 
-        void addOnSeekCompleteListener(OnSeekCompleteListener listener) {
-            if (mAllSeekListener.contains(listener)) {
-                return;
-            }
+        listener.onSeekComplete(mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime(), mPlayerState.isStalled());
+    }
 
-            mAllSeekListener.add(listener);
+    private void notifySeekComplete() {
+        if (notConnected()) {
+            return;
+        }
+
+        for (OnSeekCompleteListener listener : mAllSeekListener) {
             notifySeekComplete(listener);
         }
+    }
 
-        void removeOnSeekCompleteListener(OnSeekCompleteListener listener) {
-            mAllSeekListener.remove(listener);
+    private void notifyPlaylistChanged(Player.OnPlaylistChangeListener listener) {
+        if (notConnected()) {
+            return;
         }
 
-        void addOnPlaylistChangeListener(Player.OnPlaylistChangeListener listener) {
-            if (mAllPlaylistChangeListener.contains(listener)) {
-                return;
-            }
+        listener.onPlaylistChanged(mPlaylistManager, mPlayerState.getPlayPosition());
+    }
 
-            mAllPlaylistChangeListener.add(listener);
+    private void notifyPlaylistChanged() {
+        if (notConnected()) {
+            return;
+        }
+
+        for (Player.OnPlaylistChangeListener listener : mAllPlaylistChangeListener) {
             notifyPlaylistChanged(listener);
         }
+    }
 
-        void removeOnPlaylistChangeListener(Player.OnPlaylistChangeListener listener) {
-            mAllPlaylistChangeListener.remove(listener);
+    private void notifyPlayModeChanged(Player.OnPlayModeChangeListener listener) {
+        if (notConnected()) {
+            return;
         }
 
-        void addOnPlayModeChangeListener(Player.OnPlayModeChangeListener listener) {
-            if (mAllPlayModeChangeListener.contains(listener)) {
-                return;
-            }
+        listener.onPlayModeChanged(mPlayerState.getPlayMode());
+    }
 
-            mAllPlayModeChangeListener.add(listener);
-            notifyPlayModeChanged();
+    private void notifyPlayModeChanged() {
+        if (notConnected()) {
+            return;
         }
 
-        void removeOnPlayModeChangeListener(Player.OnPlayModeChangeListener listener) {
-            mAllPlayModeChangeListener.remove(listener);
+        for (Player.OnPlayModeChangeListener listener : mAllPlayModeChangeListener) {
+            notifyPlayModeChanged(listener);
+        }
+    }
+
+    private void notifyClientPlaybackStateChanged() {
+        if (notConnected()) {
+            return;
         }
 
-        void addOnPlaybackStateChangeListener(OnPlaybackStateChangeListener listener) {
-            if (mClientAllPlaybackStateChangeListener.contains(listener)) {
-                return;
-            }
-
-            mClientAllPlaybackStateChangeListener.add(listener);
+        for (OnPlaybackStateChangeListener listener : mClientAllPlaybackStateChangeListener) {
             notifyClientPlaybackStateChanged(listener);
         }
+    }
 
-        void removeOnPlaybackStateChangeListener(OnPlaybackStateChangeListener listener) {
-            mClientAllPlaybackStateChangeListener.remove(listener);
+    private void notifyClientPlaybackStateChanged(OnPlaybackStateChangeListener listener) {
+        if (notConnected()) {
+            return;
         }
 
-        void addOnAudioSessionChangeListener(OnAudioSessionChangeListener listener) {
-            if (mAllAudioSessionChangeListener.contains(listener)) {
-                return;
-            }
+        listener.onPlaybackStateChanged(mPlayerState.getPlaybackState(), mPlayerState.isStalled());
+    }
 
-            mAllAudioSessionChangeListener.add(listener);
+    private void notifyAudioSessionChanged() {
+        if (notConnected()) {
+            return;
+        }
+
+        for (OnAudioSessionChangeListener listener : mAllAudioSessionChangeListener) {
             notifyAudioSessionChanged(listener);
         }
+    }
 
-        void removeOnAudioSessionChangeListener(OnAudioSessionChangeListener listener) {
-            mAllAudioSessionChangeListener.remove(listener);
+    private void notifyAudioSessionChanged(OnAudioSessionChangeListener listener) {
+        if (notConnected()) {
+            return;
         }
 
-        void addOnSleepTimerStateChangeListener(SleepTimer.OnStateChangeListener listener) {
-            if (mAllSleepTimerStateChangeListener.contains(listener)) {
-                return;
-            }
+        listener.onAudioSessionChanged(mPlayerState.getAudioSessionId());
+    }
 
-            mAllSleepTimerStateChangeListener.add(listener);
-            if (mPlayerState.isSleepTimerStarted()) {
-                notifySleepTimerStateChanged(listener);
-            }
+    private void notifySleepTimerStateChanged() {
+        if (notConnected()) {
+            return;
         }
 
-        void removeOnSleepTimerStateChangeListener(SleepTimer.OnStateChangeListener listener) {
-            mAllSleepTimerStateChangeListener.remove(listener);
+        for (SleepTimer.OnStateChangeListener listener : mAllSleepTimerStateChangeListener) {
+            notifySleepTimerStateChanged(listener);
+        }
+    }
+
+    private void notifySleepTimerStateChanged(SleepTimer.OnStateChangeListener listener) {
+        if (notConnected()) {
+            return;
         }
 
-        private void notifyPlaybackStateChanged(Player.OnPlaybackStateChangeListener listener) {
-            if (notConnected()) {
-                return;
-            }
-
-            switch (mPlayerState.getPlaybackState()) {
-                case PLAYING:
-                    listener.onPlay(mPlayerState.isStalled(), mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime());
-                    break;
-                case PAUSED:
-                    listener.onPause(mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime());
-                    break;
-                case STOPPED:
-                    listener.onStop();
-                    break;
-                case ERROR:
-                    listener.onError(mPlayerState.getErrorCode(), mPlayerState.getErrorMessage());
-                    break;
-                default:
-                    break;
-            }
+        if (mPlayerState.isSleepTimerStarted()) {
+            listener.onTimerStart(
+                    mPlayerState.getSleepTimerTime(),
+                    mPlayerState.getSleepTimerStartTime(),
+                    mPlayerState.getTimeoutAction());
+        } else {
+            listener.onTimerEnd();
         }
+    }
 
-        private void notifyPlaybackStateChanged() {
-            if (notConnected()) {
-                return;
-            }
-
-            for (Player.OnPlaybackStateChangeListener listener : mAllPlaybackStateChangeListener) {
-                notifyPlaybackStateChanged(listener);
-            }
-
-            notifyClientPlaybackStateChanged();
-        }
-
-        private void notifyPrepareStateChanged(Player.OnPrepareListener listener) {
-            if (notConnected()) {
-                return;
-            }
-
-            if (mPlayerState.isPreparing()) {
-                listener.onPreparing();
-                return;
-            }
-
-            if (mPlayerState.isPrepared()) {
-                listener.onPrepared(mPlayerState.getAudioSessionId());
-            }
-        }
-
-        private void notifyPrepareStateChanged() {
-            if (notConnected()) {
-                return;
-            }
-
-            for (Player.OnPrepareListener listener : mAllPrepareListener) {
-                notifyPrepareStateChanged(listener);
-            }
-        }
-
-        private void notifyStalledChanged(Player.OnStalledChangeListener listener) {
-            if (notConnected()) {
-                return;
-            }
-
-            listener.onStalledChanged(mPlayerState.isStalled(),
-                    mPlayerState.getPlayProgress(),
-                    mPlayerState.getPlayProgressUpdateTime());
-        }
-
-        private void notifyStalledChanged() {
-            if (notConnected()) {
-                return;
-            }
-
-            for (Player.OnStalledChangeListener listener : mAllStalledChangeListener) {
-                notifyStalledChanged(listener);
-            }
-        }
-
-        private void notifyOnBufferedProgressChanged(OnBufferedProgressChangeListener listener) {
-            if (notConnected()) {
-                return;
-            }
-
-            listener.onBufferedProgressChanged(mPlayerState.getBufferedProgress());
-        }
-
-        private void notifyOnBufferedProgressChanged() {
-            if (notConnected()) {
-                return;
-            }
-
-            for (OnBufferedProgressChangeListener listener : mAllBufferedProgressChangeListener) {
-                notifyOnBufferedProgressChanged(listener);
-            }
-        }
-
-        private void notifyPlayingMusicItemChanged(Player.OnPlayingMusicItemChangeListener listener) {
-            if (notConnected()) {
-                return;
-            }
-
-            listener.onPlayingMusicItemChanged(mPlayerState.getMusicItem(), mPlayerState.getPlayPosition(), mPlayerState.getPlayProgress());
-        }
-
-        private void notifyPlayingMusicItemChanged() {
-            if (notConnected()) {
-                return;
-            }
-
-            for (Player.OnPlayingMusicItemChangeListener listener : mAllPlayingMusicItemChangeListener) {
-                notifyPlayingMusicItemChanged(listener);
-            }
-        }
-
-        private void notifySeekComplete(OnSeekCompleteListener listener) {
-            if (notConnected()) {
-                return;
-            }
-
-            listener.onSeekComplete(mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime(), mPlayerState.isStalled());
-        }
-
-        private void notifySeekComplete() {
-            if (notConnected()) {
-                return;
-            }
-
-            for (OnSeekCompleteListener listener : mAllSeekListener) {
-                notifySeekComplete(listener);
-            }
-        }
-
-        private void notifyPlaylistChanged(Player.OnPlaylistChangeListener listener) {
-            if (notConnected()) {
-                return;
-            }
-
-            listener.onPlaylistChanged(mPlaylistManager, mPlayerState.getPlayPosition());
-        }
-
-        private void notifyPlaylistChanged() {
-            if (notConnected()) {
-                return;
-            }
-
-            for (Player.OnPlaylistChangeListener listener : mAllPlaylistChangeListener) {
-                notifyPlaylistChanged(listener);
-            }
-        }
-
-        private void notifyPlayModeChanged(Player.OnPlayModeChangeListener listener) {
-            if (notConnected()) {
-                return;
-            }
-
-            listener.onPlayModeChanged(mPlayerState.getPlayMode());
-        }
-
-        private void notifyPlayModeChanged() {
-            if (notConnected()) {
-                return;
-            }
-
-            for (Player.OnPlayModeChangeListener listener : mAllPlayModeChangeListener) {
-                notifyPlayModeChanged(listener);
-            }
-        }
-
-        private void notifyClientPlaybackStateChanged() {
-            if (notConnected()) {
-                return;
-            }
-
-            for (OnPlaybackStateChangeListener listener : mClientAllPlaybackStateChangeListener) {
-                notifyClientPlaybackStateChanged(listener);
-            }
-        }
-
-        private void notifyClientPlaybackStateChanged(OnPlaybackStateChangeListener listener) {
-            if (notConnected()) {
-                return;
-            }
-
-            listener.onPlaybackStateChanged(mPlayerState.getPlaybackState(), mPlayerState.isStalled());
-        }
-
-        private void notifyAudioSessionChanged() {
-            if (notConnected()) {
-                return;
-            }
-
-            for (OnAudioSessionChangeListener listener : mAllAudioSessionChangeListener) {
-                notifyAudioSessionChanged(listener);
-            }
-        }
-
-        private void notifyAudioSessionChanged(OnAudioSessionChangeListener listener) {
-            if (notConnected()) {
-                return;
-            }
-
-            listener.onAudioSessionChanged(mPlayerState.getAudioSessionId());
-        }
-
-        private void notifySleepTimerStateChanged() {
-            if (notConnected()) {
-                return;
-            }
-
-            for (SleepTimer.OnStateChangeListener listener : mAllSleepTimerStateChangeListener) {
-                notifySleepTimerStateChanged(listener);
-            }
-        }
-
-        private void notifySleepTimerStateChanged(SleepTimer.OnStateChangeListener listener) {
-            if (notConnected()) {
-                return;
-            }
-
-            if (mPlayerState.isSleepTimerStarted()) {
-                listener.onTimerStart(
-                        mPlayerState.getSleepTimerTime(),
-                        mPlayerState.getSleepTimerStartTime(),
-                        mPlayerState.getTimeoutAction());
-            } else {
-                listener.onTimerEnd();
-            }
-        }
+    // 用于管理与同步播放器状态
+    private class PlayerStateHolder implements PlayerStateListener, SleepTimer.OnStateChangeListener {
 
         @Override
         public void onPreparing() {
