@@ -1064,7 +1064,17 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     @Override
     public int getPlaylistSize() {
-        return mPlayer.getPlaylistSize();
+        return mPlaylistManager.getPlaylistSize();
+    }
+
+    @Override
+    public String getPlaylistToken() {
+        return mPlaylistManager.getPlaylistToken();
+    }
+
+    @Override
+    public boolean isPlaylistEditable() {
+        return mPlaylistManager.isPlaylistEditable();
     }
 
     @Override
