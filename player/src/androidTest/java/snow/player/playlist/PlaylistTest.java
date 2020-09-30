@@ -30,7 +30,9 @@ public class PlaylistTest {
             mItems.add(generateMusicItem(i));
         }
 
-        mPlaylist = new Playlist(mItems);
+        mPlaylist = new Playlist.Builder()
+                .appendAll(mItems)
+                .build();
     }
 
     private static MusicItem generateMusicItem(int id) {
@@ -66,9 +68,33 @@ public class PlaylistTest {
         items.add(item0);
         items.add(item0);
 
-        Playlist playlist = new Playlist(items);
+        Playlist playlist = new Playlist.Builder()
+                .appendAll(items)
+                .build();
 
         assertEquals(4, playlist.size());
+    }
+
+    @Test
+    public void getToken() {
+        final String token = "token_test";
+
+        Playlist playlist = new Playlist.Builder()
+                .setToken(token)
+                .build();
+
+        assertEquals(token, playlist.getToken());
+    }
+
+    @Test
+    public void isEditable() {
+        final boolean editable = false;
+
+        Playlist playlist = new Playlist.Builder()
+                .setEditable(editable)
+                .build();
+
+        assertEquals(editable, playlist.isEditable());
     }
 
     @Test
@@ -102,7 +128,8 @@ public class PlaylistTest {
     public void isEmpty() {
         assertFalse(mPlaylist.isEmpty());
 
-        Playlist playlist = new Playlist(new ArrayList<MusicItem>());
+        Playlist playlist = new Playlist.Builder()
+                .build();
 
         assertTrue(playlist.isEmpty());
     }
@@ -131,11 +158,26 @@ public class PlaylistTest {
 
     @Test
     public void equalsTest() {
-        Playlist playlist1 = new Playlist(mItems);
-        Playlist playlist2 = new Playlist(mItems);
+        final String token = "token_test";
+        final boolean editable = false;
 
-        mItems.remove(0);
-        Playlist playlist3 = new Playlist(mItems);
+        Playlist playlist1 = new Playlist.Builder()
+                .setToken(token)
+                .appendAll(mItems)
+                .setEditable(editable)
+                .build();
+
+        Playlist playlist2 = new Playlist.Builder()
+                .setToken(token)
+                .appendAll(mItems)
+                .setEditable(editable)
+                .build();
+
+        Playlist playlist3 = new Playlist.Builder()
+                .setToken("token_other")
+                .appendAll(mItems)
+                .setEditable(editable)
+                .build();
 
         assertEquals(playlist1, playlist2);
         assertNotEquals(playlist1, playlist3);
@@ -143,11 +185,26 @@ public class PlaylistTest {
 
     @Test
     public void hashCodeTest() {
-        Playlist playlist1 = new Playlist(mItems);
-        Playlist playlist2 = new Playlist(mItems);
+        final String token = "token_test";
+        final boolean editable = false;
 
-        mItems.remove(0);
-        Playlist playlist3 = new Playlist(mItems);
+        Playlist playlist1 = new Playlist.Builder()
+                .setToken(token)
+                .appendAll(mItems)
+                .setEditable(editable)
+                .build();
+
+        Playlist playlist2 = new Playlist.Builder()
+                .setToken(token)
+                .appendAll(mItems)
+                .setEditable(editable)
+                .build();
+
+        Playlist playlist3 = new Playlist.Builder()
+                .setToken("token_other")
+                .appendAll(mItems)
+                .setEditable(editable)
+                .build();
 
         assertEquals(playlist1.hashCode(), playlist2.hashCode());
         assertNotEquals(playlist1.hashCode(), playlist3.hashCode());
@@ -156,6 +213,9 @@ public class PlaylistTest {
     @Test
     public void parcelableTest() {
         Parcel parcel = Parcel.obtain();
+
+        final String token = "token_test";
+        final boolean editable = false;
 
         List<MusicItem> items = new ArrayList<>();
         items.add(generateMusicItem(1));
@@ -168,7 +228,7 @@ public class PlaylistTest {
         final String value = "tom";
         extra.putString(key, value);
 
-        Playlist playlist = new Playlist(items, extra);
+        Playlist playlist = new Playlist(token, items, editable, extra);
 
         playlist.writeToParcel(parcel, 0);
 

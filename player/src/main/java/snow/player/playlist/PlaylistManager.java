@@ -17,6 +17,20 @@ public interface PlaylistManager {
     int getPlaylistSize();
 
     /**
+     * 获取播放列表的 Token
+     *
+     * @return 播放列表的 Token，如果没有设置，则返回一个空字符串。
+     */
+    String getPlaylistToken();
+
+    /**
+     * 播放列表是否是可编辑的。
+     *
+     * @return 播放列表是否是可编辑的，如果是可编辑的，则返回 true，否则返回 false（默认为 true）。
+     */
+    boolean isPlaylistEditable();
+
+    /**
      * 以异步的方式获取播放队列。
      */
     void getPlaylist(@NonNull Callback callback);

@@ -28,6 +28,8 @@ import snow.player.playlist.PlaylistManager;
 class PlaylistManagerImp implements PlaylistManager {
     private static final String KEY_PLAYLIST = "playlist";
     private static final String KEY_PLAYLIST_SIZE = "playlist_size";
+    private static final String KEY_TOKEN = "token";
+    private static final String KEY_EDITABLE = "editable";
 
     private final MMKV mMMKV;
     private Disposable mSaveDisposable;
@@ -53,6 +55,16 @@ class PlaylistManagerImp implements PlaylistManager {
         return mMMKV.decodeInt(KEY_PLAYLIST_SIZE, 0);
     }
 
+    @Override
+    public String getPlaylistToken() {
+        return mMMKV.decodeString(KEY_TOKEN, "");
+    }
+
+    @Override
+    public boolean isPlaylistEditable() {
+        return mMMKV.decodeBool(KEY_EDITABLE, false);
+    }
+
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     @Override
@@ -62,7 +74,7 @@ class PlaylistManagerImp implements PlaylistManager {
             public void subscribe(SingleEmitter<Playlist> emitter) {
                 Playlist playlist = mMMKV.decodeParcelable(KEY_PLAYLIST, Playlist.class);
                 if (playlist == null) {
-                    playlist = new Playlist(new ArrayList<MusicItem>());
+                    playlist = new Playlist.Builder().build();
                 }
                 emitter.onSuccess(playlist);
             }
@@ -97,6 +109,8 @@ class PlaylistManagerImp implements PlaylistManager {
 
                 mMMKV.encode(KEY_PLAYLIST, playlist);
                 mMMKV.encode(KEY_PLAYLIST_SIZE, playlist.size());
+                mMMKV.encode(KEY_TOKEN, playlist.getToken());
+                mMMKV.encode(KEY_EDITABLE, playlist.isEditable());
 
                 if (emitter.isDisposed()) {
                     return;

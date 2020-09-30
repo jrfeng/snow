@@ -24,30 +24,27 @@ import snow.player.audio.MusicItem;
  */
 public final class Playlist implements Iterable<MusicItem>, Parcelable {
     private static final String TAG = "Playlist";
+
+    private final String mToken;
     private final ArrayList<MusicItem> mMusicItems;
+    private final boolean mEditable;
     private final Bundle mExtra;
 
     /**
      * 创建一个 {@link Playlist} 对象。
-     * <p>
-     * 建议优先使用 {@link Builder} 来创建 {@link Playlist} 对象。
      *
-     * @param items 要添加到播放队列中的 {@link MusicItem} 对象，重复的 {@link MusicItem} 对象会被排除
-     * @see Builder
+     * @param token    播放列表的 token
+     * @param items    所由要添加到播放列表的中的 {@link MusicItem} 对象
+     * @param editable 播放列表是否是可编辑的
+     * @param extra    播放列表的额外参数
      */
-    public Playlist(@NonNull List<MusicItem> items) {
-        this(items, null);
-    }
-
-    /**
-     * 创建一个 {@link Playlist} 对象。
-     *
-     * @param items 要添加到播放队列中的 {@link MusicItem} 对象，重复的 {@link MusicItem} 对象会被排除
-     * @param extra 要携带的额外参数
-     */
-    public Playlist(@NonNull List<MusicItem> items, Bundle extra) {
+    public Playlist(@NonNull String token, @NonNull List<MusicItem> items, boolean editable, Bundle extra) {
+        Preconditions.checkNotNull(token);
         Preconditions.checkNotNull(items);
+
+        mToken = token;
         mMusicItems = excludeRepeatItem(items);
+        mEditable = editable;
         mExtra = extra;
     }
 
@@ -63,6 +60,24 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
         }
 
         return musicItems;
+    }
+
+    /**
+     * 获取播放列表的 Token。
+     *
+     * @return 播放列表的 Token（默认为空字符串）。
+     */
+    public String getToken() {
+        return mToken;
+    }
+
+    /**
+     * 播放列表是否是可编辑的。
+     *
+     * @return 播放列表是否是可编辑的，如果是可编辑的，则返回 true，否则返回 false（默认为 true）。
+     */
+    public boolean isEditable() {
+        return mEditable;
     }
 
     /**
@@ -172,7 +187,11 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
             return false;
         }
 
-        return Objects.equal(mMusicItems, ((Playlist) obj).mMusicItems);
+        Playlist other = (Playlist) obj;
+
+        return Objects.equal(mToken, other.mToken) &&
+                Objects.equal(mMusicItems, other.mMusicItems) &&
+                Objects.equal(mEditable, other.mEditable);
     }
 
     /**
@@ -180,18 +199,24 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
      */
     @Override
     public int hashCode() {
-        return Objects.hashCode(mMusicItems);
+        return Objects.hashCode(mToken,
+                mMusicItems,
+                mEditable);
     }
 
     // Parcelable
     protected Playlist(Parcel in) {
+        mToken = in.readString();
         mMusicItems = in.createTypedArrayList(MusicItem.CREATOR);
+        mEditable = in.readByte() != 0;
         mExtra = in.readBundle(Thread.currentThread().getContextClassLoader());
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mToken);
         dest.writeTypedList(mMusicItems);
+        dest.writeByte((byte) (mEditable ? 1 : 0));
         dest.writeBundle(mExtra);
     }
 
@@ -216,14 +241,39 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
      * {@link Playlist} 构建器。
      */
     public static final class Builder {
+        private String mToken;
         private final List<MusicItem> mMusicItems;
+        private boolean mEditable;
         private Bundle mExtra;
 
         /**
          * 创建一个 {@link Builder} 构建器对象。
          */
         public Builder() {
+            mToken = "";
             mMusicItems = new ArrayList<>();
+            mEditable = true;
+        }
+
+        /**
+         * 设置播放列表的 Token
+         *
+         * @param token 播放列表的 Token，不能为 null
+         */
+        public Builder setToken(@NonNull String token) {
+            Preconditions.checkNotNull(token);
+            mToken = token;
+            return this;
+        }
+
+        /**
+         * 设置播放列表是否是可编辑的。
+         *
+         * @param editable 播放列表是否是可编辑的，如果是可编辑的，则为 true，否则为 false
+         */
+        public Builder setEditable(boolean editable) {
+            mEditable = editable;
+            return this;
         }
 
         /**
@@ -278,7 +328,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
          * 重复的 {@link MusicItem} 项会被在构造 {@link Playlist} 对象时被排除。
          */
         public Playlist build() {
-            return new Playlist(mMusicItems, mExtra);
+            return new Playlist(mToken, mMusicItems, mEditable, mExtra);
         }
     }
 }

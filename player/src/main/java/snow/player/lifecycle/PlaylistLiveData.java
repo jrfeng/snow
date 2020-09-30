@@ -30,7 +30,7 @@ public class PlaylistLiveData extends LiveData<Playlist>
     private boolean mActive;
 
     public PlaylistLiveData() {
-        super(new Playlist(new ArrayList<MusicItem>()));
+        super(new Playlist.Builder().build());
     }
 
     /**

@@ -37,7 +37,7 @@ import snow.player.audio.ErrorCode;
 /**
  * 播放器客户端，用于向播放器发送各种控制命令。
  */
-public class PlayerClient implements Player, PlaylistEditor {
+public class PlayerClient implements Player, PlaylistEditor, PlaylistManager {
     private final Context mApplicationContext;
     private final Class<? extends PlayerService> mPlayerService;
     private final String mClientToken;
@@ -518,21 +518,25 @@ public class PlayerClient implements Player, PlaylistEditor {
         mPlaylistEditor.setPlaylist(playlist, position, play);
     }
 
-    /**
-     * 获取当前的播放队列。
-     *
-     * @param callback 回调接口，该接口的回调方法会在主线程中调用
-     */
+    @Override
     public void getPlaylist(@NonNull PlaylistManager.Callback callback) {
         Preconditions.checkNotNull(callback);
         mPlaylistManager.getPlaylist(callback);
     }
 
-    /**
-     * 获取播放列表中包含的歌曲的数量。
-     */
+    @Override
     public int getPlaylistSize() {
         return mPlaylistManager.getPlaylistSize();
+    }
+
+    @Override
+    public String getPlaylistToken() {
+        return mPlaylistManager.getPlaylistToken();
+    }
+
+    @Override
+    public boolean isPlaylistEditable() {
+        return mPlaylistManager.isPlaylistEditable();
     }
 
     /**

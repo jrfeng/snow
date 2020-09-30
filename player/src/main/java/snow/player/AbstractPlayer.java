@@ -1495,7 +1495,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     @Override
     public void setPlaylist(Playlist playlist, final int position, final boolean play) {
         final MusicItem musicItem = playlist.get(position);
-        updatePlaylist(playlist.getAllMusicItem(), new Runnable() {
+        updatePlaylist(playlist, playlist.getAllMusicItem(), new Runnable() {
             @Override
             public void run() {
                 stop();
@@ -1578,6 +1578,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void insertMusicItem(final int position, @NonNull final MusicItem musicItem) {
+        if (!mPlaylistManager.isPlaylistEditable()) {
+            return;
+        }
+
         if (mLoadingPlaylist) {
             mPlaylistLoadedAction = new Runnable() {
                 @Override
@@ -1597,7 +1601,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         musicItems.add(position, musicItem);
 
         onMusicItemInserted(position);
-        updatePlaylist(musicItems, new Runnable() {
+        updatePlaylist(mPlaylist, musicItems, new Runnable() {
             @Override
             public void run() {
                 notifyPlaylistChanged(mPlayerState.getPlayPosition());
@@ -1607,11 +1611,19 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void appendMusicItem(@NonNull MusicItem musicItem) {
+        if (!mPlaylistManager.isPlaylistEditable()) {
+            return;
+        }
+
         insertMusicItem(getPlaylistSize(), musicItem);
     }
 
     @Override
     public void moveMusicItem(final int fromPosition, final int toPosition) {
+        if (!mPlaylistManager.isPlaylistEditable()) {
+            return;
+        }
+
         if (fromPosition == toPosition) {
             return;
         }
@@ -1633,7 +1645,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         musicItems.add(position, from);
 
         onMusicItemMoved(fromPosition, position);
-        updatePlaylist(musicItems, new Runnable() {
+        updatePlaylist(mPlaylist, musicItems, new Runnable() {
             @Override
             public void run() {
                 notifyPlaylistChanged(mPlayerState.getPlayPosition());
@@ -1643,6 +1655,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void removeMusicItem(@NonNull final MusicItem musicItem) {
+        if (!mPlaylistManager.isPlaylistEditable()) {
+            return;
+        }
+
         if (mLoadingPlaylist) {
             mPlaylistLoadedAction = new Runnable() {
                 @Override
@@ -1664,7 +1680,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         musicItems.remove(musicItem);
 
         onMusicItemRemoved(index, oldPlayPosition);
-        updatePlaylist(musicItems, new Runnable() {
+        updatePlaylist(mPlaylist, musicItems, new Runnable() {
             @Override
             public void run() {
                 int playPosition = mPlayerState.getPlayPosition();
@@ -1685,6 +1701,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void setNextPlay(@NonNull final MusicItem musicItem) {
+        if (!mPlaylistManager.isPlaylistEditable()) {
+            return;
+        }
+
         if (musicItem == getMusicItem()) {
             return;
         }
@@ -1703,8 +1723,13 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mConfirmNextPlay = true;
     }
 
-    private void updatePlaylist(List<MusicItem> musicItems, Runnable doOnSaved) {
-        mPlaylist = new Playlist(musicItems);
+    private void updatePlaylist(Playlist playlist, List<MusicItem> musicItems, Runnable doOnSaved) {
+        mPlaylist = new Playlist.Builder()
+                .setToken(playlist.getToken())
+                .appendAll(musicItems)
+                .setEditable(playlist.isEditable())
+                .setExtra(playlist.getExtra())
+                .build();
         mPlaylistManager.save(mPlaylist, doOnSaved);
     }
 }
