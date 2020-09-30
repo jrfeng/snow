@@ -286,6 +286,9 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void initCustomActionDispatcher() {
+        final Dispatcher playerStateSynchronizerDispatcher =
+                ChannelHelper.newDispatcher(PlayerStateSynchronizer.class, this);
+
         final Dispatcher playerManagerDispatcher =
                 ChannelHelper.newDispatcher(PlayerManager.class, this);
 
@@ -300,6 +303,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         mCustomActionDispatcher = new CustomActionPipe(
                 DispatcherUtil.merge(
+                        playerStateSynchronizerDispatcher,
                         playerManagerDispatcher,
                         playerDispatcher,
                         playlistEditorDispatcher,
