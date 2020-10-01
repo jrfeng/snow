@@ -24,8 +24,6 @@ import snow.player.playlist.Playlist;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private TextView tvMediaSessionTitle;
-    private TextView tvMediaSessionArtist;
     private TextView tvMediaSessionState;
 
     private PlayerClient mPlayerClient;
@@ -39,8 +37,6 @@ public class MainActivity extends AppCompatActivity {
         PlayerViewModel playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
         binding.setViewModel(playerViewModel);
 
-        tvMediaSessionTitle = binding.tvMediaSessionTitle;
-        tvMediaSessionArtist = binding.tvMediaSessionArtist;
         tvMediaSessionState = binding.tvMediaSessionState;
 
         if (playerViewModel.isInitialized()) {
@@ -146,42 +142,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void testMediaSession(MediaControllerCompat mediaController) {
-        MediaMetadataCompat metadata = mediaController.getMetadata();
         PlaybackStateCompat playbackState = mediaController.getPlaybackState();
-
-        tvMediaSessionTitle.setText(getStringValue(metadata, MediaMetadataCompat.METADATA_KEY_TITLE));
-        tvMediaSessionArtist.setText(getStringValue(metadata, MediaMetadataCompat.METADATA_KEY_ARTIST));
         tvMediaSessionState.setText(getStateString(playbackState));
 
         mediaController.registerCallback(new MediaControllerCompat.Callback() {
             @Override
             public void onPlaybackStateChanged(PlaybackStateCompat state) {
                 String stateString = getStateString(state);
-                Log.d(TAG, stateString);
+
                 tvMediaSessionState.setText(stateString);
+                Log.d(TAG, stateString);
             }
 
             @Override
             public void onMetadataChanged(MediaMetadataCompat metadata) {
-                tvMediaSessionTitle.setText(getStringValue(metadata, MediaMetadataCompat.METADATA_KEY_TITLE));
-                tvMediaSessionArtist.setText(getStringValue(metadata, MediaMetadataCompat.METADATA_KEY_ARTIST));
-
                 Log.d(TAG, "Metadata: " + metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
             }
         });
-    }
-
-    private String getStringValue(MediaMetadataCompat metadata, String key) {
-        if (metadata == null) {
-            return "Unknown";
-        }
-
-        String value = metadata.getString(key);
-        if (value == null || value.isEmpty()) {
-            return "Unknown";
-        }
-
-        return value;
     }
 
     private String getStateString(PlaybackStateCompat state) {
