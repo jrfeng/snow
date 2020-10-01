@@ -4,11 +4,11 @@
 
 [**中文**](./readme_zh.md)
 
-Android music player library. 
+Android music player framework. Compatible with MediaSession.
 
 **Support:**
 
-* Custom music player(MediaPlayer, ExoPlayer)
+* Custom music player (MediaPlayer, ExoPlayer)
 * Custom Notification
 * Custom audio effect engine
 * Headset clicks
@@ -36,11 +36,11 @@ allprojects {
 }
 ```
 
-2. Add a dependency in the `build.gradle` file of your app module([last version](https://github.com/jrfeng/snow/releases)).
+2. Add a dependency in the `build.gradle` file of your app module --- [last version](https://github.com/jrfeng/snow/releases)
 
 ```gradle
 dependencies {
-    implementation 'com.github.jrfeng.snow:player:0.1.19'
+    implementation 'com.github.jrfeng.snow:player:0.1.20'
 }
 ```
 

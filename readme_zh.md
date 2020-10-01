@@ -4,7 +4,7 @@
 
 [**English**](./readme.md)
 
-Android 音乐播放器框架。
+Android 音乐播放器框架，兼容 MediaSession 。
 
 **支持的功能：**
 
@@ -36,11 +36,11 @@ allprojects {
 }
 ```
 
-2. 将以下代码添加到模块的依赖中（[最新版本](https://github.com/jrfeng/snow/releases)）：
+2. 将以下代码添加到模块的依赖中 --- [最新版本](https://github.com/jrfeng/snow/releases)：
 
 ```gradle
 dependencies {
-    implementation 'com.github.jrfeng.snow:player:0.1.19'
+    implementation 'com.github.jrfeng.snow:player:0.1.20'
 }
 ```
 
