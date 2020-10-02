@@ -20,7 +20,6 @@ import snow.player.Player;
 import snow.player.PlayerClient;
 import snow.player.R;
 import snow.player.SleepTimer;
-import snow.player.helper.PlayerClientHelper;
 import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
@@ -33,7 +32,6 @@ import snow.player.util.MusicItemUtil;
  * <b>注意！使用前必须先调用 {@link PlayerViewModel} 对象的任意一个 init 方法进行初始化。</b>
  */
 public class PlayerViewModel extends ViewModel {
-    private PlayerClientHelper mPlayerClientHelper;
     private PlayerClient mPlayerClient;
 
     private MutableLiveData<String> mTitle;
@@ -171,94 +169,7 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 初始化 {@link PlayerViewModel} 对象。
-     * <p>
-     * 默认启动了进度条时钟（用于实时更新播放进度）。
-     * <p>
-     * 默认标题为 "未知标题"；默认歌手为 "未知歌手"；默认专辑为 "未知专辑"。这些默认值会在正在播放的
-     * {@link MusicItem} 对应的字段为空（empty）时展示。
-     *
-     * @param context            Context 对象，不能为 null
-     * @param playerClientHelper {@link PlayerClientHelper} 对象，不能为 null
-     */
-    public void init(@NonNull Context context, @NonNull PlayerClientHelper playerClientHelper) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(playerClientHelper);
-
-        init(context, playerClientHelper, true);
-    }
-
-    /**
-     * 初始化 {@link PlayerViewModel} 对象。
-     * <p>
-     * 默认标题为 "未知标题"；默认歌手为 "未知歌手"；默认专辑为 "未知专辑"。这些默认值会在正在播放的
-     * {@link MusicItem} 对应的字段为空时展示。
-     *
-     * @param context             Context 对象，不能为 null
-     * @param playerClientHelper  {@link PlayerClientHelper} 对象，不能为 null
-     * @param enableProgressClock 是否启用进度条时钟（用于实时更新播放进度）
-     */
-    public void init(@NonNull Context context, @NonNull PlayerClientHelper playerClientHelper, boolean enableProgressClock) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(playerClientHelper);
-
-        init(playerClientHelper,
-                context.getString(R.string.snow_music_item_unknown_title),
-                context.getString(R.string.snow_music_item_unknown_artist),
-                context.getString(R.string.snow_music_item_unknown_album),
-                enableProgressClock);
-    }
-
-    /**
-     * 初始化 {@link PlayerViewModel} 对象。
-     * <p>
-     * 默认启用了进度条时钟（用于实时更新播放进度）。
-     *
-     * @param playerClientHelper {@link PlayerClientHelper} 对象，不能为 null
-     * @param defaultTitle       默认标题，会在正在播放的歌曲的标题为空时展示，不能为 null
-     * @param defaultArtist      默认艺术家，会在正在播放的歌曲的艺术家为空时展示，不能为 null
-     * @param defaultAlbum       默认专辑，会在正在播放的歌曲的专辑为空时展示，不能为 null
-     */
-    public void init(@NonNull PlayerClientHelper playerClientHelper,
-                     @NonNull String defaultTitle,
-                     @NonNull String defaultArtist,
-                     @NonNull String defaultAlbum) {
-        Preconditions.checkNotNull(playerClientHelper);
-        Preconditions.checkNotNull(defaultTitle);
-        Preconditions.checkNotNull(defaultArtist);
-        Preconditions.checkNotNull(defaultAlbum);
-
-        init(playerClientHelper, defaultTitle, defaultArtist, defaultAlbum, true);
-    }
-
-    /**
-     * 初始化 {@link PlayerViewModel} 对象。
-     *
-     * @param playerClientHelper  {@link PlayerClientHelper} 对象，不能为 null
-     * @param defaultTitle        默认标题，会在正在播放的歌曲的标题为空时展示，不能为 null
-     * @param defaultArtist       默认艺术家，会在正在播放的歌曲的艺术家为空时展示，不能为 null
-     * @param defaultAlbum        默认专辑，会在正在播放的歌曲的专辑为空时展示，不能为 null
-     * @param enableProgressClock 是否启用进度条时钟（用于实时更新播放进度）
-     */
-    public void init(@NonNull PlayerClientHelper playerClientHelper,
-                     @NonNull String defaultTitle,
-                     @NonNull String defaultArtist,
-                     @NonNull String defaultAlbum,
-                     boolean enableProgressClock) {
-        Preconditions.checkNotNull(playerClientHelper);
-        Preconditions.checkNotNull(defaultTitle);
-        Preconditions.checkNotNull(defaultArtist);
-        Preconditions.checkNotNull(defaultAlbum);
-
-        mPlayerClientHelper = playerClientHelper;
-        init(mPlayerClientHelper.getPlayerClient(), defaultTitle, defaultArtist, defaultAlbum, enableProgressClock);
-    }
-
-    /**
      * 设置是否在 ViewModel 被清理时自动断开 PlayerClient 的连接。
-     * <p>
-     * 该方法对使用 {@link PlayerClientHelper} 初始化的 {@link PlayerViewModel} 无效，
-     * 例如 {@link #init(PlayerClientHelper, String, String, String, boolean)}。
      *
      * @param autoDisconnect 如果为 true，则会在 ViewModel 被清理时自动断开 PlayerClient 的连接
      */
@@ -471,13 +382,10 @@ public class PlayerViewModel extends ViewModel {
         mPlaylist.release();
         removeAllListener();
 
-        if (mPlayerClientHelper != null) {
-            mPlayerClientHelper.repay();
-        } else if (mAutoDisconnect) {
+        if (mAutoDisconnect) {
             mPlayerClient.disconnect();
         }
 
-        mPlayerClientHelper = null;
         mPlayerClient = null;
     }
 
