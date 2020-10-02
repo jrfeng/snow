@@ -1120,6 +1120,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void fastForward() {
+        if (mPlayerState.isForbidSeek()) {
+            return;
+        }
+
         if (isPreparing()) {
             mPreparedAction = new Runnable() {
                 @Override
@@ -1143,6 +1147,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void rewind() {
+        if (mPlayerState.isForbidSeek()) {
+            return;
+        }
+
         if (isPreparing()) {
             mPreparedAction = new Runnable() {
                 @Override
