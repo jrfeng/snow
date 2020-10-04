@@ -1,4 +1,4 @@
-package snow.demo;
+package snow.music;
 
 import androidx.appcompat.app.AppCompatActivity;
 
