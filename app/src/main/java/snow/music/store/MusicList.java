@@ -9,7 +9,6 @@ import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Unique;
 import io.objectbox.relation.ToMany;
-import snow.music.util.ToManyWrapper;
 
 @Entity
 public class MusicList implements ToManyWrapper.OrderedSource<Music> {
