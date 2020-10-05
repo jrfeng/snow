@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- for play local music -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- for play network music -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -17,6 +17,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name="androidx.multidex.MultiDexApplication"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
