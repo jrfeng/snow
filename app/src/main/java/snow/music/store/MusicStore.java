@@ -221,6 +221,34 @@ public class MusicStore {
     }
 
     /**
+     * 将歌曲添加到 “我喜欢” 歌单。
+     */
+    public synchronized void addToFavorite(@NonNull Music music) {
+        Preconditions.checkNotNull(music);
+
+        if (isFavorite(music)) {
+            return;
+        }
+
+        MusicList favorite = getFavoriteMusicList();
+        favorite.getMusicElements().add(music);
+        updateMusicList(favorite);
+    }
+
+    /**
+     * 将歌曲从 “我喜欢” 歌单中移除。
+     */
+    public synchronized void removeFromFavorite(@NonNull Music music) {
+        Preconditions.checkNotNull(music);
+
+        if (isFavorite(music)) {
+            MusicList favorite = getFavoriteMusicList();
+            favorite.getMusicElements().remove(music);
+            updateMusicList(favorite);
+        }
+    }
+
+    /**
      * 指定 name 名称是否是内置歌单名。如果是，则返回 true，否则返回 false。
      */
     public static boolean isBuiltInName(String name) {
