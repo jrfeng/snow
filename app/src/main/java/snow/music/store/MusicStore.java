@@ -85,6 +85,15 @@ public class MusicStore {
         return count > 0;
     }
 
+    private boolean isMusicListExists(long id) {
+        long count = mMusicListEntityBox.query()
+                .equal(MusicListEntity_.id, id)
+                .build()
+                .count();
+
+        return count > 0;
+    }
+
     /**
      * 创建一个新的歌单，如果歌单已存在，则直接返回它，不会创建新歌单。
      *
@@ -150,7 +159,7 @@ public class MusicStore {
     public synchronized void updateMusicList(@NonNull MusicList musicList) {
         Preconditions.checkNotNull(musicList);
 
-        if (!isMusicListExists(musicList.getName())) {
+        if (!isMusicListExists(musicList.getId())) {
             return;
         }
 
