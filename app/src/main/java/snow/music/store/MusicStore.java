@@ -25,12 +25,14 @@ public class MusicStore {
 
     private static MusicStore mInstance;
 
+    private BoxStore mBoxStore;
     private Box<Music> mMusicBox;
     private Box<MusicListEntity> mMusicListEntityBox;
 
     private MusicList mHistory;
 
     private MusicStore(BoxStore boxStore) {
+        mBoxStore = boxStore;
         mMusicBox = boxStore.boxFor(Music.class);
         mMusicListEntityBox = boxStore.boxFor(MusicListEntity.class);
     }
@@ -70,6 +72,19 @@ public class MusicStore {
         }
 
         return mInstance;
+    }
+
+    /**
+     * 获取当前数据库的 BoxStore 对象，如果数据库还没有初始化，则会抛出 {@link IllegalStateException}
+     *
+     * @return 当前数据库的 BoxStore 对象
+     */
+    public synchronized BoxStore getBoxStore() throws IllegalStateException {
+        if (mBoxStore == null) {
+            throw new IllegalStateException("MusicStore not init yet.");
+        }
+
+        return mBoxStore;
     }
 
     /**
@@ -344,6 +359,19 @@ public class MusicStore {
     public synchronized void putMusic(@NonNull Music music) {
         Preconditions.checkNotNull(music);
         mMusicBox.put(music);
+    }
+
+    /**
+     * 获取指定 ID 的歌曲，如果歌曲不存在，则返回 null。
+     *
+     * @param id 歌曲 ID
+     */
+    @Nullable
+    public synchronized Music getMusic(long id) {
+        return mMusicBox.query()
+                .equal(Music_.id, id)
+                .build()
+                .findUnique();
     }
 
     /**
