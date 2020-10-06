@@ -13,7 +13,7 @@ import io.objectbox.relation.ToMany;
 @Entity
 public class MusicList implements ToManyWrapper.OrderedSource<Music> {
     @Id
-    private long id;
+    long id;
     @Unique
     private String name;
     private String description;
@@ -30,10 +30,6 @@ public class MusicList implements ToManyWrapper.OrderedSource<Music> {
 
     public long getId() {
         return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getName() {

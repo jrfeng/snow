@@ -10,7 +10,7 @@ import io.objectbox.annotation.Id;
 @Entity
 public class Music {
     @Id
-    private long id;
+    long id;
 
     private String title;
     private String artist;
@@ -33,10 +33,6 @@ public class Music {
 
     public long getId() {
         return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getTitle() {
