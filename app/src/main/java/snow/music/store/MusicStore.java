@@ -227,6 +227,7 @@ public class MusicStore {
     /**
      * 获取 “本地音乐” 歌单。
      */
+    @NonNull
     public synchronized MusicList getLocalMusicList() {
         return getBuiltInMusicList(MUSIC_LIST_LOCAL_MUSIC);
     }
@@ -234,6 +235,7 @@ public class MusicStore {
     /**
      * 获取 “我喜欢” 歌单。
      */
+    @NonNull
     public synchronized MusicList getFavoriteMusicList() {
         return getBuiltInMusicList(MUSIC_LIST_FAVORITE);
     }
@@ -364,12 +366,20 @@ public class MusicStore {
 
     @NonNull
     private synchronized MusicList getBuiltInMusicList(String name) {
-        MusicList musicList = getMusicList(name);
-        if (musicList != null) {
-            return musicList;
+        if (!isBuiltInName(name)) {
+            throw new IllegalArgumentException("not built-in name:" + name);
         }
 
-        MusicListEntity entity = new MusicListEntity(0, name, "", new byte[0]);
+        MusicListEntity entity = mMusicListEntityBox.query()
+                .equal(MusicListEntity_.name, name)
+                .build()
+                .findUnique();
+
+        if (entity != null) {
+            return new MusicList(entity);
+        }
+
+        entity = new MusicListEntity(0, name, "", new byte[0]);
         mMusicListEntityBox.put(entity);
 
         return new MusicList(entity);
