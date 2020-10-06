@@ -101,4 +101,4 @@ lint/tmp/
 # lint/reports/
 
 # ObjectBox Test
-./app/objectbox-jni-windows-x64.dll
+/app/objectbox-jni-windows-x64.dll
