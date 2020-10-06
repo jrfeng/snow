@@ -20,6 +20,11 @@ public class MusicListEntity {
     byte[] orderBytes;
     ToMany<Music> musicElements;
 
+    public MusicListEntity() {
+        this.name = "";
+        this.description = "";
+    }
+
     public MusicListEntity(long id, String name, String description, byte[] orderBytes) {
         this.id = id;
         this.name = name;
