@@ -320,12 +320,12 @@ public class MusicList {
         }
 
         /**
-         * 如果 element 已存在，则会忽略本次操作。
+         * 如果 element 已存在，则会先移除，然后再进行设置。
          */
         @Override
         public Music set(int index, Music element) {
-            if (contains(element)) {
-                return element;
+            if (contains(element) && indexOf(element) != index) {
+                remove(element);
             }
 
             Music music = mOrderedList.set(index, element);
@@ -334,12 +334,12 @@ public class MusicList {
         }
 
         /**
-         * 如果 element 已存在，则会忽略本次操作。
+         * 如果 element 已存在，则会先移除，然后再添加到 index 位置。
          */
         @Override
         public void add(int index, Music element) {
-            if (contains(element)) {
-                return;
+            if (contains(element) && indexOf(element) != index) {
+                remove(element);
             }
 
             mMusicListEntity.musicElements.add(index, element);
