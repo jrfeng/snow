@@ -346,4 +346,23 @@ public class MusicStoreTest {
 
         assertEquals(0, mMusicStore.getAllHistory().size());
     }
+
+    @Test
+    public void getMusic() {
+        final Music music1 = new Music(
+                0,
+                "title1",
+                "artist1",
+                "album1",
+                "https://www.test.com/test1.mp3",
+                "https://www.test.com/test1.png",
+                60_000,
+                System.currentTimeMillis());
+
+        mMusicStore.putMusic(music1);
+
+        Music music2 = mMusicStore.getMusic(music1.getId());
+
+        assertEquals(music1, music2);
+    }
 }
