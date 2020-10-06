@@ -11,17 +11,17 @@ import io.objectbox.annotation.Unique;
 import io.objectbox.relation.ToMany;
 
 @Entity
-public class MusicList implements ToManyWrapper.OrderedSource<Music> {
+public class MusicListEntity implements ToManyWrapper.OrderedSource<Music> {
     @Id
     long id;
     @Unique
     private String name;
     private String description;
-    public byte[] orderBytes;
 
-    public ToMany<Music> musicElements;
+    byte[] orderBytes;
+    ToMany<Music> musicElements;
 
-    public MusicList(long id, String name, String description, byte[] orderBytes) {
+    public MusicListEntity(long id, String name, String description, byte[] orderBytes) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -52,7 +52,7 @@ public class MusicList implements ToManyWrapper.OrderedSource<Music> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MusicList musicList1 = (MusicList) o;
+        MusicListEntity musicList1 = (MusicListEntity) o;
         return id == musicList1.id &&
                 Objects.equal(name, musicList1.name);
     }
