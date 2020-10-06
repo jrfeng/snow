@@ -297,7 +297,7 @@ public class MusicList {
             List<Music> musicList = new ArrayList<>();
 
             for (Object music : c) {
-                if (contains(music)) {
+                if (musicList.contains(music)) {
                     continue;
                 }
 
