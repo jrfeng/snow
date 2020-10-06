@@ -44,6 +44,13 @@ public class MusicList {
     }
 
     /**
+     * 获取歌单的 ID.
+     */
+    public long getId() {
+        return mMusicListEntity.id;
+    }
+
+    /**
      * 获取歌单名称。
      */
     @NonNull
