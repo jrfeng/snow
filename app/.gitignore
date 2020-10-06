@@ -1,1 +1,5 @@
 /build
+
+# ObjectBox Test
+/objectbox-jni-windows-x64.dll
+/objectbox-debug
