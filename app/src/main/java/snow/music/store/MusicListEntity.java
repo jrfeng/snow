@@ -15,6 +15,7 @@ public class MusicListEntity {
     @Unique
     String name;
     String description;
+    long size;
 
     byte[] orderBytes;
     ToMany<Music> musicElements;
