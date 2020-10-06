@@ -14,6 +14,7 @@ import java.util.List;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.query.QueryBuilder;
 
 public class MusicStore {
     public static final String MUSIC_LIST_LOCAL_MUSIC = "__local_music";
@@ -216,14 +217,11 @@ public class MusicStore {
             return false;
         }
 
-        long count = mMusicBox.query()
-                .equal(Music_.id, musicId)
-                .backlink(MusicListEntity_.musicElements)
-                .equal(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
-                .build()
-                .count();
+        QueryBuilder<Music> builder = mMusicBox.query().equal(Music_.id, musicId);
+        builder.backlink(MusicListEntity_.musicElements)
+                .equal(MusicListEntity_.name, MUSIC_LIST_FAVORITE);
 
-        return count > 0;
+        return builder.build().count() > 0;
     }
 
     /**
