@@ -102,7 +102,7 @@ public class MusicStore {
     public synchronized MusicList createMusicList(@NonNull String name, @NonNull String description) throws IllegalArgumentException {
         Preconditions.checkNotNull(name);
         Preconditions.checkNotNull(description);
-        Preconditions.checkArgument(name.isEmpty(), "name must not empty");
+        Preconditions.checkArgument(!name.isEmpty(), "name must not empty");
 
         if (isBuiltInName(name)) {
             throw new IllegalArgumentException("Illegal music list name, conflicts with built-in name.");
