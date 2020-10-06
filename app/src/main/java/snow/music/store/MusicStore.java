@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Preconditions;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -297,7 +298,7 @@ public class MusicStore {
     /**
      * 移除多条历史记录。
      */
-    public synchronized void removeHistory(@NonNull List<Music> musics) {
+    public synchronized void removeHistory(@NonNull Collection<Music> musics) {
         Preconditions.checkNotNull(musics);
 
         MusicList history = getHistoryMusicList();
@@ -313,6 +314,13 @@ public class MusicStore {
         MusicList history = getHistoryMusicList();
         history.getMusicElements().clear();
         updateMusicList(history);
+    }
+
+    /**
+     * 获取所有的历史记录。
+     */
+    public synchronized List<Music> getAllHistory() {
+        return new ArrayList<>(getHistoryMusicList().getMusicElements());
     }
 
     /**
