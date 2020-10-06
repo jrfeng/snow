@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Preconditions;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 import io.objectbox.Box;
@@ -312,6 +313,26 @@ public class MusicStore {
         MusicList history = getHistoryMusicList();
         history.getMusicElements().clear();
         updateMusicList(history);
+    }
+
+    /**
+     * 存储/更新一个 {@link Music} 对象到数据库中。
+     * <p>
+     * <b>注意！必须先将 {@link Music} 对象存储到数据库中，然后才能添加到歌单中，否则无法保证歌单中元素的顺序</b>
+     */
+    public synchronized void putMusic(@NonNull Music music) {
+        Preconditions.checkNotNull(music);
+        mMusicBox.put(music);
+    }
+
+    /**
+     * 存储/更新多个 {@link Music} 对象到数据库中。
+     * <p>
+     * <b>注意！必须先将 {@link Music} 对象存储到数据库中，然后才能添加到歌单中，否则无法保证歌单中元素的顺序</b>
+     */
+    public synchronized void putAllMusic(@NonNull Collection<Music> musics) {
+        Preconditions.checkNotNull(musics);
+        mMusicBox.put(musics);
     }
 
     private synchronized MusicList getHistoryMusicList() {
