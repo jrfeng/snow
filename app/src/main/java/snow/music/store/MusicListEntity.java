@@ -5,6 +5,9 @@ import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Unique;
 import io.objectbox.relation.ToMany;
 
+/**
+ * 这是一个 ObjectBox Entity, 请不要直接用于该类。
+ */
 @Entity
 public class MusicListEntity {
     @Id
