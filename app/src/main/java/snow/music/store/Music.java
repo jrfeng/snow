@@ -20,14 +20,6 @@ public class Music {
     private int duration;
     private long addTime;
 
-    public Music() {
-        this.title = "";
-        this.artist = "";
-        this.album = "";
-        this.uri = "";
-        this.iconUri = "";
-    }
-
     public Music(long id, String title, String artist, String album, String uri, String iconUri, int duration, long addTime) {
         this.id = id;
         this.title = title;
