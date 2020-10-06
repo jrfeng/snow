@@ -58,11 +58,6 @@ public class MusicStore {
      */
     public synchronized static void init(@NonNull BoxStore boxStore) {
         Preconditions.checkNotNull(boxStore);
-
-        if (mInstance != null) {
-            return;
-        }
-
         mInstance = new MusicStore(boxStore);
     }
 
@@ -91,7 +86,17 @@ public class MusicStore {
     /**
      * 创建一个新的歌单，如果歌单已存在，则直接返回它，不会创建新歌单。
      *
-     * @throws IllegalArgumentException 如果 name 参数是个空字符串，则抛出该异常。
+     * @throws IllegalArgumentException 如果 name 参数是个空字符串或者内置名称，则抛出该异常。
+     */
+    @NonNull
+    public synchronized MusicList createMusicList(@NonNull String name) throws IllegalArgumentException {
+        return createMusicList(name, "");
+    }
+
+    /**
+     * 创建一个新的歌单，如果歌单已存在，则直接返回它，不会创建新歌单。
+     *
+     * @throws IllegalArgumentException 如果 name 参数是个空字符串或者内置名称，则抛出该异常。
      */
     @NonNull
     public synchronized MusicList createMusicList(@NonNull String name, @NonNull String description) throws IllegalArgumentException {
