@@ -56,7 +56,7 @@
     },
     {
       "id": "2:3731149829137421655",
-      "lastPropertyId": "4:3443879266240678600",
+      "lastPropertyId": "5:8384611773884868628",
       "name": "MusicList",
       "properties": [
         {
@@ -78,8 +78,8 @@
           "type": 9
         },
         {
-          "id": "4:3443879266240678600",
-          "name": "orders",
+          "id": "5:8384611773884868628",
+          "name": "orderBytes",
           "type": 23
         }
       ],
@@ -100,7 +100,9 @@
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    3443879266240678600
+  ],
   "retiredRelationUids": [],
   "version": 1
 }
