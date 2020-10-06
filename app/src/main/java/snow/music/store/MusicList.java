@@ -253,7 +253,7 @@ public class MusicList {
 
             c = excludeDuplicates(c);
 
-            boolean result = mOrderedList.addAll(c);
+            boolean result = mOrderedList.addAll(index, c);
 
             if (result) {
                 mMusicListEntity.musicElements.addAll(c);
