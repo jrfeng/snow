@@ -174,7 +174,11 @@ public class MusicStore {
      */
     public synchronized void deleteMusicList(@NonNull MusicList musicList) {
         Preconditions.checkNotNull(musicList);
-        deleteMusicList(musicList.getName());
+
+        mMusicListEntityBox.query()
+                .equal(MusicListEntity_.id, musicList.getId())
+                .build()
+                .remove();
     }
 
     /**
