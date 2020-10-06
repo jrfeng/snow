@@ -99,3 +99,6 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+
+# ObjectBox Test
+./app/objectbox-jni-windows-x64.dll
