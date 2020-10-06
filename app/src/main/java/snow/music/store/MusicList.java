@@ -61,7 +61,18 @@ public class MusicList {
         Preconditions.checkNotNull(name);
         Preconditions.checkArgument(name.isEmpty(), "name must not empty");
 
+        if (isBuiltIn()) {
+            return;
+        }
+
         mMusicListEntity.name = name;
+    }
+
+    /**
+     * 当前歌单是否是内置歌单。如果是，则不允许修改歌单的名称。
+     */
+    public boolean isBuiltIn() {
+        return MusicStore.isBuiltInName(mMusicListEntity.name);
     }
 
     /**
