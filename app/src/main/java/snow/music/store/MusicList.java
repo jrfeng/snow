@@ -161,6 +161,9 @@ public class MusicList {
             return mOrderedList.toArray(a);
         }
 
+        /**
+         * 如果 element 已存在，则会忽略本次操作，并直接返回 false。
+         */
         @Override
         public boolean add(Music t) {
             if (contains(t)) {
@@ -199,7 +202,7 @@ public class MusicList {
         public boolean addAll(@NonNull Collection<? extends Music> c) {
             Preconditions.checkNotNull(c);
 
-            // TODO 排除重复歌曲
+            c = excludeDuplicates(c);
 
             boolean result = mOrderedList.addAll(c);
 
@@ -215,7 +218,7 @@ public class MusicList {
         public boolean addAll(int index, @NonNull Collection<? extends Music> c) {
             Preconditions.checkNotNull(c);
 
-            // TODO 排除重复歌曲
+            c = excludeDuplicates(c);
 
             boolean result = mOrderedList.addAll(c);
 
@@ -245,7 +248,7 @@ public class MusicList {
         public boolean retainAll(@NonNull Collection<?> c) {
             Preconditions.checkNotNull(c);
 
-            // TODO 排除重复歌曲
+            c = excludeDuplicates(c);
 
             boolean result = mOrderedList.retainAll(c);
 
@@ -255,6 +258,20 @@ public class MusicList {
             }
 
             return result;
+        }
+
+        private Collection<Music> excludeDuplicates(Collection<?> c) {
+            List<Music> musicList = new ArrayList<>();
+
+            for (Object music : c) {
+                if (contains(music)) {
+                    continue;
+                }
+
+                musicList.add((Music) music);
+            }
+
+            return musicList;
         }
 
         @Override
@@ -269,18 +286,28 @@ public class MusicList {
             return mOrderedList.get(index);
         }
 
+        /**
+         * 如果 element 已存在，则会忽略本次操作。
+         */
         @Override
         public Music set(int index, Music element) {
-            // TODO 排除重复歌曲
+            if (contains(element)) {
+                return element;
+            }
 
             Music music = mOrderedList.set(index, element);
             mMusicListEntity.musicElements.set(mMusicListEntity.musicElements.indexOf(music), element);
             return music;
         }
 
+        /**
+         * 如果 element 已存在，则会忽略本次操作。
+         */
         @Override
         public void add(int index, Music element) {
-            // TODO 排除重复歌曲
+            if (contains(element)) {
+                return;
+            }
 
             mMusicListEntity.musicElements.add(index, element);
             mMusicListEntity.size = mMusicListEntity.musicElements.size();
