@@ -126,7 +126,12 @@ public class MusicList {
 
                 mOrderedList = new ArrayList<>();
                 while (input.available() > 0) {
-                    mOrderedList.add(mMusicListEntity.musicElements.getById(input.readLong()));
+                    long id = input.readLong();
+                    if (id <= 0) {
+                        mOrderedList = new ArrayList<>(mMusicListEntity.musicElements);
+                        return;
+                    }
+                    mOrderedList.add(mMusicListEntity.musicElements.getById(id));
                 }
 
                 input.close();
