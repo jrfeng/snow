@@ -52,11 +52,33 @@ public class MusicList {
     }
 
     /**
+     * 设置歌单名。
+     * <p>
+     * 如果歌单名已存在，则忽略本次操作。可以调用 {@link MusicStore#isMusicListExists(String)}
+     * 方法判断歌单名是否已存在。
+     */
+    public void setName(@NonNull String name) {
+        Preconditions.checkNotNull(name);
+        Preconditions.checkArgument(name.isEmpty(), "name must not empty");
+
+        mMusicListEntity.name = name;
+    }
+
+    /**
      * 获取歌单的描述信息。
      */
     @NonNull
     public String getDescription() {
         return mMusicListEntity.description;
+    }
+
+    /**
+     * 设置歌单的描述信息。
+     */
+    public void setDescription(@NonNull String description) {
+        Preconditions.checkNotNull(description);
+
+        mMusicListEntity.description = description;
     }
 
     /**
