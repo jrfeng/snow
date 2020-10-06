@@ -122,7 +122,7 @@ public class MusicList {
         private List<Music> mOrderedList;
 
         ElementList() {
-            if (mMusicListEntity.orderBytes == null) {
+            if (mMusicListEntity.orderBytes == null || mMusicListEntity.orderBytes.length <= 0) {
                 mOrderedList = new ArrayList<>(mMusicListEntity.musicElements);
                 return;
             }
