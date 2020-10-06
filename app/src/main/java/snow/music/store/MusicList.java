@@ -235,7 +235,7 @@ public class MusicList {
         public boolean addAll(@NonNull Collection<? extends Music> c) {
             Preconditions.checkNotNull(c);
 
-            c = excludeDuplicates(c);
+            c = excludeDuplicates(c, true);
 
             boolean result = mOrderedList.addAll(c);
 
@@ -251,7 +251,7 @@ public class MusicList {
         public boolean addAll(int index, @NonNull Collection<? extends Music> c) {
             Preconditions.checkNotNull(c);
 
-            c = excludeDuplicates(c);
+            c = excludeDuplicates(c, true);
 
             boolean result = mOrderedList.addAll(index, c);
 
@@ -281,7 +281,7 @@ public class MusicList {
         public boolean retainAll(@NonNull Collection<?> c) {
             Preconditions.checkNotNull(c);
 
-            c = excludeDuplicates(c);
+            c = excludeDuplicates(c, false);
 
             boolean result = mOrderedList.retainAll(c);
 
@@ -293,11 +293,15 @@ public class MusicList {
             return result;
         }
 
-        private Collection<Music> excludeDuplicates(Collection<?> c) {
+        private Collection<Music> excludeDuplicates(Collection<?> c, boolean excludeExists) {
             List<Music> musicList = new ArrayList<>();
 
             for (Object music : c) {
-                if (musicList.contains(music) || contains(music)) {
+                if (musicList.contains(music)) {
+                    continue;
+                }
+
+                if (excludeExists && contains(music)) {
                     continue;
                 }
 
@@ -320,30 +324,36 @@ public class MusicList {
         }
 
         /**
-         * 如果 element 已存在，则会先移除，然后再进行设置。
+         * 如果 element 已存在，则会在设置完成后移除旧元素。
          */
         @Override
         public Music set(int index, Music element) {
-            if (contains(element) && indexOf(element) != index) {
-                remove(element);
-            }
+            int elementIndex = indexOf(element);
 
             Music music = mOrderedList.set(index, element);
             mMusicListEntity.musicElements.set(mMusicListEntity.musicElements.indexOf(music), element);
+
+            if (elementIndex > 0 && elementIndex != index) {
+                remove(elementIndex);
+            }
+
             return music;
         }
 
         /**
-         * 如果 element 已存在，则会先移除，然后再添加到 index 位置。
+         * 如果 element 已存在，则会添加后移除旧元素。
          */
         @Override
         public void add(int index, Music element) {
-            if (contains(element) && indexOf(element) != index) {
-                remove(element);
-            }
+            int elementIndex = indexOf(element);
 
             mMusicListEntity.musicElements.add(index, element);
             mMusicListEntity.size = mMusicListEntity.musicElements.size();
+
+            if (elementIndex > -1) {
+                remove(element);
+            }
+
             mOrderedList.add(index, element);
         }
 
