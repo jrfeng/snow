@@ -59,7 +59,7 @@ public class MusicList {
      */
     public void setName(@NonNull String name) {
         Preconditions.checkNotNull(name);
-        Preconditions.checkArgument(name.isEmpty(), "name must not empty");
+        Preconditions.checkArgument(!name.isEmpty(), "name must not empty");
 
         if (isBuiltIn()) {
             return;
