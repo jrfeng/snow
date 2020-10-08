@@ -22,7 +22,7 @@
         <activity
             android:name=".WelcomeActivity"
             android:noHistory="true"
-            android:theme="@style/Welcome">
+            android:theme="@style/AppTheme.Welcome">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
