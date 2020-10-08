@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#7E57C2</color>
+    <string name="des_logo">应用图标</string>
 </resources>
