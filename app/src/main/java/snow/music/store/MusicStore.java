@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
 import com.google.common.base.Preconditions;
@@ -22,7 +23,6 @@ import io.objectbox.query.Query;
 import io.objectbox.query.QueryBuilder;
 
 public class MusicStore {
-    public static final String MUSIC_LIST_LOCAL_MUSIC = "__local_music";
     public static final String MUSIC_LIST_FAVORITE = "__favorite";
     public static final String MUSIC_LIST_HISTORY = "__history";
 
@@ -35,6 +35,7 @@ public class MusicStore {
     private Box<MusicListEntity> mMusicListEntityBox;
 
     private MusicList mHistory;
+    private MutableLiveData<List<Music>> mHistoryLiveData;
 
     private MusicStore(BoxStore boxStore) {
         mBoxStore = boxStore;
@@ -226,8 +227,6 @@ public class MusicStore {
     @NonNull
     public synchronized List<MusicList> getAllMusicList() {
         List<MusicListEntity> allEntity = mMusicListEntityBox.query()
-                .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC)
-                .and()
                 .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
                 .and()
                 .notEqual(MusicListEntity_.name, MUSIC_LIST_HISTORY)
@@ -265,6 +264,16 @@ public class MusicStore {
     }
 
     /**
+     * 监听历史记录。
+     */
+    public synchronized LiveData<List<Music>> observeHistory() {
+        if (mHistoryLiveData == null) {
+            mHistoryLiveData = new MutableLiveData<>(getHistoryMusicList().getMusicElements());
+        }
+        return mHistoryLiveData;
+    }
+
+    /**
      * 歌曲是否是 “我喜欢”
      */
     public synchronized boolean isFavorite(@NonNull Music music) {
@@ -286,14 +295,6 @@ public class MusicStore {
                 .equal(MusicListEntity_.name, MUSIC_LIST_FAVORITE);
 
         return builder.build().count() > 0;
-    }
-
-    /**
-     * 获取 “本地音乐” 歌单。
-     */
-    @NonNull
-    public synchronized MusicList getLocalMusicList() {
-        return getBuiltInMusicList(MUSIC_LIST_LOCAL_MUSIC);
     }
 
     /**
@@ -336,8 +337,7 @@ public class MusicStore {
      * 指定 name 名称是否是内置歌单名。如果是，则返回 true，否则返回 false。
      */
     public static boolean isBuiltInName(String name) {
-        return name.equalsIgnoreCase(MUSIC_LIST_LOCAL_MUSIC) ||
-                name.equalsIgnoreCase(MUSIC_LIST_FAVORITE) ||
+        return name.equalsIgnoreCase(MUSIC_LIST_FAVORITE) ||
                 name.equalsIgnoreCase(MUSIC_LIST_HISTORY);
     }
 
@@ -357,6 +357,7 @@ public class MusicStore {
             elements.remove(0);
         }
 
+        mHistoryLiveData.setValue(new ArrayList<>(history.getMusicElements()));
         updateMusicList(history);
     }
 
@@ -369,6 +370,7 @@ public class MusicStore {
         MusicList history = getHistoryMusicList();
         history.getMusicElements().remove(music);
 
+        mHistoryLiveData.setValue(new ArrayList<>(history.getMusicElements()));
         updateMusicList(history);
     }
 
@@ -381,6 +383,7 @@ public class MusicStore {
         MusicList history = getHistoryMusicList();
         history.getMusicElements().removeAll(musics);
 
+        mHistoryLiveData.setValue(new ArrayList<>(history.getMusicElements()));
         updateMusicList(history);
     }
 
@@ -390,6 +393,8 @@ public class MusicStore {
     public synchronized void clearHistory() {
         MusicList history = getHistoryMusicList();
         history.getMusicElements().clear();
+
+        mHistoryLiveData.setValue(new ArrayList<>(history.getMusicElements()));
         updateMusicList(history);
     }
 
@@ -417,10 +422,25 @@ public class MusicStore {
      */
     @Nullable
     public synchronized Music getMusic(long id) {
+        return mMusicBox.get(id);
+    }
+
+    /**
+     * 获取所有本地音乐。
+     */
+    @NonNull
+    public synchronized List<Music> getAllMusic() {
+        return mMusicBox.getAll();
+    }
+
+    /**
+     * 获取在给定的 offset 偏移量和 limit 限制之间的所有音乐。
+     */
+    @NonNull
+    public synchronized List<Music> getAllMusic(long offset, long limit) {
         return mMusicBox.query()
-                .equal(Music_.id, id)
                 .build()
-                .findUnique();
+                .find(offset, limit);
     }
 
     /**
