@@ -47,12 +47,6 @@ public class MusicListTest {
 
         assertEquals(newName, musicList.getName());
 
-        MusicList localMusicList = mMusicStore.getLocalMusicList();
-        localMusicList.setName(newName);
-
-        assertNotEquals(newName, localMusicList.getName());
-        assertEquals(MusicStore.MUSIC_LIST_LOCAL_MUSIC, localMusicList.getName());
-
         MusicList favorite = mMusicStore.getFavoriteMusicList();
         favorite.setName(newName);
 
