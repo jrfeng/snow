@@ -444,6 +444,33 @@ public class MusicStore {
     }
 
     /**
+     * 获取数据库中包含的 {@link Music} 对象的数量。
+     */
+    public synchronized long getMusicCount() {
+        return mMusicBox.count();
+    }
+
+    /**
+     * 从数据中移除指定歌曲。
+     * <p>
+     * 注意！如果歌曲已添加到歌单中，则会把歌曲同时从所有歌单中移除。
+     *
+     * @return 如果歌曲已添加到数据库中，并且移除成功则返回 true；如果歌曲没有添加到数据库中，则返回 false
+     */
+    public synchronized boolean removeMusic(@NonNull Music music) {
+        return mMusicBox.remove(music.getId());
+    }
+
+    /**
+     * 从数据中移除指定集合中的所有歌曲。
+     *
+     * @param musics 所有要移除的歌曲。
+     */
+    public synchronized void removeMusic(Collection<Music> musics) {
+        mMusicBox.remove(musics);
+    }
+
+    /**
      * 存储/更新多个 {@link Music} 对象到数据库中。
      * <p>
      * <b>注意！必须先将 {@link Music} 对象存储到数据库中，然后才能添加到歌单中，否则无法保证歌单中元素的顺序</b>
