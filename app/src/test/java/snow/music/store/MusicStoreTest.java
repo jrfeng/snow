@@ -365,4 +365,19 @@ public class MusicStoreTest {
 
         assertEquals(music1, music2);
     }
+
+    @Test
+    public void getAllMusicList() {
+        final String nameA = "Test Music List A";
+        final String nameB = "Test Music List B";
+
+        mMusicStore.createMusicList(nameA);
+        mMusicStore.createMusicList(nameB);
+
+        List<MusicList> allMusicList = mMusicStore.getAllMusicList();
+
+        assertEquals(2, allMusicList.size());
+        assertEquals(nameA, allMusicList.get(0).getName());
+        assertEquals(nameB, allMusicList.get(1).getName());
+    }
 }

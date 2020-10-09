@@ -4,16 +4,21 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Transformations;
 
 import com.google.common.base.Preconditions;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.android.ObjectBoxLiveData;
+import io.objectbox.query.Query;
 import io.objectbox.query.QueryBuilder;
 
 public class MusicStore {
@@ -216,6 +221,50 @@ public class MusicStore {
     }
 
     /**
+     * 获取所有自建歌单（不包括内置歌单）。
+     */
+    @NonNull
+    public synchronized List<MusicList> getAllMusicList() {
+        List<MusicListEntity> allEntity = mMusicListEntityBox.query()
+                .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC)
+                .and()
+                .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
+                .and()
+                .notEqual(MusicListEntity_.name, MUSIC_LIST_HISTORY)
+                .build()
+                .find();
+
+        if (allEntity.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<MusicList> allMusicList = new ArrayList<>(allEntity.size());
+
+        for (MusicListEntity entity : allEntity) {
+            allMusicList.add(new MusicList(entity));
+        }
+
+        return allMusicList;
+    }
+
+    /**
+     * 监听 “我喜欢” 歌单。
+     */
+    @NonNull
+    public synchronized LiveData<MusicList> observeFavorite() {
+        Query<MusicListEntity> favoriteQuery = mMusicListEntityBox.query()
+                .equal(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
+                .build();
+
+        if (favoriteQuery.count() < 0) {
+            createBuiltInMusicList(MUSIC_LIST_FAVORITE);
+        }
+
+        ObjectBoxLiveData<MusicListEntity> favoriteLiveData = new ObjectBoxLiveData<>(favoriteQuery);
+        return Transformations.map(favoriteLiveData, input -> new MusicList(input.get(0)));
+    }
+
+    /**
      * 歌曲是否是 “我喜欢”
      */
     public synchronized boolean isFavorite(@NonNull Music music) {
@@ -407,9 +456,14 @@ public class MusicStore {
             return new MusicList(entity);
         }
 
-        entity = new MusicListEntity(0, name, "", new byte[0]);
-        mMusicListEntityBox.put(entity);
+        entity = createBuiltInMusicList(name);
 
         return new MusicList(entity);
+    }
+
+    private MusicListEntity createBuiltInMusicList(String name) {
+        MusicListEntity entity = new MusicListEntity(0, name, "", new byte[0]);
+        mMusicListEntityBox.put(entity);
+        return entity;
     }
 }
