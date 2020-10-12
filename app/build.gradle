@@ -53,8 +53,15 @@ dependencies {
     implementation project(path: ':exo')
 
     // media-helper
-    implementation 'com.github.jrfeng:media-helper:1.0.10'
+    implementation "com.github.jrfeng:media-helper:$mediaHelperVersion"
 
     // Guava
-    implementation "com.google.guava:guava:29.0-android"
+    implementation "com.google.guava:guava:$guavaVersion"
+
+    // RxJava2
+    implementation "io.reactivex.rxjava2:rxjava:$rxjavaVersion"
+    implementation "io.reactivex.rxjava2:rxandroid:$rxandroidVersion"
+
+    // MMKV
+    implementation "com.tencent:mmkv-static:$mmkvVersion"
 }

@@ -39,14 +39,14 @@ dependencies {
     api "androidx.lifecycle:lifecycle-extensions:2.2.0"
 
     // Guava
-    implementation "com.google.guava:guava:29.0-android"
+    implementation "com.google.guava:guava:$guavaVersion"
 
     // MMKV
-    implementation "com.tencent:mmkv-static:1.1.1"
+    implementation "com.tencent:mmkv-static:$mmkvVersion"
 
     // RxJava
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation "io.reactivex.rxjava2:rxjava:$rxjavaVersion"
+    implementation "io.reactivex.rxjava2:rxandroid:$rxandroidVersion"
 
     // Glide
     implementation "com.github.bumptech.glide:glide:4.11.0"
@@ -57,5 +57,5 @@ dependencies {
     annotationProcessor 'com.github.jrfeng.channel-helper:processor:1.2.7'
 
     // media-helper
-    implementation 'com.github.jrfeng:media-helper:1.0.10'
+    implementation "com.github.jrfeng:media-helper:$mediaHelperVersion"
 }

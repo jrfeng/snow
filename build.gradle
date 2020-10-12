@@ -27,6 +27,21 @@ allprojects {
         jcenter()
         maven { url 'https://jitpack.io' }
     }
+
+    ext {
+        // Guava
+        guavaVersion = "29.0-android"
+
+        // RxJava
+        rxjavaVersion = "2.2.19"
+        rxandroidVersion = "2.1.1"
+
+        // media-helper
+        mediaHelperVersion = "1.0.10"
+
+        // MMKV
+        mmkvVersion = "1.1.1"
+    }
 }
 
 task clean(type: Delete) {
