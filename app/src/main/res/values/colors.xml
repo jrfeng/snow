@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#7E57C2</color>
-    <color name="colorPrimaryDark">#7E57C2</color>
-    <color name="colorAccent">#7E57C2</color>
+    <color name="deep_purple_400">#7E57C2</color>
+    <color name="grey_800">#424242</color>
 
-    <color name="ic_launcher_background">#7E57C2</color>
+    <color name="ic_launcher_background">@color/deep_purple_400</color>
 </resources>
