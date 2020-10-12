@@ -2,8 +2,10 @@ package snow.music.util;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
 
 /**
@@ -19,8 +21,12 @@ public class NightModeUtil {
      * <p>
      * 可以在 Application 的 onCreate 方法中调用该方法来恢复上次设置的夜间模式。默认的模式为
      * {@link Mode#NIGHT_FOLLOW_SYSTEM}，即 AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+     *
+     * @param context Context 对象，不能为 null
      */
-    public static void applyNightMode(Context context) {
+    public static void applyNightMode(@NonNull Context context) {
+        Preconditions.checkNotNull(context);
+
         MMKV mmkv = MMKV.mmkvWithID(getMMapId(context));
         Mode mode = Mode.getModeById(mmkv.decodeInt(KEY_MODE, 0));
         AppCompatDelegate.setDefaultNightMode(mode.getModeValue());
@@ -33,10 +39,27 @@ public class NightModeUtil {
      * @param mode    要设置的模式
      * @see Mode
      */
-    public static void setDefaultNightMode(Context context, Mode mode) {
+    public static void setDefaultNightMode(@NonNull Context context, @NonNull Mode mode) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(mode);
+
         MMKV mmkv = MMKV.mmkvWithID(getMMapId(context));
         mmkv.encode(KEY_MODE, mode.id);
         AppCompatDelegate.setDefaultNightMode(mode.getModeValue());
+    }
+
+    /**
+     * 获取当前设置的夜间模式。
+     *
+     * @param context Context 对象，不能为 null
+     * @return 当前设置的夜间模式。
+     */
+    @NonNull
+    public static Mode getNightMode(@NonNull Context context) {
+        Preconditions.checkNotNull(context);
+
+        MMKV mmkv = MMKV.mmkvWithID(getMMapId(context));
+        return Mode.getModeById(mmkv.decodeInt(KEY_MODE, 0));
     }
 
     private static String getMMapId(Context context) {
