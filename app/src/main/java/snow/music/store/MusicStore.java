@@ -1,6 +1,7 @@
 package snow.music.store;
 
 import android.content.Context;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,9 +13,11 @@ import com.google.common.base.Preconditions;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import android.os.Handler;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
@@ -35,12 +38,14 @@ public class MusicStore {
     private Box<MusicListEntity> mMusicListEntityBox;
 
     private MusicList mHistory;
+    private Handler mMainHandler;
     private MutableLiveData<List<Music>> mHistoryLiveData;
 
     private MusicStore(BoxStore boxStore) {
         mBoxStore = boxStore;
         mMusicBox = boxStore.boxFor(Music.class);
         mMusicListEntityBox = boxStore.boxFor(MusicListEntity.class);
+        mMainHandler = new Handler(Looper.getMainLooper());
     }
 
     /**
@@ -268,7 +273,7 @@ public class MusicStore {
      */
     public synchronized LiveData<List<Music>> observeHistory() {
         if (mHistoryLiveData == null) {
-            mHistoryLiveData = new MutableLiveData<>(getHistoryMusicList().getMusicElements());
+            initHistory();
         }
         return mHistoryLiveData;
     }
@@ -357,8 +362,8 @@ public class MusicStore {
             elements.remove(0);
         }
 
-        mHistoryLiveData.setValue(new ArrayList<>(history.getMusicElements()));
         updateMusicList(history);
+        updateHistoryLiveData();
     }
 
     /**
@@ -370,8 +375,8 @@ public class MusicStore {
         MusicList history = getHistoryMusicList();
         history.getMusicElements().remove(music);
 
-        mHistoryLiveData.setValue(new ArrayList<>(history.getMusicElements()));
         updateMusicList(history);
+        updateHistoryLiveData();
     }
 
     /**
@@ -383,8 +388,8 @@ public class MusicStore {
         MusicList history = getHistoryMusicList();
         history.getMusicElements().removeAll(musics);
 
-        mHistoryLiveData.setValue(new ArrayList<>(history.getMusicElements()));
         updateMusicList(history);
+        updateHistoryLiveData();
     }
 
     /**
@@ -394,8 +399,8 @@ public class MusicStore {
         MusicList history = getHistoryMusicList();
         history.getMusicElements().clear();
 
-        mHistoryLiveData.setValue(new ArrayList<>(history.getMusicElements()));
         updateMusicList(history);
+        updateHistoryLiveData();
     }
 
     /**
@@ -480,12 +485,107 @@ public class MusicStore {
         mMusicBox.put(musics);
     }
 
+    /**
+     * 获取所有的歌手名。
+     */
+    @NonNull
+    public synchronized List<String> getAllArtist() {
+        return new ArrayList<>(Arrays.asList(mMusicBox.query()
+                .build()
+                .property(Music_.artist)
+                .distinct()
+                .findStrings()));
+    }
+
+    /**
+     * 获取所有的专辑名。
+     */
+    @NonNull
+    public synchronized List<String> getAllAlbum() {
+        return new ArrayList<>(Arrays.asList(mMusicBox.query()
+                .build()
+                .property(Music_.album)
+                .distinct()
+                .findStrings()));
+    }
+
+    /**
+     * 获取指定歌手的全部音乐。
+     *
+     * @param artist 歌手名，不能为 null
+     * @return 歌手的全部音乐，不为 null
+     */
+    @NonNull
+    public synchronized List<Music> getArtistAllMusic(@NonNull String artist) {
+        Preconditions.checkNotNull(artist);
+
+        return mMusicBox.query()
+                .equal(Music_.artist, artist)
+                .build()
+                .find();
+    }
+
+    /**
+     * 获取指定歌手在给定的 offset 偏移量和 limit 限制间的全部音乐。
+     *
+     * @param artist 歌手名，不能为 null
+     * @return 在给定的 offset 偏移量和 limit 限制间的全部音乐，不为 null
+     */
+    public synchronized List<Music> getArtistAllMusic(@NonNull String artist, long offset, long limit) {
+        Preconditions.checkNotNull(artist);
+
+        return mMusicBox.query()
+                .equal(Music_.artist, artist)
+                .build()
+                .find(offset, limit);
+    }
+
+    /**
+     * 获取指定专辑的全部音乐。
+     *
+     * @param album 专辑名，不能为 null
+     * @return 专辑中的全部音乐，不为 null
+     */
+    @NonNull
+    public synchronized List<Music> getAlbumAllMusic(@NonNull String album) {
+        Preconditions.checkNotNull(album);
+
+        return mMusicBox.query()
+                .equal(Music_.album, album)
+                .build()
+                .find();
+    }
+
+    /**
+     * 获取指定专辑在给定的 offset 偏移量和 limit 限制间的全部音乐。
+     *
+     * @param album 专辑名，不能为 null
+     * @return 在给定的 offset 偏移量和 limit 限制间的全部音乐，不为 null
+     */
+    public synchronized List<Music> getAlbumAllMusic(@NonNull String album, long offset, long limit) {
+        Preconditions.checkNotNull(album);
+
+        return mMusicBox.query()
+                .equal(Music_.album, album)
+                .build()
+                .find(offset, limit);
+    }
+
     private synchronized MusicList getHistoryMusicList() {
         if (mHistory == null) {
-            mHistory = getBuiltInMusicList(MUSIC_LIST_HISTORY);
+            initHistory();
         }
 
         return mHistory;
+    }
+
+    private void updateHistoryLiveData() {
+        mMainHandler.post(() -> mHistoryLiveData.setValue(getHistoryMusicList().getMusicElements()));
+    }
+
+    private void initHistory() {
+        mHistory = getBuiltInMusicList(MUSIC_LIST_HISTORY);
+        mHistoryLiveData = new MutableLiveData<>(mHistory.getMusicElements());
     }
 
     @NonNull
