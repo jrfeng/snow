@@ -16,7 +16,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+
 import android.os.Handler;
 
 import io.objectbox.Box;
@@ -41,11 +43,14 @@ public class MusicStore {
     private Handler mMainHandler;
     private MutableLiveData<List<Music>> mHistoryLiveData;
 
+    private List<OnFavoriteChangeListener> mAllFavoriteChangeListener;
+
     private MusicStore(BoxStore boxStore) {
         mBoxStore = boxStore;
         mMusicBox = boxStore.boxFor(Music.class);
         mMusicListEntityBox = boxStore.boxFor(MusicListEntity.class);
         mMainHandler = new Handler(Looper.getMainLooper());
+        mAllFavoriteChangeListener = new LinkedList<>();
     }
 
     /**
@@ -323,6 +328,7 @@ public class MusicStore {
         MusicList favorite = getFavoriteMusicList();
         favorite.getMusicElements().add(music);
         updateMusicList(favorite);
+        notifyFavoriteChanged();
     }
 
     /**
@@ -335,7 +341,44 @@ public class MusicStore {
             MusicList favorite = getFavoriteMusicList();
             favorite.getMusicElements().remove(music);
             updateMusicList(favorite);
+            notifyFavoriteChanged();
         }
+    }
+
+    private void notifyFavoriteChanged() {
+        mMainHandler.post(() -> {
+            for (OnFavoriteChangeListener listener : mAllFavoriteChangeListener) {
+                listener.onFavoriteChanged();
+            }
+        });
+    }
+
+    /**
+     * 添加一个 {@link OnFavoriteChangeListener} 监听器，如果已添加，则忽略本次调用。
+     *
+     * @param listener {@link OnFavoriteChangeListener} 监听器对象，不能为 null
+     */
+    public synchronized void addOnFavoriteChangeListener(@NonNull OnFavoriteChangeListener listener) {
+        Preconditions.checkNotNull(listener);
+
+        if (mAllFavoriteChangeListener.contains(listener)) {
+            return;
+        }
+
+        mAllFavoriteChangeListener.add(listener);
+    }
+
+    /**
+     * 移除一个已添加的 {@link OnFavoriteChangeListener} 监听器，如果未添加或者已经移除，则忽略本次调用。
+     *
+     * @param listener {@link OnFavoriteChangeListener} 监听器对象，为 null 时将忽略本次调用。
+     */
+    public synchronized void removeOnFavoriteChangeListener(OnFavoriteChangeListener listener) {
+        if (listener == null) {
+            return;
+        }
+
+        mAllFavoriteChangeListener.remove(listener);
     }
 
     /**
@@ -612,5 +655,17 @@ public class MusicStore {
         MusicListEntity entity = new MusicListEntity(0, name, "", new byte[0]);
         mMusicListEntityBox.put(entity);
         return entity;
+    }
+
+    /**
+     * 用于监听 “我喜欢” 歌单的修改事件。
+     * <p>
+     * 当往 “我喜欢” 歌单中添加或移除一首歌曲时，该监听器会被调用。
+     */
+    public interface OnFavoriteChangeListener {
+        /**
+         * 当 “我喜欢” 歌单被修改时，会调用该方法。
+         */
+        void onFavoriteChanged();
     }
 }

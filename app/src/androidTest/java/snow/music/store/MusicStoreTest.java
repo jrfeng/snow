@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import io.objectbox.BoxStore;
 
@@ -584,5 +585,54 @@ public class MusicStoreTest {
 
         assertEquals(2, musicsA.size());
         assertEquals(1, musicsB.size());
+    }
+
+    @Test(timeout = 3000)
+    public void onFavoriteChangeListener() throws InterruptedException {
+        final Music music = new Music(
+                0,
+                "title",
+                "artist",
+                "album",
+                "https://www.test.com/test.mp3",
+                "https://www.test.com/test.png",
+                60_000,
+                System.currentTimeMillis());
+
+        mMusicStore.putMusic(music);
+
+        CountDownLatch addLatch = new CountDownLatch(1);
+        MusicStore.OnFavoriteChangeListener addListener = new MusicStore.OnFavoriteChangeListener() {
+            @Override
+            public void onFavoriteChanged() {
+                addLatch.countDown();
+            }
+        };
+
+        mMusicStore.addOnFavoriteChangeListener(addListener);
+
+        mMusicStore.addToFavorite(music);
+        addLatch.await();
+
+        // assert
+        assertTrue(mMusicStore.isFavorite(music));
+        mMusicStore.removeOnFavoriteChangeListener(addListener);
+
+        CountDownLatch removeLatch = new CountDownLatch(1);
+        MusicStore.OnFavoriteChangeListener removeListener = new MusicStore.OnFavoriteChangeListener() {
+            @Override
+            public void onFavoriteChanged() {
+                removeLatch.countDown();
+            }
+        };
+
+        mMusicStore.addOnFavoriteChangeListener(removeListener);
+
+        mMusicStore.removeFromFavorite(music);
+        removeLatch.await();
+
+        // assert
+        assertFalse(mMusicStore.isFavorite(music));
+        mMusicStore.removeOnFavoriteChangeListener(removeListener);
     }
 }
