@@ -1013,7 +1013,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void play() {
-        if (isPlaying()) {
+        if (getMusicItem() == null || isPlaying()) {
             return;
         }
 

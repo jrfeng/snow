@@ -22,7 +22,6 @@ public class NavigationActivity extends AppCompatActivity {
 
         ActivityNavigationBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_navigation);
 
-
         ViewModelProvider viewModelProvider = new ViewModelProvider(this);
         PlayerViewModel playerViewModel = viewModelProvider.get(PlayerViewModel.class);
 
@@ -48,5 +47,8 @@ public class NavigationActivity extends AppCompatActivity {
 
         PlayerClient playerClient = PlayerClient.newInstance(this, PlayerService.class);
         playerViewModel.init(this, playerClient);
+        playerClient.connect();
+
+        playerViewModel.setAutoDisconnect(true);
     }
 }
