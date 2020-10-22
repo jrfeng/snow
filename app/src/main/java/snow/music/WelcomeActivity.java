@@ -31,13 +31,13 @@ public class WelcomeActivity extends AppCompatActivity {
             mTimerDisposable.isDisposed();
         }
 
-        mTimerDisposable = Observable.timer(1500, TimeUnit.MILLISECONDS)
+        mTimerDisposable = Observable.timer(1000, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::startMainActivity);
     }
 
     public void startMainActivity(Long along) {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, NavigationActivity.class);
         startActivity(intent);
     }
 }
