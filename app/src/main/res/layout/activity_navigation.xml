@@ -1,389 +1,374 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical"
-    tools:context=".NavigationActivity">
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="playerViewModel"
+            type="snow.player.lifecycle.PlayerViewModel" />
+    </data>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingLeft="16dp"
-        tools:ignore="RtlSymmetry">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical"
+        tools:context=".activity.navigation.NavigationActivity">
 
         <LinearLayout
-            android:id="@+id/searchBar"
-            android:layout_width="0dp"
-            android:layout_height="36dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_grey_round_rect_corner_8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:contentDescription="@string/des_search"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_search" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/search"
-                android:textColor="@color/grey_600" />
-
-        </LinearLayout>
-
-        <ImageButton
-            android:id="@+id/btnSetting"
-            android:layout_width="@dimen/image_button_size"
-            android:layout_height="@dimen/image_button_size"
-            android:background="@drawable/bg_button_48dp"
-            android:contentDescription="@string/des_setting"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_setting" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <ImageView
-            android:id="@+id/ivAlbumIcon"
-            android:layout_width="@dimen/album_icon_size"
-            android:layout_height="@dimen/album_icon_size"
-            android:contentDescription="@string/des_album_icon"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_default_album_icon" />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="16dp" />
-
-        <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/unknown_title" />
-
-        <TextView
-            android:id="@+id/tvArtist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/unknown_artist"
-            android:textSize="12sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:baselineAligned="false"
-        android:orientation="horizontal">
-
-        <LinearLayout
-            android:id="@+id/itemLocalMusic"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_navigation_item"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@string/des_local_music"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_local_music" />
-
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/item_local_music" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/itemFavorite"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_navigation_item"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@string/des_favorite"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_my_favorite" />
-
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/item_favorite" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/itemMusicList"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_navigation_item"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@string/des_music_list"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_music_list" />
-
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/item_music_list" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:baselineAligned="false"
-        android:orientation="horizontal">
-
-        <LinearLayout
-            android:id="@+id/itemArtist"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_navigation_item"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@string/des_artist"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_artist" />
-
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/item_artist" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/itemAlbum"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_navigation_item"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@string/des_album"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_album" />
-
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/item_album" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/itemHistory"
-            android:layout_width="0dp"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_navigation_item"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@string/des_history"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_history" />
-
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/item_history" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <FrameLayout
-            android:id="@+id/separatorLine"
             android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_gravity="top"
-            android:background="@color/grey_300" />
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingLeft="16dp"
+            tools:ignore="RtlSymmetry">
+
+            <LinearLayout
+                android:id="@+id/searchBar"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_grey_round_rect_corner_8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:contentDescription="@string/des_search"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/ic_search" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/search"
+                    android:textColor="@color/grey_600" />
+
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/btnSetting"
+                android:layout_width="@dimen/image_button_size"
+                android:layout_height="@dimen/image_button_size"
+                android:background="@drawable/bg_button_48dp"
+                android:contentDescription="@string/des_setting"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_setting" />
+
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvDiskPanel"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:baselineAligned="false"
-            android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <FrameLayout
+            <LinearLayout
+                android:id="@+id/itemLocalMusic"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_navigation_item"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
 
-                <ImageButton
-                    android:layout_width="@dimen/image_button_size"
-                    android:layout_height="@dimen/image_button_size"
-                    android:layout_gravity="center"
-                    android:background="@drawable/bg_button_48dp"
-                    android:contentDescription="@string/des_toggle_favorite"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@string/des_local_music"
                     android:scaleType="centerInside"
-                    app:srcCompat="@drawable/level_favorite" />
+                    app:srcCompat="@drawable/ic_local_music" />
 
-            </FrameLayout>
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="8dp" />
 
-            <FrameLayout
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/item_local_music" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/itemFavorite"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_navigation_item"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
 
-                <ImageButton
-                    android:layout_width="@dimen/image_button_size"
-                    android:layout_height="@dimen/image_button_size"
-                    android:layout_gravity="center"
-                    android:background="@drawable/bg_button_48dp"
-                    android:contentDescription="@string/des_skip_to_previous"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@string/des_favorite"
                     android:scaleType="centerInside"
-                    app:srcCompat="@drawable/ic_skip_to_previous" />
+                    app:srcCompat="@drawable/ic_my_favorite" />
 
-            </FrameLayout>
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="8dp" />
 
-            <FrameLayout
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/item_favorite" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/itemMusicList"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_navigation_item"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
 
-                <ImageButton
-                    android:layout_width="72dp"
-                    android:layout_height="72dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/bg_play_pause"
-                    android:contentDescription="@string/des_play_pause"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@string/des_music_list"
                     android:scaleType="centerInside"
-                    app:srcCompat="@drawable/level_play_pause" />
+                    app:srcCompat="@drawable/ic_music_list" />
 
-            </FrameLayout>
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="8dp" />
 
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/item_music_list" />
 
-                <ImageButton
-                    android:layout_width="@dimen/image_button_size"
-                    android:layout_height="@dimen/image_button_size"
-                    android:layout_gravity="center"
-                    android:background="@drawable/bg_button_48dp"
-                    android:contentDescription="@string/des_skip_to_next"
-                    android:scaleType="centerInside"
-                    app:srcCompat="@drawable/ic_skip_to_next" />
-
-            </FrameLayout>
-
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <ImageButton
-                    android:layout_width="@dimen/image_button_size"
-                    android:layout_height="@dimen/image_button_size"
-                    android:layout_gravity="center"
-                    android:background="@drawable/bg_button_48dp"
-                    android:contentDescription="@string/des_show_playlist"
-                    android:scaleType="centerInside"
-                    app:srcCompat="@drawable/ic_playlist" />
-
-            </FrameLayout>
+            </LinearLayout>
 
         </LinearLayout>
 
-        <ProgressBar
-            style="@android:style/Widget.ProgressBar.Horizontal"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_gravity="bottom"
-            android:progressDrawable="@drawable/progress_navigation"
-            tools:progress="50" />
+            android:layout_height="80dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
 
-    </FrameLayout>
+            <LinearLayout
+                android:id="@+id/itemArtist"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_navigation_item"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
 
-</LinearLayout>
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@string/des_artist"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/ic_artist" />
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/item_artist" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/itemAlbum"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_navigation_item"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@string/des_album"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/ic_album" />
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/item_album" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/itemHistory"
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_navigation_item"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@string/des_history"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/ic_history" />
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/item_history" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <FrameLayout
+                android:id="@+id/separatorLine"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_gravity="top"
+                android:background="@color/grey_300" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:baselineAligned="false"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:layout_width="@dimen/image_button_size"
+                        android:layout_height="@dimen/image_button_size"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_button_48dp"
+                        android:contentDescription="@string/des_toggle_favorite"
+                        android:scaleType="centerInside"
+                        app:srcCompat="@drawable/ic_favorite_false" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:layout_width="@dimen/image_button_size"
+                        android:layout_height="@dimen/image_button_size"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_button_48dp"
+                        android:contentDescription="@string/des_skip_to_previous"
+                        android:onClick="@{() -> playerViewModel.skipToPrevious()}"
+                        android:scaleType="centerInside"
+                        app:srcCompat="@drawable/ic_skip_to_previous" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_play_pause"
+                        android:contentDescription="@string/des_play_pause"
+                        android:onClick="@{() -> playerViewModel.playPause()}"
+                        android:scaleType="centerInside"
+                        app:srcCompat="@drawable/ic_play" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:layout_width="@dimen/image_button_size"
+                        android:layout_height="@dimen/image_button_size"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_button_48dp"
+                        android:contentDescription="@string/des_skip_to_next"
+                        android:onClick="@{() -> playerViewModel.skipToNext()}"
+                        android:scaleType="centerInside"
+                        app:srcCompat="@drawable/ic_skip_to_next" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <ImageButton
+                        android:layout_width="@dimen/image_button_size"
+                        android:layout_height="@dimen/image_button_size"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_button_48dp"
+                        android:contentDescription="@string/des_show_playlist"
+                        android:scaleType="centerInside"
+                        app:srcCompat="@drawable/ic_playlist" />
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <ProgressBar
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_gravity="bottom"
+                android:progressDrawable="@drawable/progress_navigation"
+                tools:progress="50" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+</layout>

@@ -20,8 +20,9 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".WelcomeActivity"
+            android:name=".activity.welcome.WelcomeActivity"
             android:noHistory="true"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Welcome">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,9 +32,22 @@
         </activity>
 
         <activity
-            android:name=".NavigationActivity"
+            android:name=".activity.navigation.NavigationActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
+
+        <service android:name="snow.player.PlayerService">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name="androidx.media.session.MediaButtonReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

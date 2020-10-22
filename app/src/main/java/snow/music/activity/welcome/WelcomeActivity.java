@@ -1,4 +1,4 @@
-package snow.music;
+package snow.music.activity.welcome;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import snow.music.R;
+import snow.music.activity.navigation.NavigationActivity;
 
 public class WelcomeActivity extends AppCompatActivity {
     private Disposable mTimerDisposable;
