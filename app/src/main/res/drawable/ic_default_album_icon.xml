@@ -10,7 +10,7 @@
       android:fillColor="#212121"/>
   <path
       android:pathData="M120,120m-48,0a48,48 0,1 1,96 0a48,48 0,1 1,-96 0"
-      android:fillColor="#9c27b0"/>
+      android:fillColor="#7E57C2"/>
   <path
       android:pathData="M126,108h6a6,6 0,0 0,6 -6h0a6,6 0,0 0,-6 -6h0a6,6 0,0 0,-6 6v30a12,12 0,0 1,-12 12h0a12,12 0,0 1,-12 -12h0a12,12 0,0 1,12 -12h24"
       android:strokeWidth="6"
