@@ -278,98 +278,113 @@
     </LinearLayout>
 
     <FrameLayout
-        android:id="@+id/separatorLine"
         android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="@color/grey_300" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:baselineAligned="false"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content">
 
         <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:id="@+id/separatorLine"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_gravity="top"
+            android:background="@color/grey_300" />
 
-            <ImageButton
-                android:layout_width="@dimen/image_button_size"
-                android:layout_height="@dimen/image_button_size"
-                android:layout_gravity="center"
-                android:background="@drawable/bg_button_48dp"
-                android:contentDescription="@string/des_toggle_favorite"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_favorite_false" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        </FrameLayout>
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
 
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+                <ImageButton
+                    android:layout_width="@dimen/image_button_size"
+                    android:layout_height="@dimen/image_button_size"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_toggle_favorite"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/level_favorite" />
 
-            <ImageButton
-                android:layout_width="@dimen/image_button_size"
-                android:layout_height="@dimen/image_button_size"
-                android:layout_gravity="center"
-                android:background="@drawable/bg_button_48dp"
-                android:contentDescription="@string/des_skip_to_previous"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_skip_to_previous" />
+            </FrameLayout>
 
-        </FrameLayout>
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
 
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+                <ImageButton
+                    android:layout_width="@dimen/image_button_size"
+                    android:layout_height="@dimen/image_button_size"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_skip_to_previous"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/ic_skip_to_previous" />
 
-            <ImageButton
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                android:layout_gravity="center"
-                android:background="@drawable/bg_play_pause"
-                android:contentDescription="@string/des_play_pause"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_play" />
+            </FrameLayout>
 
-        </FrameLayout>
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
 
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+                <ImageButton
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_play_pause"
+                    android:contentDescription="@string/des_play_pause"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/level_play_pause" />
 
-            <ImageButton
-                android:layout_width="@dimen/image_button_size"
-                android:layout_height="@dimen/image_button_size"
-                android:layout_gravity="center"
-                android:background="@drawable/bg_button_48dp"
-                android:contentDescription="@string/des_skip_to_next"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_skip_to_next" />
+            </FrameLayout>
 
-        </FrameLayout>
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
 
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+                <ImageButton
+                    android:layout_width="@dimen/image_button_size"
+                    android:layout_height="@dimen/image_button_size"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_skip_to_next"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/ic_skip_to_next" />
 
-            <ImageButton
-                android:layout_width="@dimen/image_button_size"
-                android:layout_height="@dimen/image_button_size"
-                android:layout_gravity="center"
-                android:background="@drawable/bg_button_48dp"
-                android:contentDescription="@string/des_show_playlist"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_playlist" />
+            </FrameLayout>
 
-        </FrameLayout>
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
 
-    </LinearLayout>
+                <ImageButton
+                    android:layout_width="@dimen/image_button_size"
+                    android:layout_height="@dimen/image_button_size"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_show_playlist"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/ic_playlist" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <ProgressBar
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_gravity="bottom"
+            android:progress="50"
+            android:progressDrawable="@drawable/progress_navigation" />
+
+    </FrameLayout>
 
 </LinearLayout>
