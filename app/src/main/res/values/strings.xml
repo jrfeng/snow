@@ -1,3 +1,28 @@
 <resources>
     <string name="app_name" translatable="false">snow</string>
+    <string name="search">Search</string>
+
+    <string name="item_local_music">Local Music</string>
+    <string name="item_favorite">Favorite</string>
+    <string name="item_music_list">Music List</string>
+    <string name="item_artist">Artist</string>
+    <string name="item_album">Album</string>
+    <string name="item_history">History</string>
+
+    <!-- content description -->
+    <string name="des_logo">logo</string>
+    <string name="des_search">Search</string>
+    <string name="des_setting">Setting</string>
+    <string name="des_album_icon">Album Icon</string>
+    <string name="des_local_music">Local Music</string>
+    <string name="des_favorite">Favorite</string>
+    <string name="des_music_list">Music List</string>
+    <string name="des_artist">Artist</string>
+    <string name="des_album">Album</string>
+    <string name="des_history">History</string>
+    <string name="des_toggle_favorite">Toggle Favorite</string>
+    <string name="des_skip_to_previous">Skip To Previous</string>
+    <string name="des_play_pause">Play Pause</string>
+    <string name="des_skip_to_next">Skip To Next</string>
+    <string name="des_show_playlist">Show Playlist</string>
 </resources>

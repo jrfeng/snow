@@ -8,6 +8,7 @@
         <item name="colorAccent">@color/deep_purple_400</item>
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:statusBarColor">#54000000</item>
+        <item name="android:textColor">@color/grey_900</item>
     </style>
 
 </resources>

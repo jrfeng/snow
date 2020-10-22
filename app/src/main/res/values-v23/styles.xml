@@ -9,6 +9,7 @@
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:textColor">@color/grey_900</item>
     </style>
 
 </resources>
