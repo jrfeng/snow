@@ -382,8 +382,8 @@
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_gravity="bottom"
-            android:progress="50"
-            android:progressDrawable="@drawable/progress_navigation" />
+            android:progressDrawable="@drawable/progress_navigation"
+            tools:progress="50" />
 
     </FrameLayout>
 
