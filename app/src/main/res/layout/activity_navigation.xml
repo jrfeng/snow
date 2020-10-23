@@ -8,6 +8,10 @@
         <variable
             name="playerViewModel"
             type="snow.player.lifecycle.PlayerViewModel" />
+
+        <variable
+            name="navViewModel"
+            type="snow.music.activity.navigation.NavigationViewModel" />
     </data>
 
     <LinearLayout
@@ -287,7 +291,8 @@
                         android:background="@drawable/bg_button_48dp"
                         android:contentDescription="@string/des_toggle_favorite"
                         android:scaleType="centerInside"
-                        app:srcCompat="@drawable/ic_favorite_false" />
+                        app:srcCompat="@{navViewModel.favoriteDrawable}"
+                        tools:src="@drawable/ic_favorite_false" />
 
                 </FrameLayout>
 
@@ -321,7 +326,8 @@
                         android:contentDescription="@string/des_play_pause"
                         android:onClick="@{() -> playerViewModel.playPause()}"
                         android:scaleType="centerInside"
-                        app:srcCompat="@drawable/ic_play" />
+                        app:srcCompat="@{navViewModel.playPauseDrawable}"
+                        tools:src="@drawable/ic_play" />
 
                 </FrameLayout>
 

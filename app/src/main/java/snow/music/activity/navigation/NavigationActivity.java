@@ -24,11 +24,16 @@ public class NavigationActivity extends AppCompatActivity {
 
         ViewModelProvider viewModelProvider = new ViewModelProvider(this);
         PlayerViewModel playerViewModel = viewModelProvider.get(PlayerViewModel.class);
+        NavigationViewModel navigationViewModel = viewModelProvider.get(NavigationViewModel.class);
 
-        initPlayerViewModel(playerViewModel);
+        initAllViewModel(playerViewModel);
         initDiskPanel(binding.rvDiskPanel, playerViewModel);
+        if (!navigationViewModel.isInitialized()) {
+            navigationViewModel.init(playerViewModel);
+        }
 
         binding.setPlayerViewModel(playerViewModel);
+        binding.setNavViewModel(navigationViewModel);
     }
 
     private void initDiskPanel(RecyclerView diskPanel, PlayerViewModel playerViewModel) {
@@ -40,7 +45,7 @@ public class NavigationActivity extends AppCompatActivity {
         pagerSnapHelper.attachToRecyclerView(diskPanel);
     }
 
-    private void initPlayerViewModel(PlayerViewModel playerViewModel) {
+    private void initAllViewModel(PlayerViewModel playerViewModel) {
         if (playerViewModel.isInitialized()) {
             return;
         }
