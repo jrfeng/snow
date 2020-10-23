@@ -6,6 +6,7 @@ import com.google.common.base.Objects;
 
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Unique;
 
 @Entity
 public class Music {
@@ -15,6 +16,7 @@ public class Music {
     private String title;
     private String artist;
     private String album;
+    @Unique
     private String uri;
     private String iconUri;
     private int duration;
