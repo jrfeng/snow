@@ -15,8 +15,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import java.util.List;
+
 import snow.music.R;
 import snow.music.databinding.ActivityNavigationBinding;
+import snow.music.store.Music;
 import snow.player.PlayerClient;
 import snow.player.PlayerService;
 import snow.player.lifecycle.PlayerViewModel;
@@ -27,6 +30,8 @@ public class NavigationActivity extends AppCompatActivity {
     private boolean mScanOnPermissionGranted;
     private boolean mRepeatedRequestStoragePermission;
 
+    private NavigationViewModel mNavigationViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,16 +40,16 @@ public class NavigationActivity extends AppCompatActivity {
 
         ViewModelProvider viewModelProvider = new ViewModelProvider(this);
         PlayerViewModel playerViewModel = viewModelProvider.get(PlayerViewModel.class);
-        NavigationViewModel navigationViewModel = viewModelProvider.get(NavigationViewModel.class);
+        mNavigationViewModel = viewModelProvider.get(NavigationViewModel.class);
 
-        initAllViewModel(playerViewModel);
+        initPlayerViewModel(playerViewModel);
         initDiskPanel(binding.rvDiskPanel, playerViewModel);
-        if (!navigationViewModel.isInitialized()) {
-            navigationViewModel.init(playerViewModel);
+        if (!mNavigationViewModel.isInitialized()) {
+            mNavigationViewModel.init(playerViewModel);
         }
 
         binding.setPlayerViewModel(playerViewModel);
-        binding.setNavViewModel(navigationViewModel);
+        binding.setNavViewModel(mNavigationViewModel);
 
         if (shouldScanLocalMusic()) {
             scanLocalMusic();
@@ -60,7 +65,7 @@ public class NavigationActivity extends AppCompatActivity {
         pagerSnapHelper.attachToRecyclerView(diskPanel);
     }
 
-    private void initAllViewModel(PlayerViewModel playerViewModel) {
+    private void initPlayerViewModel(PlayerViewModel playerViewModel) {
         if (playerViewModel.isInitialized()) {
             return;
         }
@@ -137,6 +142,11 @@ public class NavigationActivity extends AppCompatActivity {
                 .putBoolean(KEY_SCAN_LOCAL_MUSIC, false)
                 .apply();
 
-        // TODO
+        mNavigationViewModel.scanLocalMusicAsync(new NavigationViewModel.OnScanCompleteListener() {
+            @Override
+            public void onScanComplete(List<Music> musicList) {
+                // TODO
+            }
+        });
     }
 }

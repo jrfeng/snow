@@ -11,13 +11,18 @@ import androidx.lifecycle.Observer;
 
 import com.google.common.base.Preconditions;
 
+import java.util.List;
+import java.util.Objects;
+
 import io.reactivex.Single;
+import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
+import snow.music.store.Music;
 import snow.music.store.MusicStore;
-import snow.music.util.MusicItemUtil;
+import snow.music.util.MusicUtil;
 import snow.player.PlaybackState;
 import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
@@ -25,6 +30,9 @@ import snow.player.lifecycle.PlayerViewModel;
 public class NavigationViewModel extends AndroidViewModel {
     private MutableLiveData<Integer> mFavoriteDrawable;
     private MutableLiveData<Integer> mPlayPauseDrawable;
+    private MutableLiveData<Boolean> mScanningMusic;
+    private MutableLiveData<Integer> mScannedProgress;
+    private MutableLiveData<Integer> mScannerMaxProgress;
 
     private MusicStore.OnFavoriteChangeListener mFavoriteChangeListener;
     private Observer<MusicItem> mPlayingMusicItemObserver;
@@ -40,6 +48,9 @@ public class NavigationViewModel extends AndroidViewModel {
 
         mFavoriteDrawable = new MutableLiveData<>(R.drawable.ic_favorite_false);
         mPlayPauseDrawable = new MutableLiveData<>(R.drawable.ic_play);
+        mScanningMusic = new MutableLiveData<>(false);
+        mScannedProgress = new MutableLiveData<>(0);
+        mScannerMaxProgress = new MutableLiveData<>(100);
 
         mFavoriteChangeListener = this::checkPlayingMusicFavoriteState;
         mPlayingMusicItemObserver = musicItem -> checkPlayingMusicFavoriteState();
@@ -89,6 +100,26 @@ public class NavigationViewModel extends AndroidViewModel {
         return mPlayPauseDrawable;
     }
 
+    @NonNull
+    public LiveData<Boolean> getScanningMusic() {
+        return mScanningMusic;
+    }
+
+    @NonNull
+    public LiveData<Integer> getScannedProgress() {
+        return mScannedProgress;
+    }
+
+    @NonNull
+    public LiveData<Integer> getScannerMaxProgress() {
+        return mScannerMaxProgress;
+    }
+
+    public void scanLocalMusicAsync(@NonNull OnScanCompleteListener listener) {
+        Objects.requireNonNull(listener);
+        // TODO
+    }
+
     public boolean isInitialized() {
         return mInitialized;
     }
@@ -96,13 +127,21 @@ public class NavigationViewModel extends AndroidViewModel {
     private void checkPlayingMusicFavoriteState() {
         disposeCheckFavorite();
 
-        mCheckFavoriteDisposable = Single.fromCallable(() -> {
+        mCheckFavoriteDisposable = Single.create((SingleOnSubscribe<Boolean>) emitter -> {
             MusicItem playingMusicItem = mPlayerViewModel.getPlayingMusicItem().getValue();
+
+            boolean result;
             if (playingMusicItem == null) {
-                return false;
+                result = false;
+            } else {
+                result = MusicStore.getInstance().isFavorite(MusicUtil.getId(playingMusicItem));
             }
 
-            return MusicStore.getInstance().isFavorite(MusicItemUtil.getId(playingMusicItem));
+            if (emitter.isDisposed()) {
+                return;
+            }
+
+            emitter.onSuccess(result);
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(aBoolean -> mFavoriteDrawable.setValue(aBoolean ? R.drawable.ic_favorite_true : R.drawable.ic_favorite_false));
@@ -115,8 +154,16 @@ public class NavigationViewModel extends AndroidViewModel {
     }
 
     public void togglePlayingMusicFavorite() {
-        // TODO
-        Log.d("DEBUG", "togglePlayingMusicFavorite");
+        if (!mInitialized) {
+            return;
+        }
+
+        MusicItem playingMusicItem = mPlayerViewModel.getPlayingMusicItem().getValue();
+        if (playingMusicItem == null) {
+            return;
+        }
+
+        MusicStore.getInstance().toggleFavorite(MusicUtil.asMusic(playingMusicItem));
     }
 
     public void showPlaylist() {
@@ -162,5 +209,9 @@ public class NavigationViewModel extends AndroidViewModel {
     public void navigateToHistory() {
         // TODO
         Log.d("DEBUG", "navigateToHistory");
+    }
+
+    public interface OnScanCompleteListener {
+        void onScanComplete(List<Music> musicList);
     }
 }
