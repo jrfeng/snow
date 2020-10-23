@@ -52,6 +52,11 @@ public final class MusicItemUtil {
         return musicItem;
     }
 
+    public static long getId(@NonNull MusicItem musicItem) {
+        Preconditions.checkNotNull(musicItem);
+        return Long.parseLong(musicItem.getMusicId());
+    }
+
     private static long getAddTime(MusicItem musicItem) {
         Bundle extra = musicItem.getExtra();
         if (extra == null) {
