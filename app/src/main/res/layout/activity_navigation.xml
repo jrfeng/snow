@@ -36,7 +36,10 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:background="@drawable/bg_grey_round_rect_corner_8dp"
+                android:clickable="true"
+                android:focusable="true"
                 android:gravity="center_vertical"
+                android:onClick="@{() -> navViewModel.navigateToSearch()}"
                 android:orientation="horizontal">
 
                 <ImageView

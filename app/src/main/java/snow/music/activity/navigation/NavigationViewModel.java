@@ -124,6 +124,11 @@ public class NavigationViewModel extends AndroidViewModel {
         Log.d("DEBUG", "showPlaylist");
     }
 
+    public void navigateToSearch() {
+        // TODO
+        Log.d("DEBUG", "navigateToSearch");
+    }
+
     public void navigateToSetting() {
         // TODO
         Log.d("DEBUG", "navigateToSetting");
