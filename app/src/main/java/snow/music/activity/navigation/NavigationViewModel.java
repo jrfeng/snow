@@ -1,6 +1,7 @@
 package snow.music.activity.navigation;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -111,5 +112,50 @@ public class NavigationViewModel extends AndroidViewModel {
         if (mCheckFavoriteDisposable != null) {
             mCheckFavoriteDisposable.dispose();
         }
+    }
+
+    public void togglePlayingMusicFavorite() {
+        // TODO
+        Log.d("DEBUG", "togglePlayingMusicFavorite");
+    }
+
+    public void showPlaylist() {
+        // TODO
+        Log.d("DEBUG", "showPlaylist");
+    }
+
+    public void navigateToSetting() {
+        // TODO
+        Log.d("DEBUG", "navigateToSetting");
+    }
+
+    public void navigateToLocalMusic() {
+        // TODO
+        Log.d("DEBUG", "navigateToLocalMusic");
+    }
+
+    public void navigateToFavorite() {
+        // TODO
+        Log.d("DEBUG", "navigateToFavorite");
+    }
+
+    public void navigateToMusicList() {
+        // TODO
+        Log.d("DEBUG", "navigateToMusicList");
+    }
+
+    public void navigateToArtist() {
+        // TODO
+        Log.d("DEBUG", "navigateToArtist");
+    }
+
+    public void navigateToAlbum() {
+        // TODO
+        Log.d("DEBUG", "navigateToAlbum");
+    }
+
+    public void navigateToHistory() {
+        // TODO
+        Log.d("DEBUG", "navigateToHistory");
     }
 }

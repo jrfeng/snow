@@ -60,6 +60,7 @@
                 android:layout_height="@dimen/image_button_size"
                 android:background="@drawable/bg_button_48dp"
                 android:contentDescription="@string/des_setting"
+                android:onClick="@{() -> navViewModel.navigateToSetting()}"
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/ic_setting" />
 
@@ -86,6 +87,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
+                android:onClick="@{() -> navViewModel.navigateToLocalMusic()}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -115,6 +117,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
+                android:onClick="@{() -> navViewModel.navigateToFavorite()}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -144,6 +147,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
+                android:onClick="@{() -> navViewModel.navigateToMusicList()}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -181,6 +185,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
+                android:onClick="@{() -> navViewModel.navigateToArtist()}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -210,6 +215,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
+                android:onClick="@{() -> navViewModel.navigateToAlbum()}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -239,6 +245,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
+                android:onClick="@{() -> navViewModel.navigateToHistory()}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -290,6 +297,7 @@
                         android:layout_gravity="center"
                         android:background="@drawable/bg_button_48dp"
                         android:contentDescription="@string/des_toggle_favorite"
+                        android:onClick="@{() -> navViewModel.togglePlayingMusicFavorite()}"
                         android:scaleType="centerInside"
                         app:srcCompat="@{navViewModel.favoriteDrawable}"
                         tools:src="@drawable/ic_favorite_false" />
@@ -359,6 +367,7 @@
                         android:layout_gravity="center"
                         android:background="@drawable/bg_button_48dp"
                         android:contentDescription="@string/des_show_playlist"
+                        android:onClick="@{() -> navViewModel.showPlaylist()}"
                         android:scaleType="centerInside"
                         app:srcCompat="@drawable/ic_playlist" />
 
