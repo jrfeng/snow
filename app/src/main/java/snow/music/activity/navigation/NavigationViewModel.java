@@ -11,16 +11,12 @@ import androidx.lifecycle.Observer;
 
 import com.google.common.base.Preconditions;
 
-import java.util.List;
-import java.util.Objects;
-
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
-import snow.music.store.Music;
 import snow.music.store.MusicStore;
 import snow.music.util.MusicUtil;
 import snow.player.PlaybackState;
@@ -30,9 +26,6 @@ import snow.player.lifecycle.PlayerViewModel;
 public class NavigationViewModel extends AndroidViewModel {
     private MutableLiveData<Integer> mFavoriteDrawable;
     private MutableLiveData<Integer> mPlayPauseDrawable;
-    private MutableLiveData<Boolean> mScanningMusic;
-    private MutableLiveData<Integer> mScannedProgress;
-    private MutableLiveData<Integer> mScannerMaxProgress;
 
     private MusicStore.OnFavoriteChangeListener mFavoriteChangeListener;
     private Observer<MusicItem> mPlayingMusicItemObserver;
@@ -48,9 +41,6 @@ public class NavigationViewModel extends AndroidViewModel {
 
         mFavoriteDrawable = new MutableLiveData<>(R.drawable.ic_favorite_false);
         mPlayPauseDrawable = new MutableLiveData<>(R.drawable.ic_play);
-        mScanningMusic = new MutableLiveData<>(false);
-        mScannedProgress = new MutableLiveData<>(0);
-        mScannerMaxProgress = new MutableLiveData<>(100);
 
         mFavoriteChangeListener = this::checkPlayingMusicFavoriteState;
         mPlayingMusicItemObserver = musicItem -> checkPlayingMusicFavoriteState();
@@ -98,26 +88,6 @@ public class NavigationViewModel extends AndroidViewModel {
     @NonNull
     public LiveData<Integer> getPlayPauseDrawable() {
         return mPlayPauseDrawable;
-    }
-
-    @NonNull
-    public LiveData<Boolean> getScanningMusic() {
-        return mScanningMusic;
-    }
-
-    @NonNull
-    public LiveData<Integer> getScannedProgress() {
-        return mScannedProgress;
-    }
-
-    @NonNull
-    public LiveData<Integer> getScannerMaxProgress() {
-        return mScannerMaxProgress;
-    }
-
-    public void scanLocalMusicAsync(@NonNull OnScanCompleteListener listener) {
-        Objects.requireNonNull(listener);
-        // TODO
     }
 
     public boolean isInitialized() {
@@ -209,9 +179,5 @@ public class NavigationViewModel extends AndroidViewModel {
     public void navigateToHistory() {
         // TODO
         Log.d("DEBUG", "navigateToHistory");
-    }
-
-    public interface OnScanCompleteListener {
-        void onScanComplete(List<Music> musicList);
     }
 }

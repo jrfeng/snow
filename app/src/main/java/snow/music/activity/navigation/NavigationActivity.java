@@ -11,18 +11,31 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Single;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.databinding.ActivityNavigationBinding;
+import snow.music.model.ScannerViewModel;
 import snow.music.store.Music;
+import snow.music.store.MusicStore;
+import snow.music.util.MusicUtil;
 import snow.player.PlayerClient;
 import snow.player.PlayerService;
+import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
+import snow.player.playlist.Playlist;
 
 public class NavigationActivity extends AppCompatActivity {
     private static final String KEY_SCAN_LOCAL_MUSIC = "scan_local_music";
@@ -30,7 +43,8 @@ public class NavigationActivity extends AppCompatActivity {
     private boolean mScanOnPermissionGranted;
     private boolean mRepeatedRequestStoragePermission;
 
-    private NavigationViewModel mNavigationViewModel;
+    private ScannerViewModel mScannerViewModel;
+    private PlayerClient mPlayerClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,16 +54,17 @@ public class NavigationActivity extends AppCompatActivity {
 
         ViewModelProvider viewModelProvider = new ViewModelProvider(this);
         PlayerViewModel playerViewModel = viewModelProvider.get(PlayerViewModel.class);
-        mNavigationViewModel = viewModelProvider.get(NavigationViewModel.class);
+        NavigationViewModel navigationViewModel = viewModelProvider.get(NavigationViewModel.class);
+        mScannerViewModel = viewModelProvider.get(ScannerViewModel.class);
 
         initPlayerViewModel(playerViewModel);
         initDiskPanel(binding.rvDiskPanel, playerViewModel);
-        if (!mNavigationViewModel.isInitialized()) {
-            mNavigationViewModel.init(playerViewModel);
+        if (!navigationViewModel.isInitialized()) {
+            navigationViewModel.init(playerViewModel);
         }
 
         binding.setPlayerViewModel(playerViewModel);
-        binding.setNavViewModel(mNavigationViewModel);
+        binding.setNavViewModel(navigationViewModel);
 
         if (shouldScanLocalMusic()) {
             scanLocalMusic();
@@ -67,12 +82,13 @@ public class NavigationActivity extends AppCompatActivity {
 
     private void initPlayerViewModel(PlayerViewModel playerViewModel) {
         if (playerViewModel.isInitialized()) {
+            mPlayerClient = playerViewModel.getPlayerClient();
             return;
         }
 
-        PlayerClient playerClient = PlayerClient.newInstance(this, PlayerService.class);
-        playerViewModel.init(this, playerClient);
-        playerClient.connect();
+        mPlayerClient = PlayerClient.newInstance(this, PlayerService.class);
+        playerViewModel.init(this, mPlayerClient);
+        mPlayerClient.connect();
 
         playerViewModel.setAutoDisconnect(true);
     }
@@ -142,11 +158,40 @@ public class NavigationActivity extends AppCompatActivity {
                 .putBoolean(KEY_SCAN_LOCAL_MUSIC, false)
                 .apply();
 
-        mNavigationViewModel.scanLocalMusicAsync(new NavigationViewModel.OnScanCompleteListener() {
-            @Override
-            public void onScanComplete(List<Music> musicList) {
-                // TODO
+        mScannerViewModel.scan(30_000, musicList -> {
+            if (musicList.isEmpty()) {
+                return;
             }
+
+            saveToMusicStore(musicList);
         });
+    }
+
+    @SuppressLint("CheckResult")
+    private void saveToMusicStore(@NonNull List<Music> musicList) {
+        Single.create((SingleOnSubscribe<Boolean>) emitter -> {
+            if (emitter.isDisposed()) {
+                return;
+            }
+
+            MusicStore.getInstance().putAllMusic(musicList);
+            emitter.onSuccess(true);
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aBoolean -> {
+                    mPlayerClient.setPlaylist(createPlaylist(musicList));
+                });
+    }
+
+    private Playlist createPlaylist(List<Music> musicList) {
+        List<MusicItem> itemList = new ArrayList<>(musicList.size());
+
+        for (Music music : musicList) {
+            itemList.add(MusicUtil.asMusicItem(music));
+        }
+
+        return new Playlist.Builder()
+                .appendAll(itemList)
+                .build();
     }
 }
