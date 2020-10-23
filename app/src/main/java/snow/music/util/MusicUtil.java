@@ -12,10 +12,10 @@ import snow.player.audio.MusicItem;
 /**
  * 用于在 {@link Music} 与 {@link MusicItem} 之间进行类型转换。
  */
-public final class MusicItemUtil {
+public final class MusicUtil {
     private static final String KEY_ADD_TIME = "add_time";
 
-    private MusicItemUtil() {
+    private MusicUtil() {
         throw new AssertionError();
     }
 

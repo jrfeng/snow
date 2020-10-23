@@ -11,7 +11,7 @@ import snow.music.store.Music;
 import snow.player.audio.MusicItem;
 
 @RunWith(AndroidJUnit4.class)
-public class MusicItemUtilTest {
+public class MusicUtilTest {
 
     @Test
     public void asMusic_asMusicItem() {
@@ -24,10 +24,10 @@ public class MusicItemUtilTest {
                 60_000,
                 System.currentTimeMillis());
 
-        MusicItem musicItem1 = MusicItemUtil.asMusicItem(music1);
+        MusicItem musicItem1 = MusicUtil.asMusicItem(music1);
 
-        Music music2 = MusicItemUtil.asMusic(musicItem1);
-        MusicItem musicItem2 = MusicItemUtil.asMusicItem(music2);
+        Music music2 = MusicUtil.asMusic(musicItem1);
+        MusicItem musicItem2 = MusicUtil.asMusicItem(music2);
 
         // assert
         assertEquals(music1, music2);
