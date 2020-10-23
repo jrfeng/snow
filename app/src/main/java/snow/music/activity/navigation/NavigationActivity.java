@@ -132,6 +132,11 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     private void scanLocalMusicAsync() {
+        getPreferences(MODE_PRIVATE)
+                .edit()
+                .putBoolean(KEY_SCAN_LOCAL_MUSIC, false)
+                .apply();
+
         // TODO
     }
 }
