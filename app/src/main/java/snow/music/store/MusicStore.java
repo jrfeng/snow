@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import android.os.Handler;
 
@@ -342,6 +343,23 @@ public class MusicStore {
             favorite.getMusicElements().remove(music);
             updateMusicList(favorite);
             notifyFavoriteChanged();
+        }
+    }
+
+    /**
+     * 切换歌曲的 “我喜欢” 状态。
+     * <p>
+     * 如果歌曲已经添加到 “我喜欢” 歌单中，则移除它，否则将其添加到 “我喜欢” 歌单中。
+     *
+     * @param music {@link Music} 对象，不能为 null
+     */
+    public synchronized void toggleFavorite(@NonNull Music music) {
+        Objects.requireNonNull(music);
+
+        if (isFavorite(music)) {
+            removeFromFavorite(music);
+        } else {
+            addToFavorite(music);
         }
     }
 
