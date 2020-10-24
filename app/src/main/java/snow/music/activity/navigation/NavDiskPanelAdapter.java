@@ -148,10 +148,14 @@ public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapte
         mDiskRotateAnimator.setRepeatMode(ObjectAnimator.RESTART);
         mDiskRotateAnimator.setInterpolator(new LinearInterpolator());
 
-        PlayerClient playerClient = mNavigationViewModel.getPlayerClient();
-        if (playerClient.isPlaying() && !playerClient.isPreparing() && !playerClient.isStalled()) {
+        if (shouldStartAnim()) {
             mDiskRotateAnimator.start();
         }
+    }
+
+    private boolean shouldStartAnim() {
+        PlayerClient playerClient = mNavigationViewModel.getPlayerClient();
+        return playerClient.isPlaying() && !playerClient.isPreparing() && !playerClient.isStalled();
     }
 
     private void cancelDiskRotateAnim() {
@@ -178,7 +182,7 @@ public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapte
     }
 
     private void resumeDiskRotateAnim() {
-        if (mDiskRotateAnimator == null) {
+        if (mDiskRotateAnimator == null || !shouldStartAnim()) {
             return;
         }
 
@@ -194,6 +198,14 @@ public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapte
 
         mDiskRotateAnimator.start();
         mDiskRotateAnimator.setCurrentPlayTime(mDiskAnimPlayTime);
+    }
+
+    public void pauseAnim() {
+        pauseDiskRotateAnim();
+    }
+
+    public void resumeAnim() {
+        resumeDiskRotateAnim();
     }
 
     @NonNull
