@@ -42,8 +42,6 @@ public class NavigationViewModel extends PlayerViewModel {
 
     @Override
     protected void onCleared() {
-        super.onCleared();
-
         if (!isInitialized()) {
             return;
         }
@@ -52,6 +50,9 @@ public class NavigationViewModel extends PlayerViewModel {
         getPlayingMusicItem().removeObserver(mPlayingMusicItemObserver);
 
         disposeCheckFavorite();
+
+        // 必须放在最后面
+        super.onCleared();
     }
 
     @NonNull
