@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.Transformations;
 
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
@@ -21,34 +22,22 @@ import snow.player.lifecycle.PlayerViewModel;
 
 public class NavigationViewModel extends PlayerViewModel {
     private MutableLiveData<Integer> mFavoriteDrawable;
-    private MutableLiveData<Integer> mPlayPauseDrawable;
 
     private MusicStore.OnFavoriteChangeListener mFavoriteChangeListener;
     private Observer<MusicItem> mPlayingMusicItemObserver;
-    private Observer<PlaybackState> mPlaybackStateObserver;
 
     private Disposable mCheckFavoriteDisposable;
 
     public NavigationViewModel() {
         mFavoriteDrawable = new MutableLiveData<>(R.drawable.ic_favorite_false);
-        mPlayPauseDrawable = new MutableLiveData<>(R.drawable.ic_play);
-
         mFavoriteChangeListener = this::checkPlayingMusicFavoriteState;
         mPlayingMusicItemObserver = musicItem -> checkPlayingMusicFavoriteState();
-        mPlaybackStateObserver = playbackState -> {
-            if (playbackState == PlaybackState.PLAYING) {
-                mPlayPauseDrawable.setValue(R.drawable.ic_pause);
-            } else {
-                mPlayPauseDrawable.setValue(R.drawable.ic_play);
-            }
-        };
     }
 
     @Override
     protected void onInitialized() {
         MusicStore.getInstance().addOnFavoriteChangeListener(mFavoriteChangeListener);
         getPlayingMusicItem().observeForever(mPlayingMusicItemObserver);
-        getPlaybackState().observeForever(mPlaybackStateObserver);
     }
 
     @Override
@@ -61,7 +50,6 @@ public class NavigationViewModel extends PlayerViewModel {
 
         MusicStore.getInstance().removeOnFavoriteChangeListener(mFavoriteChangeListener);
         getPlayingMusicItem().removeObserver(mPlayingMusicItemObserver);
-        getPlaybackState().removeObserver(mPlaybackStateObserver);
 
         disposeCheckFavorite();
     }
@@ -73,7 +61,17 @@ public class NavigationViewModel extends PlayerViewModel {
 
     @NonNull
     public LiveData<Integer> getPlayPauseDrawable() {
-        return mPlayPauseDrawable;
+        if (!isInitialized()) {
+            throw new IllegalStateException("NavigationViewModel not init yet.");
+        }
+
+        return Transformations.map(getPlaybackState(), playbackState -> {
+            if (playbackState == PlaybackState.PLAYING) {
+                return R.drawable.ic_pause;
+            } else {
+                return R.drawable.ic_play;
+            }
+        });
     }
 
     private void checkPlayingMusicFavoriteState() {
