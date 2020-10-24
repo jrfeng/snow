@@ -12,14 +12,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import snow.music.R;
 import snow.player.audio.MusicItem;
-import snow.player.lifecycle.PlayerViewModel;
 import snow.player.playlist.Playlist;
 
 public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapter.ViewHolder> {
     private LiveData<Playlist> mPlaylist;
 
-    public NavDiskPanelAdapter(PlayerViewModel playerViewModel) {
-        mPlaylist = playerViewModel.getPlaylist();
+    public NavDiskPanelAdapter(NavigationViewModel navigationViewModel) {
+        mPlaylist = navigationViewModel.getPlaylist();
 
         // TODO 1. observe playlist
         // TODO 2. observe scroll to position

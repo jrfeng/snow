@@ -32,7 +32,6 @@ import snow.music.util.MusicUtil;
 import snow.player.PlayerClient;
 import snow.player.PlayerService;
 import snow.player.audio.MusicItem;
-import snow.player.lifecycle.PlayerViewModel;
 import snow.player.playlist.Playlist;
 
 public class NavigationActivity extends AppCompatActivity {
@@ -51,17 +50,13 @@ public class NavigationActivity extends AppCompatActivity {
         ActivityNavigationBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_navigation);
 
         ViewModelProvider viewModelProvider = new ViewModelProvider(this);
-        PlayerViewModel playerViewModel = viewModelProvider.get(PlayerViewModel.class);
         NavigationViewModel navigationViewModel = viewModelProvider.get(NavigationViewModel.class);
+        initNavigationViewModel(navigationViewModel);
+
         mScannerViewModel = viewModelProvider.get(ScannerViewModel.class);
 
-        initPlayerViewModel(playerViewModel);
-        initDiskPanel(binding.rvDiskPanel, playerViewModel);
-        if (!navigationViewModel.isInitialized()) {
-            navigationViewModel.init(playerViewModel);
-        }
+        initDiskPanel(binding.rvDiskPanel, navigationViewModel);
 
-        binding.setPlayerViewModel(playerViewModel);
         binding.setNavViewModel(navigationViewModel);
 
         if (shouldScanLocalMusic()) {
@@ -69,26 +64,26 @@ public class NavigationActivity extends AppCompatActivity {
         }
     }
 
-    private void initDiskPanel(RecyclerView diskPanel, PlayerViewModel playerViewModel) {
+    private void initDiskPanel(RecyclerView diskPanel, NavigationViewModel navigationViewModel) {
         diskPanel.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
-        diskPanel.setAdapter(new NavDiskPanelAdapter(playerViewModel));
+        diskPanel.setAdapter(new NavDiskPanelAdapter(navigationViewModel));
 
         PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
         pagerSnapHelper.attachToRecyclerView(diskPanel);
     }
 
-    private void initPlayerViewModel(PlayerViewModel playerViewModel) {
-        if (playerViewModel.isInitialized()) {
-            mPlayerClient = playerViewModel.getPlayerClient();
+    private void initNavigationViewModel(NavigationViewModel navigationViewModel) {
+        if (navigationViewModel.isInitialized()) {
+            mPlayerClient = navigationViewModel.getPlayerClient();
             return;
         }
 
         mPlayerClient = PlayerClient.newInstance(this, PlayerService.class);
-        playerViewModel.init(this, mPlayerClient);
+        navigationViewModel.init(this, mPlayerClient);
         mPlayerClient.connect();
 
-        playerViewModel.setAutoDisconnect(true);
+        navigationViewModel.setAutoDisconnect(true);
     }
 
     private boolean shouldScanLocalMusic() {
@@ -176,9 +171,7 @@ public class NavigationActivity extends AppCompatActivity {
             emitter.onSuccess(true);
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> {
-                    mPlayerClient.setPlaylist(createPlaylist(musicList));
-                });
+                .subscribe(aBoolean -> mPlayerClient.setPlaylist(createPlaylist(musicList)));
     }
 
     private Playlist createPlaylist(List<Music> musicList) {
