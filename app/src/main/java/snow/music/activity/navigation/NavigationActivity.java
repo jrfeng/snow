@@ -42,7 +42,6 @@ public class NavigationActivity extends AppCompatActivity {
 
     private ScannerViewModel mScannerViewModel;
     private NavigationViewModel mNavigationViewModel;
-    private NavDiskPanelAdapter mNavDiskPanelAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,36 +55,12 @@ public class NavigationActivity extends AppCompatActivity {
 
         mScannerViewModel = viewModelProvider.get(ScannerViewModel.class);
 
-        mNavDiskPanelAdapter = new NavDiskPanelAdapter(mNavigationViewModel);
-        binding.rvDiskPanel.setAdapter(mNavDiskPanelAdapter);
-        binding.rvDiskPanel.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-
         binding.setNavViewModel(mNavigationViewModel);
-        fixDataBindingBUG(binding, mNavigationViewModel);
+        binding.setLifecycleOwner(this);
 
         if (shouldScanLocalMusic()) {
             scanLocalMusic();
         }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mNavDiskPanelAdapter.resumeAnim();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mNavDiskPanelAdapter.pauseAnim();
-    }
-
-    private void fixDataBindingBUG(ActivityNavigationBinding binding, NavigationViewModel navigationViewModel) {
-        // BUG: DataBinding 框架不会自动更新绑定到 getFavoriteDrawable() 与 getPlayPauseDrawable() 的属性
-        navigationViewModel.getFavoriteDrawable()
-                .observe(this, integer -> AppBinderAdapter.setSrcCompat(binding.btnFavorite, integer));
-        navigationViewModel.getPlayPauseDrawable()
-                .observe(this, integer -> AppBinderAdapter.setSrcCompat(binding.btnPlayPause, integer));
     }
 
     private void initNavigationViewModel(NavigationViewModel navigationViewModel) {

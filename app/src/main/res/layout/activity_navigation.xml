@@ -65,11 +65,51 @@
 
         </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvDiskPanel"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/ivDisk"
+                android:layout_width="@dimen/album_icon_size"
+                android:layout_height="@dimen/album_icon_size"
+                android:contentDescription="@string/des_album_icon"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_default_album_icon" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="16dp" />
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:ellipsize="middle"
+                android:gravity="center_horizontal"
+                android:singleLine="true"
+                android:text="@{navViewModel.title}"
+                tools:text="@string/snow_music_item_unknown_title" />
+
+            <TextView
+                android:id="@+id/tvArtist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:ellipsize="middle"
+                android:gravity="center_horizontal"
+                android:singleLine="true"
+                android:text="@{navViewModel.artist}"
+                android:textSize="12sp"
+                tools:text="@string/snow_music_item_unknown_artist" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -299,6 +339,7 @@
                         android:contentDescription="@string/des_toggle_favorite"
                         android:onClick="@{() -> navViewModel.togglePlayingMusicFavorite()}"
                         android:scaleType="centerInside"
+                        app:srcCompat="@{navViewModel.favoriteDrawable}"
                         tools:src="@drawable/ic_favorite_false" />
 
                 </FrameLayout>
@@ -334,6 +375,7 @@
                         android:contentDescription="@string/des_play_pause"
                         android:onClick="@{() -> navViewModel.playPause()}"
                         android:scaleType="centerInside"
+                        app:srcCompat="@{navViewModel.playPauseDrawable}"
                         tools:src="@drawable/ic_play" />
 
                 </FrameLayout>
