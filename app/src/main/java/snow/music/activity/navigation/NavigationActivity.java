@@ -25,6 +25,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.databinding.ActivityNavigationBinding;
+import snow.music.databinding.AppBinderAdapter;
 import snow.music.model.ScannerViewModel;
 import snow.music.store.Music;
 import snow.music.store.MusicStore;
@@ -58,10 +59,19 @@ public class NavigationActivity extends AppCompatActivity {
         initDiskPanel(binding.rvDiskPanel, navigationViewModel);
 
         binding.setNavViewModel(navigationViewModel);
+        fixDataBindingBUG(binding, navigationViewModel);
 
         if (shouldScanLocalMusic()) {
             scanLocalMusic();
         }
+    }
+
+    private void fixDataBindingBUG(ActivityNavigationBinding binding, NavigationViewModel navigationViewModel) {
+        // BUG: DataBinding 框架不会自动更新绑定到 getFavoriteDrawable() 与 getPlayPauseDrawable() 的属性
+        navigationViewModel.getFavoriteDrawable()
+                .observe(this, integer -> AppBinderAdapter.setSrcCompat(binding.btnFavorite, integer));
+        navigationViewModel.getPlayPauseDrawable()
+                .observe(this, integer -> AppBinderAdapter.setSrcCompat(binding.btnPlayPause, integer));
     }
 
     private void initDiskPanel(RecyclerView diskPanel, NavigationViewModel navigationViewModel) {

@@ -291,6 +291,7 @@
                     android:layout_weight="1">
 
                     <ImageButton
+                        android:id="@+id/btnFavorite"
                         android:layout_width="@dimen/image_button_size"
                         android:layout_height="@dimen/image_button_size"
                         android:layout_gravity="center"
@@ -298,7 +299,6 @@
                         android:contentDescription="@string/des_toggle_favorite"
                         android:onClick="@{() -> navViewModel.togglePlayingMusicFavorite()}"
                         android:scaleType="centerInside"
-                        app:srcCompat="@{navViewModel.favoriteDrawable}"
                         tools:src="@drawable/ic_favorite_false" />
 
                 </FrameLayout>
@@ -326,6 +326,7 @@
                     android:layout_weight="1">
 
                     <ImageButton
+                        android:id="@+id/btnPlayPause"
                         android:layout_width="72dp"
                         android:layout_height="72dp"
                         android:layout_gravity="center"
@@ -333,7 +334,6 @@
                         android:contentDescription="@string/des_play_pause"
                         android:onClick="@{() -> navViewModel.playPause()}"
                         android:scaleType="centerInside"
-                        app:srcCompat="@{navViewModel.playPauseDrawable}"
                         tools:src="@drawable/ic_play" />
 
                 </FrameLayout>
