@@ -41,7 +41,8 @@ public class NavigationActivity extends AppCompatActivity {
     private boolean mRepeatedRequestStoragePermission;
 
     private ScannerViewModel mScannerViewModel;
-    private PlayerClient mPlayerClient;
+    private NavigationViewModel mNavigationViewModel;
+    private NavDiskPanelAdapter mNavDiskPanelAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,19 +51,33 @@ public class NavigationActivity extends AppCompatActivity {
         ActivityNavigationBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_navigation);
 
         ViewModelProvider viewModelProvider = new ViewModelProvider(this);
-        NavigationViewModel navigationViewModel = viewModelProvider.get(NavigationViewModel.class);
-        initNavigationViewModel(navigationViewModel);
+        mNavigationViewModel = viewModelProvider.get(NavigationViewModel.class);
+        initNavigationViewModel(mNavigationViewModel);
 
         mScannerViewModel = viewModelProvider.get(ScannerViewModel.class);
 
-        initDiskPanel(binding.rvDiskPanel, navigationViewModel);
+        mNavDiskPanelAdapter = new NavDiskPanelAdapter(mNavigationViewModel);
+        binding.rvDiskPanel.setAdapter(mNavDiskPanelAdapter);
+        binding.rvDiskPanel.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
-        binding.setNavViewModel(navigationViewModel);
-        fixDataBindingBUG(binding, navigationViewModel);
+        binding.setNavViewModel(mNavigationViewModel);
+        fixDataBindingBUG(binding, mNavigationViewModel);
 
         if (shouldScanLocalMusic()) {
             scanLocalMusic();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mNavDiskPanelAdapter.resumeAnim();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mNavDiskPanelAdapter.pauseAnim();
     }
 
     private void fixDataBindingBUG(ActivityNavigationBinding binding, NavigationViewModel navigationViewModel) {
@@ -73,20 +88,14 @@ public class NavigationActivity extends AppCompatActivity {
                 .observe(this, integer -> AppBinderAdapter.setSrcCompat(binding.btnPlayPause, integer));
     }
 
-    private void initDiskPanel(RecyclerView diskPanel, NavigationViewModel navigationViewModel) {
-        diskPanel.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        diskPanel.setAdapter(new NavDiskPanelAdapter(navigationViewModel));
-    }
-
     private void initNavigationViewModel(NavigationViewModel navigationViewModel) {
         if (navigationViewModel.isInitialized()) {
-            mPlayerClient = navigationViewModel.getPlayerClient();
             return;
         }
 
-        mPlayerClient = PlayerClient.newInstance(this, PlayerService.class);
-        navigationViewModel.init(this, mPlayerClient);
-        mPlayerClient.connect();
+        PlayerClient playerClient = PlayerClient.newInstance(this, PlayerService.class);
+        navigationViewModel.init(this, playerClient);
+        playerClient.connect();
 
         navigationViewModel.setAutoDisconnect(true);
     }
@@ -156,7 +165,7 @@ public class NavigationActivity extends AppCompatActivity {
                 .putBoolean(KEY_SCAN_LOCAL_MUSIC, false)
                 .apply();
 
-        mScannerViewModel.scan(30_000, new ScanCompleteListener(mPlayerClient));
+        mScannerViewModel.scan(30_000, new ScanCompleteListener(mNavigationViewModel.getPlayerClient()));
     }
 
     private static class ScanCompleteListener implements ScannerViewModel.OnScanCompleteListener {
