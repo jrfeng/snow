@@ -26,6 +26,7 @@ public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapte
 
     private Observer<Playlist> mPlaylistObserver;
     private Observer<Integer> mPlayPositionObserver;
+    private RecyclerView.OnScrollListener mScrollListener;
 
     public NavDiskPanelAdapter(@NonNull NavigationViewModel navigationViewModel) {
         Preconditions.checkNotNull(navigationViewModel);
@@ -42,6 +43,22 @@ public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapte
         };
 
         mPlayPositionObserver = playPosition -> mRecyclerView.scrollToPosition(playPosition);
+
+        mScrollListener = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+                    assert layoutManager != null;
+
+                    View snapView = mPagerSnapHelper.findSnapView(layoutManager);
+                    assert snapView != null;
+
+                    mNavigationViewModel.getPlayerClient()
+                            .skipToPosition(recyclerView.getChildAdapterPosition(snapView));
+                }
+            }
+        };
     }
 
     @Override
@@ -68,21 +85,7 @@ public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapte
         mNavigationViewModel.getPlayPosition()
                 .observeForever(mPlayPositionObserver);
 
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-                    assert layoutManager != null;
-
-                    View snapView = mPagerSnapHelper.findSnapView(layoutManager);
-                    assert snapView != null;
-
-                    mNavigationViewModel.getPlayerClient()
-                            .skipToPosition(recyclerView.getChildAdapterPosition(snapView));
-                }
-            }
-        });
+        mRecyclerView.addOnScrollListener(mScrollListener);
     }
 
     private void removeAllObserver() {
@@ -91,6 +94,8 @@ public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapte
 
         mNavigationViewModel.getPlayPosition()
                 .removeObserver(mPlayPositionObserver);
+
+        mRecyclerView.removeOnScrollListener(mScrollListener);
     }
 
     @NonNull
