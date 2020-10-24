@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.common.base.Preconditions;
 
 import snow.music.R;
+import snow.player.PlayerClient;
 import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
 
@@ -146,6 +147,11 @@ public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapte
         mDiskRotateAnimator.setRepeatCount(-1);
         mDiskRotateAnimator.setRepeatMode(ObjectAnimator.RESTART);
         mDiskRotateAnimator.setInterpolator(new LinearInterpolator());
+
+        PlayerClient playerClient = mNavigationViewModel.getPlayerClient();
+        if (playerClient.isPlaying() && !playerClient.isPreparing() && !playerClient.isStalled()) {
+            mDiskRotateAnimator.start();
+        }
     }
 
     private void cancelDiskRotateAnim() {
