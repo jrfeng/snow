@@ -37,6 +37,7 @@ public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapte
     @Nullable
     private ObjectAnimator mDiskRotateAnimator;
     private long mDiskAnimPlayTime;
+    private boolean mAnimPaused;
 
     public NavDiskPanelAdapter(@NonNull NavigationViewModel navigationViewModel) {
         Preconditions.checkNotNull(navigationViewModel);
@@ -155,7 +156,7 @@ public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapte
 
     private boolean shouldStartAnim() {
         PlayerClient playerClient = mNavigationViewModel.getPlayerClient();
-        return playerClient.isPlaying() && !playerClient.isPreparing() && !playerClient.isStalled();
+        return !mAnimPaused && playerClient.isPlaying() && !playerClient.isPreparing() && !playerClient.isStalled();
     }
 
     private void cancelDiskRotateAnim() {
@@ -201,10 +202,12 @@ public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapte
     }
 
     public void pauseAnim() {
+        mAnimPaused = true;
         pauseDiskRotateAnim();
     }
 
     public void resumeAnim() {
+        mAnimPaused = false;
         resumeDiskRotateAnim();
     }
 
@@ -227,9 +230,7 @@ public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapte
         holder.tvTitle.setText(musicItem.getTitle());
         holder.tvArtist.setText(musicItem.getArtist());
 
-        Integer playPosition = mNavigationViewModel.getPlayPosition().getValue();
-        assert playPosition != null;
-        if (position == playPosition) {
+        if (position == mNavigationViewModel.getPlayerClient().getPlayPosition()) {
             updateDiskRotateAnimator(holder.ivDisk);
         }
     }
