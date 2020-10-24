@@ -165,14 +165,14 @@ public class PlayerViewModel extends ViewModel {
 
         addAllListener();
 
-        onInit();
         mInitialized = true;
+        onInitialized();
     }
 
     /**
-     * 该方法会在初始化 {@link PlayerViewModel} 时被调用，子类可以覆盖该方法来完成一些初始化操作。
+     * 该方法会在 {@link PlayerViewModel} 初始化完成后调用。
      */
-    protected void onInit() {
+    protected void onInitialized() {
     }
 
     /**

@@ -45,7 +45,7 @@ public class NavigationViewModel extends PlayerViewModel {
     }
 
     @Override
-    protected void onInit() {
+    protected void onInitialized() {
         MusicStore.getInstance().addOnFavoriteChangeListener(mFavoriteChangeListener);
         getPlayingMusicItem().observeForever(mPlayingMusicItemObserver);
         getPlaybackState().observeForever(mPlaybackStateObserver);
