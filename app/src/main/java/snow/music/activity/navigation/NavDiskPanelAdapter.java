@@ -15,10 +15,10 @@ import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 import snow.player.playlist.Playlist;
 
-public class DiskPanelAdapter extends RecyclerView.Adapter<DiskPanelAdapter.ViewHolder> {
+public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapter.ViewHolder> {
     private LiveData<Playlist> mPlaylist;
 
-    public DiskPanelAdapter(PlayerViewModel playerViewModel) {
+    public NavDiskPanelAdapter(PlayerViewModel playerViewModel) {
         mPlaylist = playerViewModel.getPlaylist();
 
         // TODO 1. observe playlist

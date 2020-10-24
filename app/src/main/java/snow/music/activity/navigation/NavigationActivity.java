@@ -15,7 +15,6 @@ import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,6 @@ import java.util.List;
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.databinding.ActivityNavigationBinding;
@@ -74,7 +72,7 @@ public class NavigationActivity extends AppCompatActivity {
     private void initDiskPanel(RecyclerView diskPanel, PlayerViewModel playerViewModel) {
         diskPanel.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
-        diskPanel.setAdapter(new DiskPanelAdapter(playerViewModel));
+        diskPanel.setAdapter(new NavDiskPanelAdapter(playerViewModel));
 
         PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
         pagerSnapHelper.attachToRecyclerView(diskPanel);
