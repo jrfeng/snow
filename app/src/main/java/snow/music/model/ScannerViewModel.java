@@ -57,7 +57,9 @@ public class ScannerViewModel extends AndroidViewModel {
     protected void onCleared() {
         super.onCleared();
 
-        mMusicScanner.cancel();
+        if (mMusicScanner != null) {
+            mMusicScanner.cancel();
+        }
     }
 
     /**
