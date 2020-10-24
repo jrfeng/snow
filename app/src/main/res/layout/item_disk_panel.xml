@@ -20,8 +20,10 @@
 
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="@dimen/album_icon_size"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         android:ellipsize="middle"
         android:gravity="center_horizontal"
         android:singleLine="true"
@@ -29,8 +31,10 @@
 
     <TextView
         android:id="@+id/tvArtist"
-        android:layout_width="@dimen/album_icon_size"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         android:ellipsize="middle"
         android:gravity="center_horizontal"
         android:singleLine="true"
