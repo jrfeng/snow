@@ -41,6 +41,9 @@ allprojects {
 
         // MMKV
         mmkvVersion = "1.1.1"
+
+        // Glide
+        glideVersion = "4.11.0"
     }
 }
 
