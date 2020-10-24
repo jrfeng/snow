@@ -63,13 +63,17 @@ public class ScannerViewModel extends AndroidViewModel {
     }
 
     /**
-     * 扫描本地音乐。
+     * 扫描本地音乐。如果扫描器当前正在运行，则会忽略本次调用。
      *
      * @param minDuration 本地音乐的最短时长，低于这个时长的本地音乐会被忽略（单位：毫秒）
      * @param listener    扫描结束事件监听器，该监听器会在扫描完成时调用。不能为 null
      */
     public void scan(int minDuration, @NonNull OnScanCompleteListener listener) {
         Preconditions.checkNotNull(listener);
+
+        if (mScanningMusic.getValue() != null && mScanningMusic.getValue()) {
+            return;
+        }
 
         mMusicScanner = MediaStoreHelper.scanAudio(getApplication().getContentResolver(), new MusicDecoder(getApplication()))
                 .updateThreshold(1000)
