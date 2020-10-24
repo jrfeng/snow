@@ -6,14 +6,16 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.view.animation.LinearInterpolator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,10 @@ public class NavigationActivity extends AppCompatActivity {
     private ScannerViewModel mScannerViewModel;
     private NavigationViewModel mNavigationViewModel;
 
+    private ObjectAnimator mDiskRotateAnimator;
+    private long mDiskAnimPlayTime;
+    private boolean mAnimPaused;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +60,7 @@ public class NavigationActivity extends AppCompatActivity {
         initNavigationViewModel(mNavigationViewModel);
 
         mScannerViewModel = viewModelProvider.get(ScannerViewModel.class);
+        initDiskRotateAnim(binding.ivDisk);
 
         binding.setNavViewModel(mNavigationViewModel);
         binding.setLifecycleOwner(this);
@@ -61,6 +68,20 @@ public class NavigationActivity extends AppCompatActivity {
         if (shouldScanLocalMusic()) {
             scanLocalMusic();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAnimPaused = false;
+        resumeDiskRotateAnim();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mAnimPaused = true;
+        pauseDiskRotateAnim();
     }
 
     private void initNavigationViewModel(NavigationViewModel navigationViewModel) {
@@ -73,6 +94,61 @@ public class NavigationActivity extends AppCompatActivity {
         playerClient.connect();
 
         navigationViewModel.setAutoDisconnect(true);
+    }
+
+    private void initDiskRotateAnim(View diskView) {
+        mDiskRotateAnimator = ObjectAnimator.ofFloat(diskView, "rotation", 0, 360);
+        mDiskRotateAnimator.setDuration(20_000);
+        mDiskRotateAnimator.setRepeatCount(-1);
+        mDiskRotateAnimator.setRepeatMode(ObjectAnimator.RESTART);
+        mDiskRotateAnimator.setInterpolator(new LinearInterpolator());
+
+        mNavigationViewModel.getPlayingNoStalled()
+                .observe(this, playingNoStalled -> {
+                    if (playingNoStalled) {
+                        resumeDiskRotateAnim();
+                    } else {
+                        pauseDiskRotateAnim();
+                    }
+                });
+    }
+
+    private void pauseDiskRotateAnim() {
+        if (mDiskRotateAnimator == null) {
+            return;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            mDiskRotateAnimator.pause();
+            return;
+        }
+
+        mDiskAnimPlayTime = mDiskRotateAnimator.getCurrentPlayTime();
+        mDiskRotateAnimator.cancel();
+    }
+
+    private void resumeDiskRotateAnim() {
+        if (mDiskRotateAnimator == null || !shouldStartAnim()) {
+            return;
+        }
+
+        if (!mDiskRotateAnimator.isStarted()) {
+            mDiskRotateAnimator.start();
+            return;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            mDiskRotateAnimator.resume();
+            return;
+        }
+
+        mDiskRotateAnimator.start();
+        mDiskRotateAnimator.setCurrentPlayTime(mDiskAnimPlayTime);
+    }
+
+    private boolean shouldStartAnim() {
+        PlayerClient playerClient = mNavigationViewModel.getPlayerClient();
+        return !mAnimPaused && playerClient.isPlaying() && !playerClient.isPreparing() && !playerClient.isStalled();
     }
 
     private boolean shouldScanLocalMusic() {
