@@ -72,6 +72,7 @@ public class PlayerViewModel extends ViewModel {
     private ProgressClock mSleepTimerProgressClock;
 
     private boolean mInitialized;
+    private boolean mCleared;
     private boolean mAutoDisconnect;
 
     /**
@@ -153,6 +154,14 @@ public class PlayerViewModel extends ViewModel {
         Preconditions.checkNotNull(defaultTitle);
         Preconditions.checkNotNull(defaultArtist);
         Preconditions.checkNotNull(defaultAlbum);
+
+        if (mInitialized) {
+            throw new IllegalArgumentException("PlayerViewModel is initialized, please do not repeat initialization.");
+        }
+
+        if (mCleared) {
+            throw new IllegalStateException("PlayerViewModel is cleared.");
+        }
 
         mPlayerClient = playerClient;
         mDefaultTitle = defaultTitle;
@@ -378,6 +387,8 @@ public class PlayerViewModel extends ViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
+
+        mCleared = true;
 
         if (!mInitialized) {
             return;
