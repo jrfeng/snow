@@ -1,15 +1,11 @@
 package snow.music.activity.navigation;
 
-import android.app.Application;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
-
-import com.google.common.base.Preconditions;
 
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
@@ -23,7 +19,7 @@ import snow.player.PlaybackState;
 import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 
-public class NavigationViewModel extends AndroidViewModel {
+public class NavigationViewModel extends PlayerViewModel {
     private MutableLiveData<Integer> mFavoriteDrawable;
     private MutableLiveData<Integer> mPlayPauseDrawable;
 
@@ -31,14 +27,9 @@ public class NavigationViewModel extends AndroidViewModel {
     private Observer<MusicItem> mPlayingMusicItemObserver;
     private Observer<PlaybackState> mPlaybackStateObserver;
 
-    private boolean mInitialized;
-    private PlayerViewModel mPlayerViewModel;
-
     private Disposable mCheckFavoriteDisposable;
 
-    public NavigationViewModel(@NonNull Application application) {
-        super(application);
-
+    public NavigationViewModel() {
         mFavoriteDrawable = new MutableLiveData<>(R.drawable.ic_favorite_false);
         mPlayPauseDrawable = new MutableLiveData<>(R.drawable.ic_play);
 
@@ -53,30 +44,25 @@ public class NavigationViewModel extends AndroidViewModel {
         };
     }
 
-    public void init(@NonNull PlayerViewModel playerViewModel) {
-        Preconditions.checkNotNull(playerViewModel);
-        mInitialized = true;
-        mPlayerViewModel = playerViewModel;
-
+    @Override
+    protected void onInit() {
         MusicStore.getInstance().addOnFavoriteChangeListener(mFavoriteChangeListener);
-        mPlayerViewModel.getPlayingMusicItem().observeForever(mPlayingMusicItemObserver);
-        mPlayerViewModel.getPlaybackState().observeForever(mPlaybackStateObserver);
+        getPlayingMusicItem().observeForever(mPlayingMusicItemObserver);
+        getPlaybackState().observeForever(mPlaybackStateObserver);
     }
 
     @Override
     protected void onCleared() {
         super.onCleared();
 
-        if (!mInitialized) {
+        if (!isInitialized()) {
             return;
         }
 
         MusicStore.getInstance().removeOnFavoriteChangeListener(mFavoriteChangeListener);
-        mPlayerViewModel.getPlayingMusicItem().removeObserver(mPlayingMusicItemObserver);
-        mPlayerViewModel.getPlaybackState().removeObserver(mPlaybackStateObserver);
+        getPlayingMusicItem().removeObserver(mPlayingMusicItemObserver);
+        getPlaybackState().removeObserver(mPlaybackStateObserver);
 
-        mInitialized = false;
-        mPlayerViewModel = null;
         disposeCheckFavorite();
     }
 
@@ -90,15 +76,11 @@ public class NavigationViewModel extends AndroidViewModel {
         return mPlayPauseDrawable;
     }
 
-    public boolean isInitialized() {
-        return mInitialized;
-    }
-
     private void checkPlayingMusicFavoriteState() {
         disposeCheckFavorite();
 
         mCheckFavoriteDisposable = Single.create((SingleOnSubscribe<Boolean>) emitter -> {
-            MusicItem playingMusicItem = mPlayerViewModel.getPlayingMusicItem().getValue();
+            MusicItem playingMusicItem = getPlayingMusicItem().getValue();
 
             boolean result;
             if (playingMusicItem == null) {
@@ -124,11 +106,11 @@ public class NavigationViewModel extends AndroidViewModel {
     }
 
     public void togglePlayingMusicFavorite() {
-        if (!mInitialized) {
+        if (!isInitialized()) {
             return;
         }
 
-        MusicItem playingMusicItem = mPlayerViewModel.getPlayingMusicItem().getValue();
+        MusicItem playingMusicItem = getPlayingMusicItem().getValue();
         if (playingMusicItem == null) {
             return;
         }
