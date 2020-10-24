@@ -156,38 +156,49 @@ public class NavigationActivity extends AppCompatActivity {
                 .putBoolean(KEY_SCAN_LOCAL_MUSIC, false)
                 .apply();
 
-        mScannerViewModel.scan(30_000, musicList -> {
+        mScannerViewModel.scan(30_000, new ScanCompleteListener(mPlayerClient));
+    }
+
+    private static class ScanCompleteListener implements ScannerViewModel.OnScanCompleteListener {
+        private PlayerClient mPlayerClient;
+
+        ScanCompleteListener(PlayerClient playerClient) {
+            mPlayerClient = playerClient;
+        }
+
+        @Override
+        public void onScanComplete(@NonNull List<Music> musicList) {
             if (musicList.isEmpty()) {
                 return;
             }
 
             saveToMusicStore(musicList);
-        });
-    }
-
-    @SuppressLint("CheckResult")
-    private void saveToMusicStore(@NonNull List<Music> musicList) {
-        Single.create((SingleOnSubscribe<Boolean>) emitter -> {
-            if (emitter.isDisposed()) {
-                return;
-            }
-
-            MusicStore.getInstance().putAllMusic(musicList);
-            emitter.onSuccess(true);
-        }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> mPlayerClient.setPlaylist(createPlaylist(musicList)));
-    }
-
-    private Playlist createPlaylist(List<Music> musicList) {
-        List<MusicItem> itemList = new ArrayList<>(musicList.size());
-
-        for (Music music : musicList) {
-            itemList.add(MusicUtil.asMusicItem(music));
         }
 
-        return new Playlist.Builder()
-                .appendAll(itemList)
-                .build();
+        @SuppressLint("CheckResult")
+        private void saveToMusicStore(@NonNull List<Music> musicList) {
+            Single.create((SingleOnSubscribe<Boolean>) emitter -> {
+                if (emitter.isDisposed()) {
+                    return;
+                }
+
+                MusicStore.getInstance().putAllMusic(musicList);
+                emitter.onSuccess(true);
+            }).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(aBoolean -> mPlayerClient.setPlaylist(createPlaylist(musicList)));
+        }
+
+        private Playlist createPlaylist(List<Music> musicList) {
+            List<MusicItem> itemList = new ArrayList<>(musicList.size());
+
+            for (Music music : musicList) {
+                itemList.add(MusicUtil.asMusicItem(music));
+            }
+
+            return new Playlist.Builder()
+                    .appendAll(itemList)
+                    .build();
+        }
     }
 }
