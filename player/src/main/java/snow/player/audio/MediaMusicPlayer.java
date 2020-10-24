@@ -1,9 +1,20 @@
 package snow.player.audio;
 
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+
+import com.google.common.base.Preconditions;
+
+import java.net.HttpCookie;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 封装了一个 MediaPlayer。
@@ -11,7 +22,11 @@ import android.util.Log;
 public class MediaMusicPlayer extends AbstractMusicPlayer {
     private static final String TAG = "MediaMusicPlayer";
 
+    private final Context mContext;
     private final Uri mUri;
+    private final Map<String, String> mHeaders;
+    private List<HttpCookie> mCookies;
+
     private MediaPlayer mMediaPlayer;
 
     private OnErrorListener mErrorListener;
@@ -22,9 +37,29 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
 
     /**
      * 创建一个 {@link MediaMusicPlayer} 对象。
+     *
+     * @param context Context 对象，不能为 null
+     * @param uri     要播放的歌曲的 URI，不能为 null
      */
-    public MediaMusicPlayer(Uri uri) {
+    public MediaMusicPlayer(@NonNull Context context, @NonNull Uri uri) {
+        this(context, uri, null);
+    }
+
+    /**
+     * 创建一个 {@link MediaMusicPlayer} 对象。
+     *
+     * @param context Context 对象，不能为 null
+     * @param uri     要播放的歌曲的 URI，不能为 null
+     * @param headers HTTP 首部
+     */
+    public MediaMusicPlayer(@NonNull Context context, @NonNull Uri uri, @Nullable Map<String, String> headers) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(uri);
+
+        mContext = context;
         mUri = uri;
+        mHeaders = headers;
+
         mMediaPlayer = new MediaPlayer();
         mInvalid = false;
 
@@ -57,6 +92,20 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
                 return false;
             }
         });
+    }
+
+    /**
+     * 创建一个 {@link MediaMusicPlayer} 对象。
+     *
+     * @param context Context 对象，不能为 null
+     * @param uri     要播放的歌曲的 URI，不能为 null
+     * @param headers HTTP 首部
+     * @param cookies HTTP cookies
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    public MediaMusicPlayer(@NonNull Context context, @NonNull Uri uri, @Nullable Map<String, String> headers, @Nullable List<HttpCookie> cookies) {
+        this(context, uri, headers);
+        mCookies = cookies;
     }
 
     private int toErrorCode(int what, int extra) {
@@ -96,7 +145,11 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
         }
 
         try {
-            mMediaPlayer.setDataSource(mUri.toString());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                mMediaPlayer.setDataSource(mContext, mUri, mHeaders, mCookies);
+            } else {
+                mMediaPlayer.setDataSource(mContext, mUri, mHeaders);
+            }
             mMediaPlayer.prepareAsync();
         } catch (Exception e) {
             setInvalid();

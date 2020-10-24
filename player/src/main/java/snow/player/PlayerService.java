@@ -996,7 +996,7 @@ public class PlayerService extends MediaBrowserServiceCompat
      */
     @NonNull
     protected MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
-        return new MediaMusicPlayer(uri);
+        return new MediaMusicPlayer(context, uri);
     }
 
     /**
