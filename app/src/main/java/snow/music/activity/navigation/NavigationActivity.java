@@ -26,7 +26,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.databinding.ActivityNavigationBinding;
-import snow.music.databinding.AppBinderAdapter;
 import snow.music.model.ScannerViewModel;
 import snow.music.store.Music;
 import snow.music.store.MusicStore;
