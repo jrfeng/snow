@@ -51,6 +51,7 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<Boolean> mPreparing;
     private MutableLiveData<String> mErrorMessage;
     private MutableLiveData<MusicItem> mPlayingMusicItem;
+    private MutableLiveData<Boolean> mPlayingNoStalled;
     private PlaylistLiveData mPlaylist;
 
     private Player.OnPlayingMusicItemChangeListener mPlayingMusicItemChangeListener;
@@ -246,6 +247,7 @@ public class PlayerViewModel extends ViewModel {
                 }
 
                 mPlaybackState.setValue(playbackState);
+                mPlayingNoStalled.setValue(playbackState == PlaybackState.PLAYING && !stalled);
 
                 switch (playbackState) {
                     case PLAYING:
@@ -305,12 +307,13 @@ public class PlayerViewModel extends ViewModel {
             @Override
             public void onStalledChanged(boolean stalled, int playProgress, long updateTime) {
                 mStalled.setValue(stalled);
+                mPlayingNoStalled.setValue(mPlayerClient.isPlaying() && !stalled);
                 if (stalled) {
                     mProgressClock.cancel();
                     return;
                 }
 
-                if (PlaybackState.PLAYING == mPlaybackState.getValue()) {
+                if (mPlayerClient.isPlaying()) {
                     mProgressClock.start(playProgress, updateTime, mPlayerClient.getPlayingMusicItemDuration());
                 }
             }
@@ -661,6 +664,17 @@ public class PlayerViewModel extends ViewModel {
         }
 
         return mPlayingMusicItem;
+    }
+
+    /**
+     * 当前播放器状态为 {@link PlaybackState#PLAYING} 并且播放器没有处于 stalled 状态。
+     *
+     * @see PlayerClient#isPlaying()
+     * @see PlayerClient#isStalled()
+     */
+    @NonNull
+    public LiveData<Boolean> getPlayingNoStalled() {
+        return mPlayingNoStalled;
     }
 
     /**
@@ -1049,6 +1063,7 @@ public class PlayerViewModel extends ViewModel {
         mPreparing = new MutableLiveData<>(mPlayerClient.isPreparing());
         mErrorMessage = new MutableLiveData<>(mPlayerClient.getErrorMessage());
         mPlayingMusicItem = new MutableLiveData<>(mPlayerClient.getPlayingMusicItem());
+        mPlayingNoStalled = new MutableLiveData<>(mPlayerClient.isPlaying() && !mPlayerClient.isStalled());
         mPlaylist = new PlaylistLiveData();
         mPlaylist.init(mPlayerClient);
     }
