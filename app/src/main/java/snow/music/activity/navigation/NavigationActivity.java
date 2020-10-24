@@ -7,7 +7,6 @@ import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
@@ -76,11 +75,7 @@ public class NavigationActivity extends AppCompatActivity {
 
     private void initDiskPanel(RecyclerView diskPanel, NavigationViewModel navigationViewModel) {
         diskPanel.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-
         diskPanel.setAdapter(new NavDiskPanelAdapter(navigationViewModel));
-
-        PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
-        pagerSnapHelper.attachToRecyclerView(diskPanel);
     }
 
     private void initNavigationViewModel(NavigationViewModel navigationViewModel) {

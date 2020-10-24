@@ -2,12 +2,15 @@
     <string name="app_name" translatable="false">snow</string>
     <string name="search">Search</string>
 
+    <!-- NavigationActivity -->
     <string name="item_local_music">Local Music</string>
     <string name="item_favorite">Favorite</string>
     <string name="item_music_list">Music List</string>
     <string name="item_artist">Artist</string>
     <string name="item_album">Album</string>
     <string name="item_history">History</string>
+    <string name="empty_playlist">Empty Playlist</string>
+    <string name="playlist_is_empty">playlist is empty</string>
 
     <!-- content description -->
     <string name="des_logo">logo</string>

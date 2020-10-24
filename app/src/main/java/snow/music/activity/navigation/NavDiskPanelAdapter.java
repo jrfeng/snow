@@ -7,21 +7,90 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.common.base.Preconditions;
 
 import snow.music.R;
 import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
 
 public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapter.ViewHolder> {
-    private LiveData<Playlist> mPlaylist;
+    private NavigationViewModel mNavigationViewModel;
+    private Playlist mPlaylist;
 
-    public NavDiskPanelAdapter(NavigationViewModel navigationViewModel) {
-        mPlaylist = navigationViewModel.getPlaylist();
+    private RecyclerView mRecyclerView;
+    private PagerSnapHelper mPagerSnapHelper;
 
-        // TODO 1. observe playlist
-        // TODO 2. observe scroll to position
+    private Observer<Playlist> mPlaylistObserver;
+    private Observer<Integer> mPlayPositionObserver;
+
+    public NavDiskPanelAdapter(@NonNull NavigationViewModel navigationViewModel) {
+        Preconditions.checkNotNull(navigationViewModel);
+
+        mNavigationViewModel = navigationViewModel;
+        mPlaylist = navigationViewModel.getPlaylist().getValue();
+        initAllObserver();
+    }
+
+    private void initAllObserver() {
+        mPlaylistObserver = playlist -> {
+            mPlaylist = playlist;
+            notifyDataSetChanged();
+        };
+
+        mPlayPositionObserver = playPosition -> mRecyclerView.scrollToPosition(playPosition);
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        mRecyclerView = recyclerView;
+
+        mPagerSnapHelper = new PagerSnapHelper();
+        mPagerSnapHelper.attachToRecyclerView(recyclerView);
+
+        addAllObserver();
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        removeAllObserver();
+    }
+
+    private void addAllObserver() {
+        mNavigationViewModel.getPlaylist()
+                .observeForever(mPlaylistObserver);
+
+        mNavigationViewModel.getPlayPosition()
+                .observeForever(mPlayPositionObserver);
+
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+                    assert layoutManager != null;
+
+                    View snapView = mPagerSnapHelper.findSnapView(layoutManager);
+                    assert snapView != null;
+
+                    mNavigationViewModel.getPlayerClient()
+                            .skipToPosition(recyclerView.getChildAdapterPosition(snapView));
+                }
+            }
+        });
+    }
+
+    private void removeAllObserver() {
+        mNavigationViewModel.getPlaylist()
+                .removeObserver(mPlaylistObserver);
+
+        mNavigationViewModel.getPlayPosition()
+                .removeObserver(mPlayPositionObserver);
     }
 
     @NonNull
@@ -32,38 +101,25 @@ public class NavDiskPanelAdapter extends RecyclerView.Adapter<NavDiskPanelAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        if (isEmpty()) {
+        if (mPlaylist.isEmpty()) {
+            holder.tvTitle.setText(R.string.empty_playlist);
+            holder.tvArtist.setText(R.string.playlist_is_empty);
             return;
         }
 
-        MusicItem musicItem = getMusicItem(position);
+        MusicItem musicItem = mPlaylist.get(position);
 
         holder.tvTitle.setText(musicItem.getTitle());
         holder.tvArtist.setText(musicItem.getArtist());
     }
 
-    private boolean isEmpty() {
-        assert mPlaylist.getValue() != null;
-        return mPlaylist.getValue().isEmpty();
-    }
-
-    private int getPlaylistSize() {
-        assert mPlaylist.getValue() != null;
-        return mPlaylist.getValue().size();
-    }
-
-    private MusicItem getMusicItem(int position) {
-        assert mPlaylist.getValue() != null;
-        return mPlaylist.getValue().get(position);
-    }
-
     @Override
     public int getItemCount() {
-        if (isEmpty()) {
+        if (mPlaylist.isEmpty()) {
             return 1;
         }
 
-        return getPlaylistSize();
+        return mPlaylist.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
