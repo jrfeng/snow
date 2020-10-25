@@ -133,13 +133,8 @@ public class ScannerViewModel extends AndroidViewModel {
         }
 
         public String getMusicTitle(Cursor cursor) {
-            String title = getTitle(cursor);
-            if ("<unknown>".equals(title)) {
-                title = getDisplayName(cursor);
-                title = title.substring(0, title.lastIndexOf("."));
-            }
-
-            return title;
+            String title = getDisplayName(cursor);
+            return title.substring(0, title.lastIndexOf("."));
         }
 
         public String optimizeText(String text, int stringId) {
