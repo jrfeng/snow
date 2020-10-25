@@ -37,7 +37,7 @@ allprojects {
 }
 ```
 
-2. Add a dependency in the `build.gradle` file of your app module --- [last version](https://github.com/jrfeng/snow/releases)
+2. Add a dependency in the `build.gradle` file of your app module --- [latest version](https://github.com/jrfeng/snow/releases)
 
 ```gradle
 dependencies {
