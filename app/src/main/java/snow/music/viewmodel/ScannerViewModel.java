@@ -1,4 +1,4 @@
-package snow.music.model;
+package snow.music.viewmodel;
 
 import android.app.Application;
 import android.content.Context;
