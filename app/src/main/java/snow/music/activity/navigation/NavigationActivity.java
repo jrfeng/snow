@@ -17,18 +17,24 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.databinding.ActivityNavigationBinding;
 import snow.music.model.ScannerViewModel;
 import snow.music.store.Music;
 import snow.music.store.MusicStore;
+import snow.music.util.EmbeddedPictureUtil;
 import snow.music.util.MusicUtil;
 import snow.player.PlayerClient;
 import snow.player.PlayerService;
@@ -41,6 +47,7 @@ public class NavigationActivity extends AppCompatActivity {
     private boolean mScanOnPermissionGranted;
     private boolean mRepeatedRequestStoragePermission;
 
+    private ActivityNavigationBinding mBinding;
     private ScannerViewModel mScannerViewModel;
     private NavigationViewModel mNavigationViewModel;
 
@@ -48,21 +55,25 @@ public class NavigationActivity extends AppCompatActivity {
     private long mDiskAnimPlayTime;
     private boolean mAnimPaused;
 
+    private Disposable mIconLoadDisposable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ActivityNavigationBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_navigation);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_navigation);
 
         ViewModelProvider viewModelProvider = new ViewModelProvider(this);
         mNavigationViewModel = viewModelProvider.get(NavigationViewModel.class);
         initNavigationViewModel(mNavigationViewModel);
 
         mScannerViewModel = viewModelProvider.get(ScannerViewModel.class);
-        initDiskRotateAnim(binding.ivDisk);
+        initDiskRotateAnim(mBinding.ivDiskIcon);
 
-        binding.setNavViewModel(mNavigationViewModel);
-        binding.setLifecycleOwner(this);
+        mBinding.setNavViewModel(mNavigationViewModel);
+        mBinding.setLifecycleOwner(this);
+
+        observerMusicIconUri();
 
         if (shouldScanLocalMusic()) {
             scanLocalMusic();
@@ -81,6 +92,10 @@ public class NavigationActivity extends AppCompatActivity {
         super.onStop();
         mAnimPaused = true;
         pauseDiskRotateAnim();
+
+        if (isFinishing() && mIconLoadDisposable != null) {
+            mIconLoadDisposable.dispose();
+        }
     }
 
     private void initNavigationViewModel(NavigationViewModel navigationViewModel) {
@@ -148,6 +163,29 @@ public class NavigationActivity extends AppCompatActivity {
     private boolean shouldStartAnim() {
         PlayerClient playerClient = mNavigationViewModel.getPlayerClient();
         return !mAnimPaused && playerClient.isPlaying() && !playerClient.isPreparing() && !playerClient.isStalled();
+    }
+
+    private void observerMusicIconUri() {
+        mNavigationViewModel.getPlayingMusicItem()
+                .observe(this, musicItem -> {
+                    if (musicItem == null) {
+                        mBinding.ivDiskIcon.setImageResource(0);
+                        return;
+                    }
+
+                    loadMusicIcon(musicItem.getUri());
+                });
+    }
+
+    private void loadMusicIcon(String musicUri) {
+        mIconLoadDisposable = EmbeddedPictureUtil.getEmbeddedPicture(this, musicUri)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(bytes -> Glide.with(NavigationActivity.this)
+                        .load(bytes)
+                        .transform(new CircleCrop())
+                        .transition(DrawableTransitionOptions.withCrossFade(200))
+                        .into(mBinding.ivDiskIcon));
     }
 
     private boolean shouldScanLocalMusic() {
