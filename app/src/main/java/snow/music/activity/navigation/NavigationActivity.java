@@ -257,7 +257,7 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     private static class ScanCompleteListener implements ScannerViewModel.OnScanCompleteListener {
-        private PlayerClient mPlayerClient;
+        private final PlayerClient mPlayerClient;
 
         ScanCompleteListener(PlayerClient playerClient) {
             mPlayerClient = playerClient;
@@ -272,6 +272,7 @@ public class NavigationActivity extends AppCompatActivity {
             saveToMusicStore(musicList);
         }
 
+        @SuppressWarnings("ResultOfMethodCallIgnored")
         @SuppressLint("CheckResult")
         private void saveToMusicStore(@NonNull List<Music> musicList) {
             Single.create((SingleOnSubscribe<Boolean>) emitter -> {

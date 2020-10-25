@@ -95,7 +95,7 @@ public class NightModeUtil {
          */
         NIGHT_AUTO_BATTERY(3);
 
-        private int id;
+        private final int id;
 
         Mode(int id) {
             this.id = id;

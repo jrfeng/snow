@@ -12,7 +12,7 @@
 
     <style name="AppTheme.Welcome">
         <item name="android:windowFullscreen">true</item>
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowBackground">@color/deep_purple_400</item>
     </style>
 
 </resources>

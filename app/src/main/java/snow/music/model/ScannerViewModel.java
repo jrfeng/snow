@@ -16,7 +16,6 @@ import java.util.List;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import media.helper.MediaStoreHelper;
 import snow.music.store.Music;

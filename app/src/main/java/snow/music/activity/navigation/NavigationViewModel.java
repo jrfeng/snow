@@ -21,10 +21,10 @@ import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 
 public class NavigationViewModel extends PlayerViewModel {
-    private MutableLiveData<Integer> mFavoriteDrawable;
+    private final MutableLiveData<Integer> mFavoriteDrawable;
 
-    private MusicStore.OnFavoriteChangeListener mFavoriteChangeListener;
-    private Observer<MusicItem> mPlayingMusicItemObserver;
+    private final MusicStore.OnFavoriteChangeListener mFavoriteChangeListener;
+    private final Observer<MusicItem> mPlayingMusicItemObserver;
 
     private Disposable mCheckFavoriteDisposable;
 

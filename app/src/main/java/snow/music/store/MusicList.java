@@ -22,7 +22,7 @@ import java.util.ListIterator;
  * 歌单中的歌曲是延迟加载的，会在第一次调用 {@link #getMusicElements()} 方法时进行加载并进行缓存。
  */
 public class MusicList {
-    private MusicListEntity mMusicListEntity;
+    private final MusicListEntity mMusicListEntity;
     private ElementList mElementList;
 
     MusicList(@NonNull MusicListEntity musicListEntity) {

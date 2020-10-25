@@ -36,15 +36,15 @@ public class MusicStore {
 
     private static MusicStore mInstance;
 
-    private BoxStore mBoxStore;
-    private Box<Music> mMusicBox;
-    private Box<MusicListEntity> mMusicListEntityBox;
+    private final BoxStore mBoxStore;
+    private final Box<Music> mMusicBox;
+    private final Box<MusicListEntity> mMusicListEntityBox;
 
     private MusicList mHistory;
-    private Handler mMainHandler;
+    private final Handler mMainHandler;
     private MutableLiveData<List<Music>> mHistoryLiveData;
 
-    private List<OnFavoriteChangeListener> mAllFavoriteChangeListener;
+    private final List<OnFavoriteChangeListener> mAllFavoriteChangeListener;
 
     private MusicStore(BoxStore boxStore) {
         mBoxStore = boxStore;

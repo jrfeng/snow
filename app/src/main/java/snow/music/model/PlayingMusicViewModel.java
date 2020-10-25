@@ -4,11 +4,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import snow.music.store.MusicStore;
-import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 
 public class PlayingMusicViewModel extends PlayerViewModel {
-    private MutableLiveData<Boolean> mFavorite;
+    private final MutableLiveData<Boolean> mFavorite;
 
     public PlayingMusicViewModel() {
         mFavorite = new MutableLiveData<>(false);

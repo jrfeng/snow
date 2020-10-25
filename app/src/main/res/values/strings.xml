@@ -9,8 +9,6 @@
     <string name="item_artist">Artist</string>
     <string name="item_album">Album</string>
     <string name="item_history">History</string>
-    <string name="empty_playlist">Empty Playlist</string>
-    <string name="playlist_is_empty">playlist is empty</string>
 
     <!-- content description -->
     <string name="des_logo">logo</string>
