@@ -1533,7 +1533,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
 
             try {
-                retriever.setDataSource(getPlayingMusicItem().getUri());
+                retriever.setDataSource(getContext(), Uri.parse(getPlayingMusicItem().getUri()));
                 return retriever.getEmbeddedPicture();
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
