@@ -1,10 +1,11 @@
+![API Level](https://img.shields.io/badge/Android-API%20Level%2016-brightgreen)
 [![GitHub](https://img.shields.io/github/license/jrfeng/snow)](./license)
 [![GitHub issues](https://img.shields.io/github/issues/jrfeng/snow)](https://github.com/jrfeng/snow/issues)
 [![GitHub closed issues](https://img.shields.io/github/issues-closed/jrfeng/snow)](https://github.com/jrfeng/snow/issues?q=is%3Aissue+is%3Aclosed)
 
 [**中文**](./readme_zh.md)
 
-Android music player framework. Compatible with MediaSession.
+Android music player library. Compatible with MediaSession.
 
 **Support:**
 
