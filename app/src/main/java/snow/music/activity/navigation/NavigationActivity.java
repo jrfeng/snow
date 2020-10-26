@@ -8,14 +8,10 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
-import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
-import android.view.animation.LinearInterpolator;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
@@ -51,10 +47,7 @@ public class NavigationActivity extends AppCompatActivity {
     private ScannerViewModel mScannerViewModel;
     private NavigationViewModel mNavigationViewModel;
 
-    private ObjectAnimator mDiskRotateAnimator;
-    private long mDiskAnimPlayTime;
-    private boolean mAnimPaused;
-
+    private DiskAnimManager mDiskAnimManager;
     private Disposable mIconLoadDisposable;
 
     @Override
@@ -68,11 +61,11 @@ public class NavigationActivity extends AppCompatActivity {
         initNavigationViewModel(mNavigationViewModel);
 
         mScannerViewModel = viewModelProvider.get(ScannerViewModel.class);
-        initDiskRotateAnim(mBinding.ivDiskIcon);
 
         mBinding.setNavViewModel(mNavigationViewModel);
         mBinding.setLifecycleOwner(this);
 
+        mDiskAnimManager = new DiskAnimManager(mBinding.ivDisk, this, mNavigationViewModel);
         observerPlayingMusicItem();
 
         if (shouldScanLocalMusic()) {
@@ -81,18 +74,8 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        mAnimPaused = false;
-        resumeDiskRotateAnim();
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
-        mAnimPaused = true;
-        pauseDiskRotateAnim();
-
         if (isFinishing() && mIconLoadDisposable != null) {
             mIconLoadDisposable.dispose();
         }
@@ -110,71 +93,13 @@ public class NavigationActivity extends AppCompatActivity {
         navigationViewModel.setAutoDisconnect(true);
     }
 
-    private void initDiskRotateAnim(View diskView) {
-        mDiskRotateAnimator = ObjectAnimator.ofFloat(diskView, "rotation", 0, 360);
-        mDiskRotateAnimator.setDuration(20_000);
-        mDiskRotateAnimator.setRepeatCount(-1);
-        mDiskRotateAnimator.setRepeatMode(ObjectAnimator.RESTART);
-        mDiskRotateAnimator.setInterpolator(new LinearInterpolator());
-
-        mNavigationViewModel.getPlayingNoStalled()
-                .observe(this, playingNoStalled -> {
-                    if (playingNoStalled) {
-                        resumeDiskRotateAnim();
-                    } else {
-                        pauseDiskRotateAnim();
-                    }
-                });
-    }
-
-    private void pauseDiskRotateAnim() {
-        if (mDiskRotateAnimator == null) {
-            return;
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mDiskRotateAnimator.pause();
-            return;
-        }
-
-        mDiskAnimPlayTime = mDiskRotateAnimator.getCurrentPlayTime();
-        mDiskRotateAnimator.cancel();
-    }
-
-    private void resumeDiskRotateAnim() {
-        if (mDiskRotateAnimator == null || !shouldStartAnim()) {
-            return;
-        }
-
-        if (!mDiskRotateAnimator.isStarted()) {
-            mDiskRotateAnimator.start();
-            return;
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mDiskRotateAnimator.resume();
-            return;
-        }
-
-        mDiskRotateAnimator.start();
-        mDiskRotateAnimator.setCurrentPlayTime(mDiskAnimPlayTime);
-    }
-
-    private boolean shouldStartAnim() {
-        PlayerClient playerClient = mNavigationViewModel.getPlayerClient();
-        return !mAnimPaused && playerClient.isPlaying() && !playerClient.isPreparing() && !playerClient.isStalled();
-    }
-
     private void observerPlayingMusicItem() {
         mNavigationViewModel.getPlayingMusicItem()
                 .observe(this, musicItem -> {
-                    if (mDiskRotateAnimator != null) {
-                        mDiskRotateAnimator.cancel();
-                        mBinding.ivDiskIcon.setRotation(0);
-                    }
+                    mDiskAnimManager.reset();
 
                     if (musicItem == null) {
-                        mBinding.ivDiskIcon.setImageResource(0);
+                        mBinding.ivDisk.setImageResource(0);
                         return;
                     }
 
@@ -190,7 +115,7 @@ public class NavigationActivity extends AppCompatActivity {
                         .load(bytes)
                         .transform(new CircleCrop())
                         .transition(DrawableTransitionOptions.withCrossFade(200))
-                        .into(mBinding.ivDiskIcon));
+                        .into(mBinding.ivDisk));
     }
 
     private boolean shouldScanLocalMusic() {

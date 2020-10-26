@@ -73,7 +73,7 @@
             android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/ivDiskIcon"
+                android:id="@+id/ivDisk"
                 android:layout_width="@dimen/album_icon_size"
                 android:layout_height="@dimen/album_icon_size"
                 android:background="@mipmap/ic_disk_default_icon"
