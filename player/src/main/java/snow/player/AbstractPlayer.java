@@ -70,6 +70,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private BecomeNoiseHelper mBecomeNoiseHelper;
     private NetworkHelper mNetworkHelper;
 
+    @Nullable
     private MusicPlayer mMusicPlayer;
 
     private boolean mLoadingPlaylist;
@@ -495,8 +496,9 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
             @Override
             public void onLossTransientCanDuck() {
-                mResumePlay = isPlayingState();
-                if (mResumePlay) {
+                mResumePlay = isPlaying();
+                if (isPlaying() && mResumePlay) {
+                    assert mMusicPlayer != null;
                     mMusicPlayer.quiet();
                 }
             }
@@ -512,7 +514,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                     return;
                 }
 
-                if (lossTransientCanDuck && isPlaying()) {
+                if (mMusicPlayer != null && lossTransientCanDuck && isPlaying()) {
                     mMusicPlayer.dismissQuiet();
                 }
             }
@@ -738,7 +740,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      * @return 如果播放器已准备完毕，则返回 true，否则返回 false
      */
     public final boolean isPrepared() {
-        return mPlayerState.isPrepared();
+        return mMusicPlayer != null && mPlayerState.isPrepared();
     }
 
     /**
@@ -751,7 +753,12 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     }
 
     private boolean isPlaying() {
-        return isPrepared() && mMusicPlayer.isPlaying();
+        if (isPrepared()) {
+            assert mMusicPlayer != null;
+            return mMusicPlayer.isPlaying();
+        }
+
+        return false;
     }
 
     private boolean isPlayingState() {
@@ -796,7 +803,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      * @return 当前正在播放的音乐的 audio session id。
      */
     public final int getAudioSessionId() {
-        if (isPrepared()) {
+        if (mMusicPlayer != null && isPrepared()) {
             return mMusicPlayer.getAudioSessionId();
         }
 
@@ -859,6 +866,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         long updateTime = mPlayerState.getPlayProgressUpdateTime();
 
         if (isPrepared()) {
+            assert mMusicPlayer != null;
             playProgress = mMusicPlayer.getProgress();
             updateTime = SystemClock.elapsedRealtime();
         }
@@ -900,6 +908,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         long updateTime = mPlayerState.getPlayProgressUpdateTime();
 
         if (isPlaying()) {
+            assert mMusicPlayer != null;
             playProgress = mMusicPlayer.getProgress();
             updateTime = SystemClock.elapsedRealtime();
         }
@@ -1033,6 +1042,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         mMediaSession.setActive(true);
         if (isPrepared()) {
+            assert mMusicPlayer != null;
             mMusicPlayer.start();
             notifyPlaying(mMusicPlayer.isStalled(), mMusicPlayer.getProgress(), SystemClock.elapsedRealtime());
             return;
@@ -1054,6 +1064,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         if (isPlaying()) {
+            assert mMusicPlayer != null;
             mMusicPlayer.pause();
         }
 
@@ -1067,6 +1078,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         if (isPrepared()) {
+            assert mMusicPlayer != null;
             mMusicPlayer.stop();
         }
 
@@ -1105,12 +1117,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (!isPrepared()) {
-            return;
+        if (isPrepared()) {
+            assert mMusicPlayer != null;
+            mSeekCompleteAction = seekCompleteAction;
+            mMusicPlayer.seekTo(progress);
         }
-
-        mSeekCompleteAction = seekCompleteAction;
-        mMusicPlayer.seekTo(progress);
     }
 
     @Override
@@ -1134,15 +1145,14 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (!isPrepared()) {
-            return;
+        if (isPrepared()) {
+            assert mMusicPlayer != null;
+            int progress = Math.min(mMusicPlayer.getDuration(),
+                    mMusicPlayer.getProgress() + FORWARD_STEP);
+
+            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_FAST_FORWARDING));
+            seekTo(progress);
         }
-
-        int progress = Math.min(mMusicPlayer.getDuration(),
-                mMusicPlayer.getProgress() + FORWARD_STEP);
-
-        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_FAST_FORWARDING));
-        seekTo(progress);
     }
 
     @Override
@@ -1161,14 +1171,13 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (!isPrepared()) {
-            return;
+        if (isPrepared()) {
+            assert mMusicPlayer != null;
+            int progress = Math.max(0, mMusicPlayer.getProgress() - FORWARD_STEP);
+
+            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_REWINDING));
+            seekTo(progress);
         }
-
-        int progress = Math.max(0, mMusicPlayer.getProgress() - FORWARD_STEP);
-
-        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_REWINDING));
-        seekTo(progress);
     }
 
     /**
@@ -1178,22 +1187,21 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      * {@link PlayerConfig#setSoundQuality(SoundQuality)} 方法后调用。
      */
     public final void notifySoundQualityChanged() {
-        if (!isPrepared()) {
-            return;
-        }
+        if (isPrepared()) {
+            assert mMusicPlayer != null;
+            boolean playing = mMusicPlayer.isPlaying();
+            final int position = mMusicPlayer.getProgress();
 
-        boolean playing = mMusicPlayer.isPlaying();
-        final int position = mMusicPlayer.getProgress();
-
-        releaseMusicPlayer();
-        prepareMusicPlayer(playing, new Runnable() {
-            @Override
-            public void run() {
-                if (position > 0) {
-                    seekTo(position);
+            releaseMusicPlayer();
+            prepareMusicPlayer(playing, new Runnable() {
+                @Override
+                public void run() {
+                    if (position > 0) {
+                        seekTo(position);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -1491,6 +1499,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         if (isPrepared()) {
+            assert mMusicPlayer != null;
             mMusicPlayer.setLooping(playMode == PlayMode.LOOP);
         }
 
@@ -1564,11 +1573,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) {
-                        if (!isPrepared()) {
-                            return;
+                        if (isPrepared()) {
+                            assert mMusicPlayer != null;
+                            mPlayerStateHelper.updatePlayProgress(mMusicPlayer.getProgress(), SystemClock.elapsedRealtime());
                         }
-
-                        mPlayerStateHelper.updatePlayProgress(mMusicPlayer.getProgress(), SystemClock.elapsedRealtime());
                     }
                 });
     }
