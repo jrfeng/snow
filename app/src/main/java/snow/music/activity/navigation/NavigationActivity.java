@@ -73,7 +73,7 @@ public class NavigationActivity extends AppCompatActivity {
         mBinding.setNavViewModel(mNavigationViewModel);
         mBinding.setLifecycleOwner(this);
 
-        observerMusicIconUri();
+        observerPlayingMusicItem();
 
         if (shouldScanLocalMusic()) {
             scanLocalMusic();
@@ -165,9 +165,14 @@ public class NavigationActivity extends AppCompatActivity {
         return !mAnimPaused && playerClient.isPlaying() && !playerClient.isPreparing() && !playerClient.isStalled();
     }
 
-    private void observerMusicIconUri() {
+    private void observerPlayingMusicItem() {
         mNavigationViewModel.getPlayingMusicItem()
                 .observe(this, musicItem -> {
+                    if (mDiskRotateAnimator != null) {
+                        mDiskRotateAnimator.cancel();
+                        mBinding.ivDiskIcon.setRotation(0);
+                    }
+
                     if (musicItem == null) {
                         mBinding.ivDiskIcon.setImageResource(0);
                         return;
