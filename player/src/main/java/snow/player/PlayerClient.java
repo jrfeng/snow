@@ -64,6 +64,10 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     private PlaylistManagerImp mPlaylistManager;
     private PlayerStateListenerImpl mPlayerStateListener;
 
+    private boolean mConnecting;
+    private boolean mAutoConnect;
+    private Runnable mConnectedAction;
+
     private final List<Player.OnPlaybackStateChangeListener> mAllPlaybackStateChangeListener;
     private final List<Player.OnPrepareListener> mAllPrepareListener;
     private final List<Player.OnStalledChangeListener> mAllStalledChangeListener;
@@ -227,8 +231,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     private void notifyConnectStateChanged(boolean connected) {
+        mConnecting = false;
         for (OnConnectStateChangeListener listener : mAllConnectStateChangeListener) {
             listener.onConnectStateChanged(connected);
+        }
+
+        if (connected && mConnectedAction != null) {
+            mConnectedAction.run();
         }
     }
 
@@ -240,6 +249,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
             return;
         }
 
+        mConnecting = true;
         mMediaBrowser.connect();
     }
 
@@ -280,6 +290,42 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public boolean isConnected() {
         return mMediaBrowser.isConnected();
+    }
+
+    /**
+     * 设置是否自动连接。
+     * <p>
+     * 如果启用了自动连接，那么在调用下面这些方法时，如果 {@link PlayerClient} 还没有连接到
+     * {@link PlayerService}，则会自动建立连接，并在连接成功后执行对应的方法。
+     * <p>
+     * 可以触发自动连接的方法：
+     * <ul>
+     * <li>{@link #play()}</li>
+     * <li>{@link #pause()}</li>
+     * <li>{@link #playPause()}</li>
+     * <li>{@link #playPause(int)}</li>
+     * <li>{@link #stop()}</li>
+     * <li>{@link #seekTo(int)}</li>
+     * <li>{@link #skipToPrevious()}</li>
+     * <li>{@link #skipToNext()}</li>
+     * <li>{@link #skipToPosition(int)}</li>
+     * <li>{@link #fastForward()}</li>
+     * <li>{@link #rewind()}</li>
+     * </ul>
+     *
+     * @param autoConnect 是否自动连接，为 true 时启用自动连接，为 false 时不启用。
+     */
+    public void setAutoConnect(boolean autoConnect) {
+        mAutoConnect = autoConnect;
+    }
+
+    /**
+     * 是否已经启用自动连接。
+     *
+     * @return 是否已经启用自动连接。
+     */
+    public boolean isAutoConnect() {
+        return mAutoConnect;
     }
 
     /**
@@ -796,6 +842,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     @Override
     public void skipToNext() {
         if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    skipToNext();
+                }
+            });
             return;
         }
 
@@ -810,6 +862,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     @Override
     public void skipToPrevious() {
         if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    skipToPrevious();
+                }
+            });
             return;
         }
 
@@ -825,12 +883,18 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @throws IllegalArgumentException 如果 position 值小于 0，则会抛出该异常。
      */
     @Override
-    public void skipToPosition(int position) throws IllegalArgumentException {
+    public void skipToPosition(final int position) throws IllegalArgumentException {
         if (position < 0) {
             throw new IllegalArgumentException("position music >= 0");
         }
 
         if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    skipToPosition(position);
+                }
+            });
             return;
         }
 
@@ -846,12 +910,18 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @throws IllegalArgumentException 如果 position 的值小于 0，则会抛出该异常。
      */
     @Override
-    public void playPause(int position) throws IllegalArgumentException {
+    public void playPause(final int position) throws IllegalArgumentException {
         if (position < 0) {
             throw new IllegalArgumentException("position music >= 0");
         }
 
         if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    playPause(position);
+                }
+            });
             return;
         }
 
@@ -875,6 +945,18 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         mPlayer.setPlayMode(playMode);
     }
 
+    private void tryAutoConnect(Runnable connectedAction) {
+        if (isConnected() || !mAutoConnect) {
+            return;
+        }
+
+        mConnectedAction = connectedAction;
+
+        if (!mConnecting) {
+            connect();
+        }
+    }
+
     /**
      * 开始播放。
      * <p>
@@ -883,6 +965,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     @Override
     public void play() {
         if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    play();
+                }
+            });
             return;
         }
 
@@ -897,6 +985,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     @Override
     public void pause() {
         if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    pause();
+                }
+            });
             return;
         }
 
@@ -911,6 +1005,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     @Override
     public void stop() {
         if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    stop();
+                }
+            });
             return;
         }
 
@@ -925,6 +1025,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     @Override
     public void playPause() {
         if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    playPause();
+                }
+            });
             return;
         }
 
@@ -939,8 +1045,14 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @param progress 要调整到的播放进度（单位：毫秒）
      */
     @Override
-    public void seekTo(int progress) {
+    public void seekTo(final int progress) {
         if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    seekTo(progress);
+                }
+            });
             return;
         }
 
@@ -970,6 +1082,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     @Override
     public void fastForward() {
         if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    fastForward();
+                }
+            });
             return;
         }
 
@@ -984,6 +1102,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     @Override
     public void rewind() {
         if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    rewind();
+                }
+            });
             return;
         }
 
