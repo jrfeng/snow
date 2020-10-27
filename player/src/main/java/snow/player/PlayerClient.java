@@ -946,7 +946,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     private void tryAutoConnect(Runnable connectedAction) {
-        if (isConnected() || !mAutoConnect) {
+        if (!mAutoConnect || isConnected()) {
             return;
         }
 
