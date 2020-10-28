@@ -3,6 +3,6 @@
     <color name="colorPrimary">@color/deep_purple_400</color>
     <color name="colorPrimaryDark">@color/deep_purple_400</color>
     <color name="colorAccent">@color/deep_purple_400</color>
-    <color name="colorWindowBackground">@android:color/white</color>
-    <color name="colorText">@color/grey_900</color>
+    <color name="colorWindowBackground">@color/grey_800</color>
+    <color name="colorText">@android:color/white</color>
 </resources>
