@@ -1,11 +1,13 @@
 package snow.music.util;
 
 import android.app.Dialog;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StyleRes;
 
@@ -141,5 +143,42 @@ public final class DialogUtil {
         }
 
         window.setWindowAnimations(styleRes);
+    }
+
+    /**
+     * 设置 Dialog 的背景。
+     *
+     * @param dialog   Dialog 对象，不能为 null
+     * @param drawable Drawable 对象，不能为 null
+     */
+    public static void setBackgroundDrawable(@NonNull Dialog dialog, @NonNull Drawable drawable) {
+        Preconditions.checkNotNull(dialog);
+        Preconditions.checkNotNull(drawable);
+
+        Window window = dialog.getWindow();
+        if (window == null) {
+            Log.e(TAG, "The Window of dialog is null.");
+            return;
+        }
+
+        window.setBackgroundDrawable(drawable);
+    }
+
+    /**
+     * 设置 Dialog 的背景。
+     *
+     * @param dialog     Dialog 对象，不能为 null
+     * @param drawableId Drawable 资源的 ID
+     */
+    public static void setBackgroundDrawableResource(@NonNull Dialog dialog, @DrawableRes int drawableId) {
+        Preconditions.checkNotNull(dialog);
+
+        Window window = dialog.getWindow();
+        if (window == null) {
+            Log.e(TAG, "The Window of dialog is null.");
+            return;
+        }
+
+        window.setBackgroundDrawableResource(drawableId);
     }
 }
