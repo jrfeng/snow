@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -19,6 +20,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
+import snow.music.dialog.playlist.PlaylistDialog;
 import snow.music.store.MusicStore;
 import snow.music.util.MusicUtil;
 import snow.player.PlaybackState;
@@ -136,8 +138,8 @@ public class NavigationViewModel extends ViewModel {
     public void showPlaylist(View view) {
         Preconditions.checkNotNull(view);
 
-        // TODO
-        Log.d("DEBUG", "showPlaylist");
+        PlaylistDialog playlistDialog = PlaylistDialog.newInstance();
+        playlistDialog.show(((AppCompatActivity) view.getContext()).getSupportFragmentManager(), "PlaylistDialog");
     }
 
     public void navigateToSearch() {
