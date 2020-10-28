@@ -42,7 +42,6 @@ public class NavigationActivity extends AppCompatActivity {
     private static final String KEY_SCAN_LOCAL_MUSIC = "scan_local_music";
     private static final int PERMISSION_REQUEST_CODE = 1;
     private boolean mScanOnPermissionGranted;
-    private boolean mRepeatedRequestStoragePermission;
 
     private ActivityNavigationBinding mBinding;
     private ScannerViewModel mScannerViewModel;
@@ -174,26 +173,12 @@ public class NavigationActivity extends AppCompatActivity {
         }
 
         if (grantResults.length <= 0 || grantResults[0] == PackageManager.PERMISSION_DENIED) {
-            showRequestPermissionRationale();
             return;
         }
 
         if (mScanOnPermissionGranted) {
             scanLocalMusicAsync();
         }
-    }
-
-    private void showRequestPermissionRationale() {
-        if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            return;
-        }
-
-        if (mRepeatedRequestStoragePermission) {
-            return;
-        }
-
-        mRepeatedRequestStoragePermission = true;
-        requestStoragePermission();
     }
 
     private void scanLocalMusicAsync() {
