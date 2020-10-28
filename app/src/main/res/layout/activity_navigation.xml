@@ -4,6 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <variable
+            name="playerViewModel"
+            type="snow.player.lifecycle.PlayerViewModel" />
 
         <variable
             name="navViewModel"
@@ -94,7 +97,7 @@
                 android:ellipsize="middle"
                 android:gravity="center_horizontal"
                 android:singleLine="true"
-                android:text="@{navViewModel.title}"
+                android:text="@{playerViewModel.title}"
                 tools:text="@string/snow_music_item_unknown_title" />
 
             <TextView
@@ -106,7 +109,7 @@
                 android:ellipsize="middle"
                 android:gravity="center_horizontal"
                 android:singleLine="true"
-                android:text="@{navViewModel.artist}"
+                android:text="@{playerViewModel.artist}"
                 android:textSize="12sp"
                 tools:text="@string/snow_music_item_unknown_artist" />
 
@@ -356,7 +359,7 @@
                         android:layout_gravity="center"
                         android:background="@drawable/bg_button_48dp"
                         android:contentDescription="@string/des_skip_to_previous"
-                        android:onClick="@{() -> navViewModel.skipToPrevious()}"
+                        android:onClick="@{() -> playerViewModel.skipToPrevious()}"
                         android:scaleType="centerInside"
                         app:srcCompat="@drawable/ic_skip_to_previous" />
 
@@ -374,7 +377,7 @@
                         android:layout_gravity="center"
                         android:background="@drawable/bg_play_pause"
                         android:contentDescription="@string/des_play_pause"
-                        android:onClick="@{() -> navViewModel.playPause()}"
+                        android:onClick="@{() -> playerViewModel.playPause()}"
                         android:scaleType="centerInside"
                         app:srcCompat="@{navViewModel.playPauseDrawable}"
                         tools:src="@drawable/ic_play" />
@@ -392,7 +395,7 @@
                         android:layout_gravity="center"
                         android:background="@drawable/bg_button_48dp"
                         android:contentDescription="@string/des_skip_to_next"
-                        android:onClick="@{() -> navViewModel.skipToNext()}"
+                        android:onClick="@{() -> playerViewModel.skipToNext()}"
                         android:scaleType="centerInside"
                         app:srcCompat="@drawable/ic_skip_to_next" />
 
@@ -409,7 +412,7 @@
                         android:layout_gravity="center"
                         android:background="@drawable/bg_button_48dp"
                         android:contentDescription="@string/des_show_playlist"
-                        android:onClick="@{() -> navViewModel.showPlaylist()}"
+                        android:onClick="@{(view) -> navViewModel.showPlaylist(view)}"
                         android:scaleType="centerInside"
                         app:srcCompat="@drawable/ic_playlist" />
 
@@ -422,8 +425,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
                 android:layout_gravity="bottom"
-                android:max="@{navViewModel.duration}"
-                android:progress="@{navViewModel.playProgress}"
+                android:max="@{playerViewModel.duration}"
+                android:progress="@{playerViewModel.playProgress}"
                 android:progressDrawable="@drawable/progress_navigation"
                 tools:progress="50" />
 

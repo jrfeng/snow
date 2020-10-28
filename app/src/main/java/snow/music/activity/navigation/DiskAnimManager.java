@@ -14,6 +14,7 @@ import androidx.lifecycle.OnLifecycleEvent;
 import com.google.common.base.Preconditions;
 
 import snow.player.PlayerClient;
+import snow.player.lifecycle.PlayerViewModel;
 
 /**
  * 管理布局中 {@link snow.music.R.id#ivDisk } 的动画。
@@ -21,7 +22,7 @@ import snow.player.PlayerClient;
 public class DiskAnimManager implements LifecycleObserver {
     private View mTarget;
     private LifecycleOwner mLifecycleOwner;
-    private NavigationViewModel mNavigationViewModel;
+    private PlayerViewModel mPlayerViewModel;
 
     private ObjectAnimator mDiskRotateAnimator;
     private long mDiskAnimPlayTime;
@@ -30,14 +31,14 @@ public class DiskAnimManager implements LifecycleObserver {
 
     public DiskAnimManager(@NonNull View target,
                            @NonNull LifecycleOwner lifecycleOwner,
-                           @NonNull NavigationViewModel viewModel) {
+                           @NonNull PlayerViewModel viewModel) {
         Preconditions.checkNotNull(target);
         Preconditions.checkNotNull(lifecycleOwner);
         Preconditions.checkNotNull(viewModel);
 
         mTarget = target;
         mLifecycleOwner = lifecycleOwner;
-        mNavigationViewModel = viewModel;
+        mPlayerViewModel = viewModel;
         initDiskRotateAnim();
 
         lifecycleOwner.getLifecycle().addObserver(this);
@@ -78,7 +79,7 @@ public class DiskAnimManager implements LifecycleObserver {
         mDiskRotateAnimator.setRepeatMode(ObjectAnimator.RESTART);
         mDiskRotateAnimator.setInterpolator(new LinearInterpolator());
 
-        mNavigationViewModel.getPlayingNoStalled()
+        mPlayerViewModel.getPlayingNoStalled()
                 .observe(mLifecycleOwner, playingNoStalled -> {
                     if (playingNoStalled) {
                         resumeAnim();
@@ -126,7 +127,7 @@ public class DiskAnimManager implements LifecycleObserver {
     }
 
     private boolean shouldStartAnim() {
-        PlayerClient playerClient = mNavigationViewModel.getPlayerClient();
+        PlayerClient playerClient = mPlayerViewModel.getPlayerClient();
         return !mActivityStopped && playerClient.isPlaying() && !playerClient.isPreparing() && !playerClient.isStalled();
     }
 }

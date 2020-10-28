@@ -35,6 +35,7 @@ import snow.music.util.MusicUtil;
 import snow.player.PlayerClient;
 import snow.player.PlayerService;
 import snow.player.audio.MusicItem;
+import snow.player.lifecycle.PlayerViewModel;
 import snow.player.playlist.Playlist;
 
 public class NavigationActivity extends AppCompatActivity {
@@ -45,6 +46,7 @@ public class NavigationActivity extends AppCompatActivity {
 
     private ActivityNavigationBinding mBinding;
     private ScannerViewModel mScannerViewModel;
+    private PlayerViewModel mPlayerViewModel;
     private NavigationViewModel mNavigationViewModel;
 
     private DiskAnimManager mDiskAnimManager;
@@ -56,16 +58,13 @@ public class NavigationActivity extends AppCompatActivity {
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_navigation);
 
-        ViewModelProvider viewModelProvider = new ViewModelProvider(this);
-        mNavigationViewModel = viewModelProvider.get(NavigationViewModel.class);
-        initNavigationViewModel(mNavigationViewModel);
+        initAllViewModel();
 
-        mScannerViewModel = viewModelProvider.get(ScannerViewModel.class);
-
+        mBinding.setPlayerViewModel(mPlayerViewModel);
         mBinding.setNavViewModel(mNavigationViewModel);
         mBinding.setLifecycleOwner(this);
 
-        mDiskAnimManager = new DiskAnimManager(mBinding.ivDisk, this, mNavigationViewModel);
+        mDiskAnimManager = new DiskAnimManager(mBinding.ivDisk, this, mPlayerViewModel);
         observerPlayingMusicItem();
 
         if (shouldScanLocalMusic()) {
@@ -81,20 +80,40 @@ public class NavigationActivity extends AppCompatActivity {
         }
     }
 
-    private void initNavigationViewModel(NavigationViewModel navigationViewModel) {
-        if (navigationViewModel.isInitialized()) {
+    private void initAllViewModel() {
+        ViewModelProvider viewModelProvider = new ViewModelProvider(this);
+
+        mPlayerViewModel = viewModelProvider.get(PlayerViewModel.class);
+        mNavigationViewModel = viewModelProvider.get(NavigationViewModel.class);
+        mScannerViewModel = viewModelProvider.get(ScannerViewModel.class);
+
+        initPlayerViewModel();
+        initNavigationViewModel();
+    }
+
+    private void initPlayerViewModel() {
+        if (mPlayerViewModel.isInitialized()) {
             return;
         }
 
         PlayerClient playerClient = PlayerClient.newInstance(this, PlayerService.class);
-        navigationViewModel.init(this, playerClient);
+        playerClient.setAutoConnect(true);
         playerClient.connect();
 
-        navigationViewModel.setAutoDisconnect(true);
+        mPlayerViewModel.init(this, playerClient);
+        mPlayerViewModel.setAutoDisconnect(true);
+    }
+
+    private void initNavigationViewModel() {
+        if (mNavigationViewModel.isInitialized()) {
+            return;
+        }
+
+        mNavigationViewModel.init(mPlayerViewModel);
     }
 
     private void observerPlayingMusicItem() {
-        mNavigationViewModel.getPlayingMusicItem()
+        mPlayerViewModel.getPlayingMusicItem()
                 .observe(this, musicItem -> {
                     mDiskAnimManager.reset();
 
@@ -183,7 +202,7 @@ public class NavigationActivity extends AppCompatActivity {
                 .putBoolean(KEY_SCAN_LOCAL_MUSIC, false)
                 .apply();
 
-        mScannerViewModel.scan(30_000, new ScanCompleteListener(mNavigationViewModel.getPlayerClient()));
+        mScannerViewModel.scan(30_000, new ScanCompleteListener(mPlayerViewModel.getPlayerClient()));
     }
 
     private static class ScanCompleteListener implements ScannerViewModel.OnScanCompleteListener {
