@@ -15,7 +15,6 @@
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ellipsize="middle"
         android:singleLine="true"
         tools:text="@string/snow_music_item_unknown_title" />
 
