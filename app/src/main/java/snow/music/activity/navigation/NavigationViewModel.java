@@ -1,6 +1,5 @@
 package snow.music.activity.navigation;
 
-import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
@@ -20,7 +19,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
-import snow.music.dialog.playlist.PlaylistDialog;
+import snow.music.dialog.PlaylistDialog;
 import snow.music.store.MusicStore;
 import snow.music.util.MusicUtil;
 import snow.player.PlaybackState;

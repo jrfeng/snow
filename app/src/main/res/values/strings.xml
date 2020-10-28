@@ -10,6 +10,10 @@
     <string name="item_album">Album</string>
     <string name="item_history">History</string>
 
+    <!-- PlaylistDialog -->
+    <string name="playlist">Playlist</string>
+    <string name="playlist_empty">Playlist is empty</string>
+
     <!-- content description -->
     <string name="des_logo">logo</string>
     <string name="des_search">Search</string>
@@ -26,4 +30,5 @@
     <string name="des_play_pause">Play Pause</string>
     <string name="des_skip_to_next">Skip To Next</string>
     <string name="des_show_playlist">Show Playlist</string>
+    <string name="des_locate_playing_music">Locate Playing Music</string>
 </resources>

@@ -24,4 +24,7 @@
     <string name="des_play_pause">播放/暂停</string>
     <string name="des_skip_to_next">下一曲</string>
     <string name="des_show_playlist">显示播放列表</string>
+    <string name="playlist">播放列表</string>
+    <string name="des_locate_playing_music">定位正在播放的音乐</string>
+    <string name="playlist_empty">播放列表为空</string>
 </resources>

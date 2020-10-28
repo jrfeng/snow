@@ -5,4 +5,5 @@
     <color name="colorAccent">@color/deep_purple_400</color>
     <color name="colorWindowBackground">@android:color/white</color>
     <color name="colorText">@color/grey_900</color>
+    <color name="colorDivider">@color/grey_300</color>
 </resources>
