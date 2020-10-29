@@ -27,13 +27,13 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.databinding.ActivityNavigationBinding;
+import snow.music.service.AppPlayerService;
 import snow.music.viewmodel.ScannerViewModel;
 import snow.music.store.Music;
 import snow.music.store.MusicStore;
 import snow.music.util.EmbeddedPictureUtil;
 import snow.music.util.MusicUtil;
 import snow.player.PlayerClient;
-import snow.player.PlayerService;
 import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 import snow.player.playlist.Playlist;
@@ -95,7 +95,7 @@ public class NavigationActivity extends AppCompatActivity {
             return;
         }
 
-        PlayerClient playerClient = PlayerClient.newInstance(this, PlayerService.class);
+        PlayerClient playerClient = PlayerClient.newInstance(this, AppPlayerService.class);
         playerClient.setAutoConnect(true);
         playerClient.connect();
 
