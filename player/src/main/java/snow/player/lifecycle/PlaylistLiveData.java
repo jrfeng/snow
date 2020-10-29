@@ -1,7 +1,5 @@
 package snow.player.lifecycle;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 
@@ -15,64 +13,68 @@ import snow.player.playlist.PlaylistManager;
 /**
  * 用于监听 {@link PlayerClient} 的播放列表。
  * <p>
- * {@link PlaylistLiveData} 是惰性的，它只会在 onActive 时开始监听 {@link PlayerClient} 的播放列表，
+ * 情况下，{@link PlaylistLiveData} 是惰性的，它只会在 onActive 时开始监听 {@link PlayerClient} 的播放列表，
  * 并且会在 onInactive 时自动取消对 {@link PlayerClient} 的播放列表的监听。
- * <p>
- * 最后，当你不再需要 {@link PlaylistLiveData} 时，应该调用 {@link #release()} 方法将其释放。
  */
 public class PlaylistLiveData extends LiveData<Playlist>
         implements Player.OnPlaylistChangeListener {
     private static final String TAG = "PlaylistLiveData";
     private PlayerClient mPlayerClient;
-    private boolean mActive;
-
-    public PlaylistLiveData() {
-        super(new Playlist.Builder().build());
-    }
+    private boolean mLazy;
 
     /**
-     * 初始化 {@link PlaylistLiveData}。
+     * 创建一个 {@link PlaylistLiveData} 对象。
+     * <p>
+     * 使用该构造器创建的 {@link PlaylistLiveData} 对象默认是惰性的，只会在 onActive 时开始监听
+     * {@link PlayerClient} 的播放列表，并且会在 onInactive 时自动取消对 {@link PlayerClient}
+     * 的播放列表的监听。
      *
-     * @param playerClient 要监听的 PlayerClient 对象
+     * @param playerClient {@link PlayerClient} 对象，不能为 null
+     * @param value        LiveData 的初始化值
      */
-    public void init(@NonNull PlayerClient playerClient) {
-        Preconditions.checkNotNull(playerClient);
-        mPlayerClient = playerClient;
-
-        if (mActive) {
-            observePlaylist();
-        }
+    public PlaylistLiveData(@NonNull PlayerClient playerClient, Playlist value) {
+        this(playerClient, value, true);
     }
 
     /**
-     * 释放 PlaylistLiveData，调用该方法后请不要再尝试使用 PlaylistLiveData，因为这可能会导致未知错误。
+     * 创建一个 {@link PlaylistLiveData} 对象。
+     *
+     * @param playerClient {@link PlayerClient} 对象，不能为 null
+     * @param value        LiveData 的初始化值
+     * @param lazy         当前 LiveData 是否是惰性的。如果是，则只会在 onActive 时开始监听
+     *                     {@link PlayerClient} 的播放列表，并且会在 onInactive 时自动取消对
+     *                     {@link PlayerClient} 的播放列表的监听。
      */
-    public void release() {
-        onInactive();
-        mPlayerClient = null;
-    }
+    public PlaylistLiveData(@NonNull PlayerClient playerClient, Playlist value, boolean lazy) {
+        super(value);
+        Preconditions.checkNotNull(playerClient);
 
-    private boolean notInit() {
-        return mPlayerClient == null;
-    }
+        mPlayerClient = playerClient;
+        mLazy = lazy;
 
-    @Override
-    protected void onActive() {
-        mActive = true;
-        if (notInit()) {
-            Log.e(TAG, "PlaylistLiveData not init.");
+        if (mLazy) {
             return;
         }
 
         observePlaylist();
     }
 
+    /**
+     * 当前 LiveData 是否是惰性的。
+     *
+     * @return 如果当前 LiveData 是惰性的，则返回 true，否则返回 false
+     */
+    public boolean isLazy() {
+        return mLazy;
+    }
+
+    @Override
+    protected void onActive() {
+        observePlaylist();
+    }
+
     @Override
     protected void onInactive() {
-        mActive = false;
-        if (notInit()) {
-            return;
-        }
         mPlayerClient.removeOnPlaylistChangeListener(this);
     }
 

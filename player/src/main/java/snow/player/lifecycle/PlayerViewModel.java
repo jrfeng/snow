@@ -52,7 +52,6 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<String> mErrorMessage;
     private MutableLiveData<MusicItem> mPlayingMusicItem;
     private MutableLiveData<Boolean> mPlayingNoStalled;
-    private PlaylistLiveData mPlaylist;
 
     private Player.OnPlayingMusicItemChangeListener mPlayingMusicItemChangeListener;
     private Player.OnPlaylistChangeListener mPlaylistChangeListener;
@@ -400,7 +399,6 @@ public class PlayerViewModel extends ViewModel {
         mInitialized = false;
         mProgressClock.cancel();
         mSleepTimerProgressClock.cancel();
-        mPlaylist.release();
         removeAllListener();
 
         if (mAutoDisconnect) {
@@ -1046,8 +1044,6 @@ public class PlayerViewModel extends ViewModel {
         mErrorMessage = new MutableLiveData<>(mPlayerClient.getErrorMessage());
         mPlayingMusicItem = new MutableLiveData<>(mPlayerClient.getPlayingMusicItem());
         mPlayingNoStalled = new MutableLiveData<>(mPlayerClient.isPlaying() && !mPlayerClient.isStalled());
-        mPlaylist = new PlaylistLiveData();
-        mPlaylist.init(mPlayerClient);
     }
 
     private int getDurationSec() {
