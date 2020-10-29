@@ -935,6 +935,11 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     @Override
+    public void removeMusicItem(int position) {
+        mPlayer.removeMusicItem(position);
+    }
+
+    @Override
     public void setNextPlay(@NonNull MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
         mPlayer.setNextPlay(musicItem);

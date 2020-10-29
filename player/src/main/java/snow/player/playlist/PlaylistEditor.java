@@ -50,6 +50,13 @@ public interface PlaylistEditor {
     void removeMusicItem(@NonNull MusicItem musicItem);
 
     /**
+     * 移除播放列表中指定位置的歌曲。
+     *
+     * @param position 要移除的歌曲的位置
+     */
+    void removeMusicItem(int position);
+
+    /**
      * 设置 “下一次播放” 的歌曲。
      *
      * @param musicItem 要设定为 “下一次播放” 的歌曲，如果歌曲已存在播放列表中，则会移动到 “下一曲播放” 的位

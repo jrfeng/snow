@@ -1713,6 +1713,29 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     }
 
     @Override
+    public void removeMusicItem(final int position) {
+        if (!mPlaylistManager.isPlaylistEditable()) {
+            return;
+        }
+
+        if (mLoadingPlaylist) {
+            mPlaylistLoadedAction = new Runnable() {
+                @Override
+                public void run() {
+                    removeMusicItem(position);
+                }
+            };
+            return;
+        }
+
+        if (position < 0 || position >= mPlaylist.size()) {
+            return;
+        }
+
+        removeMusicItem(mPlaylist.get(position));
+    }
+
+    @Override
     public void setNextPlay(@NonNull final MusicItem musicItem) {
         if (!mPlaylistManager.isPlaylistEditable()) {
             return;

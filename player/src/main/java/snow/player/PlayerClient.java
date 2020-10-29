@@ -1835,6 +1835,15 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     @Override
+    public void removeMusicItem(int position) {
+        if (!isConnected()) {
+            return;
+        }
+
+        mPlaylistEditor.removeMusicItem(position);
+    }
+
+    @Override
     public void setNextPlay(@NonNull MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
         if (!isConnected()) {
