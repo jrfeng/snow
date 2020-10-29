@@ -1699,13 +1699,14 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                 int playPosition = mPlayerState.getPlayPosition();
                 notifyPlaylistChanged(playPosition);
 
-                if (mPlaylist.size() < 1) {
+                if (mPlaylist.isEmpty()) {
                     notifyPlayingMusicItemChanged(null, playPosition, false);
                     notifyStopped();
                     return;
                 }
 
                 if (index == oldPlayPosition) {
+                    playPosition = playPosition < mPlaylist.size() ? playPosition : 0;
                     notifyPlayingMusicItemChanged(mPlaylist.get(playPosition), playPosition, isPlaying());
                 }
             }
