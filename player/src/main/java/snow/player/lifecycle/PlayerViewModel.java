@@ -678,24 +678,6 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 获取播放列表。
-     * <p>
-     * 需要向 LiveData 至少注册一个观察者，才会在播放列表发生改变时实时更新当前 LiveData 的值。如果当前
-     * LiveData 没有任何观察者，出于性能考虑，不会实时更新当前 LiveData 的值。
-     *
-     * @return 包含当前播放列表的 LiveData 对象
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
-     */
-    @NonNull
-    public LiveData<Playlist> getPlaylist() throws IllegalStateException {
-        if (!isInitialized()) {
-            throw new IllegalStateException("PlayerViewModel not initialized yet.");
-        }
-
-        return mPlaylist;
-    }
-
-    /**
      * 获取歌曲的持续时间（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"
      *
      * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
