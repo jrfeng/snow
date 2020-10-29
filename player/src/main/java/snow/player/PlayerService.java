@@ -799,8 +799,6 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
-        mNotificationView.setPlayingMusicItem(musicItem);
-
         if (shouldBeForeground() && !isForeground()) {
             startForeground();
             return;
@@ -1041,6 +1039,12 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
+        if (mNotificationView != null && musicItem != null) {
+            mNotificationView.setPlayingMusicItem(musicItem);
+        }
+
+        updateNotificationView();
+
         if (mHistoryRecorder != null && musicItem != null) {
             mHistoryRecorder.recordHistory(musicItem);
         }
@@ -1245,7 +1249,6 @@ public class PlayerService extends MediaBrowserServiceCompat
         @Override
         protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
             super.onPlayingMusicItemChanged(musicItem);
-            PlayerService.this.updateNotificationView();
             PlayerService.this.onPlayingMusicItemChanged(musicItem);
         }
 
@@ -1459,6 +1462,9 @@ public class PlayerService extends MediaBrowserServiceCompat
          */
         @SuppressWarnings("EmptyMethod")
         protected void onRelease() {
+        }
+
+        protected void onPlayingMusicItemChanged(@NonNull MusicItem musicItem) {
         }
 
         /**
@@ -1887,6 +1893,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
             mNeedReloadIcon = true;
             mMusicItem = musicItem;
+            onPlayingMusicItemChanged(musicItem);
         }
 
         boolean isNeedReloadIcon() {
