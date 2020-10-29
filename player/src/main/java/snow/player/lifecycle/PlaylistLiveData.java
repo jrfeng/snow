@@ -81,20 +81,15 @@ public class PlaylistLiveData extends LiveData<Playlist>
 
     @Override
     public void onPlaylistChanged(PlaylistManager playlistManager, int position) {
-        updatePlaylist(playlistManager);
-    }
-
-    private void observePlaylist() {
-        mPlayerClient.addOnPlaylistChangeListener(this);
-        updatePlaylist(mPlayerClient.getPlaylistManager());
-    }
-
-    private void updatePlaylist(PlaylistManager playlistManager) {
         playlistManager.getPlaylist(new PlaylistManager.Callback() {
             @Override
             public void onFinished(@NonNull Playlist playlist) {
                 setValue(playlist);
             }
         });
+    }
+
+    private void observePlaylist() {
+        mPlayerClient.addOnPlaylistChangeListener(this);
     }
 }
