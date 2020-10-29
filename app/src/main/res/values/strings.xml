@@ -31,4 +31,6 @@
     <string name="des_skip_to_next">Skip To Next</string>
     <string name="des_show_playlist">Show Playlist</string>
     <string name="des_locate_playing_music">Locate Playing Music</string>
+    <string name="des_remove_music">Playlist is empty</string>
+
 </resources>

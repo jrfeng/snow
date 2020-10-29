@@ -34,7 +34,7 @@
                 android:layout_width="0dp"
                 android:layout_height="36dp"
                 android:layout_weight="1"
-                android:background="@drawable/bg_grey_round_rect_corner_4dp"
+                android:background="@drawable/shape_rect_corner_4dp_grey_200"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"

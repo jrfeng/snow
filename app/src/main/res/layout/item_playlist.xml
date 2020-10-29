@@ -1,21 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/playlistItem"
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:background="@drawable/bg_list_item"
     android:clickable="true"
     android:focusable="true"
     android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp">
+    android:orientation="horizontal">
+
+    <Space
+        android:layout_width="16dp"
+        android:layout_height="0dp" />
 
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:singleLine="true"
         tools:text="@string/snow_music_item_unknown_title" />
+
+    <FrameLayout
+        android:id="@+id/mark"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:background="@drawable/shape_oval_deep_purple_400"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <ImageButton
+        android:id="@+id/btnRemove"
+        android:layout_width="@dimen/image_button_size"
+        android:layout_height="@dimen/image_button_size"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_button_48dp"
+        android:contentDescription="@string/des_remove_music"
+        android:scaleType="centerInside"
+        app:srcCompat="@drawable/ic_delete" />
+
+    <Space
+        android:layout_width="8dp"
+        android:layout_height="0dp" />
 
 </LinearLayout>

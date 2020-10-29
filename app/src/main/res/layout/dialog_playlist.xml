@@ -12,10 +12,11 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp">
+            android:gravity="center_vertical">
+
+            <Space
+                android:layout_width="16dp"
+                android:layout_height="0dp" />
 
             <TextView
                 android:id="@+id/tvPlaylistTitle"
@@ -26,7 +27,7 @@
                 android:textSize="16sp" />
 
             <ImageButton
-                android:id="@+id/btnLocation"
+                android:id="@+id/btnLocate"
                 android:layout_width="@dimen/image_button_size"
                 android:layout_height="@dimen/image_button_size"
                 android:layout_gravity="center"
@@ -34,6 +35,10 @@
                 android:contentDescription="@string/des_locate_playing_music"
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/ic_locate" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="0dp" />
 
         </LinearLayout>
 

@@ -27,4 +27,5 @@
     <string name="playlist">播放列表</string>
     <string name="des_locate_playing_music">定位正在播放的音乐</string>
     <string name="playlist_empty">播放列表为空</string>
+    <string name="des_remove_music">移除歌曲</string>
 </resources>
