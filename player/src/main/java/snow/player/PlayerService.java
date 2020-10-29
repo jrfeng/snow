@@ -1399,11 +1399,12 @@ public class PlayerService extends MediaBrowserServiceCompat
         public static final String CHANNEL_ID = "player";
 
         private PlayerService mPlayerService;
-        private MusicItem mMusicItem;
+
+        private MusicItem mPlayingMusicItem;
+        private boolean mExpire;
 
         private int[] mIconSize;            // [width, height]
         private int[] mIconCornerRadius;    // [topLeft, topRight, bottomRight, bottomLeft]
-        private boolean mNeedReloadIcon;
         private Bitmap mIcon;
         private Bitmap mDefaultIcon;
         private CustomTarget<Bitmap> mTarget;
@@ -1416,7 +1417,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         void init(PlayerService playerService) {
             mPlayerService = playerService;
-            mMusicItem = new MusicItem();
+            mPlayingMusicItem = new MusicItem();
             mIconSize = new int[2];
             mIconCornerRadius = new int[4];
 
@@ -1424,7 +1425,6 @@ public class PlayerService extends MediaBrowserServiceCompat
             mIcon = mDefaultIcon;
 
             setIconSize(playerService.getResources().getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
-            setNeedReloadIcon(true);
             onInit(mPlayerService);
 
             mTarget = new CustomTarget<Bitmap>(mIconSize[0], mIconSize[1]) {
@@ -1464,17 +1464,12 @@ public class PlayerService extends MediaBrowserServiceCompat
         protected void onRelease() {
         }
 
-        protected void onPlayingMusicItemChanged(@NonNull MusicItem musicItem) {
-        }
-
         /**
          * 加载当前正在播放的歌曲的图标。
          * <p>
          * 你可以重写该方法实现自己的图标加载逻辑。
          */
         protected void reloadIcon() {
-            setNeedReloadIcon(false);
-
             Glide.with(getContext())
                     .clear(mTarget);
 
@@ -1854,7 +1849,7 @@ public class PlayerService extends MediaBrowserServiceCompat
          */
         @NonNull
         public final MusicItem getPlayingMusicItem() {
-            return mMusicItem;
+            return mPlayingMusicItem;
         }
 
         /**
@@ -1864,6 +1859,17 @@ public class PlayerService extends MediaBrowserServiceCompat
          */
         public final MediaSessionCompat getMediaSession() {
             return mPlayerService.getMediaSession();
+        }
+
+        /**
+         * 通知是否已经过期。
+         * <p>
+         * 通知会在当前正在播放的音乐改变时过期。你可以在 {@link #onCreateNotification()}
+         * 方法中调用该方法检测当前通知是否已过期，如果已过期，
+         * 则你应该重新获取与当前正在播放的歌曲相关的信息，例如重新获取歌曲的封面图片。
+         */
+        public final boolean isExpire() {
+            return mExpire;
         }
 
         /**
@@ -1879,29 +1885,22 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         @NonNull
         Notification createNotification() {
-            if (isNeedReloadIcon()) {
+            if (mExpire) {
                 reloadIcon();
             }
-            return onCreateNotification();
+            Notification notification = onCreateNotification();
+            mExpire = false;
+            return notification;
         }
 
         void setPlayingMusicItem(@NonNull MusicItem musicItem) {
             Preconditions.checkNotNull(musicItem);
-            if (mMusicItem.equals(musicItem)) {
+            if (mPlayingMusicItem.equals(musicItem)) {
                 return;
             }
 
-            mNeedReloadIcon = true;
-            mMusicItem = musicItem;
-            onPlayingMusicItemChanged(musicItem);
-        }
-
-        boolean isNeedReloadIcon() {
-            return mNeedReloadIcon;
-        }
-
-        void setNeedReloadIcon(boolean needReloadIcon) {
-            mNeedReloadIcon = needReloadIcon;
+            mPlayingMusicItem = musicItem;
+            mExpire = true;
         }
     }
 
