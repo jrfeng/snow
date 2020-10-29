@@ -7,11 +7,8 @@ import androidx.lifecycle.LiveData;
 
 import com.google.common.base.Preconditions;
 
-import java.util.ArrayList;
-
 import snow.player.Player;
 import snow.player.PlayerClient;
-import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
 
