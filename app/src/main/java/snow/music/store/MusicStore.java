@@ -683,6 +683,8 @@ public class MusicStore {
     public interface OnFavoriteChangeListener {
         /**
          * 当 “我喜欢” 歌单被修改时，会调用该方法。
+         * <p>
+         * 该回调方法会在应用程序主线程调用。
          */
         void onFavoriteChanged();
     }
