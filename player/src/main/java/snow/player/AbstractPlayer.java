@@ -116,8 +116,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                           @NonNull PlayerConfig playerConfig,
                           @NonNull PlayerState playerState,
                           @NonNull PlaylistManagerImp playlistManager,
-                          @NonNull AppWidgetPreferences pref,
-                          boolean prepare) {
+                          @NonNull AppWidgetPreferences pref) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerConfig);
         Preconditions.checkNotNull(playerState);
@@ -136,10 +135,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         mNetworkHelper.subscribeNetworkState();
         reloadPlaylist();
-
-        if (prepare) {
-            prepareMusicPlayer(false, null);
-        }
     }
 
     /**

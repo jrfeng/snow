@@ -175,10 +175,6 @@ public class PlayerService extends MediaBrowserServiceCompat
         initCustomActionReceiver();
 
         keepServiceAlive();
-
-        if (mNotificationView != null && mNotificationView.isNotifyOnCreate()) {
-            updateNotificationView();
-        }
     }
 
     @Override
@@ -275,14 +271,11 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void initPlayer() {
-        boolean prepare = mNotificationView != null && mNotificationView.isNotifyOnCreate();
-
         mPlayer = new PlayerImp(this,
                 mPlayerConfig,
                 mPlayerState,
                 mPlaylistManager,
-                new AppWidgetPreferences(this, this.getClass()),
-                prepare);
+                new AppWidgetPreferences(this, this.getClass()));
     }
 
     private void initCustomActionDispatcher() {
@@ -816,8 +809,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             return true;
         }
 
-        return mPlayerState.getPlaybackState() == PlaybackState.STOPPED &&
-                !mNotificationView.isKeepOnStopped();
+        return mPlayerState.getPlaybackState() == PlaybackState.STOPPED;
     }
 
     private boolean noNotificationView() {
@@ -1030,11 +1022,6 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
-        if (mNotificationView.isKeepOnStopped()) {
-            updateNotificationView();
-            return;
-        }
-
         stopForegroundEx(true);
     }
 
@@ -1178,9 +1165,8 @@ public class PlayerService extends MediaBrowserServiceCompat
                          @NonNull PlayerConfig playerConfig,
                          @NonNull PlayerState playlistState,
                          @NonNull PlaylistManagerImp playlistManager,
-                         @NonNull AppWidgetPreferences pref,
-                         boolean prepare) {
-            super(context, playerConfig, playlistState, playlistManager, pref, prepare);
+                         @NonNull AppWidgetPreferences pref) {
+            super(context, playerConfig, playlistState, playlistManager, pref);
         }
 
         @Override
@@ -1409,8 +1395,6 @@ public class PlayerService extends MediaBrowserServiceCompat
         private Bitmap mDefaultIcon;
         private CustomTarget<Bitmap> mTarget;
 
-        private boolean mNotifyOnCreate;
-        private boolean mKeepOnStopped;
         private boolean mReleased;
 
         private int mPendingIntentRequestCode;
@@ -1651,41 +1635,6 @@ public class PlayerService extends MediaBrowserServiceCompat
             mIconCornerRadius[1] = topRight;
             mIconCornerRadius[2] = bottomRight;
             mIconCornerRadius[3] = bottomLeft;
-        }
-
-        /**
-         * 设置是否在 {@link PlayerService} 创建后立即显示通知栏控制器（默认为 false）。
-         */
-        public void setNotifyOnCreate(boolean notifyOnCreate) {
-            mNotifyOnCreate = notifyOnCreate;
-        }
-
-        /**
-         * 判断是否在 {@link PlayerService} 创建后立即显示通知栏控制器（默认为 false）。
-         */
-        public boolean isNotifyOnCreate() {
-            return mNotifyOnCreate;
-        }
-
-        /**
-         * 设置是否在停止播放后依然保留通知栏控制器（默认为 false）。
-         */
-        public void setKeepOnStopped(boolean keepOnStopped) {
-            mKeepOnStopped = keepOnStopped;
-        }
-
-        /**
-         * 判断是否在停止播放后依然保留通知栏控制器（默认为 false）。
-         */
-        public boolean isKeepOnStopped() {
-            return mKeepOnStopped;
-        }
-
-        /**
-         * 获取通知栏控制器的 content title
-         */
-        public final CharSequence getContentTitle() {
-            return MusicItemUtil.getTitle(getContext(), getPlayingMusicItem());
         }
 
         /**
@@ -1992,8 +1941,8 @@ public class PlayerService extends MediaBrowserServiceCompat
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), CHANNEL_ID)
                     .setSmallIcon(getSmallIconId())
                     .setLargeIcon(getIcon())
-                    .setContentTitle(getContentTitle())
-                    .setContentText(getContentText(MusicItemUtil.getArtist(getContext(), getPlayingMusicItem())))
+                    .setContentTitle(MusicItemUtil.getTitle(getContext(), getPlayingMusicItem()))
+                    .setContentText(MusicItemUtil.getArtist(getContext(), getPlayingMusicItem()))
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setPriority(NotificationCompat.PRIORITY_LOW)
                     .setShowWhen(false)
