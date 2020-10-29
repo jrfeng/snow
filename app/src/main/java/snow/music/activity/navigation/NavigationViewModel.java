@@ -21,6 +21,7 @@ import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.dialog.PlaylistDialog;
 import snow.music.store.MusicStore;
+import snow.music.util.FavoriteHelper;
 import snow.music.util.MusicUtil;
 import snow.player.PlaybackState;
 import snow.player.audio.MusicItem;
@@ -29,18 +30,17 @@ import snow.player.lifecycle.PlayerViewModel;
 public class NavigationViewModel extends ViewModel {
     private final MutableLiveData<Integer> mFavoriteDrawable;
 
-    private final MusicStore.OnFavoriteChangeListener mFavoriteChangeListener;
     private final Observer<MusicItem> mPlayingMusicItemObserver;
+    private FavoriteHelper mFavoriteHelper;
 
     private PlayerViewModel mPlayerViewModel;
     private boolean mInitialized;
 
-    private Disposable mCheckFavoriteDisposable;
-
     public NavigationViewModel() {
         mFavoriteDrawable = new MutableLiveData<>(R.drawable.ic_favorite_false);
-        mFavoriteChangeListener = this::checkPlayingMusicFavoriteState;
-        mPlayingMusicItemObserver = musicItem -> checkPlayingMusicFavoriteState();
+        mFavoriteHelper = new FavoriteHelper(favorite ->
+                mFavoriteDrawable.setValue(favorite ? R.drawable.ic_favorite_true : R.drawable.ic_favorite_false));
+        mPlayingMusicItemObserver = musicItem -> mFavoriteHelper.setMusicItem(musicItem);
     }
 
     public void init(@NonNull PlayerViewModel playerViewModel) {
@@ -49,7 +49,6 @@ public class NavigationViewModel extends ViewModel {
         mInitialized = true;
         mPlayerViewModel = playerViewModel;
 
-        MusicStore.getInstance().addOnFavoriteChangeListener(mFavoriteChangeListener);
         mPlayerViewModel.getPlayingMusicItem().observeForever(mPlayingMusicItemObserver);
     }
 
@@ -59,14 +58,11 @@ public class NavigationViewModel extends ViewModel {
 
     @Override
     protected void onCleared() {
-        if (!isInitialized()) {
+        mFavoriteHelper.release();
+        if (isInitialized()) {
+            mPlayerViewModel.getPlayingMusicItem().removeObserver(mPlayingMusicItemObserver);
             return;
         }
-
-        MusicStore.getInstance().removeOnFavoriteChangeListener(mFavoriteChangeListener);
-        mPlayerViewModel.getPlayingMusicItem().removeObserver(mPlayingMusicItemObserver);
-
-        disposeCheckFavorite();
 
         // 必须放在最后面
         super.onCleared();
@@ -90,35 +86,6 @@ public class NavigationViewModel extends ViewModel {
                 return R.drawable.ic_play;
             }
         });
-    }
-
-    private void checkPlayingMusicFavoriteState() {
-        disposeCheckFavorite();
-
-        mCheckFavoriteDisposable = Single.create((SingleOnSubscribe<Boolean>) emitter -> {
-            MusicItem playingMusicItem = mPlayerViewModel.getPlayingMusicItem().getValue();
-
-            boolean result;
-            if (playingMusicItem == null) {
-                result = false;
-            } else {
-                result = MusicStore.getInstance().isFavorite(MusicUtil.getId(playingMusicItem));
-            }
-
-            if (emitter.isDisposed()) {
-                return;
-            }
-
-            emitter.onSuccess(result);
-        }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> mFavoriteDrawable.setValue(aBoolean ? R.drawable.ic_favorite_true : R.drawable.ic_favorite_false));
-    }
-
-    private void disposeCheckFavorite() {
-        if (mCheckFavoriteDisposable != null) {
-            mCheckFavoriteDisposable.dispose();
-        }
     }
 
     public void togglePlayingMusicFavorite() {
