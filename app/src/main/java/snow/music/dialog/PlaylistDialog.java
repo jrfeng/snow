@@ -119,7 +119,7 @@ public class PlaylistDialog extends AppCompatDialogFragment {
             });
 
             mPlaylistLiveData.observe(PlaylistDialog.this, newPlaylist -> {
-                tvPlaylistTitle.setText(getText(R.string.playlist) + "(" + playlist.size() + ")");
+                tvPlaylistTitle.setText(getText(R.string.playlist) + "(" + newPlaylist.size() + ")");
                 mPlaylistAdapter.setPlaylist(newPlaylist);
             });
 
@@ -173,12 +173,12 @@ public class PlaylistDialog extends AppCompatDialogFragment {
             diffResult.dispatchUpdatesTo(this);
 
             mPlaylist = playlist;
-            mSelectableHelper.setSelect(mPlayPosition, true);
         }
 
         public void setPlayPosition(int playPosition) {
             mPlayPosition = playPosition;
             if (mPlaylist.isEmpty()) {
+                mSelectableHelper.clearSelected();
                 return;
             }
 
