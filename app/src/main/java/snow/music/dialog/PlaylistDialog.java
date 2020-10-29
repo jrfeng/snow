@@ -120,11 +120,11 @@ public class PlaylistDialog extends AppCompatDialogFragment {
 
             mPlaylistLiveData.observe(PlaylistDialog.this, newPlaylist -> {
                 tvPlaylistTitle.setText(getText(R.string.playlist) + "(" + newPlaylist.size() + ")");
-                mPlaylistAdapter.setPlaylist(newPlaylist);
+                mPlaylistAdapter.setPlaylist(newPlaylist, playerClient.getPlayPosition());
             });
 
-            mPlayerViewModel.getPlayPosition()
-                    .observe(PlaylistDialog.this, playPosition -> mPlaylistAdapter.setPlayPosition(playPosition));
+            mPlayerViewModel.getPlayingMusicItem()
+                    .observe(PlaylistDialog.this, musicItem -> mPlaylistAdapter.setPlayPosition(playerClient.getPlayPosition()));
         });
     }
 
@@ -152,7 +152,7 @@ public class PlaylistDialog extends AppCompatDialogFragment {
             mSelectableHelper.setSelect(playPosition, true);
         }
 
-        public void setPlaylist(@NonNull Playlist playlist) {
+        public void setPlaylist(@NonNull Playlist playlist, int playPosition) {
             Preconditions.checkNotNull(playlist);
 
             if (playlist.isEmpty()) {
@@ -173,6 +173,8 @@ public class PlaylistDialog extends AppCompatDialogFragment {
             diffResult.dispatchUpdatesTo(this);
 
             mPlaylist = playlist;
+            mPlayPosition = playPosition;
+            mSelectableHelper.setSelect(mPlayPosition, true);
         }
 
         public void setPlayPosition(int playPosition) {
