@@ -435,7 +435,7 @@ public class PlayerService extends MediaBrowserServiceCompat
      * @return 如果返回 null，则不会记录播放历史（默认返回 null）
      */
     @Nullable
-    protected final HistoryRecorder onCreateHistoryRecorder() {
+    protected HistoryRecorder onCreateHistoryRecorder() {
         return null;
     }
 
