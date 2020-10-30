@@ -245,7 +245,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * 连接播放器。
      */
     public void connect() {
-        if (isConnected()) {
+        if (mConnecting || isConnected()) {
             return;
         }
 
@@ -952,9 +952,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
 
         mConnectedAction = connectedAction;
 
-        if (!mConnecting) {
-            connect();
-        }
+        connect();
     }
 
     /**
