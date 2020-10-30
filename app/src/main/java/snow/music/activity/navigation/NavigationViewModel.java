@@ -41,6 +41,10 @@ public class NavigationViewModel extends ViewModel {
     public void init(@NonNull PlayerViewModel playerViewModel) {
         Preconditions.checkNotNull(playerViewModel);
 
+        if (mInitialized) {
+            return;
+        }
+
         mInitialized = true;
         mPlayerViewModel = playerViewModel;
 
