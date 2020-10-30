@@ -15,7 +15,7 @@ Android music player library. Compatible with MediaSession.
 * Headset clicks
 * Sleep timer
 * Playback history
-* Player status automatic recovery on restart
+* Player state persistence
 
 **Document:**
 
