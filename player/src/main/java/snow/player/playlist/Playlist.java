@@ -20,6 +20,10 @@ import snow.player.audio.MusicItem;
 /**
  * 用于存储播放队列。
  * <p>
+ * {@link Playlist} 对象是不可变的，且不包含重复的 {@link MusicItem} 对象，
+ * 并且最大尺寸为 {@link #MAX_SIZE}（1000）。如果往 {@link Playlist} 中添加的 {@link MusicItem}
+ * 数量超出了最大尺寸，则超出部分会被忽略。
+ * <p>
  * 关于 {@link Playlist} 的 “可编辑” 状态，在这里对其进行说明。在创建 {@link Playlist} 对象时，
  * 你可能已经注意到构造器有一个 editable 参数，但 {@link Playlist} 是不可变的，它并未提供任何编辑方法，
  * 你可能会对此存在疑惑。
@@ -41,6 +45,7 @@ import snow.player.audio.MusicItem;
  */
 public final class Playlist implements Iterable<MusicItem>, Parcelable {
     private static final String TAG = "Playlist";
+    public static final int MAX_SIZE = 1000;
 
     private final String mToken;
     private final ArrayList<MusicItem> mMusicItems;
@@ -51,7 +56,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
      * 创建一个 {@link Playlist} 对象。
      *
      * @param token    播放列表的 token
-     * @param items    所由要添加到播放列表的中的 {@link MusicItem} 对象
+     * @param items    所由要添加到播放列表的中的 {@link MusicItem} 对象，超出 {@link #MAX_SIZE}（1000）的部分元素会被忽略
      * @param editable 播放列表是否是可编辑的
      * @param extra    播放列表的额外参数
      */
@@ -74,6 +79,10 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
             }
 
             musicItems.add(item);
+        }
+
+        if (musicItems.size() > MAX_SIZE) {
+            return new ArrayList<>(musicItems.subList(0, MAX_SIZE));
         }
 
         return musicItems;
