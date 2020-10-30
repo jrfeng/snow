@@ -65,7 +65,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
         Preconditions.checkNotNull(items);
 
         mToken = token;
-        mMusicItems = excludeRepeatItem(items);
+        mMusicItems = trim(excludeRepeatItem(items));
         mEditable = editable;
         mExtra = extra;
     }
@@ -81,6 +81,10 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
             musicItems.add(item);
         }
 
+        return musicItems;
+    }
+
+    private ArrayList<MusicItem> trim(ArrayList<MusicItem> musicItems) {
         if (musicItems.size() > MAX_SIZE) {
             return new ArrayList<>(musicItems.subList(0, MAX_SIZE));
         }
