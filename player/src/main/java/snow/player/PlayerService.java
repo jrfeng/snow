@@ -685,10 +685,13 @@ public class PlayerService extends MediaBrowserServiceCompat
     /**
      * 获取指定 {@link PlayerService} 的持久化 ID。
      * <p>
-     * 该 ID 值将用于状态持久化，请务必保证其唯一性。
+     * 可以使用 {@link PersistenceId} 注解设置你的的 {@link PlayerService} 的持久化 ID。
+     * 该 ID 值将用于状态持久化，请务必保证其唯一性。如果没有设置，则默认返回你的 {@link PlayerService}
+     * 的完整类名（使用 {@code Class.getName()} 方法获取）。
      *
      * @param service 你的 {@link PlayerService} 的 Class 对象，不能为 null
-     * @return {@link PlayerService} 的持久化 ID，如果没有设置，则返回 null
+     * @return {@link PlayerService} 的持久化 ID，如果没有设置，则返回使用你的 {@link PlayerService}
+     * 的完整类名
      */
     @NonNull
     public static String getPersistenceId(@NonNull Class<? extends PlayerService> service) {
