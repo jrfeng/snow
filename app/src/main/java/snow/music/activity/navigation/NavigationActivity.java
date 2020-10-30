@@ -72,6 +72,15 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!mPlayerViewModel.getPlayerClient().isConnected()) {
+            mPlayerViewModel.getPlayerClient().connect();
+        }
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         if (isFinishing() && mIconLoadDisposable != null) {
