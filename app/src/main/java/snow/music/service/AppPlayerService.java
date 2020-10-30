@@ -77,6 +77,12 @@ public class AppPlayerService extends PlayerService {
         }
 
         @Override
+        protected void onRelease() {
+            super.onRelease();
+            mFavoriteHelper.release();
+        }
+
+        @Override
         protected void onBuildMediaStyle(androidx.media.app.NotificationCompat.MediaStyle mediaStyle) {
             mediaStyle.setShowActionsInCompactView(2, 3);
         }
