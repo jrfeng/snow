@@ -44,6 +44,7 @@ public class NavigationViewModel extends ViewModel {
         mInitialized = true;
         mPlayerViewModel = playerViewModel;
 
+        mFavoriteObserver.subscribe();
         mPlayerViewModel.getPlayingMusicItem().observeForever(mPlayingMusicItemObserver);
     }
 
@@ -53,7 +54,7 @@ public class NavigationViewModel extends ViewModel {
 
     @Override
     protected void onCleared() {
-        mFavoriteObserver.release();
+        mFavoriteObserver.unsubscribe();
         if (isInitialized()) {
             mPlayerViewModel.getPlayingMusicItem().removeObserver(mPlayingMusicItemObserver);
             return;

@@ -56,6 +56,7 @@ public class AppPlayerService extends PlayerService {
             super.onInit(context);
 
             mFavoriteObserver = new FavoriteObserver(favorite -> invalidate());
+            mFavoriteObserver.subscribe();
 
             mToggleFavorite = buildCustomAction(ACTION_TOGGLE_FAVORITE, (player, extras) ->
                     MusicStore.getInstance().toggleFavorite(MusicUtil.asMusic(getPlayingMusicItem())));
@@ -79,7 +80,7 @@ public class AppPlayerService extends PlayerService {
         @Override
         protected void onRelease() {
             super.onRelease();
-            mFavoriteObserver.release();
+            mFavoriteObserver.unsubscribe();
         }
 
         @Override

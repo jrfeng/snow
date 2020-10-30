@@ -16,7 +16,7 @@ import snow.player.audio.MusicItem;
 /**
  * 帮助实时监听指定歌曲的 “我喜欢” 状态。
  * <p>
- * 当不在需要 {@link FavoriteObserver} 对象时，请务必调用 {@link #release()} 将其释放，否则会导致内存泄漏。
+ * 当不在需要 {@link FavoriteObserver} 对象时，请务必调用 {@link #unsubscribe()} 取消订阅，否则会导致内存泄漏。
  */
 public class FavoriteObserver {
     private boolean mFavorite;
@@ -24,6 +24,7 @@ public class FavoriteObserver {
     private MusicItem mMusicItem;
     private OnFavoriteStateChangeListener mListener;
 
+    private boolean mSubscribed;
     private MusicStore.OnFavoriteChangeListener mFavoriteChangeListener;
     private Disposable mCheckFavoriteDisposable;
 
@@ -37,7 +38,6 @@ public class FavoriteObserver {
         mListener = listener;
 
         mFavoriteChangeListener = this::checkMusicFavoriteState;
-        MusicStore.getInstance().addOnFavoriteChangeListener(mFavoriteChangeListener);
     }
 
     /**
@@ -70,9 +70,22 @@ public class FavoriteObserver {
     }
 
     /**
-     * 释放监听器。
+     * 开始订阅歌曲的 “我喜欢” 状态。
      */
-    public void release() {
+    public void subscribe() {
+        if (mSubscribed) {
+            return;
+        }
+
+        mSubscribed = true;
+        MusicStore.getInstance().addOnFavoriteChangeListener(mFavoriteChangeListener);
+    }
+
+    /**
+     * 取消订阅歌曲的 “我喜欢” 状态。
+     */
+    public void unsubscribe() {
+        mSubscribed = false;
         disposeCheckFavorite();
         MusicStore.getInstance().removeOnFavoriteChangeListener(mFavoriteChangeListener);
     }
