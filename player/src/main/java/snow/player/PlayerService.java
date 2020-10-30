@@ -60,6 +60,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import media.helper.HeadsetHookHelper;
 
+import snow.player.annotation.PersistenceId;
 import snow.player.appwidget.AppWidgetPreferences;
 import snow.player.effect.AudioEffectManager;
 import snow.player.audio.MediaMusicPlayer;
@@ -155,7 +156,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     public void onCreate() {
         super.onCreate();
 
-        mPersistentId = getPersistentId();
+        mPersistentId = getPersistenceId(this.getClass());
         mAllCustomAction = new HashMap<>();
         mKeepAliveIntent = new Intent(this, this.getClass());
         mKeepAliveConnection = new KeepAliveConnection();
@@ -682,6 +683,31 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     /**
+     * 获取指定 {@link PlayerService} 的持久化 ID。
+     * <p>
+     * 该 ID 值将用于状态持久化，请务必保证其唯一性。
+     *
+     * @param service 你的 {@link PlayerService} 的 Class 对象，不能为 null
+     * @return {@link PlayerService} 的持久化 ID，如果没有设置，则返回 null
+     */
+    @NonNull
+    public static String getPersistenceId(@NonNull Class<? extends PlayerService> service) {
+        Preconditions.checkNotNull(service);
+
+        PersistenceId annotation = service.getAnnotation(PersistenceId.class);
+        if (annotation == null) {
+            return service.getName();
+        }
+
+        String persistenceId = annotation.value();
+        if (persistenceId.isEmpty()) {
+            throw new IllegalArgumentException("Persistence ID is empty.");
+        }
+
+        return persistenceId;
+    }
+
+    /**
      * 移除一个自定义动作。
      *
      * @param action 自定义动作的名称
@@ -697,16 +723,6 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         mPlayerStateListener.onShutdown();
         mMediaSession.sendSessionEvent(SESSION_EVENT_ON_SHUTDOWN, null);
-    }
-
-    /**
-     * 返回一个字符串 ID。该 ID 将用于对播放器的状态进行持久化。请确保该 ID 的唯一性。
-     * <p>
-     * 默认的 ID 值为：this.getClass().getName()
-     */
-    @NonNull
-    protected String getPersistentId() {
-        return this.getClass().getName();
     }
 
     /**

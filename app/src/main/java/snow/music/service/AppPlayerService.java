@@ -17,7 +17,9 @@ import snow.music.util.MusicUtil;
 import snow.player.HistoryRecorder;
 import snow.player.PlayMode;
 import snow.player.PlayerService;
+import snow.player.annotation.PersistenceId;
 
+@PersistenceId("AppPlayerService")
 public class AppPlayerService extends PlayerService {
     private MusicStore mMusicStore;
 

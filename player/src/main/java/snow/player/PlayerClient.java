@@ -87,7 +87,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         mApplicationContext = context.getApplicationContext();
         mPlayerService = playerService;
         mClientToken = UUID.randomUUID().toString();
-        mPersistentId = mPlayerService.getName();
+        mPersistentId = PlayerService.getPersistenceId(playerService);
 
         mPlayerConfig = new PlayerConfig(context, mPersistentId);
 
