@@ -13,15 +13,10 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.common.base.Preconditions;
 
-import io.reactivex.Single;
-import io.reactivex.SingleOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.dialog.PlaylistDialog;
 import snow.music.store.MusicStore;
-import snow.music.util.FavoriteHelper;
+import snow.music.util.FavoriteObserver;
 import snow.music.util.MusicUtil;
 import snow.player.PlaybackState;
 import snow.player.audio.MusicItem;
@@ -31,16 +26,16 @@ public class NavigationViewModel extends ViewModel {
     private final MutableLiveData<Integer> mFavoriteDrawable;
 
     private final Observer<MusicItem> mPlayingMusicItemObserver;
-    private FavoriteHelper mFavoriteHelper;
+    private FavoriteObserver mFavoriteObserver;
 
     private PlayerViewModel mPlayerViewModel;
     private boolean mInitialized;
 
     public NavigationViewModel() {
         mFavoriteDrawable = new MutableLiveData<>(R.drawable.ic_favorite_false);
-        mFavoriteHelper = new FavoriteHelper(favorite ->
+        mFavoriteObserver = new FavoriteObserver(favorite ->
                 mFavoriteDrawable.setValue(favorite ? R.drawable.ic_favorite_true : R.drawable.ic_favorite_false));
-        mPlayingMusicItemObserver = musicItem -> mFavoriteHelper.setMusicItem(musicItem);
+        mPlayingMusicItemObserver = musicItem -> mFavoriteObserver.setMusicItem(musicItem);
     }
 
     public void init(@NonNull PlayerViewModel playerViewModel) {
@@ -58,7 +53,7 @@ public class NavigationViewModel extends ViewModel {
 
     @Override
     protected void onCleared() {
-        mFavoriteHelper.release();
+        mFavoriteObserver.release();
         if (isInitialized()) {
             mPlayerViewModel.getPlayingMusicItem().removeObserver(mPlayingMusicItemObserver);
             return;

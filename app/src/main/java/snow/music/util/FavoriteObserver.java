@@ -16,9 +16,9 @@ import snow.player.audio.MusicItem;
 /**
  * 帮助实时监听指定歌曲的 “我喜欢” 状态。
  * <p>
- * 当不在需要 {@link FavoriteHelper} 对象时，请务必调用 {@link #release()} 将其释放，否则会导致内存泄漏。
+ * 当不在需要 {@link FavoriteObserver} 对象时，请务必调用 {@link #release()} 将其释放，否则会导致内存泄漏。
  */
-public class FavoriteHelper {
+public class FavoriteObserver {
     private boolean mFavorite;
     @Nullable
     private MusicItem mMusicItem;
@@ -28,11 +28,11 @@ public class FavoriteHelper {
     private Disposable mCheckFavoriteDisposable;
 
     /**
-     * 创建一个 {@link FavoriteHelper} 对象。
+     * 创建一个 {@link FavoriteObserver} 对象。
      *
      * @param listener 歌曲的 “我喜欢” 状态监听器，不能为 null
      */
-    public FavoriteHelper(@NonNull OnFavoriteStateChangeListener listener) {
+    public FavoriteObserver(@NonNull OnFavoriteStateChangeListener listener) {
         Preconditions.checkNotNull(listener);
         mListener = listener;
 

@@ -12,7 +12,7 @@ import androidx.core.content.res.ResourcesCompat;
 
 import snow.music.R;
 import snow.music.store.MusicStore;
-import snow.music.util.FavoriteHelper;
+import snow.music.util.FavoriteObserver;
 import snow.music.util.MusicUtil;
 import snow.player.HistoryRecorder;
 import snow.player.PlayMode;
@@ -47,7 +47,7 @@ public class AppPlayerService extends PlayerService {
         private static final String ACTION_TOGGLE_FAVORITE = "toggle_favorite";
         private static final String ACTION_SWITCH_PLAY_MODE = "switch_play_mode";
 
-        private FavoriteHelper mFavoriteHelper;
+        private FavoriteObserver mFavoriteObserver;
         private PendingIntent mToggleFavorite;
         private PendingIntent mSwitchPlayMode;
 
@@ -55,7 +55,7 @@ public class AppPlayerService extends PlayerService {
         protected void onInit(Context context) {
             super.onInit(context);
 
-            mFavoriteHelper = new FavoriteHelper(favorite -> invalidate());
+            mFavoriteObserver = new FavoriteObserver(favorite -> invalidate());
 
             mToggleFavorite = buildCustomAction(ACTION_TOGGLE_FAVORITE, (player, extras) ->
                     MusicStore.getInstance().toggleFavorite(MusicUtil.asMusic(getPlayingMusicItem())));
@@ -79,7 +79,7 @@ public class AppPlayerService extends PlayerService {
         @Override
         protected void onRelease() {
             super.onRelease();
-            mFavoriteHelper.release();
+            mFavoriteObserver.release();
         }
 
         @Override
@@ -115,10 +115,10 @@ public class AppPlayerService extends PlayerService {
 
         private void addToggleFavorite(NotificationCompat.Builder builder) {
             if (isExpire()) {
-                mFavoriteHelper.setMusicItem(getPlayingMusicItem());
+                mFavoriteObserver.setMusicItem(getPlayingMusicItem());
             }
 
-            if (mFavoriteHelper.isFavorite()) {
+            if (mFavoriteObserver.isFavorite()) {
                 builder.addAction(R.drawable.ic_notif_favorite_true, "favorite", mToggleFavorite);
             } else {
                 builder.addAction(R.drawable.ic_notif_favorite_false, "don't favorite", mToggleFavorite);
