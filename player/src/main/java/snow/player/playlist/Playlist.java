@@ -19,6 +19,23 @@ import snow.player.audio.MusicItem;
 
 /**
  * 用于存储播放队列。
+ * <p>
+ * 关于 {@link Playlist} 的 “可编辑” 状态，在这里对其进行说明。在创建 {@link Playlist} 对象时，
+ * 你可能已经注意到构造器有一个 editable 参数，但 {@link Playlist} 是不可变的，它并未提供任何编辑方法，
+ * 你可能会对此存在疑惑。
+ * <p>
+ * 实际上，{@link Playlist} 的 “可编辑” 状态是针对播放器而言的。如果 {@link Playlist} 是不可编辑的，
+ * 则所有通过 {@link snow.player.PlayerClient} 修改播放列表的操作会被忽略。
+ * <p>
+ * 也就是说，如果 {@link Playlist} 是不可编辑，则 {@link snow.player.PlayerClient} 的以下方法会被忽略：
+ * <ul>
+ * <li>{@link snow.player.PlayerClient#setNextPlay(MusicItem)}</li>
+ * <li>{@link snow.player.PlayerClient#insertMusicItem(int, MusicItem)}</li>
+ * <li>{@link snow.player.PlayerClient#appendMusicItem(MusicItem)}</li>
+ * <li>{@link snow.player.PlayerClient#moveMusicItem(int, int)}</li>
+ * <li>{@link snow.player.PlayerClient#removeMusicItem(MusicItem)}</li>
+ * <li>{@link snow.player.PlayerClient#removeMusicItem(int)}</li>
+ * </ul>
  *
  * @see snow.player.PlayerClient#setPlaylist(Playlist, int, boolean)
  */
@@ -73,6 +90,19 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
 
     /**
      * 播放列表是否是可编辑的。
+     * <p>
+     * {@link Playlist} 本身是不可变的，这里的 “可编辑” 状态是针对播放器而言的。如果 {@link Playlist}
+     * 是不可编辑的，则所有通过 {@link snow.player.PlayerClient} 修改播放列表的操作会被忽略。
+     * <p>
+     * 也就是说，如果 {@link Playlist} 是不可编辑，则 {@link snow.player.PlayerClient} 的以下方法会被忽略：
+     * <ul>
+     * <li>{@link snow.player.PlayerClient#setNextPlay(MusicItem)}</li>
+     * <li>{@link snow.player.PlayerClient#insertMusicItem(int, MusicItem)}</li>
+     * <li>{@link snow.player.PlayerClient#appendMusicItem(MusicItem)}</li>
+     * <li>{@link snow.player.PlayerClient#moveMusicItem(int, int)}</li>
+     * <li>{@link snow.player.PlayerClient#removeMusicItem(MusicItem)}</li>
+     * <li>{@link snow.player.PlayerClient#removeMusicItem(int)}</li>
+     * </ul>
      *
      * @return 播放列表是否是可编辑的，如果是可编辑的，则返回 true，否则返回 false（默认为 true）。
      */
