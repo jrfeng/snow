@@ -1,7 +1,5 @@
 ![API Level](https://img.shields.io/badge/Android-API%20Level%2016%2B-brightgreen)
 [![GitHub](https://img.shields.io/github/license/jrfeng/snow)](./license)
-[![GitHub issues](https://img.shields.io/github/issues/jrfeng/snow)](https://github.com/jrfeng/snow/issues)
-[![GitHub closed issues](https://img.shields.io/github/issues-closed/jrfeng/snow)](https://github.com/jrfeng/snow/issues?q=is%3Aissue+is%3Aclosed)
 
 [**English**](./readme.md)
 
