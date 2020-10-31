@@ -1,10 +1,11 @@
 package snow.music.activity.navigation;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -23,6 +24,7 @@ import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 
 public class NavigationViewModel extends ViewModel {
+    private static final String TAG = "NavigationViewModel";
     private final MutableLiveData<Integer> mFavoriteDrawable;
 
     private final Observer<MusicItem> mPlayingMusicItemObserver;
@@ -104,8 +106,14 @@ public class NavigationViewModel extends ViewModel {
     public void showPlaylist(View view) {
         Preconditions.checkNotNull(view);
 
-        PlaylistDialog playlistDialog = PlaylistDialog.newInstance();
-        playlistDialog.show(((AppCompatActivity) view.getContext()).getSupportFragmentManager(), "PlaylistDialog");
+        Context context = view.getContext();
+        if (!(context instanceof FragmentActivity)) {
+            Log.e(TAG, "This view not belong a FragmentActivity.");
+            return;
+        }
+
+        PlaylistDialog.newInstance()
+                .show(((FragmentActivity) context).getSupportFragmentManager(), "PlaylistDialog");
     }
 
     public void navigateToSearch() {
