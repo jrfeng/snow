@@ -45,10 +45,15 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     }
 
     public void setMusicList(@NonNull MusicList musicList) {
+        setMusicList(musicList, -1);
+    }
+
+    public void setMusicList(@NonNull MusicList musicList, int playPosition) {
         Preconditions.checkNotNull(musicList);
 
         if (mOrderMusicList.isEmpty() && musicList.getSize() < 1) {
             mOrderMusicList = asOrderMusicList(musicList);
+            mSelectableHelper.clearSelected();
             notifyDataSetChanged();
             return;
         }
@@ -57,6 +62,12 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new OrderMusicDiffCallback(mOrderMusicList, newMusicList));
         diffResult.dispatchUpdatesTo(this);
         mOrderMusicList = newMusicList;
+
+        if (playPosition < 0) {
+            mSelectableHelper.clearSelected();
+        } else {
+            mSelectableHelper.setSelect(playPosition, true);
+        }
     }
 
     public void setOnItemClickListener(ItemClickHelper.OnItemClickListener listener) {
