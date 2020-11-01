@@ -59,7 +59,6 @@ public class NavigationActivity extends AppCompatActivity {
 
         initAllViewModel();
 
-        mBinding.setPlayerViewModel(mPlayerViewModel);
         mBinding.setNavViewModel(mNavigationViewModel);
         mBinding.setLifecycleOwner(this);
 

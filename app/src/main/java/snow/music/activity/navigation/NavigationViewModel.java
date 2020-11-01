@@ -70,6 +70,22 @@ public class NavigationViewModel extends ViewModel {
         super.onCleared();
     }
 
+    public LiveData<String> getMusicTitle() {
+        if (!mInitialized) {
+            throw new IllegalStateException("NavigationViewModel not init yet.");
+        }
+
+        return mPlayerViewModel.getTitle();
+    }
+
+    public LiveData<String> getMusicArtist() {
+        if (!mInitialized) {
+            throw new IllegalStateException("NavigationViewModel not init yet.");
+        }
+
+        return mPlayerViewModel.getArtist();
+    }
+
     @NonNull
     public LiveData<Integer> getFavoriteDrawable() {
         return mFavoriteDrawable;
@@ -77,7 +93,7 @@ public class NavigationViewModel extends ViewModel {
 
     @NonNull
     public LiveData<Integer> getPlayPauseDrawable() {
-        if (!isInitialized()) {
+        if (!mInitialized) {
             throw new IllegalStateException("NavigationViewModel not init yet.");
         }
 
@@ -103,8 +119,36 @@ public class NavigationViewModel extends ViewModel {
         MusicStore.getInstance().toggleFavorite(MusicUtil.asMusic(playingMusicItem));
     }
 
+    public void skipToPrevious() {
+        if (!mInitialized) {
+            throw new IllegalStateException("NavigationViewModel not init yet.");
+        }
+
+        mPlayerViewModel.skipToPrevious();
+    }
+
+    public void playPause() {
+        if (!mInitialized) {
+            throw new IllegalStateException("NavigationViewModel not init yet.");
+        }
+
+        mPlayerViewModel.playPause();
+    }
+
+    public void skipToNext() {
+        if (!mInitialized) {
+            throw new IllegalStateException("NavigationViewModel not init yet.");
+        }
+
+        mPlayerViewModel.skipToNext();
+    }
+
     public void showPlaylist(View view) {
         Preconditions.checkNotNull(view);
+
+        if (!mInitialized) {
+            throw new IllegalStateException("NavigationViewModel not init yet.");
+        }
 
         Context context = view.getContext();
         if (!(context instanceof FragmentActivity)) {
@@ -114,6 +158,22 @@ public class NavigationViewModel extends ViewModel {
 
         PlaylistDialog.newInstance()
                 .show(((FragmentActivity) context).getSupportFragmentManager(), "PlaylistDialog");
+    }
+
+    public LiveData<Integer> getDuration() {
+        if (!mInitialized) {
+            throw new IllegalStateException("NavigationViewModel not init yet.");
+        }
+
+        return mPlayerViewModel.getDuration();
+    }
+
+    public LiveData<Integer> getPlayProgress() {
+        if (!mInitialized) {
+            throw new IllegalStateException("NavigationViewModel not init yet.");
+        }
+
+        return mPlayerViewModel.getPlayProgress();
     }
 
     public void navigateToSearch() {
