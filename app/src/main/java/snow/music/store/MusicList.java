@@ -19,7 +19,7 @@ import java.util.ListIterator;
 /**
  * 用于表示一个歌单。
  * <p>
- * 歌单中的歌曲是延迟加载的，会在第一次调用 {@link #getMusicElements()} 方法时进行加载并进行缓存。
+ * 歌单中的歌曲是延迟加载的，会在第一次调用 {@link #load()} 或者 {@link #getMusicElements()} 方法时进行加载并进行缓存。
  */
 public class MusicList {
     private final MusicListEntity mMusicListEntity;
@@ -107,7 +107,21 @@ public class MusicList {
     }
 
     /**
+     * 加载歌单中的歌曲。
+     * <p>
+     * 由于歌单中的歌曲是延迟加载的，如果你需要立即加载歌单中所有歌曲，则可以调用该方法。由于调用该方法会访问数据库，
+     * 因此不建议在 UI 线程调用该方法。
+     */
+    public void load() {
+        if (mElementList == null) {
+            mElementList = new ElementList();
+        }
+    }
+
+    /**
      * 获取歌单中的所有歌曲。
+     * <p>
+     * 由于调用该方法会访问数据库，因此不建议在 UI 线程调用该方法。
      * <p>
      * 你可以对返回的 List 进行增删该操作，但不允许往列表中添加两首完全相同的音乐。
      */
@@ -313,7 +327,7 @@ public class MusicList {
                     continue;
                 }
 
-                if (musicList.contains((Music) music)) {
+                if (musicList.contains(music)) {
                     continue;
                 }
 
