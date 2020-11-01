@@ -152,8 +152,8 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
 
         List<OrderMusic> orderMusicList = new ArrayList<>(musicList.size());
 
-        for (int i = 1; i <= musicList.size(); i++) {
-            orderMusicList.add(new OrderMusic(i, musicList.get(i)));
+        for (int i = 0; i < musicList.size(); i++) {
+            orderMusicList.add(new OrderMusic(i + 1, musicList.get(i)));
         }
 
         return orderMusicList;
