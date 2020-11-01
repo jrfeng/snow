@@ -1,11 +1,15 @@
 package snow.music.util;
 
+import android.content.Context;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
 import com.google.common.base.Preconditions;
 
+import io.reactivex.Single;
 import snow.music.store.Music;
 import snow.player.audio.MusicItem;
 
@@ -55,6 +59,47 @@ public final class MusicUtil {
     public static long getId(@NonNull MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
         return Long.parseLong(musicItem.getMusicId());
+    }
+
+    public static Single<byte[]> getEmbeddedPicture(@NonNull Context context, @NonNull Music music) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(music);
+        return getEmbeddedPicture(context, music.getUri());
+    }
+
+    public static Single<byte[]> getEmbeddedPicture(@NonNull Context context, @NonNull String uri) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(uri);
+
+        return Single.create(emitter -> {
+            if (uri.isEmpty()) {
+                emitter.onSuccess(new byte[0]);
+                return;
+            }
+
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+
+            try {
+                retriever.setDataSource(context, Uri.parse(uri));
+                byte[] picture = retriever.getEmbeddedPicture();
+                retriever.release();
+
+                if (emitter.isDisposed()) {
+                    return;
+                }
+
+                if (picture == null) {
+                    emitter.onSuccess(new byte[0]);
+                } else {
+                    emitter.onSuccess(picture);
+                }
+
+            } catch (Exception e) {
+                emitter.onSuccess(new byte[0]);
+            } finally {
+                retriever.release();
+            }
+        });
     }
 
     private static long getAddTime(MusicItem musicItem) {
