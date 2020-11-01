@@ -12,7 +12,7 @@
 
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>
-    <string name="playlist_empty">Playlist is empty</string>
+    <string name="empty_playlist">Playlist is empty</string>
 
     <!-- content description -->
     <string name="des_logo">logo</string>
