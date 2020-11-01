@@ -41,8 +41,12 @@ public class BottomBarFragment extends Fragment {
         assert activity != null;
         ViewModelProvider viewModelProvider = new ViewModelProvider(activity);
 
+        PlayerViewModel playerViewModel = viewModelProvider.get(PlayerViewModel.class);
         mBottomBarViewModel = viewModelProvider.get(BottomBarViewModel.class);
-        mBottomBarViewModel.init(viewModelProvider.get(PlayerViewModel.class));
+        mBottomBarViewModel.init(playerViewModel);
+
+        playerViewModel.getPlayingMusicItem()
+                .observe(this, musicItem -> loadMusicIcon(musicItem.getUri()));
     }
 
     @Nullable
