@@ -10,6 +10,8 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.res.ResourcesCompat;
 
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.store.MusicStore;
 import snow.music.util.FavoriteObserver;
@@ -40,7 +42,9 @@ public class AppPlayerService extends PlayerService {
     @Nullable
     @Override
     protected HistoryRecorder onCreateHistoryRecorder() {
-        return musicItem -> mMusicStore.addHistory(MusicUtil.asMusic(musicItem));
+        return musicItem -> Single.create(emitter -> mMusicStore.addHistory(MusicUtil.asMusic(musicItem)))
+                .subscribeOn(Schedulers.io())
+                .subscribe();
     }
 
     private static class AppNotificationView extends MediaNotificationView {
