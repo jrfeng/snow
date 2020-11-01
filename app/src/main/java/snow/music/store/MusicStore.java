@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 import android.os.Handler;
+import android.util.Log;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
@@ -28,7 +29,22 @@ import io.objectbox.android.ObjectBoxLiveData;
 import io.objectbox.query.Query;
 import io.objectbox.query.QueryBuilder;
 
+/**
+ * 歌曲数据库，用于存储本地音乐与本地歌单。
+ * <p>
+ * 注意！除以下方法外，{@link MusicStore} 的其他方法都会访问数据库，因此不建议在 UI 线程上调用，否则可能会导致 ANR。
+ * <ul>
+ *     <li>{@link #getInstance()}</li>
+ *     <li>{@link #init(Context)}</li>
+ *     <li>{@link #init(BoxStore)}</li>
+ *     <li>{@link #isBuiltInName(String)}</li>
+ *     <li>{@link #getBoxStore()}</li>
+ *     <li>{@link #observeFavorite()}</li>
+ *     <li>{@link #observeHistory()}</li>
+ * </ul>
+ */
 public class MusicStore {
+    private static final String TAG = "MusicStore";
     public static final String MUSIC_LIST_FAVORITE = "__favorite";
     public static final String MUSIC_LIST_HISTORY = "__history";
 
@@ -104,11 +120,18 @@ public class MusicStore {
         return mBoxStore;
     }
 
+    private void checkThread() {
+        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+            Log.e(TAG, "Please do not access the database on the main thread.");
+        }
+    }
+
     /**
      * 歌单是否已存在。
      */
     public synchronized boolean isMusicListExists(@NonNull String name) {
         Preconditions.checkNotNull(name);
+        checkThread();
 
         long count = mMusicListEntityBox.query()
                 .equal(MusicListEntity_.name, name)
@@ -147,6 +170,7 @@ public class MusicStore {
         Preconditions.checkNotNull(name);
         Preconditions.checkNotNull(description);
         Preconditions.checkArgument(!name.isEmpty(), "name must not empty");
+        checkThread();
 
         if (isBuiltInName(name)) {
             throw new IllegalArgumentException("Illegal music list name, conflicts with built-in name.");
@@ -169,6 +193,7 @@ public class MusicStore {
     @Nullable
     public synchronized MusicList getMusicList(@NonNull String name) {
         Preconditions.checkNotNull(name);
+        checkThread();
 
         if (isBuiltInName(name)) {
             return null;
@@ -191,6 +216,7 @@ public class MusicStore {
      */
     public synchronized void updateMusicList(@NonNull MusicList musicList) {
         Preconditions.checkNotNull(musicList);
+        checkThread();
 
         if (!isMusicListExists(musicList.getId())) {
             return;
@@ -207,6 +233,7 @@ public class MusicStore {
      */
     public synchronized void deleteMusicList(@NonNull MusicList musicList) {
         Preconditions.checkNotNull(musicList);
+        checkThread();
 
         mMusicListEntityBox.query()
                 .equal(MusicListEntity_.id, musicList.getId())
@@ -221,6 +248,7 @@ public class MusicStore {
      */
     public synchronized void deleteMusicList(@NonNull String name) {
         Preconditions.checkNotNull(name);
+        checkThread();
 
         if (isBuiltInName(name)) {
             return;
@@ -237,6 +265,8 @@ public class MusicStore {
      */
     @NonNull
     public synchronized List<MusicList> getAllMusicList() {
+        checkThread();
+
         List<MusicListEntity> allEntity = mMusicListEntityBox.query()
                 .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
                 .and()
@@ -289,6 +319,7 @@ public class MusicStore {
      */
     public synchronized boolean isFavorite(@NonNull Music music) {
         Preconditions.checkNotNull(music);
+        checkThread();
 
         return isFavorite(music.getId());
     }
@@ -297,6 +328,7 @@ public class MusicStore {
      * 指定 musicId 的歌曲是否是 “我喜欢”
      */
     public synchronized boolean isFavorite(long musicId) {
+        checkThread();
         if (musicId <= 0) {
             return false;
         }
@@ -313,6 +345,7 @@ public class MusicStore {
      */
     @NonNull
     public synchronized MusicList getFavoriteMusicList() {
+        checkThread();
         return getBuiltInMusicList(MUSIC_LIST_FAVORITE);
     }
 
@@ -321,6 +354,7 @@ public class MusicStore {
      */
     public synchronized void addToFavorite(@NonNull Music music) {
         Preconditions.checkNotNull(music);
+        checkThread();
 
         if (isFavorite(music)) {
             return;
@@ -337,6 +371,7 @@ public class MusicStore {
      */
     public synchronized void removeFromFavorite(@NonNull Music music) {
         Preconditions.checkNotNull(music);
+        checkThread();
 
         if (isFavorite(music)) {
             MusicList favorite = getFavoriteMusicList();
@@ -355,6 +390,7 @@ public class MusicStore {
      */
     public synchronized void toggleFavorite(@NonNull Music music) {
         Objects.requireNonNull(music);
+        checkThread();
 
         if (isFavorite(music)) {
             removeFromFavorite(music);
@@ -412,6 +448,7 @@ public class MusicStore {
      */
     public synchronized void addHistory(@NonNull Music music) {
         Preconditions.checkNotNull(music);
+        checkThread();
 
         MusicList history = getHistoryMusicList();
         List<Music> elements = history.getMusicElements();
@@ -432,6 +469,7 @@ public class MusicStore {
      */
     public synchronized void removeHistory(@NonNull Music music) {
         Preconditions.checkNotNull(music);
+        checkThread();
 
         MusicList history = getHistoryMusicList();
         history.getMusicElements().remove(music);
@@ -445,6 +483,7 @@ public class MusicStore {
      */
     public synchronized void removeHistory(@NonNull Collection<Music> musics) {
         Preconditions.checkNotNull(musics);
+        checkThread();
 
         MusicList history = getHistoryMusicList();
         history.getMusicElements().removeAll(musics);
@@ -457,6 +496,7 @@ public class MusicStore {
      * 清空历史记录。
      */
     public synchronized void clearHistory() {
+        checkThread();
         MusicList history = getHistoryMusicList();
         history.getMusicElements().clear();
 
@@ -468,6 +508,7 @@ public class MusicStore {
      * 获取所有的历史记录。
      */
     public synchronized List<Music> getAllHistory() {
+        checkThread();
         return new ArrayList<>(getHistoryMusicList().getMusicElements());
     }
 
@@ -477,6 +518,7 @@ public class MusicStore {
      * <b>注意！必须先将 {@link Music} 对象存储到数据库中，然后才能添加到歌单中，否则无法保证歌单中元素的顺序</b>
      */
     public synchronized void putMusic(@NonNull Music music) {
+        checkThread();
         Preconditions.checkNotNull(music);
         mMusicBox.put(music);
     }
@@ -488,6 +530,7 @@ public class MusicStore {
      */
     @Nullable
     public synchronized Music getMusic(long id) {
+        checkThread();
         return mMusicBox.get(id);
     }
 
@@ -496,6 +539,7 @@ public class MusicStore {
      */
     @NonNull
     public synchronized List<Music> getAllMusic() {
+        checkThread();
         return mMusicBox.getAll();
     }
 
@@ -504,6 +548,7 @@ public class MusicStore {
      */
     @NonNull
     public synchronized List<Music> getAllMusic(long offset, long limit) {
+        checkThread();
         return mMusicBox.query()
                 .build()
                 .find(offset, limit);
@@ -513,6 +558,7 @@ public class MusicStore {
      * 获取数据库中包含的 {@link Music} 对象的数量。
      */
     public synchronized long getMusicCount() {
+        checkThread();
         return mMusicBox.count();
     }
 
@@ -524,6 +570,7 @@ public class MusicStore {
      * @return 如果歌曲已添加到数据库中，并且移除成功则返回 true；如果歌曲没有添加到数据库中，则返回 false
      */
     public synchronized boolean removeMusic(@NonNull Music music) {
+        checkThread();
         return mMusicBox.remove(music.getId());
     }
 
@@ -533,6 +580,7 @@ public class MusicStore {
      * @param musics 所有要移除的歌曲。
      */
     public synchronized void removeMusic(Collection<Music> musics) {
+        checkThread();
         mMusicBox.remove(musics);
     }
 
@@ -543,6 +591,7 @@ public class MusicStore {
      */
     public synchronized void putAllMusic(@NonNull Collection<Music> musics) {
         Preconditions.checkNotNull(musics);
+        checkThread();
         mMusicBox.put(musics);
     }
 
@@ -551,6 +600,7 @@ public class MusicStore {
      */
     @NonNull
     public synchronized List<String> getAllArtist() {
+        checkThread();
         return new ArrayList<>(Arrays.asList(mMusicBox.query()
                 .build()
                 .property(Music_.artist)
@@ -563,6 +613,7 @@ public class MusicStore {
      */
     @NonNull
     public synchronized List<String> getAllAlbum() {
+        checkThread();
         return new ArrayList<>(Arrays.asList(mMusicBox.query()
                 .build()
                 .property(Music_.album)
@@ -579,6 +630,7 @@ public class MusicStore {
     @NonNull
     public synchronized List<Music> getArtistAllMusic(@NonNull String artist) {
         Preconditions.checkNotNull(artist);
+        checkThread();
 
         return mMusicBox.query()
                 .equal(Music_.artist, artist)
@@ -594,6 +646,7 @@ public class MusicStore {
      */
     public synchronized List<Music> getArtistAllMusic(@NonNull String artist, long offset, long limit) {
         Preconditions.checkNotNull(artist);
+        checkThread();
 
         return mMusicBox.query()
                 .equal(Music_.artist, artist)
@@ -610,6 +663,7 @@ public class MusicStore {
     @NonNull
     public synchronized List<Music> getAlbumAllMusic(@NonNull String album) {
         Preconditions.checkNotNull(album);
+        checkThread();
 
         return mMusicBox.query()
                 .equal(Music_.album, album)
@@ -625,6 +679,7 @@ public class MusicStore {
      */
     public synchronized List<Music> getAlbumAllMusic(@NonNull String album, long offset, long limit) {
         Preconditions.checkNotNull(album);
+        checkThread();
 
         return mMusicBox.query()
                 .equal(Music_.album, album)
