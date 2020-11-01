@@ -19,7 +19,6 @@ import recyclerview.helper.ItemClickHelper;
 import recyclerview.helper.SelectableHelper;
 import snow.music.R;
 import snow.music.store.Music;
-import snow.music.store.MusicList;
 
 public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.ViewHolder> {
     private static final int TYPE_EMPTY_VIEW = 1;
@@ -29,7 +28,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     private ItemClickHelper mItemClickHelper;
     private SelectableHelper mSelectableHelper;
 
-    public MusicListAdapter(@NonNull MusicList musicList, int playPosition) {
+    public MusicListAdapter(@NonNull List<Music> musicList, int playPosition) {
         Preconditions.checkNotNull(musicList);
 
         mOrderMusicList = asOrderMusicList(musicList);
@@ -44,14 +43,14 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         mSelectableHelper.setSelect(playPosition, true);
     }
 
-    public void setMusicList(@NonNull MusicList musicList) {
+    public void setMusicList(@NonNull List<Music> musicList) {
         setMusicList(musicList, -1);
     }
 
-    public void setMusicList(@NonNull MusicList musicList, int playPosition) {
+    public void setMusicList(@NonNull List<Music> musicList, int playPosition) {
         Preconditions.checkNotNull(musicList);
 
-        if (mOrderMusicList.isEmpty() && musicList.getSize() < 1) {
+        if (mOrderMusicList.isEmpty() && musicList.isEmpty()) {
             mOrderMusicList = asOrderMusicList(musicList);
             mSelectableHelper.clearSelected();
             notifyDataSetChanged();
@@ -148,13 +147,13 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         return TYPE_ITEM_VIEW;
     }
 
-    private List<OrderMusic> asOrderMusicList(@NonNull MusicList musicList) {
+    private List<OrderMusic> asOrderMusicList(@NonNull List<Music> musicList) {
         Preconditions.checkNotNull(musicList);
 
-        List<OrderMusic> orderMusicList = new ArrayList<>(musicList.getSize());
+        List<OrderMusic> orderMusicList = new ArrayList<>(musicList.size());
 
-        for (int i = 1; i <= musicList.getSize(); i++) {
-            orderMusicList.add(new OrderMusic(i, musicList.getMusicElements().get(i)));
+        for (int i = 1; i <= musicList.size(); i++) {
+            orderMusicList.add(new OrderMusic(i, musicList.get(i)));
         }
 
         return orderMusicList;
