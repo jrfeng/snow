@@ -14,6 +14,9 @@
     <string name="playlist">Playlist</string>
     <string name="empty_playlist">Playlist is empty</string>
 
+    <!-- MusicListAdapter -->
+    <string name="empty_music_list">Music list is Empty</string>
+
     <!-- content description -->
     <string name="des_logo">logo</string>
     <string name="des_search">Search</string>

@@ -1,60 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/musicListItem"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
-    android:background="@drawable/bg_list_item"
-    android:clickable="true"
-    android:focusable="true"
-    android:gravity="center_vertical"
-    android:orientation="horizontal">
+    android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/tvPosition"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:minWidth="48dp"
-        android:singleLine="true"
-        tools:text="1" />
+    <FrameLayout
+        android:id="@+id/mark"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/deep_purple_50"
+        android:visibility="gone" />
 
     <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:id="@+id/musicListItem"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@drawable/bg_list_item"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/tvTitle"
+            android:id="@+id/tvOrder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:minWidth="48dp"
             android:singleLine="true"
-            tools:text="@string/snow_music_item_unknown_title" />
+            tools:text="1" />
 
-        <TextView
-            android:id="@+id/tvArtist"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:textColor="@color/colorSecondaryText"
-            android:textSize="12sp"
-            tools:text="@string/snow_music_item_unknown_artist" />
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                tools:text="@string/snow_music_item_unknown_title" />
+
+            <TextView
+                android:id="@+id/tvArtist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textColor="@color/colorSecondaryText"
+                android:textSize="12sp"
+                tools:text="@string/snow_music_item_unknown_artist" />
+
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnOptionMenu"
+            android:layout_width="@dimen/image_button_size"
+            android:layout_height="@dimen/image_button_size"
+            android:background="@drawable/bg_button_48dp"
+            android:contentDescription="@string/des_skip_to_previous"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_option_menu" />
+
+        <Space
+            android:layout_width="8dp"
+            android:layout_height="0dp" />
 
     </LinearLayout>
-
-    <ImageButton
-        android:id="@+id/btnOptionMenu"
-        android:layout_width="@dimen/image_button_size"
-        android:layout_height="@dimen/image_button_size"
-        android:background="@drawable/bg_button_48dp"
-        android:contentDescription="@string/des_skip_to_previous"
-        android:scaleType="centerInside"
-        app:srcCompat="@drawable/ic_option_menu" />
-
-    <Space
-        android:layout_width="8dp"
-        android:layout_height="0dp" />
-
-</LinearLayout>
+</FrameLayout>
