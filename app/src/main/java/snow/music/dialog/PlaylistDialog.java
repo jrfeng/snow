@@ -135,7 +135,6 @@ public class PlaylistDialog extends AppCompatDialogFragment {
 
         private ItemClickHelper mItemClickHelper;
         private SelectableHelper mSelectableHelper;
-        private int mPlayPosition;
 
         public PlaylistAdapter(@NonNull Playlist playlist, int playPosition) {
             Preconditions.checkNotNull(playlist);
@@ -143,7 +142,6 @@ public class PlaylistDialog extends AppCompatDialogFragment {
 
             mItemClickHelper = new ItemClickHelper();
             mSelectableHelper = new SelectableHelper(this);
-            mPlayPosition = playPosition;
 
             if (mPlaylist.isEmpty()) {
                 return;
@@ -165,7 +163,7 @@ public class PlaylistDialog extends AppCompatDialogFragment {
             if (mPlaylist.isEmpty()) {
                 mPlaylist = playlist;
                 notifyDataSetChanged();
-                mSelectableHelper.setSelect(mPlayPosition, true);
+                mSelectableHelper.setSelect(playPosition, true);
                 return;
             }
 
@@ -173,12 +171,10 @@ public class PlaylistDialog extends AppCompatDialogFragment {
             diffResult.dispatchUpdatesTo(this);
 
             mPlaylist = playlist;
-            mPlayPosition = playPosition;
-            mSelectableHelper.setSelect(mPlayPosition, true);
+            mSelectableHelper.setSelect(playPosition, true);
         }
 
         public void setPlayPosition(int playPosition) {
-            mPlayPosition = playPosition;
             if (mPlaylist.isEmpty()) {
                 mSelectableHelper.clearSelected();
                 return;
