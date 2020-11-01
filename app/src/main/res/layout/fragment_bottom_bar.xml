@@ -11,70 +11,83 @@
 
     </data>
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp">
+        android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/ivIcon"
-            android:layout_width="@dimen/player_bottom_bar_icon_size"
-            android:layout_height="@dimen/player_bottom_bar_icon_size"
-            android:contentDescription="@string/des_album_icon"
-            android:src="@mipmap/ic_notif_default_icon" />
-
-        <Space
-            android:layout_width="16dp"
-            android:layout_height="0dp" />
+        <FrameLayout
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_gravity="top"
+            android:background="@color/colorDivider" />
 
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp">
 
-            <TextView
-                android:id="@+id/tvTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:text="@{bottomBarViewModel.musicTitle}"
-                tools:text="@string/snow_music_item_unknown_title" />
+            <ImageView
+                android:id="@+id/ivIcon"
+                android:layout_width="@dimen/player_bottom_bar_icon_size"
+                android:layout_height="@dimen/player_bottom_bar_icon_size"
+                android:contentDescription="@string/des_album_icon"
+                android:src="@mipmap/ic_notif_default_icon" />
 
-            <TextView
-                android:id="@+id/tvArtist"
-                android:layout_width="wrap_content"
+            <Space
+                android:layout_width="16dp"
+                android:layout_height="0dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:text="@{bottomBarViewModel.musicArtist}"
-                android:textSize="12sp"
-                tools:text="@string/snow_music_item_unknown_artist" />
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:text="@{bottomBarViewModel.musicTitle}"
+                    tools:text="@string/snow_music_item_unknown_title" />
+
+                <TextView
+                    android:id="@+id/tvArtist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:text="@{bottomBarViewModel.musicArtist}"
+                    android:textSize="12sp"
+                    tools:text="@string/snow_music_item_unknown_artist" />
+
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/btnPlayPause"
+                android:layout_width="@dimen/image_button_size"
+                android:layout_height="@dimen/image_button_size"
+                android:background="@drawable/bg_button_48dp"
+                android:contentDescription="@string/des_play_pause"
+                android:onClick="@{() -> bottomBarViewModel.playPause()}"
+                android:scaleType="centerInside"
+                app:srcCompat="@{bottomBarViewModel.playPauseDrawableRes}"
+                tools:src="@drawable/ic_bottom_bar_play" />
+
+            <ImageView
+                android:id="@+id/btnShowPlaylist"
+                android:layout_width="@dimen/image_button_size"
+                android:layout_height="@dimen/image_button_size"
+                android:background="@drawable/bg_button_48dp"
+                android:contentDescription="@string/des_play_pause"
+                android:onClick="@{(view) -> bottomBarViewModel.showPlaylist(view)}"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_playlist" />
 
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/btnPlayPause"
-            android:layout_width="@dimen/image_button_size"
-            android:layout_height="@dimen/image_button_size"
-            android:background="@drawable/bg_button_48dp"
-            android:contentDescription="@string/des_play_pause"
-            android:onClick="@{() -> bottomBarViewModel.playPause()}"
-            android:scaleType="centerInside"
-            app:srcCompat="@{bottomBarViewModel.playPauseDrawableRes}"
-            tools:src="@drawable/ic_bottom_bar_play" />
-
-        <ImageView
-            android:id="@+id/btnShowPlaylist"
-            android:layout_width="@dimen/image_button_size"
-            android:layout_height="@dimen/image_button_size"
-            android:background="@drawable/bg_button_48dp"
-            android:contentDescription="@string/des_play_pause"
-            android:onClick="@{(view) -> bottomBarViewModel.showPlaylist(view)}"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_playlist" />
-
-    </LinearLayout>
+    </FrameLayout>
 </layout>
