@@ -396,7 +396,6 @@ public class PlayerViewModel extends ViewModel {
             return;
         }
 
-        mInitialized = false;
         mProgressClock.cancel();
         mSleepTimerProgressClock.cancel();
         removeAllListener();
