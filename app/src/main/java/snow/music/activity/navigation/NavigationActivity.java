@@ -31,7 +31,6 @@ import snow.music.service.AppPlayerService;
 import snow.music.viewmodel.ScannerViewModel;
 import snow.music.store.Music;
 import snow.music.store.MusicStore;
-import snow.music.util.EmbeddedPictureUtil;
 import snow.music.util.MusicUtil;
 import snow.player.PlayerClient;
 import snow.player.audio.MusicItem;
@@ -82,8 +81,8 @@ public class NavigationActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (isFinishing() && mIconLoadDisposable != null) {
-            mIconLoadDisposable.dispose();
+        if (isFinishing()) {
+            cancelLoadMusicIcon();
         }
     }
 
@@ -134,7 +133,8 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     private void loadMusicIcon(String musicUri) {
-        mIconLoadDisposable = EmbeddedPictureUtil.getEmbeddedPicture(this, musicUri)
+        cancelLoadMusicIcon();
+        mIconLoadDisposable = MusicUtil.getEmbeddedPicture(this, musicUri)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bytes -> Glide.with(NavigationActivity.this)
@@ -142,6 +142,12 @@ public class NavigationActivity extends AppCompatActivity {
                         .transform(new CircleCrop())
                         .transition(DrawableTransitionOptions.withCrossFade(200))
                         .into(mBinding.ivDisk));
+    }
+
+    private void cancelLoadMusicIcon() {
+        if (mIconLoadDisposable != null && !mIconLoadDisposable.isDisposed()) {
+            mIconLoadDisposable.dispose();
+        }
     }
 
     private boolean shouldScanLocalMusic() {
