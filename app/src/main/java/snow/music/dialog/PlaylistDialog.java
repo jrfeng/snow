@@ -198,6 +198,13 @@ public class PlaylistDialog extends AppCompatDialogFragment {
             mSelectableHelper.attachToRecyclerView(recyclerView);
         }
 
+        @Override
+        public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView);
+            mItemClickHelper.detach();
+            mSelectableHelper.detach();
+        }
+
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
