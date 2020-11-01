@@ -102,7 +102,7 @@ public class MusicList {
     /**
      * 获取歌单大小。
      */
-    public long getSize() {
+    public int getSize() {
         return mMusicListEntity.size;
     }
 
@@ -309,7 +309,11 @@ public class MusicList {
             List<Music> musicList = new ArrayList<>();
 
             for (Object music : c) {
-                if (musicList.contains(music)) {
+                if (!(music instanceof Music)) {
+                    continue;
+                }
+
+                if (musicList.contains((Music) music)) {
                     continue;
                 }
 
