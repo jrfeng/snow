@@ -696,12 +696,12 @@ public class MusicStore {
     }
 
     private void updateHistoryLiveData() {
-        mMainHandler.post(() -> mHistoryLiveData.setValue(getHistoryMusicList().getMusicElements()));
+        mMainHandler.post(() -> mHistoryLiveData.setValue(new ArrayList<>(getHistoryMusicList().getMusicElements())));
     }
 
     private void initHistory() {
         mHistory = getBuiltInMusicList(MUSIC_LIST_HISTORY);
-        mHistoryLiveData = new MutableLiveData<>(mHistory.getMusicElements());
+        mHistoryLiveData = new MutableLiveData<>(new ArrayList<>(mHistory.getMusicElements()));
     }
 
     @NonNull
