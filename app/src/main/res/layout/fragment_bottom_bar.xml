@@ -89,5 +89,15 @@
 
         </LinearLayout>
 
+        <ProgressBar
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_gravity="bottom"
+            android:max="@{bottomBarViewModel.duration}"
+            android:progress="@{bottomBarViewModel.playProgress}"
+            android:progressDrawable="@drawable/progress_navigation"
+            tools:progress="50" />
+
     </FrameLayout>
 </layout>

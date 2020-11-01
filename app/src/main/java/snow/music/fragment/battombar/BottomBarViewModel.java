@@ -84,4 +84,20 @@ public class BottomBarViewModel extends ViewModel {
         PlaylistDialog.newInstance()
                 .show(((FragmentActivity) context).getSupportFragmentManager(), "PlaylistDialog");
     }
+
+    public LiveData<Integer> getDuration() {
+        if (!mInitialized) {
+            throw new IllegalStateException("NavigationViewModel not init yet.");
+        }
+
+        return mPlayerViewModel.getDuration();
+    }
+
+    public LiveData<Integer> getPlayProgress() {
+        if (!mInitialized) {
+            throw new IllegalStateException("NavigationViewModel not init yet.");
+        }
+
+        return mPlayerViewModel.getPlayProgress();
+    }
 }
