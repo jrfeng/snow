@@ -28,10 +28,6 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     private ItemClickHelper mItemClickHelper;
     private SelectableHelper mSelectableHelper;
 
-    public MusicListAdapter(@NonNull List<Music> musicList) {
-        this(musicList, -1);
-    }
-
     public MusicListAdapter(@NonNull List<Music> musicList, int playPosition) {
         Preconditions.checkNotNull(musicList);
 
@@ -47,10 +43,6 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         mSelectableHelper.setSelect(playPosition, true);
     }
 
-    public void setMusicList(@NonNull List<Music> musicList) {
-        setMusicList(musicList, -1);
-    }
-
     public void setMusicList(@NonNull List<Music> musicList, int playPosition) {
         Preconditions.checkNotNull(musicList);
 
@@ -64,7 +56,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
             mOrderMusicList = newMusicList;
         }
 
-        if (playPosition < 0) {
+        if (mOrderMusicList.isEmpty() || playPosition < 0) {
             mSelectableHelper.clearSelected();
         } else {
             mSelectableHelper.setSelect(playPosition, true);
