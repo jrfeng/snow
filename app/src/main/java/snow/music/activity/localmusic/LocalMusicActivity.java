@@ -1,6 +1,5 @@
 package snow.music.activity.localmusic;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,7 +25,6 @@ import snow.music.util.MusicUtil;
 import snow.music.util.PlayerUtil;
 import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
-import snow.player.playlist.Playlist;
 
 public class LocalMusicActivity extends AppCompatActivity {
     private PlayerViewModel mPlayerViewModel;
@@ -83,7 +81,7 @@ public class LocalMusicActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(musicList -> {
                     mLocalMusicViewModel.setMusicList(new ArrayList<>(musicList));
-                    mMusicListAdapter.setMusicList(musicList);
+                    mMusicListAdapter.setMusicList(musicList, mPlayerViewModel.getPlayerClient().getPlayPosition());
                 });
 
         mPlayerViewModel.getPlayingMusicItem()
@@ -99,7 +97,8 @@ public class LocalMusicActivity extends AppCompatActivity {
     }
 
     private void initMusicListAdapter() {
-        mMusicListAdapter = new MusicListAdapter(new ArrayList<>());
+        mMusicListAdapter = new MusicListAdapter(mLocalMusicViewModel.getMusicList(),
+                mPlayerViewModel.getPlayerClient().getPlayPosition());
 
         mMusicListAdapter.setOnItemClickListener((position, viewId, view, holder) -> {
             switch (viewId) {
