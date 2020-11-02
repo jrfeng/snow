@@ -1110,6 +1110,11 @@ public class PlayerService extends MediaBrowserServiceCompat
         mPlaylistManager.getPlaylist(callback);
     }
 
+    @Override
+    public long getLastModified() {
+        return mPlaylistManager.getLastModified();
+    }
+
     /**
      * 启动睡眠定时器。
      *

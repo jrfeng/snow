@@ -598,6 +598,11 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     @Override
+    public long getLastModified() {
+        return mPlaylistManager.getLastModified();
+    }
+
+    @Override
     public int getPlaylistSize() {
         return mPlaylistManager.getPlaylistSize();
     }

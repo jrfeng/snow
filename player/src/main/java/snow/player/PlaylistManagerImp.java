@@ -30,6 +30,7 @@ class PlaylistManagerImp implements PlaylistManager {
     private static final String KEY_PLAYLIST_SIZE = "playlist_size";
     private static final String KEY_TOKEN = "token";
     private static final String KEY_EDITABLE = "editable";
+    private static final String KEY_LAST_MODIFIED = "last_modified";
 
     private final MMKV mMMKV;
     private Disposable mSaveDisposable;
@@ -88,6 +89,11 @@ class PlaylistManagerImp implements PlaylistManager {
                 });
     }
 
+    @Override
+    public long getLastModified() {
+        return mMMKV.decodeLong(KEY_LAST_MODIFIED, System.currentTimeMillis());
+    }
+
     /**
      * 将 Playlist 持久化保存到本地存储器。该方法会异步执行。
      * <p>
@@ -111,6 +117,7 @@ class PlaylistManagerImp implements PlaylistManager {
                 mMMKV.encode(KEY_PLAYLIST_SIZE, playlist.size());
                 mMMKV.encode(KEY_TOKEN, playlist.getToken());
                 mMMKV.encode(KEY_EDITABLE, playlist.isEditable());
+                mMMKV.encode(KEY_LAST_MODIFIED, System.currentTimeMillis());
 
                 if (emitter.isDisposed()) {
                     return;

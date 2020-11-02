@@ -36,6 +36,15 @@ public interface PlaylistManager {
     void getPlaylist(@NonNull Callback callback);
 
     /**
+     * 获取最后一次修改播放列表的时间。
+     * <p>
+     * 这个时间是 {@code System.currentTimeMillis()}
+     *
+     * @return 最后一次修改播放列表的时间。
+     */
+    long getLastModified();
+
+    /**
      * {@link #getPlaylist(Callback)} 方法的回调接口。
      */
     interface Callback {
