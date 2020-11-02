@@ -1,6 +1,7 @@
 package snow.music.activity.navigation;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 
@@ -15,6 +16,7 @@ import androidx.lifecycle.ViewModel;
 import com.google.common.base.Preconditions;
 
 import snow.music.R;
+import snow.music.activity.localmusic.LocalMusicActivity;
 import snow.music.dialog.PlaylistDialog;
 import snow.music.store.MusicStore;
 import snow.music.util.FavoriteObserver;
@@ -176,42 +178,43 @@ public class NavigationViewModel extends ViewModel {
         return mPlayerViewModel.getPlayProgress();
     }
 
-    public void navigateToSearch() {
+    public void navigateToSearch(View view) {
         // TODO
         Log.d("DEBUG", "navigateToSearch");
     }
 
-    public void navigateToSetting() {
+    public void navigateToSetting(View view) {
         // TODO
         Log.d("DEBUG", "navigateToSetting");
     }
 
-    public void navigateToLocalMusic() {
-        // TODO
-        Log.d("DEBUG", "navigateToLocalMusic");
+    public void navigateToLocalMusic(View view) {
+        Context context = view.getContext();
+        Intent intent = new Intent(context, LocalMusicActivity.class);
+        context.startActivity(intent);
     }
 
-    public void navigateToFavorite() {
+    public void navigateToFavorite(View view) {
         // TODO
         Log.d("DEBUG", "navigateToFavorite");
     }
 
-    public void navigateToMusicList() {
+    public void navigateToMusicList(View view) {
         // TODO
         Log.d("DEBUG", "navigateToMusicList");
     }
 
-    public void navigateToArtist() {
+    public void navigateToArtist(View view) {
         // TODO
         Log.d("DEBUG", "navigateToArtist");
     }
 
-    public void navigateToAlbum() {
+    public void navigateToAlbum(View view) {
         // TODO
         Log.d("DEBUG", "navigateToAlbum");
     }
 
-    public void navigateToHistory() {
+    public void navigateToHistory(View view) {
         // TODO
         Log.d("DEBUG", "navigateToHistory");
     }

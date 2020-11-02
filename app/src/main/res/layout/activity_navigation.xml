@@ -34,7 +34,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
-                android:onClick="@{() -> navViewModel.navigateToSearch()}"
+                android:onClick="@{(view) -> navViewModel.navigateToSearch(view)}"
                 android:orientation="horizontal">
 
                 <ImageView
@@ -58,7 +58,7 @@
                 android:layout_height="@dimen/image_button_size"
                 android:background="@drawable/bg_button_48dp"
                 android:contentDescription="@string/des_setting"
-                android:onClick="@{() -> navViewModel.navigateToSetting()}"
+                android:onClick="@{(view) -> navViewModel.navigateToSetting(view)}"
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/ic_setting" />
 
@@ -126,7 +126,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{() -> navViewModel.navigateToLocalMusic()}"
+                android:onClick="@{(view) -> navViewModel.navigateToLocalMusic(view)}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -156,7 +156,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{() -> navViewModel.navigateToFavorite()}"
+                android:onClick="@{(view) -> navViewModel.navigateToFavorite(view)}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -186,7 +186,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{() -> navViewModel.navigateToMusicList()}"
+                android:onClick="@{(view) -> navViewModel.navigateToMusicList(view)}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -224,7 +224,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{() -> navViewModel.navigateToArtist()}"
+                android:onClick="@{(view) -> navViewModel.navigateToArtist(view)}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -254,7 +254,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{() -> navViewModel.navigateToAlbum()}"
+                android:onClick="@{(view) -> navViewModel.navigateToAlbum(view)}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -284,7 +284,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{() -> navViewModel.navigateToHistory()}"
+                android:onClick="@{(view) -> navViewModel.navigateToHistory(view)}"
                 android:orientation="vertical">
 
                 <ImageView
