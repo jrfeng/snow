@@ -3,7 +3,7 @@
     <dimen name="image_button_size">48dp</dimen>
     <dimen name="album_icon_size">240dp</dimen>
     <dimen name="player_bottom_bar_icon_size">40dp</dimen>
-    <dimen name="player_bottom_bar_icon_corner_size">6dp</dimen>
+    <dimen name="player_bottom_bar_icon_corner_size">4dp</dimen>
 
     <dimen name="action_bar_height">56dp</dimen>
     <dimen name="action_bar_title_text_size">18sp</dimen>
