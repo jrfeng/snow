@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="snow.music.activity.localmusic.LocalMusicActivity">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/action_bar_height"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="@dimen/image_button_size"
+                android:layout_height="@dimen/image_button_size"
+                android:background="@drawable/bg_button_48dp"
+                android:contentDescription="@string/des_back"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_back" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/local_music"
+                android:textSize="@dimen/action_bar_title_text_size" />
+
+            <ImageButton
+                android:id="@+id/btnSearch"
+                android:layout_width="@dimen/image_button_size"
+                android:layout_height="@dimen/image_button_size"
+                android:background="@drawable/bg_button_48dp"
+                android:contentDescription="@string/des_search"
+                android:onClick="onActionMenuClicked"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_action_search" />
+
+            <ImageButton
+                android:id="@+id/btnSort"
+                android:layout_width="@dimen/image_button_size"
+                android:layout_height="@dimen/image_button_size"
+                android:background="@drawable/bg_button_48dp"
+                android:contentDescription="@string/des_sort_music_list"
+                android:onClick="onActionMenuClicked"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_action_sort" />
+
+            <ImageButton
+                android:id="@+id/btnScan"
+                android:layout_width="@dimen/image_button_size"
+                android:layout_height="@dimen/image_button_size"
+                android:background="@drawable/bg_button_48dp"
+                android:contentDescription="@string/des_scan_local_music"
+                android:onClick="onActionMenuClicked"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_action_scan" />
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_gravity="bottom"
+            android:background="@color/colorDivider" />
+
+    </FrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMusicList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/bottomBar"
+        android:name="snow.music.fragment.battombar.BottomBarFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
