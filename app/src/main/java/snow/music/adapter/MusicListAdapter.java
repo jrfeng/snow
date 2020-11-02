@@ -56,15 +56,13 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
 
         if (mOrderMusicList.isEmpty() || musicList.isEmpty()) {
             mOrderMusicList = asOrderMusicList(musicList);
-            mSelectableHelper.clearSelected();
             notifyDataSetChanged();
-            return;
+        } else {
+            List<OrderMusic> newMusicList = asOrderMusicList(musicList);
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new OrderMusicDiffCallback(mOrderMusicList, newMusicList));
+            diffResult.dispatchUpdatesTo(this);
+            mOrderMusicList = newMusicList;
         }
-
-        List<OrderMusic> newMusicList = asOrderMusicList(musicList);
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new OrderMusicDiffCallback(mOrderMusicList, newMusicList));
-        diffResult.dispatchUpdatesTo(this);
-        mOrderMusicList = newMusicList;
 
         if (playPosition < 0) {
             mSelectableHelper.clearSelected();
@@ -128,8 +126,8 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         holder.tvTitle.setText(orderMusic.music.getTitle());
         holder.tvArtist.setText(orderMusic.music.getArtist());
 
-        mItemClickHelper.bindClickListener(holder.itemView, holder.btnOptionMenu);
-        mItemClickHelper.bindLongClickListener(holder.itemView);
+        mItemClickHelper.bindClickListener(holder.musicListItem, holder.btnOptionMenu);
+        mItemClickHelper.bindLongClickListener(holder.musicListItem);
         mSelectableHelper.updateSelectState(holder, position);
     }
 
@@ -164,6 +162,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements SelectableHelper.Selectable {
+        View musicListItem;
         TextView tvOrder;
         TextView tvTitle;
         TextView tvArtist;
@@ -184,6 +183,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
                 return;
             }
 
+            musicListItem = itemView.findViewById(R.id.musicListItem);
             tvOrder = itemView.findViewById(R.id.tvOrder);
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvArtist = itemView.findViewById(R.id.tvArtist);
