@@ -28,6 +28,10 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     private ItemClickHelper mItemClickHelper;
     private SelectableHelper mSelectableHelper;
 
+    public MusicListAdapter(@NonNull List<Music> musicList) {
+        this(musicList, -1);
+    }
+
     public MusicListAdapter(@NonNull List<Music> musicList, int playPosition) {
         Preconditions.checkNotNull(musicList);
 
@@ -50,7 +54,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     public void setMusicList(@NonNull List<Music> musicList, int playPosition) {
         Preconditions.checkNotNull(musicList);
 
-        if (mOrderMusicList.isEmpty() && musicList.isEmpty()) {
+        if (mOrderMusicList.isEmpty() || musicList.isEmpty()) {
             mOrderMusicList = asOrderMusicList(musicList);
             mSelectableHelper.clearSelected();
             notifyDataSetChanged();
