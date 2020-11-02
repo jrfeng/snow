@@ -147,21 +147,7 @@ public class LocalMusicActivity extends AppCompatActivity {
             }
 
             mPlayerViewModel.getPlayerClient()
-                    .setPlaylist(asPlaylist(), position, true);
+                    .setPlaylist(MusicUtil.asPlaylist(position, mMusicList, MusicStore.MUSIC_LIST_LOCAL_MUSIC), position, true);
         };
-    }
-
-    @NonNull
-    private Playlist asPlaylist() {
-        List<MusicItem> musicItemList = new ArrayList<>(mMusicList.size());
-
-        for (Music music : mMusicList) {
-            musicItemList.add(MusicUtil.asMusicItem(music));
-        }
-
-        return new Playlist.Builder()
-                .setToken(MusicStore.MUSIC_LIST_LOCAL_MUSIC)
-                .appendAll(musicItemList)
-                .build();
     }
 }
