@@ -7,4 +7,6 @@
 
     <dimen name="action_bar_height">56dp</dimen>
     <dimen name="action_bar_title_text_size">18sp</dimen>
+
+    <dimen name="min_slide_distance">20dp</dimen>
 </resources>
