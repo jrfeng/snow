@@ -28,6 +28,7 @@ import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.databinding.ActivityNavigationBinding;
 import snow.music.service.AppPlayerService;
+import snow.music.util.PlayerUtil;
 import snow.music.viewmodel.ScannerViewModel;
 import snow.music.store.Music;
 import snow.music.store.MusicStore;
@@ -93,21 +94,8 @@ public class NavigationActivity extends AppCompatActivity {
         mNavigationViewModel = viewModelProvider.get(NavigationViewModel.class);
         mScannerViewModel = viewModelProvider.get(ScannerViewModel.class);
 
-        initPlayerViewModel();
+        PlayerUtil.initPlayerViewModel(this, mPlayerViewModel, AppPlayerService.class);
         initNavigationViewModel();
-    }
-
-    private void initPlayerViewModel() {
-        if (mPlayerViewModel.isInitialized()) {
-            return;
-        }
-
-        PlayerClient playerClient = PlayerClient.newInstance(this, AppPlayerService.class);
-        playerClient.setAutoConnect(true);
-        playerClient.connect();
-
-        mPlayerViewModel.init(this, playerClient);
-        mPlayerViewModel.setAutoDisconnect(true);
     }
 
     private void initNavigationViewModel() {

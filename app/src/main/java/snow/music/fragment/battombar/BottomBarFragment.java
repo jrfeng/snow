@@ -26,7 +26,7 @@ import snow.music.databinding.FragmentBottomBarBinding;
 import snow.music.service.AppPlayerService;
 import snow.music.util.DimenUtil;
 import snow.music.util.MusicUtil;
-import snow.player.PlayerClient;
+import snow.music.util.PlayerUtil;
 import snow.player.lifecycle.PlayerViewModel;
 
 public class BottomBarFragment extends Fragment {
@@ -44,7 +44,7 @@ public class BottomBarFragment extends Fragment {
         ViewModelProvider viewModelProvider = new ViewModelProvider(activity);
 
         PlayerViewModel playerViewModel = viewModelProvider.get(PlayerViewModel.class);
-        initPlayerViewModel(context, playerViewModel);
+        PlayerUtil.initPlayerViewModel(context, playerViewModel, AppPlayerService.class);
         mBottomBarViewModel = viewModelProvider.get(BottomBarViewModel.class);
         mBottomBarViewModel.init(playerViewModel);
 
@@ -69,19 +69,6 @@ public class BottomBarFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         cancelLoadMusicIcon();
-    }
-
-    private void initPlayerViewModel(Context context, PlayerViewModel playerViewModel) {
-        if (playerViewModel.isInitialized()) {
-            return;
-        }
-
-        PlayerClient playerClient = PlayerClient.newInstance(context, AppPlayerService.class);
-        playerClient.setAutoConnect(true);
-        playerClient.connect();
-
-        playerViewModel.init(context, playerClient);
-        playerViewModel.setAutoDisconnect(true);
     }
 
     private void loadMusicIcon(String musicUri) {

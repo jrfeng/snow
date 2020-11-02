@@ -32,6 +32,7 @@ import recyclerview.helper.SelectableHelper;
 import snow.music.R;
 import snow.music.service.AppPlayerService;
 import snow.music.util.DialogUtil;
+import snow.music.util.PlayerUtil;
 import snow.player.PlayerClient;
 import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
@@ -61,20 +62,7 @@ public class PlaylistDialog extends AppCompatDialogFragment {
 
         ViewModelProvider provider = new ViewModelProvider(activity);
         mPlayerViewModel = provider.get(PlayerViewModel.class);
-        initPlayerViewModel(context);
-    }
-
-    private void initPlayerViewModel(Context context) {
-        if (mPlayerViewModel.isInitialized()) {
-            return;
-        }
-
-        PlayerClient playerClient = PlayerClient.newInstance(context, AppPlayerService.class);
-        playerClient.setAutoConnect(true);
-        playerClient.connect();
-
-        mPlayerViewModel.init(context, playerClient);
-        mPlayerViewModel.setAutoDisconnect(true);
+        PlayerUtil.initPlayerViewModel(context, mPlayerViewModel, AppPlayerService.class);
     }
 
     @NonNull
