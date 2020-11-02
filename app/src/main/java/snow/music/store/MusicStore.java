@@ -45,6 +45,7 @@ import io.objectbox.query.QueryBuilder;
  */
 public class MusicStore {
     private static final String TAG = "MusicStore";
+    public static final String MUSIC_LIST_LOCAL_MUSIC = "__local_music";
     public static final String MUSIC_LIST_FAVORITE = "__favorite";
     public static final String MUSIC_LIST_HISTORY = "__history";
 
@@ -439,7 +440,8 @@ public class MusicStore {
      * 指定 name 名称是否是内置歌单名。如果是，则返回 true，否则返回 false。
      */
     public static boolean isBuiltInName(String name) {
-        return name.equalsIgnoreCase(MUSIC_LIST_FAVORITE) ||
+        return name.equalsIgnoreCase(MUSIC_LIST_LOCAL_MUSIC) ||
+                name.equalsIgnoreCase(MUSIC_LIST_FAVORITE) ||
                 name.equalsIgnoreCase(MUSIC_LIST_HISTORY);
     }
 
@@ -706,6 +708,10 @@ public class MusicStore {
 
     @NonNull
     private synchronized MusicList getBuiltInMusicList(String name) {
+        if (MUSIC_LIST_LOCAL_MUSIC.equals(name)) {
+            throw new IllegalArgumentException("can't get local music list, Please use method: getAllMusic()");
+        }
+
         if (!isBuiltInName(name)) {
             throw new IllegalArgumentException("not built-in name:" + name);
         }
