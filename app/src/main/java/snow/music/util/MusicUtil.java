@@ -9,9 +9,14 @@ import androidx.annotation.NonNull;
 
 import com.google.common.base.Preconditions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.reactivex.Single;
 import snow.music.store.Music;
+import snow.music.store.MusicStore;
 import snow.player.audio.MusicItem;
+import snow.player.playlist.Playlist;
 
 /**
  * 用于在 {@link Music} 与 {@link MusicItem} 之间进行类型转换。
@@ -100,6 +105,49 @@ public final class MusicUtil {
                 retriever.release();
             }
         });
+    }
+
+    /**
+     * 将一个 {@code List<Music>} 列表转换为一个 {@link Playlist} 对象。
+     *
+     * @param position  基准值，大于等于 0，并且小于 {@code List<Music>} 列表的大小。
+     *                  如果 {@code List<Music>} 列表的尺寸大于 {@link Playlist#MAX_SIZE}，则会以
+     *                  position 为基准，获取一个尺寸为 {@link Playlist#MAX_SIZE} 的 {@link Playlist}
+     *                  对象，否则直接将 {@code List<Music>} 列表转换为一个 {@link Playlist} 对象。
+     * @param musicList {@code List<Music>} 列表，不能为 null
+     * @param token     {@link Playlist} 的 token，不能为 null
+     * @return {@link Playlist} 对象，不为 null
+     */
+    @NonNull
+    public static Playlist asPlaylist(int position, @NonNull List<Music> musicList, @NonNull String token) {
+        Preconditions.checkNotNull(musicList);
+        Preconditions.checkNotNull(token);
+        if (position < 0 || position >= musicList.size()) {
+            throw new IndexOutOfBoundsException("position out of bound, position: " + position + ", size: " + musicList.size());
+        }
+
+        int start = 0;
+        int end = musicList.size();
+        List<MusicItem> musicItemList = new ArrayList<>(Math.min(musicList.size(), Playlist.MAX_SIZE));
+
+        if (end > Playlist.MAX_SIZE) {
+            int value = end - position;
+            if (value >= Playlist.MAX_SIZE) {
+                end = position + Playlist.MAX_SIZE;
+                start = position;
+            } else {
+                start = position - (Playlist.MAX_SIZE - value);
+            }
+        }
+
+        for (int i = start; i < end; i++) {
+            musicItemList.add(MusicUtil.asMusicItem(musicList.get(i)));
+        }
+
+        return new Playlist.Builder()
+                .setToken(token)
+                .appendAll(musicItemList)
+                .build();
     }
 
     private static long getAddTime(MusicItem musicItem) {
