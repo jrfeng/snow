@@ -23,8 +23,10 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.databinding.FragmentBottomBarBinding;
+import snow.music.service.AppPlayerService;
 import snow.music.util.DimenUtil;
 import snow.music.util.MusicUtil;
+import snow.player.PlayerClient;
 import snow.player.lifecycle.PlayerViewModel;
 
 public class BottomBarFragment extends Fragment {
@@ -42,11 +44,16 @@ public class BottomBarFragment extends Fragment {
         ViewModelProvider viewModelProvider = new ViewModelProvider(activity);
 
         PlayerViewModel playerViewModel = viewModelProvider.get(PlayerViewModel.class);
+        initPlayerViewModel(context, playerViewModel);
         mBottomBarViewModel = viewModelProvider.get(BottomBarViewModel.class);
         mBottomBarViewModel.init(playerViewModel);
 
         playerViewModel.getPlayingMusicItem()
-                .observe(this, musicItem -> loadMusicIcon(musicItem.getUri()));
+                .observe(this, musicItem -> {
+                    if (musicItem != null) {
+                        loadMusicIcon(musicItem.getUri());
+                    }
+                });
     }
 
     @Nullable
@@ -62,6 +69,19 @@ public class BottomBarFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         cancelLoadMusicIcon();
+    }
+
+    private void initPlayerViewModel(Context context, PlayerViewModel playerViewModel) {
+        if (playerViewModel.isInitialized()) {
+            return;
+        }
+
+        PlayerClient playerClient = PlayerClient.newInstance(context, AppPlayerService.class);
+        playerClient.setAutoConnect(true);
+        playerClient.connect();
+
+        playerViewModel.init(context, playerClient);
+        playerViewModel.setAutoDisconnect(true);
     }
 
     private void loadMusicIcon(String musicUri) {
