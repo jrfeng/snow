@@ -14,7 +14,7 @@
         android:paddingLeft="24dp"
         android:paddingRight="24dp"
         android:singleLine="true"
-        android:text="@string/dialog"
+        android:text="@string/message_dialog_default_title"
         android:textSize="@dimen/dialog_title_text_size" />
 
     <TextView
@@ -27,8 +27,7 @@
         android:paddingRight="24dp"
         android:paddingBottom="16dp"
         android:singleLine="true"
-        android:text="@string/dialog"
-        android:textSize="@dimen/dialog_title_text_size" />
+        tools:text="message" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -46,7 +45,7 @@
             android:ellipsize="middle"
             android:minWidth="@dimen/dialog_button_min_width"
             android:singleLine="true"
-            tools:text="Cancel" />
+            android:text="@string/message_dialog_negative_text" />
 
         <Space
             android:layout_width="16dp"
@@ -61,8 +60,8 @@
             android:ellipsize="middle"
             android:minWidth="@dimen/dialog_button_min_width"
             android:singleLine="true"
-            android:textColor="@color/colorPrimary"
-            tools:text="OK" />
+            android:text="@string/message_dialog_positive_text"
+            android:textColor="@color/colorPrimary" />
 
     </LinearLayout>
 
