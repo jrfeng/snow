@@ -11,5 +11,7 @@
     <color name="grey_800">#424242</color>
     <color name="grey_900">#212121</color>
 
+    <color name="red_500">#F44336</color>
+
     <color name="ic_launcher_background">@color/deep_purple_400</color>
 </resources>

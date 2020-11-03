@@ -143,7 +143,7 @@ public class PlaylistDialog extends AppCompatDialogFragment {
         MessageDialog messageDialog = new MessageDialog.Builder(context)
                 .setTitle(musicItem.getTitle())
                 .setMessage(R.string.message_remove_music)
-                .setPositiveTextColor(Color.parseColor("#F44336"))
+                .setPositiveTextColor(context.getResources().getColor(R.color.red_500))
                 .setPositiveButtonClickListener((dialog, which) -> mPlayerViewModel.getPlayerClient().removeMusicItem(position))
                 .build();
 
