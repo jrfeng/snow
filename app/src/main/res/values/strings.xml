@@ -13,6 +13,7 @@
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>
     <string name="empty_playlist">Playlist is empty</string>
+    <string name="message_remove_music">Remove  from playlist?</string>
 
     <!-- MusicListAdapter -->
     <string name="empty_music_list">Music list is Empty</string>

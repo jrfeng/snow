@@ -116,7 +116,7 @@ public class PlaylistDialog extends AppCompatDialogFragment {
                         playerClient.playPause(position);
                         break;
                     case R.id.btnRemove:
-                        playerClient.removeMusicItem(position);
+                        removeMusicItem(position);
                         break;
                 }
             });
@@ -129,6 +129,23 @@ public class PlaylistDialog extends AppCompatDialogFragment {
             mPlayerViewModel.getPlayingMusicItem()
                     .observe(PlaylistDialog.this, musicItem -> mPlaylistAdapter.setPlayPosition(playerClient.getPlayPosition()));
         });
+    }
+
+    private void removeMusicItem(int position) {
+        Context context = getContext();
+        Playlist playlist = mPlaylistLiveData.getValue();
+        if (context == null || playlist == null) {
+            return;
+        }
+
+        MusicItem musicItem = playlist.get(position);
+        MessageDialog messageDialog = new MessageDialog.Builder(context)
+                .setTitle(musicItem.getTitle())
+                .setMessage(R.string.message_remove_music)
+                .setPositiveButtonClickListener((dialog, which) -> mPlayerViewModel.getPlayerClient().removeMusicItem(position))
+                .build();
+
+        messageDialog.show(getParentFragmentManager(), "RemoveMusicItem");
     }
 
     private static class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
