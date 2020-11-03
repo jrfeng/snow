@@ -35,4 +35,7 @@
     <string name="des_scan_local_music">扫描本地音乐</string>
     <string name="dialog">对话框</string>
     <string name="des_menu_icon">菜单图标</string>
+    <string name="message_dialog_negative_text">取消</string>
+    <string name="message_dialog_positive_text">确认</string>
+    <string name="message_dialog_default_title">提示</string>
 </resources>

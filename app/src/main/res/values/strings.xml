@@ -23,6 +23,11 @@
     <!-- BottomMenuDialog -->
     <string name="dialog">Dialog</string>
 
+    <!-- MessageDialog -->
+    <string name="message_dialog_default_title">Tips</string>
+    <string name="message_dialog_negative_text">Cancel</string>
+    <string name="message_dialog_positive_text">OK</string>
+
     <!-- content description -->
     <string name="des_logo">logo</string>
     <string name="des_search">Search</string>
