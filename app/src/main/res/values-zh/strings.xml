@@ -33,4 +33,6 @@
     <string name="des_back">返回</string>
     <string name="des_sort_music_list">排序歌单</string>
     <string name="des_scan_local_music">扫描本地音乐</string>
+    <string name="dialog">对话框</string>
+    <string name="des_menu_icon">菜单图标</string>
 </resources>

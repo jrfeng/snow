@@ -20,6 +20,9 @@
     <!-- LocalMusicActivity -->
     <string name="local_music">Local Music</string>
 
+    <!-- BottomMenuDialog -->
+    <string name="dialog">Dialog</string>
+
     <!-- content description -->
     <string name="des_logo">logo</string>
     <string name="des_search">Search</string>
@@ -41,5 +44,6 @@
     <string name="des_back">Back</string>
     <string name="des_sort_music_list">Sort music list</string>
     <string name="des_scan_local_music">Scan local music</string>
+    <string name="des_menu_icon">menu icon</string>
 
 </resources>
