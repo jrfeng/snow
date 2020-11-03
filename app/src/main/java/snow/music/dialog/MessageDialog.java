@@ -136,6 +136,11 @@ public class MessageDialog extends AppCompatDialogFragment {
             return this;
         }
 
+        public Builder setPositiveButtonClickListener(@Nullable DialogInterface.OnClickListener listener) {
+            mPositiveButtonClickListener = listener;
+            return this;
+        }
+
         public Builder setNegativeButton(@NonNull String text, @Nullable DialogInterface.OnClickListener listener) {
             mNegativeButtonText = text;
             mNegativeButtonClickListener = listener;
@@ -144,6 +149,11 @@ public class MessageDialog extends AppCompatDialogFragment {
 
         public Builder setNegativeButton(@StringRes int textId, @Nullable DialogInterface.OnClickListener listener) {
             mNegativeButtonText = mContext.getString(textId);
+            mNegativeButtonClickListener = listener;
+            return this;
+        }
+
+        public Builder setNegativeButtonClickListener(@Nullable DialogInterface.OnClickListener listener) {
             mNegativeButtonClickListener = listener;
             return this;
         }
