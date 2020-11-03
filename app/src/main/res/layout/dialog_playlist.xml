@@ -11,7 +11,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="@dimen/dialog_title_height"
             android:gravity="center_vertical">
 
             <Space
@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/playlist"
-                android:textSize="16sp" />
+                android:textSize="@dimen/dialog_title_text_size" />
 
             <ImageButton
                 android:id="@+id/btnLocate"
