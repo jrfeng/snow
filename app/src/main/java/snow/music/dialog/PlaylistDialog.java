@@ -1,24 +1,17 @@
 package snow.music.dialog;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Build;
-import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialog;
-import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DiffUtil;
@@ -32,7 +25,6 @@ import recyclerview.helper.ScrollToPositionHelper;
 import recyclerview.helper.SelectableHelper;
 import snow.music.R;
 import snow.music.service.AppPlayerService;
-import snow.music.util.DialogUtil;
 import snow.music.util.PlayerUtil;
 import snow.player.PlayerClient;
 import snow.player.audio.MusicItem;
@@ -40,7 +32,7 @@ import snow.player.lifecycle.PlayerViewModel;
 import snow.player.lifecycle.PlaylistLiveData;
 import snow.player.playlist.Playlist;
 
-public class PlaylistDialog extends AppCompatDialogFragment {
+public class PlaylistDialog extends BottomDialog {
     private PlayerViewModel mPlayerViewModel;
     private PlaylistAdapter mPlaylistAdapter;
     private PlaylistLiveData mPlaylistLiveData;
@@ -66,17 +58,8 @@ public class PlaylistDialog extends AppCompatDialogFragment {
         PlayerUtil.initPlayerViewModel(context, mPlayerViewModel, AppPlayerService.class);
     }
 
-    @NonNull
     @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        AppCompatDialog dialog = new AppCompatDialog(getContext(), getTheme());
-
-        DialogUtil.setWith(dialog, WindowManager.LayoutParams.MATCH_PARENT);
-        DialogUtil.setGravity(dialog, Gravity.BOTTOM);
-        DialogUtil.setBackgroundDrawableResource(dialog, R.drawable.bg_playlist);
-        DialogUtil.setAnimations(dialog, R.style.PlaylistTransition);
-        dialog.setCanceledOnTouchOutside(true);
-
+    protected void onInitDialog(AppCompatDialog dialog) {
         dialog.setContentView(R.layout.dialog_playlist);
 
         tvPlaylistTitle = dialog.findViewById(R.id.tvPlaylistTitle);
@@ -88,8 +71,6 @@ public class PlaylistDialog extends AppCompatDialogFragment {
         ImageButton btnLocate = dialog.findViewById(R.id.btnLocate);
         assert btnLocate != null;
         btnLocate.setOnClickListener(v -> mScrollToPositionHelper.smoothScrollToPosition(mPlayerViewModel.getPlayerClient().getPlayPosition()));
-
-        return dialog;
     }
 
     private void initRecyclerView(RecyclerView rvPlaylist) {

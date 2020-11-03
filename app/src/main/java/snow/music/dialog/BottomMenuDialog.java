@@ -1,13 +1,9 @@
 package snow.music.dialog;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatDialog;
-import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,9 +23,8 @@ import java.util.Objects;
 
 import recyclerview.helper.ItemClickHelper;
 import snow.music.R;
-import snow.music.util.DialogUtil;
 
-public class BottomMenuDialog extends AppCompatDialogFragment {
+public class BottomMenuDialog extends BottomDialog {
     private String mDialogTitle = "";
     private List<MenuItem> mMenuItems = new ArrayList<>();
 
@@ -41,17 +35,8 @@ public class BottomMenuDialog extends AppCompatDialogFragment {
         return new BottomMenuDialog();
     }
 
-    @NonNull
     @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        AppCompatDialog dialog = new AppCompatDialog(getContext(), getTheme());
-
-        DialogUtil.setWith(dialog, WindowManager.LayoutParams.MATCH_PARENT);
-        DialogUtil.setGravity(dialog, Gravity.BOTTOM);
-        DialogUtil.setBackgroundDrawableResource(dialog, R.drawable.bg_playlist);
-        DialogUtil.setAnimations(dialog, R.style.PlaylistTransition);
-        dialog.setCanceledOnTouchOutside(true);
-
+    protected void onInitDialog(AppCompatDialog dialog) {
         dialog.setContentView(R.layout.dialog_bottom_menu);
 
         TextView tvDialogTitle = dialog.findViewById(R.id.tvDialogTitle);
@@ -65,8 +50,6 @@ public class BottomMenuDialog extends AppCompatDialogFragment {
         MenuItemAdapter menuItemAdapter = new MenuItemAdapter(mMenuItems);
         menuItemAdapter.setOnMenuItemClickListener(mMenuItemClickListener);
         rvMenuItems.setAdapter(menuItemAdapter);
-
-        return dialog;
     }
 
     public static class Builder {
