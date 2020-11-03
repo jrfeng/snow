@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -142,6 +143,7 @@ public class PlaylistDialog extends AppCompatDialogFragment {
         MessageDialog messageDialog = new MessageDialog.Builder(context)
                 .setTitle(musicItem.getTitle())
                 .setMessage(R.string.message_remove_music)
+                .setPositiveTextColor(Color.parseColor("#F44336"))
                 .setPositiveButtonClickListener((dialog, which) -> mPlayerViewModel.getPlayerClient().removeMusicItem(position))
                 .build();
 
