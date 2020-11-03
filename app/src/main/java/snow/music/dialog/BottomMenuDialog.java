@@ -118,7 +118,7 @@ public class BottomMenuDialog extends AppCompatDialogFragment {
         }
     }
 
-    public static class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHolder> {
+    private static class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHolder> {
         private List<MenuItem> mMenuItems;
         private ItemClickHelper mItemClickHelper;
         @Nullable
@@ -193,7 +193,7 @@ public class BottomMenuDialog extends AppCompatDialogFragment {
         }
     }
 
-    public static class MenuItem {
+    private static class MenuItem {
         private int mIconId;
         private String mTitle;
 
