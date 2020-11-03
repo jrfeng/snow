@@ -1,6 +1,7 @@
 package snow.music.dialog;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -30,36 +31,14 @@ import snow.music.R;
 import snow.music.util.DialogUtil;
 
 public class BottomMenuDialog extends AppCompatDialogFragment {
-    private int mTitleResId = R.string.dialog;
+    private String mDialogTitle = "";
     private List<MenuItem> mMenuItems = new ArrayList<>();
-    @Nullable
-    private MenuItemAdapter mMenuItemAdapter;
+
     @Nullable
     private MenuItemAdapter.OnMenuItemClickListener mMenuItemClickListener;
 
-    public static BottomMenuDialog newInstance(@StringRes int titleResId, @NonNull List<MenuItem> menuItems) {
-        Preconditions.checkNotNull(menuItems);
-
-        BottomMenuDialog dialog = new BottomMenuDialog();
-        dialog.setDialogTitle(titleResId);
-        dialog.setMenuItem(menuItems);
-        return dialog;
-    }
-
-    private void setDialogTitle(@StringRes int titleResId) {
-        mTitleResId = titleResId;
-    }
-
-    private void setMenuItem(@NonNull List<MenuItem> menuItems) {
-        Preconditions.checkNotNull(menuItems);
-        mMenuItems = new ArrayList<>(menuItems);
-    }
-
-    public void setOnMenuItemClickListener(MenuItemAdapter.OnMenuItemClickListener listener) {
-        mMenuItemClickListener = listener;
-        if (mMenuItemAdapter != null) {
-            mMenuItemAdapter.setOnMenuItemClickListener(mMenuItemClickListener);
-        }
+    public static BottomMenuDialog newInstance() {
+        return new BottomMenuDialog();
     }
 
     @NonNull
@@ -81,13 +60,62 @@ public class BottomMenuDialog extends AppCompatDialogFragment {
         Objects.requireNonNull(tvDialogTitle);
         Objects.requireNonNull(rvMenuItems);
 
-        tvDialogTitle.setText(mTitleResId);
+        tvDialogTitle.setText(mDialogTitle);
         rvMenuItems.setLayoutManager(new LinearLayoutManager(getContext()));
-        mMenuItemAdapter = new MenuItemAdapter(mMenuItems);
-        mMenuItemAdapter.setOnMenuItemClickListener(mMenuItemClickListener);
-        rvMenuItems.setAdapter(mMenuItemAdapter);
+        MenuItemAdapter menuItemAdapter = new MenuItemAdapter(mMenuItems);
+        menuItemAdapter.setOnMenuItemClickListener(mMenuItemClickListener);
+        rvMenuItems.setAdapter(menuItemAdapter);
 
         return dialog;
+    }
+
+    public static class Builder {
+        private Context mContext;
+        private String mDialogTitle;
+        private List<MenuItem> mMenuItems;
+        private MenuItemAdapter.OnMenuItemClickListener mMenuItemClickListener;
+
+        public Builder(@NonNull Context context) {
+            mContext = context;
+            mDialogTitle = mContext.getString(R.string.dialog);
+            mMenuItems = new ArrayList<>();
+        }
+
+        public Builder setTitle(@NonNull String title) {
+            mDialogTitle = title;
+            return this;
+        }
+
+        public Builder setTitle(@StringRes int titleId) {
+            mDialogTitle = mContext.getString(titleId);
+            return this;
+        }
+
+        public Builder addMenuItem(@DrawableRes int iconId, @NonNull String menuTitle) {
+            Preconditions.checkNotNull(menuTitle);
+            mMenuItems.add(new MenuItem(iconId, menuTitle));
+            return this;
+        }
+
+        public Builder addMenuItem(@DrawableRes int iconId, @StringRes int meueTitleId) {
+            mMenuItems.add(new MenuItem(iconId, mContext.getString(meueTitleId)));
+            return this;
+        }
+
+        public Builder setOnMenuItemClickListener(MenuItemAdapter.OnMenuItemClickListener listener) {
+            mMenuItemClickListener = listener;
+            return this;
+        }
+
+        public BottomMenuDialog build() {
+            BottomMenuDialog dialog = BottomMenuDialog.newInstance();
+
+            dialog.mDialogTitle = mDialogTitle;
+            dialog.mMenuItems = new ArrayList<>(mMenuItems);
+            dialog.mMenuItemClickListener = mMenuItemClickListener;
+
+            return dialog;
+        }
     }
 
     public static class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHolder> {
@@ -167,11 +195,12 @@ public class BottomMenuDialog extends AppCompatDialogFragment {
 
     public static class MenuItem {
         private int mIconId;
-        private int mTitleId;
+        private String mTitle;
 
-        public MenuItem(@DrawableRes int iconId, @StringRes int titleId) {
+        public MenuItem(@DrawableRes int iconId, @NonNull String title) {
+            Preconditions.checkNotNull(title);
             mIconId = iconId;
-            mTitleId = titleId;
+            mTitle = title;
         }
 
         @DrawableRes
@@ -179,9 +208,9 @@ public class BottomMenuDialog extends AppCompatDialogFragment {
             return mIconId;
         }
 
-        @StringRes
-        public int getTitleId() {
-            return mTitleId;
+        @NonNull
+        public String getTitleId() {
+            return mTitle;
         }
     }
 }
