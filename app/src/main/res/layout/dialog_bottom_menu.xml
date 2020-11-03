@@ -20,13 +20,6 @@
             android:text="@string/dialog"
             android:textSize="@dimen/dialog_title_text_size" />
 
-        <FrameLayout
-            android:id="@+id/divider"
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_gravity="bottom"
-            android:background="@color/colorDivider" />
-
     </FrameLayout>
 
     <androidx.recyclerview.widget.RecyclerView
