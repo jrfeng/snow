@@ -139,7 +139,6 @@ public class BottomMenuDialog extends AppCompatDialogFragment {
 
             holder.menuIcon.setImageResource(menuItem.getIconId());
             holder.menuTitle.setText(menuItem.getTitleId());
-            holder.setClickable(menuItem.isClickable());
 
             mItemClickHelper.bindClickListener(holder.itemView);
         }
@@ -159,11 +158,6 @@ public class BottomMenuDialog extends AppCompatDialogFragment {
                 menuIcon = itemView.findViewById(R.id.ivMenuIcon);
                 menuTitle = itemView.findViewById(R.id.tvMenuTitle);
             }
-
-            public void setClickable(boolean clickable) {
-                itemView.setClickable(clickable);
-                itemView.setFocusable(clickable);
-            }
         }
 
         public interface OnMenuItemClickListener {
@@ -174,12 +168,10 @@ public class BottomMenuDialog extends AppCompatDialogFragment {
     public static class MenuItem {
         private int mIconId;
         private int mTitleId;
-        private boolean mClickable;
 
-        public MenuItem(@DrawableRes int iconId, @StringRes int titleId, boolean clickable) {
+        public MenuItem(@DrawableRes int iconId, @StringRes int titleId) {
             mIconId = iconId;
             mTitleId = titleId;
-            mClickable = clickable;
         }
 
         @DrawableRes
@@ -190,10 +182,6 @@ public class BottomMenuDialog extends AppCompatDialogFragment {
         @StringRes
         public int getTitleId() {
             return mTitleId;
-        }
-
-        public boolean isClickable() {
-            return mClickable;
         }
     }
 }
