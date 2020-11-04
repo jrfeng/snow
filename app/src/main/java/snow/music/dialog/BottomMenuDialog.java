@@ -29,7 +29,7 @@ public class BottomMenuDialog extends BottomDialog {
     private List<MenuItem> mMenuItems = new ArrayList<>();
 
     @Nullable
-    private MenuItemAdapter.OnMenuItemClickListener mMenuItemClickListener;
+    private OnMenuItemClickListener mMenuItemClickListener;
 
     public static BottomMenuDialog newInstance() {
         return new BottomMenuDialog();
@@ -48,7 +48,11 @@ public class BottomMenuDialog extends BottomDialog {
         tvDialogTitle.setText(mDialogTitle);
         rvMenuItems.setLayoutManager(new LinearLayoutManager(getContext()));
         MenuItemAdapter menuItemAdapter = new MenuItemAdapter(mMenuItems);
-        menuItemAdapter.setOnMenuItemClickListener(mMenuItemClickListener);
+        menuItemAdapter.setOnMenuItemClickListener((position, viewId, view, holder) -> {
+            if (mMenuItemClickListener != null) {
+                mMenuItemClickListener.onMenuItemClicked(dialog, position);
+            }
+        });
         rvMenuItems.setAdapter(menuItemAdapter);
     }
 
@@ -56,7 +60,7 @@ public class BottomMenuDialog extends BottomDialog {
         private Context mContext;
         private String mDialogTitle;
         private List<MenuItem> mMenuItems;
-        private MenuItemAdapter.OnMenuItemClickListener mMenuItemClickListener;
+        private OnMenuItemClickListener mMenuItemClickListener;
 
         public Builder(@NonNull Context context) {
             mContext = context;
@@ -85,7 +89,7 @@ public class BottomMenuDialog extends BottomDialog {
             return this;
         }
 
-        public Builder setOnMenuItemClickListener(MenuItemAdapter.OnMenuItemClickListener listener) {
+        public Builder setOnMenuItemClickListener(OnMenuItemClickListener listener) {
             mMenuItemClickListener = listener;
             return this;
         }
@@ -101,27 +105,22 @@ public class BottomMenuDialog extends BottomDialog {
         }
     }
 
+    public interface OnMenuItemClickListener {
+        void onMenuItemClicked(AppCompatDialog dialog, int position);
+    }
+
     private static class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHolder> {
         private List<MenuItem> mMenuItems;
         private ItemClickHelper mItemClickHelper;
-        @Nullable
-        private OnMenuItemClickListener mMenuItemClickListener;
-        private ItemClickHelper.OnItemClickListener mItemClickListener;
 
         public MenuItemAdapter(@NonNull List<MenuItem> menuItems) {
             Preconditions.checkNotNull(menuItems);
             mMenuItems = menuItems;
             mItemClickHelper = new ItemClickHelper();
-            mItemClickListener = (position, viewId, view, holder) -> {
-                if (mMenuItemClickListener != null) {
-                    mMenuItemClickListener.onMenuItemClicked(position);
-                }
-            };
         }
 
-        public void setOnMenuItemClickListener(@Nullable OnMenuItemClickListener listener) {
-            mMenuItemClickListener = listener;
-            mItemClickHelper.setOnItemClickListener(listener == null ? null : mItemClickListener);
+        public void setOnMenuItemClickListener(@Nullable ItemClickHelper.OnItemClickListener listener) {
+            mItemClickHelper.setOnItemClickListener(listener);
         }
 
         @Override
@@ -169,10 +168,6 @@ public class BottomMenuDialog extends BottomDialog {
                 menuIcon = itemView.findViewById(R.id.ivMenuIcon);
                 menuTitle = itemView.findViewById(R.id.tvMenuTitle);
             }
-        }
-
-        public interface OnMenuItemClickListener {
-            void onMenuItemClicked(int position);
         }
     }
 
