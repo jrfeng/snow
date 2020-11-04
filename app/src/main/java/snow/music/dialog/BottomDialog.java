@@ -20,7 +20,6 @@ public abstract class BottomDialog extends AppCompatDialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // 因为重启时状态会丢失，因此检测到重启时自动 dismiss，避免显示一个空白的 MessageDialog
         if (savedInstanceState != null && !savedInstanceState.getBoolean(KEY_KEEP_ON_RESTARTED, true)) {
             dismiss();
         }
