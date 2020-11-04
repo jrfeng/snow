@@ -123,7 +123,7 @@ public class PlaylistDialog extends BottomDialog {
         MusicItem musicItem = playlist.get(position);
         MessageDialog messageDialog = new MessageDialog.Builder(context)
                 .setTitle(musicItem.getTitle())
-                .setMessage(R.string.message_remove_music)
+                .setMessage(R.string.message_remove_from_playlist)
                 .setPositiveTextColor(context.getResources().getColor(R.color.red_500))
                 .setPositiveButtonClickListener((dialog, which) -> mPlayerViewModel.getPlayerClient().removeMusicItem(position))
                 .build();

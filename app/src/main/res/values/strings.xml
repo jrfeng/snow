@@ -13,7 +13,6 @@
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>
     <string name="empty_playlist">Playlist is empty</string>
-    <string name="message_remove_music">Remove  from playlist?</string>
 
     <!-- MusicListAdapter -->
     <string name="empty_music_list">Music list is Empty</string>
@@ -23,11 +22,25 @@
 
     <!-- BottomMenuDialog -->
     <string name="dialog">Dialog</string>
+    <string name="menu_item_next_play">Next play</string>
+    <string name="menu_item_add_to_favorite">Add to favorites</string>
+    <string name="menu_item_remove_from_favorite">Remove from favorites</string>
+    <string name="menu_item_add_to_music_list">Add to music list</string>
+    <string name="menu_item_set_as_ringtone">Set as ringtone</string>
+    <string name="menu_item_remove">Remove</string>
 
     <!-- MessageDialog -->
     <string name="message_dialog_default_title">Tips</string>
     <string name="message_dialog_negative_text">Cancel</string>
     <string name="message_dialog_positive_text">OK</string>
+    <string name="message_remove_from_playlist">Remove  from playlist?</string>
+    <string name="message_remove_from_favorite">Remove from favorites?</string>
+    <string name="message_remove_music">Remove music?</string>
+
+    <!-- Toast -->
+    <string name="toast_added_to_playlist">Added to playlist</string>
+    <string name="toast_added_to_favorites">Added to favorites</string>
+    <string name="toast_removed_from_favorites">Removed from favorites</string>
 
     <!-- content description -->
     <string name="des_logo">logo</string>
