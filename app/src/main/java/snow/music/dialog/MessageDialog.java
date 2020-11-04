@@ -2,6 +2,7 @@ package snow.music.dialog;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -9,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatDialog;
+import androidx.savedstate.SavedStateRegistry;
 
 import com.google.common.base.Preconditions;
 
@@ -17,6 +19,7 @@ import java.util.Objects;
 import snow.music.R;
 
 public class MessageDialog extends BottomDialog {
+    private static final String KEY_RESTARTED = "restarted";
     private String mTitle;
     private String mMessage;
     private String mPositiveButtonText;
@@ -25,6 +28,16 @@ public class MessageDialog extends BottomDialog {
     private int mNegativeTextColor;
     private DialogInterface.OnClickListener mPositiveButtonClickListener;
     private DialogInterface.OnClickListener mNegativeButtonClickListener;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // 因为重启时状态会丢失，因此检测到重启时自动 dismiss，避免显示一个空白的 MessageDialog
+        if (savedInstanceState != null && savedInstanceState.getBoolean(KEY_RESTARTED, false)) {
+            dismiss();
+        }
+    }
 
     @Override
     protected void onInitDialog(AppCompatDialog dialog) {
@@ -60,6 +73,12 @@ public class MessageDialog extends BottomDialog {
             }
             dismiss();
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(KEY_RESTARTED, true);
     }
 
     public static class Builder {
