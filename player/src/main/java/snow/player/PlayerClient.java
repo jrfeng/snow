@@ -293,27 +293,16 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     /**
-     * 设置是否自动连接。
+     * 设置是否启用自动连接功能。
      * <p>
-     * 如果启用了自动连接，那么在调用下面这些方法时，如果 {@link PlayerClient} 还没有连接到
-     * {@link PlayerService}，则会自动建立连接，并在连接成功后执行对应的方法。
-     * <p>
-     * 可以触发自动连接的方法：
-     * <ul>
-     * <li>{@link #play()}</li>
-     * <li>{@link #pause()}</li>
-     * <li>{@link #playPause()}</li>
-     * <li>{@link #playPause(int)}</li>
-     * <li>{@link #stop()}</li>
-     * <li>{@link #seekTo(int)}</li>
-     * <li>{@link #skipToPrevious()}</li>
-     * <li>{@link #skipToNext()}</li>
-     * <li>{@link #skipToPosition(int)}</li>
-     * <li>{@link #fastForward()}</li>
-     * <li>{@link #rewind()}</li>
-     * </ul>
+     * {@link PlayerClient} 类实现了 {@link Player} 接口与 {@link PlaylistEditor} 接口。
+     * 如果启用了 {@link PlayerClient} 的自动连接功能，那么在调用定义在 {@link Player} 接口与
+     * {@link PlaylistEditor} 接口中的方法时，如果 {@link PlayerClient} 还没有连接到 {@link PlayerService}，
+     * 或者连接已断开，则 {@link PlayerClient} 会尝试自动建立连接，并且会在连接成功后再去执行对应的方法。
      *
-     * @param autoConnect 是否自动连接，为 true 时启用自动连接，为 false 时不启用。
+     * @param autoConnect 是否启用自动连接功能，为 true 时启用自动连接，为 false 时不启用。
+     * @see Player
+     * @see PlaylistEditor
      */
     public void setAutoConnect(boolean autoConnect) {
         mAutoConnect = autoConnect;
@@ -578,13 +567,19 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @throws IllegalArgumentException 如果 position 的值小于 0，则抛出该异常
      */
     @Override
-    public void setPlaylist(@NonNull Playlist playlist, int position, boolean play) throws IllegalArgumentException {
+    public void setPlaylist(@NonNull final Playlist playlist, final int position, final boolean play) throws IllegalArgumentException {
         Preconditions.checkNotNull(playlist);
         if (position < 0) {
             throw new IllegalArgumentException("position must >= 0.");
         }
 
-        if (!isConnected()) {
+        if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    setPlaylist(playlist, position, play);
+                }
+            });
             return;
         }
 
@@ -941,9 +936,15 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @param playMode 播放模式
      */
     @Override
-    public void setPlayMode(@NonNull PlayMode playMode) {
+    public void setPlayMode(@NonNull final PlayMode playMode) {
         Preconditions.checkNotNull(playMode);
         if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    setPlayMode(playMode);
+                }
+            });
             return;
         }
 
@@ -1781,12 +1782,19 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @throws IllegalArgumentException 如果 position 的值小于 0，则抛出该异常
      */
     @Override
-    public void insertMusicItem(int position, @NonNull MusicItem musicItem) throws IllegalArgumentException {
+    public void insertMusicItem(final int position, @NonNull final MusicItem musicItem) throws IllegalArgumentException {
         if (position < 0) {
             throw new IllegalArgumentException("position must >= 0.");
         }
         Preconditions.checkNotNull(musicItem);
-        if (!isConnected()) {
+
+        if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    insertMusicItem(position, musicItem);
+                }
+            });
             return;
         }
 
@@ -1794,9 +1802,15 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     @Override
-    public void appendMusicItem(@NonNull MusicItem musicItem) {
+    public void appendMusicItem(@NonNull final MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
-        if (!isConnected()) {
+        if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    appendMusicItem(musicItem);
+                }
+            });
             return;
         }
 
@@ -1811,7 +1825,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @throws IllegalArgumentException 如果 fromPosition 或者 toPosition 参数小于 0，则抛出该异常
      */
     @Override
-    public void moveMusicItem(int fromPosition, int toPosition) throws IllegalArgumentException {
+    public void moveMusicItem(final int fromPosition, final int toPosition) throws IllegalArgumentException {
         if (fromPosition < 0) {
             throw new IllegalArgumentException("fromPosition must >= 0.");
         }
@@ -1820,7 +1834,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
             throw new IllegalArgumentException("toPosition must >= 0.");
         }
 
-        if (!isConnected()) {
+        if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    moveMusicItem(fromPosition, toPosition);
+                }
+            });
             return;
         }
 
@@ -1828,9 +1848,15 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     @Override
-    public void removeMusicItem(@NonNull MusicItem musicItem) {
+    public void removeMusicItem(@NonNull final MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
-        if (!isConnected()) {
+        if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    removeMusicItem(musicItem);
+                }
+            });
             return;
         }
 
@@ -1838,8 +1864,14 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     @Override
-    public void removeMusicItem(int position) {
-        if (!isConnected()) {
+    public void removeMusicItem(final int position) {
+        if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    removeMusicItem(position);
+                }
+            });
             return;
         }
 
@@ -1847,9 +1879,15 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     @Override
-    public void setNextPlay(@NonNull MusicItem musicItem) {
+    public void setNextPlay(@NonNull final MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
-        if (!isConnected()) {
+        if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    setNextPlay(musicItem);
+                }
+            });
             return;
         }
 
