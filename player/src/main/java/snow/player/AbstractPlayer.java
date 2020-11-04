@@ -1601,8 +1601,9 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         List<MusicItem> musicItems = mPlaylist.getAllMusicItem();
-        if (musicItems.contains(musicItem)) {
-            moveMusicItem(musicItems.indexOf(musicItem), position);
+        int index = musicItems.indexOf(musicItem);
+        if (index > -1) {
+            moveMusicItem(index, position);
             return;
         }
 
@@ -1646,13 +1647,22 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        int position = Math.min(toPosition, mPlaylist.size() - 1);
+        int size = mPlaylist.size();
+        if (fromPosition < 0 || fromPosition >= size) {
+            throw new IndexOutOfBoundsException("fromPosition: " + fromPosition + ", size: " + size);
+        }
+
+        if (toPosition < 0 || toPosition >= size) {
+            throw new IndexOutOfBoundsException("toPosition: " + toPosition + ", size: " + size);
+        }
+
         List<MusicItem> musicItems = mPlaylist.getAllMusicItem();
 
-        MusicItem from = musicItems.remove(fromPosition);
-        musicItems.add(position, from);
+        MusicItem from = musicItems.get(fromPosition);
+        musicItems.add(toPosition, from);
+        musicItems.remove(fromPosition);
 
-        onMusicItemMoved(fromPosition, position);
+        onMusicItemMoved(fromPosition, toPosition);
         updatePlaylist(mPlaylist, musicItems, new Runnable() {
             @Override
             public void run() {

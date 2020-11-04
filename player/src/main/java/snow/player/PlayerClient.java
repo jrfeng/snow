@@ -1822,16 +1822,17 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      *
      * @param fromPosition 歌曲在列表中的位置
      * @param toPosition   歌曲要移动到的位置。如果 {@code toPosition == fromPosition}，则会忽略本次调用
-     * @throws IllegalArgumentException 如果 fromPosition 或者 toPosition 参数小于 0，则抛出该异常
+     * @throws IndexOutOfBoundsException 如果 fromPosition 或者 toPosition 超出播放列表索引的范围，则抛出该异常
      */
     @Override
-    public void moveMusicItem(final int fromPosition, final int toPosition) throws IllegalArgumentException {
-        if (fromPosition < 0) {
-            throw new IllegalArgumentException("fromPosition must >= 0.");
+    public void moveMusicItem(final int fromPosition, final int toPosition) throws IndexOutOfBoundsException {
+        int size = getPlaylistSize();
+        if (fromPosition < 0 || fromPosition >= size) {
+            throw new IndexOutOfBoundsException("fromPosition: " + fromPosition + ", size: " + size);
         }
 
-        if (toPosition < 0) {
-            throw new IllegalArgumentException("toPosition must >= 0.");
+        if (toPosition < 0 || toPosition >= size) {
+            throw new IndexOutOfBoundsException("toPosition: " + toPosition + ", size: " + size);
         }
 
         if (notConnected()) {
