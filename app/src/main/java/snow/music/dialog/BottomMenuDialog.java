@@ -56,6 +56,11 @@ public class BottomMenuDialog extends BottomDialog {
         rvMenuItems.setAdapter(menuItemAdapter);
     }
 
+    @Override
+    protected boolean keepOnRestarted() {
+        return false;
+    }
+
     public static class Builder {
         private Context mContext;
         private String mDialogTitle;
