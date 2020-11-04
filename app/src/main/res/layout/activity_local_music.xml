@@ -23,6 +23,7 @@
                 android:layout_height="@dimen/image_button_size"
                 android:background="@drawable/bg_button_48dp"
                 android:contentDescription="@string/des_back"
+                android:onClick="finishSelf"
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/ic_back" />
 
@@ -39,7 +40,7 @@
                 android:layout_height="@dimen/image_button_size"
                 android:background="@drawable/bg_button_48dp"
                 android:contentDescription="@string/des_search"
-                android:onClick="onActionMenuClicked"
+                android:onClick="onOptionMenuClicked"
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/ic_action_search" />
 
@@ -49,7 +50,7 @@
                 android:layout_height="@dimen/image_button_size"
                 android:background="@drawable/bg_button_48dp"
                 android:contentDescription="@string/des_sort_music_list"
-                android:onClick="onActionMenuClicked"
+                android:onClick="onOptionMenuClicked"
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/ic_action_sort" />
 
@@ -59,7 +60,7 @@
                 android:layout_height="@dimen/image_button_size"
                 android:background="@drawable/bg_button_48dp"
                 android:contentDescription="@string/des_scan_local_music"
-                android:onClick="onActionMenuClicked"
+                android:onClick="onOptionMenuClicked"
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/ic_action_scan" />
 

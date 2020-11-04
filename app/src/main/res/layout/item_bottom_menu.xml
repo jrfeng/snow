@@ -13,8 +13,8 @@
 
     <ImageView
         android:id="@+id/ivMenuIcon"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:contentDescription="@string/des_menu_icon"
         android:scaleType="centerInside"
         tools:src="@drawable/ic_favorite_true" />
