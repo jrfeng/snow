@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import recyclerview.helper.ItemClickHelper;
+import recyclerview.helper.PositionHelper;
 import recyclerview.helper.SelectableHelper;
 import snow.music.R;
 import snow.music.store.Music;
@@ -23,7 +24,7 @@ import snow.music.store.Music;
 public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.ViewHolder> {
     private static final int TYPE_EMPTY_VIEW = 1;
     private static final int TYPE_ITEM_VIEW = 2;
-    private List<OrderMusic> mOrderMusicList;
+    private List<Music> mMusicList;
 
     private ItemClickHelper mItemClickHelper;
     private SelectableHelper mSelectableHelper;
@@ -31,12 +32,12 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     public MusicListAdapter(@NonNull List<Music> musicList, int playPosition) {
         Preconditions.checkNotNull(musicList);
 
-        mOrderMusicList = asOrderMusicList(musicList);
+        mMusicList = new ArrayList<>(musicList);
 
         mItemClickHelper = new ItemClickHelper();
         mSelectableHelper = new SelectableHelper(this);
 
-        if (mOrderMusicList.isEmpty() || playPosition < 0) {
+        if (mMusicList.isEmpty() || playPosition < 0) {
             return;
         }
 
@@ -46,17 +47,17 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     public void setMusicList(@NonNull List<Music> musicList, int playPosition) {
         Preconditions.checkNotNull(musicList);
 
-        if (mOrderMusicList.isEmpty() || musicList.isEmpty()) {
-            mOrderMusicList = asOrderMusicList(musicList);
+        if (mMusicList.isEmpty() || musicList.isEmpty()) {
+            mMusicList = new ArrayList<>(musicList);
             notifyDataSetChanged();
         } else {
-            List<OrderMusic> newMusicList = asOrderMusicList(musicList);
-            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new OrderMusicDiffCallback(mOrderMusicList, newMusicList));
+            List<Music> newMusicList = new ArrayList<>(musicList);
+            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new OrderMusicDiffCallback(mMusicList, newMusicList));
             diffResult.dispatchUpdatesTo(this);
-            mOrderMusicList = newMusicList;
+            mMusicList = newMusicList;
         }
 
-        if (mOrderMusicList.isEmpty() || playPosition < 0) {
+        if (mMusicList.isEmpty() || playPosition < 0) {
             mSelectableHelper.clearSelected();
         } else {
             mSelectableHelper.setSelect(playPosition, true);
@@ -72,7 +73,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     }
 
     public void setPlayPosition(int position) {
-        if (mOrderMusicList.isEmpty()) {
+        if (mMusicList.isEmpty()) {
             mSelectableHelper.clearSelected();
             return;
         }
@@ -108,15 +109,15 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        if (mOrderMusicList.isEmpty()) {
+        if (mMusicList.isEmpty()) {
             return;
         }
 
-        OrderMusic orderMusic = mOrderMusicList.get(position);
+        Music music = mMusicList.get(position);
 
-        holder.tvOrder.setText(String.valueOf(orderMusic.order));
-        holder.tvTitle.setText(orderMusic.music.getTitle());
-        holder.tvArtist.setText(orderMusic.music.getArtist());
+        holder.tvPosition.setText(String.valueOf(position + 1));
+        holder.tvTitle.setText(music.getTitle());
+        holder.tvArtist.setText(music.getArtist());
 
         mItemClickHelper.bindClickListener(holder.musicListItem, holder.btnOptionMenu);
         mItemClickHelper.bindLongClickListener(holder.musicListItem);
@@ -125,37 +126,26 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
 
     @Override
     public int getItemCount() {
-        if (mOrderMusicList.isEmpty()) {
+        if (mMusicList.isEmpty()) {
             return 1;
         }
 
-        return mOrderMusicList.size();
+        return mMusicList.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (mOrderMusicList.isEmpty()) {
+        if (mMusicList.isEmpty()) {
             return TYPE_EMPTY_VIEW;
         }
 
         return TYPE_ITEM_VIEW;
     }
 
-    private List<OrderMusic> asOrderMusicList(@NonNull List<Music> musicList) {
-        Preconditions.checkNotNull(musicList);
-
-        List<OrderMusic> orderMusicList = new ArrayList<>(musicList.size());
-
-        for (int i = 0; i < musicList.size(); i++) {
-            orderMusicList.add(new OrderMusic(i + 1, musicList.get(i)));
-        }
-
-        return orderMusicList;
-    }
-
-    public static class ViewHolder extends RecyclerView.ViewHolder implements SelectableHelper.Selectable {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements SelectableHelper.Selectable,
+            PositionHelper.OnPositionChangeListener {
         View musicListItem;
-        TextView tvOrder;
+        TextView tvPosition;
         TextView tvTitle;
         TextView tvArtist;
         ImageButton btnOptionMenu;
@@ -176,7 +166,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
             }
 
             musicListItem = itemView.findViewById(R.id.musicListItem);
-            tvOrder = itemView.findViewById(R.id.tvOrder);
+            tvPosition = itemView.findViewById(R.id.tvPosition);
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvArtist = itemView.findViewById(R.id.tvArtist);
             btnOptionMenu = itemView.findViewById(R.id.btnOptionMenu);
@@ -209,23 +199,22 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
             tvArtist.setTextColor(mSecondaryTextColor);
             markView.setVisibility(View.GONE);
         }
-    }
 
-    private static class OrderMusic {
-        int order;
-        Music music;
+        @Override
+        public void onPositionChanged(int oldPosition, int newPosition) {
+            if (mEmptyView) {
+                return;
+            }
 
-        OrderMusic(int order, Music music) {
-            this.order = order;
-            this.music = music;
+            tvPosition.setText(String.valueOf(newPosition + 1));
         }
     }
 
     private static class OrderMusicDiffCallback extends DiffUtil.Callback {
-        private List<OrderMusic> mOldMusicList;
-        private List<OrderMusic> mNewMusicList;
+        private List<Music> mOldMusicList;
+        private List<Music> mNewMusicList;
 
-        OrderMusicDiffCallback(@NonNull List<OrderMusic> oldMusicList, @NonNull List<OrderMusic> newMusicList) {
+        OrderMusicDiffCallback(@NonNull List<Music> oldMusicList, @NonNull List<Music> newMusicList) {
             Preconditions.checkNotNull(oldMusicList);
             Preconditions.checkNotNull(newMusicList);
 
@@ -245,10 +234,10 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
 
         @Override
         public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-            OrderMusic oldMusic = mOldMusicList.get(oldItemPosition);
-            OrderMusic newMusic = mNewMusicList.get(newItemPosition);
+            Music oldMusic = mOldMusicList.get(oldItemPosition);
+            Music newMusic = mNewMusicList.get(newItemPosition);
 
-            return oldMusic.order == newMusic.order && oldMusic.music.equals(newMusic.music);
+            return oldMusic.equals(newMusic);
         }
 
         @Override
