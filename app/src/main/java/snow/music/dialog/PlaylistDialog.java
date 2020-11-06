@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.common.base.Preconditions;
 
 import recyclerview.helper.ItemClickHelper;
+import recyclerview.helper.PositionHelper;
 import recyclerview.helper.ScrollToPositionHelper;
 import recyclerview.helper.SelectableHelper;
 import snow.music.R;
@@ -138,6 +139,7 @@ public class PlaylistDialog extends BottomDialog {
 
         private ItemClickHelper mItemClickHelper;
         private SelectableHelper mSelectableHelper;
+        private PositionHelper<PlaylistAdapter.ViewHolder> mPositionHelper;
 
         public PlaylistAdapter(@NonNull Playlist playlist, int playPosition) {
             Preconditions.checkNotNull(playlist);
@@ -145,6 +147,7 @@ public class PlaylistDialog extends BottomDialog {
 
             mItemClickHelper = new ItemClickHelper();
             mSelectableHelper = new SelectableHelper(this);
+            mPositionHelper = new PositionHelper<>(this);
 
             if (mPlaylist.isEmpty()) {
                 return;
@@ -195,6 +198,7 @@ public class PlaylistDialog extends BottomDialog {
             super.onAttachedToRecyclerView(recyclerView);
             mItemClickHelper.attachToRecyclerView(recyclerView);
             mSelectableHelper.attachToRecyclerView(recyclerView);
+            mPositionHelper.attachToRecyclerView(recyclerView);
         }
 
         @Override
@@ -202,6 +206,7 @@ public class PlaylistDialog extends BottomDialog {
             super.onDetachedFromRecyclerView(recyclerView);
             mItemClickHelper.detach();
             mSelectableHelper.detach();
+            mPositionHelper.detach();
         }
 
         @NonNull
@@ -223,6 +228,8 @@ public class PlaylistDialog extends BottomDialog {
             if (mPlaylist.isEmpty()) {
                 return;
             }
+
+            holder.tvPosition.setText(String.valueOf(position + 1));
 
             MusicItem musicItem = mPlaylist.get(position);
             holder.tvTitle.setText(musicItem.getTitle());
@@ -249,11 +256,13 @@ public class PlaylistDialog extends BottomDialog {
             return TYPE_ITEM_VIEW;
         }
 
-        private static class ViewHolder extends RecyclerView.ViewHolder implements SelectableHelper.Selectable {
+        private static class ViewHolder extends RecyclerView.ViewHolder implements SelectableHelper.Selectable,
+                PositionHelper.OnPositionChangeListener {
             private boolean mEmptyView;
             private int mColorMark;
             private int mColorText;
 
+            TextView tvPosition;
             View mark;
             TextView tvTitle;
             ImageButton btnRemove;
@@ -266,6 +275,7 @@ public class PlaylistDialog extends BottomDialog {
                     return;
                 }
 
+                tvPosition = itemView.findViewById(R.id.tvPosition);
                 mark = itemView.findViewById(R.id.mark);
                 tvTitle = itemView.findViewById(R.id.tvTitle);
                 btnRemove = itemView.findViewById(R.id.btnRemove);
@@ -299,6 +309,15 @@ public class PlaylistDialog extends BottomDialog {
 
                 mark.setVisibility(View.GONE);
                 tvTitle.setTextColor(mColorText);
+            }
+
+            @Override
+            public void onPositionChanged(int oldPosition, int newPosition) {
+                if (mEmptyView) {
+                    return;
+                }
+
+                tvPosition.setText(String.valueOf(newPosition + 1));
             }
         }
 
