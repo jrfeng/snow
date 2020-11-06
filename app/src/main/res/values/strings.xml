@@ -3,11 +3,11 @@
     <string name="search">Search</string>
 
     <!-- NavigationActivity -->
-    <string name="item_local_music">Local Music</string>
-    <string name="item_favorite">Favorite</string>
-    <string name="item_music_list">Music List</string>
-    <string name="item_artist">Artist</string>
-    <string name="item_album">Album</string>
+    <string name="item_local_music">Musics</string>
+    <string name="item_favorite">Favorites</string>
+    <string name="item_music_list">Music Lists</string>
+    <string name="item_artist">Artists</string>
+    <string name="item_album">Albums</string>
     <string name="item_history">History</string>
 
     <!-- PlaylistDialog -->
@@ -18,7 +18,7 @@
     <string name="empty_music_list">Music list is Empty</string>
 
     <!-- LocalMusicActivity -->
-    <string name="local_music">Local Music</string>
+    <string name="local_music">Musics</string>
 
     <!-- BottomMenuDialog -->
     <string name="dialog">Dialog</string>
