@@ -72,5 +72,5 @@ dependencies {
     implementation "com.github.bumptech.glide:glide:$glideVersion"
 
     // rv-helper
-    implementation 'com.github.jrfeng:rv-helper:1.0.2'
+    implementation 'com.github.jrfeng:rv-helper:1.1'
 }
