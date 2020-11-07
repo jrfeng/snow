@@ -1490,9 +1490,6 @@ public class PlayerService extends MediaBrowserServiceCompat
          */
         protected void reloadIcon() {
             Glide.with(getContext())
-                    .clear(mTarget);
-
-            Glide.with(getContext())
                     .asBitmap()
                     .load(getPlayingMusicItem().getIconUri())
                     .error(loadEmbeddedIcon())
