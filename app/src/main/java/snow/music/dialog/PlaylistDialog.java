@@ -71,7 +71,13 @@ public class PlaylistDialog extends BottomDialog {
 
         ImageButton btnLocate = dialog.findViewById(R.id.btnLocate);
         assert btnLocate != null;
-        btnLocate.setOnClickListener(v -> mScrollToPositionHelper.smoothScrollToPosition(mPlayerViewModel.getPlayerClient().getPlayPosition()));
+        btnLocate.setOnClickListener(v -> {
+            if (mPlayerViewModel.getPlayerClient().getPlaylistSize() <= 0) {
+                return;
+            }
+
+            mScrollToPositionHelper.smoothScrollToPosition(mPlayerViewModel.getPlayerClient().getPlayPosition());
+        });
     }
 
     private void initRecyclerView(RecyclerView rvPlaylist) {
