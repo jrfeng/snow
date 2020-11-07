@@ -69,7 +69,6 @@ dependencies {
 <service android:name="snow.player.PlayerService">
     <intent-filter>
         <action android:name="android.media.browse.MediaBrowserService" />
-        <action android:name="android.intent.action.MEDIA_BUTTON" />
     </intent-filter>
 </service>
 
