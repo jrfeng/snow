@@ -597,11 +597,18 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         return mPlaylistManager.getLastModified();
     }
 
+    @NonNull
+    @Override
+    public String getPlaylistName() {
+        return mPlaylistManager.getPlaylistName();
+    }
+
     @Override
     public int getPlaylistSize() {
         return mPlaylistManager.getPlaylistSize();
     }
 
+    @NonNull
     @Override
     public String getPlaylistToken() {
         return mPlaylistManager.getPlaylistToken();

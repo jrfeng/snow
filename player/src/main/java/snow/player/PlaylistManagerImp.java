@@ -28,6 +28,7 @@ import snow.player.playlist.PlaylistManager;
 class PlaylistManagerImp implements PlaylistManager {
     private static final String KEY_PLAYLIST = "playlist";
     private static final String KEY_PLAYLIST_SIZE = "playlist_size";
+    private static final String KEY_NAME = "name";
     private static final String KEY_TOKEN = "token";
     private static final String KEY_EDITABLE = "editable";
     private static final String KEY_LAST_MODIFIED = "last_modified";
@@ -51,11 +52,18 @@ class PlaylistManagerImp implements PlaylistManager {
         mMMKV = MMKV.mmkvWithID("PlaylistManager:" + playlistId, MMKV.MULTI_PROCESS_MODE);
     }
 
+    @NonNull
+    @Override
+    public String getPlaylistName() {
+        return mMMKV.decodeString(KEY_NAME, "");
+    }
+
     @Override
     public int getPlaylistSize() {
         return mMMKV.decodeInt(KEY_PLAYLIST_SIZE, 0);
     }
 
+    @NonNull
     @Override
     public String getPlaylistToken() {
         return mMMKV.decodeString(KEY_TOKEN, "");
@@ -115,6 +123,7 @@ class PlaylistManagerImp implements PlaylistManager {
 
                 mMMKV.encode(KEY_PLAYLIST, playlist);
                 mMMKV.encode(KEY_PLAYLIST_SIZE, playlist.size());
+                mMMKV.encode(KEY_NAME, playlist.getName());
                 mMMKV.encode(KEY_TOKEN, playlist.getToken());
                 mMMKV.encode(KEY_EDITABLE, playlist.isEditable());
                 mMMKV.encode(KEY_LAST_MODIFIED, System.currentTimeMillis());

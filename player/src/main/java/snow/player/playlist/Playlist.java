@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import snow.player.audio.MusicItem;
+import snow.player.util.MusicItemUtil;
 
 /**
  * 用于存储播放队列。
@@ -28,13 +29,13 @@ import snow.player.audio.MusicItem;
  * 数量超出了最大尺寸，则超出部分会被忽略。
  * <p>
  * 关于 {@link Playlist} 的 “可编辑” 状态，在这里对其进行说明。在创建 {@link Playlist} 对象时，
- * 你可能已经注意到构造器有一个 editable 参数，但 {@link Playlist} 是不可变的，它并未提供任何编辑方法，
+ * 你可能已经注意到构造器有一个 editable 参数，但 {@link Playlist} 本身是不可变的，它并未提供任何编辑方法，
  * 你可能会对此存在疑惑。
  * <p>
  * 实际上，{@link Playlist} 的 “可编辑” 状态是针对播放器而言的。如果 {@link Playlist} 是不可编辑的，
  * 则所有通过 {@link snow.player.PlayerClient} 修改播放列表的操作会被忽略。
  * <p>
- * 也就是说，如果 {@link Playlist} 是不可编辑，则 {@link snow.player.PlayerClient} 的以下方法会被忽略：
+ * 也就是说，如果 {@link Playlist} 是不可编辑，则调用 {@link snow.player.PlayerClient} 的以下方法时会被忽略：
  * <ul>
  * <li>{@link snow.player.PlayerClient#setNextPlay(MusicItem)}</li>
  * <li>{@link snow.player.PlayerClient#insertMusicItem(int, MusicItem)}</li>
@@ -99,15 +100,14 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
         return musicItems;
     }
 
-    @SuppressWarnings("all")
     private String generateToken() {
-        Hasher hasher = Hashing.sha256().newHasher();
-
-        for (MusicItem musicItem : mMusicItems) {
-            hasher.putString(musicItem.getUri(), Charsets.UTF_8);
-        }
-
-        return hasher.hash().toString();
+        return MusicItemUtil.generateToken(mMusicItems, new MusicItemUtil.GetUriFunction<MusicItem>() {
+            @NonNull
+            @Override
+            public String getUri(MusicItem item) {
+                return item.getUri();
+            }
+        });
     }
 
     /**
@@ -126,6 +126,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
      * @return 播放列表的 Token。一个全部小写的 SHA-256 摘要字符串，由 {@link Playlist}
      * 根据其包含的所有歌曲的 URI 自动生成。
      * @see MusicItem#getUri()
+     * @see MusicItemUtil#generateToken(List, MusicItemUtil.GetUriFunction)
      */
     @NonNull
     public String getToken() {
@@ -320,7 +321,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
      * {@link Playlist} 构建器。
      */
     public static final class Builder {
-        private String mToken;
+        private String mName;
         private final List<MusicItem> mMusicItems;
         private boolean mEditable;
         private Bundle mExtra;
@@ -329,19 +330,19 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
          * 创建一个 {@link Builder} 构建器对象。
          */
         public Builder() {
-            mToken = "";
+            mName = "";
             mMusicItems = new ArrayList<>();
             mEditable = true;
         }
 
         /**
-         * 设置播放列表的 Token
+         * 设置播放列表的名称。
          *
-         * @param token 播放列表的 Token，不能为 null
+         * @param name 播放列表的名称，不能为 null
          */
-        public Builder setToken(@NonNull String token) {
-            Preconditions.checkNotNull(token);
-            mToken = token;
+        public Builder setName(@NonNull String name) {
+            Preconditions.checkNotNull(name);
+            mName = name;
             return this;
         }
 
@@ -407,7 +408,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
          * 重复的 {@link MusicItem} 项会被在构造 {@link Playlist} 对象时被排除。
          */
         public Playlist build() {
-            return new Playlist(mToken, mMusicItems, mEditable, mExtra);
+            return new Playlist(mName, mMusicItems, mEditable, mExtra);
         }
     }
 }

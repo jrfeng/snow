@@ -6,6 +6,13 @@ import androidx.annotation.NonNull;
  * 用于获取播放器的播放队列。
  */
 public interface PlaylistManager {
+    /**
+     * 获取播放列表的名称。
+     *
+     * @return 播放列表的名称，如果没有设置，则返回一个空字符串。
+     */
+    @NonNull
+    String getPlaylistName();
 
     /**
      * 获取当前播放队列的大小。
@@ -21,6 +28,7 @@ public interface PlaylistManager {
      *
      * @return 播放列表的 Token，如果没有设置，则返回一个空字符串。
      */
+    @NonNull
     String getPlaylistToken();
 
     /**

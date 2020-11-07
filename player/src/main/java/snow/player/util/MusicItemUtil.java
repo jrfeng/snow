@@ -4,7 +4,12 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
+
+import java.util.List;
 
 import snow.player.R;
 import snow.player.audio.MusicItem;
@@ -71,5 +76,32 @@ public final class MusicItemUtil {
     // value 参数为空时返回 defaultValue 参数
     private static String getStringOrDefault(String value, String defaultValue) {
         return value.isEmpty() ? defaultValue : value;
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static <T> String generateToken(List<T> items, GetUriFunction<T> function) {
+        Hasher hasher = Hashing.sha256().newHasher();
+
+        for (T item : items) {
+            hasher.putString(function.getUri(item), Charsets.UTF_8);
+        }
+
+        return hasher.hash().toString();
+    }
+
+    /**
+     * 获取 URI 函数
+     *
+     * @param <T> 要获取其 URI 的类型。
+     */
+    public interface GetUriFunction<T> {
+        /**
+         * 返回 item 的 URI 字符串。
+         *
+         * @param item 要获取其 URI 的对象
+         * @return 返回 item 的 URI 字符串，如果没有，则返回一个空字符串。
+         */
+        @NonNull
+        String getUri(T item);
     }
 }

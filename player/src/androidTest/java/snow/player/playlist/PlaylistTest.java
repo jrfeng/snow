@@ -76,14 +76,14 @@ public class PlaylistTest {
     }
 
     @Test
-    public void getToken() {
-        final String token = "token_test";
+    public void getName() {
+        final String name = "test_name";
 
         Playlist playlist = new Playlist.Builder()
-                .setToken(token)
+                .setName(name)
                 .build();
 
-        assertEquals(token, playlist.getToken());
+        assertEquals(name, playlist.getName());
     }
 
     @Test
@@ -158,23 +158,23 @@ public class PlaylistTest {
 
     @Test
     public void equalsTest() {
-        final String token = "token_test";
+        final String name = "test_name";
         final boolean editable = false;
 
         Playlist playlist1 = new Playlist.Builder()
-                .setToken(token)
+                .setName(name)
                 .appendAll(mItems)
                 .setEditable(editable)
                 .build();
 
         Playlist playlist2 = new Playlist.Builder()
-                .setToken(token)
+                .setName(name)
                 .appendAll(mItems)
                 .setEditable(editable)
                 .build();
 
         Playlist playlist3 = new Playlist.Builder()
-                .setToken("token_other")
+                .setName("test_other_name")
                 .appendAll(mItems)
                 .setEditable(editable)
                 .build();
@@ -185,23 +185,23 @@ public class PlaylistTest {
 
     @Test
     public void hashCodeTest() {
-        final String token = "token_test";
+        final String name = "test_name";
         final boolean editable = false;
 
         Playlist playlist1 = new Playlist.Builder()
-                .setToken(token)
+                .setName(name)
                 .appendAll(mItems)
                 .setEditable(editable)
                 .build();
 
         Playlist playlist2 = new Playlist.Builder()
-                .setToken(token)
+                .setName(name)
                 .appendAll(mItems)
                 .setEditable(editable)
                 .build();
 
         Playlist playlist3 = new Playlist.Builder()
-                .setToken("token_other")
+                .setName("test_other_name")
                 .appendAll(mItems)
                 .setEditable(editable)
                 .build();
@@ -214,7 +214,7 @@ public class PlaylistTest {
     public void parcelableTest() {
         Parcel parcel = Parcel.obtain();
 
-        final String token = "token_test";
+        final String name = "test_name";
         final boolean editable = false;
 
         List<MusicItem> items = new ArrayList<>();
@@ -228,7 +228,7 @@ public class PlaylistTest {
         final String value = "tom";
         extra.putString(key, value);
 
-        Playlist playlist = new Playlist(token, items, editable, extra);
+        Playlist playlist = new Playlist(name, items, editable, extra);
 
         playlist.writeToParcel(parcel, 0);
 

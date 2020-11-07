@@ -1089,11 +1089,18 @@ public class PlayerService extends MediaBrowserServiceCompat
         handleCustomAction(action, extras);
     }
 
+    @NonNull
+    @Override
+    public String getPlaylistName() {
+        return mPlaylistManager.getPlaylistName();
+    }
+
     @Override
     public int getPlaylistSize() {
         return mPlaylistManager.getPlaylistSize();
     }
 
+    @NonNull
     @Override
     public String getPlaylistToken() {
         return mPlaylistManager.getPlaylistToken();

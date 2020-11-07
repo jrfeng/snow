@@ -1767,7 +1767,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     private void updatePlaylist(Playlist playlist, List<MusicItem> musicItems, Runnable doOnSaved) {
         mPlaylist = new Playlist.Builder()
-                .setToken(playlist.getToken())
+                .setName(playlist.getName())
                 .appendAll(musicItems)
                 .setEditable(playlist.isEditable())
                 .setExtra(playlist.getExtra())
