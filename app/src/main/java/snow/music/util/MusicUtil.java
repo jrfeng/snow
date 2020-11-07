@@ -14,7 +14,6 @@ import java.util.List;
 
 import io.reactivex.Single;
 import snow.music.store.Music;
-import snow.music.store.MusicStore;
 import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
 
@@ -115,13 +114,13 @@ public final class MusicUtil {
      *                  position 为基准，获取一个尺寸为 {@link Playlist#MAX_SIZE} 的 {@link Playlist}
      *                  对象，否则直接将 {@code List<Music>} 列表转换为一个 {@link Playlist} 对象。
      * @param musicList {@code List<Music>} 列表，不能为 null
-     * @param token     {@link Playlist} 的 token，不能为 null
+     * @param name      {@link Playlist} 的名称，不能为 null
      * @return {@link Playlist} 对象，不为 null
      */
     @NonNull
-    public static Playlist asPlaylist(int position, @NonNull List<Music> musicList, @NonNull String token) {
+    public static Playlist asPlaylist(int position, @NonNull List<Music> musicList, @NonNull String name) {
         Preconditions.checkNotNull(musicList);
-        Preconditions.checkNotNull(token);
+        Preconditions.checkNotNull(name);
         if (position < 0 || position >= musicList.size()) {
             throw new IndexOutOfBoundsException("position out of bound, position: " + position + ", size: " + musicList.size());
         }
@@ -145,7 +144,7 @@ public final class MusicUtil {
         }
 
         return new Playlist.Builder()
-                .setToken(token)
+                .setName(name)
                 .appendAll(musicItemList)
                 .build();
     }
