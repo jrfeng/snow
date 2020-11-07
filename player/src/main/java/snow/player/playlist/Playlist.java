@@ -8,8 +8,11 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -47,27 +50,31 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
     private static final String TAG = "Playlist";
     public static final int MAX_SIZE = 1000;
 
+    private final String mName;
     private final String mToken;
     private final ArrayList<MusicItem> mMusicItems;
     private final boolean mEditable;
+    @Nullable
     private final Bundle mExtra;
 
     /**
      * 创建一个 {@link Playlist} 对象。
      *
-     * @param token    播放列表的 token
+     * @param name     播放列表的名称，不能为 null
      * @param items    所由要添加到播放列表的中的 {@link MusicItem} 对象，超出 {@link #MAX_SIZE}（1000）的部分元素会被忽略
      * @param editable 播放列表是否是可编辑的
      * @param extra    播放列表的额外参数
      */
-    public Playlist(@NonNull String token, @NonNull List<MusicItem> items, boolean editable, Bundle extra) {
-        Preconditions.checkNotNull(token);
+    public Playlist(@NonNull String name, @NonNull List<MusicItem> items, boolean editable, @Nullable Bundle extra) {
+        Preconditions.checkNotNull(name);
         Preconditions.checkNotNull(items);
 
-        mToken = token;
+        mName = name;
         mMusicItems = trim(excludeRepeatItem(items));
         mEditable = editable;
         mExtra = extra;
+
+        mToken = generateToken();
     }
 
     private ArrayList<MusicItem> excludeRepeatItem(List<MusicItem> items) {
@@ -92,11 +99,35 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
         return musicItems;
     }
 
+    @SuppressWarnings("all")
+    private String generateToken() {
+        Hasher hasher = Hashing.sha256().newHasher();
+
+        for (MusicItem musicItem : mMusicItems) {
+            hasher.putString(musicItem.getUri(), Charsets.UTF_8);
+        }
+
+        return hasher.hash().toString();
+    }
+
+    /**
+     * 获取播放列表的名称。
+     *
+     * @return 播放列表的名称，不为 null
+     */
+    @NonNull
+    public String getName() {
+        return mName;
+    }
+
     /**
      * 获取播放列表的 Token。
      *
-     * @return 播放列表的 Token（默认为空字符串）。
+     * @return 播放列表的 Token。一个全部小写的 SHA-256 摘要字符串，由 {@link Playlist}
+     * 根据其包含的所有歌曲的 URI 自动生成。
+     * @see MusicItem#getUri()
      */
+    @NonNull
     public String getToken() {
         return mToken;
     }
@@ -213,6 +244,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
         return new ArrayList<>(mMusicItems);
     }
 
+    @Nullable
     public Bundle getExtra() {
         return mExtra;
     }
@@ -232,7 +264,8 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
 
         Playlist other = (Playlist) obj;
 
-        return Objects.equal(mToken, other.mToken) &&
+        return Objects.equal(mName, other.mName) &&
+                Objects.equal(mToken, other.mToken) &&
                 Objects.equal(mMusicItems, other.mMusicItems) &&
                 Objects.equal(mEditable, other.mEditable);
     }
@@ -242,13 +275,15 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
      */
     @Override
     public int hashCode() {
-        return Objects.hashCode(mToken,
+        return Objects.hashCode(mName,
+                mToken,
                 mMusicItems,
                 mEditable);
     }
 
     // Parcelable
     protected Playlist(Parcel in) {
+        mName = in.readString();
         mToken = in.readString();
         mMusicItems = in.createTypedArrayList(MusicItem.CREATOR);
         mEditable = in.readByte() != 0;
@@ -257,6 +292,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mName);
         dest.writeString(mToken);
         dest.writeTypedList(mMusicItems);
         dest.writeByte((byte) (mEditable ? 1 : 0));
