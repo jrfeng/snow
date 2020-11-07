@@ -81,6 +81,10 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         mSelectableHelper.setSelect(position, true);
     }
 
+    public void clearPlayPosition() {
+        mSelectableHelper.clearSelected();
+    }
+
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);

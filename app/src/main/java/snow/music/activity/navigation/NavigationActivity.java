@@ -231,7 +231,7 @@ public class NavigationActivity extends AppCompatActivity {
             }
 
             return new Playlist.Builder()
-                    .setToken(MusicStore.MUSIC_LIST_LOCAL_MUSIC)
+                    .setName(MusicStore.MUSIC_LIST_LOCAL_MUSIC)
                     .appendAll(itemList)
                     .build();
         }

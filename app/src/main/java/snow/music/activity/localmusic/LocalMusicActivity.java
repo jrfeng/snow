@@ -1,5 +1,6 @@
 package snow.music.activity.localmusic;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,6 +31,7 @@ import snow.music.util.MusicUtil;
 import snow.music.util.PlayerUtil;
 import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
+import snow.player.util.MusicItemUtil;
 
 public class LocalMusicActivity extends AppCompatActivity {
     private PlayerViewModel mPlayerViewModel;
@@ -96,12 +98,11 @@ public class LocalMusicActivity extends AppCompatActivity {
 
         mPlayerViewModel.getPlayingMusicItem()
                 .observe(this, playingMusicItem -> {
-                    if (playingMusicItem != null &&
-                            MusicStore.MUSIC_LIST_LOCAL_MUSIC.equals(mPlayerViewModel.getPlayerClient().getPlaylistToken())) {
+                    if (playingMusicItem != null && matchPlaylist()) {
                         int playPosition = mLocalMusicViewModel.getMusicList().indexOf(MusicUtil.asMusic(playingMusicItem));
                         mMusicListAdapter.setPlayPosition(playPosition);
                     } else {
-                        mMusicListAdapter.setPlayPosition(-1);
+                        mMusicListAdapter.clearPlayPosition();
                     }
                 });
     }
@@ -122,13 +123,28 @@ public class LocalMusicActivity extends AppCompatActivity {
         });
     }
 
+    private boolean matchPlaylist() {
+        String playlistName = mPlayerViewModel.getPlayerClient().getPlaylistName();
+        String playlistToken = mPlayerViewModel.getPlayerClient().getPlaylistToken();
+
+        String token = MusicItemUtil.generateToken(mLocalMusicViewModel.getMusicList(), item -> {
+            String uri = item.getUri();
+            return uri == null ? "" : uri;
+        });
+
+        return MusicStore.MUSIC_LIST_LOCAL_MUSIC.equals(playlistName) && token.equals(playlistToken);
+    }
+
     private void onMusicListItemClicked(int position) {
-        if (mLocalMusicViewModel.getPlaylistLastModified() != mPlayerViewModel.getPlayerClient().getLastModified()) {
-            getFreshPlaylist(playPause(position));
+        if (matchPlaylist()) {
+            mPlayerViewModel.playPause(position);
             return;
         }
 
-        playPause(position).run();
+        mPlayerViewModel.setPlaylist(
+                MusicUtil.asPlaylist(position, mLocalMusicViewModel.getMusicList(), MusicStore.MUSIC_LIST_LOCAL_MUSIC),
+                position,
+                true);
     }
 
     private void onItemMenuClicked(int position) {
@@ -258,29 +274,5 @@ public class LocalMusicActivity extends AppCompatActivity {
 
     private void removeMusic(Music music) {
         // TODO
-    }
-
-    private void getFreshPlaylist(Runnable task) {
-        mPlayerViewModel.getPlayerClient().getPlaylist(playlist -> {
-            mLocalMusicViewModel.setPlaylistLastModified(mPlayerViewModel.getPlayerClient().getLastModified());
-            mLocalMusicViewModel.setPlaylist(playlist);
-            task.run();
-        });
-    }
-
-    private Runnable playPause(final int position) {
-        return () -> {
-            Music music = mLocalMusicViewModel.getMusicList().get(position);
-            MusicItem musicItem = MusicUtil.asMusicItem(music);
-
-            int index = mLocalMusicViewModel.getPlaylist().indexOf(musicItem);
-            if (index > -1) {
-                mPlayerViewModel.getPlayerClient().playPause(index);
-                return;
-            }
-
-            mPlayerViewModel.getPlayerClient()
-                    .setPlaylist(MusicUtil.asPlaylist(position, mLocalMusicViewModel.getMusicList(), MusicStore.MUSIC_LIST_LOCAL_MUSIC), position, true);
-        };
     }
 }
