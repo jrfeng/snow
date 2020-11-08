@@ -13,7 +13,6 @@ import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
@@ -36,16 +35,14 @@ import androidx.media.MediaBrowserServiceCompat;
 import androidx.media.session.MediaButtonReceiver;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.request.FutureTarget;
 import com.google.common.base.Preconditions;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import channel.helper.ChannelHelper;
@@ -55,9 +52,13 @@ import channel.helper.pipe.CustomActionPipe;
 
 import channel.helper.pipe.SessionEventPipe;
 import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import media.helper.HeadsetHookHelper;
 
 import snow.player.annotation.PersistenceId;
@@ -1424,11 +1425,8 @@ public class PlayerService extends MediaBrowserServiceCompat
         private MusicItem mPlayingMusicItem;
         private boolean mExpire;
 
-        private int[] mIconSize;            // [width, height]
-        private int[] mIconCornerRadius;    // [topLeft, topRight, bottomRight, bottomLeft]
         private Bitmap mIcon;
-        private Bitmap mDefaultIcon;
-        private CustomTarget<Bitmap> mTarget;
+        private IconLoader mIconLoader;
 
         private boolean mReleased;
 
@@ -1437,37 +1435,35 @@ public class PlayerService extends MediaBrowserServiceCompat
         void init(PlayerService playerService) {
             mPlayerService = playerService;
             mPlayingMusicItem = new MusicItem();
-            mIconSize = new int[2];
-            mIconCornerRadius = new int[4];
-
-            mDefaultIcon = getDefaultIcon();
-            mIcon = mDefaultIcon;
+            mIconLoader = onCreateIconLoader(mPlayerService);
+            mIcon = mIconLoader.getDefaultIcon();
 
             setIconSize(playerService.getResources().getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
             onInit(mPlayerService);
-
-            mTarget = new CustomTarget<Bitmap>(mIconSize[0], mIconSize[1]) {
-                @Override
-                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                    setIcon(resource);
-                }
-
-                @Override
-                public void onLoadCleared(@Nullable Drawable placeholder) {
-                    // ignore
-                }
-            };
-
         }
 
-        private void release() {
-            mReleased = true;
-            Glide.with(getContext())
-                    .clear(mTarget);
-            mTarget = null;
-            mIcon = null;
-            mDefaultIcon = null;
-            onRelease();
+        @NonNull
+        private Bitmap getDefaultIcon() {
+            Context context = getContext();
+            BitmapDrawable drawable = (BitmapDrawable) ResourcesCompat.getDrawable(
+                    context.getResources(),
+                    R.mipmap.snow_notif_default_icon,
+                    context.getTheme());
+
+            if (drawable == null) {
+                throw new NullPointerException();
+            }
+
+            return drawable.getBitmap();
+        }
+
+        private void reloadIcon() {
+            mIconLoader.loadIcon(getPlayingMusicItem(), new IconLoader.Callback() {
+                @Override
+                public void onIconLoaded(Bitmap bitmap) {
+                    setIcon(bitmap);
+                }
+            });
         }
 
         /**
@@ -1477,27 +1473,23 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         /**
+         * 创建一个 {@link IconLoader} 对象。
+         * <p>
+         * 如果子类想要实现自定义的图片加载逻辑，则可以覆盖该方法来提供一个自定义的 {@link IconLoader}。
+         *
+         * @param context Context 对象，不为 null
+         * @return {@link IconLoader} 对象，不能为 null
+         */
+        @NonNull
+        protected IconLoader onCreateIconLoader(@NonNull Context context) {
+            return new IconLoaderImp(context, getDefaultIcon());
+        }
+
+        /**
          * 该方法会在 Service 销毁时调用，可以在该方法中释放占用的资源。
          */
         @SuppressWarnings("EmptyMethod")
         protected void onRelease() {
-        }
-
-        /**
-         * 加载当前正在播放的歌曲的图标。
-         * <p>
-         * 你可以重写该方法实现自己的图标加载逻辑。
-         */
-        protected void reloadIcon() {
-            Glide.with(getContext())
-                    .asBitmap()
-                    .load(getPlayingMusicItem().getIconUri())
-                    .error(loadEmbeddedIcon())
-                    .transform(new GranularRoundedCorners(mIconCornerRadius[0],
-                            mIconCornerRadius[1],
-                            mIconCornerRadius[2],
-                            mIconCornerRadius[3]))
-                    .into(mTarget);
         }
 
         /**
@@ -1519,52 +1511,6 @@ public class PlayerService extends MediaBrowserServiceCompat
                     PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
-        private boolean notLocaleMusic() {
-            String stringUri = getPlayingMusicItem().getUri();
-            String scheme = Uri.parse(stringUri).getScheme();
-
-            return "http".equalsIgnoreCase(scheme) | "https".equalsIgnoreCase(scheme);
-        }
-
-        private RequestBuilder<Bitmap> loadEmbeddedIcon() {
-            return Glide.with(getContext())
-                    .asBitmap()
-                    .load(getEmbeddedIcon())
-                    .error(loadDefaultIcon())
-                    .transform(new GranularRoundedCorners(mIconCornerRadius[0],
-                            mIconCornerRadius[1],
-                            mIconCornerRadius[2],
-                            mIconCornerRadius[3]));
-        }
-
-        private RequestBuilder<Bitmap> loadDefaultIcon() {
-            return Glide.with(getContext())
-                    .asBitmap()
-                    .load(mDefaultIcon)
-                    .transform(new GranularRoundedCorners(mIconCornerRadius[0],
-                            mIconCornerRadius[1],
-                            mIconCornerRadius[2],
-                            mIconCornerRadius[3]));
-        }
-
-        private byte[] getEmbeddedIcon() {
-            if (notLocaleMusic()) {
-                return null;
-            }
-
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-
-            try {
-                retriever.setDataSource(getContext(), Uri.parse(getPlayingMusicItem().getUri()));
-                return retriever.getEmbeddedPicture();
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-                return null;
-            } finally {
-                retriever.release();
-            }
-        }
-
         /**
          * 创建一个新的 Notification 对象，不能为 null。
          *
@@ -1577,26 +1523,6 @@ public class PlayerService extends MediaBrowserServiceCompat
          * 返回 Notification 的 ID。
          */
         public abstract int getNotificationId();
-
-        /**
-         * 获取默认图标。
-         *
-         * @return 通知的默认图标，不能为 null
-         */
-        @NonNull
-        public Bitmap getDefaultIcon() {
-            Context context = getContext();
-            BitmapDrawable drawable = (BitmapDrawable) ResourcesCompat.getDrawable(
-                    context.getResources(),
-                    R.mipmap.snow_notif_default_icon,
-                    context.getTheme());
-
-            if (drawable == null) {
-                throw new NullPointerException();
-            }
-
-            return drawable.getBitmap();
-        }
 
         /**
          * 关闭播放器。
@@ -1637,36 +1563,13 @@ public class PlayerService extends MediaBrowserServiceCompat
          * 建议子类覆盖 {@link #onInit(Context)} 方法，并在该方法中完成图标宽高尺寸的设置。
          */
         public final void setIconSize(int width, int height) {
-            mIconSize[0] = width;
-            mIconSize[1] = height;
+            mIconLoader.setWidth(width);
+            mIconLoader.setHeight(height);
         }
 
-        /**
-         * 设置图标圆角的半径。
-         * <p>
-         * 建议子类覆盖 {@link #onInit(Context)} 方法，并在该方法中完成圆角半径的设置。
-         *
-         * @param radius 图标圆角的半径
-         */
-        public final void setIconCornerRadius(int radius) {
-            setIconCornerRadius(radius, radius, radius, radius);
-        }
-
-        /**
-         * 分别设置图标 4 个圆角的半径。
-         * <p>
-         * 建议子类覆盖 {@link #onInit(Context)} 方法，并在该方法中完成圆角半径的设置。
-         *
-         * @param topLeft     左上角圆角半径
-         * @param topRight    右上角圆角半径
-         * @param bottomLeft  左下角圆角半径
-         * @param bottomRight 右下角圆角半径
-         */
-        public final void setIconCornerRadius(int topLeft, int topRight, int bottomRight, int bottomLeft) {
-            mIconCornerRadius[0] = topLeft;
-            mIconCornerRadius[1] = topRight;
-            mIconCornerRadius[2] = bottomRight;
-            mIconCornerRadius[3] = bottomLeft;
+        public final void setDefaultIcon(@NonNull Bitmap bitmap) {
+            Preconditions.checkNotNull(bitmap);
+            mIconLoader.setDefaultIcon(bitmap);
         }
 
         /**
@@ -1882,6 +1785,207 @@ public class PlayerService extends MediaBrowserServiceCompat
 
             mPlayingMusicItem = musicItem;
             mExpire = true;
+        }
+
+        void release() {
+            onRelease();
+            mReleased = true;
+            mIconLoader.cancel();
+        }
+
+        /**
+         * 用于加载 {@link MusicItem} 对象的 Icon 图片。
+         */
+        public abstract static class IconLoader {
+            private int mWidth;
+            private int mHeight;
+            private Bitmap mDefaultIcon;
+
+            public IconLoader(@NonNull Bitmap defaultIcon) {
+                Preconditions.checkNotNull(defaultIcon);
+                mDefaultIcon = defaultIcon;
+            }
+
+            /**
+             * 加载图片。
+             */
+            public abstract void loadIcon(@NonNull MusicItem musicItem, @NonNull Callback callback);
+
+            /**
+             * 取消加载。
+             */
+            public abstract void cancel();
+
+            /**
+             * 设置图片的宽度（便于自动采样以降低内存占用）。
+             */
+            public void setWidth(int width) {
+                mWidth = width;
+            }
+
+            /**
+             * 获取图片的宽度。
+             */
+            public int getWidth() {
+                return mWidth;
+            }
+
+            /**
+             * 设置图片高度（便于自动采样以降低内存占用）。
+             */
+            public void setHeight(int height) {
+                mHeight = height;
+            }
+
+            /**
+             * 获取图片高度。
+             */
+            public int getHeight() {
+                return mHeight;
+            }
+
+            /**
+             * 设置默认图片，并在图片加载失败时返回该默认图片。
+             */
+            public void setDefaultIcon(@NonNull Bitmap bitmap) {
+                Preconditions.checkNotNull(bitmap);
+                mDefaultIcon = bitmap;
+            }
+
+            /**
+             * 获取默认图片，该图片会在加载失败时返回。
+             */
+            @NonNull
+            public Bitmap getDefaultIcon() {
+                return mDefaultIcon;
+            }
+
+            /**
+             * 回调接口。
+             */
+            public interface Callback {
+                /**
+                 * 图片加载成功或者失败时调用该方法。
+                 *
+                 * @param bitmap 加载的图片，加载失败时会返回默认图片。
+                 * @see IconLoader#setDefaultIcon(Bitmap)
+                 */
+                void onIconLoaded(Bitmap bitmap);
+            }
+        }
+
+        private static class IconLoaderImp extends IconLoader {
+            private Context mContext;
+            private Disposable mLoadIconDisposable;
+            private FutureTarget<Bitmap> mFutureTarget;
+
+            IconLoaderImp(Context context, Bitmap defaultIcon) {
+                super(defaultIcon);
+                mContext = context;
+            }
+
+            @Override
+            public void loadIcon(@NonNull final MusicItem musicItem, @NonNull final Callback callback) {
+                cancelLastLoading();
+                mLoadIconDisposable = Single.create(new SingleOnSubscribe<Bitmap>() {
+                    @Override
+                    public void subscribe(SingleEmitter<Bitmap> emitter) {
+                        // 1. load icon from internet
+                        Bitmap bitmap = loadIconFromInternet(musicItem);
+
+                        // check disposed
+                        if (emitter.isDisposed()) {
+                            return;
+                        }
+
+                        // 2. load embedded picture
+                        if (bitmap == null) {
+                            bitmap = loadEmbeddedPicture(musicItem);
+                        }
+
+                        // check disposed
+                        if (emitter.isDisposed()) {
+                            return;
+                        }
+
+                        // 3. load default icon
+                        if (bitmap == null) {
+                            bitmap = getDefaultIcon();
+                        }
+
+                        // check disposed
+                        if (emitter.isDisposed()) {
+                            return;
+                        }
+
+                        emitter.onSuccess(bitmap);
+                    }
+                }).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Consumer<Bitmap>() {
+                            @Override
+                            public void accept(Bitmap bitmap) {
+                                callback.onIconLoaded(bitmap);
+                            }
+                        });
+            }
+
+            @Override
+            public void cancel() {
+                cancelLastLoading();
+            }
+
+            private Bitmap loadIconFromInternet(MusicItem musicItem) {
+                mFutureTarget = Glide.with(mContext)
+                        .asBitmap()
+                        .load(musicItem.getIconUri())
+                        .submit(getWidth(), getHeight());
+
+                try {
+                    return mFutureTarget.get();
+                } catch (ExecutionException | InterruptedException e) {
+                    return null;
+                }
+            }
+
+            private Bitmap loadEmbeddedPicture(MusicItem musicItem) {
+                if (notLocaleMusic(musicItem)) {
+                    return null;
+                }
+
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+
+                try {
+                    retriever.setDataSource(mContext, Uri.parse(musicItem.getUri()));
+                    byte[] pictureData = retriever.getEmbeddedPicture();
+                    return Glide.with(mContext)
+                            .asBitmap()
+                            .load(pictureData)
+                            .submit(getWidth(), getHeight())
+                            .get();
+                } catch (IllegalArgumentException | ExecutionException | InterruptedException e) {
+                    return null;
+                } finally {
+                    retriever.release();
+                }
+            }
+
+            private boolean notLocaleMusic(MusicItem musicItem) {
+                String stringUri = musicItem.getUri();
+                String scheme = Uri.parse(stringUri).getScheme();
+
+                return "http".equalsIgnoreCase(scheme) | "https".equalsIgnoreCase(scheme);
+            }
+
+            private void cancelLastLoading() {
+                if (mLoadIconDisposable != null && !mLoadIconDisposable.isDisposed()) {
+                    mLoadIconDisposable.dispose();
+                }
+
+                if (mFutureTarget != null && !mFutureTarget.isDone()) {
+                    mFutureTarget.cancel(true);
+                }
+            }
         }
     }
 
