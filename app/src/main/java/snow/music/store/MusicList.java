@@ -59,6 +59,22 @@ public class MusicList {
     }
 
     /**
+     * 获取歌单中歌曲的排列顺序。
+     */
+    @NonNull
+    public SortOrder getSortOrder() {
+        return mMusicListEntity.sortOrder;
+    }
+
+    /**
+     * 设置歌单中歌曲的排列顺序。
+     */
+    public void setSortOrder(@NonNull SortOrder sortOrder) {
+        Preconditions.checkNotNull(sortOrder);
+        mMusicListEntity.sortOrder = sortOrder;
+    }
+
+    /**
      * 设置歌单名。
      * <p>
      * 如果歌单名已存在，则忽略本次操作。可以调用 {@link MusicStore#isMusicListExists(String)}
@@ -421,6 +437,50 @@ public class MusicList {
         @Override
         public List<Music> subList(int fromIndex, int toIndex) {
             return mOrderedList.subList(fromIndex, toIndex);
+        }
+    }
+
+    /**
+     * 歌单中歌曲的排列顺序。
+     */
+    public enum SortOrder {
+        /**
+         * 按歌曲的添加时间排序
+         */
+        BY_ADD_TIME(0),
+        /**
+         * 按歌曲名排序
+         */
+        BY_NAME(1),
+        /**
+         * 按歌手名排序
+         */
+        BY_ARTIST(2),
+        /**
+         * 按专辑名排序
+         */
+        BY_ALBUM(3);
+
+        /**
+         * 枚举值 ID，序列化与反序列化专用
+         */
+        public final int id;
+
+        SortOrder(int id) {
+            this.id = id;
+        }
+
+        public static SortOrder getValueById(int id) {
+            switch (id) {
+                case 1:
+                    return BY_NAME;
+                case 2:
+                    return BY_ARTIST;
+                case 3:
+                    return BY_ALBUM;
+                default:
+                    return BY_ADD_TIME;
+            }
         }
     }
 }

@@ -1,8 +1,14 @@
 package snow.music.store;
 
+import android.content.Context;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,18 +18,25 @@ import io.objectbox.BoxStore;
 
 import static org.junit.Assert.*;
 
+@RunWith(AndroidJUnit4.class)
 public class MusicListTest {
-    private static final File TEST_DIRECTORY = new File("objectbox-debug/test-db");
     private static final String TEST_MUSIC_LIST = "music_list_test";
 
+    private File test_directory;
     private BoxStore store;
     private MusicStore mMusicStore;
 
+    private Context getContext() {
+        return InstrumentationRegistry.getInstrumentation().getTargetContext();
+    }
+
     @Before
     public void setUp() {
-        BoxStore.deleteAllFiles(TEST_DIRECTORY);
+        test_directory = new File(getContext().getCacheDir(), "objectbox-test");
+
+        BoxStore.deleteAllFiles(test_directory);
         store = MyObjectBox.builder()
-                .directory(TEST_DIRECTORY)
+                .directory(test_directory)
                 .build();
         MusicStore.init(store);
         mMusicStore = MusicStore.getInstance();
@@ -35,14 +48,14 @@ public class MusicListTest {
             store.close();
             store = null;
         }
-        BoxStore.deleteAllFiles(TEST_DIRECTORY);
+        BoxStore.deleteAllFiles(test_directory);
     }
 
     @Test
     public void setName() {
         final String newName = "NewTestName";
 
-        MusicList musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
         musicList.setName(newName);
 
         assertEquals(newName, musicList.getName());
@@ -58,7 +71,7 @@ public class MusicListTest {
     public void setDescription() {
         final String description = "new description";
 
-        MusicList musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
         musicList.setDescription(description);
 
         assertEquals(description, musicList.getDescription());
@@ -66,7 +79,7 @@ public class MusicListTest {
 
     @Test
     public void getSize() {
-        MusicList musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
 
         musicList.getMusicElements()
                 .add(new Music(
@@ -115,7 +128,7 @@ public class MusicListTest {
                 60_000,
                 System.currentTimeMillis());
 
-        MusicList musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
 
         musicList.getMusicElements().add(musicA);
         musicList.getMusicElements().add(musicA);
@@ -149,7 +162,7 @@ public class MusicListTest {
                 60_000,
                 System.currentTimeMillis());
 
-        MusicList musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
 
         musicList.getMusicElements().add(musicA);
         musicList.getMusicElements().add(musicB);
@@ -197,7 +210,7 @@ public class MusicListTest {
                 60_000,
                 System.currentTimeMillis());
 
-        MusicList musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
         musicList.getMusicElements().add(musicA);
 
         List<Music> musics = new ArrayList<>();
@@ -246,7 +259,7 @@ public class MusicListTest {
                 60_000,
                 System.currentTimeMillis());
 
-        MusicList musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
         musicList.getMusicElements().add(musicA);
 
         List<Music> musics = new ArrayList<>();
@@ -285,7 +298,7 @@ public class MusicListTest {
                 60_000,
                 System.currentTimeMillis());
 
-        MusicList musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
         musicList.getMusicElements().add(musicA);
         musicList.getMusicElements().add(musicB);
 
@@ -317,7 +330,7 @@ public class MusicListTest {
                 60_000,
                 System.currentTimeMillis());
 
-        MusicList musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
         musicList.getMusicElements().add(musicA);
         musicList.getMusicElements().add(musicB);
 
@@ -349,7 +362,7 @@ public class MusicListTest {
                 60_000,
                 System.currentTimeMillis());
 
-        MusicList musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
         musicList.getMusicElements().add(musicA);
         musicList.getMusicElements().add(musicB);
 
@@ -396,7 +409,7 @@ public class MusicListTest {
                 60_000,
                 System.currentTimeMillis());
 
-        MusicList musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
         musicList.getMusicElements().add(musicA);
         musicList.getMusicElements().add(musicB);
 
@@ -444,7 +457,7 @@ public class MusicListTest {
                 60_000,
                 System.currentTimeMillis());
 
-        MusicList musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
         musicList.getMusicElements().add(musicA);
         musicList.getMusicElements().add(musicB);
 
@@ -497,14 +510,14 @@ public class MusicListTest {
 
         mMusicStore.putAllMusic(musics);
 
-        MusicList musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
         musicList.getMusicElements().add(musicB);
         musicList.getMusicElements().add(musicC);
         musicList.getMusicElements().add(musicA);
 
         mMusicStore.updateMusicList(musicList);
 
-        musicList = mMusicStore.createMusicList(TEST_MUSIC_LIST);
+        musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
 
         assertEquals(musicB, musicList.getMusicElements().get(0));
         assertEquals(musicC, musicList.getMusicElements().get(1));

@@ -51,18 +51,18 @@ public class MusicStoreTest {
     }
 
     @Test
-    public void createMusicList() {
+    public void createCustomMusicList() {
         final String name = "TestMusicList";
         final String description = "test description";
 
-        MusicList musicList = mMusicStore.createMusicList(name, description);
+        MusicList musicList = mMusicStore.createCustomMusicList(name, description);
 
         assertEquals(name, musicList.getName());
         assertEquals(description, musicList.getDescription());
 
         boolean exception = false;
         try {
-            mMusicStore.createMusicList(MusicStore.MUSIC_LIST_FAVORITE);
+            mMusicStore.createCustomMusicList(MusicStore.MUSIC_LIST_FAVORITE);
         } catch (IllegalArgumentException e) {
             exception = true;
         }
@@ -71,12 +71,24 @@ public class MusicStoreTest {
     }
 
     @Test
-    public void getMusicList() {
+    public void getLocalMusicList() {
+        MusicList localMusicList = mMusicStore.getLocalMusicList();
+        assertNotNull(localMusicList);
+    }
+
+    @Test
+    public void getFavoriteMusicList() {
+        MusicList favoriteMusicList = mMusicStore.getFavoriteMusicList();
+        assertNotNull(favoriteMusicList);
+    }
+
+    @Test
+    public void getCustomMusicList() {
         final String name = "TestMusicList";
         final String description = "test description";
 
-        mMusicStore.createMusicList(name, description);
-        MusicList musicList = mMusicStore.getMusicList(name);
+        mMusicStore.createCustomMusicList(name, description);
+        MusicList musicList = mMusicStore.getCustomMusicList(name);
 
         assertNotNull(musicList);
         assertEquals(name, musicList.getName());
@@ -101,7 +113,7 @@ public class MusicStoreTest {
                 System.currentTimeMillis());
         mMusicStore.putMusic(music);
 
-        MusicList musicList = mMusicStore.createMusicList(name, description);
+        MusicList musicList = mMusicStore.createCustomMusicList(name, description);
 
         musicList.setName(newName);
         musicList.setDescription(newDescription);
@@ -109,7 +121,7 @@ public class MusicStoreTest {
 
         mMusicStore.updateMusicList(musicList);
 
-        musicList = mMusicStore.getMusicList(newName);
+        musicList = mMusicStore.getCustomMusicList(newName);
 
         assertNotNull(musicList);
         assertEquals(newName, musicList.getName());
@@ -121,14 +133,14 @@ public class MusicStoreTest {
     public void deleteMusicList() {
         final String name = "TestMusicList";
         final String description = "test description";
-        mMusicStore.createMusicList(name, description);
+        mMusicStore.createCustomMusicList(name, description);
 
-        MusicList musicList = mMusicStore.getMusicList(name);
+        MusicList musicList = mMusicStore.getCustomMusicList(name);
 
         assertNotNull(musicList);
 
         mMusicStore.deleteMusicList(musicList);
-        musicList = mMusicStore.getMusicList(name);
+        musicList = mMusicStore.getCustomMusicList(name);
 
         assertNull(musicList);
     }
@@ -137,14 +149,14 @@ public class MusicStoreTest {
     public void deleteMusicList_name() {
         final String name = "TestMusicList";
         final String description = "test description";
-        mMusicStore.createMusicList(name, description);
+        mMusicStore.createCustomMusicList(name, description);
 
-        MusicList musicList = mMusicStore.getMusicList(name);
+        MusicList musicList = mMusicStore.getCustomMusicList(name);
 
         assertNotNull(musicList);
 
         mMusicStore.deleteMusicList(name);
-        musicList = mMusicStore.getMusicList(name);
+        musicList = mMusicStore.getCustomMusicList(name);
 
         assertNull(musicList);
     }
@@ -385,10 +397,10 @@ public class MusicStoreTest {
         final String nameA = "Test Music List A";
         final String nameB = "Test Music List B";
 
-        mMusicStore.createMusicList(nameA);
-        mMusicStore.createMusicList(nameB);
+        mMusicStore.createCustomMusicList(nameA);
+        mMusicStore.createCustomMusicList(nameB);
 
-        List<MusicList> allMusicList = mMusicStore.getAllMusicList();
+        List<MusicList> allMusicList = mMusicStore.getAllCustomMusicList();
 
         assertEquals(2, allMusicList.size());
         assertEquals(nameA, allMusicList.get(0).getName());

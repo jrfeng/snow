@@ -157,8 +157,8 @@ public class MusicStore {
      * @throws IllegalArgumentException 如果 name 参数是个空字符串或者内置名称，则抛出该异常。
      */
     @NonNull
-    public synchronized MusicList createMusicList(@NonNull String name) throws IllegalArgumentException {
-        return createMusicList(name, "");
+    public synchronized MusicList createCustomMusicList(@NonNull String name) throws IllegalArgumentException {
+        return createCustomMusicList(name, "");
     }
 
     /**
@@ -167,7 +167,7 @@ public class MusicStore {
      * @throws IllegalArgumentException 如果 name 参数是个空字符串或者内置名称，则抛出该异常。
      */
     @NonNull
-    public synchronized MusicList createMusicList(@NonNull String name, @NonNull String description) throws IllegalArgumentException {
+    public synchronized MusicList createCustomMusicList(@NonNull String name, @NonNull String description) throws IllegalArgumentException {
         Preconditions.checkNotNull(name);
         Preconditions.checkNotNull(description);
         Preconditions.checkArgument(!name.isEmpty(), "name must not empty");
@@ -178,7 +178,7 @@ public class MusicStore {
         }
 
         if (isMusicListExists(name)) {
-            MusicList musicList = getMusicList(name);
+            MusicList musicList = getCustomMusicList(name);
             assert musicList != null;
             return musicList;
         }
@@ -192,7 +192,7 @@ public class MusicStore {
      * 获取自建歌单，如果自建歌单不存在，则返回 null。
      */
     @Nullable
-    public synchronized MusicList getMusicList(@NonNull String name) {
+    public synchronized MusicList getCustomMusicList(@NonNull String name) {
         Preconditions.checkNotNull(name);
         checkThread();
 
@@ -236,6 +236,10 @@ public class MusicStore {
         Preconditions.checkNotNull(musicList);
         checkThread();
 
+        if (isBuiltInMusicList(musicList)) {
+            return;
+        }
+
         mMusicListEntityBox.query()
                 .equal(MusicListEntity_.id, musicList.getId())
                 .build()
@@ -265,10 +269,12 @@ public class MusicStore {
      * 获取所有自建歌单（不包括内置歌单）。
      */
     @NonNull
-    public synchronized List<MusicList> getAllMusicList() {
+    public synchronized List<MusicList> getAllCustomMusicList() {
         checkThread();
 
         List<MusicListEntity> allEntity = mMusicListEntityBox.query()
+                .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC)
+                .and()
                 .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
                 .and()
                 .notEqual(MusicListEntity_.name, MUSIC_LIST_HISTORY)
@@ -339,6 +345,14 @@ public class MusicStore {
                 .equal(MusicListEntity_.name, MUSIC_LIST_FAVORITE);
 
         return builder.build().count() > 0;
+    }
+
+    /**
+     * 获取 “本地音乐” 歌单。
+     */
+    public synchronized MusicList getLocalMusicList() {
+        checkThread();
+        return getBuiltInMusicList(MUSIC_LIST_LOCAL_MUSIC);
     }
 
     /**
@@ -434,6 +448,23 @@ public class MusicStore {
         }
 
         mAllFavoriteChangeListener.remove(listener);
+    }
+
+    /**
+     * 是否是内置歌单。
+     *
+     * @param musicList {@link MusicList} 对象，不能为 null
+     * @return 如果是内置歌单，则返回 true，否则返回 false
+     */
+    public boolean isBuiltInMusicList(@NonNull MusicList musicList) {
+        String name = mMusicListEntityBox.query()
+                .equal(MusicListEntity_.id, musicList.getId())
+                .build()
+                .property(MusicListEntity_.name)
+                .unique()
+                .findString();
+
+        return isBuiltInName(name);
     }
 
     /**
@@ -708,10 +739,6 @@ public class MusicStore {
 
     @NonNull
     private synchronized MusicList getBuiltInMusicList(String name) {
-        if (MUSIC_LIST_LOCAL_MUSIC.equals(name)) {
-            throw new IllegalArgumentException("can't get local music list, Please use method: getAllMusic()");
-        }
-
         if (!isBuiltInName(name)) {
             throw new IllegalArgumentException("not built-in name:" + name);
         }
