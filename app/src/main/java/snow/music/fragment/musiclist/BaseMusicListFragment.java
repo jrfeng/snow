@@ -238,8 +238,7 @@ public abstract class BaseMusicListFragment extends Fragment {
 
     protected final void setAsRingtone(@NonNull Music music) {
         if (checkSetRingtonePermission()) {
-            RingtoneManager.setActualDefaultRingtoneUri(mContext, RingtoneManager.TYPE_RINGTONE, Uri.parse(music.getUri()));
-            Toast.makeText(mContext, R.string.toast_set_successfully, Toast.LENGTH_SHORT).show();
+            showSetAsRingtoneDialog(music);
             return;
         }
 
@@ -247,6 +246,19 @@ public abstract class BaseMusicListFragment extends Fragment {
             mMusicListViewModel.setRingtoneMusic(music);
             requestSetRingtonePermission();
         }
+    }
+
+    private void showSetAsRingtoneDialog(Music music) {
+        MessageDialog dialog = new MessageDialog.Builder(mContext)
+                .setTitle(music.getTitle())
+                .setMessage(R.string.message_set_as_ringtone)
+                .setPositiveButtonClickListener(((dialog1, which) -> {
+                    RingtoneManager.setActualDefaultRingtoneUri(mContext, RingtoneManager.TYPE_RINGTONE, Uri.parse(music.getUri()));
+                    Toast.makeText(mContext, R.string.toast_set_successfully, Toast.LENGTH_SHORT).show();
+                }))
+                .build();
+
+        dialog.show(getParentFragmentManager(), "setAsRingtoneDialog");
     }
 
     private boolean checkSetRingtonePermission() {

@@ -56,4 +56,5 @@
     <string name="message_need_write_settings_permission">需要权限：修改系统设置</string>
     <string name="positive_text_request">申请</string>
     <string name="title_favorites">我喜欢</string>
+    <string name="message_set_as_ringtone">设置为手机铃声？</string>
 </resources>

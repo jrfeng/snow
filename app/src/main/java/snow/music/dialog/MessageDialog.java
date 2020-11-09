@@ -50,17 +50,17 @@ public class MessageDialog extends BottomDialog {
         btnPositive.setTextColor(mPositiveTextColor);
 
         btnNegative.setOnClickListener(v -> {
+            dismiss();
             if (mNegativeButtonClickListener != null) {
                 mNegativeButtonClickListener.onClick(dialog, DialogInterface.BUTTON_NEGATIVE);
             }
-            dismiss();
         });
 
         btnPositive.setOnClickListener(v -> {
+            dismiss();
             if (mPositiveButtonClickListener != null) {
                 mPositiveButtonClickListener.onClick(dialog, DialogInterface.BUTTON_POSITIVE);
             }
-            dismiss();
         });
     }
 

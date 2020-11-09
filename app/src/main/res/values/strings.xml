@@ -38,6 +38,7 @@
     <string name="message_remove_from_favorite">Remove from favorites?</string>
     <string name="message_remove_music">Remove music?</string>
     <string name="message_need_write_settings_permission">Need permission: Write Settings</string>
+    <string name="message_set_as_ringtone">Set as phone ringtone?</string>
 
     <string name="positive_text_request">Request</string>
 
