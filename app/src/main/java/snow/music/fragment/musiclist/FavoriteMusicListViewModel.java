@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 
 import com.google.common.base.Preconditions;
 
-import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Single;
@@ -15,7 +14,6 @@ import io.reactivex.schedulers.Schedulers;
 import snow.music.store.Music;
 import snow.music.store.MusicList;
 import snow.music.store.MusicStore;
-import snow.music.util.MusicListUtil;
 
 public class FavoriteMusicListViewModel extends BaseMusicListViewModel {
     private MusicList mFavoriteMusicList;
@@ -60,8 +58,7 @@ public class FavoriteMusicListViewModel extends BaseMusicListViewModel {
     protected void sortMusicList(@NonNull MusicList.SortOrder sortOrder) {
         Preconditions.checkNotNull(sortOrder);
 
-        MusicListUtil.sort(mFavoriteMusicList, sortOrder);
-        notifyMusicItemsChanged(mFavoriteMusicList.getMusicElements());
+        MusicStore.getInstance().sort(mFavoriteMusicList, sortOrder, () -> notifyMusicItemsChanged(mFavoriteMusicList.getMusicElements()));
     }
 
     @NonNull

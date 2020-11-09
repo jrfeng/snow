@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 
 import com.google.common.base.Preconditions;
 
-import java.util.Collections;
 import java.util.List;
 
 import snow.music.store.Music;
@@ -41,13 +40,5 @@ public final class MusicListUtil {
         }
 
         return builder.build();
-    }
-
-    public static void sort(@NonNull MusicList musicList, @NonNull MusicList.SortOrder sortOrder) {
-        Preconditions.checkNotNull(musicList);
-        Preconditions.checkNotNull(sortOrder);
-
-        Collections.sort(musicList.getMusicElements(), sortOrder.comparator());
-        musicList.setSortOrder(sortOrder);
     }
 }

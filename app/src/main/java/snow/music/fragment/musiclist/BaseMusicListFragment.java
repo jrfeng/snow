@@ -96,7 +96,18 @@ public abstract class BaseMusicListFragment extends Fragment {
                     if (mMusicListAdapter == null) {
                         return;
                     }
+
                     mMusicListAdapter.setMusicList(musicList);
+
+                    MusicItem musicItem = mPlayerViewModel.getPlayerClient().getPlayingMusicItem();
+
+                    if (musicItem == null || !matchPlaylistName()) {
+                        mMusicListAdapter.clearPlayPosition();
+                        return;
+                    }
+
+                    int index = mMusicListViewModel.indexOf(MusicUtil.asMusic(musicItem));
+                    mMusicListAdapter.setPlayPosition(index);
                 });
     }
 
@@ -189,6 +200,10 @@ public abstract class BaseMusicListFragment extends Fragment {
     private boolean matchPlaylistToken() {
         return mMusicListViewModel.getMusicListToken()
                 .equals(mPlayerViewModel.getPlayerClient().getPlaylistToken());
+    }
+
+    public void showSortDialog() {
+        // TODO show sort dialog
     }
 
     protected final void setNextPlay(@NonNull Music music) {

@@ -14,7 +14,6 @@ import io.reactivex.schedulers.Schedulers;
 import snow.music.store.Music;
 import snow.music.store.MusicList;
 import snow.music.store.MusicStore;
-import snow.music.util.MusicListUtil;
 
 public class MusicListViewModel extends BaseMusicListViewModel {
     @Nullable
@@ -60,8 +59,7 @@ public class MusicListViewModel extends BaseMusicListViewModel {
             return;
         }
 
-        MusicListUtil.sort(mMusicList, sortOrder);
-        notifyMusicItemsChanged(mMusicList.getMusicElements());
+        MusicStore.getInstance().sort(mMusicList, sortOrder, () -> notifyMusicItemsChanged(mMusicList.getMusicElements()));
     }
 
     @NonNull

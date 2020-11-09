@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
 
 import com.google.common.base.Preconditions;
 
@@ -25,8 +24,6 @@ import android.util.Log;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
-import io.objectbox.android.ObjectBoxLiveData;
-import io.objectbox.query.Query;
 import io.objectbox.query.QueryBuilder;
 
 /**
@@ -105,6 +102,28 @@ public class MusicStore {
         }
 
         return mInstance;
+    }
+
+    public synchronized void sort(@NonNull MusicList musicList, @NonNull MusicList.SortOrder sortOrder, @Nullable SortCallback callback) {
+        Preconditions.checkNotNull(musicList);
+        Preconditions.checkNotNull(sortOrder);
+
+        BoxStore boxStore = getInstance().getBoxStore();
+        boxStore.runInTxAsync(() -> {
+            ArrayList<Music> items = new ArrayList<>(musicList.getMusicElements());
+            Collections.sort(items, sortOrder.comparator());
+
+            musicList.setSortOrder(sortOrder);
+            musicList.getMusicElements().clear();
+            getInstance().updateMusicList(musicList);
+
+            musicList.getMusicElements().addAll(items);
+            getInstance().updateMusicList(musicList);
+        }, (result, error) -> mMainHandler.post(() -> {
+            if (callback != null) {
+                callback.onSortFinished();
+            }
+        }));
     }
 
     /**
@@ -757,5 +776,15 @@ public class MusicStore {
          * 该回调方法会在应用程序主线程调用。
          */
         void onFavoriteChanged();
+    }
+
+    /**
+     * 监听 “排序歌单” 完成事件。
+     */
+    public interface SortCallback {
+        /**
+         * 歌单排序完成后会调用该方法，且会在主线程中调用该方法。
+         */
+        void onSortFinished();
     }
 }

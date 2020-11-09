@@ -11,6 +11,7 @@ import snow.music.fragment.musiclist.MusicListFragment;
 import snow.music.store.MusicStore;
 
 public class LocalMusicActivity extends AppCompatActivity {
+    private MusicListFragment mMusicListFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,9 +19,13 @@ public class LocalMusicActivity extends AppCompatActivity {
         setContentView(R.layout.activity_local_music);
 
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.musicListContainer);
-        if (fragment == null) {
+        if (fragment instanceof MusicListFragment) {
+            mMusicListFragment = (MusicListFragment) fragment;
+        } else {
+            mMusicListFragment = MusicListFragment.newInstance(MusicStore.MUSIC_LIST_LOCAL_MUSIC);
+
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.musicListContainer, MusicListFragment.newInstance(MusicStore.MUSIC_LIST_LOCAL_MUSIC), "MusicList")
+                    .add(R.id.musicListContainer, mMusicListFragment, "MusicList")
                     .commit();
         }
     }
@@ -30,6 +35,16 @@ public class LocalMusicActivity extends AppCompatActivity {
     }
 
     public void onOptionMenuClicked(View view) {
-        // TODO
+        switch (view.getId()) {
+            case R.id.btnSearch:
+                // TODO
+                break;
+            case R.id.btnSort:
+                mMusicListFragment.showSortDialog();
+                break;
+            case R.id.btnScan:
+                // TODO
+                break;
+        }
     }
 }

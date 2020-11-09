@@ -8,10 +8,9 @@ import android.view.View;
 
 import snow.music.R;
 import snow.music.fragment.musiclist.FavoriteMusicListFragment;
-import snow.music.fragment.musiclist.MusicListFragment;
-import snow.music.store.MusicStore;
 
 public class FavoriteActivity extends AppCompatActivity {
+    private FavoriteMusicListFragment mFavoriteMusicListFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,9 +18,13 @@ public class FavoriteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_favorite);
 
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.musicListContainer);
-        if (fragment == null) {
+        if (fragment instanceof FavoriteMusicListFragment) {
+            mFavoriteMusicListFragment = (FavoriteMusicListFragment) fragment;
+        } else {
+            mFavoriteMusicListFragment = FavoriteMusicListFragment.newInstance();
+
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.musicListContainer, FavoriteMusicListFragment.newInstance(), "favoriteMusicList")
+                    .add(R.id.musicListContainer, mFavoriteMusicListFragment, "favoriteMusicList")
                     .commit();
         }
     }
@@ -31,6 +34,13 @@ public class FavoriteActivity extends AppCompatActivity {
     }
 
     public void onOptionMenuClicked(View view) {
-        // TODO
+        switch (view.getId()) {
+            case R.id.btnSearch:
+                // TODO
+                break;
+            case R.id.btnSort:
+                mFavoriteMusicListFragment.showSortDialog();
+                break;
+        }
     }
 }

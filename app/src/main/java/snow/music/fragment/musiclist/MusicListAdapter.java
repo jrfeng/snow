@@ -30,6 +30,8 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     private SelectableHelper mSelectableHelper;
     private PositionHelper<MusicListAdapter.ViewHolder> mPositionHelper;
 
+    private boolean mIgnoreDiffUtilOnce;
+
     public MusicListAdapter(@NonNull List<Music> musicList) {
         Preconditions.checkNotNull(musicList);
 
@@ -43,7 +45,8 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     public void setMusicList(@NonNull List<Music> musicList) {
         Preconditions.checkNotNull(musicList);
 
-        if (mMusicList.isEmpty() || musicList.isEmpty()) {
+        if (mIgnoreDiffUtilOnce || mMusicList.isEmpty() || musicList.isEmpty()) {
+            mIgnoreDiffUtilOnce = false;
             mMusicList = new ArrayList<>(musicList);
             notifyDataSetChanged();
         } else {
@@ -52,6 +55,15 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
             diffResult.dispatchUpdatesTo(this);
             mMusicList = newMusicList;
         }
+    }
+
+    /**
+     * 设置是否忽略 DiffUtil。如果忽略的话，则没有动画效果。
+     * <p>
+     * 该方法仅对下次调用 {@link #setMusicList(List)} 方法时有效。
+     */
+    public void setIgnoreDiffUtilOnce(boolean ignoreDiffUtil) {
+        mIgnoreDiffUtilOnce = ignoreDiffUtil;
     }
 
     public void setOnItemClickListener(ItemClickHelper.OnItemClickListener listener) {
@@ -64,6 +76,11 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
 
     public void setPlayPosition(int position) {
         if (mMusicList.isEmpty()) {
+            return;
+        }
+
+        if (position < 0) {
+            mSelectableHelper.clearSelected();
             return;
         }
 
