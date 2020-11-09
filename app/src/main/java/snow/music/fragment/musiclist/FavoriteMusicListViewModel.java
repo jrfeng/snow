@@ -15,6 +15,7 @@ import io.reactivex.schedulers.Schedulers;
 import snow.music.store.Music;
 import snow.music.store.MusicList;
 import snow.music.store.MusicStore;
+import snow.music.util.MusicListUtil;
 
 public class FavoriteMusicListViewModel extends BaseMusicListViewModel {
     private MusicList mFavoriteMusicList;
@@ -58,8 +59,8 @@ public class FavoriteMusicListViewModel extends BaseMusicListViewModel {
     @Override
     protected void sortMusicList(@NonNull MusicList.SortOrder sortOrder) {
         Preconditions.checkNotNull(sortOrder);
-        Collections.sort(mFavoriteMusicList.getMusicElements(), sortOrder.comparator());
-        mFavoriteMusicList.setSortOrder(sortOrder);
+
+        MusicListUtil.sort(mFavoriteMusicList, sortOrder);
         notifyMusicItemsChanged(mFavoriteMusicList.getMusicElements());
     }
 

@@ -3,6 +3,8 @@ package snow.music.fragment.musiclist;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.common.base.Preconditions;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -52,6 +54,8 @@ public class MusicListViewModel extends BaseMusicListViewModel {
 
     @Override
     protected void sortMusicList(@NonNull MusicList.SortOrder sortOrder) {
+        Preconditions.checkNotNull(sortOrder);
+
         if (mMusicList == null) {
             return;
         }
