@@ -460,7 +460,7 @@ public class MusicList {
         /**
          * 按歌曲名排序
          */
-        BY_NAME(1) {
+        BY_TITLE(1) {
             @NonNull
             @Override
             public Comparator<Music> comparator() {
@@ -524,7 +524,7 @@ public class MusicList {
         public static SortOrder getValueById(int id) {
             switch (id) {
                 case 1:
-                    return BY_NAME;
+                    return BY_TITLE;
                 case 2:
                     return BY_ARTIST;
                 case 3:
