@@ -29,7 +29,7 @@
     <string name="empty_playlist">播放列表为空</string>
     <string name="des_remove_music">移除歌曲</string>
     <string name="empty_music_list">歌单为空</string>
-    <string name="local_music">本地音乐</string>
+    <string name="title_local_music">本地音乐</string>
     <string name="des_back">返回</string>
     <string name="des_sort_music_list">排序歌单</string>
     <string name="des_scan_local_music">扫描本地音乐</string>
@@ -55,4 +55,5 @@
     <string name="toast_set_successfully">设置成功</string>
     <string name="message_need_write_settings_permission">需要权限：修改系统设置</string>
     <string name="positive_text_request">申请</string>
+    <string name="title_favorites">我喜欢</string>
 </resources>

@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModel;
 import com.google.common.base.Preconditions;
 
 import snow.music.R;
+import snow.music.activity.favorite.FavoriteActivity;
 import snow.music.activity.localmusic.LocalMusicActivity;
 import snow.music.dialog.PlaylistDialog;
 import snow.music.store.MusicStore;
@@ -195,8 +196,9 @@ public class NavigationViewModel extends ViewModel {
     }
 
     public void navigateToFavorite(View view) {
-        // TODO
-        Log.d("DEBUG", "navigateToFavorite");
+        Context context = view.getContext();
+        Intent intent = new Intent(context, FavoriteActivity.class);
+        context.startActivity(intent);
     }
 
     public void navigateToMusicList(View view) {

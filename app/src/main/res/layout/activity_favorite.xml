@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="snow.music.activity.localmusic.LocalMusicActivity">
+    tools:context="snow.music.activity.favorite.FavoriteActivity">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -31,7 +31,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/title_local_music"
+                android:text="@string/title_favorites"
                 android:textSize="@dimen/action_bar_title_text_size" />
 
             <ImageButton
@@ -53,16 +53,6 @@
                 android:onClick="onOptionMenuClicked"
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/ic_action_sort" />
-
-            <ImageButton
-                android:id="@+id/btnScan"
-                android:layout_width="@dimen/image_button_size"
-                android:layout_height="@dimen/image_button_size"
-                android:background="@drawable/bg_button_48dp"
-                android:contentDescription="@string/des_scan_local_music"
-                android:onClick="onOptionMenuClicked"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_action_scan" />
 
         </LinearLayout>
 

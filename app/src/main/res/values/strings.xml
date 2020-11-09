@@ -17,8 +17,9 @@
     <!-- MusicListAdapter -->
     <string name="empty_music_list">Music list is Empty</string>
 
-    <!-- LocalMusicActivity -->
-    <string name="local_music">Musics</string>
+    <!-- Activity Title -->
+    <string name="title_local_music">Musics</string>
+    <string name="title_favorites">Favorites</string>
 
     <!-- BottomMenuDialog -->
     <string name="dialog">Dialog</string>
