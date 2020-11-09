@@ -284,6 +284,7 @@ public abstract class BaseMusicListFragment extends Fragment {
 
     protected final void removeMusic(@NonNull Music music) {
         MessageDialog messageDialog = new MessageDialog.Builder(mContext)
+                .setTitle(music.getTitle())
                 .setMessage(R.string.message_remove_music)
                 .setPositiveTextColor(getResources().getColor(R.color.red_500))
                 .setPositiveButtonClickListener((dialog, which) -> {
