@@ -28,6 +28,14 @@ public class WelcomeActivity extends AppCompatActivity {
         startTimer();
     }
 
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(
+                android.R.anim.fade_in,
+                android.R.anim.fade_out);
+    }
+
     public void startTimer() {
         if (mTimerDisposable != null && !mTimerDisposable.isDisposed()) {
             mTimerDisposable.isDisposed();
@@ -35,11 +43,12 @@ public class WelcomeActivity extends AppCompatActivity {
 
         mTimerDisposable = Observable.timer(1000, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::startMainActivity);
+                .subscribe(this::startNavigationActivity);
     }
 
-    public void startMainActivity(Long along) {
+    public void startNavigationActivity(Long along) {
         Intent intent = new Intent(this, NavigationActivity.class);
         startActivity(intent);
+        finish();
     }
 }
