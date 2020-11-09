@@ -1573,18 +1573,12 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         /**
-         * 这是一个帮助方法，用于获取通知栏控制器用于显示的 content text，该方法会根据播放器状态的不同而返回
-         * 不同的 CharSequence 值。
-         * <p>
-         * 例如，在 {@link PlaybackState#ERROR} 状态时，会返回一个
-         * {@code android.R.color.holo_red_dark} 颜色的描述错误信息的 CharSequence 对象；而在
-         * {@code preparing} 状态时，会返回一个
-         * {@code android.R.color.holo_green_dark} 颜色的值为 “准备中…” 的 CharSequence 对象；而在
-         * {@link #isStalled()} 返回 true 时，会返回一个 {@code android.R.color.holo_orange_dark} 颜色
-         * 的值为 “缓冲中…” 的 CharSequence 对象。其它状态下会将 {@code defaultValue} 原值返回。
+         * 工具方法，在 {@link PlaybackState#ERROR} 状态时，会返回一个
+         * {@code android.R.color.holo_red_dark} 颜色的描述错误信息的 CharSequence 对象；其它状态下会将
+         * {@code defaultValue} 原值返回。
          *
          * @param contentText context text 的值，如果播放器处于正常播放器状态，该方法会将这个值原样返回，
-         *                    如果播放器正在缓冲，或发生了错误，则将返回一个提示字符串
+         *                    如果播放器正发生了错误，则将返回一个提示字符串
          */
         public final CharSequence getContentText(String contentText) {
             String value = contentText;
@@ -1595,16 +1589,6 @@ public class PlayerService extends MediaBrowserServiceCompat
             if (isError()) {
                 value = getErrorMessage();
                 textColor = res.getColor(android.R.color.holo_red_dark);
-            }
-
-            if (isPreparing()) {
-                value = getContext().getString(R.string.snow_preparing);
-                textColor = res.getColor(android.R.color.holo_green_dark);
-            }
-
-            if (isStalled()) {
-                value = res.getString(R.string.snow_buffering);
-                textColor = res.getColor(android.R.color.holo_orange_dark);
             }
 
             CharSequence text = value;
@@ -2078,7 +2062,7 @@ public class PlayerService extends MediaBrowserServiceCompat
                     .setSmallIcon(getSmallIconId())
                     .setLargeIcon(getIcon())
                     .setContentTitle(MusicItemUtil.getTitle(getContext(), getPlayingMusicItem()))
-                    .setContentText(MusicItemUtil.getArtist(getContext(), getPlayingMusicItem()))
+                    .setContentText(getContentText(MusicItemUtil.getArtist(getContext(), getPlayingMusicItem())))
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setPriority(NotificationCompat.PRIORITY_LOW)
                     .setShowWhen(false)
