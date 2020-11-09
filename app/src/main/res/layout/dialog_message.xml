@@ -45,7 +45,8 @@
             android:ellipsize="middle"
             android:minWidth="@dimen/dialog_button_min_width"
             android:singleLine="true"
-            android:text="@string/message_dialog_negative_text" />
+            android:text="@string/message_dialog_negative_text"
+            android:textAllCaps="false" />
 
         <Space
             android:layout_width="16dp"
@@ -61,6 +62,7 @@
             android:minWidth="@dimen/dialog_button_min_width"
             android:singleLine="true"
             android:text="@string/message_dialog_positive_text"
+            android:textAllCaps="false"
             android:textColor="@color/colorPrimary" />
 
     </LinearLayout>
