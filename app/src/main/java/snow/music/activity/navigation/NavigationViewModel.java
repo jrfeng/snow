@@ -2,6 +2,10 @@ package snow.music.activity.navigation;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
 
@@ -23,14 +27,18 @@ import snow.music.store.MusicStore;
 import snow.music.util.FavoriteObserver;
 import snow.music.util.MusicUtil;
 import snow.player.PlaybackState;
+import snow.player.PlayerClient;
 import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 
 public class NavigationViewModel extends ViewModel {
     private static final String TAG = "NavigationViewModel";
     private final MutableLiveData<Integer> mFavoriteDrawable;
+    private MutableLiveData<CharSequence> mSecondaryText;
 
     private final Observer<MusicItem> mPlayingMusicItemObserver;
+    private final Observer<String> mArtistObserver;
+    private final Observer<Boolean> mErrorObserver;
     private FavoriteObserver mFavoriteObserver;
 
     private PlayerViewModel mPlayerViewModel;
@@ -38,8 +46,11 @@ public class NavigationViewModel extends ViewModel {
 
     public NavigationViewModel() {
         mFavoriteDrawable = new MutableLiveData<>(R.drawable.ic_favorite_false);
+        mSecondaryText = new MutableLiveData<>("");
         mFavoriteObserver = new FavoriteObserver(favorite ->
                 mFavoriteDrawable.setValue(favorite ? R.drawable.ic_favorite_true : R.drawable.ic_favorite_false));
+        mArtistObserver = artist -> updateSecondaryText();
+        mErrorObserver = error -> updateSecondaryText();
         mPlayingMusicItemObserver = musicItem -> mFavoriteObserver.setMusicItem(musicItem);
     }
 
@@ -55,6 +66,23 @@ public class NavigationViewModel extends ViewModel {
 
         mFavoriteObserver.subscribe();
         mPlayerViewModel.getPlayingMusicItem().observeForever(mPlayingMusicItemObserver);
+        mPlayerViewModel.getArtist().observeForever(mArtistObserver);
+        mPlayerViewModel.isError().observeForever(mErrorObserver);
+    }
+
+    private void updateSecondaryText() {
+        PlayerClient playerClient = mPlayerViewModel.getPlayerClient();
+
+        CharSequence text = mPlayerViewModel.getArtist().getValue();
+
+        if (playerClient.isError()) {
+            text = playerClient.getErrorMessage();
+            SpannableString colorText = new SpannableString(text);
+            colorText.setSpan(new ForegroundColorSpan(Color.parseColor("#F44336")), 0, text.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            text = colorText;
+        }
+
+        mSecondaryText.setValue(text);
     }
 
     public boolean isInitialized() {
@@ -66,6 +94,8 @@ public class NavigationViewModel extends ViewModel {
         mFavoriteObserver.unsubscribe();
         if (isInitialized()) {
             mPlayerViewModel.getPlayingMusicItem().removeObserver(mPlayingMusicItemObserver);
+            mPlayerViewModel.getArtist().removeObserver(mArtistObserver);
+            mPlayerViewModel.isError().removeObserver(mErrorObserver);
             return;
         }
 
@@ -81,12 +111,12 @@ public class NavigationViewModel extends ViewModel {
         return mPlayerViewModel.getTitle();
     }
 
-    public LiveData<String> getMusicArtist() {
+    public LiveData<CharSequence> getSecondaryText() {
         if (!mInitialized) {
             throw new IllegalStateException("NavigationViewModel not init yet.");
         }
 
-        return mPlayerViewModel.getArtist();
+        return mSecondaryText;
     }
 
     @NonNull
