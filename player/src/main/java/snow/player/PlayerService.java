@@ -1581,23 +1581,14 @@ public class PlayerService extends MediaBrowserServiceCompat
          *                    如果播放器正发生了错误，则将返回一个提示字符串
          */
         public final CharSequence getContentText(String contentText) {
-            String value = contentText;
-            int textColor = 0;
-
-            Resources res = getContext().getResources();
+            CharSequence text = contentText;
 
             if (isError()) {
-                value = getErrorMessage();
-                textColor = res.getColor(android.R.color.holo_red_dark);
-            }
-
-            CharSequence text = value;
-
-            if (textColor != 0) {
-                SpannableString colorText = new SpannableString(value);
-                colorText.setSpan(new ForegroundColorSpan(textColor), 0, value.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-
-                text = colorText;
+                text = getErrorMessage();
+                Resources res = getContext().getResources();
+                SpannableString colorText = new SpannableString(text);
+                colorText.setSpan(new ForegroundColorSpan(res.getColor(android.R.color.holo_red_dark)), 0, text.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                return colorText;
             }
 
             return text;
