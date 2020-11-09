@@ -16,8 +16,8 @@
     </style>
 
     <style name="PlaylistTransition">
-        <item name="android:windowEnterAnimation">@anim/bottom_slide_in</item>
-        <item name="android:windowExitAnimation">@anim/bottom_slide_out</item>
+        <item name="android:windowEnterAnimation">@anim/dialog_bottom_slide_in</item>
+        <item name="android:windowExitAnimation">@anim/dialog_bottom_slide_out</item>
     </style>
 
 </resources>
