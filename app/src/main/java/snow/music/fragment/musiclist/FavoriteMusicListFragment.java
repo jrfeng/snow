@@ -41,10 +41,10 @@ public class FavoriteMusicListFragment extends BaseMusicListFragment {
                         case 1:
                             addToMusicList(music);
                             break;
-                        case 3:
+                        case 2:
                             setAsRingtone(music);
                             break;
-                        case 4:
+                        case 3:
                             removeMusic(music);
                             break;
                     }
