@@ -1657,10 +1657,12 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         List<MusicItem> musicItems = mPlaylist.getAllMusicItem();
-
-        MusicItem from = musicItems.get(fromPosition);
-        musicItems.add(toPosition, from);
-        musicItems.remove(fromPosition);
+        MusicItem from = musicItems.remove(fromPosition);
+        int addPosition = toPosition;
+        if (fromPosition < toPosition) {
+            addPosition -= 1;
+        }
+        musicItems.add(addPosition, from);
 
         onMusicItemMoved(fromPosition, toPosition);
         updatePlaylist(mPlaylist, musicItems, new Runnable() {
@@ -1747,7 +1749,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (musicItem == getMusicItem()) {
+        if (musicItem.equals(getMusicItem())) {
             return;
         }
 
