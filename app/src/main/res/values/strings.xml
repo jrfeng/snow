@@ -36,11 +36,17 @@
     <string name="message_remove_from_playlist">Remove  from playlist?</string>
     <string name="message_remove_from_favorite">Remove from favorites?</string>
     <string name="message_remove_music">Remove music?</string>
+    <string name="message_need_write_settings_permission">Need permission: Write Settings</string>
+
+    <string name="positive_text_request">Request</string>
 
     <!-- Toast -->
     <string name="toast_added_to_playlist">Added to playlist</string>
     <string name="toast_added_to_favorites">Added to favorites</string>
     <string name="toast_removed_from_favorites">Removed from favorites</string>
+    <string name="toast_added">Added</string>
+    <string name="toast_removed">Removed</string>
+    <string name="toast_set_successfully">Set successfully</string>
 
     <!-- content description -->
     <string name="des_logo">logo</string>

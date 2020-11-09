@@ -1,6 +1,7 @@
 package snow.music.fragment.musiclist;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -28,6 +29,9 @@ public abstract class BaseMusicListViewModel extends ViewModel {
 
     private boolean mInitialized;
     private Disposable mLoadMusicListDisposable;
+
+    @Nullable
+    private Music mRingtoneMusic;
 
     public BaseMusicListViewModel() {
         mMusicListItems = new MutableLiveData<>(Collections.emptyList());
@@ -78,6 +82,15 @@ public abstract class BaseMusicListViewModel extends ViewModel {
 
     public boolean isInitialized() {
         return mInitialized;
+    }
+
+    @Nullable
+    public Music getRingtoneMusic() {
+        return mRingtoneMusic;
+    }
+
+    public void setRingtoneMusic(@Nullable Music ringtoneMusic) {
+        mRingtoneMusic = ringtoneMusic;
     }
 
     /**

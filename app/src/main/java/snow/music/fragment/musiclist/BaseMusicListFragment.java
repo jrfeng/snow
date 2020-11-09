@@ -1,24 +1,35 @@
 package snow.music.fragment.musiclist;
 
 import android.content.Context;
+import android.content.Intent;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.common.base.Preconditions;
+
 import java.util.List;
 import java.util.Objects;
 
 import snow.music.R;
+import snow.music.dialog.MessageDialog;
 import snow.music.service.AppPlayerService;
 import snow.music.store.Music;
+import snow.music.store.MusicStore;
 import snow.music.util.MusicListUtil;
 import snow.music.util.MusicUtil;
 import snow.music.util.PlayerUtil;
@@ -26,6 +37,8 @@ import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 
 public abstract class BaseMusicListFragment extends Fragment {
+    private static final int REQUEST_CODE_WRITE_SETTINGS = 1;
+
     private Context mContext;
     private PlayerViewModel mPlayerViewModel;
     private BaseMusicListViewModel mMusicListViewModel;
@@ -60,6 +73,21 @@ public abstract class BaseMusicListFragment extends Fragment {
 
         observeMusicListItems();
         observePlayPosition();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode != REQUEST_CODE_WRITE_SETTINGS) {
+            return;
+        }
+
+        Music ringtoneMusic = mMusicListViewModel.getRingtoneMusic();
+
+        if (ringtoneMusic != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSetRingtonePermission()) {
+            setAsRingtone(ringtoneMusic);
+        }
     }
 
     private void observeMusicListItems() {
@@ -140,11 +168,11 @@ public abstract class BaseMusicListFragment extends Fragment {
     }
 
     private void onMusicListItemMenuClicked(int position) {
-        showItemOptionMenu();
+        showItemOptionMenu(getMusicListItems().get(position));
     }
 
     private void onMusicListItemLongClicked(int position) {
-        // TODO
+        // TODO start multi select activity
     }
 
     @NonNull
@@ -163,31 +191,84 @@ public abstract class BaseMusicListFragment extends Fragment {
                 .equals(mPlayerViewModel.getPlayerClient().getPlaylistToken());
     }
 
-    protected void setNextPlay(@NonNull Music music) {
+    protected final void setNextPlay(@NonNull Music music) {
         mPlayerViewModel.setNextPlay(MusicUtil.asMusicItem(music));
+        Toast.makeText(mContext, R.string.toast_added_to_playlist, Toast.LENGTH_SHORT).show();
     }
 
-    protected void addToFavorite(@NonNull Music music) {
-        // TODO
+    protected final void addToFavorite(@NonNull Music music) {
+        Preconditions.checkNotNull(music);
+        MusicStore.getInstance().addToFavorite(music);
+        Toast.makeText(mContext, R.string.toast_added, Toast.LENGTH_SHORT).show();
     }
 
-    protected void removeFavorite(@NonNull Music music) {
-        // TODO
+    protected final void removeFavorite(@NonNull Music music) {
+        Preconditions.checkNotNull(music);
+
+        MessageDialog messageDialog = new MessageDialog.Builder(mContext)
+                .setMessage(R.string.message_remove_from_favorite)
+                .setPositiveTextColor(getResources().getColor(R.color.red_500))
+                .setPositiveButtonClickListener((dialog, which) -> {
+                    MusicStore.getInstance().removeFromFavorite(music);
+                    Toast.makeText(mContext, R.string.toast_removed, Toast.LENGTH_SHORT).show();
+                })
+                .build();
+
+        messageDialog.show(getParentFragmentManager(), "removeFavorite");
     }
 
-    protected void addToMusicList(@NonNull Music music) {
-        // TODO
+    protected final void addToMusicList(@NonNull Music music) {
+        // TODO show add to music list dialog
     }
 
-    protected void setAsRingtone(@NonNull Music music) {
-        // TODO
+    protected final void setAsRingtone(@NonNull Music music) {
+        if (checkSetRingtonePermission()) {
+            RingtoneManager.setActualDefaultRingtoneUri(mContext, RingtoneManager.TYPE_RINGTONE, Uri.parse(music.getUri()));
+            Toast.makeText(mContext, R.string.toast_set_successfully, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mMusicListViewModel.setRingtoneMusic(music);
+            requestSetRingtonePermission();
+        }
     }
 
-    private void removeMusic(@NonNull Music music) {
-        // TODO
+    private boolean checkSetRingtonePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return Settings.System.canWrite(mContext);
+        }
+        return true;
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private void requestSetRingtonePermission() {
+        MessageDialog messageDialog = new MessageDialog.Builder(mContext)
+                .setMessage(R.string.message_need_write_settings_permission)
+                .setPositiveButton(R.string.positive_text_request, (dialog, which) -> {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                    intent.setData(Uri.parse("package:" + mContext.getApplicationContext().getPackageName()));
+                    startActivityForResult(intent, REQUEST_CODE_WRITE_SETTINGS);
+                })
+                .build();
+
+        messageDialog.show(getParentFragmentManager(), "requestSetRingtonePermission");
+    }
+
+    protected final void removeMusic(@NonNull Music music) {
+        MessageDialog messageDialog = new MessageDialog.Builder(mContext)
+                .setMessage(R.string.message_remove_music)
+                .setPositiveTextColor(getResources().getColor(R.color.red_500))
+                .setPositiveButtonClickListener((dialog, which) -> {
+                    mMusicListViewModel.removeMusic(music);
+                    Toast.makeText(mContext, R.string.toast_removed, Toast.LENGTH_SHORT).show();
+                })
+                .build();
+
+        messageDialog.show(getParentFragmentManager(), "removeMusic");
     }
 
     protected abstract BaseMusicListViewModel onCreateMusicListViewModel(ViewModelProvider viewModelProvider);
 
-    protected abstract void showItemOptionMenu();
+    protected abstract void showItemOptionMenu(@NonNull Music music);
 }
