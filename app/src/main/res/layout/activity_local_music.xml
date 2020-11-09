@@ -75,14 +75,14 @@
 
     </FrameLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvMusicList"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/musicListContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
 
     <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/bottomBar"
+        android:id="@+id/bottomBarContainer"
         android:name="snow.music.fragment.battombar.BottomBarFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

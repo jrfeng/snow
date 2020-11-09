@@ -39,7 +39,6 @@ import io.objectbox.query.QueryBuilder;
  *     <li>{@link #init(BoxStore)}</li>
  *     <li>{@link #isBuiltInName(String)}</li>
  *     <li>{@link #getBoxStore()}</li>
- *     <li>{@link #observeFavorite()}</li>
  *     <li>{@link #observeHistory()}</li>
  * </ul>
  */
@@ -292,23 +291,6 @@ public class MusicStore {
         }
 
         return allMusicList;
-    }
-
-    /**
-     * 监听 “我喜欢” 歌单。
-     */
-    @NonNull
-    public synchronized LiveData<MusicList> observeFavorite() {
-        Query<MusicListEntity> favoriteQuery = mMusicListEntityBox.query()
-                .equal(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
-                .build();
-
-        if (favoriteQuery.count() < 0) {
-            createBuiltInMusicList(MUSIC_LIST_FAVORITE);
-        }
-
-        ObjectBoxLiveData<MusicListEntity> favoriteLiveData = new ObjectBoxLiveData<>(favoriteQuery);
-        return Transformations.map(favoriteLiveData, input -> new MusicList(input.get(0)));
     }
 
     /**

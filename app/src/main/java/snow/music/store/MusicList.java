@@ -12,9 +12,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+
+import pinyin.util.PinyinComparator;
 
 /**
  * 用于表示一个歌单。
@@ -447,24 +450,72 @@ public class MusicList {
         /**
          * 按歌曲的添加时间排序
          */
-        BY_ADD_TIME(0),
+        BY_ADD_TIME(0) {
+            @NonNull
+            @Override
+            public Comparator<Music> comparator() {
+                return (o1, o2) -> (int) ((o1.getAddTime() - o2.getAddTime()) >> 32);
+            }
+        },
         /**
          * 按歌曲名排序
          */
-        BY_NAME(1),
+        BY_NAME(1) {
+            @NonNull
+            @Override
+            public Comparator<Music> comparator() {
+                return new Comparator<Music>() {
+                    private PinyinComparator mPinyinComparator = new PinyinComparator();
+
+                    @Override
+                    public int compare(Music o1, Music o2) {
+                        return mPinyinComparator.compare(o1.getTitle(), o2.getTitle());
+                    }
+                };
+            }
+        },
         /**
          * 按歌手名排序
          */
-        BY_ARTIST(2),
+        BY_ARTIST(2) {
+            @NonNull
+            @Override
+            public Comparator<Music> comparator() {
+                return new Comparator<Music>() {
+                    private PinyinComparator mPinyinComparator = new PinyinComparator();
+
+                    @Override
+                    public int compare(Music o1, Music o2) {
+                        return mPinyinComparator.compare(o1.getArtist(), o2.getArtist());
+                    }
+                };
+            }
+        },
         /**
          * 按专辑名排序
          */
-        BY_ALBUM(3);
+        BY_ALBUM(3) {
+            @NonNull
+            @Override
+            public Comparator<Music> comparator() {
+                return new Comparator<Music>() {
+                    private PinyinComparator mPinyinComparator = new PinyinComparator();
+
+                    @Override
+                    public int compare(Music o1, Music o2) {
+                        return mPinyinComparator.compare(o1.getAlbum(), o2.getAlbum());
+                    }
+                };
+            }
+        };
 
         /**
          * 枚举值 ID，序列化与反序列化专用
          */
         public final int id;
+
+        @NonNull
+        public abstract Comparator<Music> comparator();
 
         SortOrder(int id) {
             this.id = id;

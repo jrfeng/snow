@@ -28,6 +28,7 @@ import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.databinding.ActivityNavigationBinding;
 import snow.music.service.AppPlayerService;
+import snow.music.store.MusicList;
 import snow.music.util.PlayerUtil;
 import snow.music.viewmodel.ScannerViewModel;
 import snow.music.store.Music;
@@ -216,7 +217,12 @@ public class NavigationActivity extends AppCompatActivity {
                     return;
                 }
 
-                MusicStore.getInstance().putAllMusic(musicList);
+                MusicStore musicStore = MusicStore.getInstance();
+
+                musicStore.putAllMusic(musicList);
+                MusicList localMusicList = musicStore.getLocalMusicList();
+                localMusicList.getMusicElements().addAll(musicList);
+                musicStore.updateMusicList(localMusicList);
                 emitter.onSuccess(true);
             }).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

@@ -79,6 +79,8 @@ public class AppPlayerService extends PlayerService {
                 }
                 invalidate();
             });
+
+            setDefaultIcon(getDefaultIcon());
         }
 
         @Override
@@ -102,9 +104,7 @@ public class AppPlayerService extends PlayerService {
             addSwitchPlayMode(builder);
         }
 
-        @NonNull
-        @Override
-        public Bitmap getDefaultIcon() {
+        private Bitmap getDefaultIcon() {
             Context context = getContext();
             BitmapDrawable drawable = (BitmapDrawable) ResourcesCompat.getDrawable(
                     context.getResources(),

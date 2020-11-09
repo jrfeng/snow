@@ -73,4 +73,7 @@ dependencies {
 
     // rv-helper
     implementation 'com.github.jrfeng:rv-helper:1.1'
+
+    // pinyin-comparator
+    implementation 'com.github.jrfeng:pinyin-comparator:0.1.1'
 }

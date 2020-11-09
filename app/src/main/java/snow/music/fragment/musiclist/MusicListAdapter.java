@@ -1,4 +1,4 @@
-package snow.music.adapter;
+package snow.music.fragment.musiclist;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,22 +29,16 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     private ItemClickHelper mItemClickHelper;
     private SelectableHelper mSelectableHelper;
 
-    public MusicListAdapter(@NonNull List<Music> musicList, int playPosition) {
+    public MusicListAdapter(@NonNull List<Music> musicList) {
         Preconditions.checkNotNull(musicList);
 
         mMusicList = new ArrayList<>(musicList);
 
         mItemClickHelper = new ItemClickHelper();
         mSelectableHelper = new SelectableHelper(this);
-
-        if (mMusicList.isEmpty() || playPosition < 0) {
-            return;
-        }
-
-        mSelectableHelper.setSelect(playPosition, true);
     }
 
-    public void setMusicList(@NonNull List<Music> musicList, int playPosition) {
+    public void setMusicList(@NonNull List<Music> musicList) {
         Preconditions.checkNotNull(musicList);
 
         if (mMusicList.isEmpty() || musicList.isEmpty()) {
@@ -55,12 +49,6 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
             DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new OrderMusicDiffCallback(mMusicList, newMusicList));
             diffResult.dispatchUpdatesTo(this);
             mMusicList = newMusicList;
-        }
-
-        if (mMusicList.isEmpty() || playPosition < 0) {
-            mSelectableHelper.clearSelected();
-        } else {
-            mSelectableHelper.setSelect(playPosition, true);
         }
     }
 
@@ -74,7 +62,6 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
 
     public void setPlayPosition(int position) {
         if (mMusicList.isEmpty()) {
-            mSelectableHelper.clearSelected();
             return;
         }
 
@@ -103,7 +90,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         int layoutId = R.layout.item_music_list;
-        boolean emptyView = viewType == TYPE_EMPTY_VIEW;
+        boolean emptyView = (viewType == TYPE_EMPTY_VIEW);
         if (emptyView) {
             layoutId = R.layout.empty_music_list;
         }
