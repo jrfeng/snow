@@ -880,6 +880,15 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
+     * 播放 position 处的音乐，如果播放列表中 position 处的音乐是当前正在播放的音乐，则忽略本次调用。
+     */
+    public void skipToPosition(int position) {
+        if (isInitialized()) {
+            mPlayerClient.skipToPosition(position);
+        }
+    }
+
+    /**
      * 快进。
      */
     public void fastForward() {
