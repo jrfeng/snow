@@ -229,6 +229,7 @@ public class PlaylistDialog extends BottomDialog {
             return new ViewHolder(itemView, emptyView);
         }
 
+        @SuppressLint("SetTextI18n")
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             if (mPlaylist.isEmpty()) {
@@ -239,6 +240,7 @@ public class PlaylistDialog extends BottomDialog {
 
             MusicItem musicItem = mPlaylist.get(position);
             holder.tvTitle.setText(musicItem.getTitle());
+            holder.tvArtist.setText(" - " + musicItem.getArtist());
 
             mItemClickHelper.bindClickListener(holder.itemView, holder.btnRemove);
             mSelectableHelper.updateSelectState(holder, position);
@@ -266,11 +268,13 @@ public class PlaylistDialog extends BottomDialog {
                 PositionHelper.OnPositionChangeListener {
             private boolean mEmptyView;
             private int mColorMark;
-            private int mColorText;
+            private int mColorTitle;
+            private int mColorArtist;
 
             TextView tvPosition;
             View mark;
             TextView tvTitle;
+            TextView tvArtist;
             ImageButton btnRemove;
 
             public ViewHolder(@NonNull View itemView, boolean emptyView) {
@@ -284,16 +288,19 @@ public class PlaylistDialog extends BottomDialog {
                 tvPosition = itemView.findViewById(R.id.tvPosition);
                 mark = itemView.findViewById(R.id.mark);
                 tvTitle = itemView.findViewById(R.id.tvTitle);
+                tvArtist = itemView.findViewById(R.id.tvArtist);
                 btnRemove = itemView.findViewById(R.id.btnRemove);
 
                 Resources res = itemView.getResources();
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     mColorMark = res.getColor(R.color.colorMark, itemView.getContext().getTheme());
-                    mColorText = res.getColor(R.color.colorText, itemView.getContext().getTheme());
+                    mColorTitle = res.getColor(R.color.colorText, itemView.getContext().getTheme());
+                    mColorArtist = res.getColor(R.color.colorSecondaryText, itemView.getContext().getTheme());
                 } else {
                     mColorMark = res.getColor(R.color.colorMark);
-                    mColorText = res.getColor(R.color.colorText);
+                    mColorTitle = res.getColor(R.color.colorText);
+                    mColorArtist = res.getColor(R.color.colorSecondaryText);
                 }
             }
 
@@ -305,6 +312,7 @@ public class PlaylistDialog extends BottomDialog {
 
                 mark.setVisibility(View.VISIBLE);
                 tvTitle.setTextColor(mColorMark);
+                tvArtist.setTextColor(mColorMark);
             }
 
             @Override
@@ -314,7 +322,8 @@ public class PlaylistDialog extends BottomDialog {
                 }
 
                 mark.setVisibility(View.GONE);
-                tvTitle.setTextColor(mColorText);
+                tvTitle.setTextColor(mColorTitle);
+                tvArtist.setTextColor(mColorArtist);
             }
 
             @Override
