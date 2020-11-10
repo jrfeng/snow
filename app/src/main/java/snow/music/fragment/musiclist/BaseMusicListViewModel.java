@@ -141,6 +141,11 @@ public abstract class BaseMusicListViewModel extends ViewModel {
 
     /**
      * 对歌单中的歌曲进行排序。
+     * <p>
+     * <b>注意！由于排序歌单会导致 {@link #getMusicListItems()} 返回的 LiveData 中的数据发生改变，
+     * 如果你使用 RecyclerView 来展示歌单，那么在排序歌单后更新数据集时，不应该使用 DiffUtil
+     * 来通知数据集发生了改变，而应该使用 RecyclerView.Adapter 的 notifyDataSetChanged() 方法，
+     * 因为排序歌单可能会导致列表发生复杂变动，此时如果使用 DiffUtil 则可能会因耗时过长而导致 ANR。</b>
      *
      * @param sortOrder 歌单中歌曲的排列顺序。
      */

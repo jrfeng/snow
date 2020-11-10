@@ -58,9 +58,11 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     }
 
     /**
-     * 设置是否忽略 DiffUtil。如果忽略的话，则没有动画效果。
+     * 设置是否忽略 DiffUtil 一次（仅单次有效）。该方法仅对下次调用 {@link #setMusicList(List)} 方法时有效。
      * <p>
-     * 该方法仅对下次调用 {@link #setMusicList(List)} 方法时有效。
+     * 如果忽略的话，则会在下次调用 {@link #setMusicList(List)} 方法更新数据集时忽略 DiffUtil 而直接调用
+     * notifyDataSetChanged() 通知数据集发生了改变。<b>注意！如果你对歌单进行了排序，那么必须在调用
+     * {@link #setMusicList(List)} 方法更新数据集之前，调用该方法忽略 DiffUtil，否则 DiffUtil 可能会导致 ANR ！</b>
      */
     public void setIgnoreDiffUtilOnce(boolean ignoreDiffUtil) {
         mIgnoreDiffUtilOnce = ignoreDiffUtil;
