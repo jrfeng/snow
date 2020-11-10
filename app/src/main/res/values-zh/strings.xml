@@ -64,4 +64,5 @@
     <string name="item_sort_by_artist">按歌手名 A-Z 排序</string>
     <string name="item_sort_by_album">按专辑名 A-Z 排序</string>
     <string name="title_sort_music_list">排序歌单</string>
+    <string name="toast_request_permission_failed">权限申请失败</string>
 </resources>

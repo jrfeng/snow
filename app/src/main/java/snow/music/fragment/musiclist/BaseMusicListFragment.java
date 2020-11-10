@@ -87,9 +87,16 @@ public abstract class BaseMusicListFragment extends Fragment {
         }
 
         Music ringtoneMusic = mMusicListViewModel.getRingtoneMusic();
+        mMusicListViewModel.setRingtoneMusic(null);
 
-        if (ringtoneMusic != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSetRingtonePermission()) {
+        if (ringtoneMusic == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+
+        if (checkSetRingtonePermission()) {
             setAsRingtone(ringtoneMusic);
+        } else {
+            Toast.makeText(mContext, R.string.toast_request_permission_failed, Toast.LENGTH_SHORT).show();
         }
     }
 

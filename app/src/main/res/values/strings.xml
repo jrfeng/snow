@@ -49,6 +49,7 @@
     <string name="toast_added">Added</string>
     <string name="toast_removed">Removed</string>
     <string name="toast_set_successfully">Set successfully</string>
+    <string name="toast_request_permission_failed">Request permission failed</string>
 
     <!-- SingleChoiceDialog -->
     <string name="title_single_choice">Title</string>
