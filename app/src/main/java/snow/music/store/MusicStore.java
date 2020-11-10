@@ -55,7 +55,6 @@ public class MusicStore {
     private final Box<Music> mMusicBox;
     private final Box<MusicListEntity> mMusicListEntityBox;
 
-    private MusicList mHistory;
     private final Handler mMainHandler;
 
     private final List<OnFavoriteChangeListener> mAllFavoriteChangeListener;
@@ -707,15 +706,7 @@ public class MusicStore {
     }
 
     private synchronized MusicList getHistoryMusicList() {
-        if (mHistory == null) {
-            initHistory();
-        }
-
-        return mHistory;
-    }
-
-    private void initHistory() {
-        mHistory = getBuiltInMusicList(MUSIC_LIST_HISTORY);
+        return getBuiltInMusicList(MUSIC_LIST_HISTORY);
     }
 
     @NonNull
