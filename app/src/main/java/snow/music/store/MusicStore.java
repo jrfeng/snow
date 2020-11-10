@@ -36,8 +36,10 @@ import io.objectbox.query.QueryBuilder;
  *     <li>{@link #init(BoxStore)}</li>
  *     <li>{@link #isBuiltInName(String)}</li>
  *     <li>{@link #getBoxStore()}</li>
- *     <li>{@link #observeHistory()}</li>
  * </ul>
+ * <p>
+ * 还有就是 {@link #sort(MusicList, MusicList.SortOrder, SortCallback)} 方法，该方法虽然会访问数据库，
+ * 但是会在异步线程中执行。
  */
 public class MusicStore {
     private static final String TAG = "MusicStore";
@@ -55,7 +57,6 @@ public class MusicStore {
 
     private MusicList mHistory;
     private final Handler mMainHandler;
-    private MutableLiveData<List<Music>> mHistoryLiveData;
 
     private final List<OnFavoriteChangeListener> mAllFavoriteChangeListener;
 
@@ -311,16 +312,6 @@ public class MusicStore {
     }
 
     /**
-     * 监听历史记录。
-     */
-    public synchronized LiveData<List<Music>> observeHistory() {
-        if (mHistoryLiveData == null) {
-            initHistory();
-        }
-        return mHistoryLiveData;
-    }
-
-    /**
      * 歌曲是否是 “我喜欢”
      */
     public synchronized boolean isFavorite(@NonNull Music music) {
@@ -493,7 +484,6 @@ public class MusicStore {
         }
 
         updateMusicList(history);
-        updateHistoryLiveData();
     }
 
     /**
@@ -507,7 +497,6 @@ public class MusicStore {
         history.getMusicElements().remove(music);
 
         updateMusicList(history);
-        updateHistoryLiveData();
     }
 
     /**
@@ -521,7 +510,6 @@ public class MusicStore {
         history.getMusicElements().removeAll(musics);
 
         updateMusicList(history);
-        updateHistoryLiveData();
     }
 
     /**
@@ -533,7 +521,6 @@ public class MusicStore {
         history.getMusicElements().clear();
 
         updateMusicList(history);
-        updateHistoryLiveData();
     }
 
     /**
@@ -727,13 +714,8 @@ public class MusicStore {
         return mHistory;
     }
 
-    private void updateHistoryLiveData() {
-        mMainHandler.post(() -> mHistoryLiveData.setValue(new ArrayList<>(getHistoryMusicList().getMusicElements())));
-    }
-
     private void initHistory() {
         mHistory = getBuiltInMusicList(MUSIC_LIST_HISTORY);
-        mHistoryLiveData = new MutableLiveData<>(new ArrayList<>(mHistory.getMusicElements()));
     }
 
     @NonNull
