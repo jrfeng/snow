@@ -86,7 +86,6 @@ public class HistoryActivity extends AppCompatActivity {
 
     private void playMusic(Music music) {
         MessageDialog messageDialog = new MessageDialog.Builder(getApplicationContext())
-                .setTitle(music.getTitle())
                 .setMessage(R.string.message_play_music)
                 .setPositiveButtonClickListener((dialog, which) -> {
                     Playlist playlist = new Playlist.Builder()
