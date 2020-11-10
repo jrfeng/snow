@@ -12,6 +12,7 @@ import android.view.View;
 import java.util.Objects;
 
 import snow.music.R;
+import snow.music.activity.ListActivity;
 import snow.music.dialog.MessageDialog;
 import snow.music.service.AppPlayerService;
 import snow.music.store.Music;
@@ -21,7 +22,7 @@ import snow.music.util.PlayerUtil;
 import snow.player.lifecycle.PlayerViewModel;
 import snow.player.playlist.Playlist;
 
-public class HistoryActivity extends AppCompatActivity {
+public class HistoryActivity extends ListActivity {
     private PlayerViewModel mPlayerViewModel;
     private HistoryViewModel mHistoryViewModel;
     private HistoryAdapter mHistoryAdapter;

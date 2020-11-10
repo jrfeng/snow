@@ -7,9 +7,10 @@ import android.os.Bundle;
 import android.view.View;
 
 import snow.music.R;
+import snow.music.activity.ListActivity;
 import snow.music.fragment.musiclist.FavoriteMusicListFragment;
 
-public class FavoriteActivity extends AppCompatActivity {
+public class FavoriteActivity extends ListActivity {
     private FavoriteMusicListFragment mFavoriteMusicListFragment;
 
     @Override

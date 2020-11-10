@@ -7,10 +7,11 @@ import android.os.Bundle;
 import android.view.View;
 
 import snow.music.R;
+import snow.music.activity.ListActivity;
 import snow.music.fragment.musiclist.MusicListFragment;
 import snow.music.store.MusicStore;
 
-public class LocalMusicActivity extends AppCompatActivity {
+public class LocalMusicActivity extends ListActivity {
     private MusicListFragment mMusicListFragment;
 
     @Override
