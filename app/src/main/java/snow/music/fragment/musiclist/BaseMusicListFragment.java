@@ -1,6 +1,7 @@
 package snow.music.fragment.musiclist;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -27,8 +28,10 @@ import java.util.Objects;
 
 import snow.music.R;
 import snow.music.dialog.MessageDialog;
+import snow.music.dialog.SingleChoiceDialog;
 import snow.music.service.AppPlayerService;
 import snow.music.store.Music;
+import snow.music.store.MusicList;
 import snow.music.store.MusicStore;
 import snow.music.util.MusicListUtil;
 import snow.music.util.MusicUtil;
@@ -203,7 +206,27 @@ public abstract class BaseMusicListFragment extends Fragment {
     }
 
     public void showSortDialog() {
-        // TODO show sort dialog
+        SingleChoiceDialog singleChoiceDialog = new SingleChoiceDialog.Builder(mContext)
+                .setTitle(R.string.title_sort_music_list)
+                .setItems(new int[]{R.string.item_sort_by_add_time,
+                                R.string.item_sort_by_title,
+                                R.string.item_sort_by_artist,
+                                R.string.item_sort_by_album},
+                        mMusicListViewModel.getSortOrder().ordinal(),
+                        (DialogInterface.OnClickListener) (dialog, which) -> {
+                            dialog.dismiss();
+                            MusicList.SortOrder sortOrder = MusicList.SortOrder.values()[which];
+
+                            /*
+                             * 因为调用 mMusicListViewModel.sortMusicList() 方法导致歌单的数据集发生改变，
+                             * 因此，在排序歌单前必须调用该方法忽略 DiffUtil 一次，否则 DiffUtil 可能会导致 ANR
+                             */
+                            mMusicListAdapter.setIgnoreDiffUtilOnce(true);
+                            mMusicListViewModel.sortMusicList(sortOrder);
+                        })
+                .build();
+
+        singleChoiceDialog.show(getParentFragmentManager(), "sortMusicList");
     }
 
     protected final void setNextPlay(@NonNull Music music) {
