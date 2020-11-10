@@ -454,7 +454,7 @@ public class MusicList {
             @NonNull
             @Override
             public Comparator<Music> comparator() {
-                return (o1, o2) -> (int) ((o1.getAddTime() - o2.getAddTime()) >> 32);
+                return (o1, o2) -> Long.compare(o1.getAddTime(), o2.getAddTime());
             }
         },
         /**
