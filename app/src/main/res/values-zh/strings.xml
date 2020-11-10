@@ -57,4 +57,11 @@
     <string name="positive_text_request">申请</string>
     <string name="title_favorites">我喜欢</string>
     <string name="message_set_as_ringtone">设置为手机铃声？</string>
+    <string name="title_single_choice">标题</string>
+    <string name="des_checked">选中</string>
+    <string name="item_sort_by_add_time">按添加时间排序</string>
+    <string name="item_sort_by_title">按歌曲名 A-Z 排序</string>
+    <string name="item_sort_by_artist">按歌手名 A-Z 排序</string>
+    <string name="item_sort_by_album">按专辑名 A-Z 排序</string>
+    <string name="title_sort_music_list">排序歌单</string>
 </resources>

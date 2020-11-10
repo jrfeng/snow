@@ -50,6 +50,16 @@
     <string name="toast_removed">Removed</string>
     <string name="toast_set_successfully">Set successfully</string>
 
+    <!-- SingleChoiceDialog -->
+    <string name="title_single_choice">Title</string>
+
+    <!-- sort order dialog -->
+    <string name="title_sort_music_list">Sort music list</string>
+    <string name="item_sort_by_add_time">By add time</string>
+    <string name="item_sort_by_title">Musics from A-Z</string>
+    <string name="item_sort_by_artist">Artists from A-Z</string>
+    <string name="item_sort_by_album">Albums from A-Z</string>
+
     <!-- content description -->
     <string name="des_logo">logo</string>
     <string name="des_search">Search</string>
@@ -72,5 +82,6 @@
     <string name="des_sort_music_list">Sort music list</string>
     <string name="des_scan_local_music">Scan local music</string>
     <string name="des_menu_icon">menu icon</string>
+    <string name="des_checked">checked</string>
 
 </resources>
