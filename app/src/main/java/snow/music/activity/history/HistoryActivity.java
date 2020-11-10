@@ -1,7 +1,6 @@
 package snow.music.activity.history;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -61,6 +60,7 @@ public class HistoryActivity extends ListActivity {
         mHistoryViewModel = viewModelProvider.get(HistoryViewModel.class);
 
         PlayerUtil.initPlayerViewModel(this, mPlayerViewModel, AppPlayerService.class);
+        setPlayerClient(mPlayerViewModel.getPlayerClient());
     }
 
     private void initRecyclerView() {

@@ -1,7 +1,6 @@
 package snow.music.activity.navigation;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
@@ -26,6 +25,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
+import snow.music.activity.BaseActivity;
 import snow.music.databinding.ActivityNavigationBinding;
 import snow.music.service.AppPlayerService;
 import snow.music.store.MusicList;
@@ -39,7 +39,7 @@ import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 import snow.player.playlist.Playlist;
 
-public class NavigationActivity extends AppCompatActivity {
+public class NavigationActivity extends BaseActivity {
     private static final String KEY_SCAN_LOCAL_MUSIC = "scan_local_music";
     private static final int PERMISSION_REQUEST_CODE = 1;
     private boolean mScanOnPermissionGranted;
@@ -59,6 +59,7 @@ public class NavigationActivity extends AppCompatActivity {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_navigation);
 
         initAllViewModel();
+        setPlayerClient(mPlayerViewModel.getPlayerClient());
 
         mBinding.setNavViewModel(mNavigationViewModel);
         mBinding.setLifecycleOwner(this);
@@ -68,15 +69,6 @@ public class NavigationActivity extends AppCompatActivity {
 
         if (shouldScanLocalMusic()) {
             scanLocalMusic();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (!mPlayerViewModel.getPlayerClient().isConnected()) {
-            mPlayerViewModel.getPlayerClient().connect();
         }
     }
 

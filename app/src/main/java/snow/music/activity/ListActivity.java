@@ -3,14 +3,13 @@ package snow.music.activity;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import snow.music.R;
 
 /**
  * 那些用来展示列表的 Activity 可以继承该类，该类对过渡动画进行了自定义配置。
  */
-public class ListActivity extends AppCompatActivity {
+public class ListActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
