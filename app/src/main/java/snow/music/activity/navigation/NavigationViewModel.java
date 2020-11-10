@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 
 import snow.music.R;
 import snow.music.activity.favorite.FavoriteActivity;
+import snow.music.activity.history.HistoryActivity;
 import snow.music.activity.localmusic.LocalMusicActivity;
 import snow.music.dialog.PlaylistDialog;
 import snow.music.store.MusicStore;
@@ -247,7 +248,8 @@ public class NavigationViewModel extends ViewModel {
     }
 
     public void navigateToHistory(View view) {
-        // TODO
-        Log.d("DEBUG", "navigateToHistory");
+        Context context = view.getContext();
+        Intent intent = new Intent(context, HistoryActivity.class);
+        context.startActivity(intent);
     }
 }

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="snow.music.activity.history.HistoryActivity">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/action_bar_height"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="@dimen/image_button_size"
+                android:layout_height="@dimen/image_button_size"
+                android:background="@drawable/bg_button_48dp"
+                android:contentDescription="@string/des_back"
+                android:onClick="finishSelf"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_back" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/title_history"
+                android:textSize="@dimen/action_bar_title_text_size" />
+
+            <ImageButton
+                android:id="@+id/btnClearHistory"
+                android:layout_width="@dimen/image_button_size"
+                android:layout_height="@dimen/image_button_size"
+                android:background="@drawable/bg_button_48dp"
+                android:contentDescription="@string/des_scan_local_music"
+                android:onClick="clearHistory"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_clear_history" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="0dp"/>
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_gravity="bottom"
+            android:background="@color/colorDivider" />
+
+    </FrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvHistory"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/bottomBarContainer"
+        android:name="snow.music.fragment.battombar.BottomBarFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

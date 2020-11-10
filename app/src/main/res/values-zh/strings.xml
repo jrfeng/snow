@@ -65,4 +65,9 @@
     <string name="item_sort_by_album">按专辑名 A-Z 排序</string>
     <string name="title_sort_music_list">排序歌单</string>
     <string name="toast_request_permission_failed">权限申请失败</string>
+    <string name="title_history">最近播放</string>
+    <string name="no_history">无历史记录</string>
+    <string name="message_remove_history">移除历史记录？</string>
+    <string name="message_clear_history">清空历史记录？</string>
+    <string name="message_play_music">播放歌曲？</string>
 </resources>

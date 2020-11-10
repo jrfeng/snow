@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/historyItem"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:background="@drawable/bg_list_item"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <Space
+        android:layout_width="24dp"
+        android:layout_height="0dp" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            tools:text="@string/snow_music_item_unknown_title" />
+
+        <TextView
+            android:id="@+id/tvArtistAndAlbum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:textColor="@color/colorSecondaryText"
+            android:textSize="12sp"
+            tools:text="@string/snow_music_item_unknown_artist" />
+
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/btnRemove"
+        android:layout_width="@dimen/image_button_size"
+        android:layout_height="@dimen/image_button_size"
+        android:background="@drawable/bg_button_48dp"
+        android:contentDescription="@string/des_skip_to_previous"
+        android:scaleType="centerInside"
+        app:srcCompat="@drawable/ic_remove_history" />
+
+    <Space
+        android:layout_width="8dp"
+        android:layout_height="0dp" />
+
+</LinearLayout>
