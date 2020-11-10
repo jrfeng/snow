@@ -115,10 +115,8 @@ public class MusicStore {
 
             musicList.setSortOrder(sortOrder);
             musicList.getMusicElements().clear();
-            getInstance().updateMusicList(musicList);
-
             musicList.getMusicElements().addAll(items);
-            getInstance().updateMusicList(musicList);
+            updateMusicList(musicList);
         }, (result, error) -> mMainHandler.post(() -> {
             if (callback != null) {
                 callback.onSortFinished();
