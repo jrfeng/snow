@@ -1,5 +1,6 @@
 package snow.music.fragment.musiclist;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -121,6 +122,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(layoutId, parent, false), emptyView);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         if (mMusicList.isEmpty()) {
@@ -131,7 +133,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
 
         holder.tvPosition.setText(String.valueOf(position + 1));
         holder.tvTitle.setText(music.getTitle());
-        holder.tvArtist.setText(music.getArtist());
+        holder.tvArtistAndAlbum.setText(music.getArtist() + " - " + music.getAlbum());
 
         mItemClickHelper.bindClickListener(holder.musicListItem, holder.btnOptionMenu);
         mItemClickHelper.bindLongClickListener(holder.musicListItem);
@@ -161,7 +163,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         View musicListItem;
         TextView tvPosition;
         TextView tvTitle;
-        TextView tvArtist;
+        TextView tvArtistAndAlbum;
         ImageButton btnOptionMenu;
 
         private View markView;
@@ -182,12 +184,12 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
             musicListItem = itemView.findViewById(R.id.musicListItem);
             tvPosition = itemView.findViewById(R.id.tvPosition);
             tvTitle = itemView.findViewById(R.id.tvTitle);
-            tvArtist = itemView.findViewById(R.id.tvArtist);
+            tvArtistAndAlbum = itemView.findViewById(R.id.tvArtistAndAlbum);
             btnOptionMenu = itemView.findViewById(R.id.btnOptionMenu);
             markView = itemView.findViewById(R.id.mark);
 
             mTextColor = tvTitle.getCurrentTextColor();
-            mSecondaryTextColor = tvArtist.getCurrentTextColor();
+            mSecondaryTextColor = tvArtistAndAlbum.getCurrentTextColor();
 
             mSelectedTextColor = itemView.getResources().getColor(R.color.deep_purple_400);
         }
@@ -199,7 +201,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
             }
 
             tvTitle.setTextColor(mSelectedTextColor);
-            tvArtist.setTextColor(mSelectedTextColor);
+            tvArtistAndAlbum.setTextColor(mSelectedTextColor);
             markView.setVisibility(View.VISIBLE);
         }
 
@@ -210,7 +212,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
             }
 
             tvTitle.setTextColor(mTextColor);
-            tvArtist.setTextColor(mSecondaryTextColor);
+            tvArtistAndAlbum.setTextColor(mSecondaryTextColor);
             markView.setVisibility(View.GONE);
         }
 
