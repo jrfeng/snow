@@ -20,6 +20,6 @@ public class ListActivity extends AppCompatActivity {
     @Override
     public void finish() {
         super.finish();
-        overridePendingTransition(R.anim.activity_no_transition, R.anim.activity_bottom_slide_out);
+        overridePendingTransition(R.anim.activity_no_transition, R.anim.activity_fade_out);
     }
 }
