@@ -46,12 +46,18 @@ public class HistoryViewModel extends ViewModel {
         List<Music> musics = Objects.requireNonNull(mHistory.getValue());
         musics.remove(music);
         mHistory.setValue(musics);
-        MusicStore.getInstance().removeHistory(music);
+
+        Single.create((SingleOnSubscribe<Boolean>) emitter -> MusicStore.getInstance().removeHistory(music))
+                .subscribeOn(Schedulers.io())
+                .subscribe();
     }
 
     public void clearHistory() {
         mHistory.setValue(Collections.emptyList());
-        MusicStore.getInstance().clearHistory();
+
+        Single.create((SingleOnSubscribe<Boolean>) emitter -> MusicStore.getInstance().clearHistory())
+                .subscribeOn(Schedulers.io())
+                .subscribe();
     }
 
     private void loadHistory() {
