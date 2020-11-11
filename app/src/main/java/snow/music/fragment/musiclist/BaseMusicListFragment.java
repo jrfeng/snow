@@ -178,7 +178,7 @@ public abstract class BaseMusicListFragment extends Fragment {
         }
 
         mPlayerViewModel.setPlaylist(
-                MusicListUtil.asPlaylist(mMusicListViewModel.getMusicListName(), getMusicListItems()),
+                MusicListUtil.asPlaylist(mMusicListViewModel.getMusicListName(), getMusicListItems(), position),
                 position,
                 true);
     }
