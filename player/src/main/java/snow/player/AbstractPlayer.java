@@ -170,6 +170,14 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     protected abstract Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception;
 
     /**
+     * 可以通过覆盖该方法来提供一个自定义的 AudioManager.OnAudioFocusChangeListener
+     *
+     * @return 如果返回 null，则会使用默认的音频焦点监听器。
+     */
+    @Nullable
+    protected abstract AudioManager.OnAudioFocusChangeListener onCreateAudioFocusChangeListener();
+
+    /**
      * 对指定的 audio session id 应用音频特效。
      * <p>
      * 子类可以覆盖该方法来对指定的 audio session id 应用音频特效。
@@ -474,46 +482,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     }
 
     private void initAllHelper() {
-        mAudioFocusHelper = new AudioFocusHelper(mApplicationContext, new AudioFocusHelper.OnAudioFocusChangeListener() {
-            private boolean mResumePlay;
-
-            @Override
-            public void onLoss() {
-                mResumePlay = false;
-                pause();
-            }
-
-            @Override
-            public void onLossTransient() {
-                mResumePlay = isPlayingState();
-                pause();
-            }
-
-            @Override
-            public void onLossTransientCanDuck() {
-                mResumePlay = isPlaying();
-                if (isPlaying() && mResumePlay) {
-                    assert mMusicPlayer != null;
-                    mMusicPlayer.quiet();
-                }
-            }
-
-            @Override
-            public void onGain(boolean lossTransient, boolean lossTransientCanDuck) {
-                if (!mResumePlay) {
-                    return;
-                }
-
-                if (lossTransient) {
-                    play();
-                    return;
-                }
-
-                if (mMusicPlayer != null && lossTransientCanDuck && isPlaying()) {
-                    mMusicPlayer.dismissQuiet();
-                }
-            }
-        });
+        initAudioFocusHelper();
 
         mPhoneCallStateHelper = new PhoneCallStateHelper(mApplicationContext, new PhoneCallStateHelper.OnStateChangeListener() {
             private boolean mResumePlay;
@@ -562,6 +531,55 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                 }
 
                 checkNetworkType(mPlayerConfig.isOnlyWifiNetwork(), wifiNetwork);
+            }
+        });
+    }
+
+    private void initAudioFocusHelper() {
+        AudioManager.OnAudioFocusChangeListener listener = onCreateAudioFocusChangeListener();
+        if (listener != null) {
+            mAudioFocusHelper = new AudioFocusHelper(mApplicationContext, listener);
+            return;
+        }
+
+        mAudioFocusHelper = new AudioFocusHelper(mApplicationContext, new AudioFocusHelper.OnAudioFocusChangeListener() {
+            private boolean mResumePlay;
+
+            @Override
+            public void onLoss() {
+                mResumePlay = false;
+                pause();
+            }
+
+            @Override
+            public void onLossTransient() {
+                mResumePlay = isPlayingState();
+                pause();
+            }
+
+            @Override
+            public void onLossTransientCanDuck() {
+                mResumePlay = isPlaying();
+                if (isPlaying() && mResumePlay) {
+                    assert mMusicPlayer != null;
+                    mMusicPlayer.quiet();
+                }
+            }
+
+            @Override
+            public void onGain(boolean lossTransient, boolean lossTransientCanDuck) {
+                if (!mResumePlay) {
+                    return;
+                }
+
+                if (lossTransient) {
+                    play();
+                    return;
+                }
+
+                if (mMusicPlayer != null && lossTransientCanDuck && isPlaying()) {
+                    mMusicPlayer.dismissQuiet();
+                }
             }
         });
     }

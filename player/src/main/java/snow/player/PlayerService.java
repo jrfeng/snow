@@ -13,6 +13,7 @@ import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
@@ -1019,6 +1020,16 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     /**
+     * 可以通过覆盖该方法来提供一个自定义的 AudioManager.OnAudioFocusChangeListener
+     *
+     * @return 如果返回 null，则会使用默认的音频焦点监听器（默认返回 null）。
+     */
+    @Nullable
+    protected AudioManager.OnAudioFocusChangeListener onCreateAudioFocusChangeListener() {
+        return null;
+    }
+
+    /**
      * 获取音乐的播放链接。
      * <p>
      * 该方法会在异步线程中执行，因此可以执行各种耗时操作，例如访问网络。
@@ -1214,6 +1225,12 @@ public class PlayerService extends MediaBrowserServiceCompat
         @Override
         protected MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
             return PlayerService.this.onCreateMusicPlayer(context, musicItem, uri);
+        }
+
+        @Nullable
+        @Override
+        protected AudioManager.OnAudioFocusChangeListener onCreateAudioFocusChangeListener() {
+            return PlayerService.this.onCreateAudioFocusChangeListener();
         }
 
         @Nullable
