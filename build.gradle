@@ -37,7 +37,7 @@ allprojects {
         rxandroidVersion = "2.1.1"
 
         // media-helper
-        mediaHelperVersion = "1.0.11"
+        mediaHelperVersion = "1.1"
 
         // MMKV
         mmkvVersion = "1.1.1"
