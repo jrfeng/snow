@@ -68,6 +68,9 @@
     <string name="item_sort_by_artist">Artists from A-Z</string>
     <string name="item_sort_by_album">Albums from A-Z</string>
 
+    <!-- ProgressDialog -->
+    <string name="title_progress">Progress</string>
+
     <!-- content description -->
     <string name="des_logo">logo</string>
     <string name="des_search">Search</string>

@@ -70,4 +70,5 @@
     <string name="message_remove_history">移除历史记录？</string>
     <string name="message_clear_history">清空历史记录？</string>
     <string name="message_play_music">播放歌曲？</string>
+    <string name="title_progress">进度</string>
 </resources>
