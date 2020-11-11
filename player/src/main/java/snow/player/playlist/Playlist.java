@@ -8,11 +8,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -60,6 +57,8 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
 
     /**
      * 创建一个 {@link Playlist} 对象。
+     * <p>
+     * 注意！如果 {@code items} 列表的尺寸大于 {@link #MAX_SIZE}，超出部分会被丢弃。
      *
      * @param name     播放列表的名称，不能为 null
      * @param items    所由要添加到播放列表的中的 {@link MusicItem} 对象，超出 {@link #MAX_SIZE}（1000）的部分元素会被忽略
@@ -67,11 +66,31 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
      * @param extra    播放列表的额外参数
      */
     public Playlist(@NonNull String name, @NonNull List<MusicItem> items, boolean editable, @Nullable Bundle extra) {
+        this(name, items, 0, editable, extra);
+    }
+
+    /**
+     * 创建一个 {@link Playlist} 对象。
+     * <p>
+     * 注意！如果 {@code items} 列表的尺寸大于 {@link #MAX_SIZE}，则会以 position 参数作为基准索引，
+     * 先向后提取 {@link MusicItem} 元素，当 position 后面的元素数不足以凑足 {@link #MAX_SIZE} 时，
+     * 再从 position 处向前提取，直至凑足 {@link #MAX_SIZE} 个 {@link MusicItem} 元素。
+     * 然后再使用这 {@link #MAX_SIZE} 个 {@link MusicItem} 元素来创建 {@link Playlist} 对象。
+     *
+     * @param name     播放列表的名称，不能为 null
+     * @param items    所由要添加到播放列表的中的 {@link MusicItem} 对象，重复的元素会被排除。
+     *                 当列表尺寸大于 {@link #MAX_SIZE} 时，会以 position 参数作为基准来提取一个大小为
+     *                 {@link #MAX_SIZE} 的子列表。
+     * @param position 基准索引，仅在 {@code items} 列表的尺寸大于 {@link Playlist#MAX_SIZE} 时有用
+     * @param editable 播放列表是否是可编辑的
+     * @param extra    播放列表的额外参数
+     */
+    public Playlist(@NonNull String name, @NonNull List<MusicItem> items, int position, boolean editable, @Nullable Bundle extra) {
         Preconditions.checkNotNull(name);
         Preconditions.checkNotNull(items);
 
         mName = name;
-        mMusicItems = trim(excludeRepeatItem(items));
+        mMusicItems = trim(excludeRepeatItem(items), position);
         mEditable = editable;
         mExtra = extra;
 
@@ -92,12 +111,18 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
         return musicItems;
     }
 
-    private ArrayList<MusicItem> trim(ArrayList<MusicItem> musicItems) {
-        if (musicItems.size() > MAX_SIZE) {
-            return new ArrayList<>(musicItems.subList(0, MAX_SIZE));
+    private ArrayList<MusicItem> trim(ArrayList<MusicItem> musicItems, int position) {
+        int size = musicItems.size();
+
+        int start = 0;
+        int end = musicItems.size();
+
+        if (size > Playlist.MAX_SIZE) {
+            start = position - Math.max(0, Playlist.MAX_SIZE - (size - position));
+            end = position + Math.min(Playlist.MAX_SIZE, size - position);
         }
 
-        return musicItems;
+        return new ArrayList<>(musicItems.subList(start, end));
     }
 
     private String generateToken() {
@@ -325,6 +350,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
         private final List<MusicItem> mMusicItems;
         private boolean mEditable;
         private Bundle mExtra;
+        private int mPosition;
 
         /**
          * 创建一个 {@link Builder} 构建器对象。
@@ -332,6 +358,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
         public Builder() {
             mName = "";
             mMusicItems = new ArrayList<>();
+            mPosition = 0;
             mEditable = true;
         }
 
@@ -393,6 +420,19 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
         }
 
         /**
+         * 基准索引值。
+         * <p>
+         * 当列表的尺寸大于 {@link Playlist#MAX_SIZE} 时，会以此基准值来提取一个大小为
+         * {@link Playlist#MAX_SIZE} 的子列表。
+         *
+         * @see Playlist
+         */
+        public Builder setPosition(int position) {
+            mPosition = position;
+            return this;
+        }
+
+        /**
          * 设置要携带的额外参数，
          *
          * @param extra 要携带的额外参数，可为 null
@@ -408,7 +448,7 @@ public final class Playlist implements Iterable<MusicItem>, Parcelable {
          * 重复的 {@link MusicItem} 项会被在构造 {@link Playlist} 对象时被排除。
          */
         public Playlist build() {
-            return new Playlist(mName, mMusicItems, mEditable, mExtra);
+            return new Playlist(mName, mMusicItems, mPosition, mEditable, mExtra);
         }
     }
 }
