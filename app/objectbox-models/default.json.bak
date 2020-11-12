@@ -58,7 +58,7 @@
     },
     {
       "id": "3:5067723784643407434",
-      "lastPropertyId": "5:5122587991808729882",
+      "lastPropertyId": "6:7368343324959184704",
       "name": "MusicListEntity",
       "properties": [
         {
@@ -89,6 +89,12 @@
           "name": "size",
           "type": 5,
           "flags": 4
+        },
+        {
+          "id": "6:7368343324959184704",
+          "name": "sortOrder",
+          "type": 5,
+          "flags": 2
         }
       ],
       "relations": [
