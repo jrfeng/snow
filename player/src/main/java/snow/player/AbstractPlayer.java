@@ -1028,7 +1028,13 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             mPlayerStateListener.onSeekComplete(playProgress, updateTime, stalled);
         }
 
-        if (!isPlaying() && !mPlayOnSeekComplete && !stalled) {
+        if (stalled || mPlayOnSeekComplete) {
+            return;
+        }
+
+        if (isPlaying()) {
+            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
+        } else {
             notifyPaused();
         }
     }
@@ -1415,8 +1421,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         int position = getNextPosition(mPlayerState.getPlayPosition());
 
-        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT));
         notifyPlayingMusicItemChanged(mPlaylist.get(position), position, true);
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT));
     }
 
     @Override
@@ -1460,8 +1466,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         int position = getPreviousPosition(mPlayerState.getPlayPosition());
 
-        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS));
         notifyPlayingMusicItemChanged(mPlaylist.get(position), position, true);
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS));
     }
 
     private int getPreviousPosition(int currentPosition) {
