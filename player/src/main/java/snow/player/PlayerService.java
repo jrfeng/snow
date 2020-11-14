@@ -87,7 +87,7 @@ import snow.player.util.MusicItemUtil;
  */
 @SuppressWarnings("SameReturnValue")
 public class PlayerService extends MediaBrowserServiceCompat
-        implements PlayerStateSynchronizer, PlayerManager, PlaylistManager, PlaylistEditor, SleepTimer {
+        implements PlayerManager, PlaylistManager, PlaylistEditor, SleepTimer {
     /**
      * 默认的 root id，值为 `"root"`。
      */
@@ -283,7 +283,12 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private void initCustomActionDispatcher() {
         final Dispatcher playerStateSynchronizerDispatcher =
-                ChannelHelper.newDispatcher(PlayerStateSynchronizer.class, this);
+                ChannelHelper.newDispatcher(PlayerStateSynchronizer.class, new PlayerStateSynchronizer() {
+                    @Override
+                    public void syncPlayerState(String clientToken) {
+                        mSyncPlayerStateListener.onSyncPlayerState(clientToken, new PlayerState(mPlayerState));
+                    }
+                });
 
         final Dispatcher playerManagerDispatcher =
                 ChannelHelper.newDispatcher(PlayerManager.class, this);
@@ -559,11 +564,6 @@ public class PlayerService extends MediaBrowserServiceCompat
         stopSelf();
         notifyOnShutdown();
         dismissKeepServiceAlive();
-    }
-
-    @Override
-    public void syncPlayerState(final String clientToken) {
-        mSyncPlayerStateListener.onSyncPlayerState(clientToken, new PlayerState(mPlayerState));
     }
 
     /**
