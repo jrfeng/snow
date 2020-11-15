@@ -1,13 +1,19 @@
 package snow.music.activity.localmusic;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 
 import snow.music.R;
 import snow.music.activity.ListActivity;
+import snow.music.dialog.MessageDialog;
+import snow.music.dialog.ScannerDialog;
 import snow.music.fragment.musiclist.MusicListFragment;
 import snow.music.service.AppPlayerService;
 import snow.music.store.MusicStore;
@@ -34,6 +40,10 @@ public class LocalMusicActivity extends ListActivity {
                     .add(R.id.musicListContainer, mMusicListFragment, "MusicList")
                     .commit();
         }
+
+        if (noPermission() && localMusicIsEmpty() && shouldShowRequestPermissionRationale()) {
+            scanMusic();
+        }
     }
 
     private void initPlayerClient() {
@@ -56,8 +66,33 @@ public class LocalMusicActivity extends ListActivity {
                 mMusicListFragment.showSortDialog();
                 break;
             case R.id.btnScan:
-                // TODO
+                scanMusic();
                 break;
         }
+    }
+
+    private boolean noPermission() {
+        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        return result == PackageManager.PERMISSION_DENIED;
+    }
+
+    private boolean localMusicIsEmpty() {
+        return MusicStore.getInstance().getLocalMusicList().getSize() < 1;
+    }
+
+    private boolean shouldShowRequestPermissionRationale() {
+        return ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+    }
+
+    private void scanMusic() {
+        MessageDialog messageDialog = new MessageDialog.Builder(this)
+                .setMessage(R.string.message_scan_local_music)
+                .setPositiveButtonClickListener((dialog, which) -> {
+                    ScannerDialog scannerDialog = ScannerDialog.newInstance(localMusicIsEmpty());
+                    scannerDialog.show(getSupportFragmentManager(), "scanMusic");
+                })
+                .build();
+
+        messageDialog.show(getSupportFragmentManager(), "messageScanMusic");
     }
 }
