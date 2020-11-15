@@ -139,8 +139,8 @@ public class ScannerDialog extends BottomDialog {
         }
 
         if (grantResults.length <= 0 || grantResults[0] == PackageManager.PERMISSION_DENIED) {
-            dismiss();
-            Toast.makeText(getContext(), R.string.toast_no_read_storage_permission, Toast.LENGTH_LONG).show();
+            delayDismiss();
+            Toast.makeText(getContext(), R.string.toast_no_read_storage_permission, Toast.LENGTH_SHORT).show();
             return;
         }
 
