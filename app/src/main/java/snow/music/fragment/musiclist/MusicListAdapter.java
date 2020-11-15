@@ -31,8 +31,6 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     private SelectableHelper mSelectableHelper;
     private PositionHelper<MusicListAdapter.ViewHolder> mPositionHelper;
 
-    private boolean mIgnoreDiffUtilOnce;
-
     public MusicListAdapter(@NonNull List<Music> musicList) {
         Preconditions.checkNotNull(musicList);
 
@@ -43,11 +41,10 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         mPositionHelper = new PositionHelper<>(this);
     }
 
-    public void setMusicList(@NonNull List<Music> musicList) {
+    public void setMusicList(@NonNull List<Music> musicList, boolean ignoreDiffUtil) {
         Preconditions.checkNotNull(musicList);
 
-        if (mIgnoreDiffUtilOnce || mMusicList.isEmpty() || musicList.isEmpty()) {
-            mIgnoreDiffUtilOnce = false;
+        if (ignoreDiffUtil || mMusicList.isEmpty() || musicList.isEmpty()) {
             mMusicList = new ArrayList<>(musicList);
             notifyDataSetChanged();
         } else {
@@ -56,17 +53,6 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
             diffResult.dispatchUpdatesTo(this);
             mMusicList = newMusicList;
         }
-    }
-
-    /**
-     * 设置是否忽略 DiffUtil 一次（仅单次有效）。该方法仅对下次调用 {@link #setMusicList(List)} 方法时有效。
-     * <p>
-     * 如果忽略的话，则会在下次调用 {@link #setMusicList(List)} 方法更新数据集时忽略 DiffUtil 而直接调用
-     * notifyDataSetChanged() 通知数据集发生了改变。<b>注意！如果你对歌单进行了排序，那么必须在调用
-     * {@link #setMusicList(List)} 方法更新数据集之前，调用该方法忽略 DiffUtil，否则 DiffUtil 可能会导致 ANR ！</b>
-     */
-    public void setIgnoreDiffUtilOnce(boolean ignoreDiffUtil) {
-        mIgnoreDiffUtilOnce = ignoreDiffUtil;
     }
 
     public void setOnItemClickListener(ItemClickHelper.OnItemClickListener listener) {

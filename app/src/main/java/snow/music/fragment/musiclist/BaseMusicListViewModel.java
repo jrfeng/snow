@@ -30,6 +30,8 @@ public abstract class BaseMusicListViewModel extends ViewModel {
     private boolean mInitialized;
     private Disposable mLoadMusicListDisposable;
 
+    private boolean mIgnoreDiffUtil;
+
     @Nullable
     private Music mRingtoneMusic;
 
@@ -84,6 +86,17 @@ public abstract class BaseMusicListViewModel extends ViewModel {
         return mInitialized;
     }
 
+    public void setIgnoreDiffUtil(boolean ignoreDiffUtil) {
+        mIgnoreDiffUtil = ignoreDiffUtil;
+    }
+
+    public boolean consumeIgnoreDiffUtil() {
+        boolean result = mIgnoreDiffUtil;
+        mIgnoreDiffUtil = false;
+
+        return result;
+    }
+
     @Nullable
     public Music getRingtoneMusic() {
         return mRingtoneMusic;
@@ -108,6 +121,10 @@ public abstract class BaseMusicListViewModel extends ViewModel {
                 .subscribe(this::notifyMusicItemsChanged);
     }
 
+    protected final void reloadMusicList() {
+        loadMusicList();
+    }
+
     protected void notifyMusicItemsChanged(@NonNull List<Music> musicListItems) {
         Preconditions.checkNotNull(musicListItems);
         mMusicListToken = MusicItemUtil.generateToken(musicListItems, item -> {
@@ -120,6 +137,12 @@ public abstract class BaseMusicListViewModel extends ViewModel {
     protected int indexOf(Music music) {
         List<Music> musicList = mMusicListItems.getValue();
         return Objects.requireNonNull(musicList).indexOf(music);
+    }
+
+    public void sortMusicList(@NonNull MusicList.SortOrder sortOrder) {
+        Preconditions.checkNotNull(sortOrder);
+        mIgnoreDiffUtil = true;
+        onSortMusicList(sortOrder);
     }
 
     /**
@@ -149,7 +172,7 @@ public abstract class BaseMusicListViewModel extends ViewModel {
      *
      * @param sortOrder 歌单中歌曲的排列顺序。
      */
-    protected abstract void sortMusicList(@NonNull MusicList.SortOrder sortOrder);
+    protected abstract void onSortMusicList(@NonNull MusicList.SortOrder sortOrder);
 
     @NonNull
     protected abstract MusicList.SortOrder getSortOrder();

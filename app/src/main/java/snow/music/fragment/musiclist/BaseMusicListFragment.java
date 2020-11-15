@@ -107,7 +107,7 @@ public abstract class BaseMusicListFragment extends Fragment {
                         return;
                     }
 
-                    mMusicListAdapter.setMusicList(musicList);
+                    mMusicListAdapter.setMusicList(musicList, mMusicListViewModel.consumeIgnoreDiffUtil());
 
                     MusicItem musicItem = mPlayerViewModel.getPlayerClient().getPlayingMusicItem();
 
@@ -220,15 +220,9 @@ public abstract class BaseMusicListFragment extends Fragment {
                                 R.string.item_sort_by_artist,
                                 R.string.item_sort_by_album},
                         mMusicListViewModel.getSortOrder().ordinal(),
-                        (DialogInterface.OnClickListener) (dialog, which) -> {
+                        (dialog, which) -> {
                             dialog.dismiss();
                             MusicList.SortOrder sortOrder = MusicList.SortOrder.values()[which];
-
-                            /*
-                             * 因为调用 mMusicListViewModel.sortMusicList() 方法导致歌单的数据集发生改变，
-                             * 因此，在排序歌单前必须调用该方法忽略 DiffUtil 一次，否则 DiffUtil 可能会导致 ANR
-                             */
-                            mMusicListAdapter.setIgnoreDiffUtilOnce(true);
                             mMusicListViewModel.sortMusicList(sortOrder);
                         })
                 .build();

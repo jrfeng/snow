@@ -19,11 +19,36 @@ public class MusicListViewModel extends BaseMusicListViewModel {
     @Nullable
     private MusicList mMusicList;
 
+    @Override
+    public void init(@NonNull String musicListName) {
+        super.init(musicListName);
+
+        if (musicListName.equals(MusicStore.MUSIC_LIST_LOCAL_MUSIC)) {
+            MusicStore.getInstance().setOnScanCompleteListener(() -> {
+                setIgnoreDiffUtil(true);
+                reloadMusicList();
+            });
+        }
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+
+        if (getMusicListName().equals(MusicStore.MUSIC_LIST_LOCAL_MUSIC)) {
+            MusicStore.getInstance().setOnScanCompleteListener(null);
+        }
+    }
+
     @NonNull
     @Override
     protected List<Music> loadMusicListItems() {
         if (getMusicListName().equals(MusicStore.MUSIC_LIST_LOCAL_MUSIC)) {
             mMusicList = MusicStore.getInstance().getLocalMusicList();
+            MusicStore.getInstance().setOnScanCompleteListener(() -> {
+                setIgnoreDiffUtil(true);
+                reloadMusicList();
+            });
         } else {
             mMusicList = MusicStore.getInstance().getCustomMusicList(getMusicListName());
         }
@@ -32,7 +57,6 @@ public class MusicListViewModel extends BaseMusicListViewModel {
             return Collections.emptyList();
         }
 
-        mMusicList.load();
         return mMusicList.getMusicElements();
     }
 
@@ -52,7 +76,7 @@ public class MusicListViewModel extends BaseMusicListViewModel {
     }
 
     @Override
-    protected void sortMusicList(@NonNull MusicList.SortOrder sortOrder) {
+    protected void onSortMusicList(@NonNull MusicList.SortOrder sortOrder) {
         Preconditions.checkNotNull(sortOrder);
 
         if (mMusicList == null) {

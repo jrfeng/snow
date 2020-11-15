@@ -55,7 +55,7 @@ public class FavoriteMusicListViewModel extends BaseMusicListViewModel {
     }
 
     @Override
-    protected void sortMusicList(@NonNull MusicList.SortOrder sortOrder) {
+    protected void onSortMusicList(@NonNull MusicList.SortOrder sortOrder) {
         Preconditions.checkNotNull(sortOrder);
 
         MusicStore.getInstance().sort(mFavoriteMusicList, sortOrder, () -> notifyMusicItemsChanged(mFavoriteMusicList.getMusicElements()));
