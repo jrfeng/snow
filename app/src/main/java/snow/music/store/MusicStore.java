@@ -58,6 +58,7 @@ public class MusicStore {
     private final Handler mMainHandler;
 
     private final List<OnFavoriteChangeListener> mAllFavoriteChangeListener;
+    private OnScanCompleteListener mOnScanCompleteListener;
 
     private MusicStore(BoxStore boxStore) {
         mBoxStore = boxStore;
@@ -754,6 +755,19 @@ public class MusicStore {
         return entity;
     }
 
+    public void setOnScanCompleteListener(@Nullable OnScanCompleteListener listener) {
+        mOnScanCompleteListener = listener;
+    }
+
+    /**
+     * 通知本地音乐已扫描完成。
+     */
+    public void notifyScanComplete() {
+        if (mOnScanCompleteListener != null) {
+            mOnScanCompleteListener.onScanComplete();
+        }
+    }
+
     /**
      * 用于监听 “我喜欢” 歌单的修改事件。
      * <p>
@@ -766,6 +780,20 @@ public class MusicStore {
          * 该回调方法会在应用程序主线程调用。
          */
         void onFavoriteChanged();
+    }
+
+    /**
+     * 监听 “本地音乐扫描完成” 事件。
+     */
+    public interface OnScanCompleteListener {
+        /**
+         * 本地音乐扫描完成时会调用该方法。
+         * <p>
+         * 该方法会在主线程中调用，请不要直接在该方法中访问数据库。
+         *
+         * @see #notifyFavoriteChanged()
+         */
+        void onScanComplete();
     }
 
     /**

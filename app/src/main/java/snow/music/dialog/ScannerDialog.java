@@ -317,6 +317,7 @@ public class ScannerDialog extends BottomDialog {
                     .firstElement()
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(musicList -> {
+                        musicStore.notifyScanComplete();
                         if (mUpdatePlaylist) {
                             mPlayerClient.setPlaylist(MusicListUtil.asPlaylist(MusicStore.MUSIC_LIST_LOCAL_MUSIC, musicList, 0));
                         }
