@@ -5,8 +5,6 @@ import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import com.google.common.base.Preconditions;
 
@@ -615,22 +613,43 @@ public class MusicStore {
     }
 
     /**
-     * 查询指定 {@link Music} 是否已存在。
-     * <p>
-     * 根据 {@link Music} 的 {@link Music#getUri()} 判断其是否已存在。
+     * 获取具有指定 uri 的 {@link Music} 的 id 值。
      *
-     * @param music {@link Music} 对象，不能为 null
-     * @return 如果 {@link Music} 已存在，则返回 true
+     * @param uri uri 字符串，不能为 null
+     * @return 如果 {@link Music} 已存在，则返回其 id 值，否则返回 0
      */
-    public synchronized boolean contains(@NonNull Music music) {
-        Preconditions.checkNotNull(music);
+    public synchronized long getId(@NonNull String uri) {
+        Preconditions.checkNotNull(uri);
 
-        long count = mMusicBox.query()
-                .equal(Music_.uri, music.getUri())
+        Long id = mMusicBox.query()
+                .equal(Music_.uri, uri)
                 .build()
-                .count();
+                .property(Music_.id)
+                .findLong();
 
-        return count > 0;
+        if (id == null) {
+            return 0;
+        }
+
+        return id;
+    }
+
+    /**
+     * 查询具有指定 uri 的 {@link Music} 是否已添加到 “本地音乐” 歌单中。
+     *
+     * @param uri uri 字符串，不能为 null
+     * @return 如果歌曲已添加到本地歌单，则返回 true
+     */
+    public synchronized boolean isLocalMusic(@NonNull String uri) {
+        Preconditions.checkNotNull(uri);
+
+        QueryBuilder<Music> builder = mMusicBox.query()
+                .equal(Music_.uri, uri);
+
+        builder.backlink(MusicListEntity_.musicElements)
+                .equal(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC);
+
+        return builder.build().count() > 0;
     }
 
     /**

@@ -11,7 +11,7 @@ import io.objectbox.annotation.Unique;
 @Entity
 public class Music {
     @Id
-    long id;
+    public long id;
 
     private String title;
     private String artist;
