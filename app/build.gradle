@@ -6,7 +6,7 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        applicationId "snow.demo"
+        applicationId "snow.music"
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 1
