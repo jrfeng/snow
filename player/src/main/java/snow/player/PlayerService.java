@@ -153,6 +153,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     private boolean mKeepServiceAlive;
 
     private BroadcastReceiver mCustomActionReceiver;
+    private PlayerStateSynchronizer mPlayerStateSynchronizer;
 
     @Override
     public void onCreate() {
@@ -162,6 +163,12 @@ public class PlayerService extends MediaBrowserServiceCompat
         mAllCustomAction = new HashMap<>();
         mKeepAliveIntent = new Intent(this, this.getClass());
         mKeepAliveConnection = new KeepAliveConnection();
+        mPlayerStateSynchronizer = new PlayerStateSynchronizer() {
+            @Override
+            public void syncPlayerState(String clientToken) {
+                mSyncPlayerStateListener.onSyncPlayerState(clientToken, new PlayerState(mPlayerState));
+            }
+        };
 
         initNotificationManager();
         initPlayerConfig();
@@ -283,12 +290,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private void initCustomActionDispatcher() {
         final Dispatcher playerStateSynchronizerDispatcher =
-                ChannelHelper.newDispatcher(PlayerStateSynchronizer.class, new PlayerStateSynchronizer() {
-                    @Override
-                    public void syncPlayerState(String clientToken) {
-                        mSyncPlayerStateListener.onSyncPlayerState(clientToken, new PlayerState(mPlayerState));
-                    }
-                });
+                ChannelHelper.newDispatcher(PlayerStateSynchronizer.class, mPlayerStateSynchronizer);
 
         final Dispatcher playerManagerDispatcher =
                 ChannelHelper.newDispatcher(PlayerManager.class, this);
