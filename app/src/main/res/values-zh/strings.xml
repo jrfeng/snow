@@ -73,4 +73,8 @@
     <string name="title_progress">进度</string>
     <string name="title_scan_music">扫描歌曲</string>
     <string name="toast_no_read_storage_permission">无存储器访问权限！</string>
+    <string name="message_scan_local_music">扫描本地音乐？</string>
+    <string name="message_no_new_songs_found">未发现新歌曲</string>
+    <string name="message_one_song_found">发现 1 首新歌曲\n添加到本地音乐？</string>
+    <string name="message_many_songs_found">发现 n 首新歌曲\n添加到本地音乐？</string>
 </resources>

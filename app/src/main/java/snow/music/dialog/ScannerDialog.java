@@ -23,13 +23,15 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.common.base.Preconditions;
-
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -81,16 +83,6 @@ public class ScannerDialog extends BottomDialog {
 
         ViewModelProvider viewModelProvider = new ViewModelProvider(this);
         mScannerViewModel = viewModelProvider.get(ScannerViewModel.class);
-
-        if (updatePlaylist()) {
-            FragmentActivity activity = Objects.requireNonNull(getActivity());
-            ViewModelProvider parentProvider = new ViewModelProvider(activity);
-
-            PlayerViewModel playerViewModel = parentProvider.get(PlayerViewModel.class);
-            PlayerUtil.initPlayerViewModel(activity, playerViewModel, AppPlayerService.class);
-
-            mScannerViewModel.setUpdatePlaylist(playerViewModel.getPlayerClient());
-        }
     }
 
     @Override
@@ -132,6 +124,54 @@ public class ScannerDialog extends BottomDialog {
         updateProgress();
     }
 
+    private void showScanResultDialog(FragmentActivity activity, List<Music> musicList) {
+        MessageDialog.Builder builder = new MessageDialog.Builder(activity);
+
+        switch (musicList.size()) {
+            case 0:
+                builder.setMessage(R.string.message_no_new_songs_found);
+                break;
+            case 1:
+                builder.setMessage(R.string.message_one_song_found);
+                break;
+            default:
+                String message = activity.getString(R.string.message_many_songs_found);
+                builder.setMessage(message.replaceFirst("n", String.valueOf(musicList.size())));
+                break;
+        }
+
+        MessageDialog messageDialog = builder.setPositiveButtonClickListener(
+                (dialog, which) -> addToLocalMusicList(activity, musicList, updatePlaylist()))
+                .build();
+
+        messageDialog.show(getParentFragmentManager(), "scanComplete");
+    }
+
+    @SuppressLint("CheckResult")
+    private void addToLocalMusicList(FragmentActivity activity, List<Music> musicList, boolean updatePlaylist) {
+        if (musicList.size() < 1) {
+            return;
+        }
+
+        Single.create((SingleOnSubscribe<Boolean>) emitter -> {
+            MusicStore musicStore = MusicStore.getInstance();
+            MusicList localMusic = musicStore.getLocalMusicList();
+
+            localMusic.getMusicElements().addAll(musicList);
+            musicStore.updateMusicList(localMusic);
+
+            emitter.onSuccess(true);
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aBoolean -> {
+                    MusicStore.getInstance().notifyScanComplete();
+                    if (updatePlaylist) {
+                        getPlayerClient(activity).setPlaylist(
+                                MusicListUtil.asPlaylist(MusicStore.MUSIC_LIST_LOCAL_MUSIC, musicList, 0));
+                    }
+                });
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode != PERMISSION_REQUEST_CODE) {
@@ -145,6 +185,15 @@ public class ScannerDialog extends BottomDialog {
         }
 
         startScanner();
+    }
+
+    private PlayerClient getPlayerClient(FragmentActivity activity) {
+        ViewModelProvider parentProvider = new ViewModelProvider(activity);
+
+        PlayerViewModel playerViewModel = parentProvider.get(PlayerViewModel.class);
+        PlayerUtil.initPlayerViewModel(activity, playerViewModel, AppPlayerService.class);
+
+        return playerViewModel.getPlayerClient();
     }
 
     private void observerProgress() {
@@ -165,7 +214,13 @@ public class ScannerDialog extends BottomDialog {
         mKeepOnRestarted = false;
         mDelayDismissDisposable = Observable.timer(800, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aLong -> dismiss());
+                .subscribe(aLong -> {
+                    FragmentActivity activity = Objects.requireNonNull(getActivity());
+                    dismiss();
+                    if (mScannerViewModel.isStarted()) {
+                        showScanResultDialog(activity, mScannerViewModel.getScannedMusic());
+                    }
+                });
     }
 
     @SuppressLint("SetTextI18n")
@@ -211,8 +266,7 @@ public class ScannerDialog extends BottomDialog {
         public MutableLiveData<Boolean> mFinished;
         public MutableLiveData<Integer> mScanPercent;
 
-        private boolean mUpdatePlaylist;
-        private PlayerClient mPlayerClient;
+        private List<Music> mScannedMusic;
 
         public ScannerViewModel(@NonNull Application application) {
             super(application);
@@ -221,18 +275,13 @@ public class ScannerDialog extends BottomDialog {
             mCancelled = false;
             mFinished = new MutableLiveData<>(false);
             mScanPercent = new MutableLiveData<>(0);
+            mScannedMusic = Collections.emptyList();
         }
 
         @Override
         protected void onCleared() {
             super.onCleared();
             cancel();
-        }
-
-        public void setUpdatePlaylist(@NonNull PlayerClient playerClient) {
-            Preconditions.checkNotNull(playerClient);
-            mUpdatePlaylist = true;
-            mPlayerClient = playerClient;
         }
 
         public void start(int minDuration) {
@@ -298,30 +347,44 @@ public class ScannerDialog extends BottomDialog {
             return mProgress;
         }
 
+        public List<Music> getScannedMusic() {
+            return mScannedMusic;
+        }
+
         @SuppressLint("CheckResult")
         private void updateLocalMusicList(List<Music> items) {
-            MusicStore musicStore = MusicStore.getInstance();
-
-            Observable.fromIterable(items)
-                    .subscribeOn(Schedulers.io())
-                    .filter(music -> !musicStore.contains(music))
-                    .buffer(items.size())
-                    .map(musicList -> {
-                        musicStore.putAllMusic(musicList);
-                        MusicList localMusic = musicStore.getLocalMusicList();
-                        localMusic.getMusicElements().clear();
-                        localMusic.getMusicElements().addAll(items);
-                        musicStore.updateMusicList(localMusic);
-                        return localMusic.getMusicElements();
-                    })
-                    .firstElement()
+            Single.create((SingleOnSubscribe<List<Music>>) emitter -> {
+                MusicStore.getInstance().putAllMusic(getAllNewMusic(items));
+                emitter.onSuccess(getAllNoLocalMusic(items));
+            }).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(musicList -> {
-                        musicStore.notifyScanComplete();
-                        if (mUpdatePlaylist) {
-                            mPlayerClient.setPlaylist(MusicListUtil.asPlaylist(MusicStore.MUSIC_LIST_LOCAL_MUSIC, musicList, 0));
-                        }
-                    });
+                    .subscribe(musicList -> mScannedMusic = musicList);
+        }
+
+        private List<Music> getAllNewMusic(List<Music> items) {
+            MusicStore musicStore = MusicStore.getInstance();
+            List<Music> allNewMusic = new ArrayList<>();
+            for (Music music : items) {
+                long id = musicStore.getId(music.getUri());
+                music.id = id;
+                if (id <= 0) {
+                    allNewMusic.add(music);
+                }
+            }
+            return allNewMusic;
+        }
+
+        private List<Music> getAllNoLocalMusic(List<Music> items) {
+            MusicStore musicStore = MusicStore.getInstance();
+            List<Music> allNoLocalMusic = new ArrayList<>();
+
+            for (Music music : items) {
+                if (!musicStore.isLocalMusic(music.getUri())) {
+                    allNoLocalMusic.add(music);
+                }
+            }
+
+            return allNoLocalMusic;
         }
     }
 

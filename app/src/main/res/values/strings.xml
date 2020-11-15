@@ -3,7 +3,7 @@
     <string name="search">Search</string>
 
     <!-- NavigationActivity -->
-    <string name="item_local_music">Musics</string>
+    <string name="item_local_music">Music</string>
     <string name="item_favorite">Favorites</string>
     <string name="item_music_list">Music Lists</string>
     <string name="item_artist">Artists</string>
@@ -24,7 +24,7 @@
     <string name="message_play_music">Play music?</string>
 
     <!-- Activity Title -->
-    <string name="title_local_music">Musics</string>
+    <string name="title_local_music">Music</string>
     <string name="title_favorites">Favorites</string>
     <string name="title_history">History</string>
 
@@ -46,6 +46,10 @@
     <string name="message_remove_music">Remove music?</string>
     <string name="message_need_write_settings_permission">Need permission: Write Settings</string>
     <string name="message_set_as_ringtone">Set as phone ringtone?</string>
+    <string name="message_scan_local_music">Scan local music?</string>
+    <string name="message_no_new_songs_found">No new songs found</string>
+    <string name="message_one_song_found">1 new song found\nAdd to local music list?</string>
+    <string name="message_many_songs_found">n new songs found\nAdd to local music list?</string>
 
     <string name="positive_text_request">Request</string>
 
@@ -65,7 +69,7 @@
     <!-- sort order dialog -->
     <string name="title_sort_music_list">Sort music list</string>
     <string name="item_sort_by_add_time">By add time</string>
-    <string name="item_sort_by_title">Musics from A-Z</string>
+    <string name="item_sort_by_title">Music from A-Z</string>
     <string name="item_sort_by_artist">Artists from A-Z</string>
     <string name="item_sort_by_album">Albums from A-Z</string>
 
