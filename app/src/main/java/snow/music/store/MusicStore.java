@@ -199,7 +199,7 @@ public class MusicStore {
             return musicList;
         }
 
-        MusicListEntity entity = new MusicListEntity(0, name, description, null);
+        MusicListEntity entity = new MusicListEntity(0, name, description, 0, MusicList.SortOrder.BY_ADD_TIME, new byte[0]);
         mMusicListEntityBox.put(entity);
         return new MusicList(entity);
     }
@@ -730,7 +730,7 @@ public class MusicStore {
     }
 
     private MusicListEntity createBuiltInMusicList(String name) {
-        MusicListEntity entity = new MusicListEntity(0, name, "", new byte[0]);
+        MusicListEntity entity = new MusicListEntity(0, name, "", 0, MusicList.SortOrder.BY_ADD_TIME, new byte[0]);
         mMusicListEntityBox.put(entity);
         return entity;
     }

@@ -29,10 +29,12 @@ public class MusicListEntity {
         this.description = "";
     }
 
-    public MusicListEntity(long id, String name, String description, byte[] orderBytes) {
+    public MusicListEntity(long id, String name, String description, int size, MusicList.SortOrder sortOrder, byte[] orderBytes) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.orderBytes = orderBytes;
+        this.size = size;
+        this.sortOrder = sortOrder;
     }
 }
