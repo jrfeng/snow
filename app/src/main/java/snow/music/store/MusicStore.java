@@ -614,6 +614,25 @@ public class MusicStore {
     }
 
     /**
+     * 查询指定 {@link Music} 是否已存在。
+     * <p>
+     * 根据 {@link Music} 的 {@link Music#getUri()} 判断其是否已存在。
+     *
+     * @param music {@link Music} 对象，不能为 null
+     * @return 如果 {@link Music} 已存在，则返回 true
+     */
+    public synchronized boolean contains(@NonNull Music music) {
+        Preconditions.checkNotNull(music);
+
+        long count = mMusicBox.query()
+                .equal(Music_.uri, music.getUri())
+                .build()
+                .count();
+
+        return count > 0;
+    }
+
+    /**
      * 获取所有的歌手名。
      */
     @NonNull
