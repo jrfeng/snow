@@ -71,4 +71,6 @@
     <string name="message_clear_history">清空历史记录？</string>
     <string name="message_play_music">播放歌曲？</string>
     <string name="title_progress">进度</string>
+    <string name="title_scan_music">扫描歌曲</string>
+    <string name="toast_no_read_storage_permission">无存储器访问权限！</string>
 </resources>

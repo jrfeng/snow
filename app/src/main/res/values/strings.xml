@@ -57,6 +57,7 @@
     <string name="toast_removed">Removed</string>
     <string name="toast_set_successfully">Set successfully</string>
     <string name="toast_request_permission_failed">Request permission failed</string>
+    <string name="toast_no_read_storage_permission">No read storage permission!</string>
 
     <!-- SingleChoiceDialog -->
     <string name="title_single_choice">Title</string>
@@ -70,6 +71,9 @@
 
     <!-- ProgressDialog -->
     <string name="title_progress">Progress</string>
+
+    <!-- ScannerDialog -->
+    <string name="title_scan_music">Scan music</string>
 
     <!-- content description -->
     <string name="des_logo">logo</string>
