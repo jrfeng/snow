@@ -44,9 +44,13 @@ public class BottomBarFragment extends Fragment {
     private float mActionDownY;
     private long mActionDownTime;
 
+    private int mIconCornerRadius;
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+
+        mIconCornerRadius = DimenUtil.getDimenPx(context.getResources(), R.dimen.player_bottom_bar_icon_corner_size);
 
         FragmentActivity activity = getActivity();
         assert activity != null;
@@ -115,13 +119,19 @@ public class BottomBarFragment extends Fragment {
         mIconLoadDisposable = MusicUtil.getEmbeddedPicture(Objects.requireNonNull(getContext()), musicUri)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bytes -> Glide.with(BottomBarFragment.this)
-                        .load(bytes)
-                        .placeholder(mBinding.ivIcon.getDrawable())
-                        .error(R.mipmap.ic_bottom_bar_default_icon)
-                        .transform(new RoundedCorners(DimenUtil.getDimenPx(getResources(), R.dimen.player_bottom_bar_icon_corner_size)))
-                        .transition(DrawableTransitionOptions.withCrossFade())
-                        .into(mBinding.ivIcon));
+                .subscribe(bytes -> {
+                    if (bytes == null || bytes.length < 1) {
+                        mBinding.ivIcon.setImageResource(R.mipmap.ic_bottom_bar_default_icon);
+                        return;
+                    }
+
+                    Glide.with(BottomBarFragment.this)
+                            .load(bytes)
+                            .error(R.mipmap.ic_bottom_bar_default_icon)
+                            .transform(new RoundedCorners(mIconCornerRadius))
+                            .transition(DrawableTransitionOptions.withCrossFade())
+                            .into(mBinding.ivIcon);
+                });
     }
 
     private void cancelLoadMusicIcon() {
