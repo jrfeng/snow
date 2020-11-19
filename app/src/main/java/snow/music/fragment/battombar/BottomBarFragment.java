@@ -30,6 +30,7 @@ import snow.music.service.AppPlayerService;
 import snow.music.util.DimenUtil;
 import snow.music.util.MusicUtil;
 import snow.music.util.PlayerUtil;
+import snow.player.PlayerClient;
 import snow.player.lifecycle.PlayerViewModel;
 
 public class BottomBarFragment extends Fragment {
@@ -106,6 +107,16 @@ public class BottomBarFragment extends Fragment {
         });
 
         return mBinding.getRoot();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        PlayerClient playerClient = mPlayerViewModel.getPlayerClient();
+        if (!playerClient.isConnected()) {
+            playerClient.connect();
+        }
     }
 
     @Override
