@@ -22,7 +22,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.history.HistoryActivity"/>
+        <activity android:name=".activity.browser.musiclist.MusicListBrowserActivity" />
+        <activity android:name=".activity.history.HistoryActivity" />
         <activity android:name=".activity.favorite.FavoriteActivity" />
         <activity android:name=".activity.localmusic.LocalMusicActivity" />
         <activity

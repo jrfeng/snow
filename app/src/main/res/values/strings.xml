@@ -10,6 +10,12 @@
     <string name="item_album">Albums</string>
     <string name="item_history">History</string>
 
+    <!-- MusicListBrowserActivity -->
+    <string name="empty_no_music_list">There is no music list</string>
+    <string name="music_list_size_0">0 song</string>
+    <string name="music_list_size_1">1 song</string>
+    <string name="music_list_size_n">n songs</string>
+
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>
     <string name="empty_playlist">Playlist is empty</string>
@@ -26,6 +32,7 @@
     <!-- Activity Title -->
     <string name="title_local_music">Music</string>
     <string name="title_favorites">Favorites</string>
+    <string name="title_music_lists">My music lists</string>
     <string name="title_history">History</string>
 
     <!-- BottomMenuDialog -->
@@ -102,5 +109,6 @@
     <string name="des_scan_local_music">Scan local music</string>
     <string name="des_menu_icon">menu icon</string>
     <string name="des_checked">checked</string>
+    <string name="des_music_list_icon">music list icon</string>
 
 </resources>

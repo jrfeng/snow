@@ -39,7 +39,7 @@
                 android:layout_width="@dimen/player_bottom_bar_icon_size"
                 android:layout_height="@dimen/player_bottom_bar_icon_size"
                 android:contentDescription="@string/des_album_icon"
-                android:src="@mipmap/ic_notif_default_icon" />
+                android:src="@mipmap/ic_bottom_bar_default_icon" />
 
             <Space
                 android:layout_width="16dp"

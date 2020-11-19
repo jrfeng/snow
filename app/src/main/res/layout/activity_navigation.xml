@@ -186,7 +186,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{(view) -> navViewModel.navigateToMusicList(view)}"
+                android:onClick="@{(view) -> navViewModel.navigateToMusicListBrowser(view)}"
                 android:orientation="vertical">
 
                 <ImageView
