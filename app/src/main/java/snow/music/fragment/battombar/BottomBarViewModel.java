@@ -1,15 +1,11 @@
 package snow.music.fragment.battombar;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
-import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -19,7 +15,6 @@ import androidx.lifecycle.ViewModel;
 import com.google.common.base.Preconditions;
 
 import snow.music.R;
-import snow.music.dialog.PlaylistDialog;
 import snow.player.PlaybackState;
 import snow.player.PlayerClient;
 import snow.player.lifecycle.PlayerViewModel;
@@ -120,19 +115,6 @@ public class BottomBarViewModel extends ViewModel {
         }
 
         mPlayerViewModel.playPause();
-    }
-
-    public void showPlaylist(View view) {
-        Preconditions.checkNotNull(view);
-
-        Context context = view.getContext();
-        if (!(context instanceof FragmentActivity)) {
-            Log.e(TAG, "This view not belong a FragmentActivity.");
-            return;
-        }
-
-        PlaylistDialog.newInstance()
-                .show(((FragmentActivity) context).getSupportFragmentManager(), "PlaylistDialog");
     }
 
     public LiveData<Integer> getDuration() {

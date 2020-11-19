@@ -90,7 +90,6 @@
                 android:layout_height="@dimen/image_button_size"
                 android:background="@drawable/bg_button_48dp"
                 android:contentDescription="@string/des_play_pause"
-                android:onClick="@{(view) -> bottomBarViewModel.showPlaylist(view)}"
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/ic_playlist" />
 

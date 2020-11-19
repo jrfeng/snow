@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.google.common.base.Preconditions;
 
 import java.util.Objects;
 
@@ -26,6 +27,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.databinding.FragmentBottomBarBinding;
+import snow.music.dialog.PlaylistDialog;
 import snow.music.service.AppPlayerService;
 import snow.music.util.DimenUtil;
 import snow.music.util.MusicUtil;
@@ -83,6 +85,7 @@ public class BottomBarFragment extends Fragment {
         mBinding = FragmentBottomBarBinding.inflate(inflater);
         mBinding.setBottomBarViewModel(mBottomBarViewModel);
         mBinding.setLifecycleOwner(this);
+        mBinding.btnShowPlaylist.setOnClickListener(this::showPlaylist);
 
         mBinding.messagePanel.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
@@ -149,5 +152,12 @@ public class BottomBarFragment extends Fragment {
         if (mIconLoadDisposable != null && !mIconLoadDisposable.isDisposed()) {
             mIconLoadDisposable.dispose();
         }
+    }
+
+    public void showPlaylist(View view) {
+        Preconditions.checkNotNull(view);
+
+        PlaylistDialog.newInstance()
+                .show(getParentFragmentManager(), "PlaylistDialog");
     }
 }
