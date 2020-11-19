@@ -2,15 +2,15 @@ package snow.music.dialog;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.Space;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatDialog;
-import androidx.savedstate.SavedStateRegistry;
 
 import com.google.common.base.Preconditions;
 
@@ -27,6 +27,7 @@ public class MessageDialog extends BottomDialog {
     private int mNegativeTextColor;
     private DialogInterface.OnClickListener mPositiveButtonClickListener;
     private DialogInterface.OnClickListener mNegativeButtonClickListener;
+    private boolean mHideNegativeButton;
 
     @Override
     protected void onInitDialog(AppCompatDialog dialog) {
@@ -36,11 +37,13 @@ public class MessageDialog extends BottomDialog {
         TextView tvMessage = dialog.findViewById(R.id.tvMessage);
         Button btnPositive = dialog.findViewById(R.id.btnPositive);
         Button btnNegative = dialog.findViewById(R.id.btnNegative);
+        Space space = dialog.findViewById(R.id.space);
 
         Objects.requireNonNull(tvDialogTitle);
         Objects.requireNonNull(tvMessage);
         Objects.requireNonNull(btnPositive);
         Objects.requireNonNull(btnNegative);
+        Objects.requireNonNull(space);
 
         tvDialogTitle.setText(mTitle);
         tvMessage.setText(mMessage);
@@ -49,17 +52,23 @@ public class MessageDialog extends BottomDialog {
         btnNegative.setTextColor(mNegativeTextColor);
         btnPositive.setTextColor(mPositiveTextColor);
 
-        btnNegative.setOnClickListener(v -> {
-            dismiss();
-            if (mNegativeButtonClickListener != null) {
-                mNegativeButtonClickListener.onClick(dialog, DialogInterface.BUTTON_NEGATIVE);
-            }
-        });
-
         btnPositive.setOnClickListener(v -> {
             dismiss();
             if (mPositiveButtonClickListener != null) {
                 mPositiveButtonClickListener.onClick(dialog, DialogInterface.BUTTON_POSITIVE);
+            }
+        });
+
+        if (mHideNegativeButton) {
+            btnNegative.setVisibility(View.GONE);
+            space.setVisibility(View.GONE);
+            return;
+        }
+
+        btnNegative.setOnClickListener(v -> {
+            dismiss();
+            if (mNegativeButtonClickListener != null) {
+                mNegativeButtonClickListener.onClick(dialog, DialogInterface.BUTTON_NEGATIVE);
             }
         });
     }
@@ -79,6 +88,7 @@ public class MessageDialog extends BottomDialog {
         private int mNegativeTextColor;
         private DialogInterface.OnClickListener mPositiveButtonClickListener;
         private DialogInterface.OnClickListener mNegativeButtonClickListener;
+        private boolean mHideNegativeButton;
 
         public Builder(@NonNull Context context) {
             Preconditions.checkNotNull(context);
@@ -158,6 +168,10 @@ public class MessageDialog extends BottomDialog {
             return this;
         }
 
+        public void setHideNegativeButton(boolean hide) {
+            mHideNegativeButton = hide;
+        }
+
         public MessageDialog build() {
             MessageDialog dialog = new MessageDialog();
 
@@ -169,6 +183,7 @@ public class MessageDialog extends BottomDialog {
             dialog.mNegativeTextColor = mNegativeTextColor;
             dialog.mPositiveButtonClickListener = mPositiveButtonClickListener;
             dialog.mNegativeButtonClickListener = mNegativeButtonClickListener;
+            dialog.mHideNegativeButton = mHideNegativeButton;
 
             return dialog;
         }

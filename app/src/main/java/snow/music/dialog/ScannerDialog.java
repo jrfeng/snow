@@ -129,7 +129,8 @@ public class ScannerDialog extends BottomDialog {
 
         switch (musicList.size()) {
             case 0:
-                builder.setMessage(R.string.message_no_new_songs_found);
+                builder.setMessage(R.string.message_no_new_songs_found)
+                        .setHideNegativeButton(true);
                 break;
             case 1:
                 builder.setMessage(R.string.message_one_song_found);

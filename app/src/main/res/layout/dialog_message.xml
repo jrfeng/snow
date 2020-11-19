@@ -35,32 +35,36 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:paddingLeft="24dp"
+        android:paddingTop="16dp"
+        android:paddingRight="24dp"
+        android:paddingBottom="16dp">
 
         <Button
             android:id="@+id/btnNegative"
             style="?android:attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="@dimen/dialog_button_height"
+            android:layout_weight="1"
             android:background="@drawable/bg_dialog_button"
             android:ellipsize="middle"
-            android:minWidth="@dimen/dialog_button_min_width"
             android:singleLine="true"
             android:text="@string/message_dialog_negative_text"
             android:textAllCaps="false" />
 
         <Space
+            android:id="@+id/space"
             android:layout_width="16dp"
             android:layout_height="0dp" />
 
         <Button
             android:id="@+id/btnPositive"
             style="?android:attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="@dimen/dialog_button_height"
+            android:layout_weight="1"
             android:background="@drawable/bg_dialog_button"
             android:ellipsize="middle"
-            android:minWidth="@dimen/dialog_button_min_width"
             android:singleLine="true"
             android:text="@string/message_dialog_positive_text"
             android:textAllCaps="false"
