@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -24,7 +23,6 @@ import snow.music.activity.browser.musiclist.MusicListBrowserActivity;
 import snow.music.activity.favorite.FavoriteActivity;
 import snow.music.activity.history.HistoryActivity;
 import snow.music.activity.localmusic.LocalMusicActivity;
-import snow.music.dialog.PlaylistDialog;
 import snow.music.store.MusicStore;
 import snow.music.util.FavoriteObserver;
 import snow.music.util.MusicUtil;
@@ -176,23 +174,6 @@ public class NavigationViewModel extends ViewModel {
         }
 
         mPlayerViewModel.skipToNext();
-    }
-
-    public void showPlaylist(View view) {
-        Preconditions.checkNotNull(view);
-
-        if (!mInitialized) {
-            throw new IllegalStateException("NavigationViewModel not init yet.");
-        }
-
-        Context context = view.getContext();
-        if (!(context instanceof FragmentActivity)) {
-            Log.e(TAG, "This view not belong a FragmentActivity.");
-            return;
-        }
-
-        PlaylistDialog.newInstance()
-                .show(((FragmentActivity) context).getSupportFragmentManager(), "PlaylistDialog");
     }
 
     public LiveData<Integer> getDuration() {

@@ -5,10 +5,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.google.common.base.Preconditions;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -16,6 +18,7 @@ import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
 import snow.music.activity.BaseActivity;
 import snow.music.databinding.ActivityNavigationBinding;
+import snow.music.dialog.PlaylistDialog;
 import snow.music.dialog.ScannerDialog;
 import snow.music.service.AppPlayerService;
 import snow.music.util.PlayerUtil;
@@ -123,5 +126,12 @@ public class NavigationActivity extends BaseActivity {
 
         ScannerDialog scannerDialog = ScannerDialog.newInstance(true);
         scannerDialog.show(getSupportFragmentManager(), "scannerDialog");
+    }
+
+    public void showPlaylist(View view) {
+        Preconditions.checkNotNull(view);
+
+        PlaylistDialog.newInstance()
+                .show(getSupportFragmentManager(), "Playlist");
     }
 }

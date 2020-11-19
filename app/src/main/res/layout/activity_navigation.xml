@@ -408,7 +408,7 @@
                         android:layout_gravity="center"
                         android:background="@drawable/bg_button_48dp"
                         android:contentDescription="@string/des_show_playlist"
-                        android:onClick="@{(view) -> navViewModel.showPlaylist(view)}"
+                        android:onClick="showPlaylist"
                         android:scaleType="centerInside"
                         app:srcCompat="@drawable/ic_playlist" />
 
