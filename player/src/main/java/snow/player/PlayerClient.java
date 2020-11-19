@@ -378,6 +378,24 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     /**
+     * 发送自定义动作。
+     * <p>
+     * 你可以通过覆盖 {@link PlayerService#onCustomAction(String, Bundle)} 方法来响应自定义动作。
+     *
+     * @param action 自定义动作的名称，不能为 null
+     * @param args   要携带的额外参数，可为 null
+     */
+    public void sendCustomAction(@NonNull String action, @Nullable Bundle args) {
+        Preconditions.checkNotNull(action);
+
+        if (notConnected() || getMediaController() == null) {
+            return;
+        }
+
+        getMediaController().getTransportControls().sendCustomAction(action, args);
+    }
+
+    /**
      * 设置播放器的首选音质（默认为 {@link SoundQuality#STANDARD}）。
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
