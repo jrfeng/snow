@@ -17,6 +17,7 @@ import snow.music.R;
 
 public class InputDialog extends BottomDialog {
     private String mTitle;
+    private String mText;
     private String mHint;
     private Validator mValidator;
     private OnInputConfirmListener mInputConfirmListener;
@@ -36,6 +37,12 @@ public class InputDialog extends BottomDialog {
         assert btnPositive != null;
 
         tvDialogTitle.setText(mTitle);
+
+        if (mText.length() > 0) {
+            etInput.setText(mText);
+            etInput.setSelection(0, mText.length());
+        }
+
         etInput.setHint(mHint);
         etInput.requestFocus();
 
@@ -62,6 +69,7 @@ public class InputDialog extends BottomDialog {
         private Context mContext;
 
         private String mTitle;
+        private String mText;
         private String mHint;
         private Validator mValidator;
         private OnInputConfirmListener mInputConfirmListener;
@@ -70,6 +78,7 @@ public class InputDialog extends BottomDialog {
             mContext = context;
             mTitle = context.getString(R.string.input_default_title);
             mHint = context.getString(R.string.input_default_hint);
+            mText = "";
         }
 
         public Builder setTitle(@StringRes int resId) {
@@ -81,6 +90,13 @@ public class InputDialog extends BottomDialog {
             Preconditions.checkNotNull(title);
 
             mTitle = title;
+            return this;
+        }
+
+        public Builder setText(@NonNull String text) {
+            Preconditions.checkNotNull(text);
+
+            mText = text;
             return this;
         }
 
@@ -115,6 +131,7 @@ public class InputDialog extends BottomDialog {
             InputDialog dialog = new InputDialog();
 
             dialog.mTitle = mTitle;
+            dialog.mText = mText;
             dialog.mHint = mHint;
             dialog.mValidator = mValidator;
             dialog.mInputConfirmListener = mInputConfirmListener;
