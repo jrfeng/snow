@@ -33,7 +33,7 @@ public abstract class BottomDialog extends AppCompatDialogFragment {
         DialogUtil.setWith(dialog, WindowManager.LayoutParams.MATCH_PARENT);
         DialogUtil.setGravity(dialog, Gravity.BOTTOM);
         DialogUtil.setBackgroundDrawableResource(dialog, R.drawable.bg_bottom_dialog);
-        DialogUtil.setAnimations(dialog, R.style.PlaylistTransition);
+        DialogUtil.setAnimations(dialog, R.style.BottomDialogTransition);
         dialog.setCanceledOnTouchOutside(true);
 
         onInitDialog(dialog);

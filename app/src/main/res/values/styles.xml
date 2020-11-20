@@ -14,9 +14,13 @@
         <item name="android:windowBackground">@color/deep_purple_400</item>
     </style>
 
-    <style name="PlaylistTransition">
+    <style name="BottomDialogTransition">
         <item name="android:windowEnterAnimation">@anim/dialog_bottom_slide_in</item>
         <item name="android:windowExitAnimation">@anim/dialog_bottom_slide_out</item>
+    </style>
+
+    <style name="BottomDialogTransition.NoEnterAnim">
+        <item name="android:windowEnterAnimation">@null</item>
     </style>
 
 </resources>
