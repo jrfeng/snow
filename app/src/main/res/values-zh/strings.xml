@@ -89,7 +89,7 @@
     <string name="hint_music_list_title">歌单名称</string>
     <string name="hint_please_input_music_list_title">请输入歌单名称</string>
     <string name="hint_music_list_name_exists">歌单名已存在</string>
-    <string name="menu_item_rename_music_list">重命名歌单</string>
-    <string name="menu_item_delete_music_list">删除歌单</string>
+    <string name="menu_item_rename_music_list">重命名</string>
+    <string name="menu_item_delete_music_list">删除</string>
     <string name="message_delete_music_list">删除歌单？</string>
 </resources>
