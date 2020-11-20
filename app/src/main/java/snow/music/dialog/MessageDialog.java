@@ -28,6 +28,7 @@ public class MessageDialog extends BottomDialog {
     private DialogInterface.OnClickListener mPositiveButtonClickListener;
     private DialogInterface.OnClickListener mNegativeButtonClickListener;
     private boolean mHideNegativeButton;
+    private boolean mDisableTransition;
 
     @Override
     protected void onInitDialog(AppCompatDialog dialog) {
@@ -71,6 +72,10 @@ public class MessageDialog extends BottomDialog {
                 mNegativeButtonClickListener.onClick(dialog, DialogInterface.BUTTON_NEGATIVE);
             }
         });
+
+        if (mDisableTransition && dialog.getWindow() != null) {
+            dialog.getWindow().setWindowAnimations(0);
+        }
     }
 
     @Override
@@ -89,6 +94,7 @@ public class MessageDialog extends BottomDialog {
         private DialogInterface.OnClickListener mPositiveButtonClickListener;
         private DialogInterface.OnClickListener mNegativeButtonClickListener;
         private boolean mHideNegativeButton;
+        private boolean mDisableTransition;
 
         public Builder(@NonNull Context context) {
             Preconditions.checkNotNull(context);
@@ -168,6 +174,11 @@ public class MessageDialog extends BottomDialog {
             return this;
         }
 
+        public Builder setDisableTransition(boolean disableTransition) {
+            mDisableTransition = disableTransition;
+            return this;
+        }
+
         public void setHideNegativeButton(boolean hide) {
             mHideNegativeButton = hide;
         }
@@ -184,6 +195,7 @@ public class MessageDialog extends BottomDialog {
             dialog.mPositiveButtonClickListener = mPositiveButtonClickListener;
             dialog.mNegativeButtonClickListener = mNegativeButtonClickListener;
             dialog.mHideNegativeButton = mHideNegativeButton;
+            dialog.mDisableTransition = mDisableTransition;
 
             return dialog;
         }
