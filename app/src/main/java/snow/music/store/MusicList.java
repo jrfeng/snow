@@ -25,13 +25,13 @@ import pinyin.util.PinyinComparator;
  * 歌单中的歌曲是延迟加载的，会在第一次调用 {@link #load()} 或者 {@link #getMusicElements()} 方法时进行加载并进行缓存。
  */
 public class MusicList {
-    private final MusicListEntity mMusicListEntity;
+    final MusicListEntity musicListEntity;
     private ElementList mElementList;
 
     MusicList(@NonNull MusicListEntity musicListEntity) {
         Preconditions.checkNotNull(musicListEntity);
 
-        mMusicListEntity = musicListEntity;
+        this.musicListEntity = musicListEntity;
     }
 
     synchronized void applyChanges() {
@@ -42,15 +42,11 @@ public class MusicList {
         mElementList.applyChanges();
     }
 
-    MusicListEntity getMusicListEntity() {
-        return mMusicListEntity;
-    }
-
     /**
      * 获取歌单的 ID.
      */
     public long getId() {
-        return mMusicListEntity.id;
+        return musicListEntity.id;
     }
 
     /**
@@ -58,7 +54,7 @@ public class MusicList {
      */
     @NonNull
     public String getName() {
-        return mMusicListEntity.name;
+        return musicListEntity.name;
     }
 
     /**
@@ -66,63 +62,21 @@ public class MusicList {
      */
     @NonNull
     public SortOrder getSortOrder() {
-        return mMusicListEntity.sortOrder;
-    }
-
-    /**
-     * 设置歌单中歌曲的排列顺序。
-     */
-    public void setSortOrder(@NonNull SortOrder sortOrder) {
-        Preconditions.checkNotNull(sortOrder);
-        mMusicListEntity.sortOrder = sortOrder;
-    }
-
-    /**
-     * 设置歌单名。
-     * <p>
-     * 如果歌单名已存在，则忽略本次操作。可以调用 {@link MusicStore#isMusicListExists(String)}
-     * 方法判断歌单名是否已存在。
-     */
-    public void setName(@NonNull String name) {
-        Preconditions.checkNotNull(name);
-        Preconditions.checkArgument(!name.isEmpty(), "name must not empty");
-
-        if (isBuiltIn()) {
-            return;
-        }
-
-        mMusicListEntity.name = name;
+        return musicListEntity.sortOrder;
     }
 
     /**
      * 当前歌单是否是内置歌单。如果是，则不允许修改歌单的名称。
      */
     public boolean isBuiltIn() {
-        return MusicStore.isBuiltInName(mMusicListEntity.name);
-    }
-
-    /**
-     * 获取歌单的描述信息。
-     */
-    @NonNull
-    public String getDescription() {
-        return mMusicListEntity.description;
-    }
-
-    /**
-     * 设置歌单的描述信息。
-     */
-    public void setDescription(@NonNull String description) {
-        Preconditions.checkNotNull(description);
-
-        mMusicListEntity.description = description;
+        return MusicStore.isBuiltInName(musicListEntity.name);
     }
 
     /**
      * 获取歌单大小。
      */
     public int getSize() {
-        return mMusicListEntity.size;
+        return musicListEntity.size;
     }
 
     /**
@@ -155,35 +109,35 @@ public class MusicList {
         private List<Music> mOrderedList;
 
         ElementList() {
-            if (mMusicListEntity.orderBytes == null || mMusicListEntity.orderBytes.length <= 0) {
-                mOrderedList = new ArrayList<>(mMusicListEntity.musicElements);
+            if (musicListEntity.orderBytes == null || musicListEntity.orderBytes.length <= 0) {
+                mOrderedList = new ArrayList<>(musicListEntity.musicElements);
                 return;
             }
 
             try {
-                ByteArrayInputStream byteInput = new ByteArrayInputStream(mMusicListEntity.orderBytes);
+                ByteArrayInputStream byteInput = new ByteArrayInputStream(musicListEntity.orderBytes);
                 ObjectInputStream input = new ObjectInputStream(byteInput);
 
                 mOrderedList = new ArrayList<>();
                 while (input.available() > 0) {
                     long id = input.readLong();
                     if (id <= 0) {
-                        mOrderedList = new ArrayList<>(mMusicListEntity.musicElements);
+                        mOrderedList = new ArrayList<>(musicListEntity.musicElements);
                         return;
                     }
-                    mOrderedList.add(mMusicListEntity.musicElements.getById(id));
+                    mOrderedList.add(musicListEntity.musicElements.getById(id));
                 }
 
                 input.close();
             } catch (IOException e) {
-                mOrderedList = new ArrayList<>(mMusicListEntity.musicElements);
+                mOrderedList = new ArrayList<>(musicListEntity.musicElements);
                 e.printStackTrace();
             }
         }
 
         void applyChanges() {
-            mMusicListEntity.orderBytes = getOrderBytes();
-            mMusicListEntity.size = mOrderedList.size();
+            musicListEntity.orderBytes = getOrderBytes();
+            musicListEntity.size = mOrderedList.size();
         }
 
         @NonNull
@@ -251,8 +205,8 @@ public class MusicList {
             boolean result = mOrderedList.add(t);
 
             if (result) {
-                mMusicListEntity.musicElements.add(t);
-                mMusicListEntity.size = mMusicListEntity.musicElements.size();
+                musicListEntity.musicElements.add(t);
+                musicListEntity.size = musicListEntity.musicElements.size();
             }
 
             return result;
@@ -263,8 +217,8 @@ public class MusicList {
             boolean result = mOrderedList.remove(o);
 
             if (result) {
-                mMusicListEntity.musicElements.remove(o);
-                mMusicListEntity.size = mMusicListEntity.musicElements.size();
+                musicListEntity.musicElements.remove(o);
+                musicListEntity.size = musicListEntity.musicElements.size();
             }
 
             return result;
@@ -285,8 +239,8 @@ public class MusicList {
             boolean result = mOrderedList.addAll(c);
 
             if (result) {
-                mMusicListEntity.musicElements.addAll(c);
-                mMusicListEntity.size = mMusicListEntity.musicElements.size();
+                musicListEntity.musicElements.addAll(c);
+                musicListEntity.size = musicListEntity.musicElements.size();
             }
 
             return result;
@@ -301,8 +255,8 @@ public class MusicList {
             boolean result = mOrderedList.addAll(index, c);
 
             if (result) {
-                mMusicListEntity.musicElements.addAll(c);
-                mMusicListEntity.size = mMusicListEntity.musicElements.size();
+                musicListEntity.musicElements.addAll(c);
+                musicListEntity.size = musicListEntity.musicElements.size();
             }
 
             return result;
@@ -315,8 +269,8 @@ public class MusicList {
             boolean result = mOrderedList.removeAll(c);
 
             if (result) {
-                mMusicListEntity.musicElements.removeAll(c);
-                mMusicListEntity.size = mMusicListEntity.musicElements.size();
+                musicListEntity.musicElements.removeAll(c);
+                musicListEntity.size = musicListEntity.musicElements.size();
             }
 
             return result;
@@ -331,8 +285,8 @@ public class MusicList {
             boolean result = mOrderedList.retainAll(c);
 
             if (result) {
-                mMusicListEntity.musicElements.retainAll(c);
-                mMusicListEntity.size = mMusicListEntity.musicElements.size();
+                musicListEntity.musicElements.retainAll(c);
+                musicListEntity.size = musicListEntity.musicElements.size();
             }
 
             return result;
@@ -362,8 +316,8 @@ public class MusicList {
 
         @Override
         public void clear() {
-            mMusicListEntity.musicElements.clear();
-            mMusicListEntity.size = mMusicListEntity.musicElements.size();
+            musicListEntity.musicElements.clear();
+            musicListEntity.size = musicListEntity.musicElements.size();
             mOrderedList.clear();
         }
 
@@ -380,7 +334,7 @@ public class MusicList {
             int elementIndex = indexOf(element);
 
             Music music = mOrderedList.set(index, element);
-            mMusicListEntity.musicElements.set(mMusicListEntity.musicElements.indexOf(music), element);
+            musicListEntity.musicElements.set(musicListEntity.musicElements.indexOf(music), element);
 
             if (elementIndex > 0 && elementIndex != index) {
                 remove(elementIndex);
@@ -396,8 +350,8 @@ public class MusicList {
         public void add(int index, Music element) {
             int elementIndex = indexOf(element);
 
-            mMusicListEntity.musicElements.add(index, element);
-            mMusicListEntity.size = mMusicListEntity.musicElements.size();
+            musicListEntity.musicElements.add(index, element);
+            musicListEntity.size = musicListEntity.musicElements.size();
 
             if (elementIndex > -1) {
                 remove(element);
@@ -409,8 +363,8 @@ public class MusicList {
         @Override
         public Music remove(int index) {
             Music music = mOrderedList.remove(index);
-            mMusicListEntity.musicElements.remove(music);
-            mMusicListEntity.size = mMusicListEntity.musicElements.size();
+            musicListEntity.musicElements.remove(music);
+            musicListEntity.size = musicListEntity.musicElements.size();
             return music;
         }
 

@@ -16,7 +16,6 @@ public class MusicListEntity {
     long id;
     @Unique
     String name;
-    String description;
     int size;
     @Convert(converter = SortOrderConverter.class, dbType = Integer.class)
     MusicList.SortOrder sortOrder;
@@ -26,13 +25,11 @@ public class MusicListEntity {
 
     public MusicListEntity() {
         this.name = "";
-        this.description = "";
     }
 
-    public MusicListEntity(long id, String name, String description, int size, MusicList.SortOrder sortOrder, byte[] orderBytes) {
+    public MusicListEntity(long id, String name, int size, MusicList.SortOrder sortOrder, byte[] orderBytes) {
         this.id = id;
         this.name = name;
-        this.description = description;
         this.orderBytes = orderBytes;
         this.size = size;
         this.sortOrder = sortOrder;
