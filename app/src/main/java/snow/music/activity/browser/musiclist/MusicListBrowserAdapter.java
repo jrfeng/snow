@@ -4,7 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -126,8 +125,6 @@ public class MusicListBrowserAdapter extends RecyclerView.Adapter<MusicListBrows
         }
 
         mItemClickHelper.bindClickListener(holder.itemView, holder.btnOptionMenu);
-
-        // TODO load icon
     }
 
     @Override
@@ -149,7 +146,6 @@ public class MusicListBrowserAdapter extends RecyclerView.Adapter<MusicListBrows
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public ImageView ivMusicListIcon;
         public TextView tvMusicListName;
         public TextView tvMusicListSize;
         public ImageButton btnOptionMenu;
@@ -161,7 +157,6 @@ public class MusicListBrowserAdapter extends RecyclerView.Adapter<MusicListBrows
                 return;
             }
 
-            ivMusicListIcon = itemView.findViewById(R.id.ivMusicListIcon);
             tvMusicListName = itemView.findViewById(R.id.tvMusicListName);
             tvMusicListSize = itemView.findViewById(R.id.tvMusicListSize);
             btnOptionMenu = itemView.findViewById(R.id.btnOptionMenu);

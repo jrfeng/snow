@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/musicListBrowserItem"
@@ -7,55 +7,59 @@
     android:layout_height="72dp"
     android:background="@drawable/bg_list_item"
     android:clickable="true"
-    android:focusable="true"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingLeft="16dp"
-    android:paddingEnd="8dp"
-    android:paddingRight="8dp">
-
-    <ImageView
-        android:id="@+id/ivMusicListIcon"
-        android:layout_width="@dimen/music_list_browser_item_icon_size"
-        android:layout_height="@dimen/music_list_browser_item_icon_size"
-        android:contentDescription="@string/des_music_list_icon"
-        android:src="@mipmap/ic_music_list_default_icon" />
-
-    <Space
-        android:layout_width="16dp"
-        android:layout_height="0dp" />
+    android:focusable="true">
 
     <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="36dp"
+        android:paddingLeft="36dp"
+        android:paddingEnd="8dp"
+        android:paddingRight="8dp">
 
-        <TextView
-            android:id="@+id/tvMusicListName"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            tools:text="Best Favorites" />
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvMusicListSize"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:textColor="@color/colorSecondaryText"
-            tools:text="16 songs" />
+            <TextView
+                android:id="@+id/tvMusicListName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                tools:text="Best Favorites" />
+
+            <TextView
+                android:id="@+id/tvMusicListSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textColor="@color/colorSecondaryText"
+                tools:text="16 songs" />
+
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnOptionMenu"
+            android:layout_width="@dimen/image_button_size"
+            android:layout_height="@dimen/image_button_size"
+            android:background="@drawable/bg_button_48dp"
+            android:contentDescription="@string/des_skip_to_previous"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_option_menu" />
 
     </LinearLayout>
 
-    <ImageButton
-        android:id="@+id/btnOptionMenu"
-        android:layout_width="@dimen/image_button_size"
-        android:layout_height="@dimen/image_button_size"
-        android:background="@drawable/bg_button_48dp"
-        android:contentDescription="@string/des_skip_to_previous"
-        android:scaleType="centerInside"
-        app:srcCompat="@drawable/ic_option_menu" />
+    <FrameLayout
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
+        android:background="@color/colorDivider" />
 
-</LinearLayout>
+</FrameLayout>
