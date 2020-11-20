@@ -36,12 +36,14 @@
             android:id="@+id/tvMusicListName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:singleLine="true"
             tools:text="Best Favorites" />
 
         <TextView
             android:id="@+id/tvMusicListSize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:singleLine="true"
             android:textColor="@color/colorSecondaryText"
             tools:text="16 songs" />
 
