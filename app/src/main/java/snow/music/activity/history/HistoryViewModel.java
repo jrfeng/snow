@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.common.base.Preconditions;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -39,6 +40,13 @@ public class HistoryViewModel extends ViewModel {
 
     public LiveData<List<Music>> getHistory() {
         return mHistory;
+    }
+
+    @NonNull
+    public List<Music> getAllHistory() {
+        List<Music> allHistory = mHistory.getValue();
+        assert allHistory != null;
+        return new ArrayList<>(allHistory);
     }
 
     public void removeHistory(@NonNull Music music) {

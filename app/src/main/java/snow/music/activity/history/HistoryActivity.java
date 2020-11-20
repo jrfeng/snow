@@ -16,7 +16,7 @@ import snow.music.dialog.MessageDialog;
 import snow.music.service.AppPlayerService;
 import snow.music.store.Music;
 import snow.music.store.MusicStore;
-import snow.music.util.MusicUtil;
+import snow.music.util.MusicListUtil;
 import snow.music.util.PlayerUtil;
 import snow.player.lifecycle.PlayerViewModel;
 import snow.player.playlist.Playlist;
@@ -72,7 +72,7 @@ public class HistoryActivity extends ListActivity {
         mHistoryAdapter.setOnItemClickListener(new HistoryAdapter.OnItemClickListener() {
             @Override
             public void onItemClicked(int position, @NonNull Music music) {
-                playMusic(music);
+                playMusic(position);
             }
 
             @Override
@@ -85,16 +85,13 @@ public class HistoryActivity extends ListActivity {
                 .observe(this, history -> mHistoryAdapter.setHistory(history));
     }
 
-    private void playMusic(Music music) {
+    private void playMusic(int position) {
         MessageDialog messageDialog = new MessageDialog.Builder(getApplicationContext())
-                .setMessage(R.string.message_play_music)
+                .setMessage(R.string.message_play_all_music)
                 .setPositiveButtonClickListener((dialog, which) -> {
-                    Playlist playlist = new Playlist.Builder()
-                            .setName(MusicStore.MUSIC_LIST_HISTORY)
-                            .append(MusicUtil.asMusicItem(music))
-                            .build();
+                    Playlist playlist = MusicListUtil.asPlaylist(MusicStore.MUSIC_LIST_HISTORY, mHistoryViewModel.getAllHistory(), position);
 
-                    mPlayerViewModel.setPlaylist(playlist, true);
+                    mPlayerViewModel.setPlaylist(playlist, position, true);
                 })
                 .build();
 
