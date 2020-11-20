@@ -15,6 +15,10 @@
     <string name="music_list_size_0">0 song</string>
     <string name="music_list_size_1">1 song</string>
     <string name="music_list_size_n">n songs</string>
+    <string name="title_create_music_list">Create music list</string>
+    <string name="hint_music_list_title">music list title</string>
+    <string name="hint_please_input_music_list_title">Please input music list title</string>
+    <string name="hint_music_list_name_exists">Music list name exists</string>
 
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>

@@ -85,4 +85,8 @@
     <string name="music_list_size_n">n 首</string>
     <string name="input_default_title">输入</string>
     <string name="input_default_hint">输入内容</string>
+    <string name="title_create_music_list">创建歌单</string>
+    <string name="hint_music_list_title">歌单名称</string>
+    <string name="hint_please_input_music_list_title">请输入歌单名称</string>
+    <string name="hint_music_list_name_exists">歌单名已存在</string>
 </resources>

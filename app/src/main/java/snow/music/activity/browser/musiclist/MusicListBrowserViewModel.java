@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.common.base.Preconditions;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +26,7 @@ public class MusicListBrowserViewModel extends ViewModel {
     private MutableLiveData<List<MusicList>> mAllMusicList;
 
     private Disposable mLoadMusicListDisposable;
+    private Disposable mCreateMusicListDisposable;
 
     public MusicListBrowserViewModel() {
         mAllMusicList = new MutableLiveData<>(Collections.emptyList());
@@ -37,20 +39,24 @@ public class MusicListBrowserViewModel extends ViewModel {
         if (mLoadMusicListDisposable != null && !mLoadMusicListDisposable.isDisposed()) {
             mLoadMusicListDisposable.dispose();
         }
+
+        if (mCreateMusicListDisposable != null && !mCreateMusicListDisposable.isDisposed()) {
+            mCreateMusicListDisposable.dispose();
+        }
     }
 
     public LiveData<List<MusicList>> getAllMusicList() {
         return mAllMusicList;
     }
 
-    public Single<MusicList> createMusicList(@NonNull String name) {
+    public void createMusicList(@NonNull String name) {
         Preconditions.checkNotNull(name);
 
         if (isNameIllegal(name)) {
             throw new IllegalArgumentException("name is illegal.");
         }
 
-        return Single.create(emitter -> {
+        mCreateMusicListDisposable = Single.create((SingleOnSubscribe<MusicList>) emitter -> {
             MusicList musicList = MusicStore.getInstance().createCustomMusicList(name);
 
             if (emitter.isDisposed()) {
@@ -58,7 +64,16 @@ public class MusicListBrowserViewModel extends ViewModel {
             }
 
             emitter.onSuccess(musicList);
-        });
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(musicList -> {
+                    List<MusicList> allMusicList = mAllMusicList.getValue();
+                    assert allMusicList != null;
+                    allMusicList = new ArrayList<>(allMusicList);   // getValue() 返回的 List 不支持 add 操作
+
+                    allMusicList.add(musicList);
+                    mAllMusicList.setValue(allMusicList);
+                });
     }
 
     public MusicList getMusicList(int position) {
@@ -90,7 +105,7 @@ public class MusicListBrowserViewModel extends ViewModel {
     public boolean isNameIllegal(@NonNull String name) {
         Preconditions.checkNotNull(name);
 
-        return name.isEmpty() || MusicStore.getInstance().isMusicListExists(name);
+        return name.isEmpty() || MusicStore.getInstance().isNameExists(name);
     }
 
     public void navigateToMusicList(Context context, int position) {
