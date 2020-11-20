@@ -49,6 +49,8 @@ public class MusicStore {
     public static final String MUSIC_LIST_FAVORITE = "__favorite";
     public static final String MUSIC_LIST_HISTORY = "__history";
 
+    public static final int NAME_MAX_LENGTH = 40;
+
     private static final int MAX_HISTORY_SIZE = 500;
 
     private static MusicStore mInstance;
@@ -185,7 +187,13 @@ public class MusicStore {
      */
     public boolean isNameExists(@NonNull String name) {
         Preconditions.checkNotNull(name);
+
+        name = trimName(name);
         return isBuiltInName(name) || mAllCustomMusicListName.contains(name);
+    }
+
+    private String trimName(String name) {
+        return name.trim().substring(0, Math.min(name.length(), NAME_MAX_LENGTH));
     }
 
     /**
@@ -220,6 +228,8 @@ public class MusicStore {
     /**
      * 创建一个新的歌单，如果歌单已存在，则直接返回它，不会创建新歌单。
      *
+     * @param name 歌单名，不能为 null。不能是内置名称。name 字符串的最大长度为 {@link #NAME_MAX_LENGTH}，
+     *             超出部分会被截断。
      * @throws IllegalArgumentException 如果 name 参数是个空字符串或者内置名称，则抛出该异常。
      */
     @NonNull
@@ -231,6 +241,8 @@ public class MusicStore {
         if (isBuiltInName(name)) {
             throw new IllegalArgumentException("Illegal music list name, conflicts with built-in name.");
         }
+
+        name = trimName(name);
 
         if (isMusicListExists(name)) {
             MusicList musicList = getCustomMusicList(name);
@@ -327,6 +339,12 @@ public class MusicStore {
                 .remove();
     }
 
+    /**
+     * 重命名歌单。
+     *
+     * @param musicList 要重命名的 {@link MusicList} 对象，不能为 null
+     * @param newName   新的歌单名，最长 {@link #NAME_MAX_LENGTH}（40）个字符，超出部分会被截断，不能为 null
+     */
     public synchronized void renameMusicList(@NonNull MusicList musicList, @NonNull String newName) {
         Preconditions.checkNotNull(musicList);
         Preconditions.checkNotNull(newName);
@@ -336,6 +354,9 @@ public class MusicStore {
         }
 
         mAllCustomMusicListName.remove(musicList.getName());
+
+        newName = trimName(newName);
+
         mAllCustomMusicListName.add(newName);
         musicList.musicListEntity.name = newName;
         updateMusicList(musicList);
