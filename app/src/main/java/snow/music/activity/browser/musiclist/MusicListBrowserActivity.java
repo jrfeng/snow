@@ -104,6 +104,7 @@ public class MusicListBrowserActivity extends ListActivity {
     private void renameMusicList(int position, MusicList musicList) {
         InputDialog dialog = new InputDialog.Builder(this)
                 .setTitle(R.string.menu_item_rename_music_list)
+                .setText(musicList.getName())
                 .setHint(R.string.hint_music_list_title)
                 .setOnInputConfirmListener(new InputValidator(this), input -> {
                     assert input != null;
