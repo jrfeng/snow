@@ -49,10 +49,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        android:paddingLeft="24dp"
-        android:paddingTop="16dp"
-        android:paddingRight="24dp"
-        android:paddingBottom="16dp">
+        android:padding="24dp">
 
         <Button
             android:id="@+id/btnNegative"
@@ -64,7 +61,8 @@
             android:ellipsize="middle"
             android:singleLine="true"
             android:text="@string/message_dialog_negative_text"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"
+            android:textSize="@dimen/dialog_button_text_size" />
 
         <Space
             android:id="@+id/space"
@@ -82,7 +80,8 @@
             android:singleLine="true"
             android:text="@string/message_dialog_positive_text"
             android:textAllCaps="false"
-            android:textColor="@color/colorPrimary" />
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/dialog_button_text_size" />
 
     </LinearLayout>
 

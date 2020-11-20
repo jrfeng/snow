@@ -10,13 +10,15 @@
     android:focusable="true"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingLeft="8dp"
+    android:paddingStart="16dp"
+    android:paddingLeft="16dp"
+    android:paddingEnd="8dp"
     android:paddingRight="8dp">
 
     <ImageView
         android:id="@+id/ivMusicListIcon"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="@dimen/music_list_browser_item_icon_size"
+        android:layout_height="@dimen/music_list_browser_item_icon_size"
         android:contentDescription="@string/des_music_list_icon"
         android:src="@mipmap/ic_music_list_default_icon" />
 

@@ -13,11 +13,13 @@
     <dimen name="dialog_title_height">60dp</dimen>
     <dimen name="dialog_title_text_size">18sp</dimen>
     <dimen name="dialog_item_text_size">16sp</dimen>
-    <dimen name="dialog_item_height">52dp</dimen>
+    <dimen name="dialog_item_height">56dp</dimen>
     <dimen name="dialog_content_height">120dp</dimen>
 
     <dimen name="dialog_button_min_width">148dp</dimen>
     <dimen name="dialog_button_height">48dp</dimen>
     <dimen name="dialog_button_corner_radius">24dp</dimen>
     <dimen name="dialog_button_text_size">16sp</dimen>
+
+    <dimen name="music_list_browser_item_icon_size">52dp</dimen>
 </resources>
