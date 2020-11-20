@@ -100,8 +100,9 @@ public class MusicListBrowserViewModel extends ViewModel {
             return;
         }
 
-        musicList.setName(newName);
-        Single.create((SingleOnSubscribe<Boolean>) emitter -> MusicStore.getInstance().updateMusicList(musicList)).subscribeOn(Schedulers.io())
+        Single.create((SingleOnSubscribe<Boolean>) emitter ->
+                MusicStore.getInstance().renameMusicList(musicList, newName))
+                .subscribeOn(Schedulers.io())
                 .subscribe();
     }
 

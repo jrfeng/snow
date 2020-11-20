@@ -143,7 +143,7 @@ public class MusicStore {
             ArrayList<Music> items = new ArrayList<>(musicList.getMusicElements());
             Collections.sort(items, sortOrder.comparator());
 
-            musicList.setSortOrder(sortOrder);
+            musicList.musicListEntity.sortOrder = sortOrder;
             musicList.getMusicElements().clear();
             musicList.getMusicElements().addAll(items);
             updateMusicList(musicList);
@@ -224,18 +224,7 @@ public class MusicStore {
      */
     @NonNull
     public synchronized MusicList createCustomMusicList(@NonNull String name) throws IllegalArgumentException {
-        return createCustomMusicList(name, "");
-    }
-
-    /**
-     * 创建一个新的歌单，如果歌单已存在，则直接返回它，不会创建新歌单。
-     *
-     * @throws IllegalArgumentException 如果 name 参数是个空字符串或者内置名称，则抛出该异常。
-     */
-    @NonNull
-    public synchronized MusicList createCustomMusicList(@NonNull String name, @NonNull String description) throws IllegalArgumentException {
         Preconditions.checkNotNull(name);
-        Preconditions.checkNotNull(description);
         Preconditions.checkArgument(!name.isEmpty(), "name must not empty");
         checkThread();
 
@@ -250,7 +239,7 @@ public class MusicStore {
         }
 
         mAllCustomMusicListName.add(name);
-        MusicListEntity entity = new MusicListEntity(0, name, description, 0, MusicList.SortOrder.BY_ADD_TIME, new byte[0]);
+        MusicListEntity entity = new MusicListEntity(0, name, 0, MusicList.SortOrder.BY_ADD_TIME, new byte[0]);
         mMusicListEntityBox.put(entity);
         return new MusicList(entity);
     }
@@ -296,7 +285,7 @@ public class MusicStore {
         }
 
         musicList.applyChanges();
-        mMusicListEntityBox.put(musicList.getMusicListEntity());
+        mMusicListEntityBox.put(musicList.musicListEntity);
     }
 
     /**
@@ -336,6 +325,20 @@ public class MusicStore {
                 .equal(MusicListEntity_.name, name)
                 .build()
                 .remove();
+    }
+
+    public synchronized void renameMusicList(@NonNull MusicList musicList, @NonNull String newName) {
+        Preconditions.checkNotNull(musicList);
+        Preconditions.checkNotNull(newName);
+
+        if (newName.isEmpty() || !isMusicListExists(musicList.getName())) {
+            return;
+        }
+
+        mAllCustomMusicListName.remove(musicList.getName());
+        mAllCustomMusicListName.add(newName);
+        musicList.musicListEntity.name = newName;
+        updateMusicList(musicList);
     }
 
     /**
@@ -827,7 +830,7 @@ public class MusicStore {
     }
 
     private MusicListEntity createBuiltInMusicList(String name) {
-        MusicListEntity entity = new MusicListEntity(0, name, "", 0, MusicList.SortOrder.BY_ADD_TIME, new byte[0]);
+        MusicListEntity entity = new MusicListEntity(0, name, 0, MusicList.SortOrder.BY_ADD_TIME, new byte[0]);
         mMusicListEntityBox.put(entity);
         return entity;
     }
