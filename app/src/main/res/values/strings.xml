@@ -86,6 +86,10 @@
     <!-- ScannerDialog -->
     <string name="title_scan_music">Scan music</string>
 
+    <!-- InputDialog -->
+    <string name="title_input">Input</string>
+    <string name="hint_message">Message</string>
+
     <!-- content description -->
     <string name="des_logo">logo</string>
     <string name="des_search">Search</string>
