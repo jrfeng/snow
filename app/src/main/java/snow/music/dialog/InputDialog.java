@@ -139,6 +139,7 @@ public class InputDialog extends BottomDialog {
          *
          * @return 输入内容不合法时的提示信息
          */
+        @NonNull
         String getInvalidateHint();
     }
 
