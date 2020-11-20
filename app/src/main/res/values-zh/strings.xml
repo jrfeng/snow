@@ -83,6 +83,6 @@
     <string name="music_list_size_0">0 首</string>
     <string name="music_list_size_1">1 首</string>
     <string name="music_list_size_n">n 首</string>
-    <string name="title_input">输入</string>
-    <string name="hint_message">输入内容</string>
+    <string name="input_default_title">输入</string>
+    <string name="input_default_hint">输入内容</string>
 </resources>

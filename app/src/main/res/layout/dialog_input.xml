@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tvDialogTitle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dialog_title_height"
+        android:layout_gravity="center_vertical"
+        android:ellipsize="middle"
+        android:gravity="center"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:singleLine="true"
+        android:text="@string/input_default_title"
+        android:textSize="@dimen/dialog_title_text_size" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dialog_content_height"
+        android:paddingLeft="24dp"
+        android:paddingTop="16dp"
+        android:paddingRight="24dp"
+        android:paddingBottom="16dp">
+
+        <EditText
+            android:id="@+id/etInput"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_input"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:gravity="center_vertical"
+            android:hint="@string/input_default_hint"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:singleLine="true"
+            android:textSize="@dimen/dialog_item_text_size" />
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingLeft="24dp"
+        android:paddingTop="16dp"
+        android:paddingRight="24dp"
+        android:paddingBottom="16dp">
+
+        <Button
+            android:id="@+id/btnNegative"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/dialog_button_height"
+            android:layout_weight="1"
+            android:background="@drawable/bg_dialog_button"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:text="@string/message_dialog_negative_text"
+            android:textAllCaps="false" />
+
+        <Space
+            android:id="@+id/space"
+            android:layout_width="16dp"
+            android:layout_height="0dp" />
+
+        <Button
+            android:id="@+id/btnPositive"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/dialog_button_height"
+            android:layout_weight="1"
+            android:background="@drawable/bg_dialog_button"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:text="@string/message_dialog_positive_text"
+            android:textAllCaps="false"
+            android:textColor="@color/colorPrimary" />
+
+    </LinearLayout>
+
+</LinearLayout>

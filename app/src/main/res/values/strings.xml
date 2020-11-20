@@ -87,8 +87,8 @@
     <string name="title_scan_music">Scan music</string>
 
     <!-- InputDialog -->
-    <string name="title_input">Input</string>
-    <string name="hint_message">Message</string>
+    <string name="input_default_title">Input</string>
+    <string name="input_default_hint">Message</string>
 
     <!-- content description -->
     <string name="des_logo">logo</string>
