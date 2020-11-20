@@ -85,21 +85,24 @@ public class MusicListBrowserViewModel extends ViewModel {
 
         Single.create((SingleOnSubscribe<Boolean>) emitter -> MusicStore.getInstance().deleteMusicList(musicList)).subscribeOn(Schedulers.io())
                 .subscribe();
+
+        List<MusicList> allMusicList = new ArrayList<>(Objects.requireNonNull(mAllMusicList.getValue()));
+        allMusicList.remove(musicList);
+
+        mAllMusicList.setValue(allMusicList);
     }
 
-    public boolean renameMusicList(@NonNull MusicList musicList, @NonNull String newName) {
+    public void renameMusicList(@NonNull MusicList musicList, @NonNull String newName) {
         Preconditions.checkNotNull(musicList);
         Preconditions.checkNotNull(newName);
 
         if (isNameIllegal(newName)) {
-            return false;
+            return;
         }
 
         musicList.setName(newName);
         Single.create((SingleOnSubscribe<Boolean>) emitter -> MusicStore.getInstance().updateMusicList(musicList)).subscribeOn(Schedulers.io())
                 .subscribe();
-
-        return true;
     }
 
     public boolean isNameIllegal(@NonNull String name) {

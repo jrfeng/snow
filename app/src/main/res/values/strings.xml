@@ -19,6 +19,9 @@
     <string name="hint_music_list_title">music list title</string>
     <string name="hint_please_input_music_list_title">Please input music list title</string>
     <string name="hint_music_list_name_exists">Music list name exists</string>
+    <string name="menu_item_rename_music_list">Rename music list</string>
+    <string name="menu_item_delete_music_list">Delete music list</string>
+    <string name="message_delete_music_list">Delete music list?</string>
 
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>
