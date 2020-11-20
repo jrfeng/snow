@@ -197,6 +197,16 @@ public class MusicStore {
     }
 
     /**
+     * 获取所有自建歌单的名称。
+     *
+     * @return 所有自建歌单名称
+     */
+    @NonNull
+    public Set<String> getAllCustomMusicListName() {
+        return mAllCustomMusicListName;
+    }
+
+    /**
      * 歌单是否已存在。
      * <p>
      * 该方法会访问数据库，不建议在 UI 线程调用。
