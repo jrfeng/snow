@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.common.base.Preconditions;
 
@@ -21,6 +21,7 @@ import snow.music.databinding.ActivityNavigationBinding;
 import snow.music.dialog.PlaylistDialog;
 import snow.music.dialog.ScannerDialog;
 import snow.music.service.AppPlayerService;
+import snow.music.util.DimenUtil;
 import snow.music.util.PlayerUtil;
 import snow.music.util.MusicUtil;
 import snow.player.lifecycle.PlayerViewModel;
@@ -32,7 +33,6 @@ public class NavigationActivity extends BaseActivity {
     private PlayerViewModel mPlayerViewModel;
     private NavigationViewModel mNavigationViewModel;
 
-    private DiskAnimManager mDiskAnimManager;
     private Disposable mIconLoadDisposable;
 
     @Override
@@ -47,7 +47,6 @@ public class NavigationActivity extends BaseActivity {
         mBinding.setNavViewModel(mNavigationViewModel);
         mBinding.setLifecycleOwner(this);
 
-        mDiskAnimManager = new DiskAnimManager(mBinding.ivDisk, this, mPlayerViewModel);
         observerPlayingMusicItem();
 
         if (shouldScanLocalMusic()) {
@@ -84,8 +83,6 @@ public class NavigationActivity extends BaseActivity {
     private void observerPlayingMusicItem() {
         mPlayerViewModel.getPlayingMusicItem()
                 .observe(this, musicItem -> {
-                    mDiskAnimManager.reset();
-
                     if (musicItem == null) {
                         mBinding.ivDisk.setImageResource(0);
                         return;
@@ -100,11 +97,19 @@ public class NavigationActivity extends BaseActivity {
         mIconLoadDisposable = MusicUtil.getEmbeddedPicture(this, musicUri)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bytes -> Glide.with(NavigationActivity.this)
-                        .load(bytes)
-                        .transform(new CircleCrop())
-                        .transition(DrawableTransitionOptions.withCrossFade(200))
-                        .into(mBinding.ivDisk));
+                .subscribe(bytes -> {
+                    if (bytes == null || bytes.length < 1) {
+                        mBinding.ivDisk.setImageResource(R.mipmap.ic_album_default_icon_big);
+                        return;
+                    }
+
+                    Glide.with(NavigationActivity.this)
+                            .load(bytes)
+                            .error(R.mipmap.ic_album_default_icon_big)
+                            .transform(new RoundedCorners(DimenUtil.getDimenPx(getResources(), R.dimen.album_icon_corner_radius)))
+                            .transition(DrawableTransitionOptions.withCrossFade(200))
+                            .into(mBinding.ivDisk);
+                });
     }
 
     private void cancelLoadMusicIcon() {

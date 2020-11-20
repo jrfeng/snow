@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="navViewModel"
             type="snow.music.activity.navigation.NavigationViewModel" />
@@ -75,10 +76,9 @@
                 android:id="@+id/ivDisk"
                 android:layout_width="@dimen/album_icon_size"
                 android:layout_height="@dimen/album_icon_size"
-                android:background="@mipmap/ic_disk_default_icon"
                 android:contentDescription="@string/des_album_icon"
-                android:padding="64dp"
-                android:scaleType="fitXY" />
+                android:scaleType="centerCrop"
+                android:src="@mipmap/ic_album_default_icon_big" />
 
             <Space
                 android:layout_width="0dp"
