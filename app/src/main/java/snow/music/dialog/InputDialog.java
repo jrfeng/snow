@@ -37,6 +37,7 @@ public class InputDialog extends BottomDialog {
 
         tvDialogTitle.setText(mTitle);
         etInput.setHint(mHint);
+        etInput.requestFocus();
 
         btnNegative.setOnClickListener(view -> dismiss());
 
