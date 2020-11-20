@@ -13,9 +13,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import android.os.Handler;
 import android.util.Log;
@@ -23,6 +25,8 @@ import android.util.Log;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.query.QueryBuilder;
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * 歌曲数据库，用于存储本地音乐与本地歌单。
@@ -58,12 +62,34 @@ public class MusicStore {
     private final List<OnFavoriteChangeListener> mAllFavoriteChangeListener;
     private OnScanCompleteListener mOnScanCompleteListener;
 
+    private Set<String> mAllCustomMusicListName;
+
     private MusicStore(BoxStore boxStore) {
         mBoxStore = boxStore;
         mMusicBox = boxStore.boxFor(Music.class);
         mMusicListEntityBox = boxStore.boxFor(MusicListEntity.class);
         mMainHandler = new Handler(Looper.getMainLooper());
         mAllFavoriteChangeListener = new LinkedList<>();
+        mAllCustomMusicListName = new HashSet<>();
+
+        loadAllMusicListName();
+    }
+
+    private void loadAllMusicListName() {
+        Single.create(emitter -> {
+            String[] allName = mMusicListEntityBox.query()
+                    .build()
+                    .property(MusicListEntity_.name)
+                    .findStrings();
+
+            if (allName == null) {
+                return;
+            }
+
+            mAllCustomMusicListName.addAll(Arrays.asList(allName));
+
+        }).subscribeOn(Schedulers.io())
+                .subscribe();
     }
 
     /**
@@ -82,7 +108,7 @@ public class MusicStore {
                 .directory(new File(context.getFilesDir(), "music_store"))
                 .build();
 
-        mInstance = new MusicStore(boxStore);
+        init(boxStore);
     }
 
     /**
@@ -92,6 +118,11 @@ public class MusicStore {
      */
     public synchronized static void init(@NonNull BoxStore boxStore) {
         Preconditions.checkNotNull(boxStore);
+
+        if (mInstance != null) {
+            return;
+        }
+
         mInstance = new MusicStore(boxStore);
     }
 
@@ -143,7 +174,27 @@ public class MusicStore {
     }
 
     /**
+     * 歌单名是否已存在。
+     * <p>
+     * 注意！所有自定义歌单名会在初始化时在异步线程进行预加载，如果你在所有自定义歌单名加载完成前调用该方法，
+     * 那么该方法的返回结果可能是不准确的。如果你需要准确的判断歌单名是否已存在，请使用
+     * {@link #isMusicListExists(String)} 方法，不过该方法会访问数据库，因此不建议在 UI 线程调用。
+     *
+     * @param name 歌单名，不能为 null
+     * @return 如果歌单名已存在，则返回 true，否则返回 false
+     */
+    public boolean isNameExists(@NonNull String name) {
+        Preconditions.checkNotNull(name);
+        return isBuiltInName(name) || mAllCustomMusicListName.contains(name);
+    }
+
+    /**
      * 歌单是否已存在。
+     * <p>
+     * 该方法会访问数据库，不建议在 UI 线程调用。
+     *
+     * @param name 歌单名，不能为 null
+     * @return 如果歌单已存在，则返回 true，否则返回 false
      */
     public synchronized boolean isMusicListExists(@NonNull String name) {
         Preconditions.checkNotNull(name);
@@ -198,6 +249,7 @@ public class MusicStore {
             return musicList;
         }
 
+        mAllCustomMusicListName.add(name);
         MusicListEntity entity = new MusicListEntity(0, name, description, 0, MusicList.SortOrder.BY_ADD_TIME, new byte[0]);
         mMusicListEntityBox.put(entity);
         return new MusicList(entity);
@@ -238,6 +290,11 @@ public class MusicStore {
             return;
         }
 
+        String name = musicList.getName();
+        if (!isBuiltInName(name)) {
+            mAllCustomMusicListName.add(name);
+        }
+
         musicList.applyChanges();
         mMusicListEntityBox.put(musicList.getMusicListEntity());
     }
@@ -255,6 +312,7 @@ public class MusicStore {
             return;
         }
 
+        mAllCustomMusicListName.remove(musicList.getName());
         mMusicListEntityBox.query()
                 .equal(MusicListEntity_.id, musicList.getId())
                 .build()
