@@ -133,7 +133,7 @@ public class PlaylistDialog extends BottomDialog {
                 .setMessage(R.string.message_remove_from_playlist)
                 .setPositiveTextColor(context.getResources().getColor(R.color.red_500))
                 .setPositiveButtonClickListener((dialog, which) -> mPlayerViewModel.getPlayerClient().removeMusicItem(position))
-                .setDisableTransition(true)
+                .setDisableEnterAnim(true)
                 .build();
 
         messageDialog.show(getParentFragmentManager(), "RemoveMusicItem");

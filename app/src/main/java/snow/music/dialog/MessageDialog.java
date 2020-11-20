@@ -28,7 +28,7 @@ public class MessageDialog extends BottomDialog {
     private DialogInterface.OnClickListener mPositiveButtonClickListener;
     private DialogInterface.OnClickListener mNegativeButtonClickListener;
     private boolean mHideNegativeButton;
-    private boolean mDisableTransition;
+    private boolean mDisableEnterAnim;
 
     @Override
     protected void onInitDialog(AppCompatDialog dialog) {
@@ -73,8 +73,8 @@ public class MessageDialog extends BottomDialog {
             }
         });
 
-        if (mDisableTransition && dialog.getWindow() != null) {
-            dialog.getWindow().setWindowAnimations(0);
+        if (mDisableEnterAnim && dialog.getWindow() != null) {
+            dialog.getWindow().setWindowAnimations(R.style.BottomDialogTransition_NoEnterAnim);
         }
     }
 
@@ -94,7 +94,7 @@ public class MessageDialog extends BottomDialog {
         private DialogInterface.OnClickListener mPositiveButtonClickListener;
         private DialogInterface.OnClickListener mNegativeButtonClickListener;
         private boolean mHideNegativeButton;
-        private boolean mDisableTransition;
+        private boolean mDisableEnterAnim;
 
         public Builder(@NonNull Context context) {
             Preconditions.checkNotNull(context);
@@ -174,8 +174,8 @@ public class MessageDialog extends BottomDialog {
             return this;
         }
 
-        public Builder setDisableTransition(boolean disableTransition) {
-            mDisableTransition = disableTransition;
+        public Builder setDisableEnterAnim(boolean disableEnterAnim) {
+            mDisableEnterAnim = disableEnterAnim;
             return this;
         }
 
@@ -195,7 +195,7 @@ public class MessageDialog extends BottomDialog {
             dialog.mPositiveButtonClickListener = mPositiveButtonClickListener;
             dialog.mNegativeButtonClickListener = mNegativeButtonClickListener;
             dialog.mHideNegativeButton = mHideNegativeButton;
-            dialog.mDisableTransition = mDisableTransition;
+            dialog.mDisableEnterAnim = mDisableEnterAnim;
 
             return dialog;
         }
