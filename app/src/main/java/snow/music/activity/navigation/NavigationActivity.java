@@ -84,7 +84,7 @@ public class NavigationActivity extends BaseActivity {
         mPlayerViewModel.getPlayingMusicItem()
                 .observe(this, musicItem -> {
                     if (musicItem == null) {
-                        mBinding.ivDisk.setImageResource(0);
+                        mBinding.ivDisk.setImageResource(R.mipmap.ic_album_default_icon_big);
                         return;
                     }
 
