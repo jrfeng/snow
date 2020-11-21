@@ -72,7 +72,7 @@ dependencies {
     implementation "com.github.bumptech.glide:glide:$glideVersion"
 
     // rv-helper
-    implementation 'com.github.jrfeng:rv-helper:1.1'
+    implementation 'com.github.jrfeng:rv-helper:1.2'
 
     // pinyin-comparator
     implementation 'com.github.jrfeng:pinyin-comparator:1.0.2'
