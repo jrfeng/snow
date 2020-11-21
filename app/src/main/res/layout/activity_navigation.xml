@@ -77,7 +77,6 @@
                 android:layout_width="@dimen/album_icon_size"
                 android:layout_height="@dimen/album_icon_size"
                 android:contentDescription="@string/des_album_icon"
-                android:scaleType="centerCrop"
                 android:src="@mipmap/ic_album_default_icon_big" />
 
             <Space

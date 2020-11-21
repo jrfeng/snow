@@ -34,6 +34,7 @@ public class NavigationActivity extends BaseActivity {
     private NavigationViewModel mNavigationViewModel;
 
     private Disposable mIconLoadDisposable;
+    private RoundedCorners mRoundedCorners;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +53,8 @@ public class NavigationActivity extends BaseActivity {
         if (shouldScanLocalMusic()) {
             scanLocalMusic();
         }
+
+        mRoundedCorners = new RoundedCorners(DimenUtil.getDimenPx(getResources(), R.dimen.album_icon_corner_radius));
     }
 
     @Override
@@ -105,9 +108,10 @@ public class NavigationActivity extends BaseActivity {
 
                     Glide.with(NavigationActivity.this)
                             .load(bytes)
+                            .centerCrop()
                             .error(R.mipmap.ic_album_default_icon_big)
-                            .transform(new RoundedCorners(DimenUtil.getDimenPx(getResources(), R.dimen.album_icon_corner_radius)))
-                            .transition(DrawableTransitionOptions.withCrossFade(200))
+                            .transform(mRoundedCorners)
+                            .transition(DrawableTransitionOptions.withCrossFade())
                             .into(mBinding.ivDisk);
                 });
     }
