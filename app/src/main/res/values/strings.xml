@@ -97,6 +97,12 @@
     <string name="input_default_title">Input</string>
     <string name="input_default_hint">Message</string>
 
+    <!-- AddToMusicListDialog -->
+    <string name="title_add_to_music_list">Add to music list</string>
+    <string name="button_create_music_list">Create</string>
+    <string name="button_submit">Submit</string>
+    <string name="toast_added_successfully">Added successfully</string>
+
     <!-- content description -->
     <string name="des_logo">logo</string>
     <string name="des_search">Search</string>
@@ -121,5 +127,6 @@
     <string name="des_menu_icon">menu icon</string>
     <string name="des_checked">checked</string>
     <string name="des_music_list_icon">music list icon</string>
+    <string name="des_submit_icon">submit icon</string>
 
 </resources>

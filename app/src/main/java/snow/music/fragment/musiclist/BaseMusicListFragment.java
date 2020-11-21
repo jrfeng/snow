@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 
 import snow.music.R;
+import snow.music.dialog.AddToMusicListDialog;
 import snow.music.dialog.MessageDialog;
 import snow.music.dialog.SingleChoiceDialog;
 import snow.music.service.AppPlayerService;
@@ -257,7 +258,8 @@ public abstract class BaseMusicListFragment extends Fragment {
     }
 
     protected final void addToMusicList(@NonNull Music music) {
-        // TODO show add to music list dialog
+        AddToMusicListDialog dialog = AddToMusicListDialog.newInstance(music);
+        dialog.show(getParentFragmentManager(), "addToMusicList");
     }
 
     protected final void setAsRingtone(@NonNull Music music) {

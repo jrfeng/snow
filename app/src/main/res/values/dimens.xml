@@ -23,4 +23,6 @@
     <dimen name="dialog_button_text_size">16sp</dimen>
 
     <dimen name="music_list_browser_item_icon_size">52dp</dimen>
+
+    <dimen name="small_button_height">32dp</dimen>
 </resources>
