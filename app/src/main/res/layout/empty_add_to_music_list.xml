@@ -3,14 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
+    <TextView
         android:id="@+id/btnCreate"
-        style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/small_button_height"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="@drawable/bg_dialog_button"
-        android:text="@string/button_create_music_list"
+        android:text="@string/empty_text_no_music_list"
         android:textAllCaps="false" />
 
 </FrameLayout>

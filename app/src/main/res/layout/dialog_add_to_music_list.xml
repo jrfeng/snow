@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <LinearLayout
@@ -21,19 +21,18 @@
             android:textSize="@dimen/dialog_title_text_size" />
 
         <Button
-            android:id="@+id/btnSubmit"
+            android:id="@+id/btnNewMusicList"
             style="?android:attr/borderlessButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/small_button_height"
             android:layout_gravity="center|start"
             android:background="@drawable/bg_button_submit"
-            android:drawableStart="@drawable/ic_submit"
-            android:drawableLeft="@drawable/ic_submit"
+            android:drawableStart="@drawable/ic_new_music_list"
+            android:drawableLeft="@drawable/ic_new_music_list"
             android:drawablePadding="6dp"
-            android:enabled="false"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
-            android:text="@string/button_submit"
+            android:text="@string/button_text_new_music_list"
             android:textAllCaps="false"
             android:textColor="@android:color/white" />
 
@@ -42,6 +41,20 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvItems"
         android:layout_width="match_parent"
-        android:layout_height="320dp" />
+        android:layout_height="240dp" />
+
+    <Button
+        android:id="@+id/btnOK"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="24dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/bg_dialog_button"
+        android:text="@string/message_dialog_positive_text"
+        android:textAllCaps="false"
+        android:textColor="@color/colorPrimary" />
 
 </LinearLayout>

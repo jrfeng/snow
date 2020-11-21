@@ -92,9 +92,10 @@
     <string name="menu_item_rename_music_list">重命名</string>
     <string name="menu_item_delete_music_list">删除</string>
     <string name="message_delete_music_list">删除歌单？</string>
-    <string name="button_create_music_list">创建歌单</string>
+    <string name="empty_text_no_music_list">没有歌单</string>
     <string name="title_add_to_music_list">添加到歌单</string>
-    <string name="button_submit">确认</string>
+    <string name="button_text_new_music_list">新建歌单</string>
     <string name="des_submit_icon">确认图标</string>
     <string name="toast_added_successfully">添加成功</string>
+    <string name="button_text_ok">完成</string>
 </resources>

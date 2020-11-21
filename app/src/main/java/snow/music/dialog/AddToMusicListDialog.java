@@ -60,10 +60,12 @@ public class AddToMusicListDialog extends BottomDialog {
         dialog.setContentView(R.layout.dialog_add_to_music_list);
 
         RecyclerView rvItems = dialog.findViewById(R.id.rvItems);
-        Button btnSubmit = dialog.findViewById(R.id.btnSubmit);
+        Button btnNewMusicList = dialog.findViewById(R.id.btnNewMusicList);
+        Button btnOK = dialog.findViewById(R.id.btnOK);
 
         assert rvItems != null;
-        assert btnSubmit != null;
+        assert btnNewMusicList != null;
+        assert btnOK != null;
 
         rvItems.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -73,15 +75,19 @@ public class AddToMusicListDialog extends BottomDialog {
         AllMusicListAdapter adapter = new AllMusicListAdapter(allMusicListName, mAllContainsMusicListName);
         rvItems.setAdapter(adapter);
 
-        adapter.setOnSelectCountChangeListener(selectedCount -> btnSubmit.setEnabled(selectedCount > 0));
-        adapter.setOnCreateClickListener(v -> showCreateMusicListDialog());
+        btnNewMusicList.setOnClickListener(v -> showCreateMusicListDialog());
 
-        btnSubmit.setOnClickListener(view -> {
+        btnOK.setOnClickListener(view -> {
             dismiss();
+            List<String> names = adapter.getAllSelectedMusicList();
+            if (names.size() < 1) {
+                return;
+            }
+
             Toast.makeText(getContext(), R.string.toast_added_successfully, Toast.LENGTH_SHORT).show();
 
             Single.create(emitter ->
-                    MusicStore.getInstance().addToAllMusicList(mTargetMusic, adapter.getAllSelectedMusicList())
+                    MusicStore.getInstance().addToAllMusicList(mTargetMusic, names)
             ).subscribeOn(Schedulers.io())
                     .subscribe();
         });
@@ -162,8 +168,6 @@ public class AddToMusicListDialog extends BottomDialog {
         private final SelectableHelper mSelectableHelper;
         private final ItemClickHelper mItemClickHelper;
 
-        private View.OnClickListener mOnClickListener;
-
         AllMusicListAdapter(@NonNull List<String> allMusicListName, List<String> allContainsMusicListName) {
             Preconditions.checkNotNull(allMusicListName);
 
@@ -220,7 +224,6 @@ public class AddToMusicListDialog extends BottomDialog {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             if (holder.empty) {
-                holder.btnCreate.setOnClickListener(mOnClickListener);
                 return;
             }
 
@@ -268,19 +271,9 @@ public class AddToMusicListDialog extends BottomDialog {
             return allSelectedMusicList;
         }
 
-        public void setOnCreateClickListener(@Nullable View.OnClickListener listener) {
-            mOnClickListener = listener;
-        }
-
-        public void setOnSelectCountChangeListener(SelectableHelper.OnSelectCountChangeListener listener) {
-            mSelectableHelper.setOnSelectCountChangeListener(listener);
-        }
-
         private static class ViewHolder extends RecyclerView.ViewHolder
                 implements SelectableHelper.Selectable {
             boolean empty;
-
-            Button btnCreate;
 
             TextView tvItemTitle;
             CheckBox checkBox;
@@ -290,7 +283,6 @@ public class AddToMusicListDialog extends BottomDialog {
 
                 this.empty = empty;
                 if (empty) {
-                    btnCreate = itemView.findViewById(R.id.btnCreate);
                     return;
                 }
 

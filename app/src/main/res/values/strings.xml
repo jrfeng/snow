@@ -99,8 +99,9 @@
 
     <!-- AddToMusicListDialog -->
     <string name="title_add_to_music_list">Add to music list</string>
-    <string name="button_create_music_list">Create</string>
-    <string name="button_submit">Submit</string>
+    <string name="empty_text_no_music_list">There is no music list</string>
+    <string name="button_text_new_music_list">New music list</string>
+    <string name="button_text_ok">OK</string>
     <string name="toast_added_successfully">Added successfully</string>
 
     <!-- content description -->
