@@ -399,13 +399,18 @@ public class ScannerDialog extends BottomDialog {
         @Override
         public Music decode(Cursor cursor) {
             return new Music(0,
-                    getTitle(cursor),
+                    getFileName(cursor),
                     optimizeText(getAudioArtist(cursor), snow.player.R.string.snow_music_item_unknown_artist),
                     optimizeText(getAudioAlbum(cursor), snow.player.R.string.snow_music_item_unknown_album),
                     getAudioUri(cursor).toString(),
                     "",
                     getDuration(cursor),
                     getDateModified(cursor));
+        }
+
+        private String getFileName(Cursor cursor) {
+            String displayName = getDisplayName(cursor);
+            return displayName.substring(0, displayName.lastIndexOf("."));
         }
 
         public String optimizeText(String text, int stringId) {
