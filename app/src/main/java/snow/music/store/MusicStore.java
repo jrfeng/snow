@@ -210,6 +210,35 @@ public class MusicStore {
     }
 
     /**
+     * 获取包含指定 {@link Music} 歌曲的所有自定义歌单的名称。
+     *
+     * @param music {@link Music} 对象，不能为 null
+     * @return 包含指定 {@link Music} 歌曲的所有自定义歌单的名称。
+     */
+    @NonNull
+    public synchronized List<String> getAllCustomMusicListName(@NonNull Music music) {
+        Preconditions.checkNotNull(music);
+
+        QueryBuilder<MusicListEntity> builder = mMusicListEntityBox.query()
+                .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC)
+                .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
+                .notEqual(MusicListEntity_.name, MUSIC_LIST_HISTORY);
+
+        builder.link(MusicListEntity_.musicElements)
+                .equal(Music_.id, music.getId());
+
+        String[] names = builder.build()
+                .property(MusicListEntity_.name)
+                .findStrings();
+
+        if (names == null) {
+            return Collections.emptyList();
+        }
+
+        return new ArrayList<>(Arrays.asList(names));
+    }
+
+    /**
      * 歌单是否已存在。
      * <p>
      * 该方法会访问数据库，不建议在 UI 线程调用。
@@ -402,6 +431,30 @@ public class MusicStore {
         }
 
         return allMusicList;
+    }
+
+    /**
+     * 将 {@link Music} 对象添加到 musicListNames 包含的所有歌单中。
+     *
+     * @param music            {@link Music} 对象，不能为 null
+     * @param allMusicListName {@link Music} 对象要添加到的所有歌单的名称，不能为 null。
+     */
+    public synchronized void addToAllMusicList(@NonNull Music music, @NonNull List<String> allMusicListName) {
+        Preconditions.checkNotNull(music);
+        Preconditions.checkNotNull(allMusicListName);
+
+        List<MusicListEntity> entityList = new ArrayList<>();
+        for (String name : allMusicListName) {
+            MusicList musicList = getCustomMusicList(name);
+            if (musicList == null) {
+                continue;
+            }
+            musicList.getMusicElements().add(music);
+            musicList.applyChanges();
+            entityList.add(musicList.musicListEntity);
+        }
+
+        mMusicListEntityBox.put(entityList);
     }
 
     /**
