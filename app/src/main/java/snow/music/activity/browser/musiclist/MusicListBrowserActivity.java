@@ -1,11 +1,8 @@
 package snow.music.activity.browser.musiclist;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,7 +15,7 @@ import snow.music.dialog.BottomMenuDialog;
 import snow.music.dialog.InputDialog;
 import snow.music.dialog.MessageDialog;
 import snow.music.store.MusicList;
-import snow.music.store.MusicStore;
+import snow.music.util.InputValidator;
 
 public class MusicListBrowserActivity extends ListActivity {
     private MusicListBrowserViewModel mViewModel;
@@ -124,35 +121,5 @@ public class MusicListBrowserActivity extends ListActivity {
                 .build();
 
         messageDialog.show(getSupportFragmentManager(), "deleteMusicList");
-    }
-
-    private static class InputValidator implements InputDialog.Validator {
-        private Context mContext;
-        private String mInvalidateHint;
-
-        InputValidator(Context context) {
-            mContext = context;
-        }
-
-        @Override
-        public boolean isValid(@Nullable String input) {
-            if (input == null || input.isEmpty()) {
-                mInvalidateHint = mContext.getString(R.string.hint_please_input_music_list_title);
-                return false;
-            }
-
-            if (MusicStore.getInstance().isNameExists(input)) {
-                mInvalidateHint = mContext.getString(R.string.hint_music_list_name_exists);
-                return false;
-            }
-
-            return true;
-        }
-
-        @NonNull
-        @Override
-        public String getInvalidateHint() {
-            return mInvalidateHint;
-        }
     }
 }
