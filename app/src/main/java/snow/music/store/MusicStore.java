@@ -80,6 +80,9 @@ public class MusicStore {
     private void loadAllMusicListName() {
         Single.create(emitter -> {
             String[] allName = mMusicListEntityBox.query()
+                    .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC)
+                    .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
+                    .notEqual(MusicListEntity_.name, MUSIC_LIST_HISTORY)
                     .build()
                     .property(MusicListEntity_.name)
                     .findStrings();
