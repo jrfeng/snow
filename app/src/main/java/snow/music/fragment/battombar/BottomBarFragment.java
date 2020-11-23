@@ -15,24 +15,17 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.common.base.Preconditions;
 
-import java.util.Objects;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import snow.music.GlideApp;
 import snow.music.R;
 import snow.music.databinding.FragmentBottomBarBinding;
 import snow.music.dialog.PlaylistDialog;
 import snow.music.service.AppPlayerService;
 import snow.music.util.DimenUtil;
-import snow.music.util.MusicUtil;
 import snow.music.util.PlayerUtil;
 import snow.player.PlayerClient;
 import snow.player.lifecycle.PlayerViewModel;
