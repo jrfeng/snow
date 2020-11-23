@@ -16,6 +16,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.common.base.Preconditions;
@@ -25,6 +26,7 @@ import java.util.Objects;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import snow.music.GlideApp;
 import snow.music.R;
 import snow.music.databinding.FragmentBottomBarBinding;
 import snow.music.dialog.PlaylistDialog;
@@ -39,8 +41,6 @@ public class BottomBarFragment extends Fragment {
     private FragmentBottomBarBinding mBinding;
     private PlayerViewModel mPlayerViewModel;
     private BottomBarViewModel mBottomBarViewModel;
-
-    private Disposable mIconLoadDisposable;
 
     private int mMinSlideDistance;
     private long mMaxSlideInterval;
@@ -122,36 +122,13 @@ public class BottomBarFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        cancelLoadMusicIcon();
-    }
-
     private void loadMusicIcon(String musicUri) {
-        cancelLoadMusicIcon();
-        mIconLoadDisposable = MusicUtil.getEmbeddedPicture(Objects.requireNonNull(getContext()), musicUri)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bytes -> {
-                    if (bytes == null || bytes.length < 1) {
-                        mBinding.ivIcon.setImageResource(R.mipmap.ic_bottom_bar_default_icon);
-                        return;
-                    }
-
-                    Glide.with(BottomBarFragment.this)
-                            .load(bytes)
-                            .error(R.mipmap.ic_bottom_bar_default_icon)
-                            .transform(new RoundedCorners(mIconCornerRadius))
-                            .transition(DrawableTransitionOptions.withCrossFade())
-                            .into(mBinding.ivIcon);
-                });
-    }
-
-    private void cancelLoadMusicIcon() {
-        if (mIconLoadDisposable != null && !mIconLoadDisposable.isDisposed()) {
-            mIconLoadDisposable.dispose();
-        }
+        GlideApp.with(this)
+                .load(musicUri)
+                .placeholder(R.mipmap.ic_bottom_bar_default_icon)
+                .transform(new CenterCrop(), new RoundedCorners(mIconCornerRadius))
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .into(mBinding.ivIcon);
     }
 
     public void showPlaylist(View view) {

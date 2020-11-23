@@ -7,14 +7,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.common.base.Preconditions;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
+import snow.music.GlideApp;
 import snow.music.R;
 import snow.music.activity.BaseActivity;
 import snow.music.databinding.ActivityNavigationBinding;
@@ -23,7 +21,6 @@ import snow.music.dialog.ScannerDialog;
 import snow.music.service.AppPlayerService;
 import snow.music.util.DimenUtil;
 import snow.music.util.PlayerUtil;
-import snow.music.util.MusicUtil;
 import snow.player.lifecycle.PlayerViewModel;
 
 public class NavigationActivity extends BaseActivity {
@@ -33,8 +30,7 @@ public class NavigationActivity extends BaseActivity {
     private PlayerViewModel mPlayerViewModel;
     private NavigationViewModel mNavigationViewModel;
 
-    private Disposable mIconLoadDisposable;
-    private RoundedCorners mRoundedCorners;
+    private int mIconCornerRadius;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,15 +50,7 @@ public class NavigationActivity extends BaseActivity {
             scanLocalMusic();
         }
 
-        mRoundedCorners = new RoundedCorners(DimenUtil.getDimenPx(getResources(), R.dimen.album_icon_corner_radius));
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (isFinishing()) {
-            cancelLoadMusicIcon();
-        }
+        mIconCornerRadius = DimenUtil.getDimenPx(getResources(), R.dimen.album_icon_corner_radius);
     }
 
     private void initAllViewModel() {
@@ -96,30 +84,12 @@ public class NavigationActivity extends BaseActivity {
     }
 
     private void loadMusicIcon(String musicUri) {
-        cancelLoadMusicIcon();
-        mIconLoadDisposable = MusicUtil.getEmbeddedPicture(this, musicUri)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bytes -> {
-                    if (bytes == null || bytes.length < 1) {
-                        mBinding.ivDisk.setImageResource(R.mipmap.ic_album_default_icon_big);
-                        return;
-                    }
-
-                    Glide.with(NavigationActivity.this)
-                            .load(bytes)
-                            .centerCrop()
-                            .error(R.mipmap.ic_album_default_icon_big)
-                            .transform(mRoundedCorners)
-                            .transition(DrawableTransitionOptions.withCrossFade())
-                            .into(mBinding.ivDisk);
-                });
-    }
-
-    private void cancelLoadMusicIcon() {
-        if (mIconLoadDisposable != null && !mIconLoadDisposable.isDisposed()) {
-            mIconLoadDisposable.dispose();
-        }
+        GlideApp.with(this)
+                .load(musicUri)
+                .placeholder(R.mipmap.ic_album_default_icon_big)
+                .transform(new CenterCrop(), new RoundedCorners(mIconCornerRadius))
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .into(mBinding.ivDisk);
     }
 
     private boolean shouldScanLocalMusic() {
