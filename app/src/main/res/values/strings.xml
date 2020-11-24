@@ -27,6 +27,10 @@
     <string name="title_artists">Artists</string>
     <string name="empty_no_artists">No artists</string>
 
+    <!-- AlbumBrowserActivity -->
+    <string name="title_albums">Albums</string>
+    <string name="empty_no_albums">No albums</string>
+
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>
     <string name="empty_playlist">Playlist is empty</string>

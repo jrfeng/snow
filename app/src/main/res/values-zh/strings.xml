@@ -94,4 +94,6 @@
     <string name="toast_added_successfully">添加成功</string>
     <string name="title_artists">歌手</string>
     <string name="empty_no_artists">无艺术家</string>
+    <string name="title_albums">专辑</string>
+    <string name="empty_no_albums">无专辑</string>
 </resources>
