@@ -60,6 +60,7 @@ public class MusicStore {
     private final Handler mMainHandler;
 
     private final List<OnFavoriteChangeListener> mAllFavoriteChangeListener;
+    private final List<OnCustomMusicListUpdateListener> mAllCustomMusicListUpdateListener;
     private OnScanCompleteListener mOnScanCompleteListener;
 
     private final Set<String> mAllCustomMusicListName;
@@ -70,7 +71,8 @@ public class MusicStore {
         mMusicListEntityBox = boxStore.boxFor(MusicListEntity.class);
         mHistoryEntityBox = boxStore.boxFor(HistoryEntity.class);
         mMainHandler = new Handler(Looper.getMainLooper());
-        mAllFavoriteChangeListener = new LinkedList<>();
+        mAllFavoriteChangeListener = new ArrayList<>();
+        mAllCustomMusicListUpdateListener = new ArrayList<>();
         mAllCustomMusicListName = new HashSet<>();
 
         loadAllMusicListName();
@@ -329,6 +331,7 @@ public class MusicStore {
         String name = musicList.getName();
         if (!isBuiltInName(name)) {
             mAllCustomMusicListName.add(name);
+            notifyCustomMusicListUpdated(name);
         }
 
         musicList.applyChanges();
@@ -549,6 +552,14 @@ public class MusicStore {
         });
     }
 
+    private void notifyCustomMusicListUpdated(String name) {
+        mMainHandler.post(() -> {
+            for (OnCustomMusicListUpdateListener listener : mAllCustomMusicListUpdateListener) {
+                listener.onCustomMusicListUpdate(name);
+            }
+        });
+    }
+
     /**
      * 添加一个 {@link OnFavoriteChangeListener} 监听器，如果已添加，则忽略本次调用。
      *
@@ -575,6 +586,34 @@ public class MusicStore {
         }
 
         mAllFavoriteChangeListener.remove(listener);
+    }
+
+    /**
+     * 添加一个 {@link OnCustomMusicListUpdateListener} 监听器。
+     *
+     * @param listener {@link OnCustomMusicListUpdateListener} 监听器对象，不能为 null
+     */
+    public synchronized void addOnCustomMusicListUpdateListener(@NonNull OnCustomMusicListUpdateListener listener) {
+        Preconditions.checkNotNull(listener);
+
+        if (mAllCustomMusicListUpdateListener.contains(listener)) {
+            return;
+        }
+
+        mAllCustomMusicListUpdateListener.add(listener);
+    }
+
+    /**
+     * 移除一个已添加的 {@link OnCustomMusicListUpdateListener} 监听器，如果未添加或者已经移除，则忽略本次调用。
+     *
+     * @param listener {@link OnCustomMusicListUpdateListener} 监听器对象，为 null 时将忽略本次调用。
+     */
+    public synchronized void removeOnCustomMusicListUpdateListener(OnCustomMusicListUpdateListener listener) {
+        if (listener == null) {
+            return;
+        }
+
+        mAllCustomMusicListUpdateListener.remove(listener);
     }
 
     /**
@@ -950,5 +989,19 @@ public class MusicStore {
          * 歌单排序完成后会调用该方法，且会在主线程中调用该方法。
          */
         void onSortFinished();
+    }
+
+    /**
+     * 监听自建歌单更新事件。
+     */
+    public interface OnCustomMusicListUpdateListener {
+        /**
+         * 当某个自建歌单被更新时将调用该方法。
+         * <p>
+         * 该方法会在主线程上调用，请不要在该方法中执行耗时操作。
+         *
+         * @param name 被更新的自建歌单的名称。
+         */
+        void onCustomMusicListUpdate(String name);
     }
 }
