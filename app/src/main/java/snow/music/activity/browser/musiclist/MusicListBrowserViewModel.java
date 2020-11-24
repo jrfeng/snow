@@ -29,9 +29,15 @@ public class MusicListBrowserViewModel extends ViewModel {
     private Disposable mLoadMusicListDisposable;
     private Disposable mCreateMusicListDisposable;
 
+    private MusicStore.OnCustomMusicListUpdateListener mOnCustomMusicListUpdateListener;
+    private Disposable mReloadMusicListDisposable;
+
     public MusicListBrowserViewModel() {
         mAllMusicList = new MutableLiveData<>(Collections.emptyList());
         loadAllMusicList();
+
+        mOnCustomMusicListUpdateListener = this::reloadMusicList;
+        MusicStore.getInstance().addOnCustomMusicListUpdateListener(mOnCustomMusicListUpdateListener);
     }
 
     @Override
@@ -44,6 +50,9 @@ public class MusicListBrowserViewModel extends ViewModel {
         if (mCreateMusicListDisposable != null && !mCreateMusicListDisposable.isDisposed()) {
             mCreateMusicListDisposable.dispose();
         }
+
+        cancelReloadMusicList();
+        MusicStore.getInstance().removeOnCustomMusicListUpdateListener(mOnCustomMusicListUpdateListener);
     }
 
     public LiveData<List<MusicList>> getAllMusicList() {
@@ -127,5 +136,34 @@ public class MusicListBrowserViewModel extends ViewModel {
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mAllMusicList::setValue);
+    }
+
+    private void reloadMusicList(String name) {
+        cancelReloadMusicList();
+        mReloadMusicListDisposable = Single.create((SingleOnSubscribe<MusicList>) emitter -> {
+            MusicList musicList = MusicStore.getInstance().getCustomMusicList(name);
+            if (emitter.isDisposed()) {
+                return;
+            }
+            emitter.onSuccess(musicList);
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::updateMusicList);
+    }
+
+    private void cancelReloadMusicList() {
+        if (mReloadMusicListDisposable != null && !mReloadMusicListDisposable.isDisposed()) {
+            mReloadMusicListDisposable.dispose();
+        }
+    }
+
+    private void updateMusicList(MusicList musicList) {
+        List<MusicList> allMusicList = new ArrayList<>(mAllMusicList.getValue());
+
+        int index = allMusicList.indexOf(musicList);
+        allMusicList.remove(index);
+        allMusicList.add(index, musicList);
+
+        mAllMusicList.setValue(allMusicList);
     }
 }

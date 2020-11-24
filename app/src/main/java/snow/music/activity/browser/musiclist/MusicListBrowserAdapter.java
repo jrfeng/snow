@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import java.util.ArrayList;
@@ -198,14 +199,18 @@ public class MusicListBrowserAdapter extends RecyclerView.Adapter<MusicListBrows
 
         @Override
         public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-            String oldItemName = mOldMusicLists.get(oldItemPosition).getName();
-            String newItemName = mNewMusicLists.get(newItemPosition).getName();
-            return oldItemName.equals(newItemName);
+            MusicList oldMusicList = mOldMusicLists.get(oldItemPosition);
+            MusicList newMusicList = mNewMusicLists.get(newItemPosition);
+            return oldMusicList.getId() == newMusicList.getId();
         }
 
         @Override
         public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-            return areItemsTheSame(oldItemPosition, newItemPosition);
+            MusicList oldMusicList = mOldMusicLists.get(oldItemPosition);
+            MusicList newMusicList = mNewMusicLists.get(newItemPosition);
+
+            return Objects.equal(oldMusicList.getName(), newMusicList.getName())
+                    && Objects.equal(oldMusicList.getSize(), newMusicList.getSize());
         }
     }
 }
