@@ -100,13 +100,10 @@ public class PlaylistDialog extends BottomDialog {
             rvPlaylist.scrollToPosition(playerClient.getPlayPosition());
 
             mPlaylistAdapter.setOnItemClickListener((position, viewId, view, holder) -> {
-                switch (viewId) {
-                    case R.id.playlistItem:
-                        playerClient.playPause(position);
-                        break;
-                    case R.id.btnRemove:
-                        removeMusicItem(position);
-                        break;
+                if (viewId == R.id.playlistItem) {
+                    playerClient.playPause(position);
+                } else if (viewId == R.id.btnRemove) {
+                    removeMusicItem(position);
                 }
             });
 
@@ -144,9 +141,9 @@ public class PlaylistDialog extends BottomDialog {
         private static final int TYPE_ITEM_VIEW = 2;
         private Playlist mPlaylist;
 
-        private ItemClickHelper mItemClickHelper;
-        private SelectableHelper mSelectableHelper;
-        private PositionHelper<PlaylistAdapter.ViewHolder> mPositionHelper;
+        private final ItemClickHelper mItemClickHelper;
+        private final SelectableHelper mSelectableHelper;
+        private final PositionHelper<PlaylistAdapter.ViewHolder> mPositionHelper;
 
         public PlaylistAdapter(@NonNull Playlist playlist, int playPosition) {
             Preconditions.checkNotNull(playlist);
@@ -267,7 +264,7 @@ public class PlaylistDialog extends BottomDialog {
 
         private static class ViewHolder extends RecyclerView.ViewHolder implements SelectableHelper.Selectable,
                 PositionHelper.OnPositionChangeListener {
-            private boolean mEmptyView;
+            private final boolean mEmptyView;
             private int mColorMark;
             private int mColorTitle;
             private int mColorArtist;
@@ -338,8 +335,8 @@ public class PlaylistDialog extends BottomDialog {
         }
 
         private static class MusicItemDiffCallback extends DiffUtil.Callback {
-            private Playlist mOldPlaylist;
-            private Playlist mNewPlaylist;
+            private final Playlist mOldPlaylist;
+            private final Playlist mNewPlaylist;
 
             MusicItemDiffCallback(Playlist oldPlaylist, Playlist newPlaylist) {
                 mOldPlaylist = oldPlaylist;

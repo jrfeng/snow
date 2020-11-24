@@ -27,9 +27,9 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     private static final int TYPE_ITEM_VIEW = 2;
     private List<Music> mMusicList;
 
-    private ItemClickHelper mItemClickHelper;
-    private SelectableHelper mSelectableHelper;
-    private PositionHelper<MusicListAdapter.ViewHolder> mPositionHelper;
+    private final ItemClickHelper mItemClickHelper;
+    private final SelectableHelper mSelectableHelper;
+    private final PositionHelper<MusicListAdapter.ViewHolder> mPositionHelper;
 
     public MusicListAdapter(@NonNull List<Music> musicList) {
         Preconditions.checkNotNull(musicList);
@@ -153,7 +153,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         ImageButton btnOptionMenu;
 
         private View markView;
-        private boolean mEmptyView;
+        private final boolean mEmptyView;
         private int mTextColor;
         private int mSecondaryTextColor;
 
@@ -213,8 +213,8 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     }
 
     private static class OrderMusicDiffCallback extends DiffUtil.Callback {
-        private List<Music> mOldMusicList;
-        private List<Music> mNewMusicList;
+        private final List<Music> mOldMusicList;
+        private final List<Music> mNewMusicList;
 
         OrderMusicDiffCallback(@NonNull List<Music> oldMusicList, @NonNull List<Music> newMusicList) {
             Preconditions.checkNotNull(oldMusicList);

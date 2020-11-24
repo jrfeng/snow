@@ -25,7 +25,7 @@ public class MusicListBrowserAdapter extends RecyclerView.Adapter<MusicListBrows
     private static final int TYPE_ITEM_VIEW = 2;
 
     private List<MusicList> mMusicLists;
-    private ItemClickHelper mItemClickHelper;
+    private final ItemClickHelper mItemClickHelper;
 
     @Nullable
     private OnItemClickListener mOnItemClickListener;
@@ -37,15 +37,10 @@ public class MusicListBrowserAdapter extends RecyclerView.Adapter<MusicListBrows
         mItemClickHelper = new ItemClickHelper();
 
         mItemClickHelper.setOnItemClickListener((position, viewId, view, holder) -> {
-            switch (viewId) {
-                case R.id.musicListBrowserItem:
-                    notifyItemClicked(position, OnItemClickListener.ITEM_VIEW);
-                    break;
-                case R.id.btnOptionMenu:
-                    notifyItemClicked(position, OnItemClickListener.OPTION_MENU);
-                    break;
-                default:
-                    break;
+            if (viewId == R.id.musicListBrowserItem) {
+                notifyItemClicked(position, OnItemClickListener.ITEM_VIEW);
+            } else if (viewId == R.id.btnOptionMenu) {
+                notifyItemClicked(position, OnItemClickListener.OPTION_MENU);
             }
         });
     }
@@ -183,8 +178,8 @@ public class MusicListBrowserAdapter extends RecyclerView.Adapter<MusicListBrows
     }
 
     private static class DiffCallback extends DiffUtil.Callback {
-        private List<MusicList> mOldMusicLists;
-        private List<MusicList> mNewMusicLists;
+        private final List<MusicList> mOldMusicLists;
+        private final List<MusicList> mNewMusicLists;
 
         public DiffCallback(List<MusicList> oldMusicLists, List<MusicList> newMusicLists) {
             mOldMusicLists = oldMusicLists;

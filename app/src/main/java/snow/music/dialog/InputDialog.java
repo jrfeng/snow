@@ -66,7 +66,7 @@ public class InputDialog extends BottomDialog {
     }
 
     public static class Builder {
-        private Context mContext;
+        private final Context mContext;
 
         private String mTitle;
         private String mText;

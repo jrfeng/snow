@@ -47,13 +47,11 @@ public class FavoriteActivity extends ListActivity {
     }
 
     public void onOptionMenuClicked(View view) {
-        switch (view.getId()) {
-            case R.id.btnSearch:
-                // TODO
-                break;
-            case R.id.btnSort:
-                mFavoriteMusicListFragment.showSortDialog();
-                break;
+        int id = view.getId();
+        if (id == R.id.btnSearch) {
+            // TODO
+        } else if (id == R.id.btnSort) {
+            mFavoriteMusicListFragment.showSortDialog();
         }
     }
 }

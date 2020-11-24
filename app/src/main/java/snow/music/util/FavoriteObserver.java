@@ -22,10 +22,10 @@ public class FavoriteObserver {
     private boolean mFavorite;
     @Nullable
     private MusicItem mMusicItem;
-    private OnFavoriteStateChangeListener mListener;
+    private final OnFavoriteStateChangeListener mListener;
 
     private boolean mSubscribed;
-    private MusicStore.OnFavoriteChangeListener mFavoriteChangeListener;
+    private final MusicStore.OnFavoriteChangeListener mFavoriteChangeListener;
     private Disposable mCheckFavoriteDisposable;
 
     /**

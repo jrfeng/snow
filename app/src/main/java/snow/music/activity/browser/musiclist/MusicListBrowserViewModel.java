@@ -23,7 +23,7 @@ import snow.music.store.MusicList;
 import snow.music.store.MusicStore;
 
 public class MusicListBrowserViewModel extends ViewModel {
-    private MutableLiveData<List<MusicList>> mAllMusicList;
+    private final MutableLiveData<List<MusicList>> mAllMusicList;
 
     private Disposable mLoadMusicListDisposable;
     private Disposable mCreateMusicListDisposable;
@@ -125,6 +125,6 @@ public class MusicListBrowserViewModel extends ViewModel {
             emitter.onSuccess(allMusicList);
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(allMusicList -> mAllMusicList.setValue(allMusicList));
+                .subscribe(mAllMusicList::setValue);
     }
 }

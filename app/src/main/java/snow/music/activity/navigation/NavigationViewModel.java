@@ -34,12 +34,12 @@ import snow.player.lifecycle.PlayerViewModel;
 public class NavigationViewModel extends ViewModel {
     private static final String TAG = "NavigationViewModel";
     private final MutableLiveData<Integer> mFavoriteDrawable;
-    private MutableLiveData<CharSequence> mSecondaryText;
+    private final MutableLiveData<CharSequence> mSecondaryText;
 
     private final Observer<MusicItem> mPlayingMusicItemObserver;
     private final Observer<String> mArtistObserver;
     private final Observer<Boolean> mErrorObserver;
-    private FavoriteObserver mFavoriteObserver;
+    private final FavoriteObserver mFavoriteObserver;
 
     private PlayerViewModel mPlayerViewModel;
     private boolean mInitialized;
@@ -51,7 +51,7 @@ public class NavigationViewModel extends ViewModel {
                 mFavoriteDrawable.setValue(favorite ? R.drawable.ic_favorite_true : R.drawable.ic_favorite_false));
         mArtistObserver = artist -> updateSecondaryText();
         mErrorObserver = error -> updateSecondaryText();
-        mPlayingMusicItemObserver = musicItem -> mFavoriteObserver.setMusicItem(musicItem);
+        mPlayingMusicItemObserver = mFavoriteObserver::setMusicItem;
     }
 
     public void init(@NonNull PlayerViewModel playerViewModel) {

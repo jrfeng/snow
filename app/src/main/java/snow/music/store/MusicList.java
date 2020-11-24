@@ -419,7 +419,7 @@ public class MusicList {
             @Override
             public Comparator<Music> comparator() {
                 return new Comparator<Music>() {
-                    private PinyinComparator mPinyinComparator = new PinyinComparator();
+                    private final PinyinComparator mPinyinComparator = new PinyinComparator();
 
                     @Override
                     public int compare(Music o1, Music o2) {
@@ -436,7 +436,7 @@ public class MusicList {
             @Override
             public Comparator<Music> comparator() {
                 return new Comparator<Music>() {
-                    private PinyinComparator mPinyinComparator = new PinyinComparator();
+                    private final PinyinComparator mPinyinComparator = new PinyinComparator();
 
                     @Override
                     public int compare(Music o1, Music o2) {
@@ -453,7 +453,7 @@ public class MusicList {
             @Override
             public Comparator<Music> comparator() {
                 return new Comparator<Music>() {
-                    private PinyinComparator mPinyinComparator = new PinyinComparator();
+                    private final PinyinComparator mPinyinComparator = new PinyinComparator();
 
                     @Override
                     public int compare(Music o1, Music o2) {

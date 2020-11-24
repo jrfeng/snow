@@ -1,7 +1,6 @@
 package snow.music.fragment.musiclist;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -156,13 +155,10 @@ public abstract class BaseMusicListFragment extends Fragment {
         mMusicListAdapter = new MusicListAdapter(getMusicListItems());
 
         mMusicListAdapter.setOnItemClickListener((position, viewId, view, holder) -> {
-            switch (viewId) {
-                case R.id.musicListItem:
-                    onMusicListItemClicked(position);
-                    break;
-                case R.id.btnOptionMenu:
-                    onMusicListItemMenuClicked(position);
-                    break;
+            if (viewId == R.id.musicListItem) {
+                onMusicListItemClicked(position);
+            } else if (viewId == R.id.btnOptionMenu) {
+                onMusicListItemMenuClicked(position);
             }
         });
 

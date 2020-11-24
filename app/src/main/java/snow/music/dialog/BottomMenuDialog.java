@@ -62,9 +62,9 @@ public class BottomMenuDialog extends BottomDialog {
     }
 
     public static class Builder {
-        private Context mContext;
+        private final Context mContext;
         private String mDialogTitle;
-        private List<MenuItem> mMenuItems;
+        private final List<MenuItem> mMenuItems;
         private OnMenuItemClickListener mMenuItemClickListener;
 
         public Builder(@NonNull Context context) {
@@ -115,8 +115,8 @@ public class BottomMenuDialog extends BottomDialog {
     }
 
     private static class MenuItemAdapter extends RecyclerView.Adapter<MenuItemAdapter.ViewHolder> {
-        private List<MenuItem> mMenuItems;
-        private ItemClickHelper mItemClickHelper;
+        private final List<MenuItem> mMenuItems;
+        private final ItemClickHelper mItemClickHelper;
 
         public MenuItemAdapter(@NonNull List<MenuItem> menuItems) {
             Preconditions.checkNotNull(menuItems);
@@ -164,8 +164,8 @@ public class BottomMenuDialog extends BottomDialog {
         }
 
         public static class ViewHolder extends RecyclerView.ViewHolder {
-            public ImageView menuIcon;
-            public TextView menuTitle;
+            public final ImageView menuIcon;
+            public final TextView menuTitle;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -177,8 +177,8 @@ public class BottomMenuDialog extends BottomDialog {
     }
 
     private static class MenuItem {
-        private int mIconId;
-        private String mTitle;
+        private final int mIconId;
+        private final String mTitle;
 
         public MenuItem(@DrawableRes int iconId, @NonNull String title) {
             Preconditions.checkNotNull(title);

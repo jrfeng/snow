@@ -158,6 +158,7 @@ public class ScannerDialog extends BottomDialog {
         messageDialog.show(getParentFragmentManager(), "scanComplete");
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     private void addToLocalMusicList(FragmentActivity activity, List<Music> musicList, boolean updatePlaylist) {
         if (musicList.size() < 1) {
@@ -282,8 +283,8 @@ public class ScannerDialog extends BottomDialog {
         private int mProgress;
         private MediaStoreHelper.Scanner<Music> mMusicScanner;
 
-        public MutableLiveData<Boolean> mFinished;
-        public MutableLiveData<Integer> mScanPercent;
+        public final MutableLiveData<Boolean> mFinished;
+        public final MutableLiveData<Integer> mScanPercent;
 
         private List<Music> mScannedMusic;
 
@@ -303,6 +304,7 @@ public class ScannerDialog extends BottomDialog {
             cancel();
         }
 
+        @SuppressLint("InlinedApi")
         public void start(int minDuration) {
             if (mStarted || mCancelled) {
                 return;
@@ -312,7 +314,7 @@ public class ScannerDialog extends BottomDialog {
 
             mMusicScanner = MediaStoreHelper.scanAudio(getApplication().getContentResolver(), new MusicDecoder(getApplication()))
                     .updateThreshold(1000)
-                    .selection(MediaStore.MediaColumns.DURATION + ">=?")
+                    .selection(MediaStore.Audio.Media.DURATION + ">=?")
                     .selectionArgs(new String[]{String.valueOf(minDuration)});
 
             mMusicScanner.scan(new MediaStoreHelper.OnScanCallback<Music>() {
@@ -370,6 +372,7 @@ public class ScannerDialog extends BottomDialog {
             return mScannedMusic;
         }
 
+        @SuppressWarnings("ResultOfMethodCallIgnored")
         @SuppressLint("CheckResult")
         private void updateLocalMusicList(List<Music> items) {
             Single.create((SingleOnSubscribe<List<Music>>) emitter -> {
@@ -408,7 +411,7 @@ public class ScannerDialog extends BottomDialog {
     }
 
     private static class MusicDecoder extends MediaStoreHelper.Decoder<Music> {
-        private Context mContext;
+        private final Context mContext;
 
         MusicDecoder(Context context) {
             mContext = context;

@@ -23,7 +23,7 @@ import snow.music.store.MusicList;
 import snow.player.util.MusicItemUtil;
 
 public abstract class BaseMusicListViewModel extends ViewModel {
-    private MutableLiveData<List<Music>> mMusicListItems;
+    private final MutableLiveData<List<Music>> mMusicListItems;
     private String mMusicListName = "";
     private String mMusicListToken = "";
 

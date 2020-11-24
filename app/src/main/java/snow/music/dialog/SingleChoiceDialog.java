@@ -2,8 +2,6 @@ package snow.music.dialog;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Resources;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.common.base.Preconditions;
 
-import java.util.List;
 import java.util.Objects;
 
 import recyclerview.helper.ItemClickHelper;
@@ -63,9 +60,9 @@ public class SingleChoiceDialog extends BottomDialog {
     }
 
     private static class SingleChoiceAdapter extends RecyclerView.Adapter<SingleChoiceAdapter.ViewHolder> {
-        private String[] mItems;
-        private ItemClickHelper mItemClickHelper;
-        private SelectableHelper mSelectableHelper;
+        private final String[] mItems;
+        private final ItemClickHelper mItemClickHelper;
+        private final SelectableHelper mSelectableHelper;
 
         SingleChoiceAdapter(String[] items, int checkedItem) {
             mItems = items;
@@ -121,11 +118,11 @@ public class SingleChoiceDialog extends BottomDialog {
 
         private static class ViewHolder extends RecyclerView.ViewHolder
                 implements SelectableHelper.Selectable {
-            TextView tvItemTitle;
+            final TextView tvItemTitle;
 
-            private ImageView ivChecked;
-            private int mTextColor;
-            private int mCheckedTextColor;
+            private final ImageView ivChecked;
+            private final int mTextColor;
+            private final int mCheckedTextColor;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -152,7 +149,7 @@ public class SingleChoiceDialog extends BottomDialog {
     }
 
     public static class Builder {
-        private Context mContext;
+        private final Context mContext;
         private String mTitle;
         private String[] mItems;
         private int mCheckedItem;

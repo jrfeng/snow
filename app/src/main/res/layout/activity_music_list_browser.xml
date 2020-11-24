@@ -18,7 +18,6 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/btnBack"
                 android:layout_width="@dimen/image_button_size"
                 android:layout_height="@dimen/image_button_size"
                 android:background="@drawable/bg_button_48dp"
@@ -35,7 +34,6 @@
                 android:textSize="@dimen/action_bar_title_text_size" />
 
             <ImageButton
-                android:id="@+id/btnCreate"
                 android:layout_width="@dimen/image_button_size"
                 android:layout_height="@dimen/image_button_size"
                 android:background="@drawable/bg_button_48dp"
@@ -66,7 +64,6 @@
         android:layout_weight="1" />
 
     <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/bottomBarContainer"
         android:name="snow.music.fragment.battombar.BottomBarFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

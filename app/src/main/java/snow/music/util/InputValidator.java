@@ -10,7 +10,7 @@ import snow.music.dialog.InputDialog;
 import snow.music.store.MusicStore;
 
 public class InputValidator implements InputDialog.Validator {
-    private Context mContext;
+    private final Context mContext;
     private String mInvalidateHint;
 
     public InputValidator(Context context) {

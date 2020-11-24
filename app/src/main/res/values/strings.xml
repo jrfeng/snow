@@ -69,8 +69,6 @@
 
     <!-- Toast -->
     <string name="toast_added_to_playlist">Added to playlist</string>
-    <string name="toast_added_to_favorites">Added to favorites</string>
-    <string name="toast_removed_from_favorites">Removed from favorites</string>
     <string name="toast_added">Added</string>
     <string name="toast_removed">Removed</string>
     <string name="toast_set_successfully">Set successfully</string>
@@ -88,7 +86,6 @@
     <string name="item_sort_by_album">Albums from A-Z</string>
 
     <!-- ProgressDialog -->
-    <string name="title_progress">Progress</string>
 
     <!-- ScannerDialog -->
     <string name="title_scan_music">Scan music</string>
@@ -101,7 +98,6 @@
     <string name="title_add_to_music_list">Add to music list</string>
     <string name="empty_text_no_music_list">There is no music list</string>
     <string name="button_text_new_music_list">New music list</string>
-    <string name="button_text_ok">OK</string>
     <string name="toast_added_successfully">Added successfully</string>
 
     <!-- content description -->
@@ -127,7 +123,5 @@
     <string name="des_scan_local_music">Scan local music</string>
     <string name="des_menu_icon">menu icon</string>
     <string name="des_checked">checked</string>
-    <string name="des_music_list_icon">music list icon</string>
-    <string name="des_submit_icon">submit icon</string>
 
 </resources>

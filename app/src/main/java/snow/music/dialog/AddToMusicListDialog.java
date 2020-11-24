@@ -144,6 +144,7 @@ public class AddToMusicListDialog extends BottomDialog {
         dialog.show(fm, "createMusicList");
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @SuppressLint("CheckResult")
     private void createMusicList(Context context, String name) {
         Single.create(emitter -> {
@@ -273,7 +274,7 @@ public class AddToMusicListDialog extends BottomDialog {
 
         private static class ViewHolder extends RecyclerView.ViewHolder
                 implements SelectableHelper.Selectable {
-            boolean empty;
+            final boolean empty;
 
             TextView tvItemTitle;
             CheckBox checkBox;

@@ -84,7 +84,7 @@ public class MessageDialog extends BottomDialog {
     }
 
     public static class Builder {
-        private Context mContext;
+        private final Context mContext;
         private String mTitle;
         private String mMessage;
         private String mPositiveButtonText;

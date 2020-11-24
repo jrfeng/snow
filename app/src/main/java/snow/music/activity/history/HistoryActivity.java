@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 import android.view.View;
 
-import java.util.List;
 import java.util.Objects;
 
 import snow.music.R;
@@ -16,7 +15,6 @@ import snow.music.activity.ListActivity;
 import snow.music.dialog.MessageDialog;
 import snow.music.service.AppPlayerService;
 import snow.music.store.HistoryEntity;
-import snow.music.store.Music;
 import snow.music.util.MusicListUtil;
 import snow.music.util.PlayerUtil;
 import snow.player.lifecycle.PlayerViewModel;

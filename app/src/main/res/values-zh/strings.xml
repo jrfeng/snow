@@ -45,9 +45,7 @@
     <string name="menu_item_set_as_ringtone">设置为铃声</string>
     <string name="menu_item_remove">移除</string>
     <string name="menu_item_remove_from_favorite">移除我喜欢</string>
-    <string name="toast_added_to_favorites">已添加到我喜欢</string>
     <string name="message_remove_from_favorite">从我喜欢中移除？</string>
-    <string name="toast_removed_from_favorites">已移除我喜欢</string>
     <string name="message_remove_music">移除歌曲？</string>
     <string name="toast_added_to_playlist">已添加到播放列表</string>
     <string name="toast_added">已添加</string>
@@ -70,7 +68,6 @@
     <string name="message_remove_history">移除历史记录？</string>
     <string name="message_clear_history">清空历史记录？</string>
     <string name="message_play_all_music">播放全部歌曲？</string>
-    <string name="title_progress">进度</string>
     <string name="title_scan_music">扫描歌曲</string>
     <string name="toast_no_read_storage_permission">无存储器访问权限！</string>
     <string name="message_scan_local_music">扫描本地音乐？</string>
@@ -78,7 +75,6 @@
     <string name="message_one_song_found">发现 1 首新歌曲\n添加到本地音乐？</string>
     <string name="message_many_songs_found">发现 n 首新歌曲\n添加到本地音乐？</string>
     <string name="title_music_lists">我的歌单</string>
-    <string name="des_music_list_icon">歌单图标</string>
     <string name="empty_no_music_list">没有歌单</string>
     <string name="music_list_size_0">0 首</string>
     <string name="music_list_size_1">1 首</string>
@@ -95,7 +91,5 @@
     <string name="empty_text_no_music_list">没有歌单</string>
     <string name="title_add_to_music_list">添加到歌单</string>
     <string name="button_text_new_music_list">新建歌单</string>
-    <string name="des_submit_icon">确认图标</string>
     <string name="toast_added_successfully">添加成功</string>
-    <string name="button_text_ok">完成</string>
 </resources>

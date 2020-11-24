@@ -58,16 +58,14 @@ public class LocalMusicActivity extends ListActivity {
     }
 
     public void onOptionMenuClicked(View view) {
-        switch (view.getId()) {
-            case R.id.btnSearch:
-                // TODO
-                break;
-            case R.id.btnSort:
-                mMusicListFragment.showSortDialog();
-                break;
-            case R.id.btnScan:
-                scanMusic();
-                break;
+        int id = view.getId();
+
+        if (id == R.id.btnSearch) {
+            // TODO
+        } else if (id == R.id.btnSort) {
+            mMusicListFragment.showSortDialog();
+        } else if (id == R.id.btnScan) {
+            scanMusic();
         }
     }
 

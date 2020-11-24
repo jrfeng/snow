@@ -37,13 +37,10 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
                 return;
             }
 
-            switch (viewId) {
-                case R.id.historyItem:
-                    mOnItemClickListener.onItemClicked(position, mHistory.get(position));
-                    break;
-                case R.id.btnRemove:
-                    mOnItemClickListener.onRemoveClicked(position, mHistory.get(position));
-                    break;
+            if (viewId == R.id.historyItem) {
+                mOnItemClickListener.onItemClicked(position, mHistory.get(position));
+            } else if (viewId == R.id.btnRemove) {
+                mOnItemClickListener.onRemoveClicked(position, mHistory.get(position));
             }
         });
     }
@@ -148,7 +145,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        boolean emptyView;
+        final boolean emptyView;
 
         TextView tvTitle;
         TextView tvArtistAndAlbum;

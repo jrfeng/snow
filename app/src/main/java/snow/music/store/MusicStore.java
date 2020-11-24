@@ -614,13 +614,11 @@ public class MusicStore {
                 .build()
                 .findFirst();
 
-        if (historyEntity != null) {
-            historyEntity.timestamp = System.currentTimeMillis();
-        } else {
+        if (historyEntity == null) {
             historyEntity = new HistoryEntity();
             historyEntity.music.setTarget(music);
-            historyEntity.timestamp = System.currentTimeMillis();
         }
+        historyEntity.timestamp = System.currentTimeMillis();
 
         mHistoryEntityBox.put(historyEntity);
     }
