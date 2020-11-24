@@ -122,10 +122,6 @@ public class MusicStore {
     public synchronized static void init(@NonNull BoxStore boxStore) {
         Preconditions.checkNotNull(boxStore);
 
-        if (mInstance != null) {
-            return;
-        }
-
         mInstance = new MusicStore(boxStore);
     }
 
