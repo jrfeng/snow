@@ -1,4 +1,4 @@
-package snow.music.fragment.musiclist;
+package snow.music.activity.favorite;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
@@ -8,6 +8,8 @@ import java.util.Objects;
 import snow.music.R;
 import snow.music.dialog.BottomDialog;
 import snow.music.dialog.BottomMenuDialog;
+import snow.music.fragment.musiclist.BaseMusicListFragment;
+import snow.music.fragment.musiclist.BaseMusicListViewModel;
 import snow.music.store.Music;
 import snow.music.store.MusicStore;
 

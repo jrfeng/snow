@@ -8,7 +8,6 @@ import android.view.View;
 
 import snow.music.R;
 import snow.music.activity.ListActivity;
-import snow.music.fragment.musiclist.FavoriteMusicListFragment;
 import snow.music.service.AppPlayerService;
 import snow.music.util.PlayerUtil;
 import snow.player.lifecycle.PlayerViewModel;

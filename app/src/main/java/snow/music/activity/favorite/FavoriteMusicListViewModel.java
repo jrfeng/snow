@@ -1,4 +1,4 @@
-package snow.music.fragment.musiclist;
+package snow.music.activity.favorite;
 
 import androidx.annotation.NonNull;
 
@@ -11,6 +11,7 @@ import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import snow.music.fragment.musiclist.BaseMusicListViewModel;
 import snow.music.store.Music;
 import snow.music.store.MusicList;
 import snow.music.store.MusicStore;
