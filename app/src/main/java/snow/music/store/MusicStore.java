@@ -50,8 +50,6 @@ public class MusicStore {
 
     public static final int NAME_MAX_LENGTH = 40;
 
-    private static final int MAX_HISTORY_SIZE = 500;
-
     private static MusicStore mInstance;
 
     private final BoxStore mBoxStore;
@@ -64,7 +62,7 @@ public class MusicStore {
     private final List<OnFavoriteChangeListener> mAllFavoriteChangeListener;
     private OnScanCompleteListener mOnScanCompleteListener;
 
-    private Set<String> mAllCustomMusicListName;
+    private final Set<String> mAllCustomMusicListName;
 
     private MusicStore(BoxStore boxStore) {
         mBoxStore = boxStore;
