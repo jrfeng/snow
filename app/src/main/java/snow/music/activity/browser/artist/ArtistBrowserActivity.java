@@ -1,7 +1,7 @@
 package snow.music.activity.browser.artist;
 
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -58,5 +58,9 @@ public class ArtistBrowserActivity extends ListActivity {
                     List<String> artistList = mViewModel.getAllArtist().getValue();
                     adapter.setMarkPosition(artistList.indexOf(musicItem.getArtist()));
                 });
+    }
+
+    public void finishSelf(View view) {
+        finish();
     }
 }

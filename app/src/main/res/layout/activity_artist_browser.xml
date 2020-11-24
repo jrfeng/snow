@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".activity.browser.musiclist.MusicListBrowserActivity">
+    tools:context=".activity.browser.artist.ArtistBrowserActivity">
 
     <FrameLayout
         android:layout_width="match_parent"
