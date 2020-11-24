@@ -92,4 +92,6 @@
     <string name="title_add_to_music_list">添加到歌单</string>
     <string name="button_text_new_music_list">新建歌单</string>
     <string name="toast_added_successfully">添加成功</string>
+    <string name="title_artists">歌手</string>
+    <string name="empty_no_artists">无艺术家</string>
 </resources>

@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModel;
 import com.google.common.base.Preconditions;
 
 import snow.music.R;
+import snow.music.activity.browser.artist.ArtistBrowserActivity;
 import snow.music.activity.browser.musiclist.MusicListBrowserActivity;
 import snow.music.activity.favorite.FavoriteActivity;
 import snow.music.activity.history.HistoryActivity;
@@ -220,9 +221,10 @@ public class NavigationViewModel extends ViewModel {
         context.startActivity(intent);
     }
 
-    public void navigateToArtist(View view) {
-        // TODO
-        Log.d("DEBUG", "navigateToArtist");
+    public void navigateToArtistBrowser(View view) {
+        Context context = view.getContext();
+        Intent intent = new Intent(context, ArtistBrowserActivity.class);
+        context.startActivity(intent);
     }
 
     public void navigateToAlbum(View view) {

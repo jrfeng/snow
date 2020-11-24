@@ -23,6 +23,10 @@
     <string name="menu_item_delete_music_list">Delete</string>
     <string name="message_delete_music_list">Delete music list?</string>
 
+    <!-- ArtistBrowserActivity -->
+    <string name="title_artists">Artists</string>
+    <string name="empty_no_artists">No artists</string>
+
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>
     <string name="empty_playlist">Playlist is empty</string>

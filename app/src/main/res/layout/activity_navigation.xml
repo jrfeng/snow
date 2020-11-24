@@ -223,7 +223,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{(view) -> navViewModel.navigateToArtist(view)}"
+                android:onClick="@{(view) -> navViewModel.navigateToArtistBrowser(view)}"
                 android:orientation="vertical">
 
                 <ImageView
