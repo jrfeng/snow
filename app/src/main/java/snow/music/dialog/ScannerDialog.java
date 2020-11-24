@@ -48,6 +48,7 @@ import snow.player.lifecycle.PlayerViewModel;
 
 public class ScannerDialog extends BottomDialog {
     private static final String KEY_UPDATE_PLAYLIST = "UPDATE_PLAYLIST";
+    private static final String KEY_IGNORE_ENTER_ANIM = "IGNORE_ENTER_ANIM";
     private static final int PERMISSION_REQUEST_CODE = 1;
 
     private static final int MIN_DURATION = 30_000;   // 单位：毫秒
@@ -61,17 +62,22 @@ public class ScannerDialog extends BottomDialog {
     @Nullable
     private Disposable mDelayDismissDisposable;
 
+    public static ScannerDialog newInstance(boolean updatePlaylist) {
+        return newInstance(updatePlaylist, false);
+    }
+
     /**
      * 创建一个 {@link ScannerDialog} 对象。
      *
      * @param updatePlaylist 是否更新播放列表，如果为 true，则会在扫描完成后，使用扫描到的音乐设置一个新的播放列表。
      * @return {@link ScannerDialog} 对象
      */
-    public static ScannerDialog newInstance(boolean updatePlaylist) {
+    public static ScannerDialog newInstance(boolean updatePlaylist, boolean ignoreEnterAnim) {
         ScannerDialog dialog = new ScannerDialog();
 
         Bundle args = new Bundle();
         args.putBoolean(KEY_UPDATE_PLAYLIST, updatePlaylist);
+        args.putBoolean(KEY_IGNORE_ENTER_ANIM, ignoreEnterAnim);
 
         dialog.setArguments(args);
         return dialog;
@@ -111,6 +117,10 @@ public class ScannerDialog extends BottomDialog {
     protected void onInitDialog(AppCompatDialog dialog) {
         dialog.setContentView(R.layout.dialog_scanner);
         dialog.setCanceledOnTouchOutside(false);
+
+        if (ignoreEnterAnim() && (dialog.getWindow() != null)) {
+            dialog.getWindow().setWindowAnimations(R.style.BottomDialogTransition_NoEnterAnim);
+        }
 
         mProgressBar = dialog.findViewById(R.id.progressBar);
         mTextProgress = dialog.findViewById(R.id.tvProgress);
@@ -256,6 +266,14 @@ public class ScannerDialog extends BottomDialog {
             return false;
         }
         return args.getBoolean(KEY_UPDATE_PLAYLIST, false);
+    }
+
+    private boolean ignoreEnterAnim() {
+        Bundle args = getArguments();
+        if (args == null) {
+            return false;
+        }
+        return args.getBoolean(KEY_IGNORE_ENTER_ANIM, false);
     }
 
     public static class ScannerViewModel extends AndroidViewModel {

@@ -103,7 +103,7 @@ public class NavigationActivity extends BaseActivity {
                 .putBoolean(KEY_SCAN_LOCAL_MUSIC, false)
                 .apply();
 
-        ScannerDialog scannerDialog = ScannerDialog.newInstance(true);
+        ScannerDialog scannerDialog = ScannerDialog.newInstance(true, true);
         scannerDialog.show(getSupportFragmentManager(), "scannerDialog");
     }
 
