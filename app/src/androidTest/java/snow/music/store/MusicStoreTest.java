@@ -1,6 +1,7 @@
 package snow.music.store;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -53,12 +54,10 @@ public class MusicStoreTest {
     @Test
     public void createCustomMusicList() {
         final String name = "TestMusicList";
-        final String description = "test description";
 
-        MusicList musicList = mMusicStore.createCustomMusicList(name, description);
+        MusicList musicList = mMusicStore.createCustomMusicList(name);
 
         assertEquals(name, musicList.getName());
-        assertEquals(description, musicList.getDescription());
 
         boolean exception = false;
         try {
@@ -85,55 +84,18 @@ public class MusicStoreTest {
     @Test
     public void getCustomMusicList() {
         final String name = "TestMusicList";
-        final String description = "test description";
 
-        mMusicStore.createCustomMusicList(name, description);
+        mMusicStore.createCustomMusicList(name);
         MusicList musicList = mMusicStore.getCustomMusicList(name);
 
         assertNotNull(musicList);
         assertEquals(name, musicList.getName());
-        assertEquals(description, musicList.getDescription());
-    }
-
-    @Test
-    public void updateMusicList() {
-        final String name = "TestMusicList";
-        final String description = "test description";
-
-        final String newName = "NewTestMusicList";
-        final String newDescription = "new test description";
-        final Music music = new Music(
-                0,
-                "title1",
-                "artist1",
-                "album1",
-                "https://www.test.com/test1.mp3",
-                "https://www.test.com/test1.png",
-                60_000,
-                System.currentTimeMillis());
-        mMusicStore.putMusic(music);
-
-        MusicList musicList = mMusicStore.createCustomMusicList(name, description);
-
-        musicList.setName(newName);
-        musicList.setDescription(newDescription);
-        musicList.getMusicElements().add(music);
-
-        mMusicStore.updateMusicList(musicList);
-
-        musicList = mMusicStore.getCustomMusicList(newName);
-
-        assertNotNull(musicList);
-        assertEquals(newName, musicList.getName());
-        assertEquals(newDescription, musicList.getDescription());
-        assertEquals(music, musicList.getMusicElements().get(0));
     }
 
     @Test
     public void deleteMusicList() {
         final String name = "TestMusicList";
-        final String description = "test description";
-        mMusicStore.createCustomMusicList(name, description);
+        mMusicStore.createCustomMusicList(name);
 
         MusicList musicList = mMusicStore.getCustomMusicList(name);
 
@@ -149,7 +111,7 @@ public class MusicStoreTest {
     public void deleteMusicList_name() {
         final String name = "TestMusicList";
         final String description = "test description";
-        mMusicStore.createCustomMusicList(name, description);
+        mMusicStore.createCustomMusicList(name);
 
         MusicList musicList = mMusicStore.getCustomMusicList(name);
 
@@ -248,13 +210,14 @@ public class MusicStoreTest {
         mMusicStore.addHistory(musicA);
         mMusicStore.addHistory(musicB);
 
-        assertEquals(musicA, mMusicStore.getAllHistory().get(0));
-        assertEquals(musicB, mMusicStore.getAllHistory().get(1));
+        // history is desc by timestamp
+        assertEquals(musicB, mMusicStore.getAllHistory().get(0).getMusic());
+        assertEquals(musicA, mMusicStore.getAllHistory().get(1).getMusic());
 
         mMusicStore.addHistory(musicA);
 
-        assertEquals(musicB, mMusicStore.getAllHistory().get(0));
-        assertEquals(musicA, mMusicStore.getAllHistory().get(1));
+        assertEquals(musicA, mMusicStore.getAllHistory().get(0).getMusic());
+        assertEquals(musicB, mMusicStore.getAllHistory().get(1).getMusic());
     }
 
     @Test
@@ -272,60 +235,11 @@ public class MusicStoreTest {
 
         mMusicStore.addHistory(music);
 
-        assertEquals(music, mMusicStore.getAllHistory().get(0));
+        HistoryEntity historyEntity = mMusicStore.getAllHistory().get(0);
+        assertEquals(music, historyEntity.getMusic());
 
-        mMusicStore.removeHistory(music);
-
+        mMusicStore.removeHistory(historyEntity);
         assertEquals(0, mMusicStore.getAllHistory().size());
-    }
-
-    @Test
-    public void removeHistory_collection() {
-        final Music musicA = new Music(
-                0,
-                "title1",
-                "artist1",
-                "album1",
-                "https://www.test.com/test1.mp3",
-                "https://www.test.com/test1.png",
-                60_000,
-                System.currentTimeMillis());
-
-        final Music musicB = new Music(
-                0,
-                "title2",
-                "artist2",
-                "album2",
-                "https://www.test.com/test2.mp3",
-                "https://www.test.com/test2.png",
-                60_000,
-                System.currentTimeMillis());
-
-        final Music musicC = new Music(
-                0,
-                "title3",
-                "artist3",
-                "album3",
-                "https://www.test.com/test3.mp3",
-                "https://www.test.com/test3.png",
-                60_000,
-                System.currentTimeMillis());
-
-        mMusicStore.putMusic(musicA);
-        mMusicStore.putMusic(musicB);
-        mMusicStore.putMusic(musicC);
-
-        mMusicStore.addHistory(musicA);
-        mMusicStore.addHistory(musicB);
-        mMusicStore.addHistory(musicC);
-
-        List<Music> removeItems = new ArrayList<>();
-        removeItems.add(musicA);
-        removeItems.add(musicC);
-
-        mMusicStore.removeHistory(removeItems);
-
-        assertEquals(musicB, mMusicStore.getAllHistory().get(0));
     }
 
     @Test
@@ -614,12 +528,7 @@ public class MusicStoreTest {
         mMusicStore.putMusic(music);
 
         CountDownLatch addLatch = new CountDownLatch(1);
-        MusicStore.OnFavoriteChangeListener addListener = new MusicStore.OnFavoriteChangeListener() {
-            @Override
-            public void onFavoriteChanged() {
-                addLatch.countDown();
-            }
-        };
+        MusicStore.OnFavoriteChangeListener addListener = addLatch::countDown;
 
         mMusicStore.addOnFavoriteChangeListener(addListener);
 
@@ -631,12 +540,7 @@ public class MusicStoreTest {
         mMusicStore.removeOnFavoriteChangeListener(addListener);
 
         CountDownLatch removeLatch = new CountDownLatch(1);
-        MusicStore.OnFavoriteChangeListener removeListener = new MusicStore.OnFavoriteChangeListener() {
-            @Override
-            public void onFavoriteChanged() {
-                removeLatch.countDown();
-            }
-        };
+        MusicStore.OnFavoriteChangeListener removeListener = removeLatch::countDown;
 
         mMusicStore.addOnFavoriteChangeListener(removeListener);
 

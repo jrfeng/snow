@@ -52,32 +52,6 @@ public class MusicListTest {
     }
 
     @Test
-    public void setName() {
-        final String newName = "NewTestName";
-
-        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
-        musicList.setName(newName);
-
-        assertEquals(newName, musicList.getName());
-
-        MusicList favorite = mMusicStore.getFavoriteMusicList();
-        favorite.setName(newName);
-
-        assertNotEquals(newName, favorite.getName());
-        assertEquals(MusicStore.MUSIC_LIST_FAVORITE, favorite.getName());
-    }
-
-    @Test
-    public void setDescription() {
-        final String description = "new description";
-
-        MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
-        musicList.setDescription(description);
-
-        assertEquals(description, musicList.getDescription());
-    }
-
-    @Test
     public void getSize() {
         MusicList musicList = mMusicStore.createCustomMusicList(TEST_MUSIC_LIST);
 
