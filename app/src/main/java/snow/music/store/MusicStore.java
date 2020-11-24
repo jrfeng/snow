@@ -47,7 +47,6 @@ public class MusicStore {
     private static final String TAG = "MusicStore";
     public static final String MUSIC_LIST_LOCAL_MUSIC = "__local_music";
     public static final String MUSIC_LIST_FAVORITE = "__favorite";
-    public static final String MUSIC_LIST_HISTORY = "__history";
 
     public static final int NAME_MAX_LENGTH = 40;
 
@@ -58,6 +57,7 @@ public class MusicStore {
     private final BoxStore mBoxStore;
     private final Box<Music> mMusicBox;
     private final Box<MusicListEntity> mMusicListEntityBox;
+    private final Box<HistoryEntity> mHistoryEntityBox;
 
     private final Handler mMainHandler;
 
@@ -70,6 +70,7 @@ public class MusicStore {
         mBoxStore = boxStore;
         mMusicBox = boxStore.boxFor(Music.class);
         mMusicListEntityBox = boxStore.boxFor(MusicListEntity.class);
+        mHistoryEntityBox = boxStore.boxFor(HistoryEntity.class);
         mMainHandler = new Handler(Looper.getMainLooper());
         mAllFavoriteChangeListener = new LinkedList<>();
         mAllCustomMusicListName = new HashSet<>();
@@ -82,7 +83,6 @@ public class MusicStore {
             String[] allName = mMusicListEntityBox.query()
                     .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC)
                     .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
-                    .notEqual(MusicListEntity_.name, MUSIC_LIST_HISTORY)
                     .build()
                     .property(MusicListEntity_.name)
                     .findStrings();
@@ -221,8 +221,7 @@ public class MusicStore {
 
         QueryBuilder<MusicListEntity> builder = mMusicListEntityBox.query()
                 .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC)
-                .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
-                .notEqual(MusicListEntity_.name, MUSIC_LIST_HISTORY);
+                .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE);
 
         builder.link(MusicListEntity_.musicElements)
                 .equal(Music_.id, music.getId());
@@ -415,8 +414,6 @@ public class MusicStore {
                 .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC)
                 .and()
                 .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
-                .and()
-                .notEqual(MusicListEntity_.name, MUSIC_LIST_HISTORY)
                 .build()
                 .find();
 
@@ -608,8 +605,7 @@ public class MusicStore {
      */
     public static boolean isBuiltInName(String name) {
         return name.equalsIgnoreCase(MUSIC_LIST_LOCAL_MUSIC) ||
-                name.equalsIgnoreCase(MUSIC_LIST_FAVORITE) ||
-                name.equalsIgnoreCase(MUSIC_LIST_HISTORY);
+                name.equalsIgnoreCase(MUSIC_LIST_FAVORITE);
     }
 
     /**
@@ -619,43 +615,33 @@ public class MusicStore {
         Preconditions.checkNotNull(music);
         checkThread();
 
-        MusicList history = getHistoryMusicList();
-        List<Music> elements = history.getMusicElements();
+        HistoryEntity historyEntity = mHistoryEntityBox.query()
+                .equal(HistoryEntity_.musicId, music.id)
+                .build()
+                .findFirst();
 
-        elements.remove(music);
-        elements.add(music);
-
-        if (history.getSize() - MAX_HISTORY_SIZE > 0) {
-            elements.remove(0);
+        if (historyEntity != null) {
+            historyEntity.timestamp = System.currentTimeMillis();
+        } else {
+            historyEntity = new HistoryEntity();
+            historyEntity.music.setTarget(music);
+            historyEntity.timestamp = System.currentTimeMillis();
         }
 
-        updateMusicList(history);
+        mHistoryEntityBox.put(historyEntity);
     }
 
     /**
      * 移除一条历史记录。
      */
-    public synchronized void removeHistory(@NonNull Music music) {
-        Preconditions.checkNotNull(music);
+    public synchronized void removeHistory(@NonNull HistoryEntity historyEntity) {
+        Preconditions.checkNotNull(historyEntity);
         checkThread();
 
-        MusicList history = getHistoryMusicList();
-        history.getMusicElements().remove(music);
-
-        updateMusicList(history);
-    }
-
-    /**
-     * 移除多条历史记录。
-     */
-    public synchronized void removeHistory(@NonNull Collection<Music> musics) {
-        Preconditions.checkNotNull(musics);
-        checkThread();
-
-        MusicList history = getHistoryMusicList();
-        history.getMusicElements().removeAll(musics);
-
-        updateMusicList(history);
+        mHistoryEntityBox.query()
+                .equal(HistoryEntity_.id, historyEntity.id)
+                .build()
+                .remove();
     }
 
     /**
@@ -663,18 +649,23 @@ public class MusicStore {
      */
     public synchronized void clearHistory() {
         checkThread();
-        MusicList history = getHistoryMusicList();
-        history.getMusicElements().clear();
 
-        updateMusicList(history);
+        mHistoryEntityBox.query()
+                .build()
+                .remove();
     }
 
     /**
      * 获取所有的历史记录。
      */
-    public synchronized List<Music> getAllHistory() {
+    @NonNull
+    public synchronized List<HistoryEntity> getAllHistory() {
         checkThread();
-        return new ArrayList<>(getHistoryMusicList().getMusicElements());
+
+        return mHistoryEntityBox.query()
+                .orderDesc(HistoryEntity_.timestamp)
+                .build()
+                .find();
     }
 
     /**
@@ -890,10 +881,6 @@ public class MusicStore {
                 .equal(Music_.album, album)
                 .build()
                 .find(offset, limit);
-    }
-
-    private synchronized MusicList getHistoryMusicList() {
-        return getBuiltInMusicList(MUSIC_LIST_HISTORY);
     }
 
     @NonNull

@@ -18,17 +18,18 @@ import java.util.List;
 
 import recyclerview.helper.ItemClickHelper;
 import snow.music.R;
+import snow.music.store.HistoryEntity;
 import snow.music.store.Music;
 
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHolder> {
     private static final int TYPE_EMPTY_VIEW = 1;
     private static final int TYPE_ITEM_VIEW = 2;
 
-    private List<Music> mHistory;
-    private ItemClickHelper mItemClickHelper;
+    private List<HistoryEntity> mHistory;
+    private final ItemClickHelper mItemClickHelper;
     private OnItemClickListener mOnItemClickListener;
 
-    public HistoryAdapter(@NonNull List<Music> history) {
+    public HistoryAdapter(@NonNull List<HistoryEntity> history) {
         mHistory = new ArrayList<>(history);
         mItemClickHelper = new ItemClickHelper();
         mItemClickHelper.setOnItemClickListener((position, viewId, view, holder) -> {
@@ -47,7 +48,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         });
     }
 
-    public void setHistory(@NonNull List<Music> history) {
+    public void setHistory(@NonNull List<HistoryEntity> history) {
         Preconditions.checkNotNull(history);
 
         if (mHistory.isEmpty() || history.isEmpty()) {
@@ -69,7 +70,9 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
             @Override
             public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                return mHistory.get(oldItemPosition).equals(history.get(newItemPosition));
+                Music oldMusic = mHistory.get(oldItemPosition).getMusic();
+                Music newMusic = history.get(newItemPosition).getMusic();
+                return oldMusic.equals(newMusic);
             }
 
             @Override
@@ -117,8 +120,9 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
             return;
         }
 
-        Music music = mHistory.get(position);
+        HistoryEntity historyEntity = mHistory.get(position);
 
+        Music music = historyEntity.getMusic();
         holder.tvTitle.setText(music.getTitle());
         holder.tvArtistAndAlbum.setText(music.getArtist() + " - " + music.getAlbum());
 
@@ -165,8 +169,8 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     }
 
     public interface OnItemClickListener {
-        void onItemClicked(int position, @NonNull Music music);
+        void onItemClicked(int position, @NonNull HistoryEntity historyEntity);
 
-        void onRemoveClicked(int position, @NonNull Music music);
+        void onRemoveClicked(int position, @NonNull HistoryEntity historyEntity);
     }
 }

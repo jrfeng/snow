@@ -8,14 +8,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 import android.view.View;
 
+import java.util.List;
 import java.util.Objects;
 
 import snow.music.R;
 import snow.music.activity.ListActivity;
 import snow.music.dialog.MessageDialog;
 import snow.music.service.AppPlayerService;
+import snow.music.store.HistoryEntity;
 import snow.music.store.Music;
-import snow.music.store.MusicStore;
 import snow.music.util.MusicListUtil;
 import snow.music.util.PlayerUtil;
 import snow.player.lifecycle.PlayerViewModel;
@@ -71,13 +72,13 @@ public class HistoryActivity extends ListActivity {
 
         mHistoryAdapter.setOnItemClickListener(new HistoryAdapter.OnItemClickListener() {
             @Override
-            public void onItemClicked(int position, @NonNull Music music) {
+            public void onItemClicked(int position, @NonNull HistoryEntity historyEntity) {
                 playMusic(position);
             }
 
             @Override
-            public void onRemoveClicked(int position, @NonNull Music music) {
-                removeHistory(music);
+            public void onRemoveClicked(int position, @NonNull HistoryEntity historyEntity) {
+                removeHistory(historyEntity);
             }
         });
 
@@ -89,7 +90,7 @@ public class HistoryActivity extends ListActivity {
         MessageDialog messageDialog = new MessageDialog.Builder(getApplicationContext())
                 .setMessage(R.string.message_play_all_music)
                 .setPositiveButtonClickListener((dialog, which) -> {
-                    Playlist playlist = MusicListUtil.asPlaylist(MusicStore.MUSIC_LIST_HISTORY, mHistoryViewModel.getAllHistory(), position);
+                    Playlist playlist = MusicListUtil.asPlaylist(""/*empty*/, mHistoryViewModel.getAllHistoryMusic(), position);
 
                     mPlayerViewModel.setPlaylist(playlist, position, true);
                 })
@@ -98,11 +99,11 @@ public class HistoryActivity extends ListActivity {
         messageDialog.show(getSupportFragmentManager(), "playMusic");
     }
 
-    private void removeHistory(Music music) {
+    private void removeHistory(HistoryEntity historyEntity) {
         MessageDialog messageDialog = new MessageDialog.Builder(getApplicationContext())
                 .setMessage(R.string.message_remove_history)
                 .setPositiveTextColor(getResources().getColor(R.color.red_500))
-                .setPositiveButtonClickListener((dialog, which) -> mHistoryViewModel.removeHistory(music))
+                .setPositiveButtonClickListener((dialog, which) -> mHistoryViewModel.removeHistory(historyEntity))
                 .build();
 
         messageDialog.show(getSupportFragmentManager(), "removeHistory");

@@ -17,11 +17,12 @@ import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import snow.music.store.HistoryEntity;
 import snow.music.store.Music;
 import snow.music.store.MusicStore;
 
 public class HistoryViewModel extends ViewModel {
-    private MutableLiveData<List<Music>> mHistory;
+    private final MutableLiveData<List<HistoryEntity>> mHistory;
     private Disposable mLoadHistoryDisposable;
 
     public HistoryViewModel() {
@@ -38,24 +39,32 @@ public class HistoryViewModel extends ViewModel {
         }
     }
 
-    public LiveData<List<Music>> getHistory() {
+    public LiveData<List<HistoryEntity>> getHistory() {
         return mHistory;
     }
 
     @NonNull
-    public List<Music> getAllHistory() {
-        List<Music> allHistory = mHistory.getValue();
-        assert allHistory != null;
-        return new ArrayList<>(allHistory);
+    public List<Music> getAllHistoryMusic() {
+        List<HistoryEntity> history = mHistory.getValue();
+        assert history != null;
+
+        List<Music> musicList = new ArrayList<>(history.size());
+
+        for (HistoryEntity entity : history) {
+            musicList.add(entity.getMusic());
+        }
+
+        return musicList;
     }
 
-    public void removeHistory(@NonNull Music music) {
-        Preconditions.checkNotNull(music);
-        List<Music> musics = Objects.requireNonNull(mHistory.getValue());
-        musics.remove(music);
-        mHistory.setValue(musics);
+    public void removeHistory(@NonNull HistoryEntity historyEntity) {
+        Preconditions.checkNotNull(historyEntity);
 
-        Single.create((SingleOnSubscribe<Boolean>) emitter -> MusicStore.getInstance().removeHistory(music))
+        List<HistoryEntity> history = Objects.requireNonNull(mHistory.getValue());
+        history.remove(historyEntity);
+        mHistory.setValue(history);
+
+        Single.create((SingleOnSubscribe<Boolean>) emitter -> MusicStore.getInstance().removeHistory(historyEntity))
                 .subscribeOn(Schedulers.io())
                 .subscribe();
     }
@@ -69,15 +78,14 @@ public class HistoryViewModel extends ViewModel {
     }
 
     private void loadHistory() {
-        mLoadHistoryDisposable = Single.create((SingleOnSubscribe<List<Music>>) emitter -> {
-            List<Music> history = MusicStore.getInstance().getAllHistory();
+        mLoadHistoryDisposable = Single.create((SingleOnSubscribe<List<HistoryEntity>>) emitter -> {
+            List<HistoryEntity> history = MusicStore.getInstance().getAllHistory();
             if (emitter.isDisposed()) {
                 return;
             }
-            Collections.reverse(history);
             emitter.onSuccess(history);
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(history -> mHistory.setValue(history));
+                .subscribe(mHistory::setValue);
     }
 }
