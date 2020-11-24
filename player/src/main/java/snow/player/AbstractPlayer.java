@@ -328,7 +328,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private Single<Uri> getMusicItemUri(@NonNull final MusicItem musicItem, @NonNull final SoundQuality soundQuality) {
         return Single.create(new SingleOnSubscribe<Uri>() {
             @Override
-            public void subscribe(SingleEmitter<Uri> emitter) {
+            public void subscribe(@NonNull SingleEmitter<Uri> emitter) {
                 Uri uri = null;
 
                 try {
@@ -1296,7 +1296,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private Single<Boolean> playingMusicIsCached() {
         return Single.create(new SingleOnSubscribe<Boolean>() {
             @Override
-            public void subscribe(SingleEmitter<Boolean> emitter) {
+            public void subscribe(@NonNull SingleEmitter<Boolean> emitter) {
                 boolean cached = isCached(getMusicItem(), mPlayerConfig.getSoundQuality());
                 if (emitter.isDisposed()) {
                     return;
@@ -1436,7 +1436,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     private int getNextPosition(int currentPosition) {
         PlayMode playMode = mPlayerState.getPlayMode();
-        if (mConfirmNextPlay || playMode == PlayMode.SEQUENTIAL || playMode == PlayMode.LOOP) {
+        if (mConfirmNextPlay || playMode == PlayMode.PLAYLIST_LOOP || playMode == PlayMode.LOOP) {
             mConfirmNextPlay = false;
             int position = currentPosition + 1;
             if (position >= getPlaylistSize()) {
@@ -1474,7 +1474,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         int position = 0;
 
         switch (mPlayerState.getPlayMode()) {
-            case SEQUENTIAL:   // 注意！case 穿透
+            case PLAYLIST_LOOP:   // 注意！case 穿透
             case LOOP:
                 position = currentPosition - 1;
                 if (position < 0) {

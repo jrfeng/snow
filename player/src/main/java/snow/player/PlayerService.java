@@ -1415,14 +1415,14 @@ public class PlayerService extends MediaBrowserServiceCompat
                 return;
             }
 
-            mPlayer.setPlayMode(PlayMode.SEQUENTIAL);
+            mPlayer.setPlayMode(PlayMode.PLAYLIST_LOOP);
         }
 
         @Override
         public void onSetShuffleMode(int shuffleMode) {
             if (shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_NONE ||
                     shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_INVALID) {
-                mPlayer.setPlayMode(PlayMode.SEQUENTIAL);
+                mPlayer.setPlayMode(PlayMode.PLAYLIST_LOOP);
                 return;
             }
 
@@ -1883,7 +1883,7 @@ public class PlayerService extends MediaBrowserServiceCompat
                 cancelLastLoading();
                 mLoadIconDisposable = Single.create(new SingleOnSubscribe<Bitmap>() {
                     @Override
-                    public void subscribe(SingleEmitter<Bitmap> emitter) {
+                    public void subscribe(@NonNull SingleEmitter<Bitmap> emitter) {
                         // 1. load icon from internet
                         Bitmap bitmap = loadIconFromInternet(musicItem);
 

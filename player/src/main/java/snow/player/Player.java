@@ -226,7 +226,7 @@ public interface Player {
          * 当播放模式被改变时会调用该方法。
          *
          * @param playMode 当前的播放模式。
-         * @see PlayMode#SEQUENTIAL
+         * @see PlayMode#PLAYLIST_LOOP
          * @see PlayMode#LOOP
          * @see PlayMode#SHUFFLE
          */

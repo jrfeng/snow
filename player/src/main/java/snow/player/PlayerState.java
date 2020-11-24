@@ -42,7 +42,7 @@ class PlayerState implements Parcelable {
         playProgress = 0;
         playProgressUpdateTime = 0;
         playPosition = 0;
-        playMode = PlayMode.SEQUENTIAL;
+        playMode = PlayMode.PLAYLIST_LOOP;
 
         playbackState = PlaybackState.NONE;
         preparing = false;
@@ -174,7 +174,7 @@ class PlayerState implements Parcelable {
     /**
      * 设置播放队列的播放模式。
      *
-     * @param playMode 播放队列的播放模式。只能是这些值之一：{@link PlayMode#SEQUENTIAL},
+     * @param playMode 播放队列的播放模式。只能是这些值之一：{@link PlayMode#PLAYLIST_LOOP},
      *                 {@link PlayMode#LOOP},
      *                 {@link PlayMode#SHUFFLE}
      * @see PlayMode

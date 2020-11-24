@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -67,14 +66,14 @@ public class AppPlayerService extends PlayerService {
 
             mSwitchPlayMode = buildCustomAction(ACTION_SWITCH_PLAY_MODE, (player, extras) -> {
                 switch (getPlayMode()) {
-                    case SEQUENTIAL:
+                    case PLAYLIST_LOOP:
                         player.setPlayMode(PlayMode.LOOP);
                         break;
                     case LOOP:
                         player.setPlayMode(PlayMode.SHUFFLE);
                         break;
                     case SHUFFLE:
-                        player.setPlayMode(PlayMode.SEQUENTIAL);
+                        player.setPlayMode(PlayMode.PLAYLIST_LOOP);
                         break;
                 }
                 invalidate();
@@ -132,7 +131,7 @@ public class AppPlayerService extends PlayerService {
 
         private void addSwitchPlayMode(NotificationCompat.Builder builder) {
             switch (getPlayMode()) {
-                case SEQUENTIAL:
+                case PLAYLIST_LOOP:
                     builder.addAction(R.drawable.ic_notif_play_mode_sequential, "sequential", mSwitchPlayMode);
                     break;
                 case LOOP:

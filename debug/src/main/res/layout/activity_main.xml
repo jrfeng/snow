@@ -407,8 +407,8 @@
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:onClick="@{() -> viewModel.setPlayMode(PlayMode.SEQUENTIAL)}"
-                    android:text="Sequential"
+                    android:onClick="@{() -> viewModel.setPlayMode(PlayMode.PLAYLIST_LOOP)}"
+                    android:text="Playlist loop"
                     android:textAllCaps="false" />
 
                 <Button

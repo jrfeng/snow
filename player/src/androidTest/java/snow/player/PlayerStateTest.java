@@ -24,7 +24,7 @@ public class PlayerStateTest {
         assertEquals(0, playerState.getPlayProgress());
         assertEquals(0, playerState.getPlayProgressUpdateTime());
         assertEquals(0, playerState.getPlayPosition());
-        assertEquals(PlayMode.SEQUENTIAL, playerState.getPlayMode());
+        assertEquals(PlayMode.PLAYLIST_LOOP, playerState.getPlayMode());
 
         assertEquals(PlaybackState.NONE, playerState.getPlaybackState());
         assertFalse(playerState.isPreparing());

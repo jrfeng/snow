@@ -7,9 +7,9 @@ package snow.player;
  */
 public enum PlayMode {
     /**
-     * 顺序播放。
+     * 播放列表循环。
      */
-    SEQUENTIAL,
+    PLAYLIST_LOOP,
     /**
      * 单曲循环。
      */
