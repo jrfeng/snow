@@ -58,9 +58,17 @@ public class ArtistBrowserActivity extends ListActivity {
                     List<String> artistList = mViewModel.getAllArtist().getValue();
                     adapter.setMarkPosition(artistList.indexOf(musicItem.getArtist()));
                 });
+
+        adapter.setOnItemClickListener((position, viewId, view, holder) ->
+                navigateToArtistDetail(mViewModel.getArtist(position))
+        );
     }
 
     public void finishSelf(View view) {
         finish();
+    }
+
+    public void navigateToArtistDetail(String artistName) {
+        // TODO
     }
 }

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
@@ -37,6 +38,10 @@ public class ArtistBrowserViewModel extends ViewModel {
 
     public LiveData<List<String>> getAllArtist() {
         return mAllArtist;
+    }
+
+    public String getArtist(int position) {
+        return Objects.requireNonNull(mAllArtist.getValue()).get(position);
     }
 
     private void loadAllArtist() {
