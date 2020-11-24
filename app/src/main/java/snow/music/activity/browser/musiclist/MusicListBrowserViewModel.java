@@ -19,6 +19,7 @@ import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import snow.music.activity.detail.musiclist.MusicListDetailActivity;
 import snow.music.store.MusicList;
 import snow.music.store.MusicStore;
 
@@ -113,7 +114,7 @@ public class MusicListBrowserViewModel extends ViewModel {
     }
 
     public void navigateToMusicList(Context context, int position) {
-        // TODO
+        MusicListDetailActivity.start(context, getMusicList(position).getName());
     }
 
     private void loadAllMusicList() {
