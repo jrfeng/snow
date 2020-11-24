@@ -3,6 +3,7 @@ package snow.music.store;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import java.io.ByteArrayInputStream;
@@ -103,6 +104,21 @@ public class MusicList {
             mElementList = new ElementList();
         }
         return mElementList;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MusicList musicList = (MusicList) o;
+
+        return musicListEntity.id == musicList.musicListEntity.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(musicListEntity.id);
     }
 
     private class ElementList implements List<Music> {
