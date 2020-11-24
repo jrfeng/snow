@@ -30,10 +30,7 @@
             android:id="@+id/mark"
             android:layout_width="8dp"
             android:layout_height="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginEnd="48dp"
-            android:layout_marginRight="48dp"
+            android:layout_margin="16dp"
             android:background="@drawable/shape_oval_deep_purple_400"
             android:visibility="gone"
             tools:visibility="visible" />
