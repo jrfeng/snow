@@ -22,6 +22,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".activity.detail.album.AlbumDetailActivity" />
         <activity android:name=".activity.detail.artist.ArtistDetailActivity" />
         <activity android:name=".activity.detail.musiclist.MusicListDetailActivity" />
         <activity android:name=".activity.browser.album.AlbumBrowserActivity" />

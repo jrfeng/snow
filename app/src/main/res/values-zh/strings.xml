@@ -97,4 +97,5 @@
     <string name="title_albums">专辑</string>
     <string name="empty_no_albums">无专辑</string>
     <string name="title_artist_prefix">歌手：</string>
+    <string name="title_album_prefix">专辑：</string>
 </resources>
