@@ -108,7 +108,6 @@ public class MusicStoreTest {
     @Test
     public void deleteMusicList_name() {
         final String name = "TestMusicList";
-        final String description = "test description";
         mMusicStore.createCustomMusicList(name);
 
         MusicList musicList = mMusicStore.getCustomMusicList(name);
@@ -548,5 +547,150 @@ public class MusicStoreTest {
         // assert
         assertFalse(mMusicStore.isFavorite(music));
         mMusicStore.removeOnFavoriteChangeListener(removeListener);
+    }
+
+    @Test
+    public void findMusicListMusic() {
+        final String key = "hello";
+
+        final Music musicA = new Music(
+                0,
+                "title1" + key,
+                "artist1",
+                "album1",
+                "https://www.test.com/test1.mp3",
+                "https://www.test.com/test1.png",
+                60_000,
+                System.currentTimeMillis());
+
+        final Music musicB = new Music(
+                0,
+                "title2" + key,
+                "artist2",
+                "album2",
+                "https://www.test.com/test2.mp3",
+                "https://www.test.com/test2.png",
+                60_000,
+                System.currentTimeMillis());
+
+        final Music musicC = new Music(
+                0,
+                "title3",
+                "artist3",
+                "album3",
+                "https://www.test.com/test3.mp3",
+                "https://www.test.com/test3.png",
+                60_000,
+                System.currentTimeMillis());
+
+        mMusicStore.putMusic(musicA);
+        mMusicStore.putMusic(musicB);
+        mMusicStore.putMusic(musicC);
+
+        final String musicListName = "test music list";
+        MusicList musicList = mMusicStore.createCustomMusicList(musicListName);
+
+        musicList.getMusicElements().add(musicA);
+        musicList.getMusicElements().add(musicB);
+        musicList.getMusicElements().add(musicC);
+        mMusicStore.updateMusicList(musicList);
+
+        List<Music> result = mMusicStore.findMusicListMusic(musicListName, key);
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(musicA));
+        assertTrue(result.contains(musicB));
+    }
+
+    @Test
+    public void findArtistMusic() {
+        final String artistName = "test artist";
+        final String key = "hello";
+
+        final Music musicA = new Music(
+                0,
+                "title1" + key,
+                artistName,
+                "album1",
+                "https://www.test.com/test1.mp3",
+                "https://www.test.com/test1.png",
+                60_000,
+                System.currentTimeMillis());
+
+        final Music musicB = new Music(
+                0,
+                "title2" + key,
+                artistName,
+                "album2",
+                "https://www.test.com/test2.mp3",
+                "https://www.test.com/test2.png",
+                60_000,
+                System.currentTimeMillis());
+
+        final Music musicC = new Music(
+                0,
+                "title3",
+                "artist3",
+                "album3",
+                "https://www.test.com/test3.mp3",
+                "https://www.test.com/test3.png",
+                60_000,
+                System.currentTimeMillis());
+
+        mMusicStore.putMusic(musicA);
+        mMusicStore.putMusic(musicB);
+        mMusicStore.putMusic(musicC);
+
+        List<Music> result = mMusicStore.findArtistMusic(artistName, key);
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(musicA));
+        assertTrue(result.contains(musicB));
+    }
+
+    @Test
+    public void findAlbumMusic() {
+        final String albumName = "test album";
+        final String key = "hello";
+
+        final Music musicA = new Music(
+                0,
+                "title1" + key,
+                "artist1",
+                albumName,
+                "https://www.test.com/test1.mp3",
+                "https://www.test.com/test1.png",
+                60_000,
+                System.currentTimeMillis());
+
+        final Music musicB = new Music(
+                0,
+                "title2" + key,
+                "artist2",
+                albumName,
+                "https://www.test.com/test2.mp3",
+                "https://www.test.com/test2.png",
+                60_000,
+                System.currentTimeMillis());
+
+        final Music musicC = new Music(
+                0,
+                "title3",
+                "artist3",
+                "album3",
+                "https://www.test.com/test3.mp3",
+                "https://www.test.com/test3.png",
+                60_000,
+                System.currentTimeMillis());
+
+        mMusicStore.putMusic(musicA);
+        mMusicStore.putMusic(musicB);
+        mMusicStore.putMusic(musicC);
+
+        List<Music> result = mMusicStore.findAlbumMusic(albumName, key);
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(musicA));
+        assertTrue(result.contains(musicB));
     }
 }
