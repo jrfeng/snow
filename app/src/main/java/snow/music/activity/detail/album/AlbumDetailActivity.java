@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -18,6 +17,7 @@ import snow.music.R;
 import snow.music.activity.detail.DetailActivity;
 
 public class AlbumDetailActivity extends DetailActivity {
+    public static final String ALBUM_PREFIX = "album:";
     private static final String KEY_ALBUM = "ALBUM";
 
     @Override
@@ -33,7 +33,7 @@ public class AlbumDetailActivity extends DetailActivity {
     private void initTitle() {
         TextView tvTitle = findViewById(R.id.tvTitle);
         String prefix = getString(R.string.title_album_prefix);
-        tvTitle.setText(prefix + getAlbum());
+        tvTitle.setText(prefix + getAlbumName());
     }
 
     private void initDetailFragment() {
@@ -52,14 +52,22 @@ public class AlbumDetailActivity extends DetailActivity {
         Preconditions.checkNotNull(album);
 
         Intent intent = new Intent(context, AlbumDetailActivity.class);
-        intent.putExtra(KEY_ALBUM, album);
+        intent.putExtra(KEY_ALBUM, ALBUM_PREFIX + album);   // 加上前缀，避免和自建歌单名重复
 
         context.startActivity(intent);
     }
 
-    @Nullable
     private String getAlbum() {
-        return getIntent().getStringExtra(KEY_ALBUM);
+        String name = getIntent().getStringExtra(KEY_ALBUM);
+        if (name == null || name.isEmpty()) {
+            return "";
+        }
+
+        return name;
+    }
+
+    private String getAlbumName() {
+        return getAlbum().substring(ALBUM_PREFIX.length());
     }
 
     public void finishSelf(View view) {

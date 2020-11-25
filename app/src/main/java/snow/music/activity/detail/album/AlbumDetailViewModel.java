@@ -15,7 +15,7 @@ public class AlbumDetailViewModel extends BaseMusicListViewModel {
     @NonNull
     @Override
     protected List<Music> loadMusicListItems() {
-        List<Music> musicList = MusicStore.getInstance().getAlbumAllMusic(getMusicListName());
+        List<Music> musicList = MusicStore.getInstance().getAlbumAllMusic(getAlbumName());
 
         PinyinComparator pinyinComparator = new PinyinComparator();
         Collections.sort(musicList, (o1, o2) -> pinyinComparator.compare(o1.getTitle(), o2.getTitle()));
@@ -37,5 +37,11 @@ public class AlbumDetailViewModel extends BaseMusicListViewModel {
     @Override
     protected MusicList.SortOrder getSortOrder() {
         return MusicList.SortOrder.BY_TITLE;
+    }
+
+    // 去除 album: 前缀
+    private String getAlbumName() {
+        String album = getMusicListName();
+        return album.substring(AlbumDetailActivity.ALBUM_PREFIX.length());
     }
 }

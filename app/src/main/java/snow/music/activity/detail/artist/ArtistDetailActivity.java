@@ -1,7 +1,6 @@
 package snow.music.activity.detail.artist;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -18,6 +17,7 @@ import snow.music.R;
 import snow.music.activity.detail.DetailActivity;
 
 public class ArtistDetailActivity extends DetailActivity {
+    public static final String ARTIST_PREFIX = "artist:";
     private static final String KEY_ARTIST = "ARTIST";
 
     @Override
@@ -33,7 +33,7 @@ public class ArtistDetailActivity extends DetailActivity {
     private void initTitle() {
         TextView tvTitle = findViewById(R.id.tvTitle);
         String prefix = getString(R.string.title_artist_prefix);
-        tvTitle.setText(prefix + getArtist());
+        tvTitle.setText(prefix + getArtistName());
     }
 
     private void initDetailFragment() {
@@ -52,14 +52,22 @@ public class ArtistDetailActivity extends DetailActivity {
         Preconditions.checkNotNull(artist);
 
         Intent intent = new Intent(context, ArtistDetailActivity.class);
-        intent.putExtra(KEY_ARTIST, artist);
+        intent.putExtra(KEY_ARTIST, ARTIST_PREFIX + artist);    // 加上前缀，避免和自建歌单名重复
 
         context.startActivity(intent);
     }
 
-    @Nullable
     private String getArtist() {
-        return getIntent().getStringExtra(KEY_ARTIST);
+        String name = getIntent().getStringExtra(KEY_ARTIST);
+        if (name == null || name.isEmpty()) {
+            return "";
+        }
+
+        return name;
+    }
+
+    private String getArtistName() {
+        return getArtist().substring(ARTIST_PREFIX.length());
     }
 
     public void finishSelf(View view) {
