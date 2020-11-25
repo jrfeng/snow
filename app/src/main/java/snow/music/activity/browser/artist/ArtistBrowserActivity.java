@@ -12,6 +12,7 @@ import java.util.List;
 
 import snow.music.R;
 import snow.music.activity.ListActivity;
+import snow.music.activity.detail.artist.ArtistDetailActivity;
 import snow.music.service.AppPlayerService;
 import snow.music.util.PlayerUtil;
 import snow.player.lifecycle.PlayerViewModel;
@@ -69,6 +70,6 @@ public class ArtistBrowserActivity extends ListActivity {
     }
 
     public void navigateToArtistDetail(String artistName) {
-        // TODO
+        ArtistDetailActivity.start(this, artistName);
     }
 }

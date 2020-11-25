@@ -31,6 +31,9 @@
     <string name="title_albums">Albums</string>
     <string name="empty_no_albums">No albums</string>
 
+    <!-- ArtistDetailActivity -->
+    <string name="title_prefix">Artist: </string>
+
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>
     <string name="empty_playlist">Playlist is empty</string>
