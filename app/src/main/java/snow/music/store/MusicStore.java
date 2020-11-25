@@ -954,6 +954,87 @@ public class MusicStore {
     }
 
     /**
+     * 在名为 {@code musicListName} 的歌单中查找与指定 {@code key} 匹配的 {@link Music} 对象。
+     * <p>
+     * 只要歌曲名包含给定的 {@code key}，则就算匹配成功。
+     *
+     * @param musicListName 歌单名，可以是内置歌单名（如 {@link #MUSIC_LIST_LOCAL_MUSIC}、
+     *                      {@link #MUSIC_LIST_FAVORITE}），不能为 null
+     * @param key           搜索关键字，不能为 null
+     * @return 查找结果，不为 null
+     */
+    @NonNull
+    public List<Music> findMusicListMusic(@NonNull String musicListName, @NonNull String key) {
+        Preconditions.checkNotNull(musicListName);
+        Preconditions.checkNotNull(key);
+
+        if (musicListName.isEmpty() || key.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        QueryBuilder<Music> builder = mMusicBox.query();
+
+        builder.backlink(MusicListEntity_.musicElements)
+                .equal(MusicListEntity_.name, musicListName);
+
+        return builder.contains(Music_.title, key)
+                .build()
+                .find();
+    }
+
+    /**
+     * 在歌手名为 {@code artistName} 的所有歌曲中查找与指定 {@code key} 匹配的 {@link Music} 对象。
+     * <p>
+     * 只要歌曲名包含给定的 {@code key}，则就算匹配成功。
+     *
+     * @param artistName 歌手名，不能为 null
+     * @param key        搜索关键字，不能为 null
+     * @return 查找结果，不为 null
+     */
+    @NonNull
+    public List<Music> findArtistMusic(@NonNull String artistName, @NonNull String key) {
+        Preconditions.checkNotNull(artistName);
+        Preconditions.checkNotNull(key);
+
+        if (artistName.isEmpty() || key.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return mMusicBox.query()
+                .equal(Music_.artist, artistName)
+                .and()
+                .contains(Music_.title, key)
+                .build()
+                .find();
+    }
+
+    /**
+     * 在专辑名为 {@code albumName} 的所有歌曲中查找与指定 {@code key} 匹配的 {@link Music} 对象。
+     * <p>
+     * 只要歌曲名包含给定的 {@code key}，则就算匹配成功。
+     *
+     * @param albumName 专辑名，不能为 null
+     * @param key       搜索关键字，不能为 null
+     * @return 查找结果，不为 null
+     */
+    @NonNull
+    public List<Music> findAlbumMusic(@NonNull String albumName, @NonNull String key) {
+        Preconditions.checkNotNull(albumName);
+        Preconditions.checkNotNull(key);
+
+        if (albumName.isEmpty() || key.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return mMusicBox.query()
+                .equal(Music_.album, albumName)
+                .and()
+                .contains(Music_.title, key)
+                .build()
+                .find();
+    }
+
+    /**
      * 用于监听 “我喜欢” 歌单的修改事件。
      * <p>
      * 当往 “我喜欢” 歌单中添加或移除一首歌曲时，该监听器会被调用。
