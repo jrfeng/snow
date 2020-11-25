@@ -16,7 +16,6 @@ import com.google.common.base.Preconditions;
 
 import snow.music.R;
 import snow.music.activity.detail.DetailActivity;
-import snow.music.dialog.BottomMenuDialog;
 
 public class ArtistDetailActivity extends DetailActivity {
     private static final String KEY_ARTIST = "ARTIST";

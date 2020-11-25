@@ -1,6 +1,5 @@
 package snow.music.activity.detail.artist;
 
-import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,7 +13,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
-import snow.music.activity.browser.artist.ArtistBrowserViewModel;
 import snow.music.dialog.BottomDialog;
 import snow.music.dialog.BottomMenuDialog;
 import snow.music.fragment.musiclist.BaseMusicListFragment;
