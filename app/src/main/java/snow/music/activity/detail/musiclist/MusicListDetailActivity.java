@@ -15,6 +15,7 @@ import com.google.common.base.Preconditions;
 
 import snow.music.R;
 import snow.music.activity.detail.DetailActivity;
+import snow.music.activity.search.SearchActivity;
 import snow.music.fragment.musiclist.MusicListFragment;
 
 public class MusicListDetailActivity extends DetailActivity {
@@ -56,9 +57,12 @@ public class MusicListDetailActivity extends DetailActivity {
         context.startActivity(intent);
     }
 
-    @Nullable
     private String getMusicListName() {
-        return getIntent().getStringExtra(KEY_MUSIC_LIST_NAME);
+        String name = getIntent().getStringExtra(KEY_MUSIC_LIST_NAME);
+        if (name == null) {
+            return "";
+        }
+        return name;
     }
 
     public void finishSelf(View view) {
@@ -75,6 +79,6 @@ public class MusicListDetailActivity extends DetailActivity {
     }
 
     public void startSearchActivity() {
-        // TODO
+        SearchActivity.start(this, SearchActivity.Type.MUSIC_LIST, getMusicListName());
     }
 }

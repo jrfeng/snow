@@ -25,6 +25,7 @@ import snow.music.activity.browser.musiclist.MusicListBrowserActivity;
 import snow.music.activity.favorite.FavoriteActivity;
 import snow.music.activity.history.HistoryActivity;
 import snow.music.activity.localmusic.LocalMusicActivity;
+import snow.music.activity.search.SearchActivity;
 import snow.music.store.MusicStore;
 import snow.music.util.FavoriteObserver;
 import snow.music.util.MusicUtil;
@@ -195,8 +196,8 @@ public class NavigationViewModel extends ViewModel {
     }
 
     public void navigateToSearch(View view) {
-        // TODO
-        Log.d("DEBUG", "navigateToSearch");
+        Context context = view.getContext();
+        SearchActivity.start(context, SearchActivity.Type.MUSIC_LIST, MusicStore.MUSIC_LIST_LOCAL_MUSIC);
     }
 
     public void navigateToSetting(View view) {

@@ -37,6 +37,12 @@
     <!-- AlbumDetailActivity -->
     <string name="title_album_prefix">Album: </string>
 
+    <!-- SearchActivity -->
+    <string name="hint_input_music_name">Please input music name</string>
+    <string name="button_text_play">Play</string>
+    <string name="empty_not_found">Not found</string>
+    <string name="toast_start_playing">Start playing</string>
+
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>
     <string name="empty_playlist">Playlist is empty</string>
@@ -137,5 +143,6 @@
     <string name="des_scan_local_music">Scan local music</string>
     <string name="des_menu_icon">menu icon</string>
     <string name="des_checked">checked</string>
+    <string name="des_clear_input">clear input</string>
 
 </resources>

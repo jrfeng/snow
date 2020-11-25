@@ -15,6 +15,7 @@ import com.google.common.base.Preconditions;
 
 import snow.music.R;
 import snow.music.activity.detail.DetailActivity;
+import snow.music.activity.search.SearchActivity;
 
 public class ArtistDetailActivity extends DetailActivity {
     public static final String ARTIST_PREFIX = "artist:";
@@ -75,6 +76,6 @@ public class ArtistDetailActivity extends DetailActivity {
     }
 
     public void searchMusic(View view) {
-        // TODO
+        SearchActivity.start(this, SearchActivity.Type.ARTIST, getArtistName());
     }
 }

@@ -12,6 +12,7 @@ import android.view.View;
 
 import snow.music.R;
 import snow.music.activity.ListActivity;
+import snow.music.activity.search.SearchActivity;
 import snow.music.dialog.MessageDialog;
 import snow.music.dialog.ScannerDialog;
 import snow.music.fragment.musiclist.MusicListFragment;
@@ -61,7 +62,7 @@ public class LocalMusicActivity extends ListActivity {
         int id = view.getId();
 
         if (id == R.id.btnSearch) {
-            // TODO
+            SearchActivity.start(this, SearchActivity.Type.MUSIC_LIST, MusicStore.MUSIC_LIST_LOCAL_MUSIC);
         } else if (id == R.id.btnSort) {
             mMusicListFragment.showSortDialog();
         } else if (id == R.id.btnScan) {

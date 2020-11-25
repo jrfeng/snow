@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+
+        <variable
+            name="searchViewModel"
+            type="snow.music.activity.search.SearchViewModel" />
+    </data>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context="snow.music.activity.search.SearchActivity">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/action_bar_height"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@null"
+                    android:contentDescription="@string/des_back"
+                    android:onClick="finishSelf"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/ic_back" />
+
+                <FrameLayout
+                    android:id="@+id/searchBar"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/shape_rect_corner_4dp_grey_200"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/etInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:autofillHints=""
+                        android:background="@null"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:hint="@string/hint_input_music_name"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:singleLine="true"
+                        android:text="@={searchViewModel.input}"
+                        android:textSize="14sp" />
+
+                    <ImageButton
+                        android:id="@+id/btnClearInput"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_margin="10dp"
+                        android:background="@drawable/bg_clear_input"
+                        android:contentDescription="@string/des_clear_input"
+                        android:onClick="@{() -> searchViewModel.clearInput()}"
+                        android:scaleType="centerInside"
+                        app:srcCompat="@drawable/ic_clear_input" />
+
+                </FrameLayout>
+
+                <Space
+                    android:layout_width="16dp"
+                    android:layout_height="0dp" />
+
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_gravity="bottom"
+                android:background="@color/colorDivider" />
+
+        </FrameLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvSearchResult"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fitsSystemWindows="true" />
+
+    </LinearLayout>
+
+</layout>

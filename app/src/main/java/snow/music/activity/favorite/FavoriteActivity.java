@@ -8,7 +8,9 @@ import android.view.View;
 
 import snow.music.R;
 import snow.music.activity.ListActivity;
+import snow.music.activity.search.SearchActivity;
 import snow.music.service.AppPlayerService;
+import snow.music.store.MusicStore;
 import snow.music.util.PlayerUtil;
 import snow.player.lifecycle.PlayerViewModel;
 
@@ -48,7 +50,7 @@ public class FavoriteActivity extends ListActivity {
     public void onOptionMenuClicked(View view) {
         int id = view.getId();
         if (id == R.id.btnSearch) {
-            // TODO
+            SearchActivity.start(this, SearchActivity.Type.MUSIC_LIST, MusicStore.MUSIC_LIST_FAVORITE);
         } else if (id == R.id.btnSort) {
             mFavoriteMusicListFragment.showSortDialog();
         }

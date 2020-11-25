@@ -98,4 +98,9 @@
     <string name="empty_no_albums">无专辑</string>
     <string name="title_artist_prefix">歌手：</string>
     <string name="title_album_prefix">专辑：</string>
+    <string name="hint_input_music_name">请输入歌曲名</string>
+    <string name="des_clear_input">清空输入</string>
+    <string name="button_text_play">播放</string>
+    <string name="empty_not_found">未找到</string>
+    <string name="toast_start_playing">开始播放</string>
 </resources>
