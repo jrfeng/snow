@@ -32,7 +32,7 @@
     <string name="empty_no_albums">No albums</string>
 
     <!-- ArtistDetailActivity -->
-    <string name="title_prefix">Artist: </string>
+    <string name="title_artist_prefix">Artist: </string>
 
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>

@@ -32,7 +32,7 @@ public class ArtistDetailActivity extends DetailActivity {
     @SuppressLint("SetTextI18n")
     private void initTitle() {
         TextView tvTitle = findViewById(R.id.tvTitle);
-        String prefix = getString(R.string.title_prefix);
+        String prefix = getString(R.string.title_artist_prefix);
         tvTitle.setText(prefix + getArtist());
     }
 
