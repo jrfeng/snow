@@ -10,10 +10,8 @@ import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -26,7 +24,6 @@ import snow.music.R;
 import snow.music.activity.detail.album.AlbumDetailActivity;
 import snow.music.activity.detail.artist.ArtistDetailActivity;
 import snow.music.store.Music;
-import snow.music.store.MusicList;
 import snow.music.store.MusicStore;
 import snow.music.util.MusicListUtil;
 import snow.player.playlist.Playlist;
@@ -160,6 +157,10 @@ public class SearchViewModel extends AndroidViewModel {
     }
 
     public void clearInput() {
+        if (mInput.getValue() == null || mInput.getValue().isEmpty()) {
+            return;
+        }
+
         mInput.setValue("");
         clearSearchResult();
     }
