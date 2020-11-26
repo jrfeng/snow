@@ -1,6 +1,7 @@
 package snow.music.dialog;
 
 import android.content.Context;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -58,11 +59,26 @@ public class InputDialog extends BottomDialog {
 
             Toast.makeText(getContext(), mValidator.getInvalidateHint(), Toast.LENGTH_SHORT).show();
         });
+
+        showSoftInput(etInput);
     }
 
     @Override
     protected boolean keepOnRestarted() {
         return false;
+    }
+
+    private void showSoftInput(EditText editText) {
+        Context context = getContext();
+        if (context == null) {
+            return;
+        }
+
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        editText.postDelayed(() -> {
+            editText.requestFocus();
+            imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+        }, 100);
     }
 
     public static class Builder {
