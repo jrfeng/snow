@@ -976,13 +976,17 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         mPlayer.setPlayMode(playMode);
     }
 
-    private void tryAutoConnect(Runnable connectedAction) {
-        if (!mAutoConnect || isConnected()) {
+    private void tryAutoConnect(@Nullable Runnable connectedAction) {
+        if (!mAutoConnect) {
+            return;
+        }
+
+        if (isConnected() && connectedAction != null) {
+            connectedAction.run();
             return;
         }
 
         mConnectedAction = connectedAction;
-
         connect();
     }
 
