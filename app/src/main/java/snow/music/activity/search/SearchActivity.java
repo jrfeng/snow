@@ -42,6 +42,7 @@ public class SearchActivity extends BaseActivity {
 
         mBinding.setSearchViewModel(mSearchViewModel);
         mBinding.setLifecycleOwner(this);
+        mBinding.etInput.setOnBackPressListener(this::finish);
 
         initPlayerClient();
         addViewListener();
