@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Objects;
 
 import snow.music.R;
+import snow.music.activity.multichoice.MusicMultiChoiceActivity;
+import snow.music.activity.multichoice.MultiChoiceStateHolder;
 import snow.music.dialog.AddToMusicListDialog;
 import snow.music.dialog.MessageDialog;
 import snow.music.dialog.SingleChoiceDialog;
@@ -41,12 +43,14 @@ import snow.player.lifecycle.PlayerViewModel;
 
 public abstract class BaseMusicListFragment extends Fragment {
     private static final int REQUEST_CODE_WRITE_SETTINGS = 1;
+    private static final int REQUEST_CODE_MULTI_CHOICE = 2;
 
     private Context mContext;
     private PlayerViewModel mPlayerViewModel;
     private BaseMusicListViewModel mMusicListViewModel;
 
     private MusicListAdapter mMusicListAdapter;
+    private LinearLayoutManager mLinearLayoutManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -82,6 +86,11 @@ public abstract class BaseMusicListFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        if (requestCode == REQUEST_CODE_MULTI_CHOICE) {
+            checkResultCode(resultCode);
+            return;
+        }
+
         if (requestCode != REQUEST_CODE_WRITE_SETTINGS) {
             return;
         }
@@ -97,6 +106,16 @@ public abstract class BaseMusicListFragment extends Fragment {
             setAsRingtone(ringtoneMusic);
         } else {
             Toast.makeText(mContext, R.string.toast_request_permission_failed, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void checkResultCode(int resultCode) {
+        MultiChoiceStateHolder stateHolder = MultiChoiceStateHolder.getInstance();
+        mLinearLayoutManager.onRestoreInstanceState(stateHolder.consumeLayoutManagerState());
+
+        if (resultCode == MusicMultiChoiceActivity.RESULT_CODE_MODIFIED) {
+            mMusicListViewModel.setIgnoreDiffUtil(true);
+            mMusicListViewModel.setMusicListItems(stateHolder.getMusicList());
         }
     }
 
@@ -147,7 +166,8 @@ public abstract class BaseMusicListFragment extends Fragment {
 
     private void initRecyclerView(View contentView) {
         RecyclerView rvMusicList = contentView.findViewById(R.id.rvMusicList);
-        rvMusicList.setLayoutManager(new LinearLayoutManager(mContext));
+        mLinearLayoutManager = new LinearLayoutManager(mContext);
+        rvMusicList.setLayoutManager(mLinearLayoutManager);
         rvMusicList.setAdapter(mMusicListAdapter);
     }
 
@@ -190,7 +210,25 @@ public abstract class BaseMusicListFragment extends Fragment {
     }
 
     private void onMusicListItemLongClicked(int position) {
-        // TODO start multi select activity
+        MultiChoiceStateHolder stateHolder = MultiChoiceStateHolder.getInstance();
+
+        stateHolder.setMusicList(Objects.requireNonNull(mMusicListViewModel.getMusicListItems().getValue()));
+        stateHolder.setFavorite(isFavorite());
+        stateHolder.setItemRemovable(isItemRemovable());
+        stateHolder.setLayoutManagerState(mLinearLayoutManager.onSaveInstanceState());
+        stateHolder.setMusicListName(mMusicListViewModel.getMusicListName());
+        stateHolder.setPosition(position);
+
+        Intent intent = new Intent(getContext(), MusicMultiChoiceActivity.class);
+        startActivityForResult(intent, REQUEST_CODE_MULTI_CHOICE);
+    }
+
+    private boolean isFavorite() {
+        return mMusicListViewModel.getMusicListName().equals(MusicStore.MUSIC_LIST_FAVORITE);
+    }
+
+    private boolean isItemRemovable() {
+        return MusicStore.getInstance().isNameExists(mMusicListViewModel.getMusicListName());
     }
 
     @NonNull

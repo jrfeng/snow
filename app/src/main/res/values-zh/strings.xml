@@ -103,4 +103,12 @@
     <string name="button_text_play">播放</string>
     <string name="empty_not_found">未找到</string>
     <string name="toast_start_playing">开始播放</string>
+    <string name="text_multi_select_cancel">取消</string>
+    <string name="text_multi_select_select_all">全选</string>
+    <string name="text_multi_select_deselect_all">全不选</string>
+    <string name="text_multi_select_zero_items_selected">已选择0项</string>
+    <string name="text_multi_select_one_item_selected">已选择1项</string>
+    <string name="text_multi_select_more_items_selected">已选择n项</string>
+    <string name="des_checkbox">多选框</string>
+    <string name="message_remove_all_selected_songs">移除选中歌曲？</string>
 </resources>

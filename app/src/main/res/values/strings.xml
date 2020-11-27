@@ -43,6 +43,15 @@
     <string name="empty_not_found">Not found</string>
     <string name="toast_start_playing">Start playing</string>
 
+    <!-- MusicMultiSelectActivity -->
+    <string name="text_multi_select_cancel">Cancel</string>
+    <string name="text_multi_select_select_all">Select all</string>
+    <string name="text_multi_select_deselect_all">Deselect all</string>
+    <string name="text_multi_select_zero_items_selected">0 items selected</string>
+    <string name="text_multi_select_one_item_selected">1 item selected</string>
+    <string name="text_multi_select_more_items_selected">n items selected</string>
+    <string name="message_remove_all_selected_songs">Remove all selected songs?</string>
+
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>
     <string name="empty_playlist">Playlist is empty</string>
@@ -144,5 +153,6 @@
     <string name="des_menu_icon">menu icon</string>
     <string name="des_checked">checked</string>
     <string name="des_clear_input">clear input</string>
+    <string name="des_checkbox">checkbox</string>
 
 </resources>

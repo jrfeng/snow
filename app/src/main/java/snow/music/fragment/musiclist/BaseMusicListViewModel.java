@@ -18,6 +18,8 @@ import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import snow.music.activity.multichoice.MultiChoiceStateHolder;
+import snow.music.activity.multichoice.MusicMultiChoiceActivity;
 import snow.music.store.Music;
 import snow.music.store.MusicList;
 import snow.player.util.MusicItemUtil;
@@ -61,6 +63,9 @@ public abstract class BaseMusicListViewModel extends ViewModel {
         if (mLoadMusicListDisposable != null && mLoadMusicListDisposable.isDisposed()) {
             mLoadMusicListDisposable.dispose();
         }
+
+        MultiChoiceStateHolder.getInstance()
+                .clear();
     }
 
     @NonNull
@@ -70,6 +75,11 @@ public abstract class BaseMusicListViewModel extends ViewModel {
         }
 
         return mMusicListItems;
+    }
+
+    public void setMusicListItems(@NonNull List<Music> musicListItems) {
+        Preconditions.checkNotNull(musicListItems);
+        mMusicListItems.setValue(new ArrayList<>(musicListItems));
     }
 
     @NonNull
