@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/dialog_item_height"
@@ -21,9 +22,12 @@
         android:textSize="@dimen/dialog_item_text_size"
         tools:text="@string/app_name" />
 
-    <CheckBox
-        android:id="@+id/checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <ImageView
+        android:id="@+id/ivCheckBox"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:contentDescription="@string/des_checkbox"
+        android:scaleType="centerInside"
+        app:srcCompat="@drawable/ic_checkbox_unchecked" />
 
 </LinearLayout>

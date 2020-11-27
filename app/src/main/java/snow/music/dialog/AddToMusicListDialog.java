@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -231,17 +231,12 @@ public class AddToMusicListDialog extends BottomDialog {
             holder.tvItemTitle.setText(mAllMusicListName.get(position));
 
             if (ignore(position)) {
-                holder.checkBox.setChecked(true);
-                holder.checkBox.setEnabled(false);
+                holder.ivCheckBox.setImageResource(R.drawable.ic_checkbox_disabled);
                 return;
             }
 
             mSelectableHelper.updateSelectState(holder, position);
             mItemClickHelper.bindClickListener(holder.itemView);
-
-            holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) ->
-                    mSelectableHelper.setSelect(position, isChecked)
-            );
         }
 
         @Override
@@ -277,7 +272,7 @@ public class AddToMusicListDialog extends BottomDialog {
             final boolean empty;
 
             TextView tvItemTitle;
-            CheckBox checkBox;
+            ImageView ivCheckBox;
 
             public ViewHolder(@NonNull View itemView, boolean empty) {
                 super(itemView);
@@ -288,7 +283,7 @@ public class AddToMusicListDialog extends BottomDialog {
                 }
 
                 tvItemTitle = itemView.findViewById(R.id.tvItemTitle);
-                checkBox = itemView.findViewById(R.id.checkbox);
+                ivCheckBox = itemView.findViewById(R.id.ivCheckBox);
             }
 
             @Override
@@ -297,7 +292,7 @@ public class AddToMusicListDialog extends BottomDialog {
                     return;
                 }
 
-                checkBox.setChecked(true);
+                ivCheckBox.setImageResource(R.drawable.ic_checkbox_checked);
             }
 
             @Override
@@ -306,7 +301,7 @@ public class AddToMusicListDialog extends BottomDialog {
                     return;
                 }
 
-                checkBox.setChecked(false);
+                ivCheckBox.setImageResource(R.drawable.ic_checkbox_unchecked);
             }
         }
     }
