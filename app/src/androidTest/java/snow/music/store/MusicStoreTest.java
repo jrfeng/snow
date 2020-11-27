@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -692,5 +693,109 @@ public class MusicStoreTest {
         assertEquals(2, result.size());
         assertTrue(result.contains(musicA));
         assertTrue(result.contains(musicB));
+    }
+
+    @Test
+    public void addAllMusic() {
+        final Music musicA = new Music(
+                0,
+                "title1",
+                "artist1",
+                "album1",
+                "https://www.test.com/test1.mp3",
+                "https://www.test.com/test1.png",
+                60_000,
+                System.currentTimeMillis());
+
+        final Music musicB = new Music(
+                0,
+                "title2",
+                "artist2",
+                "album2",
+                "https://www.test.com/test2.mp3",
+                "https://www.test.com/test2.png",
+                60_000,
+                System.currentTimeMillis());
+
+        final Music musicC = new Music(
+                0,
+                "title3",
+                "artist3",
+                "album3",
+                "https://www.test.com/test3.mp3",
+                "https://www.test.com/test3.png",
+                60_000,
+                System.currentTimeMillis());
+
+        mMusicStore.putMusic(musicA);
+        mMusicStore.putMusic(musicB);
+        mMusicStore.putMusic(musicC);
+
+        List<Music> allMusic = new ArrayList<>();
+        allMusic.add(musicA);
+        allMusic.add(musicB);
+        allMusic.add(musicC);
+
+        final String musicListName = "Test music list";
+        mMusicStore.createCustomMusicList(musicListName);
+        mMusicStore.addAllMusic(musicListName, allMusic);
+
+        MusicList musicList = mMusicStore.getCustomMusicList(musicListName);
+        assert musicList != null;
+        assertEquals(allMusic.size(), musicList.getSize());
+    }
+
+    @Test
+    public void removeAllMusic() {
+        final Music musicA = new Music(
+                0,
+                "title1",
+                "artist1",
+                "album1",
+                "https://www.test.com/test1.mp3",
+                "https://www.test.com/test1.png",
+                60_000,
+                System.currentTimeMillis());
+
+        final Music musicB = new Music(
+                0,
+                "title2",
+                "artist2",
+                "album2",
+                "https://www.test.com/test2.mp3",
+                "https://www.test.com/test2.png",
+                60_000,
+                System.currentTimeMillis());
+
+        final Music musicC = new Music(
+                0,
+                "title3",
+                "artist3",
+                "album3",
+                "https://www.test.com/test3.mp3",
+                "https://www.test.com/test3.png",
+                60_000,
+                System.currentTimeMillis());
+
+        mMusicStore.putMusic(musicA);
+        mMusicStore.putMusic(musicB);
+        mMusicStore.putMusic(musicC);
+
+        final String musicListName = "Test music list";
+        MusicList musicList = mMusicStore.createCustomMusicList(musicListName);
+        musicList.getMusicElements().add(musicA);
+        musicList.getMusicElements().add(musicB);
+        musicList.getMusicElements().add(musicC);
+        mMusicStore.updateMusicList(musicList);
+
+        List<Music> allMusic = new ArrayList<>();
+        allMusic.add(musicA);
+        allMusic.add(musicB);
+
+        mMusicStore.removeAllMusic(musicListName, allMusic);
+
+        musicList = mMusicStore.getCustomMusicList(musicListName);
+        assert musicList != null;
+        assertEquals(1, musicList.getSize());
     }
 }

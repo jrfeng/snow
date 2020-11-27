@@ -783,6 +783,56 @@ public class MusicStore {
     }
 
     /**
+     * 将列表中的全部音乐添加到具有指定名称的歌单中（包括内置歌单与自建歌单）。
+     *
+     * @param musicListName 歌单的名称（包括内置歌单与自建歌单），不能为 null。
+     * @param allMusic      要添加到歌单中的音乐，不能为 null。
+     */
+    public synchronized void addAllMusic(@NonNull String musicListName, @NonNull List<Music> allMusic) {
+        Preconditions.checkNotNull(musicListName);
+        Preconditions.checkNotNull(allMusic);
+
+        MusicList musicList;
+        if (isBuiltInName(musicListName)) {
+            musicList = getBuiltInMusicList(musicListName);
+        } else {
+            musicList = getCustomMusicList(musicListName);
+        }
+
+        if (musicList == null) {
+            return;
+        }
+
+        musicList.getMusicElements().addAll(allMusic);
+        updateMusicList(musicList);
+    }
+
+    /**
+     * 从歌单中移除指定列表中的所有歌曲。
+     *
+     * @param musicListName 歌单名（包括内置歌单与自建歌单），不能为 null
+     * @param allMusic      要移除的歌曲，不能为 null。
+     */
+    public synchronized void removeAllMusic(@NonNull String musicListName, @NonNull List<Music> allMusic) {
+        Preconditions.checkNotNull(musicListName);
+        Preconditions.checkNotNull(allMusic);
+
+        MusicList musicList;
+        if (isBuiltInName(musicListName)) {
+            musicList = getBuiltInMusicList(musicListName);
+        } else {
+            musicList = getCustomMusicList(musicListName);
+        }
+
+        if (musicList == null) {
+            return;
+        }
+
+        musicList.getMusicElements().removeAll(allMusic);
+        updateMusicList(musicList);
+    }
+
+    /**
      * 获取具有指定 uri 的 {@link Music} 的 id 值。
      *
      * @param uri uri 字符串，不能为 null
