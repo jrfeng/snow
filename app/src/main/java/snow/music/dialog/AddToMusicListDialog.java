@@ -184,7 +184,7 @@ public class AddToMusicListDialog extends BottomDialog {
                     return;
                 }
 
-                mSelectableHelper.setSelect(position, !mSelectableHelper.isSelected(position));
+                mSelectableHelper.toggle(position);
             });
         }
 
