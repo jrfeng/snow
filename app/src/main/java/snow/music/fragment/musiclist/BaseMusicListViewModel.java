@@ -19,7 +19,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.activity.multichoice.MultiChoiceStateHolder;
-import snow.music.activity.multichoice.MusicMultiChoiceActivity;
 import snow.music.store.Music;
 import snow.music.store.MusicList;
 import snow.player.util.MusicItemUtil;
@@ -65,7 +64,7 @@ public abstract class BaseMusicListViewModel extends ViewModel {
         }
 
         MultiChoiceStateHolder.getInstance()
-                .clear();
+                .release();
     }
 
     @NonNull

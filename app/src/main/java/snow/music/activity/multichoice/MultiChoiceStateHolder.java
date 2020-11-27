@@ -14,7 +14,7 @@ import java.util.List;
 import snow.music.store.Music;
 
 public class MultiChoiceStateHolder {
-    private static MultiChoiceStateHolder sInstance = new MultiChoiceStateHolder();
+    private static MultiChoiceStateHolder sInstance;
 
     private List<Music> mMusicList;
     private boolean mFavorite;
@@ -29,7 +29,10 @@ public class MultiChoiceStateHolder {
         mMusicListName = "";
     }
 
-    public static MultiChoiceStateHolder getInstance() {
+    public synchronized static MultiChoiceStateHolder getInstance() {
+        if (sInstance == null) {
+            sInstance = new MultiChoiceStateHolder();
+        }
         return sInstance;
     }
 
@@ -96,11 +99,9 @@ public class MultiChoiceStateHolder {
         return position;
     }
 
-    public void clear() {
-        mMusicList = Collections.emptyList();
-        mFavorite = false;
-        mItemRemovable = false;
-        mMusicListName = "";
-        mLayoutManagerState = null;
+    public void release() {
+        synchronized (MultiChoiceStateHolder.class) {
+            sInstance = null;
+        }
     }
 }
