@@ -73,7 +73,7 @@ dependencies {
     annotationProcessor "com.github.bumptech.glide:compiler:$glideVersion"
 
     // rv-helper
-    implementation 'com.github.jrfeng:rv-helper:1.2.1'
+    implementation 'com.github.jrfeng:rv-helper:1.2.2'
 
     // pinyin-comparator
     implementation 'com.github.jrfeng:pinyin-comparator:1.0.2'
