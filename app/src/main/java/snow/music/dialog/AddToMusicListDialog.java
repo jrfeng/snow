@@ -38,21 +38,65 @@ import snow.music.store.MusicStore;
 import snow.music.util.InputValidator;
 
 public class AddToMusicListDialog extends BottomDialog {
-    private Music mTargetMusic;
+    private Music mMusic;
+    private List<Music> mAllMusic;
+    private boolean mManyMusicMode;
+
+    private String mExcludeMusicList;
     private List<String> mAllContainsMusicListName;
     private Disposable mLoadNameDisposable;
 
-    public static AddToMusicListDialog newInstance(@NonNull Music targetMusic) {
-        Preconditions.checkNotNull(targetMusic);
+    @Nullable
+    private OnFinishedListener mOnFinishedListener;
+    private boolean mFinished;
+
+    /**
+     * 创建一个 {@link AddToMusicListDialog} 对象，用来把单首音乐添加到某个自建歌单中。
+     *
+     * @param music 要添加的歌曲
+     */
+    public static AddToMusicListDialog newInstance(@NonNull Music music) {
+        Preconditions.checkNotNull(music);
 
         AddToMusicListDialog dialog = new AddToMusicListDialog();
-        dialog.setTargetMusic(targetMusic);
+        dialog.setMusic(music);
 
         return dialog;
     }
 
-    private void setTargetMusic(Music targetMusic) {
-        mTargetMusic = targetMusic;
+    /**
+     * 创建一个 {@link AddToMusicListDialog} 对象，用来把多首音乐添加到某个自建歌单中。
+     *
+     * @param allMusic         所有要添加的歌曲
+     * @param excludeMusicList 要排除的自建歌单
+     */
+    public static AddToMusicListDialog newInstance(@NonNull List<Music> allMusic, @NonNull String excludeMusicList) {
+        Preconditions.checkNotNull(allMusic);
+        Preconditions.checkNotNull(excludeMusicList);
+
+        AddToMusicListDialog dialog = new AddToMusicListDialog();
+        dialog.setAllMusic(allMusic);
+        dialog.setExcludeMusicList(excludeMusicList);
+
+        return dialog;
+    }
+
+    private void setMusic(Music music) {
+        mManyMusicMode = false;
+        mMusic = music;
+    }
+
+    private void setAllMusic(List<Music> allMusic) {
+        mManyMusicMode = true;
+        mAllMusic = new ArrayList<>(allMusic);
+    }
+
+    private void setExcludeMusicList(String name) {
+        mExcludeMusicList = name;
+    }
+
+    public void setOnFinishedListener(@Nullable OnFinishedListener listener) {
+        mOnFinishedListener = listener;
     }
 
     @Override
@@ -69,8 +113,7 @@ public class AddToMusicListDialog extends BottomDialog {
 
         rvItems.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        List<String> allMusicListName = new ArrayList<>(MusicStore.getInstance().getAllCustomMusicListName());
-        Collections.sort(allMusicListName, new PinyinComparator());
+        List<String> allMusicListName = getAllCustomMusicListName();
 
         AllMusicListAdapter adapter = new AllMusicListAdapter(allMusicListName, mAllContainsMusicListName);
         rvItems.setAdapter(adapter);
@@ -78,19 +121,53 @@ public class AddToMusicListDialog extends BottomDialog {
         btnNewMusicList.setOnClickListener(v -> showCreateMusicListDialog());
 
         btnOK.setOnClickListener(view -> {
-            dismiss();
-            List<String> names = adapter.getAllSelectedMusicList();
-            if (names.size() < 1) {
+            mFinished = true;
+            List<String> selectedNames = adapter.getAllSelectedMusicList();
+            if (selectedNames.size() < 1) {
+                dismiss();
                 return;
             }
 
-            Toast.makeText(getContext(), R.string.toast_added_successfully, Toast.LENGTH_SHORT).show();
+            if (mManyMusicMode) {
+                addManyMusic(selectedNames);
+            } else {
+                addSingleMusic(selectedNames);
+            }
 
-            Single.create(emitter ->
-                    MusicStore.getInstance().addToAllMusicList(mTargetMusic, names)
-            ).subscribeOn(Schedulers.io())
-                    .subscribe();
+            dismiss();
         });
+    }
+
+    @Override
+    public void dismiss() {
+        if (mFinished) {
+            notifyFinished();
+        }
+        super.dismiss();
+    }
+
+    private void notifyFinished() {
+        if (mOnFinishedListener != null) {
+            mOnFinishedListener.onFinished();
+        }
+    }
+
+    private void addManyMusic(List<String> selectedNames) {
+        Single.create(emitter ->
+                MusicStore.getInstance().addToAllMusicList(mAllMusic, selectedNames)
+        ).subscribeOn(Schedulers.io())
+                .subscribe();
+
+        Toast.makeText(getContext(), R.string.toast_added_successfully, Toast.LENGTH_SHORT).show();
+    }
+
+    private void addSingleMusic(List<String> selectedNames) {
+        Single.create(emitter ->
+                MusicStore.getInstance().addToAllMusicList(mMusic, selectedNames)
+        ).subscribeOn(Schedulers.io())
+                .subscribe();
+
+        Toast.makeText(getContext(), R.string.toast_added_successfully, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -108,6 +185,12 @@ public class AddToMusicListDialog extends BottomDialog {
 
     @Override
     public void show(@NonNull FragmentManager manager, @Nullable String tag) {
+        if (mManyMusicMode) {
+            mAllContainsMusicListName = Collections.emptyList();
+            super.show(manager, tag);
+            return;
+        }
+
         mLoadNameDisposable = loadAllContainsMusicListName()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -117,9 +200,18 @@ public class AddToMusicListDialog extends BottomDialog {
                 });
     }
 
+    private List<String> getAllCustomMusicListName() {
+        List<String> allMusicListName = new ArrayList<>(MusicStore.getInstance().getAllCustomMusicListName());
+        if (mExcludeMusicList != null) {
+            allMusicListName.remove(mExcludeMusicList);
+        }
+        Collections.sort(allMusicListName, new PinyinComparator());
+        return allMusicListName;
+    }
+
     private Single<List<String>> loadAllContainsMusicListName() {
         return Single.create(emitter -> {
-            List<String> names = MusicStore.getInstance().getAllCustomMusicListName(mTargetMusic);
+            List<String> names = MusicStore.getInstance().getAllCustomMusicListName(mMusic);
             if (emitter.isDisposed()) {
                 return;
             }
@@ -140,7 +232,10 @@ public class AddToMusicListDialog extends BottomDialog {
                 .build();
 
         FragmentManager fm = getParentFragmentManager();
+
+        mFinished = false;
         dismiss();
+
         dialog.show(fm, "createMusicList");
     }
 
@@ -149,15 +244,20 @@ public class AddToMusicListDialog extends BottomDialog {
     private void createMusicList(Context context, String name) {
         Single.create(emitter -> {
             MusicList musicList = MusicStore.getInstance().createCustomMusicList(name);
-            musicList.getMusicElements().add(mTargetMusic);
+            if (mManyMusicMode) {
+                musicList.getMusicElements().addAll(mAllMusic);
+            } else {
+                musicList.getMusicElements().add(mMusic);
+            }
             MusicStore.getInstance().updateMusicList(musicList);
 
             emitter.onSuccess(true);
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result ->
-                        Toast.makeText(context, R.string.toast_added_successfully, Toast.LENGTH_SHORT).show()
-                );
+                .subscribe(result -> {
+                    Toast.makeText(context, R.string.toast_added_successfully, Toast.LENGTH_SHORT).show();
+                    notifyFinished();
+                });
     }
 
     private static class AllMusicListAdapter extends RecyclerView.Adapter<AllMusicListAdapter.ViewHolder> {
@@ -304,5 +404,9 @@ public class AddToMusicListDialog extends BottomDialog {
                 ivCheckBox.setImageResource(R.drawable.ic_checkbox_unchecked);
             }
         }
+    }
+
+    public interface OnFinishedListener {
+        void onFinished();
     }
 }
