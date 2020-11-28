@@ -93,6 +93,7 @@ public class MusicListBrowserViewModel extends ViewModel {
                     allMusicList = new ArrayList<>(allMusicList);   // getValue() 返回的 List 不支持 add 操作
 
                     allMusicList.add(musicList);
+                    Collections.sort(allMusicList, mMusicListComparator);
                     mAllMusicList.setValue(allMusicList);
                 });
     }
