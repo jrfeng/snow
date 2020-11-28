@@ -158,7 +158,7 @@ public class MusicMultiChoiceActivity extends BaseActivity {
     public void finish() {
         super.finish();
         mStateHolder.setLayoutManagerState(mLayoutManager.onSaveInstanceState());
-        overridePendingTransition(0, 0);
+        overridePendingTransition(R.anim.activity_no_transition, R.anim.activity_fade_out);
     }
 
     public void finishSelf(View view) {
