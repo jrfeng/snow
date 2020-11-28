@@ -452,6 +452,30 @@ public class MusicStore {
     }
 
     /**
+     * 将多首歌曲添加到多个歌单中。
+     *
+     * @param allMusic         所有要添加的歌曲
+     * @param allMusicListName 要添加到的歌单的名称
+     */
+    public synchronized void addToAllMusicList(@NonNull List<Music> allMusic, @NonNull List<String> allMusicListName) {
+        Preconditions.checkNotNull(allMusic);
+        Preconditions.checkNotNull(allMusicListName);
+
+        List<MusicListEntity> entityList = new ArrayList<>();
+        for (String name : allMusicListName) {
+            MusicList musicList = getCustomMusicList(name);
+            if (musicList == null) {
+                continue;
+            }
+            musicList.getMusicElements().addAll(allMusic);
+            musicList.applyChanges();
+            entityList.add(musicList.musicListEntity);
+        }
+
+        mMusicListEntityBox.put(entityList);
+    }
+
+    /**
      * 歌曲是否是 “我喜欢”
      */
     public synchronized boolean isFavorite(@NonNull Music music) {
