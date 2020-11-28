@@ -17,6 +17,7 @@ import java.util.List;
 
 import snow.music.R;
 import snow.music.activity.BaseActivity;
+import snow.music.dialog.AddToMusicListDialog;
 import snow.music.dialog.MessageDialog;
 import snow.music.store.Music;
 
@@ -183,7 +184,12 @@ public class MusicMultiChoiceActivity extends BaseActivity {
             return;
         }
 
-        // TODO show AddToMusicListDialog
+        AddToMusicListDialog dialog = AddToMusicListDialog.newInstance(mMultiChoiceAdapter.getAllSelectedMusic(),
+                mStateHolder.getMusicListName());
+
+        dialog.setOnFinishedListener(this::finish);
+
+        dialog.show(getSupportFragmentManager(), "addToMusicList");
     }
 
     public void remove(View view) {
@@ -205,7 +211,7 @@ public class MusicMultiChoiceActivity extends BaseActivity {
                     updateTitle();
                     updateSelectText();
 
-                    Toast.makeText(getApplicationContext(), R.string.toast_removed,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), R.string.toast_removed, Toast.LENGTH_SHORT).show();
 
                     if (mStateHolder.getMusicListSize() < 1) {
                         finish();
