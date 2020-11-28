@@ -11,6 +11,7 @@ import com.google.common.base.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,12 +20,14 @@ import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import pinyin.util.PinyinComparator;
 import snow.music.activity.detail.musiclist.MusicListDetailActivity;
 import snow.music.store.MusicList;
 import snow.music.store.MusicStore;
 
 public class MusicListBrowserViewModel extends ViewModel {
     private final MutableLiveData<List<MusicList>> mAllMusicList;
+    private final Comparator<MusicList> mMusicListComparator;
 
     private Disposable mLoadMusicListDisposable;
     private Disposable mCreateMusicListDisposable;
@@ -34,6 +37,14 @@ public class MusicListBrowserViewModel extends ViewModel {
 
     public MusicListBrowserViewModel() {
         mAllMusicList = new MutableLiveData<>(Collections.emptyList());
+        mMusicListComparator = new Comparator<MusicList>() {
+            private PinyinComparator pinyinComparator = new PinyinComparator();
+            @Override
+            public int compare(MusicList o1, MusicList o2) {
+                return pinyinComparator.compare(o1.getName(), o2.getName());
+            }
+        };
+
         loadAllMusicList();
 
         mOnCustomMusicListUpdateListener = this::reloadMusicList;
@@ -132,6 +143,7 @@ public class MusicListBrowserViewModel extends ViewModel {
             if (emitter.isDisposed()) {
                 return;
             }
+            Collections.sort(allMusicList, mMusicListComparator);
             emitter.onSuccess(allMusicList);
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -142,7 +154,7 @@ public class MusicListBrowserViewModel extends ViewModel {
         cancelReloadMusicList();
         mReloadMusicListDisposable = Single.create((SingleOnSubscribe<MusicList>) emitter -> {
             MusicList musicList = MusicStore.getInstance().getCustomMusicList(name);
-            if (emitter.isDisposed()) {
+            if (musicList == null || emitter.isDisposed()) {
                 return;
             }
             emitter.onSuccess(musicList);
@@ -158,7 +170,7 @@ public class MusicListBrowserViewModel extends ViewModel {
     }
 
     private void updateMusicList(MusicList musicList) {
-        List<MusicList> allMusicList = new ArrayList<>(mAllMusicList.getValue());
+        List<MusicList> allMusicList = new ArrayList<>(Objects.requireNonNull(mAllMusicList.getValue()));
 
         int index = allMusicList.indexOf(musicList);
         allMusicList.remove(index);
