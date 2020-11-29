@@ -167,7 +167,12 @@ public class MusicMultiChoiceActivity extends BaseActivity {
     }
 
     public void addToFavorite(View view) {
-        if (musicListIsEmpty() || noItemSelected()) {
+        if (musicListIsEmpty()) {
+            return;
+        }
+
+        if (noItemSelected()) {
+            Toast.makeText(this, R.string.toast_no_songs_selected, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -180,7 +185,12 @@ public class MusicMultiChoiceActivity extends BaseActivity {
     }
 
     public void addToMusicList(View view) {
-        if (musicListIsEmpty() || noItemSelected()) {
+        if (musicListIsEmpty()) {
+            return;
+        }
+
+        if (noItemSelected()) {
+            Toast.makeText(this, R.string.toast_no_songs_selected, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -193,7 +203,12 @@ public class MusicMultiChoiceActivity extends BaseActivity {
     }
 
     public void remove(View view) {
-        if (musicListIsEmpty() || noItemSelected()) {
+        if (musicListIsEmpty()) {
+            return;
+        }
+
+        if (noItemSelected()) {
+            Toast.makeText(this, R.string.toast_no_songs_selected, Toast.LENGTH_SHORT).show();
             return;
         }
 

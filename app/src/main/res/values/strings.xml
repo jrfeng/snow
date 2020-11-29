@@ -50,7 +50,8 @@
     <string name="text_multi_select_zero_items_selected">0 items selected</string>
     <string name="text_multi_select_one_item_selected">1 item selected</string>
     <string name="text_multi_select_more_items_selected">n items selected</string>
-    <string name="message_remove_all_selected_songs">Remove all selected songs?</string>
+    <string name="message_remove_all_selected_songs">Remove selected songs?</string>
+    <string name="toast_no_songs_selected">No songs selected</string>
 
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>

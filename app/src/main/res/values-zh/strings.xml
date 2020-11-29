@@ -111,4 +111,5 @@
     <string name="text_multi_select_more_items_selected">已选择n项</string>
     <string name="des_checkbox">多选框</string>
     <string name="message_remove_all_selected_songs">移除选中歌曲？</string>
+    <string name="toast_no_songs_selected">无选中歌曲</string>
 </resources>
