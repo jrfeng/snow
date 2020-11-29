@@ -135,9 +135,9 @@ public class NavigationViewModel extends ViewModel {
 
         return Transformations.map(mPlayerViewModel.getPlaybackState(), playbackState -> {
             if (playbackState == PlaybackState.PLAYING) {
-                return R.drawable.ic_pause;
+                return R.mipmap.ic_pause;
             } else {
-                return R.drawable.ic_play;
+                return R.mipmap.ic_play;
             }
         });
     }
