@@ -315,7 +315,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1px"
                 android:layout_gravity="top"
-                android:background="@color/colorDivider" />
+                android:background="?colorDivider" />
 
             <LinearLayout
                 android:layout_width="match_parent"

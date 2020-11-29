@@ -3,11 +3,17 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@color/colorWindowBackground</item>
-        <item name="android:textColor">@color/colorText</item>
+        <item name="colorPrimary">@color/deep_purple_400</item>
+        <item name="colorPrimaryDark">@color/deep_purple_400</item>
+        <item name="colorAccent">@color/deep_purple_400</item>
+
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:textColor">@color/grey_900</item>
+
+        <item name="colorWindowBackground">@android:color/white</item>
+        <item name="colorSecondaryText">@color/grey_500</item>
+        <item name="colorDivider">@color/grey_300</item>
+        <item name="colorMark">@color/deep_purple_400</item>
 
         <item name="android:statusBarColor">#54000000</item>
     </style>

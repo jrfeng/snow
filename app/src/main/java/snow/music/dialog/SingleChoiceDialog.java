@@ -22,6 +22,7 @@ import java.util.Objects;
 import recyclerview.helper.ItemClickHelper;
 import recyclerview.helper.SelectableHelper;
 import snow.music.R;
+import snow.music.util.ThemeUtil;
 
 public class SingleChoiceDialog extends BottomDialog {
     private String mTitle;
@@ -131,7 +132,7 @@ public class SingleChoiceDialog extends BottomDialog {
                 tvItemTitle = itemView.findViewById(R.id.tvItemTitle);
 
                 mTextColor = tvItemTitle.getCurrentTextColor();
-                mCheckedTextColor = itemView.getContext().getResources().getColor(R.color.colorPrimary);
+                mCheckedTextColor = ThemeUtil.getThemeColor(itemView.getContext().getTheme(), R.attr.colorPrimary);
             }
 
             @Override

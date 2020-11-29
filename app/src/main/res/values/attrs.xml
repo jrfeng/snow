@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="colorSecondaryText" format="color" />
+    <attr name="colorDivider" format="color" />
+    <attr name="colorMark" format="color" />
+    <attr name="colorWindowBackground" format="color" />
+</resources>

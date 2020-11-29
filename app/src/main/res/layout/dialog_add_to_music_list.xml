@@ -55,6 +55,6 @@
         android:background="@drawable/bg_dialog_button"
         android:text="@string/message_dialog_positive_text"
         android:textAllCaps="false"
-        android:textColor="@color/colorPrimary" />
+        android:textColor="?colorPrimary" />
 
 </LinearLayout>

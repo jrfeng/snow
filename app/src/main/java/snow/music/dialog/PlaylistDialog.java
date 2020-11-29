@@ -27,6 +27,7 @@ import recyclerview.helper.SelectableHelper;
 import snow.music.R;
 import snow.music.service.AppPlayerService;
 import snow.music.util.PlayerUtil;
+import snow.music.util.ThemeUtil;
 import snow.player.PlayerClient;
 import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
@@ -289,17 +290,9 @@ public class PlaylistDialog extends BottomDialog {
                 tvArtist = itemView.findViewById(R.id.tvArtist);
                 btnRemove = itemView.findViewById(R.id.btnRemove);
 
-                Resources res = itemView.getResources();
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    mColorMark = res.getColor(R.color.colorMark, itemView.getContext().getTheme());
-                    mColorTitle = res.getColor(R.color.colorText, itemView.getContext().getTheme());
-                    mColorArtist = res.getColor(R.color.colorSecondaryText, itemView.getContext().getTheme());
-                } else {
-                    mColorMark = res.getColor(R.color.colorMark);
-                    mColorTitle = res.getColor(R.color.colorText);
-                    mColorArtist = res.getColor(R.color.colorSecondaryText);
-                }
+                mColorMark = ThemeUtil.getThemeColor(itemView.getContext().getTheme(), R.attr.colorMark);
+                mColorTitle = ThemeUtil.getThemeColor(itemView.getContext().getTheme(), android.R.attr.textColor);
+                mColorArtist = ThemeUtil.getThemeColor(itemView.getContext().getTheme(), R.attr.colorSecondaryText);
             }
 
             @Override

@@ -37,7 +37,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:textColor="@color/colorSecondaryText"
+                android:textColor="?colorSecondaryText"
                 tools:text="16 songs" />
 
         </LinearLayout>
@@ -60,6 +60,6 @@
         android:layout_gravity="bottom"
         android:layout_marginStart="32dp"
         android:layout_marginLeft="32dp"
-        android:background="@color/colorDivider" />
+        android:background="?colorDivider" />
 
 </FrameLayout>
