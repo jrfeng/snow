@@ -819,12 +819,13 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
-        if (shouldBeForeground() && !isForeground()) {
+        if (shouldBeForeground()) {
             startForeground();
             return;
         }
 
-        if (!shouldBeForeground() && isForeground()) {
+        // not foreground
+        if (isForeground()) {
             stopForegroundEx(false);
         }
 
