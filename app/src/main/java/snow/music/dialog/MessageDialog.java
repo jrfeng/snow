@@ -51,8 +51,14 @@ public class MessageDialog extends BottomDialog {
         tvMessage.setText(mMessage);
         btnNegative.setText(mNegativeButtonText);
         btnPositive.setText(mPositiveButtonText);
-        btnNegative.setTextColor(mNegativeTextColor);
-        btnPositive.setTextColor(mPositiveTextColor);
+
+        if (mNegativeTextColor != 0) {
+            btnNegative.setTextColor(mNegativeTextColor);
+        }
+
+        if (mPositiveTextColor != 0) {
+            btnPositive.setTextColor(mPositiveTextColor);
+        }
 
         btnPositive.setOnClickListener(v -> {
             dismiss();
