@@ -12,7 +12,7 @@
 
         <item name="colorWindowBackground">@color/grey_900</item>
         <item name="colorSecondaryText">@color/grey_500</item>
-        <item name="colorDivider">@color/grey_600</item>
+        <item name="colorDivider">@color/grey_800</item>
         <item name="colorMark">@color/deep_purple_400</item>
     </style>
 

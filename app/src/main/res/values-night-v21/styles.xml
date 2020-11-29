@@ -7,12 +7,12 @@
         <item name="colorPrimaryDark">@color/deep_purple_400</item>
         <item name="colorAccent">@color/deep_purple_400</item>
 
-        <item name="android:windowBackground">@color/grey_800</item>
+        <item name="android:windowBackground">@color/grey_900</item>
         <item name="android:textColor">@color/grey_200</item>
 
         <item name="colorWindowBackground">@color/grey_900</item>
         <item name="colorSecondaryText">@color/grey_500</item>
-        <item name="colorDivider">@color/grey_600</item>
+        <item name="colorDivider">@color/grey_800</item>
         <item name="colorMark">@color/deep_purple_400</item>
 
         <item name="android:statusBarColor">#20FFFFFF</item>
