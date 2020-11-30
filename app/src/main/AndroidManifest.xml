@@ -22,36 +22,78 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:name=".activity.multichoice.MusicMultiChoiceActivity"
-            android:launchMode="singleTask" />
-        <activity android:name=".activity.search.SearchActivity" />
-        <activity android:name=".activity.detail.album.AlbumDetailActivity" />
-        <activity android:name=".activity.detail.artist.ArtistDetailActivity" />
-        <activity android:name=".activity.detail.musiclist.MusicListDetailActivity" />
-        <activity android:name=".activity.browser.album.AlbumBrowserActivity" />
-        <activity android:name=".activity.browser.artist.ArtistBrowserActivity" />
-        <activity android:name=".activity.browser.musiclist.MusicListBrowserActivity" />
-        <activity android:name=".activity.history.HistoryActivity" />
-        <activity android:name=".activity.favorite.FavoriteActivity" />
-        <activity android:name=".activity.localmusic.LocalMusicActivity" />
+
         <activity
             android:name=".activity.welcome.WelcomeActivity"
             android:noHistory="true"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Welcome">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
+
         <activity
             android:name=".activity.navigation.NavigationActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
 
-        <service android:name=".service.AppPlayerService">
+        <activity
+            android:name=".activity.localmusic.LocalMusicActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.favorite.FavoriteActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.browser.musiclist.MusicListBrowserActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.browser.artist.ArtistBrowserActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.browser.album.AlbumBrowserActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.history.HistoryActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.detail.musiclist.MusicListDetailActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.detail.artist.ArtistDetailActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.detail.album.AlbumDetailActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.multichoice.MusicMultiChoiceActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.search.SearchActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activity.player.PlayerActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait" />
+
+        <service
+            android:name=".service.AppPlayerService"
+            tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
@@ -62,6 +104,7 @@
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>
