@@ -1,5 +1,6 @@
 package snow.music.activity.navigation;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -25,6 +26,7 @@ import snow.music.activity.browser.musiclist.MusicListBrowserActivity;
 import snow.music.activity.favorite.FavoriteActivity;
 import snow.music.activity.history.HistoryActivity;
 import snow.music.activity.localmusic.LocalMusicActivity;
+import snow.music.activity.player.PlayerActivity;
 import snow.music.activity.search.SearchActivity;
 import snow.music.store.MusicStore;
 import snow.music.util.FavoriteObserver;
@@ -206,38 +208,35 @@ public class NavigationViewModel extends ViewModel {
     }
 
     public void navigateToLocalMusic(View view) {
-        Context context = view.getContext();
-        Intent intent = new Intent(context, LocalMusicActivity.class);
-        context.startActivity(intent);
+        startActivity(view.getContext(), LocalMusicActivity.class);
     }
 
     public void navigateToFavorite(View view) {
-        Context context = view.getContext();
-        Intent intent = new Intent(context, FavoriteActivity.class);
-        context.startActivity(intent);
+        startActivity(view.getContext(), FavoriteActivity.class);
     }
 
     public void navigateToMusicListBrowser(View view) {
-        Context context = view.getContext();
-        Intent intent = new Intent(context, MusicListBrowserActivity.class);
-        context.startActivity(intent);
+        startActivity(view.getContext(), MusicListBrowserActivity.class);
     }
 
     public void navigateToArtistBrowser(View view) {
-        Context context = view.getContext();
-        Intent intent = new Intent(context, ArtistBrowserActivity.class);
-        context.startActivity(intent);
+        startActivity(view.getContext(), ArtistBrowserActivity.class);
     }
 
     public void navigateToAlbum(View view) {
-        Context context = view.getContext();
-        Intent intent = new Intent(context, AlbumBrowserActivity.class);
-        context.startActivity(intent);
+        startActivity(view.getContext(), AlbumBrowserActivity.class);
     }
 
     public void navigateToHistory(View view) {
-        Context context = view.getContext();
-        Intent intent = new Intent(context, HistoryActivity.class);
+        startActivity(view.getContext(), HistoryActivity.class);
+    }
+
+    public void navigateToPlayer(View view) {
+        startActivity(view.getContext(), PlayerActivity.class);
+    }
+
+    private void startActivity(Context context, Class<? extends Activity> activity) {
+        Intent intent = new Intent(context, activity);
         context.startActivity(intent);
     }
 }
