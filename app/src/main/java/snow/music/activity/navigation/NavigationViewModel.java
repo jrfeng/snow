@@ -101,11 +101,7 @@ public class NavigationViewModel extends ViewModel {
             mPlayerViewModel.getPlayingMusicItem().removeObserver(mPlayingMusicItemObserver);
             mPlayerViewModel.getArtist().removeObserver(mArtistObserver);
             mPlayerViewModel.isError().removeObserver(mErrorObserver);
-            return;
         }
-
-        // 必须放在最后面
-        super.onCleared();
     }
 
     public LiveData<String> getMusicTitle() {
