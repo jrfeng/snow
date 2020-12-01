@@ -1209,6 +1209,12 @@ public class PlayerService extends MediaBrowserServiceCompat
         mSleepTimerStateChangedListener.onTimerEnd();
     }
 
+    private void notifyPlayModeChanged(@NonNull PlayMode playMode) {
+        if (mNotificationView != null) {
+            mNotificationView.onPlayModeChanged(playMode);
+        }
+    }
+
     private class PlayerImp extends AbstractPlayer {
 
         public PlayerImp(@NonNull Context context,
@@ -1292,6 +1298,12 @@ public class PlayerService extends MediaBrowserServiceCompat
         protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
             super.onPlayingMusicItemChanged(musicItem);
             PlayerService.this.onPlayingMusicItemChanged(musicItem);
+        }
+
+        @Override
+        protected void onPlayModeChanged(@NonNull PlayMode playMode) {
+            super.onPlayModeChanged(playMode);
+            PlayerService.this.notifyPlayModeChanged(playMode);
         }
 
         @Override
@@ -1503,6 +1515,14 @@ public class PlayerService extends MediaBrowserServiceCompat
         @NonNull
         protected IconLoader onCreateIconLoader(@NonNull Context context) {
             return new IconLoaderImp(context, getDefaultIcon());
+        }
+
+        /**
+         * 该方法会在播放模式发生改变时调用。
+         *
+         * @param playMode 当前播放模式。
+         */
+        protected void onPlayModeChanged(@NonNull PlayMode playMode) {
         }
 
         /**

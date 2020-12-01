@@ -260,6 +260,9 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
     }
 
+    protected void onPlayModeChanged(@NonNull PlayMode playMode) {
+    }
+
     /**
      * 释放播放器所占用的资源。注意！调用该方法后，就不允许在使用当前 Player 对象了，否则会导致不可预见的错误。
      */
@@ -1365,6 +1368,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onPlayModeChanged(playMode);
         }
+
+        onPlayModeChanged(playMode);
     }
 
     private void notifyPlaylistChanged(int position) {
