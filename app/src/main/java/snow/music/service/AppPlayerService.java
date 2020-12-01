@@ -2,6 +2,7 @@ package snow.music.service;
 
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
@@ -12,6 +13,7 @@ import androidx.core.content.res.ResourcesCompat;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import snow.music.R;
+import snow.music.activity.player.PlayerActivity;
 import snow.music.store.MusicStore;
 import snow.music.util.FavoriteObserver;
 import snow.music.util.MusicUtil;
@@ -54,6 +56,8 @@ public class AppPlayerService extends PlayerService {
         private PendingIntent mToggleFavorite;
         private PendingIntent mSwitchPlayMode;
 
+        private PendingIntent mContentIntent;
+
         @Override
         protected void onInit(Context context) {
             super.onInit(context);
@@ -80,6 +84,12 @@ public class AppPlayerService extends PlayerService {
             });
 
             setDefaultIcon(getDefaultIcon());
+
+            Intent intent = new Intent(getContext(), PlayerActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(PlayerActivity.KEY_START_BY_PENDING_INTENT, true);
+
+            mContentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
         @Override
@@ -101,6 +111,8 @@ public class AppPlayerService extends PlayerService {
             super.onBuildNotification(builder);
 
             addSwitchPlayMode(builder);
+
+            builder.setContentIntent(mContentIntent);
         }
 
         private Bitmap getDefaultIcon() {
