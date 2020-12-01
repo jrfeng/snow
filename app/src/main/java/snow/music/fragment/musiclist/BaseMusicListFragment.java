@@ -2,11 +2,7 @@ package snow.music.fragment.musiclist;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +10,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,6 +26,7 @@ import snow.music.activity.multichoice.MultiChoiceStateHolder;
 import snow.music.dialog.AddToMusicListDialog;
 import snow.music.dialog.MessageDialog;
 import snow.music.dialog.SingleChoiceDialog;
+import snow.music.fragment.ringtone.RingtoneUtilFragment;
 import snow.music.service.AppPlayerService;
 import snow.music.store.Music;
 import snow.music.store.MusicList;
@@ -43,8 +39,7 @@ import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 
 public abstract class BaseMusicListFragment extends Fragment {
-    private static final int REQUEST_CODE_WRITE_SETTINGS = 1;
-    private static final int REQUEST_CODE_MULTI_CHOICE = 2;
+    private static final int REQUEST_CODE_MULTI_CHOICE = 1;
 
     private Context mContext;
     private PlayerViewModel mPlayerViewModel;
@@ -89,24 +84,6 @@ public abstract class BaseMusicListFragment extends Fragment {
 
         if (requestCode == REQUEST_CODE_MULTI_CHOICE) {
             checkResultCode(resultCode);
-            return;
-        }
-
-        if (requestCode != REQUEST_CODE_WRITE_SETTINGS) {
-            return;
-        }
-
-        Music ringtoneMusic = mMusicListViewModel.getRingtoneMusic();
-        mMusicListViewModel.setRingtoneMusic(null);
-
-        if (ringtoneMusic == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return;
-        }
-
-        if (checkSetRingtonePermission()) {
-            setAsRingtone(ringtoneMusic);
-        } else {
-            Toast.makeText(mContext, R.string.toast_request_permission_failed, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -308,49 +285,7 @@ public abstract class BaseMusicListFragment extends Fragment {
     }
 
     protected final void setAsRingtone(@NonNull Music music) {
-        if (checkSetRingtonePermission()) {
-            showSetAsRingtoneDialog(music);
-            return;
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mMusicListViewModel.setRingtoneMusic(music);
-            requestSetRingtonePermission();
-        }
-    }
-
-    private void showSetAsRingtoneDialog(Music music) {
-        MessageDialog dialog = new MessageDialog.Builder(mContext)
-                .setTitle(music.getTitle())
-                .setMessage(R.string.message_set_as_ringtone)
-                .setPositiveButtonClickListener(((dialog1, which) -> {
-                    RingtoneManager.setActualDefaultRingtoneUri(mContext, RingtoneManager.TYPE_RINGTONE, Uri.parse(music.getUri()));
-                    Toast.makeText(mContext, R.string.toast_set_successfully, Toast.LENGTH_SHORT).show();
-                }))
-                .build();
-
-        dialog.show(getParentFragmentManager(), "setAsRingtoneDialog");
-    }
-
-    private boolean checkSetRingtonePermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return Settings.System.canWrite(mContext);
-        }
-        return true;
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private void requestSetRingtonePermission() {
-        MessageDialog messageDialog = new MessageDialog.Builder(mContext)
-                .setMessage(R.string.message_need_write_settings_permission)
-                .setPositiveButton(R.string.positive_text_request, (dialog, which) -> {
-                    Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-                    intent.setData(Uri.parse("package:" + mContext.getApplicationContext().getPackageName()));
-                    startActivityForResult(intent, REQUEST_CODE_WRITE_SETTINGS);
-                })
-                .build();
-
-        messageDialog.show(getParentFragmentManager(), "requestSetRingtonePermission");
+        RingtoneUtilFragment.setAsRingtone(getParentFragmentManager(), music);
     }
 
     protected final void removeMusic(@NonNull Music music) {

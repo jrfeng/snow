@@ -33,9 +33,6 @@ public abstract class BaseMusicListViewModel extends ViewModel {
 
     private boolean mIgnoreDiffUtil;
 
-    @Nullable
-    private Music mRingtoneMusic;
-
     public BaseMusicListViewModel() {
         mMusicListItems = new MutableLiveData<>(Collections.emptyList());
     }
@@ -104,15 +101,6 @@ public abstract class BaseMusicListViewModel extends ViewModel {
         mIgnoreDiffUtil = false;
 
         return result;
-    }
-
-    @Nullable
-    public Music getRingtoneMusic() {
-        return mRingtoneMusic;
-    }
-
-    public void setRingtoneMusic(@Nullable Music ringtoneMusic) {
-        mRingtoneMusic = ringtoneMusic;
     }
 
     /**
