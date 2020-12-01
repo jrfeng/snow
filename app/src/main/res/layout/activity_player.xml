@@ -181,6 +181,7 @@
                     android:layout_gravity="center"
                     android:background="@drawable/bg_button_48dp"
                     android:contentDescription="@string/des_option_menu"
+                    android:onClick="showOptionMenu"
                     android:scaleType="centerInside"
                     app:srcCompat="@drawable/ic_player_option_menu" />
 

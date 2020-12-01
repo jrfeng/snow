@@ -1,6 +1,5 @@
 package snow.music.activity.player;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -18,14 +17,20 @@ import snow.music.R;
 import snow.music.activity.BaseActivity;
 import snow.music.activity.navigation.NavigationActivity;
 import snow.music.databinding.ActivityPlayerBinding;
+import snow.music.dialog.AddToMusicListDialog;
+import snow.music.dialog.BottomMenuDialog;
 import snow.music.dialog.PlaylistDialog;
+import snow.music.fragment.ringtone.RingtoneUtilFragment;
 import snow.music.service.AppPlayerService;
+import snow.music.util.MusicUtil;
 import snow.music.util.PlayerUtil;
+import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 
 public class PlayerActivity extends BaseActivity {
     public static final String KEY_START_BY_PENDING_INTENT = "START_BY_PENDING_INTENT";
 
+    private PlayerViewModel mPlayerViewModel;
     private PlayerStateViewModel mPlayerStateViewModel;
 
     private ActivityPlayerBinding mBinding;
@@ -38,20 +43,20 @@ public class PlayerActivity extends BaseActivity {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_player);
 
         ViewModelProvider provider = new ViewModelProvider(this);
-        PlayerViewModel playerViewModel = provider.get(PlayerViewModel.class);
-        PlayerUtil.initPlayerViewModel(this, playerViewModel, AppPlayerService.class);
-        setPlayerClient(playerViewModel.getPlayerClient());
+        mPlayerViewModel = provider.get(PlayerViewModel.class);
+        PlayerUtil.initPlayerViewModel(this, mPlayerViewModel, AppPlayerService.class);
+        setPlayerClient(mPlayerViewModel.getPlayerClient());
 
         mPlayerStateViewModel = provider.get(PlayerStateViewModel.class);
-        mPlayerStateViewModel.init(playerViewModel, isStartByPendingIntent());
+        mPlayerStateViewModel.init(mPlayerViewModel, isStartByPendingIntent());
 
-        mBinding.setPlayerViewModel(playerViewModel);
+        mBinding.setPlayerViewModel(mPlayerViewModel);
         mBinding.setPlayerStateViewModel(mPlayerStateViewModel);
         mBinding.setLifecycleOwner(this);
 
-        mAlbumIconAnimManager = new AlbumIconAnimManager(mBinding.ivAlbumIcon, this, playerViewModel);
+        mAlbumIconAnimManager = new AlbumIconAnimManager(mBinding.ivAlbumIcon, this, mPlayerViewModel);
         mRequestManager = GlideApp.with(this);
-        observePlayingMusicItem(playerViewModel);
+        observePlayingMusicItem(mPlayerViewModel);
     }
 
     private boolean isStartByPendingIntent() {
@@ -104,5 +109,38 @@ public class PlayerActivity extends BaseActivity {
         if (mPlayerStateViewModel.isStartByPendingIntent()) {
             overridePendingTransition(R.anim.activity_fade_in, R.anim.activity_fade_out);
         }
+    }
+
+    public void showOptionMenu(View view) {
+        MusicItem musicItem = mPlayerViewModel.getPlayerClient().getPlayingMusicItem();
+        if (musicItem == null) {
+            return;
+        }
+
+        BottomMenuDialog bottomMenuDialog = new BottomMenuDialog.Builder(this)
+                .setTitle(musicItem.getTitle())
+                .addMenuItem(R.drawable.ic_menu_item_add, R.string.menu_item_add_to_music_list)
+                .addMenuItem(R.drawable.ic_menu_item_rington, R.string.menu_item_set_as_ringtone)
+                .setOnMenuItemClickListener((dialog, position) -> {
+                    dialog.dismiss();
+
+                    if (position == 0) {
+                        addToMusicListDialog(musicItem);
+                    } else if (position == 1) {
+                        setAsRingtone(musicItem);
+                    }
+                })
+                .build();
+
+        bottomMenuDialog.show(getSupportFragmentManager(), "musicItemOptionMenu");
+    }
+
+    private void addToMusicListDialog(MusicItem musicItem) {
+        AddToMusicListDialog dialog = AddToMusicListDialog.newInstance(MusicUtil.asMusic(musicItem));
+        dialog.show(getSupportFragmentManager(), "addToMusicList");
+    }
+
+    private void setAsRingtone(MusicItem musicItem) {
+        RingtoneUtilFragment.setAsRingtone(getSupportFragmentManager(), MusicUtil.asMusic(musicItem));
     }
 }
