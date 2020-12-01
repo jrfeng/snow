@@ -38,6 +38,7 @@ import snow.music.store.MusicStore;
 import snow.music.util.MusicListUtil;
 import snow.music.util.MusicUtil;
 import snow.music.util.PlayerUtil;
+import snow.player.PlayerClient;
 import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 
@@ -106,6 +107,16 @@ public abstract class BaseMusicListFragment extends Fragment {
             setAsRingtone(ringtoneMusic);
         } else {
             Toast.makeText(mContext, R.string.toast_request_permission_failed, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        PlayerClient playerClient = mPlayerViewModel.getPlayerClient();
+        if (!playerClient.isConnected()) {
+            playerClient.connect();
         }
     }
 
