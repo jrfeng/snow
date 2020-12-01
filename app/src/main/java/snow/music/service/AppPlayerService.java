@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -80,7 +81,6 @@ public class AppPlayerService extends PlayerService {
                         player.setPlayMode(PlayMode.PLAYLIST_LOOP);
                         break;
                 }
-                invalidate();
             });
 
             setDefaultIcon(getDefaultIcon());
@@ -90,6 +90,11 @@ public class AppPlayerService extends PlayerService {
             intent.putExtra(PlayerActivity.KEY_START_BY_PENDING_INTENT, true);
 
             mContentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+
+        @Override
+        protected void onPlayModeChanged(@NonNull PlayMode playMode) {
+            invalidate();
         }
 
         @Override
