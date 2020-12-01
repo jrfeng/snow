@@ -92,6 +92,7 @@ public class SearchActivity extends BaseActivity {
         mPlayerClient = PlayerClient.newInstance(this, AppPlayerService.class);
         mPlayerClient.setAutoConnect(true);
         mPlayerClient.connect();
+        setPlayerClient(mPlayerClient);
     }
 
     private void showSoftInput() {

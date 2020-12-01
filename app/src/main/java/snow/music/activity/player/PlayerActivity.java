@@ -15,6 +15,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 
 import snow.music.GlideApp;
 import snow.music.R;
+import snow.music.activity.BaseActivity;
 import snow.music.activity.navigation.NavigationActivity;
 import snow.music.databinding.ActivityPlayerBinding;
 import snow.music.dialog.PlaylistDialog;
@@ -22,7 +23,7 @@ import snow.music.service.AppPlayerService;
 import snow.music.util.PlayerUtil;
 import snow.player.lifecycle.PlayerViewModel;
 
-public class PlayerActivity extends AppCompatActivity {
+public class PlayerActivity extends BaseActivity {
     public static final String KEY_START_BY_PENDING_INTENT = "START_BY_PENDING_INTENT";
 
     private PlayerStateViewModel mPlayerStateViewModel;
@@ -39,6 +40,7 @@ public class PlayerActivity extends AppCompatActivity {
         ViewModelProvider provider = new ViewModelProvider(this);
         PlayerViewModel playerViewModel = provider.get(PlayerViewModel.class);
         PlayerUtil.initPlayerViewModel(this, playerViewModel, AppPlayerService.class);
+        setPlayerClient(playerViewModel.getPlayerClient());
 
         mPlayerStateViewModel = provider.get(PlayerStateViewModel.class);
         mPlayerStateViewModel.init(playerViewModel, isStartByPendingIntent());
