@@ -1250,71 +1250,60 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         @Override
         protected void onPreparing() {
-            super.onPreparing();
             PlayerService.this.updateNotificationView();
             PlayerService.this.cancelIDLETimer();
         }
 
         @Override
         protected void onPrepared(int audioSessionId) {
-            super.onPrepared(audioSessionId);
             PlayerService.this.updateNotificationView();
         }
 
         @Override
         protected void onPlaying(int progress, long updateTime) {
-            super.onPlaying(progress, updateTime);
             PlayerService.this.updateNotificationView();
             PlayerService.this.cancelIDLETimer();
         }
 
         @Override
         protected void onPaused() {
-            super.onPaused();
             PlayerService.this.updateNotificationView();
             PlayerService.this.startIDLETimer();
         }
 
         @Override
         protected void onStalledChanged(boolean stalled) {
-            super.onStalledChanged(stalled);
             PlayerService.this.updateNotificationView();
         }
 
         @Override
         protected void onStopped() {
-            super.onStopped();
             PlayerService.this.onStopped();
             PlayerService.this.startIDLETimer();
         }
 
         @Override
         protected void onError(int errorCode, String errorMessage) {
-            super.onError(errorCode, errorMessage);
             PlayerService.this.updateNotificationView();
         }
 
         @Override
         protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
-            super.onPlayingMusicItemChanged(musicItem);
             PlayerService.this.onPlayingMusicItemChanged(musicItem);
         }
 
         @Override
         protected void onPlayModeChanged(@NonNull PlayMode playMode) {
-            super.onPlayModeChanged(playMode);
             PlayerService.this.notifyPlayModeChanged(playMode);
         }
 
         @Override
         protected void attachAudioEffect(int audioSessionId) {
-            super.attachAudioEffect(audioSessionId);
             PlayerService.this.attachAudioEffect(audioSessionId);
         }
 
         @Override
         protected void detachAudioEffect() {
-            super.detachAudioEffect();
             PlayerService.this.detachAudioEffect();
         }
     }

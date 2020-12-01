@@ -184,30 +184,26 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      *
      * @param audioSessionId 当前正在播放的音乐的 audio session id。如果为 0，则可以忽略。
      */
-    protected void attachAudioEffect(int audioSessionId) {
-    }
+    protected abstract void attachAudioEffect(int audioSessionId);
 
     /**
      * 取消当前的音频特效。
      * <p>
      * 子类可以覆盖该方法来取消指定的 audio session id 的音频特效。
      */
-    protected void detachAudioEffect() {
-    }
+    protected abstract void detachAudioEffect();
 
     /**
      * 该方法会在开始准备音乐播放器时调用。
      */
-    protected void onPreparing() {
-    }
+    protected abstract void onPreparing();
 
     /**
      * 该方法会在音乐播放器准备完毕后调用。
      *
      * @param audioSessionId 当前正准备播放的音乐的 audio session id。
      */
-    protected void onPrepared(int audioSessionId) {
-    }
+    protected abstract void onPrepared(int audioSessionId);
 
     /**
      * 该方法会在开始播放时调用。
@@ -215,14 +211,12 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      * @param progress   当前的播放进度。
      * @param updateTime 播放进度的更新时间。
      */
-    protected void onPlaying(int progress, long updateTime) {
-    }
+    protected abstract void onPlaying(int progress, long updateTime);
 
     /**
      * 该方法会在暂停播放时调用。
      */
-    protected void onPaused() {
-    }
+    protected abstract void onPaused();
 
     /**
      * 该方法会在 stalled 状态改变时调用。
@@ -233,14 +227,12 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      * @param stalled 如果缓冲区没有足够的数据继续播放时，则该参数为 true，当缓冲区缓存了足够的数据可以继续
      *                播放时，该参数为 false。
      */
-    protected void onStalledChanged(boolean stalled) {
-    }
+    protected abstract void onStalledChanged(boolean stalled);
 
     /**
      * 该方法会在停止播放时调用。
      */
-    protected void onStopped() {
-    }
+    protected abstract void onStopped();
 
     /**
      * 该方法会在错误发生时调用。
@@ -249,19 +241,16 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      * @param errorMessage 错误信息
      * @see ErrorCode
      */
-    protected void onError(int errorCode, String errorMessage) {
-    }
+    protected abstract void onError(int errorCode, String errorMessage);
 
     /**
      * 该方法会在当前播放的 MusicItem 对象改变时调用。
      *
      * @param musicItem 本次要播放的 MusicItem 对象（可能为 null）。
      */
-    protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
-    }
+    protected abstract void onPlayingMusicItemChanged(@Nullable MusicItem musicItem);
 
-    protected void onPlayModeChanged(@NonNull PlayMode playMode) {
-    }
+    protected abstract void onPlayModeChanged(@NonNull PlayMode playMode);
 
     /**
      * 释放播放器所占用的资源。注意！调用该方法后，就不允许在使用当前 Player 对象了，否则会导致不可预见的错误。
@@ -587,7 +576,17 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         });
     }
 
-    public final void setMediaSession(MediaSessionCompat mediaSession) {
+    /**
+     * 设置 MediaSessionCompat 对象。
+     * <p>
+     * 创建 {@link AbstractPlayer} 对象后，必须调用该方法设置一个 MediaSessionCompat 对象，否则
+     * {@link AbstractPlayer} 对象无法正常工作。
+     *
+     * @param mediaSession MediaSessionCompat 对象，不能为 null
+     */
+    public final void setMediaSession(@NonNull MediaSessionCompat mediaSession) {
+        Preconditions.checkNotNull(mediaSession);
+
         initMediaMetadataBuilder();
         initPlaybackStateBuilder();
 
