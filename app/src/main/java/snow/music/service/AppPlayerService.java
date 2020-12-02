@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -105,16 +106,19 @@ public class AppPlayerService extends PlayerService {
 
         @Override
         protected void onBuildMediaStyle(androidx.media.app.NotificationCompat.MediaStyle mediaStyle) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                mediaStyle.setShowActionsInCompactView(1, 2, 3);
+                return;
+            }
             mediaStyle.setShowActionsInCompactView(2, 3);
         }
 
         @Override
         protected void onBuildNotification(NotificationCompat.Builder builder) {
             addToggleFavorite(builder);
-
-            // skip to previous, play pause, skip to next
-            super.onBuildNotification(builder);
-
+            addSkipToPrevious(builder);
+            addPlayPause(builder);
+            addSkipToNext(builder);
             addSwitchPlayMode(builder);
 
             builder.setContentIntent(mContentIntent);
@@ -140,22 +144,35 @@ public class AppPlayerService extends PlayerService {
             }
 
             if (mFavoriteObserver.isFavorite()) {
-                builder.addAction(R.drawable.ic_notif_favorite_true, "favorite", mToggleFavorite);
+                builder.addAction(R.mipmap.ic_notif_favorite_true, "favorite", mToggleFavorite);
             } else {
-                builder.addAction(R.drawable.ic_notif_favorite_false, "don't favorite", mToggleFavorite);
+                builder.addAction(R.mipmap.ic_notif_favorite_false, "don't favorite", mToggleFavorite);
             }
+        }
+
+        private void addSkipToPrevious(NotificationCompat.Builder builder) {
+            builder.addAction(R.mipmap.ic_notif_skip_to_previous, "skip to previous", doSkipToPrevious());
+        }
+
+        private void addPlayPause(NotificationCompat.Builder builder) {
+            int iconId = isPlayingState() ? R.mipmap.ic_notif_pause : R.mipmap.ic_notif_play;
+            builder.addAction(iconId, "play pause", doPlayPause());
+        }
+
+        private void addSkipToNext(NotificationCompat.Builder builder) {
+            builder.addAction(R.mipmap.ic_notif_skip_to_next, "skip to next", doSkipToNext());
         }
 
         private void addSwitchPlayMode(NotificationCompat.Builder builder) {
             switch (getPlayMode()) {
                 case PLAYLIST_LOOP:
-                    builder.addAction(R.drawable.ic_notif_play_mode_sequential, "sequential", mSwitchPlayMode);
+                    builder.addAction(R.mipmap.ic_notif_play_mode_playlist_loop, "sequential", mSwitchPlayMode);
                     break;
                 case LOOP:
-                    builder.addAction(R.drawable.ic_notif_play_mode_loop, "sequential", mSwitchPlayMode);
+                    builder.addAction(R.mipmap.ic_notif_play_mode_loop, "sequential", mSwitchPlayMode);
                     break;
                 case SHUFFLE:
-                    builder.addAction(R.drawable.ic_notif_play_mode_shuffle, "sequential", mSwitchPlayMode);
+                    builder.addAction(R.mipmap.ic_notif_play_mode_shuffle, "sequential", mSwitchPlayMode);
                     break;
             }
         }
