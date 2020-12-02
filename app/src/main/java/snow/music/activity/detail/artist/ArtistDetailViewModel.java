@@ -3,7 +3,6 @@ package snow.music.activity.detail.artist;
 import androidx.annotation.NonNull;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import pinyin.util.PinyinComparator;

@@ -203,6 +203,7 @@ public class MusicList {
             return mOrderedList.toArray();
         }
 
+        @SuppressWarnings("SuspiciousToArrayCall")
         @NonNull
         @Override
         public <T> T[] toArray(@NonNull T[] a) {
