@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="360dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tvDialogTitle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dialog_title_height"
+        android:layout_gravity="center_vertical"
+        android:ellipsize="middle"
+        android:gravity="center"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:singleLine="true"
+        android:text="@string/title_sleep_timer"
+        android:textSize="@dimen/dialog_title_text_size" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/des_clock_icon"
+            app:srcCompat="@drawable/ic_clock_big" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="16dp" />
+
+        <TextView
+            android:id="@+id/tvTextTimer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="00:00"
+            android:textSize="20sp"
+            tools:ignore="HardcodedText"
+            tools:text="04:52" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnCancelTimer"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dialog_button_height"
+        android:layout_margin="24dp"
+        android:background="@drawable/bg_dialog_button"
+        android:singleLine="true"
+        android:text="@string/sleep_timer_cancel_timer"
+        android:textAllCaps="false"
+        android:textColor="?colorPrimary"
+        android:textSize="@dimen/dialog_button_text_size" />
+
+</LinearLayout>

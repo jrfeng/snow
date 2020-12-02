@@ -14,6 +14,7 @@
         <item name="colorSecondaryText">@color/grey_500</item>
         <item name="colorDivider">@color/grey_800</item>
         <item name="colorMark">@color/deep_purple_400</item>
+        <item name="colorDisabled">@color/grey_500</item>
 
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>

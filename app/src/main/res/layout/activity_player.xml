@@ -147,8 +147,10 @@
                     android:layout_gravity="center"
                     android:background="@drawable/bg_button_48dp"
                     android:contentDescription="@string/des_sleep_timer"
+                    android:onClick="showSleepTimer"
                     android:scaleType="centerInside"
-                    app:srcCompat="@drawable/ic_sleep_timer" />
+                    app:srcCompat="@{playerStateViewModel.sleepTimerDrawable}"
+                    tools:srcCompat="@drawable/ic_sleep_timer" />
 
             </FrameLayout>
 

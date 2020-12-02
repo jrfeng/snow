@@ -4,4 +4,5 @@
     <attr name="colorDivider" format="color" />
     <attr name="colorMark" format="color" />
     <attr name="colorWindowBackground" format="color" />
+    <attr name="colorDisabled" format="color" />
 </resources>

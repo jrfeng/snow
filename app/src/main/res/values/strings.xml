@@ -133,6 +133,20 @@
     <string name="button_text_new_music_list">New music list</string>
     <string name="toast_added_successfully">Added successfully</string>
 
+    <!-- SleepTimerDialog -->
+    <string name="title_sleep_timer">Sleep timer</string>
+    <string name="sleep_timer_dialog_cancel">Cancel</string>
+    <string name="sleep_timer_dialog_start">Start</string>
+    <string name="sleep_timer_5_minutes">5 min</string>
+    <string name="sleep_timer_10_minutes">10 min</string>
+    <string name="sleep_timer_15_minutes">15 min</string>
+    <string name="sleep_timer_30_minutes">30 min</string>
+    <string name="sleep_timer_40_minutes">40 min</string>
+    <string name="sleep_timer_60_minutes">60 min</string>
+    <string name="sleep_timer_cancel_timer">Cancel Timer</string>
+    <string name="sleep_timer_start_successfully">Start successfully</string>
+    <string name="sleep_timer_cancelled_successfully">Cancelled successfully</string>
+
     <!-- content description -->
     <string name="des_logo">logo</string>
     <string name="des_search">Search</string>
@@ -162,5 +176,6 @@
     <string name="des_equalizer">equalizer</string>
     <string name="des_sleep_timer">sleep timer</string>
     <string name="des_option_menu">option menu</string>
+    <string name="des_clock_icon">clock icon</string>
 
 </resources>
