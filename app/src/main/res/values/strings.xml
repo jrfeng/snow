@@ -53,9 +53,6 @@
     <string name="message_remove_all_selected_songs">Remove selected songs?</string>
     <string name="toast_no_songs_selected">No songs selected</string>
 
-    <!-- PlayerActivity -->
-    <string name="prefix_error">Error: </string>
-
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>
     <string name="empty_playlist">Playlist is empty</string>

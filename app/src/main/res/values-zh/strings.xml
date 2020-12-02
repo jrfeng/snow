@@ -116,7 +116,6 @@
     <string name="des_option_menu">菜单按钮</string>
     <string name="des_equalizer">均衡器</string>
     <string name="des_play_mode">播放模式</string>
-    <string name="prefix_error">错误：</string>
     <string name="title_sleep_timer">睡眠定时器</string>
     <string name="sleep_timer_cancel">取消</string>
     <string name="sleep_timer_start">启动</string>
