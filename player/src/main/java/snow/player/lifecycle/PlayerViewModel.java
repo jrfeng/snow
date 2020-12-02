@@ -41,6 +41,7 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<Integer> mDuration;             // 单位：秒
     private MutableLiveData<Integer> mPlayProgress;         // 单位：秒
     private MutableLiveData<Integer> mBufferedProgress;     // 单位：秒
+    private MutableLiveData<Boolean> mSleepTimerStarted;
     private MutableLiveData<Integer> mSleepTimerTime;       // 单位：秒
     private MutableLiveData<Integer> mSleepTimerProgress;   // 单位：秒
     private MutableLiveData<Integer> mPlayPosition;
@@ -279,12 +280,14 @@ public class PlayerViewModel extends ViewModel {
         mSleepTimerStateChangeListener = new SleepTimer.OnStateChangeListener() {
             @Override
             public void onTimerStart(long time, long startTime, SleepTimer.TimeoutAction action) {
+                mSleepTimerStarted.setValue(true);
                 mSleepTimerTime.setValue((int) (time / 1000));
                 mSleepTimerProgressClock.start(0, startTime, (int) time);
             }
 
             @Override
             public void onTimerEnd() {
+                mSleepTimerStarted.setValue(false);
                 mSleepTimerProgressClock.cancel();
                 mSleepTimerTime.setValue(0);
                 mSleepTimerProgress.setValue(0);
@@ -713,10 +716,23 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
+     * 睡眠定时器是否已启动。
+     */
+    @NonNull
+    public MutableLiveData<Boolean> getSleepTimerStarted() {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
+        return mSleepTimerStarted;
+    }
+
+    /**
      * 获取睡眠定时器的时长（单位：秒）。
      *
      * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
+    @NonNull
     public LiveData<Integer> getSleepTimerTime() throws IllegalStateException {
         if (!isInitialized()) {
             throw new IllegalStateException("PlayerViewModel not initialized yet.");
@@ -730,6 +746,7 @@ public class PlayerViewModel extends ViewModel {
      *
      * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
+    @NonNull
     public LiveData<String> getTextSleepTimerTime() throws IllegalStateException {
         if (!isInitialized()) {
             throw new IllegalStateException("PlayerViewModel not initialized yet.");
@@ -750,6 +767,7 @@ public class PlayerViewModel extends ViewModel {
      *
      * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
+    @NonNull
     public LiveData<Integer> getSleepTimerProgress() throws IllegalStateException {
         if (!isInitialized()) {
             throw new IllegalStateException("PlayerViewModel not initialized yet.");
@@ -765,6 +783,7 @@ public class PlayerViewModel extends ViewModel {
      *
      * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
+    @NonNull
     public LiveData<String> getTextSleepTimerProgress() throws IllegalStateException {
         if (!isInitialized()) {
             throw new IllegalStateException("PlayerViewModel not initialized yet.");
@@ -1041,6 +1060,7 @@ public class PlayerViewModel extends ViewModel {
         mDuration = new MutableLiveData<>(getDurationSec());
         mPlayProgress = new MutableLiveData<>(getPlayProgressSec());
         mBufferedProgress = new MutableLiveData<>(getBufferedProgressSec());
+        mSleepTimerStarted = new MutableLiveData<>(mPlayerClient.isSleepTimerStarted());
         mSleepTimerTime = new MutableLiveData<>((int) (mPlayerClient.getSleepTimerTime() / 1000));
         mSleepTimerProgress = new MutableLiveData<>((int) (mPlayerClient.getSleepTimerElapsedTime() / 1000));
         mPlayPosition = new MutableLiveData<>(mPlayerClient.getPlayPosition());
