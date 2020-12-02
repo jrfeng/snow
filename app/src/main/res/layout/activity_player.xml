@@ -143,6 +143,25 @@
                 android:layout_weight="1">
 
                 <ImageButton
+                    android:id="@+id/btnKeepScreenOn"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_play_mode"
+                    android:onClick="@{playerStateViewModel.toggleKeepScreenOn}"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@{playerStateViewModel.keepScreenOnDrawable}"
+                    tools:srcCompat="@drawable/ic_keep_screen_on_false" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
                     android:id="@+id/btnSleepTimer"
                     android:layout_width="48dp"
                     android:layout_height="48dp"

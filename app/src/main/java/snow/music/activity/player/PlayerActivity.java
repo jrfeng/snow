@@ -4,6 +4,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.view.View;
 
@@ -42,6 +43,8 @@ public class PlayerActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_player);
+
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         ViewModelProvider provider = new ViewModelProvider(this);
         mPlayerViewModel = provider.get(PlayerViewModel.class);

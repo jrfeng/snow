@@ -1,6 +1,7 @@
 package snow.music.activity.player;
 
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -25,6 +26,7 @@ public class PlayerStateViewModel extends ViewModel {
     private final MutableLiveData<Integer> mFavoriteDrawable;
     private final MutableLiveData<Integer> mErrorMessageVisibility;
     private final MutableLiveData<String> mErrorMessage;
+    private final MutableLiveData<Integer> mKeepScreenOnDrawable;
 
     private final FavoriteObserver mFavoriteObserver;
     private final Observer<MusicItem> mPlayingMusicItemObserver;
@@ -39,6 +41,7 @@ public class PlayerStateViewModel extends ViewModel {
         mFavoriteDrawable = new MutableLiveData<>(R.drawable.ic_favorite_false);
         mErrorMessageVisibility = new MutableLiveData<>(View.GONE);
         mErrorMessage = new MutableLiveData<>("");
+        mKeepScreenOnDrawable = new MutableLiveData<>(R.drawable.ic_keep_screen_on_false);
 
         mFavoriteObserver = new FavoriteObserver(favorite ->
                 mFavoriteDrawable.setValue(favorite ? R.drawable.ic_favorite_true : R.drawable.ic_favorite_false));
@@ -116,6 +119,10 @@ public class PlayerStateViewModel extends ViewModel {
         });
     }
 
+    public LiveData<Integer> getKeepScreenOnDrawable() {
+        return mKeepScreenOnDrawable;
+    }
+
     public LiveData<Integer> getSleepTimerDrawable() {
         if (!isInitialized()) {
             throw new IllegalStateException("NavigationViewModel not init yet.");
@@ -182,5 +189,21 @@ public class PlayerStateViewModel extends ViewModel {
             mErrorMessage.setValue("");
             mErrorMessageVisibility.setValue(View.GONE);
         }
+    }
+
+    public void toggleKeepScreenOn(View view) {
+        boolean keepScreenOn = view.getKeepScreenOn();
+        int messageId;
+
+        if (keepScreenOn) {
+            mKeepScreenOnDrawable.setValue(R.drawable.ic_keep_screen_on_false);
+            messageId = R.string.sleep_timer_cancel_keep_screen_on;
+        } else {
+            mKeepScreenOnDrawable.setValue(R.drawable.ic_keep_screen_on_true);
+            messageId = R.string.sleep_timer_keep_screen_on;
+        }
+
+        view.setKeepScreenOn(!keepScreenOn);
+        Toast.makeText(view.getContext(), messageId, Toast.LENGTH_SHORT).show();
     }
 }

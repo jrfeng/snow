@@ -130,4 +130,6 @@
     <string name="des_clock_icon">时钟图标</string>
     <string name="sleep_timer_cancelled_successfully">取消成功</string>
     <string name="sleep_timer_start_successfully">启动成功</string>
+    <string name="sleep_timer_keep_screen_on">保持屏幕常亮</string>
+    <string name="sleep_timer_cancel_keep_screen_on">取消屏幕常亮</string>
 </resources>

@@ -146,6 +146,8 @@
     <string name="sleep_timer_cancel_timer">Cancel Timer</string>
     <string name="sleep_timer_start_successfully">Start successfully</string>
     <string name="sleep_timer_cancelled_successfully">Cancelled successfully</string>
+    <string name="sleep_timer_keep_screen_on">Keep screen on</string>
+    <string name="sleep_timer_cancel_keep_screen_on">Cancel keep screen on</string>
 
     <!-- content description -->
     <string name="des_logo">logo</string>
