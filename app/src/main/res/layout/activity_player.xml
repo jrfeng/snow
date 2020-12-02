@@ -197,7 +197,7 @@
                     android:layout_height="48dp"
                     android:layout_gravity="center"
                     android:background="@drawable/bg_button_48dp"
-                    android:contentDescription="@string/des_toggle_favorite"
+                    android:contentDescription="@string/des_equalizer"
                     android:scaleType="centerInside"
                     app:srcCompat="@drawable/ic_equalizer" />
 
@@ -244,6 +244,7 @@
                 android:textSize="12sp"
                 tools:text="00:00" />
 
+            <!--suppress AndroidUnknownAttribute -->
             <SeekBar
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
