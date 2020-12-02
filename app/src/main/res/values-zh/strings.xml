@@ -118,8 +118,8 @@
     <string name="des_play_mode">播放模式</string>
     <string name="prefix_error">错误：</string>
     <string name="title_sleep_timer">睡眠定时器</string>
-    <string name="sleep_timer_dialog_cancel">取消</string>
-    <string name="sleep_timer_dialog_start">启动</string>
+    <string name="sleep_timer_cancel">取消</string>
+    <string name="sleep_timer_start">启动</string>
     <string name="sleep_timer_5_minutes">5 分钟</string>
     <string name="sleep_timer_10_minutes">10 分钟</string>
     <string name="sleep_timer_15_minutes">15 分钟</string>
@@ -128,8 +128,8 @@
     <string name="sleep_timer_60_minutes">60 分钟</string>
     <string name="sleep_timer_cancel_timer">取消定时器</string>
     <string name="des_clock_icon">时钟图标</string>
-    <string name="sleep_timer_cancelled_successfully">取消成功</string>
-    <string name="sleep_timer_start_successfully">启动成功</string>
-    <string name="sleep_timer_keep_screen_on">保持屏幕常亮</string>
-    <string name="sleep_timer_cancel_keep_screen_on">取消屏幕常亮</string>
+    <string name="toast_cancel_sleep_timer">取消睡眠定时器</string>
+    <string name="toast_start_sleep_timer">启动睡眠定时器</string>
+    <string name="toast_keep_screen_on">保持屏幕常亮</string>
+    <string name="toast_cancel_keep_screen_on">取消屏幕常亮</string>
 </resources>

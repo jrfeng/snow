@@ -162,7 +162,7 @@ public class SleepTimerDialog extends BottomDialog {
             btnNegative.setOnClickListener(v -> dismiss());
             btnPositive.setOnClickListener(v -> {
                 getPlayerViewModel().startSleepTimer(mMinutesItemGroup.getMinutes() * 60_000);
-                Toast.makeText(getContext(), R.string.sleep_timer_start_successfully, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), R.string.toast_start_sleep_timer, Toast.LENGTH_SHORT).show();
                 dismiss();
             });
         }
@@ -406,7 +406,7 @@ public class SleepTimerDialog extends BottomDialog {
             btnCancelTimer.setOnClickListener(v -> {
                 getPlayerViewModel().cancelSleepTimer();
                 dismiss();
-                Toast.makeText(getContext(), R.string.sleep_timer_cancelled_successfully, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), R.string.toast_cancel_sleep_timer, Toast.LENGTH_SHORT).show();
             });
         }
     }

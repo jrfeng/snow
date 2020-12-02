@@ -297,7 +297,7 @@
             android:layout_weight="1"
             android:background="@drawable/bg_dialog_button"
             android:singleLine="true"
-            android:text="@string/sleep_timer_dialog_cancel"
+            android:text="@string/sleep_timer_cancel"
             android:textAllCaps="false"
             android:textSize="@dimen/dialog_button_text_size" />
 
@@ -314,7 +314,7 @@
             android:layout_weight="1"
             android:background="@drawable/bg_dialog_button"
             android:singleLine="true"
-            android:text="@string/sleep_timer_dialog_start"
+            android:text="@string/sleep_timer_start"
             android:textAllCaps="false"
             android:textColor="?colorPrimary"
             android:textSize="@dimen/dialog_button_text_size" />

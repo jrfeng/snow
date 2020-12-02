@@ -135,8 +135,8 @@
 
     <!-- SleepTimerDialog -->
     <string name="title_sleep_timer">Sleep timer</string>
-    <string name="sleep_timer_dialog_cancel">Cancel</string>
-    <string name="sleep_timer_dialog_start">Start</string>
+    <string name="sleep_timer_cancel">Cancel</string>
+    <string name="sleep_timer_start">Start</string>
     <string name="sleep_timer_5_minutes">5 min</string>
     <string name="sleep_timer_10_minutes">10 min</string>
     <string name="sleep_timer_15_minutes">15 min</string>
@@ -144,10 +144,10 @@
     <string name="sleep_timer_40_minutes">40 min</string>
     <string name="sleep_timer_60_minutes">60 min</string>
     <string name="sleep_timer_cancel_timer">Cancel Timer</string>
-    <string name="sleep_timer_start_successfully">Start successfully</string>
-    <string name="sleep_timer_cancelled_successfully">Cancelled successfully</string>
-    <string name="sleep_timer_keep_screen_on">Keep screen on</string>
-    <string name="sleep_timer_cancel_keep_screen_on">Cancel keep screen on</string>
+    <string name="toast_start_sleep_timer">Start sleep timer</string>
+    <string name="toast_cancel_sleep_timer">Cancel sleep timer</string>
+    <string name="toast_keep_screen_on">Keep screen on</string>
+    <string name="toast_cancel_keep_screen_on">Cancel keep screen on</string>
 
     <!-- content description -->
     <string name="des_logo">logo</string>

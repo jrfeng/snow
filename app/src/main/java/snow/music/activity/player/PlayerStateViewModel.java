@@ -197,10 +197,10 @@ public class PlayerStateViewModel extends ViewModel {
 
         if (keepScreenOn) {
             mKeepScreenOnDrawable.setValue(R.drawable.ic_keep_screen_on_false);
-            messageId = R.string.sleep_timer_cancel_keep_screen_on;
+            messageId = R.string.toast_cancel_keep_screen_on;
         } else {
             mKeepScreenOnDrawable.setValue(R.drawable.ic_keep_screen_on_true);
-            messageId = R.string.sleep_timer_keep_screen_on;
+            messageId = R.string.toast_keep_screen_on;
         }
 
         view.setKeepScreenOn(!keepScreenOn);
