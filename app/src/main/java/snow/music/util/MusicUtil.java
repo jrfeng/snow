@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.common.base.Preconditions;
 
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Single;
+import snow.music.fragment.ringtone.RingtoneUtilFragment;
 import snow.music.store.Music;
 import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
@@ -147,6 +149,13 @@ public final class MusicUtil {
                 .setName(name)
                 .appendAll(musicItemList)
                 .build();
+    }
+
+    public static void setAsRingtone(@NonNull FragmentManager fm, @NonNull Music music) {
+        Preconditions.checkNotNull(fm);
+        Preconditions.checkNotNull(music);
+
+        RingtoneUtilFragment.setAsRingtone(fm, music);
     }
 
     private static long getAddTime(MusicItem musicItem) {

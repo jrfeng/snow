@@ -26,7 +26,6 @@ import snow.music.activity.multichoice.MultiChoiceStateHolder;
 import snow.music.dialog.AddToMusicListDialog;
 import snow.music.dialog.MessageDialog;
 import snow.music.dialog.SingleChoiceDialog;
-import snow.music.fragment.ringtone.RingtoneUtilFragment;
 import snow.music.service.AppPlayerService;
 import snow.music.store.Music;
 import snow.music.store.MusicList;
@@ -285,7 +284,7 @@ public abstract class BaseMusicListFragment extends Fragment {
     }
 
     protected final void setAsRingtone(@NonNull Music music) {
-        RingtoneUtilFragment.setAsRingtone(getParentFragmentManager(), music);
+        MusicUtil.setAsRingtone(getParentFragmentManager(), music);
     }
 
     protected final void removeMusic(@NonNull Music music) {

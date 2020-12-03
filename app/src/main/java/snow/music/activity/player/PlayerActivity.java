@@ -22,7 +22,6 @@ import snow.music.dialog.AddToMusicListDialog;
 import snow.music.dialog.BottomMenuDialog;
 import snow.music.dialog.PlaylistDialog;
 import snow.music.dialog.SleepTimerDialog;
-import snow.music.fragment.ringtone.RingtoneUtilFragment;
 import snow.music.service.AppPlayerService;
 import snow.music.util.MusicUtil;
 import snow.music.util.PlayerUtil;
@@ -145,7 +144,7 @@ public class PlayerActivity extends BaseActivity {
     }
 
     private void setAsRingtone(MusicItem musicItem) {
-        RingtoneUtilFragment.setAsRingtone(getSupportFragmentManager(), MusicUtil.asMusic(musicItem));
+        MusicUtil.setAsRingtone(getSupportFragmentManager(), MusicUtil.asMusic(musicItem));
     }
 
     public void showSleepTimer(View view) {
