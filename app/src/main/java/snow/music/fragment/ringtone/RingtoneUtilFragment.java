@@ -126,6 +126,7 @@ public class RingtoneUtilFragment extends Fragment {
     private void requestSetRingtonePermission() {
         MessageDialog messageDialog = new MessageDialog.Builder(mContext)
                 .setMessage(R.string.message_need_write_settings_permission)
+                .setNegativeButtonClickListener((dialog1, which) -> removeSelf())
                 .setPositiveButton(R.string.positive_text_request, (dialog, which) -> {
                     Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
                     intent.setData(Uri.parse("package:" + mContext.getApplicationContext().getPackageName()));
