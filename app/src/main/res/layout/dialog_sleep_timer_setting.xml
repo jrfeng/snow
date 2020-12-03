@@ -316,7 +316,7 @@
             android:singleLine="true"
             android:text="@string/sleep_timer_start"
             android:textAllCaps="false"
-            android:textColor="?colorPrimary"
+            android:textColor="@color/colorPositiveButtonText"
             android:textSize="@dimen/dialog_button_text_size" />
 
     </LinearLayout>

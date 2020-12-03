@@ -18,6 +18,7 @@
     <color name="colorDivider">@color/grey_800</color>
 
     <color name="colorSearchInputBackground">@color/grey_800</color>
+    <color name="colorClearInputBackground">@color/grey_700</color>
 
     <color name="colorIconTint">@color/grey_300</color>
 
@@ -28,4 +29,6 @@
     <color name="colorPlaylistItemRemoveIconTint">@color/grey_700</color>
 
     <color name="colorInputBackground">@color/grey_800</color>
+
+    <color name="colorPositiveButtonText">@color/deep_purple_300</color>
 </resources>
