@@ -13,7 +13,7 @@
 
     <!-- WelcomeActivity Theme -->
     <style name="AppTheme.Welcome">
-        <item name="android:windowBackground">@color/deep_purple_400</item>
+        <item name="android:windowBackground">@drawable/app_cover</item>
     </style>
 
     <style name="BottomDialogTransition">
