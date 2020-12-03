@@ -17,7 +17,6 @@ import com.google.common.base.Preconditions;
 import java.util.Objects;
 
 import snow.music.R;
-import snow.music.util.ThemeUtil;
 
 public class MessageDialog extends BottomDialog {
     private String mTitle;
@@ -111,8 +110,8 @@ public class MessageDialog extends BottomDialog {
             mMessage = "";
             mPositiveButtonText = context.getString(R.string.message_dialog_positive_text);
             mNegativeButtonText = context.getString(R.string.message_dialog_negative_text);
-            mPositiveTextColor = ThemeUtil.getThemeColor(context.getTheme(), R.attr.colorPrimary);
-            mNegativeTextColor = ThemeUtil.getThemeColor(context.getTheme(), android.R.attr.textColor);
+            mPositiveTextColor = context.getResources().getColor(R.color.colorPrimary);
+            mNegativeTextColor = context.getResources().getColor(R.color.colorText);
         }
 
         public Builder setTitle(@NonNull String title) {

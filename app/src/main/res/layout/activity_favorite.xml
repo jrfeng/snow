@@ -24,6 +24,7 @@
                 android:contentDescription="@string/des_back"
                 android:onClick="finishSelf"
                 android:scaleType="centerInside"
+                android:tint="@color/colorIconTint"
                 app:srcCompat="@drawable/ic_back" />
 
             <TextView
@@ -41,6 +42,7 @@
                 android:contentDescription="@string/des_search"
                 android:onClick="onOptionMenuClicked"
                 android:scaleType="centerInside"
+                android:tint="@color/colorIconTint"
                 app:srcCompat="@drawable/ic_action_search" />
 
             <ImageButton
@@ -51,11 +53,12 @@
                 android:contentDescription="@string/des_sort_music_list"
                 android:onClick="onOptionMenuClicked"
                 android:scaleType="centerInside"
+                android:tint="@color/colorIconTint"
                 app:srcCompat="@drawable/ic_action_sort" />
 
             <Space
                 android:layout_width="8dp"
-                android:layout_height="0dp"/>
+                android:layout_height="0dp" />
 
         </LinearLayout>
 
@@ -64,7 +67,7 @@
             android:layout_width="match_parent"
             android:layout_height="1px"
             android:layout_gravity="bottom"
-            android:background="?colorDivider" />
+            android:background="@color/colorDivider" />
 
     </FrameLayout>
 

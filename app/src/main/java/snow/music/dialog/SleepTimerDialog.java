@@ -2,6 +2,7 @@ package snow.music.dialog;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -23,7 +24,6 @@ import java.util.Set;
 import snow.music.R;
 import snow.music.service.AppPlayerService;
 import snow.music.util.PlayerUtil;
-import snow.music.util.ThemeUtil;
 import snow.player.lifecycle.PlayerViewModel;
 
 public class SleepTimerDialog extends BottomDialog {
@@ -234,8 +234,9 @@ public class SleepTimerDialog extends BottomDialog {
             MinutesItem(int itemId, View itemView) {
                 mItemId = itemId;
 
-                mCheckedTextColor = ThemeUtil.getThemeColor(itemView.getContext().getTheme(), android.R.attr.textColor);
-                mUncheckedTextColor = ThemeUtil.getThemeColor(itemView.getContext().getTheme(), R.attr.colorDisabled);
+                Resources res = itemView.getResources();
+                mCheckedTextColor = res.getColor(R.color.colorText);
+                mUncheckedTextColor = res.getColor(R.color.colorTextDisabled);
             }
 
             public int getItemId() {

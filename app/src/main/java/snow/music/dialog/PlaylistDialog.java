@@ -2,6 +2,7 @@ package snow.music.dialog;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +26,6 @@ import recyclerview.helper.SelectableHelper;
 import snow.music.R;
 import snow.music.service.AppPlayerService;
 import snow.music.util.PlayerUtil;
-import snow.music.util.ThemeUtil;
 import snow.player.PlayerClient;
 import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
@@ -66,7 +66,9 @@ public class PlaylistDialog extends BottomDialog {
         rvPlaylist = dialog.findViewById(R.id.rvPlaylist);
 
         initRecyclerView(rvPlaylist);
-        mScrollToPositionHelper = new ScrollToPositionHelper(rvPlaylist, getResources().getColor(R.color.deep_purple_50));
+        Context context = getContext();
+        assert context != null;
+        mScrollToPositionHelper = new ScrollToPositionHelper(rvPlaylist, context.getResources().getColor(R.color.colorPlaylistItemFlash));
 
         ImageButton btnLocate = dialog.findViewById(R.id.btnLocate);
         assert btnLocate != null;
@@ -288,9 +290,11 @@ public class PlaylistDialog extends BottomDialog {
                 tvArtist = itemView.findViewById(R.id.tvArtist);
                 btnRemove = itemView.findViewById(R.id.btnRemove);
 
-                mColorMark = ThemeUtil.getThemeColor(itemView.getContext().getTheme(), R.attr.colorMark);
-                mColorTitle = ThemeUtil.getThemeColor(itemView.getContext().getTheme(), android.R.attr.textColor);
-                mColorArtist = ThemeUtil.getThemeColor(itemView.getContext().getTheme(), R.attr.colorSecondaryText);
+                Resources res = itemView.getContext().getResources();
+
+                mColorMark = res.getColor(R.color.colorMark);
+                mColorTitle = res.getColor(R.color.colorText);
+                mColorArtist = res.getColor(R.color.colorSecondaryText);
             }
 
             @Override

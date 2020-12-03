@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="1px"
             android:layout_gravity="bottom"
-            android:background="?colorDivider" />
+            android:background="@color/colorDivider" />
 
     </FrameLayout>
 
@@ -68,7 +68,7 @@
             android:layout_width="match_parent"
             android:layout_height="1px"
             android:layout_gravity="top"
-            android:background="?colorDivider" />
+            android:background="@color/colorDivider" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -93,6 +93,7 @@
                     android:layout_height="24dp"
                     android:scaleType="centerInside"
                     app:srcCompat="@drawable/ic_menu_item_add"
+                    app:tint="@color/colorIconTint"
                     tools:ignore="ContentDescription" />
 
                 <Space
@@ -125,6 +126,7 @@
                     android:layout_height="24dp"
                     android:scaleType="centerInside"
                     app:srcCompat="@drawable/ic_menu_item_favorite_false"
+                    app:tint="@color/colorIconTint"
                     tools:ignore="ContentDescription" />
 
                 <Space
@@ -157,6 +159,7 @@
                     android:layout_height="24dp"
                     android:scaleType="centerInside"
                     app:srcCompat="@drawable/ic_menu_item_remove"
+                    app:tint="@color/colorIconTint"
                     tools:ignore="ContentDescription" />
 
                 <Space

@@ -30,7 +30,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/des_clock_icon"
-            app:srcCompat="@drawable/ic_clock_big" />
+            app:srcCompat="@drawable/ic_clock_big"
+            app:tint="@color/colorIconTint" />
 
         <Space
             android:layout_width="0dp"

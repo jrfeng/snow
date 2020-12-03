@@ -27,8 +27,7 @@
             android:layout_height="@dimen/small_button_height"
             android:layout_gravity="center|start"
             android:background="@drawable/bg_button_submit"
-            android:drawableStart="@drawable/ic_new_music_list"
-            android:drawableLeft="@drawable/ic_new_music_list"
+
             android:drawablePadding="6dp"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"

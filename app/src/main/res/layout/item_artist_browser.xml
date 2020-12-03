@@ -44,6 +44,6 @@
         android:layout_gravity="bottom"
         android:layout_marginLeft="24dp"
         android:layout_marginRight="24dp"
-        android:background="?colorDivider" />
+        android:background="@color/colorDivider" />
 
 </FrameLayout>

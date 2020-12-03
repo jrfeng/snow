@@ -33,6 +33,7 @@
                     android:contentDescription="@string/des_back"
                     android:onClick="finishSelf"
                     android:scaleType="centerInside"
+                    android:tint="@color/colorIconTint"
                     app:srcCompat="@drawable/ic_back" />
 
                 <FrameLayout
@@ -40,7 +41,7 @@
                     android:layout_width="0dp"
                     android:layout_height="36dp"
                     android:layout_weight="1"
-                    android:background="@drawable/shape_rect_corner_4dp_grey_200"
+                    android:background="@drawable/bg_search_input"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"
@@ -88,7 +89,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1px"
                 android:layout_gravity="bottom"
-                android:background="?colorDivider" />
+                android:background="@color/colorDivider" />
 
         </FrameLayout>
 

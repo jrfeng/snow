@@ -123,20 +123,6 @@ public class PlayerStateViewModel extends ViewModel {
         return mKeepScreenOnDrawable;
     }
 
-    public LiveData<Integer> getSleepTimerDrawable() {
-        if (!isInitialized()) {
-            throw new IllegalStateException("NavigationViewModel not init yet.");
-        }
-
-        return Transformations.map(mPlayerViewModel.getSleepTimerStarted(), started -> {
-            if (started) {
-                return R.drawable.ic_sleep_timer_started;
-            } else {
-                return R.drawable.ic_sleep_timer;
-            }
-        });
-    }
-
     public LiveData<String> getErrorMessage() {
         return mErrorMessage;
     }

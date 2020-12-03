@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:minWidth="48dp"
-        android:textColor="?colorSecondaryText"
+        android:textColor="@color/colorSecondaryText"
         tools:text="0" />
 
     <LinearLayout
@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textColor="?colorSecondaryText"
+            android:textColor="@color/colorSecondaryText"
             android:textSize="12sp"
             tools:text=" - unknown artist" />
 
@@ -64,6 +64,7 @@
         android:background="@drawable/bg_button_48dp"
         android:contentDescription="@string/des_remove_music"
         android:scaleType="centerInside"
+        android:tint="@color/colorPlaylistItemRemoveIconTint"
         app:srcCompat="@drawable/ic_delete" />
 
     <Space

@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textColor="?colorSecondaryText"
+            android:textColor="@color/colorSecondaryText"
             android:textSize="12sp"
             tools:text="@string/snow_music_item_unknown_artist" />
 
@@ -46,6 +46,7 @@
         android:background="@drawable/bg_button_48dp"
         android:contentDescription="@string/des_skip_to_previous"
         android:scaleType="centerInside"
+        android:tint="@color/colorIconTint"
         app:srcCompat="@drawable/ic_remove_history" />
 
     <Space

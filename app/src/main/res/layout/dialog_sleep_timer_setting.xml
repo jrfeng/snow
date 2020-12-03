@@ -56,7 +56,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/sleep_timer_5_minutes"
-                    android:textColor="?colorDisabled"
+                    android:textColor="@color/colorTextDisabled"
                     android:textSize="@dimen/dialog_item_text_size" />
 
             </FrameLayout>
@@ -86,7 +86,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/sleep_timer_10_minutes"
-                    android:textColor="?colorDisabled"
+                    android:textColor="@color/colorTextDisabled"
                     android:textSize="@dimen/dialog_item_text_size" />
 
             </FrameLayout>
@@ -117,7 +117,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/sleep_timer_15_minutes"
-                    android:textColor="?colorDisabled"
+                    android:textColor="@color/colorTextDisabled"
                     android:textSize="@dimen/dialog_item_text_size"
                     tools:textColor="?android:textColor" />
 
@@ -156,7 +156,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/sleep_timer_30_minutes"
-                    android:textColor="?colorDisabled"
+                    android:textColor="@color/colorTextDisabled"
                     android:textSize="@dimen/dialog_item_text_size" />
 
             </FrameLayout>
@@ -186,7 +186,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/sleep_timer_40_minutes"
-                    android:textColor="?colorDisabled"
+                    android:textColor="@color/colorTextDisabled"
                     android:textSize="@dimen/dialog_item_text_size" />
 
             </FrameLayout>
@@ -216,7 +216,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/sleep_timer_60_minutes"
-                    android:textColor="?colorDisabled"
+                    android:textColor="@color/colorTextDisabled"
                     android:textSize="@dimen/dialog_item_text_size" />
 
             </FrameLayout>
@@ -259,7 +259,7 @@
                 android:gravity="start"
                 android:minWidth="26dp"
                 android:text="1"
-                android:textColor="?colorDisabled"
+                android:textColor="@color/colorTextDisabled"
                 tools:ignore="HardcodedText" />
 
             <SeekBar
@@ -275,7 +275,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="end"
                 android:text="120"
-                android:textColor="?colorDisabled"
+                android:textColor="@color/colorTextDisabled"
                 tools:ignore="HardcodedText" />
 
         </LinearLayout>

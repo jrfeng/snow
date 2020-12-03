@@ -24,6 +24,7 @@
                 android:contentDescription="@string/des_back"
                 android:onClick="finishSelf"
                 android:scaleType="centerInside"
+                android:tint="@color/colorIconTint"
                 app:srcCompat="@drawable/ic_back" />
 
             <TextView
@@ -43,6 +44,7 @@
                 android:contentDescription="@string/des_search"
                 android:onClick="searchMusic"
                 android:scaleType="centerInside"
+                android:tint="@color/colorIconTint"
                 app:srcCompat="@drawable/ic_action_search" />
 
             <Space
@@ -56,7 +58,7 @@
             android:layout_width="match_parent"
             android:layout_height="1px"
             android:layout_gravity="bottom"
-            android:background="?colorDivider" />
+            android:background="@color/colorDivider" />
 
     </FrameLayout>
 
