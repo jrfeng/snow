@@ -96,22 +96,13 @@ public class PlayerActivity extends BaseActivity {
     }
 
     @Override
-    public void onBackPressed() {
+    public void finish() {
         if (mPlayerStateViewModel.isStartByPendingIntent()) {
             startActivity(new Intent(this, NavigationActivity.class));
-            finish();
-            return;
+            overridePendingTransition(R.anim.activity_slide_in_left, R.anim.activity_slide_out_right);
         }
 
-        super.onBackPressed();
-    }
-
-    @Override
-    public void finish() {
         super.finish();
-        if (mPlayerStateViewModel.isStartByPendingIntent()) {
-            overridePendingTransition(R.anim.activity_fade_in, R.anim.activity_fade_out);
-        }
     }
 
     public void showOptionMenu(View view) {
