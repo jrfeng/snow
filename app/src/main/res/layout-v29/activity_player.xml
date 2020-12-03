@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="playerViewModel"
+            type="snow.player.lifecycle.PlayerViewModel" />
+
+        <variable
+            name="playerStateViewModel"
+            type="snow.music.activity.player.PlayerStateViewModel" />
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/action_bar_height"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:layout_width="@dimen/image_button_size"
+                android:layout_height="@dimen/image_button_size"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/bg_button_48dp"
+                android:contentDescription="@string/des_back"
+                android:onClick="finishSelf"
+                android:scaleType="centerInside"
+                android:tint="@color/colorIconTint"
+                app:srcCompat="@drawable/ic_back" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="64dp"
+                android:layout_marginRight="64dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingLeft="24dp"
+                android:paddingRight="24dp">
+
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="middle"
+                    android:singleLine="true"
+                    android:text="@{playerViewModel.title}"
+                    android:textSize="15sp"
+                    tools:text="@string/app_name" />
+
+                <TextView
+                    android:id="@+id/tvArtist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="middle"
+                    android:singleLine="true"
+                    android:text="@{playerViewModel.artist}"
+                    android:textColor="@color/colorSecondaryText"
+                    android:textSize="13sp"
+                    tools:text="@string/app_name" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/ivAlbumIcon"
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:layout_centerInParent="true"
+                android:background="@drawable/bg_player_album_icon"
+                android:contentDescription="@string/des_album_icon"
+                android:padding="8dp"
+                android:src="@mipmap/ic_player_album_default_icon_big" />
+
+            <TextView
+                android:id="@+id/tvErrorMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/bg_error_message"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:text="@{playerStateViewModel.errorMessage}"
+                android:textColor="#FFF"
+                android:textSize="12sp"
+                android:visibility="@{playerStateViewModel.errorMessageVisibility}"
+                tools:text="@string/app_name"
+                tools:visibility="visible" />
+
+        </RelativeLayout>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="16dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/btnPlayMode"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_play_mode"
+                    android:onClick="@{() -> playerStateViewModel.switchPlayMode()}"
+                    android:scaleType="centerInside"
+                    android:tint="@color/colorIconTint"
+                    app:srcCompat="@{playerStateViewModel.playModeDrawable}"
+                    tools:srcCompat="@drawable/ic_play_mode_playlist_loop" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/btnKeepScreenOn"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_play_mode"
+                    android:onClick="@{playerStateViewModel.toggleKeepScreenOn}"
+                    android:scaleType="centerInside"
+                    android:tint="@color/colorIconTint"
+                    app:srcCompat="@{playerStateViewModel.keepScreenOnDrawable}"
+                    tools:srcCompat="@drawable/ic_keep_screen_on_false" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/btnSleepTimer"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_sleep_timer"
+                    android:onClick="showSleepTimer"
+                    android:scaleType="centerInside"
+                    android:tint="@color/colorIconTint"
+                    app:srcCompat="@drawable/ic_sleep_timer" />
+
+                <TextView
+                    android:id="@+id/tvSleepTimerProgress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:text="@{playerViewModel.textSleepTimerProgress}"
+                    android:textSize="12sp"
+                    android:visibility="@{playerViewModel.sleepTimerStarted ? View.VISIBLE : View.GONE }"
+                    tools:ignore="HardcodedText"
+                    tools:visibility="visible" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/btnEqualizer"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_equalizer"
+                    android:scaleType="centerInside"
+                    android:tint="@color/colorIconTint"
+                    app:srcCompat="@drawable/ic_equalizer" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/btnOptionMenu"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_option_menu"
+                    android:onClick="showOptionMenu"
+                    android:scaleType="centerInside"
+                    android:tint="@color/colorIconTint"
+                    app:srcCompat="@drawable/ic_player_option_menu" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="16dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvTextProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:minWidth="32dp"
+                android:text="@{playerViewModel.textPlayProgress}"
+                android:textSize="12sp"
+                tools:text="00:00" />
+
+            <!--suppress AndroidUnknownAttribute -->
+            <SeekBar
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:forceDarkAllowed="false"
+                android:max="@{playerViewModel.duration}"
+                android:onStopTrackingTouch="@{playerViewModel::onStopTrackingTouch}"
+                android:onStartTrackingTouch="@{playerViewModel::onStartTrackingTouch}"
+                android:progress="@={playerViewModel.playProgress}"
+                android:progressDrawable="@drawable/progress_player" />
+
+            <TextView
+                android:id="@+id/tvTextDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:minWidth="32dp"
+                android:text="@{playerViewModel.textDuration}"
+                android:textSize="12sp"
+                tools:text="04:32" />
+
+        </LinearLayout>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="16dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/btnFavorite"
+                    android:layout_width="@dimen/image_button_size"
+                    android:layout_height="@dimen/image_button_size"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_toggle_favorite"
+                    android:forceDarkAllowed="false"
+                    android:onClick="@{() -> playerStateViewModel.togglePlayingMusicFavorite()}"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@{playerStateViewModel.favoriteDrawable}"
+                    tools:src="@drawable/ic_favorite_false" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:layout_width="@dimen/image_button_size"
+                    android:layout_height="@dimen/image_button_size"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_skip_to_previous"
+                    android:onClick="@{() -> playerViewModel.skipToPrevious()}"
+                    android:scaleType="centerInside"
+                    android:tint="@color/colorIconTint"
+                    app:srcCompat="@drawable/ic_skip_to_previous" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/btnPlayPause"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_play_pause"
+                    android:contentDescription="@string/des_play_pause"
+                    android:onClick="@{() -> playerViewModel.playPause()}"
+                    android:padding="8dp"
+                    android:scaleType="centerInside"
+                    android:src="@{playerStateViewModel.playPauseDrawable}"
+                    tools:src="@mipmap/ic_play" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:layout_width="@dimen/image_button_size"
+                    android:layout_height="@dimen/image_button_size"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_skip_to_next"
+                    android:onClick="@{() -> playerViewModel.skipToNext()}"
+                    android:scaleType="centerInside"
+                    android:tint="@color/colorIconTint"
+                    app:srcCompat="@drawable/ic_skip_to_next" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:layout_width="@dimen/image_button_size"
+                    android:layout_height="@dimen/image_button_size"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_button_48dp"
+                    android:contentDescription="@string/des_show_playlist"
+                    android:onClick="showPlaylist"
+                    android:scaleType="centerInside"
+                    android:tint="@color/colorIconTint"
+                    app:srcCompat="@drawable/ic_playlist" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</layout>

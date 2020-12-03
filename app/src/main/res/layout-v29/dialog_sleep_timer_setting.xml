@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="360dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tvDialogTitle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dialog_title_height"
+        android:layout_gravity="center_vertical"
+        android:ellipsize="middle"
+        android:gravity="center"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:singleLine="true"
+        android:text="@string/title_sleep_timer"
+        android:textSize="@dimen/dialog_title_text_size" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:id="@+id/item5Minutes"
+                android:layout_width="0dp"
+                android:layout_height="70dp"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/ivChecked"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:contentDescription="@string/des_checked"
+                    android:forceDarkAllowed="false"
+                    android:scaleType="centerInside"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_checkbox_checked" />
+
+                <TextView
+                    android:id="@+id/tvMinutes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/sleep_timer_5_minutes"
+                    android:textColor="@color/colorTextDisabled"
+                    android:textSize="@dimen/dialog_item_text_size" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/item10Minutes"
+                android:layout_width="0dp"
+                android:layout_height="70dp"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@id/ivChecked"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:contentDescription="@string/des_checked"
+                    android:forceDarkAllowed="false"
+                    android:scaleType="centerInside"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_checkbox_checked" />
+
+                <TextView
+                    android:id="@id/tvMinutes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/sleep_timer_10_minutes"
+                    android:textColor="@color/colorTextDisabled"
+                    android:textSize="@dimen/dialog_item_text_size" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/item15Minutes"
+                android:layout_width="0dp"
+                android:layout_height="70dp"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@id/ivChecked"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:contentDescription="@string/des_checked"
+                    android:forceDarkAllowed="false"
+                    android:scaleType="centerInside"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_checkbox_checked"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@id/tvMinutes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/sleep_timer_15_minutes"
+                    android:textColor="@color/colorTextDisabled"
+                    android:textSize="@dimen/dialog_item_text_size"
+                    tools:textColor="?android:textColor" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:id="@+id/item30Minutes"
+                android:layout_width="0dp"
+                android:layout_height="70dp"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@id/ivChecked"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:contentDescription="@string/des_checked"
+                    android:forceDarkAllowed="false"
+                    android:scaleType="centerInside"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_checkbox_checked" />
+
+                <TextView
+                    android:id="@id/tvMinutes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/sleep_timer_30_minutes"
+                    android:textColor="@color/colorTextDisabled"
+                    android:textSize="@dimen/dialog_item_text_size" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/item40Minutes"
+                android:layout_width="0dp"
+                android:layout_height="70dp"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@id/ivChecked"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:contentDescription="@string/des_checked"
+                    android:forceDarkAllowed="false"
+                    android:scaleType="centerInside"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_checkbox_checked" />
+
+                <TextView
+                    android:id="@id/tvMinutes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/sleep_timer_40_minutes"
+                    android:textColor="@color/colorTextDisabled"
+                    android:textSize="@dimen/dialog_item_text_size" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/item60Minutes"
+                android:layout_width="0dp"
+                android:layout_height="70dp"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@id/ivChecked"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:contentDescription="@string/des_checked"
+                    android:forceDarkAllowed="false"
+                    android:scaleType="centerInside"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_checkbox_checked" />
+
+                <TextView
+                    android:id="@id/tvMinutes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/sleep_timer_60_minutes"
+                    android:textColor="@color/colorTextDisabled"
+                    android:textSize="@dimen/dialog_item_text_size" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/itemCustomMinutes"
+        android:layout_width="match_parent"
+        android:layout_height="64dp">
+
+        <ImageView
+            android:id="@id/ivChecked"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="end"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="@string/des_checked"
+            android:forceDarkAllowed="false"
+            android:scaleType="centerInside"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_checkbox_checked"
+            tools:visibility="visible" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="38dp"
+            android:paddingRight="38dp">
+
+            <TextView
+                android:id="@+id/tvCustomMinutes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:minWidth="26dp"
+                android:text="1"
+                android:textColor="@color/colorTextDisabled"
+                tools:ignore="HardcodedText" />
+
+            <SeekBar
+                android:id="@+id/sbCustomMinutes"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="119" />
+
+            <TextView
+                android:id="@+id/tvMaxMinutes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="120"
+                android:textColor="@color/colorTextDisabled"
+                tools:ignore="HardcodedText" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="24dp">
+
+        <Button
+            android:id="@+id/btnNegative"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/dialog_button_height"
+            android:layout_weight="1"
+            android:background="@drawable/bg_dialog_button"
+            android:singleLine="true"
+            android:text="@string/sleep_timer_cancel"
+            android:textAllCaps="false"
+            android:textSize="@dimen/dialog_button_text_size" />
+
+        <Space
+            android:id="@+id/space"
+            android:layout_width="16dp"
+            android:layout_height="0dp" />
+
+        <Button
+            android:id="@+id/btnPositive"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/dialog_button_height"
+            android:layout_weight="1"
+            android:background="@drawable/bg_dialog_button"
+            android:singleLine="true"
+            android:text="@string/sleep_timer_start"
+            android:textAllCaps="false"
+            android:textColor="@color/colorPositiveButtonText"
+            android:textSize="@dimen/dialog_button_text_size" />
+
+    </LinearLayout>
+
+</LinearLayout>

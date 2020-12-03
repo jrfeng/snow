@@ -432,6 +432,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
                 android:layout_gravity="bottom"
+                android:forceDarkAllowed="false"
                 android:max="@{navViewModel.duration}"
                 android:progress="@{navViewModel.playProgress}"
                 android:progressDrawable="@drawable/progress_navigation"
