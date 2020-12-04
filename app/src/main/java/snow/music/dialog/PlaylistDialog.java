@@ -102,22 +102,24 @@ public class PlaylistDialog extends BottomDialog {
 
         mPlaylistAdapter = new PlaylistAdapter(new Playlist.Builder().build(), 0);
         mPlaylistAdapter.setLoading(true);
-        mPlaylistAdapter.setOnItemClickListener((position, viewId, view, holder) -> {
-            if (viewId == R.id.playlistItem) {
-                playerClient.playPause(position);
-            } else if (viewId == R.id.btnRemove) {
-                removeMusicItem(position);
-            }
-        });
 
         rvPlaylist.setAdapter(mPlaylistAdapter);
 
         playerClient.getPlaylist(playlist -> {
             mPlaylistAdapter = new PlaylistAdapter(playlist, playerClient.getPlayPosition());
             mPlaylistAdapter.setLoading(false);
+            mPlaylistAdapter.setOnItemClickListener((position, viewId, view, holder) -> {
+                if (viewId == R.id.playlistItem) {
+                    playerClient.playPause(position);
+                } else if (viewId == R.id.btnRemove) {
+                    removeMusicItem(position);
+                }
+            });
+
             // 必须替换掉原来的 Adapter，否则 scrollToPosition 后的位置不符合需求，该位置的列表项会显示在低端，而不是顶端、
             rvPlaylist.swapAdapter(mPlaylistAdapter, true);
             rvPlaylist.scrollToPosition(playerClient.getPlayPosition());
+
 
             mPlaylistLiveData = new PlaylistLiveData(playerClient, playlist);
             mPlaylistLiveData.observe(PlaylistDialog.this, newPlaylist -> {
