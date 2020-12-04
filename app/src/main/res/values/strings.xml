@@ -53,6 +53,15 @@
     <string name="message_remove_all_selected_songs">Remove selected songs?</string>
     <string name="toast_no_songs_selected">No songs selected</string>
 
+    <!-- SettingActivity -->
+    <string name="title_settings">Settings</string>
+    <string name="item_title_dark_mode">Dark mode</string>
+    <string name="item_dark_mode_follow_system">Follow system</string>
+    <string name="item_dark_mode_on">Dark mode</string>
+    <string name="item_dark_mode_off">Normal mode</string>
+    <string name="item_play_with_other_app">Background mode</string>
+    <string name="description_play_with_other_app">Music playback won\'t be paused by other apps in Background mode. You\'ll be able to pause music playback manually in the Notification shade.</string>
+
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>
     <string name="empty_playlist">Playlist is empty</string>

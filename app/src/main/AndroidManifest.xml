@@ -42,6 +42,11 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".activity.setting.SettingActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".activity.localmusic.LocalMusicActivity"
             android:screenOrientation="portrait" />
 

@@ -28,6 +28,7 @@ import snow.music.activity.history.HistoryActivity;
 import snow.music.activity.localmusic.LocalMusicActivity;
 import snow.music.activity.player.PlayerActivity;
 import snow.music.activity.search.SearchActivity;
+import snow.music.activity.setting.SettingActivity;
 import snow.music.store.MusicStore;
 import snow.music.util.FavoriteObserver;
 import snow.music.util.MusicUtil;
@@ -199,8 +200,7 @@ public class NavigationViewModel extends ViewModel {
     }
 
     public void navigateToSetting(View view) {
-        // TODO
-        Log.d("DEBUG", "navigateToSetting");
+        startActivity(view.getContext(), SettingActivity.class);
     }
 
     public void navigateToLocalMusic(View view) {

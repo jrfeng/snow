@@ -131,4 +131,11 @@
     <string name="toast_start_sleep_timer">启动睡眠定时器</string>
     <string name="toast_keep_screen_on">保持屏幕常亮</string>
     <string name="toast_cancel_keep_screen_on">取消屏幕常亮</string>
+    <string name="title_settings">设置</string>
+    <string name="item_title_dark_mode">暗色模式</string>
+    <string name="item_dark_mode_follow_system">跟随系统</string>
+    <string name="item_dark_mode_on">暗色模式</string>
+    <string name="item_dark_mode_off">普通模式</string>
+    <string name="item_play_with_other_app">与游戏/其他APP同时播放</string>
+    <string name="description_play_with_other_app">开启之后，在其他应用播放音频、视频或者视频语言通话时，音乐不会自动暂停，将始终作为BGM保持播放，您可以在通知栏中手动暂停播放。</string>
 </resources>
