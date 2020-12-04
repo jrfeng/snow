@@ -59,7 +59,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     private void initEventListener() {
         mEventListener = new Player.EventListener() {
             @Override
-            public void onLoadingChanged(boolean isLoading) {
+            public void onIsLoadingChanged(boolean isLoading) {
                 if (mBufferingUpdateListener != null) {
                     mBufferingUpdateListener.onBufferingUpdate(ExoMusicPlayer.this,
                             (int) mSimpleExoPlayer.getBufferedPosition(),
@@ -68,8 +68,8 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
             }
 
             @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                switch (playbackState) {
+            public void onPlaybackStateChanged(int state) {
+                switch (state) {
                     case Player.STATE_READY:
                         onReady();
                         break;
@@ -115,8 +115,9 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
             }
 
             @Override
-            public void onSeekProcessed() {
-                if (mSeekCompleteListener != null) {
+            public void onPositionDiscontinuity(int reason) {
+                if (reason == Player.DISCONTINUITY_REASON_SEEK
+                        && mSeekCompleteListener != null) {
                     mSeekCompleteListener.onSeekComplete(ExoMusicPlayer.this);
                 }
             }
@@ -168,8 +169,9 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
         }
 
         try {
-            MediaSource mediaSource = mMediaSourceFactory.createMediaSource(mUri);
-            mSimpleExoPlayer.prepare(mediaSource);
+            MediaSource mediaSource = mMediaSourceFactory.createMediaSource(MediaItem.fromUri(mUri));
+            mSimpleExoPlayer.setMediaSource(mediaSource);
+            mSimpleExoPlayer.prepare();
         } catch (Exception e) {
             setInvalid();
             throw e;
