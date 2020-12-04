@@ -215,6 +215,9 @@ public class PlaylistDialog extends BottomDialog {
 
         public void setLoading(boolean loading) {
             mLoading = loading;
+            if (mPlaylist.isEmpty()) {
+                notifyItemChanged(0);
+            }
         }
 
         @Override
