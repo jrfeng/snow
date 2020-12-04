@@ -60,6 +60,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     private MusicPlayer.OnPreparedListener mPreparedListener;
     private MusicPlayer.OnCompletionListener mCompletionListener;
+    private MusicPlayer.OnRepeatListener mRepeatListener;
     private MusicPlayer.OnSeekCompleteListener mSeekCompleteListener;
     private MusicPlayer.OnStalledListener mStalledListener;
     private MusicPlayer.OnBufferingUpdateListener mBufferingUpdateListener;
@@ -428,6 +429,13 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             }
         };
 
+        mRepeatListener = new MusicPlayer.OnRepeatListener() {
+            @Override
+            public void onRepeat(MusicPlayer mp) {
+                notifyPlaying(false, 0, SystemClock.elapsedRealtime());
+            }
+        };
+
         mSeekCompleteListener = new MusicPlayer.OnSeekCompleteListener() {
             @Override
             public void onSeekComplete(MusicPlayer mp) {
@@ -721,6 +729,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private void attachListeners(MusicPlayer musicPlayer) {
         musicPlayer.setOnPreparedListener(mPreparedListener);
         musicPlayer.setOnCompletionListener(mCompletionListener);
+        musicPlayer.setOnRepeatListener(mRepeatListener);
         musicPlayer.setOnSeekCompleteListener(mSeekCompleteListener);
         musicPlayer.setOnStalledListener(mStalledListener);
         musicPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);

@@ -1,5 +1,7 @@
 package snow.player.audio;
 
+import androidx.annotation.Nullable;
+
 /**
  * 该接口定义了音乐播放器的基本功能，开发者可以通过实现该接口来创建一个自定义的音乐播放器。
  * <p>
@@ -150,34 +152,53 @@ public interface MusicPlayer {
     int getAudioSessionId();
 
     /**
-     * 设置一个 OnPreparedListener 监听器。
+     * 设置一个 {@link OnPreparedListener} 监听器。
+     *
+     * @param listener 监听器对象，可为 null。为 null 时将清除上次设置的监听器。
      */
-    void setOnPreparedListener(OnPreparedListener listener);
+    void setOnPreparedListener(@Nullable OnPreparedListener listener);
 
     /**
-     * 设置一个 OnCompletionListener 监听器。
+     * 设置一个 {@link OnCompletionListener} 监听器。
+     *
+     * @param listener 监听器对象，可为 null。为 null 时将清除上次设置的监听器。
      */
-    void setOnCompletionListener(OnCompletionListener listener);
+    void setOnCompletionListener(@Nullable OnCompletionListener listener);
 
     /**
-     * 设置一个 OnSeekCompleteListener 监听器。
+     * 设置一个 {@link OnRepeatListener} 监听器。
+     *
+     * @param listener 监听器对象，可为 null。为 null 时将清除上次设置的监听器。
      */
-    void setOnSeekCompleteListener(OnSeekCompleteListener listener);
+    void setOnRepeatListener(@Nullable OnRepeatListener listener);
 
     /**
-     * 设置一个 OnStalledListener 监听器。
+     * 设置一个 {@link OnSeekCompleteListener} 监听器。
+     *
+     * @param listener 监听器对象，可为 null。为 null 时将清除上次设置的监听器。
      */
-    void setOnStalledListener(OnStalledListener listener);
+    void setOnSeekCompleteListener(@Nullable OnSeekCompleteListener listener);
 
     /**
-     * 设置一个 OnBufferingUpdateListener 监听器。
+     * 设置一个 {@link OnStalledListener} 监听器。
+     *
+     * @param listener 监听器对象，可为 null。为 null 时将清除上次设置的监听器。
      */
-    void setOnBufferingUpdateListener(OnBufferingUpdateListener listener);
+    void setOnStalledListener(@Nullable OnStalledListener listener);
 
     /**
-     * 设置一个 OnErrorListener 监听器。
+     * 设置一个 {@link OnBufferingUpdateListener} 监听器。
+     *
+     * @param listener 监听器对象，可为 null。为 null 时将清除上次设置的监听器。
      */
-    void setOnErrorListener(OnErrorListener listener);
+    void setOnBufferingUpdateListener(@Nullable OnBufferingUpdateListener listener);
+
+    /**
+     * 设置一个 {@link OnErrorListener} 监听器。
+     *
+     * @param listener 监听器对象，可为 null。为 null 时将清除上次设置的监听器。
+     */
+    void setOnErrorListener(@Nullable OnErrorListener listener);
 
     /**
      * 用于监听音乐播放器是否准备完毕。
@@ -201,6 +222,20 @@ public interface MusicPlayer {
          * @param mp 当前音乐播放器。
          */
         void onCompletion(MusicPlayer mp);
+    }
+
+    /**
+     * 用于监听播放的循环播放事件。
+     * <p>
+     * 事件发生的条件：播放器为循环播放，歌曲播放完成，且开始进入下个循环进行播放。
+     */
+    interface OnRepeatListener {
+        /**
+         * 播放器为循环播放，当歌曲播放完并且进入下次循环时调用该方法。
+         *
+         * @param mp 当前音乐播放器。
+         */
+        void onRepeat(MusicPlayer mp);
     }
 
     /**

@@ -37,7 +37,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     // exoplayer-core
-    api 'com.google.android.exoplayer:exoplayer-core:2.11.7'
+    api 'com.google.android.exoplayer:exoplayer-core:2.12.2'
     // extension-okhttp
-    api 'com.google.android.exoplayer:extension-okhttp:2.11.7'
+    api 'com.google.android.exoplayer:extension-okhttp:2.12.2'
 }

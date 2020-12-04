@@ -29,11 +29,18 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
 
     private MediaPlayer mMediaPlayer;
 
+    @Nullable
     private OnErrorListener mErrorListener;
+    @Nullable
     private OnStalledListener mStalledListener;
+    @Nullable
+    private OnRepeatListener mRepeatListener;
+    @Nullable
+    private OnCompletionListener mCompletionListener;
 
     private boolean mStalled;
     private boolean mInvalid;
+    private boolean mLooping;
 
     /**
      * 创建一个 {@link MediaMusicPlayer} 对象。
@@ -92,6 +99,31 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
                 return false;
             }
         });
+
+        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                if (mLooping) {
+                    mp.start();
+                    notifyOnRepeat();
+                    return;
+                }
+
+                notifyOnComplete();
+            }
+        });
+    }
+
+    private void notifyOnRepeat() {
+        if (mRepeatListener != null) {
+            mRepeatListener.onRepeat(this);
+        }
+    }
+
+    private void notifyOnComplete() {
+        if (mCompletionListener != null) {
+            mCompletionListener.onCompletion(this);
+        }
     }
 
     /**
@@ -159,7 +191,7 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
 
     @Override
     public void setLooping(boolean looping) {
-        mMediaPlayer.setLooping(looping);
+        mLooping = looping;
     }
 
     @Override
@@ -236,7 +268,7 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
     }
 
     @Override
-    public void setOnPreparedListener(final OnPreparedListener listener) {
+    public void setOnPreparedListener(@Nullable final OnPreparedListener listener) {
         if (listener == null) {
             mMediaPlayer.setOnPreparedListener(null);
             return;
@@ -251,22 +283,17 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
     }
 
     @Override
-    public void setOnCompletionListener(final OnCompletionListener listener) {
-        if (listener == null) {
-            mMediaPlayer.setOnCompletionListener(null);
-            return;
-        }
-
-        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                listener.onCompletion(MediaMusicPlayer.this);
-            }
-        });
+    public void setOnCompletionListener(@Nullable OnCompletionListener listener) {
+        mCompletionListener = listener;
     }
 
     @Override
-    public void setOnSeekCompleteListener(final OnSeekCompleteListener listener) {
+    public void setOnRepeatListener(@Nullable OnRepeatListener listener) {
+        mRepeatListener = listener;
+    }
+
+    @Override
+    public void setOnSeekCompleteListener(@Nullable final OnSeekCompleteListener listener) {
         if (listener == null) {
             mMediaPlayer.setOnSeekCompleteListener(null);
             return;
@@ -281,12 +308,12 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
     }
 
     @Override
-    public void setOnStalledListener(final OnStalledListener listener) {
+    public void setOnStalledListener(@Nullable final OnStalledListener listener) {
         mStalledListener = listener;
     }
 
     @Override
-    public void setOnBufferingUpdateListener(final OnBufferingUpdateListener listener) {
+    public void setOnBufferingUpdateListener(@Nullable final OnBufferingUpdateListener listener) {
         if (listener == null) {
             mMediaPlayer.setOnBufferingUpdateListener(null);
             return;
@@ -301,7 +328,7 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
     }
 
     @Override
-    public void setOnErrorListener(OnErrorListener listener) {
+    public void setOnErrorListener(@Nullable OnErrorListener listener) {
         mErrorListener = listener;
     }
 }

@@ -7,8 +7,10 @@ import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
@@ -29,12 +31,20 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     private SimpleExoPlayer mSimpleExoPlayer;
     private Player.EventListener mEventListener;
 
+    @Nullable
     private OnPreparedListener mPreparedListener;
+    @Nullable
     private OnCompletionListener mCompletionListener;
+    @Nullable
     private OnSeekCompleteListener mSeekCompleteListener;
+    @Nullable
     private OnStalledListener mStalledListener;
+    @Nullable
     private OnBufferingUpdateListener mBufferingUpdateListener;
+    @Nullable
     private OnErrorListener mErrorListener;
+    @Nullable
+    private OnRepeatListener mRepeatListener;
 
     private boolean mStalled;
     private boolean mInvalid;
@@ -108,6 +118,14 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
             public void onSeekProcessed() {
                 if (mSeekCompleteListener != null) {
                     mSeekCompleteListener.onSeekComplete(ExoMusicPlayer.this);
+                }
+            }
+
+            @Override
+            public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
+                if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT
+                        && mRepeatListener != null) {
+                    mRepeatListener.onRepeat(ExoMusicPlayer.this);
                 }
             }
         };
@@ -239,32 +257,37 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     }
 
     @Override
-    public void setOnPreparedListener(OnPreparedListener listener) {
+    public void setOnPreparedListener(@Nullable OnPreparedListener listener) {
         mPreparedListener = listener;
     }
 
     @Override
-    public void setOnCompletionListener(OnCompletionListener listener) {
+    public void setOnCompletionListener(@Nullable OnCompletionListener listener) {
         mCompletionListener = listener;
     }
 
     @Override
-    public void setOnSeekCompleteListener(OnSeekCompleteListener listener) {
+    public void setOnRepeatListener(@Nullable OnRepeatListener listener) {
+        mRepeatListener = listener;
+    }
+
+    @Override
+    public void setOnSeekCompleteListener(@Nullable OnSeekCompleteListener listener) {
         mSeekCompleteListener = listener;
     }
 
     @Override
-    public void setOnStalledListener(OnStalledListener listener) {
+    public void setOnStalledListener(@Nullable OnStalledListener listener) {
         mStalledListener = listener;
     }
 
     @Override
-    public void setOnBufferingUpdateListener(OnBufferingUpdateListener listener) {
+    public void setOnBufferingUpdateListener(@Nullable OnBufferingUpdateListener listener) {
         mBufferingUpdateListener = listener;
     }
 
     @Override
-    public void setOnErrorListener(OnErrorListener listener) {
+    public void setOnErrorListener(@Nullable OnErrorListener listener) {
         mErrorListener = listener;
     }
 }
