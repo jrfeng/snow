@@ -81,6 +81,11 @@ public class PlaylistDialog extends BottomDialog {
         });
     }
 
+    @Override
+    protected boolean keepOnRestarted() {
+        return false;
+    }
+
     private void initRecyclerView(RecyclerView rvPlaylist) {
         Context context = getContext();
         if (context == null) {
@@ -94,20 +99,27 @@ public class PlaylistDialog extends BottomDialog {
     @SuppressLint("SetTextI18n")
     private void initPlaylistAdapter() {
         PlayerClient playerClient = mPlayerViewModel.getPlayerClient();
+
+        mPlaylistAdapter = new PlaylistAdapter(new Playlist.Builder().build(), 0);
+        mPlaylistAdapter.setLoading(true);
+        mPlaylistAdapter.setOnItemClickListener((position, viewId, view, holder) -> {
+            if (viewId == R.id.playlistItem) {
+                playerClient.playPause(position);
+            } else if (viewId == R.id.btnRemove) {
+                removeMusicItem(position);
+            }
+        });
+
+        rvPlaylist.setAdapter(mPlaylistAdapter);
+
         playerClient.getPlaylist(playlist -> {
-            mPlaylistLiveData = new PlaylistLiveData(playerClient, playlist);
             mPlaylistAdapter = new PlaylistAdapter(playlist, playerClient.getPlayPosition());
-            rvPlaylist.setAdapter(mPlaylistAdapter);
+            mPlaylistAdapter.setLoading(false);
+            // 必须替换掉原来的 Adapter，否则 scrollToPosition 后的位置不符合需求，该位置的列表项会显示在低端，而不是顶端、
+            rvPlaylist.swapAdapter(mPlaylistAdapter, true);
             rvPlaylist.scrollToPosition(playerClient.getPlayPosition());
 
-            mPlaylistAdapter.setOnItemClickListener((position, viewId, view, holder) -> {
-                if (viewId == R.id.playlistItem) {
-                    playerClient.playPause(position);
-                } else if (viewId == R.id.btnRemove) {
-                    removeMusicItem(position);
-                }
-            });
-
+            mPlaylistLiveData = new PlaylistLiveData(playerClient, playlist);
             mPlaylistLiveData.observe(PlaylistDialog.this, newPlaylist -> {
                 tvPlaylistTitle.setText(getText(R.string.playlist) + "(" + newPlaylist.size() + ")");
                 mPlaylistAdapter.setPlaylist(newPlaylist, playerClient.getPlayPosition());
@@ -140,11 +152,14 @@ public class PlaylistDialog extends BottomDialog {
     private static class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> {
         private static final int TYPE_EMPTY_VIEW = 1;
         private static final int TYPE_ITEM_VIEW = 2;
+        private static final int TYPE_EMPTY_LOADING = 3;
         private Playlist mPlaylist;
 
         private final ItemClickHelper mItemClickHelper;
         private final SelectableHelper mSelectableHelper;
         private final PositionHelper<PlaylistAdapter.ViewHolder> mPositionHelper;
+
+        private boolean mLoading;
 
         public PlaylistAdapter(@NonNull Playlist playlist, int playPosition) {
             Preconditions.checkNotNull(playlist);
@@ -198,6 +213,10 @@ public class PlaylistDialog extends BottomDialog {
             mItemClickHelper.setOnItemClickListener(listener);
         }
 
+        public void setLoading(boolean loading) {
+            mLoading = loading;
+        }
+
         @Override
         public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
             super.onAttachedToRecyclerView(recyclerView);
@@ -217,10 +236,10 @@ public class PlaylistDialog extends BottomDialog {
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            boolean emptyView = viewType == TYPE_EMPTY_VIEW;
+            boolean emptyView = (viewType == TYPE_EMPTY_VIEW) || (viewType == TYPE_EMPTY_LOADING);
             int layoutId = R.layout.item_playlist;
             if (emptyView) {
-                layoutId = R.layout.empty_playlist;
+                layoutId = getEmptyLayoutId();
             }
 
             View itemView = LayoutInflater.from(parent.getContext())
@@ -257,10 +276,26 @@ public class PlaylistDialog extends BottomDialog {
         @Override
         public int getItemViewType(int position) {
             if (mPlaylist.isEmpty()) {
-                return TYPE_EMPTY_VIEW;
+                return getEmptyType();
             }
 
             return TYPE_ITEM_VIEW;
+        }
+
+        private int getEmptyType() {
+            if (mLoading) {
+                return TYPE_EMPTY_LOADING;
+            }
+
+            return TYPE_EMPTY_VIEW;
+        }
+
+        private int getEmptyLayoutId() {
+            if (mLoading) {
+                return R.layout.empty_loading;
+            }
+
+            return R.layout.empty_playlist;
         }
 
         private static class ViewHolder extends RecyclerView.ViewHolder implements SelectableHelper.Selectable,
