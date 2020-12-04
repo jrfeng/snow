@@ -28,7 +28,7 @@
     <string name="des_locate_playing_music">定位正在播放的音乐</string>
     <string name="empty_playlist">播放列表为空</string>
     <string name="des_remove_music">移除歌曲</string>
-    <string name="empty_music_list">歌单为空</string>
+    <string name="empty_music_list">没有歌曲</string>
     <string name="title_local_music">本地音乐</string>
     <string name="des_back">返回</string>
     <string name="des_sort_music_list">排序歌单</string>

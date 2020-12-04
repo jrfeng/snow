@@ -24,6 +24,7 @@ import snow.player.util.MusicItemUtil;
 
 public abstract class BaseMusicListViewModel extends ViewModel {
     private final MutableLiveData<List<Music>> mMusicListItems;
+    private final MutableLiveData<Boolean> mLoadingMusicList;
     private String mMusicListName = "";
     private String mMusicListToken = "";
 
@@ -34,6 +35,7 @@ public abstract class BaseMusicListViewModel extends ViewModel {
 
     public BaseMusicListViewModel() {
         mMusicListItems = new MutableLiveData<>(Collections.emptyList());
+        mLoadingMusicList = new MutableLiveData<>(false);
     }
 
     public void init(@NonNull String musicListName) {
@@ -55,9 +57,7 @@ public abstract class BaseMusicListViewModel extends ViewModel {
             return;
         }
 
-        if (mLoadMusicListDisposable != null && mLoadMusicListDisposable.isDisposed()) {
-            mLoadMusicListDisposable.dispose();
-        }
+        cancelLastLoading();
 
         MultiChoiceStateHolder.getInstance()
                 .release();
@@ -70,6 +70,10 @@ public abstract class BaseMusicListViewModel extends ViewModel {
         }
 
         return mMusicListItems;
+    }
+
+    public LiveData<Boolean> getLoadingMusicList() {
+        return mLoadingMusicList;
     }
 
     public void setMusicListItems(@NonNull List<Music> musicListItems) {
@@ -106,6 +110,9 @@ public abstract class BaseMusicListViewModel extends ViewModel {
      * 加载歌单中的所有歌曲
      */
     private void loadMusicList() {
+        cancelLastLoading();
+
+        mLoadingMusicList.setValue(true);
         mLoadMusicListDisposable = Single.create((SingleOnSubscribe<List<Music>>) emitter -> {
             List<Music> musicList = loadMusicListItems();
             if (emitter.isDisposed()) {
@@ -114,7 +121,16 @@ public abstract class BaseMusicListViewModel extends ViewModel {
             emitter.onSuccess(musicList);
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::notifyMusicItemsChanged);
+                .subscribe(musicList -> {
+                    mLoadingMusicList.setValue(false);
+                    notifyMusicItemsChanged(musicList);
+                });
+    }
+
+    private void cancelLastLoading() {
+        if (mLoadMusicListDisposable != null && mLoadMusicListDisposable.isDisposed()) {
+            mLoadMusicListDisposable.dispose();
+        }
     }
 
     protected final void reloadMusicList() {

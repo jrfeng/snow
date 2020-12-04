@@ -161,6 +161,9 @@ public abstract class BaseMusicListFragment extends Fragment {
     private void initMusicListAdapter() {
         mMusicListAdapter = new MusicListAdapter(getMusicListItems());
 
+        mMusicListViewModel.getLoadingMusicList()
+                .observe(getViewLifecycleOwner(), mMusicListAdapter::setLoading);
+
         mMusicListAdapter.setOnItemClickListener((position, viewId, view, holder) -> {
             if (viewId == R.id.musicListItem) {
                 onMusicListItemClicked(position);

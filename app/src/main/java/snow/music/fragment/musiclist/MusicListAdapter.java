@@ -25,11 +25,15 @@ import snow.music.store.Music;
 public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.ViewHolder> {
     private static final int TYPE_EMPTY_VIEW = 1;
     private static final int TYPE_ITEM_VIEW = 2;
+    private static final int TYPE_EMPTY_LOADING = 3;
+
     private List<Music> mMusicList;
 
     private final ItemClickHelper mItemClickHelper;
     private final SelectableHelper mSelectableHelper;
     private final PositionHelper<MusicListAdapter.ViewHolder> mPositionHelper;
+
+    private boolean mLoading;
 
     public MusicListAdapter(@NonNull List<Music> musicList) {
         Preconditions.checkNotNull(musicList);
@@ -80,6 +84,13 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         mSelectableHelper.clearSelected();
     }
 
+    public void setLoading(boolean loading) {
+        mLoading = loading;
+        if (mMusicList.isEmpty()) {
+            notifyItemChanged(0);
+        }
+    }
+
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
@@ -100,9 +111,9 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         int layoutId = R.layout.item_music_list;
-        boolean emptyView = (viewType == TYPE_EMPTY_VIEW);
+        boolean emptyView = (viewType == TYPE_EMPTY_VIEW) || (viewType == TYPE_EMPTY_LOADING);
         if (emptyView) {
-            layoutId = R.layout.empty_music_list;
+            layoutId = getEmptyLayoutId();
         }
 
         return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(layoutId, parent, false), emptyView);
@@ -138,10 +149,26 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
     @Override
     public int getItemViewType(int position) {
         if (mMusicList.isEmpty()) {
-            return TYPE_EMPTY_VIEW;
+            return getEmptyType();
         }
 
         return TYPE_ITEM_VIEW;
+    }
+
+    private int getEmptyType() {
+        if (mLoading) {
+            return TYPE_EMPTY_LOADING;
+        }
+
+        return TYPE_EMPTY_VIEW;
+    }
+
+    private int getEmptyLayoutId() {
+        if (mLoading) {
+            return R.layout.empty_loading;
+        }
+
+        return R.layout.empty_music_list;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements SelectableHelper.Selectable,

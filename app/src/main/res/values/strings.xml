@@ -58,7 +58,7 @@
     <string name="empty_playlist">Playlist is empty</string>
 
     <!-- MusicListAdapter -->
-    <string name="empty_music_list">Music list is Empty</string>
+    <string name="empty_music_list">No songs</string>
 
     <!-- HistoryAdapter -->
     <string name="no_history">No history</string>
