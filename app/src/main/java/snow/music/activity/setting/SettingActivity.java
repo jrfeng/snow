@@ -134,6 +134,8 @@ public class SettingActivity extends AppCompatActivity {
                 .setPositiveButtonClickListener((dialog1, which) -> mSettingViewModel.setPlayWithOtherApp(true))
                 .build();
 
+        dialog.setCancelable(false);
+
         dialog.show(getSupportFragmentManager(), "PlayWithOtherAppTips");
     }
 
