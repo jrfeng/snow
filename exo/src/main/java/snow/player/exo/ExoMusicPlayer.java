@@ -25,9 +25,6 @@ import snow.player.audio.ErrorCode;
 public class ExoMusicPlayer extends AbstractMusicPlayer {
     private static final String TAG = "ExoMusicPlayer";
 
-    private MediaSourceFactory mMediaSourceFactory;
-    private Uri mUri;
-
     private SimpleExoPlayer mSimpleExoPlayer;
     private Player.EventListener mEventListener;
 
@@ -50,10 +47,22 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     private boolean mInvalid;
 
     public ExoMusicPlayer(@NonNull Context context, @NonNull MediaSourceFactory mediaSourceFactory, @NonNull Uri uri) {
-        mMediaSourceFactory = mediaSourceFactory;
-        mUri = uri;
         initEventListener();
         initExoPlayer(context);
+
+        MediaSource mediaSource = mediaSourceFactory.createMediaSource(MediaItem.fromUri(uri));
+        mSimpleExoPlayer.setMediaSource(mediaSource);
+    }
+
+    public ExoMusicPlayer(@NonNull Context context, @NonNull Uri uri) {
+        this(context, MediaItem.fromUri(uri));
+    }
+
+    public ExoMusicPlayer(@NonNull Context context, @NonNull MediaItem mediaItem) {
+        initEventListener();
+        initExoPlayer(context);
+
+        mSimpleExoPlayer.setMediaItem(mediaItem);
     }
 
     private void initEventListener() {
@@ -168,14 +177,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
             return;
         }
 
-        try {
-            MediaSource mediaSource = mMediaSourceFactory.createMediaSource(MediaItem.fromUri(mUri));
-            mSimpleExoPlayer.setMediaSource(mediaSource);
-            mSimpleExoPlayer.prepare();
-        } catch (Exception e) {
-            setInvalid();
-            throw e;
-        }
+        mSimpleExoPlayer.prepare();
     }
 
     @Override
