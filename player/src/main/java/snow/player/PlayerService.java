@@ -1,5 +1,6 @@
 package snow.player;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -26,6 +27,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -867,9 +869,18 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
-        mForeground = true;
+        mForeground = isBackgroundRestricted();
         startForeground(mNotificationView.getNotificationId(),
                 mNotificationView.createNotification());
+    }
+
+    private boolean isBackgroundRestricted() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+            return !activityManager.isBackgroundRestricted();
+        }
+
+        return true;
     }
 
     /**
