@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -97,7 +98,7 @@ public class AlbumIconAnimManager implements LifecycleObserver {
         mRunning = false;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mDiskRotateAnimator.pause();
+            pauseAPI19();
             return;
         }
 
@@ -112,18 +113,28 @@ public class AlbumIconAnimManager implements LifecycleObserver {
 
         mRunning = true;
 
-        if (!mDiskRotateAnimator.isStarted()) {
-            mDiskRotateAnimator.start();
-            return;
-        }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mDiskRotateAnimator.resume();
+            resumeAPI19();
             return;
         }
 
         mDiskRotateAnimator.start();
         mDiskRotateAnimator.setCurrentPlayTime(mDiskAnimPlayTime);
+    }
+
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    private void pauseAPI19() {
+        mDiskRotateAnimator.pause();
+    }
+
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    private void resumeAPI19() {
+        if (!mDiskRotateAnimator.isStarted()) {
+            mDiskRotateAnimator.start();
+            return;
+        }
+
+        mDiskRotateAnimator.resume();
     }
 
     private boolean shouldStartAnim() {
