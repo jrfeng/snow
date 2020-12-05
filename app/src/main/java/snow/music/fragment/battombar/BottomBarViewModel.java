@@ -1,9 +1,12 @@
 package snow.music.fragment.battombar;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -15,6 +18,7 @@ import androidx.lifecycle.ViewModel;
 import com.google.common.base.Preconditions;
 
 import snow.music.R;
+import snow.music.activity.player.PlayerActivity;
 import snow.player.PlaybackState;
 import snow.player.PlayerClient;
 import snow.player.lifecycle.PlayerViewModel;
@@ -131,5 +135,10 @@ public class BottomBarViewModel extends ViewModel {
         }
 
         return mPlayerViewModel.getPlayProgress();
+    }
+
+    public void startPlayerActivity(View view) {
+        Context context = view.getContext();
+        context.startActivity(new Intent(context, PlayerActivity.class));
     }
 }
