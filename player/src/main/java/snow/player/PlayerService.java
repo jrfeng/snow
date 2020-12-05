@@ -869,7 +869,13 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
-        mForeground = isBackgroundRestricted();
+        if (isBackgroundRestricted()) {
+            mForeground = false;
+            updateNotification();
+            return;
+        }
+
+        mForeground = true;
         startForeground(mNotificationView.getNotificationId(),
                 mNotificationView.createNotification());
     }
@@ -877,10 +883,10 @@ public class PlayerService extends MediaBrowserServiceCompat
     private boolean isBackgroundRestricted() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-            return !activityManager.isBackgroundRestricted();
+            return activityManager.isBackgroundRestricted();
         }
 
-        return true;
+        return false;
     }
 
     /**
