@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
@@ -24,9 +23,6 @@ import snow.player.HistoryRecorder;
 import snow.player.PlayMode;
 import snow.player.PlayerService;
 import snow.player.annotation.PersistenceId;
-import snow.player.audio.MusicItem;
-import snow.player.audio.MusicPlayer;
-import snow.player.exo.ExoMusicPlayer;
 
 @PersistenceId("AppPlayerService")
 public class AppPlayerService extends PlayerService {
@@ -38,12 +34,6 @@ public class AppPlayerService extends PlayerService {
 
         setMaxIDLETime(5);
         mMusicStore = MusicStore.getInstance();
-    }
-
-    @NonNull
-    @Override
-    protected MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
-        return new ExoMusicPlayer(context, uri);
     }
 
     @Nullable
