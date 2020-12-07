@@ -1,4 +1,4 @@
-package snow.player.ui;
+package snow.player.ui.widget;
 
 import android.Manifest;
 import android.content.Context;
