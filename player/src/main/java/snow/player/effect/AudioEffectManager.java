@@ -6,8 +6,6 @@ import androidx.annotation.NonNull;
 
 /**
  * 用于管理和同步音频特效的配置。
- *
- * @see AndroidAudioEffectManager
  */
 public interface AudioEffectManager {
 
