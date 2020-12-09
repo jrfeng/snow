@@ -432,7 +432,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mRepeatListener = new MusicPlayer.OnRepeatListener() {
             @Override
             public void onRepeat(MusicPlayer mp) {
-                notifyPlaying(false, 0, SystemClock.elapsedRealtime());
+                notifyRepeat(SystemClock.elapsedRealtime());
             }
         };
 
@@ -943,6 +943,16 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onStalledChanged(stalled, playProgress, updateTime);
+        }
+    }
+
+    private void notifyRepeat(long repeatTime) {
+        mPlayerStateHelper.onRepeat(repeatTime);
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
+
+        MusicItem musicItem = getMusicItem();
+        if (mPlayerStateListener != null && musicItem != null) {
+            mPlayerStateListener.onRepeat(musicItem, repeatTime);
         }
     }
 

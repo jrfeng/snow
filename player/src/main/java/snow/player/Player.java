@@ -1,5 +1,6 @@
 package snow.player;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import channel.helper.Channel;
@@ -231,5 +232,19 @@ public interface Player {
          * @see PlayMode#SHUFFLE
          */
         void onPlayModeChanged(@UseOrdinal PlayMode playMode);
+    }
+
+    /**
+     * 用于监听歌曲循环播放事件。
+     */
+    interface OnRepeatListener {
+        /**
+         * 当播放器播放模式为 {@link PlayMode#LOOP} 单曲循环，且歌曲播放完毕，准备开始下次循环播放时会回调该方法。
+         *
+         * @param musicItem  循环播放的歌曲。
+         * @param repeatTime 歌曲再次开始播放的时间（这个时间是 {@code SystemClock.elapsedRealtime()}）。
+         */
+        @SuppressWarnings("NullableProblems")
+        void onRepeat(@NonNull MusicItem musicItem, long repeatTime);
     }
 }

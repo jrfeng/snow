@@ -71,15 +71,16 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     private final List<Player.OnPlaybackStateChangeListener> mAllPlaybackStateChangeListener;
     private final List<Player.OnPrepareListener> mAllPrepareListener;
     private final List<Player.OnStalledChangeListener> mAllStalledChangeListener;
-    private final List<OnBufferedProgressChangeListener> mAllBufferedProgressChangeListener;
+    private final List<Player.OnBufferedProgressChangeListener> mAllBufferedProgressChangeListener;
     private final List<Player.OnPlayingMusicItemChangeListener> mAllPlayingMusicItemChangeListener;
-    private final List<OnSeekCompleteListener> mAllSeekListener;
+    private final List<Player.OnSeekCompleteListener> mAllSeekListener;
     private final List<Player.OnPlaylistChangeListener> mAllPlaylistChangeListener;
     private final List<Player.OnPlayModeChangeListener> mAllPlayModeChangeListener;
 
     private final List<PlayerClient.OnPlaybackStateChangeListener> mClientAllPlaybackStateChangeListener;
     private final List<PlayerClient.OnAudioSessionChangeListener> mAllAudioSessionChangeListener;
     private final List<SleepTimer.OnStateChangeListener> mAllSleepTimerStateChangeListener;
+    private final List<Player.OnRepeatListener> mAllRepeatListener;
 
     private final List<OnConnectStateChangeListener> mAllConnectStateChangeListener;
 
@@ -102,6 +103,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         mClientAllPlaybackStateChangeListener = new ArrayList<>();
         mAllAudioSessionChangeListener = new ArrayList<>();
         mAllSleepTimerStateChangeListener = new ArrayList<>();
+        mAllRepeatListener = new ArrayList<>();
         mAllConnectStateChangeListener = new ArrayList<>();
 
         initMediaBrowser();
@@ -1797,6 +1799,57 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         mAllSleepTimerStateChangeListener.remove(listener);
     }
 
+    /**
+     * 添加一个 {@link snow.player.Player.OnRepeatListener} 监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 要添加的监听器，不能为 null
+     */
+    public void addOnRepeatListener(@NonNull Player.OnRepeatListener listener) {
+        Preconditions.checkNotNull(listener);
+
+        if (mAllRepeatListener.contains(listener)) {
+            return;
+        }
+
+        mAllRepeatListener.add(listener);
+    }
+
+    /**
+     * 添加一个 {@link snow.player.Player.OnRepeatListener} 监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param listener 要添加的监听器，不能为 null
+     */
+    public void addOnRepeatListener(@NonNull LifecycleOwner owner,
+                                    @NonNull final Player.OnRepeatListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnRepeatListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnRepeatListener(listener);
+            }
+        }));
+    }
+
+    /**
+     * 异常已注册的 {@link snow.player.Player.OnRepeatListener} 监听器。
+     */
+    public void removeOnRepeatListener(Player.OnRepeatListener listener) {
+        mAllRepeatListener.remove(listener);
+    }
+
     private boolean isDestroyed(LifecycleOwner owner) {
         return owner.getLifecycle().getCurrentState() == Lifecycle.State.DESTROYED;
     }
@@ -2233,6 +2286,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         }
     }
 
+    private void notifyRepeat(@NonNull MusicItem musicItem, long repeatTime) {
+        for (OnRepeatListener listener : mAllRepeatListener) {
+            listener.onRepeat(musicItem, repeatTime);
+        }
+    }
+
     // 用于管理与同步播放器状态
     private class PlayerStateListenerImpl implements PlayerStateListener, SleepTimer.OnStateChangeListener {
 
@@ -2346,6 +2405,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         @Override
         public void onShutdown() {
             disconnect();
+        }
+
+        @Override
+        public void onRepeat(@NonNull MusicItem musicItem, long repeatTime) {
+            mPlayerStateHelper.onRepeat(repeatTime);
+            notifyRepeat(musicItem, repeatTime);
         }
     }
 

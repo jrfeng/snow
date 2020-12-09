@@ -119,6 +119,17 @@ class PlayerStateHelper {
         }
     }
 
+    public void onRepeat(long repeatTime) {
+        updatePlayProgress(0, repeatTime);
+
+        if (mAppWidgetPreferences != null) {
+            mAppWidgetPreferences.edit()
+                    .setPlayProgress(0)
+                    .setPlayProgressUpdateTime(repeatTime)
+                    .commit();
+        }
+    }
+
     public void onError(int errorCode, String errorMessage) {
         mPlayerState.setPlaybackState(PlaybackState.ERROR);
         mPlayerState.setErrorCode(errorCode);
