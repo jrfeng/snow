@@ -29,7 +29,6 @@ public class ProgressClock {
     private int mProgressSec;       // 单位：秒
     private int mDurationSec;       // 单位：秒
 
-    private boolean mLoop;
     private Disposable mDisposable;
 
     /**
@@ -95,15 +94,6 @@ public class ProgressClock {
     }
 
     /**
-     * 设置释放循环。
-     *
-     * @param loop 如果为 true，则当计时器时间到时会自动设为 0，并重写开始及时
-     */
-    public void setLoop(boolean loop) {
-        mLoop = loop;
-    }
-
-    /**
      * 启动定时器。<b>注意！所有时间都是基于 {@code SystemClock.elapsedRealtime()} 的。</b>
      *
      * @param progress   歌曲的播放进度（单位：毫秒）
@@ -141,8 +131,8 @@ public class ProgressClock {
             return;
         }
 
-        if (!mLoop && isTimeout()) {
-            mCallback.onUpdateProgress(mDurationSec, mDurationSec);
+        if (isTimeout()) {
+            notifyTimeout();
             return;
         }
 
@@ -172,6 +162,15 @@ public class ProgressClock {
         return mProgressSec >= mDurationSec;
     }
 
+    private void notifyTimeout() {
+        if (mCountDown) {
+            mCallback.onUpdateProgress(0, mDurationSec);
+            return;
+        }
+
+        mCallback.onUpdateProgress(mDurationSec, mDurationSec);
+    }
+
     public void cancel() {
         if (mDisposable != null && !mDisposable.isDisposed()) {
             mDisposable.dispose();
@@ -182,12 +181,7 @@ public class ProgressClock {
     private void increase() {
         int newProgress = mProgressSec + 1;
 
-        if (mLoop && newProgress > mDurationSec) {
-            updateProgress(0);
-            return;
-        }
-
-        if (!mLoop && (newProgress >= mDurationSec)) {
+        if (newProgress >= mDurationSec) {
             cancel();
         }
 
@@ -197,12 +191,7 @@ public class ProgressClock {
     private void decrease() {
         int newProgress = mProgressSec - 1;
 
-        if (mLoop && (newProgress < 0)) {
-            updateProgress(mDurationSec);
-            return;
-        }
-
-        if (!mLoop && newProgress <= 0) {
+        if (newProgress <= 0) {
             cancel();
         }
 

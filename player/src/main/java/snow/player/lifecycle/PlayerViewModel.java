@@ -64,6 +64,7 @@ public class PlayerViewModel extends ViewModel {
     private Player.OnStalledChangeListener mStalledChangeListener;
     private Player.OnPrepareListener mPrepareListener;
     private PlayerClient.OnConnectStateChangeListener mConnectStateChangeListener;
+    private Player.OnRepeatListener mRepeatListener;
 
     private String mDefaultTitle;
     private String mDefaultArtist;
@@ -233,7 +234,6 @@ public class PlayerViewModel extends ViewModel {
             @Override
             public void onPlayModeChanged(PlayMode playMode) {
                 mPlayMode.setValue(playMode);
-                mProgressClock.setLoop(playMode == PlayMode.LOOP);
             }
         };
 
@@ -344,6 +344,13 @@ public class PlayerViewModel extends ViewModel {
                 }
             }
         };
+
+        mRepeatListener = new Player.OnRepeatListener() {
+            @Override
+            public void onRepeat(@NonNull MusicItem musicItem, long repeatTime) {
+                mProgressClock.start(0, repeatTime, musicItem.getDuration());
+            }
+        };
     }
 
     private void initAllProgressClock(boolean enable) {
@@ -374,6 +381,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.addOnStalledChangeListener(mStalledChangeListener);
         mPlayerClient.addOnPrepareListener(mPrepareListener);
         mPlayerClient.addOnConnectStateChangeListener(mConnectStateChangeListener);
+        mPlayerClient.addOnRepeatListener(mRepeatListener);
     }
 
     private void removeAllListener() {
@@ -387,6 +395,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.removeOnStalledChangeListener(mStalledChangeListener);
         mPlayerClient.removeOnPrepareListener(mPrepareListener);
         mPlayerClient.removeOnConnectStateChangeListener(mConnectStateChangeListener);
+        mPlayerClient.removeOnRepeatListener(mRepeatListener);
     }
 
     @Override
