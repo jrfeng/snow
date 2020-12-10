@@ -498,7 +498,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      *
      * @return 音频特效的配置
      */
-    @Nullable
+    @NonNull
     public Bundle getAudioEffectConfig() {
         return mPlayerConfig.getAudioEffectConfig();
     }
