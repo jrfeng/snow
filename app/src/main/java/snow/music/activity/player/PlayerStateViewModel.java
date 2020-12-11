@@ -30,6 +30,7 @@ public class PlayerStateViewModel extends ViewModel {
     private final MutableLiveData<Integer> mFavoriteDrawable;
     private final MutableLiveData<Integer> mErrorMessageVisibility;
     private final MutableLiveData<String> mErrorMessage;
+    private final MutableLiveData<Boolean> mKeepScreenOn;
     private final MutableLiveData<Integer> mKeepScreenOnDrawable;
 
     private final FavoriteObserver mFavoriteObserver;
@@ -41,10 +42,13 @@ public class PlayerStateViewModel extends ViewModel {
 
     private boolean mStartByPendingIntent;
 
+    private boolean mIgnoreKeepScreenOnToast;
+
     public PlayerStateViewModel() {
         mFavoriteDrawable = new MutableLiveData<>(R.drawable.ic_favorite_false);
         mErrorMessageVisibility = new MutableLiveData<>(View.GONE);
         mErrorMessage = new MutableLiveData<>("");
+        mKeepScreenOn = new MutableLiveData<>(false);
         mKeepScreenOnDrawable = new MutableLiveData<>(R.drawable.ic_keep_screen_on_false);
 
         mFavoriteObserver = new FavoriteObserver(favorite ->
@@ -123,6 +127,10 @@ public class PlayerStateViewModel extends ViewModel {
         });
     }
 
+    public LiveData<Boolean> getKeepScreenOn() {
+        return mKeepScreenOn;
+    }
+
     public LiveData<Integer> getKeepScreenOnDrawable() {
         return mKeepScreenOnDrawable;
     }
@@ -181,23 +189,31 @@ public class PlayerStateViewModel extends ViewModel {
         }
     }
 
-    public void toggleKeepScreenOn(View view) {
-        boolean keepScreenOn = view.getKeepScreenOn();
-        int messageId;
+    public void toggleKeepScreenOn() {
+        Boolean keepScreenOn = mKeepScreenOn.getValue();
+        assert keepScreenOn != null;
 
         if (keepScreenOn) {
+            mKeepScreenOn.setValue(false);
             mKeepScreenOnDrawable.setValue(R.drawable.ic_keep_screen_on_false);
-            messageId = R.string.toast_cancel_keep_screen_on;
-        } else {
-            mKeepScreenOnDrawable.setValue(R.drawable.ic_keep_screen_on_true);
-            messageId = R.string.toast_keep_screen_on;
+            return;
         }
 
-        view.setKeepScreenOn(!keepScreenOn);
-        Toast.makeText(view.getContext(), messageId, Toast.LENGTH_SHORT).show();
+        mKeepScreenOn.setValue(true);
+        mKeepScreenOnDrawable.setValue(R.drawable.ic_keep_screen_on_true);
     }
 
     public void startEqualizerActivity(View view) {
         EqualizerActivity.start(view.getContext(), AppPlayerService.class);
+    }
+
+    public void setIgnoreKeepScreenOnToast(boolean ignoreKeepScreenOnToast) {
+        mIgnoreKeepScreenOnToast = ignoreKeepScreenOnToast;
+    }
+
+    public boolean consumeIgnoreKeepScreenOnToast() {
+        boolean result = mIgnoreKeepScreenOnToast;
+        mIgnoreKeepScreenOnToast = false;
+        return result;
     }
 }

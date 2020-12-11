@@ -151,7 +151,7 @@
                     android:layout_gravity="center"
                     android:background="@drawable/bg_button_48dp"
                     android:contentDescription="@string/des_play_mode"
-                    android:onClick="@{playerStateViewModel.toggleKeepScreenOn}"
+                    android:onClick="@{() -> playerStateViewModel.toggleKeepScreenOn()}"
                     android:scaleType="centerInside"
                     android:tint="@color/colorIconTint"
                     app:srcCompat="@{playerStateViewModel.keepScreenOnDrawable}"

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
@@ -60,6 +61,26 @@ public class PlayerActivity extends BaseActivity {
         mAlbumIconAnimManager = new AlbumIconAnimManager(mBinding.ivAlbumIcon, this, mPlayerViewModel);
         mRequestManager = GlideApp.with(this);
         observePlayingMusicItem(mPlayerViewModel);
+
+        mPlayerStateViewModel.setIgnoreKeepScreenOnToast(true);
+        mPlayerStateViewModel.getKeepScreenOn()
+                .observe(this, keepScreenOn -> {
+                    mBinding.btnKeepScreenOn.setKeepScreenOn(keepScreenOn);
+
+                    if (mPlayerStateViewModel.consumeIgnoreKeepScreenOnToast()) {
+                        return;
+                    }
+
+                    int messageId;
+
+                    if (keepScreenOn) {
+                        messageId = R.string.toast_keep_screen_on;
+                    } else {
+                        messageId = R.string.toast_cancel_keep_screen_on;
+                    }
+
+                    Toast.makeText(PlayerActivity.this, messageId, Toast.LENGTH_SHORT).show();
+                });
     }
 
     private boolean isStartByPendingIntent() {
