@@ -96,6 +96,12 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name="snow.player.ui.equalizer.EqualizerActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:theme="@style/EqualizerTheme" />
+
         <service
             android:name=".service.AppPlayerService"
             tools:ignore="ExportedService">

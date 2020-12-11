@@ -51,6 +51,7 @@ dependencies {
 
     implementation project(path: ':player')
     implementation project(path: ':exo')
+    implementation project(path: ':ui')
 
     // media-helper
     implementation "com.github.jrfeng:media-helper:$mediaHelperVersion"

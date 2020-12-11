@@ -201,6 +201,7 @@
                     android:layout_gravity="center"
                     android:background="@drawable/bg_button_48dp"
                     android:contentDescription="@string/des_equalizer"
+                    android:onClick="@{playerStateViewModel::startEqualizerActivity}"
                     android:scaleType="centerInside"
                     android:tint="@color/colorIconTint"
                     app:srcCompat="@drawable/ic_equalizer" />

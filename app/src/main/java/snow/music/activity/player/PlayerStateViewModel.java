@@ -1,5 +1,7 @@
 package snow.music.activity.player;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.widget.Toast;
 
@@ -13,6 +15,7 @@ import androidx.lifecycle.ViewModel;
 import com.google.common.base.Preconditions;
 
 import snow.music.R;
+import snow.music.service.AppPlayerService;
 import snow.music.store.MusicStore;
 import snow.music.util.FavoriteObserver;
 import snow.music.util.MusicUtil;
@@ -21,6 +24,7 @@ import snow.player.PlaybackState;
 import snow.player.PlayerClient;
 import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
+import snow.player.ui.equalizer.EqualizerActivity;
 
 public class PlayerStateViewModel extends ViewModel {
     private final MutableLiveData<Integer> mFavoriteDrawable;
@@ -191,5 +195,9 @@ public class PlayerStateViewModel extends ViewModel {
 
         view.setKeepScreenOn(!keepScreenOn);
         Toast.makeText(view.getContext(), messageId, Toast.LENGTH_SHORT).show();
+    }
+
+    public void startEqualizerActivity(View view) {
+        EqualizerActivity.start(view.getContext(), AppPlayerService.class);
     }
 }

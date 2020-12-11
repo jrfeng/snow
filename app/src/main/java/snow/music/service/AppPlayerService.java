@@ -23,6 +23,8 @@ import snow.player.HistoryRecorder;
 import snow.player.PlayMode;
 import snow.player.PlayerService;
 import snow.player.annotation.PersistenceId;
+import snow.player.effect.AudioEffectManager;
+import snow.player.ui.equalizer.AndroidAudioEffectManager;
 
 @PersistenceId("AppPlayerService")
 public class AppPlayerService extends PlayerService {
@@ -48,6 +50,12 @@ public class AppPlayerService extends PlayerService {
         return musicItem -> Single.create(emitter -> mMusicStore.addHistory(MusicUtil.asMusic(musicItem)))
                 .subscribeOn(Schedulers.io())
                 .subscribe();
+    }
+
+    @Nullable
+    @Override
+    protected AudioEffectManager onCreateAudioEffectManager() {
+        return new AndroidAudioEffectManager();
     }
 
     private static class AppNotificationView extends MediaNotificationView {
