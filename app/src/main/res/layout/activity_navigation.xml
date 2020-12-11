@@ -127,7 +127,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{(view) -> navViewModel.navigateToLocalMusic(view)}"
+                android:onClick="@{navViewModel::navigateToLocalMusic}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -157,7 +157,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{(view) -> navViewModel.navigateToFavorite(view)}"
+                android:onClick="@{navViewModel::navigateToFavorite}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -187,7 +187,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{(view) -> navViewModel.navigateToMusicListBrowser(view)}"
+                android:onClick="@{navViewModel::navigateToMusicListBrowser}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -225,7 +225,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{(view) -> navViewModel.navigateToArtistBrowser(view)}"
+                android:onClick="@{navViewModel::navigateToArtistBrowser}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -255,7 +255,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{(view) -> navViewModel.navigateToAlbum(view)}"
+                android:onClick="@{navViewModel::navigateToAlbum}"
                 android:orientation="vertical">
 
                 <ImageView
@@ -285,7 +285,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
-                android:onClick="@{(view) -> navViewModel.navigateToHistory(view)}"
+                android:onClick="@{navViewModel::navigateToHistory}"
                 android:orientation="vertical">
 
                 <ImageView
