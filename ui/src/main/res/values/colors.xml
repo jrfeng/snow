@@ -16,9 +16,9 @@
     <color name="snow_ui_croller_back_circle_color">#E0E0E0</color>
     <color name="snow_ui_croller_back_circle_disable_color">#BDBDBD</color>
     <color name="snow_ui_croller_indicator_color">#7E57C2</color>
-    <color name="snow_ui_croller_indicator_disable_color">#D1C4E9</color>
+    <color name="snow_ui_croller_indicator_disable_color">#757575</color>
     <color name="snow_ui_croller_progress_primary_color">#7E57C2</color>
-    <color name="snow_ui_croller_progress_primary_disable_color">#D1C4E9</color>
+    <color name="snow_ui_croller_progress_primary_disable_color">#757575</color>
     <color name="snow_ui_croller_progress_secondary_color">#BDBDBD</color>
     <color name="snow_ui_croller_progress_secondary_disable_color">#9E9E9E</color>
 
