@@ -18,6 +18,7 @@ import com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import snow.player.ui.R;
 import snow.player.ui.equalizer.EqualizerViewModel;
@@ -167,7 +168,13 @@ public class EqualizerBandView extends LinearLayout {
                 }
             });
 
-            tvText.setText((centerFreq / 1000) + "Hz");
+            if (centerFreq >= 1000_000) {
+                double freq = centerFreq / 1000.0;
+                tvText.setText(String.format(Locale.ENGLISH, "%.1fkHz", freq / 1000.0));
+                return;
+            }
+
+            tvText.setText(centerFreq / 1000 + "Hz");
         }
     }
 
