@@ -11,11 +11,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sdsmdg.harjot.crollerTest.Croller;
 import com.sdsmdg.harjot.crollerTest.OnCrollerChangeListener;
@@ -29,6 +31,7 @@ import snow.player.PlayerService;
 import snow.player.ui.R;
 import snow.player.ui.databinding.ActivityEqualizerBinding;
 import snow.player.ui.util.AndroidAudioEffectConfigUtil;
+import snow.player.ui.widget.EqualizerBandView;
 
 public class EqualizerActivity extends AppCompatActivity {
     private static final String KEY_PLAYER_SERVICE = "PLAYER_SERVICE";
@@ -69,9 +72,23 @@ public class EqualizerActivity extends AppCompatActivity {
 
         initLineChart();
         initPresetSpinner();
-        initEqualizerItems();
+        initEqualizerBands();
         initBassCroller();
         initVirtualizerCroller();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            Boolean enabled = mEqualizerViewModel.getEnabled().getValue();
+            assert enabled != null;
+            if (!enabled) {
+                Toast.makeText(this, R.string.snow_ui_toast_equalizer_not_enabled, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        }
+
+        return super.onTouchEvent(event);
     }
 
     private void initEqualizerViewModel() {
@@ -112,19 +129,19 @@ public class EqualizerActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position == 0) {
-                    mEqualizerViewModel.equalizerUsePreset((short) 0);
-                    mEqualizerViewModel.applyChanges();
                     return;
                 }
 
                 mEqualizerViewModel.equalizerUsePreset((short) (position - 1));
                 mEqualizerViewModel.applyChanges();
-                // TODO 刷新 LineChart 与 EqualizerItem
+
+                // TODO 刷新 LineChart
+                mBinding.equalizerBands.notifyEqualizerSettingChanged();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
+                // ignore
             }
         });
 
@@ -136,8 +153,15 @@ public class EqualizerActivity extends AppCompatActivity {
         });
     }
 
-    private void initEqualizerItems() {
-        // TODO
+    private void initEqualizerBands() {
+        mBinding.equalizerBands.init(mEqualizerViewModel);
+
+        mBinding.equalizerBands.setOnBandChangeListener(new EqualizerBandView.OnBandChangeListener() {
+            @Override
+            public void onBandChanged() {
+                mBinding.presetSpinner.setSelection(0);
+            }
+        });
     }
 
     private void initBassCroller() {

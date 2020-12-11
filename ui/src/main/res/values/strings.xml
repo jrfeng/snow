@@ -23,4 +23,6 @@
     <string name="snow_ui_equalizer_preset_pop">Pop</string>
     <string name="snow_ui_equalizer_preset_rock">Rock</string>
 
+    <string name="snow_ui_toast_equalizer_not_enabled">Equalizer not enabled</string>
+
 </resources>

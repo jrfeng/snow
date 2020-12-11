@@ -101,13 +101,13 @@
 
         </FrameLayout>
 
-        <LinearLayout
-            android:id="@+id/equalizerItemContainer"
+        <snow.player.ui.widget.EqualizerBandView
+            android:id="@+id/equalizerBands"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:baselineAligned="false"
-            android:orientation="horizontal" />
+            android:enabled="@{equalizerViewModel.enabled}"
+            android:padding="16dp" />
 
         <LinearLayout
             android:layout_width="match_parent"

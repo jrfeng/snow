@@ -154,6 +154,14 @@ public class EqualizerViewModel extends ViewModel {
         return mEqualizer.getCenterFreq(band);
     }
 
+    public short[] getEqualizerBandLevelRange() {
+        if (!mInitialized) {
+            throw new IllegalStateException("EqualizerViewModel not init yet.");
+        }
+
+        return mEqualizer.getBandLevelRange();
+    }
+
     public short getEqualizerBandLevel(short band) {
         if (!mInitialized) {
             throw new IllegalStateException("EqualizerViewModel not init yet.");

@@ -25,4 +25,7 @@
     <!-- Spinner -->
     <color name="snow_ui_spinner_colorBackground">#F5F5F5</color>
 
+    <!-- EqualizerBandView -->
+    <color name="snow_ui_colorLine">#E0E0E0</color>
+
 </resources>
