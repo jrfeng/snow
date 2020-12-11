@@ -99,10 +99,39 @@
           "targetId": "1:5775022343501581136"
         }
       ]
+    },
+    {
+      "id": "4:3159153831802680421",
+      "lastPropertyId": "3:2194668822285168520",
+      "name": "HistoryEntity",
+      "properties": [
+        {
+          "id": "1:2410443832676476843",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5648341865157716549",
+          "name": "timestamp",
+          "indexId": "4:4599596560928431067",
+          "type": 6,
+          "flags": 12
+        },
+        {
+          "id": "3:2194668822285168520",
+          "name": "musicId",
+          "indexId": "5:5691205513405041255",
+          "type": 11,
+          "flags": 1548,
+          "relationTarget": "Music"
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "3:5067723784643407434",
-  "lastIndexId": "3:4221013553340286897",
+  "lastEntityId": "4:3159153831802680421",
+  "lastIndexId": "5:5691205513405041255",
   "lastRelationId": "2:7497635376339594094",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
