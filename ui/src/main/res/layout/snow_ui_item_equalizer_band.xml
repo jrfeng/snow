@@ -17,6 +17,7 @@
             android:id="@+id/seekBar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:progressDrawable="@drawable/snow_ui_progress_equalizer_band"
             app:seekBarRotation="CW270"
             tools:progress="50" />
 

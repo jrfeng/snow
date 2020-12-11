@@ -27,5 +27,8 @@
 
     <!-- EqualizerBandView -->
     <color name="snow_ui_colorLine">#E0E0E0</color>
+    <color name="snow_ui_colorProgress">#7E57C2</color>
+    <color name="snow_ui_colorProgressBackground">#EEEEEE</color>
+    <color name="snow_ui_colorProgressDisable">#EEEEEE</color>
 
 </resources>
