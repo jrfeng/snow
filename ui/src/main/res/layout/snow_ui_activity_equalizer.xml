@@ -62,7 +62,7 @@
 
         </FrameLayout>
 
-        <snow.player.ui.widget.LineChartView
+        <snow.player.ui.widget.BandChartView
             android:id="@+id/lineChart"
             android:layout_width="match_parent"
             android:layout_height="180dp"
