@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- EqualizerActivity -->
+    <string name="snow_ui_title_equalizer">Equalizer</string>
+    <string name="snow_ui_croller_bass">Bass</string>
+    <string name="snow_ui_croller_virtualizer">3D</string>
+    <string name="snow_ui_button_save">Save</string>
+
+    <string name="snow_ui_des_back">back</string>
+    <string name="snow_ui_des_drop_down">drop down</string>
+
+    <!-- Equalizer Preset -->
+    <string name="snow_ui_equalizer_preset_custom">Custom</string>
+    <string name="snow_ui_equalizer_preset_normal">Normal</string>
+    <string name="snow_ui_equalizer_preset_classical">Classical</string>
+    <string name="snow_ui_equalizer_preset_dance">Dance</string>
+    <string name="snow_ui_equalizer_preset_flat">Flat</string>
+    <string name="snow_ui_equalizer_preset_folk">Folk</string>
+    <string name="snow_ui_equalizer_preset_heavy_metal">Heavy Metal</string>
+    <string name="snow_ui_equalizer_preset_hip_hop">Hip Hop</string>
+    <string name="snow_ui_equalizer_preset_jazz">Jazz</string>
+    <string name="snow_ui_equalizer_preset_pop">Pop</string>
+    <string name="snow_ui_equalizer_preset_rock">Rock</string>
+
+</resources>

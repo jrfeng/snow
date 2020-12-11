@@ -1,14 +1,16 @@
-package snow.player.effect;
+package snow.player.ui.equalizer;
 
+import android.media.audiofx.AudioEffect;
 import android.media.audiofx.BassBoost;
 import android.media.audiofx.Equalizer;
-import android.media.audiofx.PresetReverb;
 import android.media.audiofx.Virtualizer;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-import snow.player.util.AndroidAudioEffectConfigUtil;
+import snow.player.effect.AudioEffectManager;
+import snow.player.ui.util.AndroidAudioEffectConfigUtil;
 
 /**
  * Android 音频特效管理器。
@@ -18,7 +20,6 @@ import snow.player.util.AndroidAudioEffectConfigUtil;
  *     <li>Equalizer：均衡器</li>
  *     <li>BassBoost：低音增强</li>
  *     <li>Virtualizer：环绕声</li>
- *     <li>PresetReverb：预置混响</li>
  * </ul>
  */
 public final class AndroidAudioEffectManager implements AudioEffectManager {
@@ -31,9 +32,11 @@ public final class AndroidAudioEffectManager implements AudioEffectManager {
 
     private Bundle mConfig;
 
+    @Nullable
     private Equalizer mEqualizer;
+    @Nullable
     private BassBoost mBassBoost;
-    private PresetReverb mPresetReverb;
+    @Nullable
     private Virtualizer mVirtualizer;
 
     @Override
@@ -45,20 +48,16 @@ public final class AndroidAudioEffectManager implements AudioEffectManager {
     public void updateConfig(@NonNull Bundle config) {
         mConfig = new Bundle(config);
 
-        if (mEqualizer.hasControl()) {
+        if (mEqualizer != null && mEqualizer.hasControl()) {
             AndroidAudioEffectConfigUtil.applySettings(mConfig, mEqualizer);
         }
 
-        if (mBassBoost.hasControl()) {
+        if (mBassBoost != null && mBassBoost.hasControl()) {
             AndroidAudioEffectConfigUtil.applySettings(mConfig, mBassBoost);
         }
 
-        if (mVirtualizer.hasControl()) {
+        if (mVirtualizer != null && mVirtualizer.hasControl()) {
             AndroidAudioEffectConfigUtil.applySettings(mConfig, mVirtualizer);
-        }
-
-        if (mPresetReverb.hasControl()) {
-            AndroidAudioEffectConfigUtil.applySettings(mConfig, mPresetReverb);
         }
     }
 
@@ -69,17 +68,41 @@ public final class AndroidAudioEffectManager implements AudioEffectManager {
         mEqualizer = new Equalizer(PRIORITY, audioSessionId);
         mBassBoost = new BassBoost(PRIORITY, audioSessionId);
         mVirtualizer = new Virtualizer(PRIORITY, audioSessionId);
-        mPresetReverb = new PresetReverb(PRIORITY, audioSessionId);
 
         AndroidAudioEffectConfigUtil.applySettings(mConfig, mEqualizer);
         AndroidAudioEffectConfigUtil.applySettings(mConfig, mBassBoost);
         AndroidAudioEffectConfigUtil.applySettings(mConfig, mVirtualizer);
-        AndroidAudioEffectConfigUtil.applySettings(mConfig, mPresetReverb);
+
+        mEqualizer.setControlStatusListener(new AudioEffect.OnControlStatusChangeListener() {
+            @Override
+            public void onControlStatusChange(AudioEffect effect, boolean controlGranted) {
+                if (mEqualizer != null) {
+                    AndroidAudioEffectConfigUtil.applySettings(mConfig, mEqualizer);
+                }
+            }
+        });
+
+        mBassBoost.setControlStatusListener(new AudioEffect.OnControlStatusChangeListener() {
+            @Override
+            public void onControlStatusChange(AudioEffect effect, boolean controlGranted) {
+                if (mBassBoost != null) {
+                    AndroidAudioEffectConfigUtil.applySettings(mConfig, mBassBoost);
+                }
+            }
+        });
+
+        mVirtualizer.setControlStatusListener(new AudioEffect.OnControlStatusChangeListener() {
+            @Override
+            public void onControlStatusChange(AudioEffect effect, boolean controlGranted) {
+                if (mVirtualizer != null) {
+                    AndroidAudioEffectConfigUtil.applySettings(mConfig, mVirtualizer);
+                }
+            }
+        });
 
         mEqualizer.setEnabled(true);
         mBassBoost.setEnabled(true);
         mVirtualizer.setEnabled(true);
-        mPresetReverb.setEnabled(true);
     }
 
     @Override
@@ -101,11 +124,6 @@ public final class AndroidAudioEffectManager implements AudioEffectManager {
         if (mBassBoost != null) {
             mBassBoost.release();
             mBassBoost = null;
-        }
-
-        if (mPresetReverb != null) {
-            mPresetReverb.release();
-            mPresetReverb = null;
         }
 
         if (mVirtualizer != null) {

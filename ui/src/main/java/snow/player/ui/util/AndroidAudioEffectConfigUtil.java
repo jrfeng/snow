@@ -1,12 +1,14 @@
-package snow.player.util;
+package snow.player.ui.util;
 
+import android.content.Context;
 import android.media.audiofx.BassBoost;
 import android.media.audiofx.Equalizer;
-import android.media.audiofx.PresetReverb;
 import android.media.audiofx.Virtualizer;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+
+import snow.player.ui.R;
 
 /**
  * 用于获取和修改 Android 音频特效的配置信息。
@@ -15,7 +17,6 @@ public final class AndroidAudioEffectConfigUtil {
     public static final String KEY_SETTING_EQUALIZER = "setting_equalizer";
     public static final String KEY_SETTING_BASS_BOOST = "setting_bass_boost";
     public static final String KEY_SETTING_VIRTUALIZER = "setting_virtualizer";
-    public static final String KEY_SETTING_PRESET_REVERB = "setting_preset_reverb";
 
     private AndroidAudioEffectConfigUtil() {
         throw new AssertionError();
@@ -79,25 +80,6 @@ public final class AndroidAudioEffectConfigUtil {
     }
 
     /**
-     * 从 config 中应用 PresetReverb 的配置。
-     *
-     * @param config       Bundle 对象，包含音频特效的配置信息，不能为 null
-     * @param presetReverb 要恢复配置的 PresetReverb 对象，不能为 null
-     */
-    public static void applySettings(@NonNull Bundle config, @NonNull PresetReverb presetReverb) {
-        String settings = config.getString(KEY_SETTING_PRESET_REVERB);
-        if (settings == null || settings.isEmpty()) {
-            return;
-        }
-
-        try {
-            presetReverb.setProperties(new PresetReverb.Settings(settings));
-        } catch (IllegalArgumentException | IllegalStateException | UnsupportedOperationException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * 更新音频特效的 Equalizer 配置。
      *
      * @param config   Bundle 对象，包含音频特效的配置信息，不能为 null
@@ -127,13 +109,30 @@ public final class AndroidAudioEffectConfigUtil {
         config.putString(KEY_SETTING_VIRTUALIZER, settings.toString());
     }
 
-    /**
-     * 更新音频特效的 PresetReverb 配置。
-     *
-     * @param config   Bundle 对象，包含音频特效的配置信息，不能为 null
-     * @param settings 最新的 PresetReverb 配置，不能为 null
-     */
-    public static void updateSettings(@NonNull Bundle config, @NonNull PresetReverb.Settings settings) {
-        config.putString(KEY_SETTING_PRESET_REVERB, settings.toString());
+    public static String optimizeEqualizerPresetName(@NonNull Context context, @NonNull String presetName) {
+        switch (presetName) {
+            case "Normal":
+                return context.getString(R.string.snow_ui_equalizer_preset_normal);
+            case "Classical":
+                return context.getString(R.string.snow_ui_equalizer_preset_classical);
+            case "Dance":
+                return context.getString(R.string.snow_ui_equalizer_preset_dance);
+            case "Flat":
+                return context.getString(R.string.snow_ui_equalizer_preset_flat);
+            case "Folk":
+                return context.getString(R.string.snow_ui_equalizer_preset_folk);
+            case "Heavy Metal":
+                return context.getString(R.string.snow_ui_equalizer_preset_heavy_metal);
+            case "Hip Hop":
+                return context.getString(R.string.snow_ui_equalizer_preset_hip_hop);
+            case "Jazz":
+                return context.getString(R.string.snow_ui_equalizer_preset_jazz);
+            case "Pop":
+                return context.getString(R.string.snow_ui_equalizer_preset_pop);
+            case "Rock":
+                return context.getString(R.string.snow_ui_equalizer_preset_rock);
+        }
+
+        return presetName;
     }
 }

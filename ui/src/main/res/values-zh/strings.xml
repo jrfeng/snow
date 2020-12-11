@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="snow_ui_title_equalizer">均衡器</string>
+    <string name="snow_ui_des_back">返回</string>
+    <string name="snow_ui_croller_bass">低音增强</string>
+    <string name="snow_ui_croller_virtualizer">环绕音</string>
+    <string name="snow_ui_button_save">保存</string>
+    <string name="snow_ui_des_drop_down">下拉菜单</string>
+    <string name="snow_ui_equalizer_preset_custom">自定义</string>
+    <string name="snow_ui_equalizer_preset_normal">原声</string>
+    <string name="snow_ui_equalizer_preset_classical">古典</string>
+    <string name="snow_ui_equalizer_preset_dance">舞蹈</string>
+    <string name="snow_ui_equalizer_preset_flat">低音</string>
+    <string name="snow_ui_equalizer_preset_heavy_metal">重金属</string>
+    <string name="snow_ui_equalizer_preset_hip_hop">嘻哈</string>
+    <string name="snow_ui_equalizer_preset_jazz">爵士</string>
+    <string name="snow_ui_equalizer_preset_pop">流行</string>
+    <string name="snow_ui_equalizer_preset_rock">摇滚</string>
+    <string name="snow_ui_equalizer_preset_folk">民谣</string>
+</resources>

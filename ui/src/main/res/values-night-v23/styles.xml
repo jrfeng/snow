@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="EqualizerTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/snow_ui_colorPrimary</item>
+        <item name="colorPrimaryDark">@color/snow_ui_colorPrimaryDark</item>
+        <item name="colorAccent">@color/snow_ui_colorAccent</item>
+        <item name="android:windowBackground">@color/snow_ui_windowBackground</item>
+        <item name="android:textColor">@color/snow_ui_textColor</item>
+
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+</resources>

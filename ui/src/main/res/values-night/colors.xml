@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="snow_ui_colorPrimary">#7E57C2</color>
+    <color name="snow_ui_colorPrimaryDark">#7E57C2</color>
+    <color name="snow_ui_colorAccent">#7E57C2</color>
+    <color name="snow_ui_windowBackground">#212121</color>
+    <color name="snow_ui_textColor">#E0E0E0</color>
+    <color name="snow_ui_colorDivider">#424242</color>
+    <color name="snow_ui_colorPressed">#EEEEEE</color>
+    <color name="snow_ui_colorRipple">#757575</color>
+
+    <!-- Croller -->
+    <color name="snow_ui_croller_main_circle_color">#616161</color>
+    <color name="snow_ui_croller_main_circle_disable_color">#424242</color>
+    <color name="snow_ui_croller_back_circle_color">#424242</color>
+    <color name="snow_ui_croller_back_circle_disable_color">#303030</color>
+    <color name="snow_ui_croller_indicator_color">#B39DDB</color>
+    <color name="snow_ui_croller_indicator_disable_color">#D1C4E9</color>
+    <color name="snow_ui_croller_progress_primary_color">#7E57C2</color>
+    <color name="snow_ui_croller_progress_primary_disable_color">#D1C4E9</color>
+    <color name="snow_ui_croller_progress_secondary_color">#424242</color>
+    <color name="snow_ui_croller_progress_secondary_disable_color">#303030</color>
+
+    <!-- Spinner -->
+    <color name="snow_ui_spinner_colorBackground">#424242</color>
+
+</resources>

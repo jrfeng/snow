@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data class="ActivityEqualizerBinding">
+
+        <variable
+            name="equalizerViewModel"
+            type="snow.player.ui.equalizer.EqualizerViewModel" />
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".equalizer.EqualizerActivity">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@null"
+                    android:contentDescription="@string/snow_ui_des_back"
+                    android:onClick="finishSelf"
+                    android:scaleType="centerInside"
+                    android:tint="?android:textColor"
+                    app:srcCompat="@drawable/snow_ui_ic_back" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/snow_ui_title_equalizer"
+                    android:textSize="18sp" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/swEnable"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    android:checked="@{equalizerViewModel.enabled}"
+                    android:onCheckedChanged="@{(view, checked) -> equalizerViewModel.setAudioEffectEnabled(checked)}" />
+
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_gravity="bottom"
+                android:background="@color/snow_ui_colorDivider" />
+
+        </FrameLayout>
+
+        <snow.player.ui.widget.LineChartView
+            android:id="@+id/lineChart"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/snow_ui_bg_spinner"
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/presetSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@null"
+                android:enabled="@{equalizerViewModel.enabled}" />
+
+            <ImageButton
+                android:id="@+id/btnSpinnerArrow"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_margin="6dp"
+                android:background="@drawable/snow_ui_bg_button_36dp"
+                android:contentDescription="@string/snow_ui_des_drop_down"
+                android:enabled="@{equalizerViewModel.enabled}"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/snow_ui_ic_arrow_drop_down"
+                app:tint="@color/snow_ui_textColor" />
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/equalizerItemContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:baselineAligned="false"
+            android:orientation="horizontal" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <com.sdsmdg.harjot.crollerTest.Croller
+                    android:id="@+id/bassCroller"
+                    style="@style/crollerStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    app:enabled="@{equalizerViewModel.enabled}"
+                    app:label="" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/snow_ui_croller_bass" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <com.sdsmdg.harjot.crollerTest.Croller
+                    android:id="@+id/virtualizerCroller"
+                    style="@style/crollerStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    app:enabled="@{equalizerViewModel.enabled}"
+                    app:label="" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/snow_ui_croller_virtualizer" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</layout>
