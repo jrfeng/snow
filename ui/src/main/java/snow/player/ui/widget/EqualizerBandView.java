@@ -117,9 +117,6 @@ public class EqualizerBandView extends LinearLayout {
             short[] bandLevelRange = mEqualizerViewModel.getEqualizerBandLevelRange();
             short bandLevel = mEqualizerViewModel.getEqualizerBandLevel(mBand);
             int progress = bandLevel - bandLevelRange[0];
-            if (mEqualizerViewModel.getEqualizerCurrentPreset() == 0) {
-                progress = -bandLevelRange[0];
-            }
             seekBar.setProgress(progress);
         }
 
@@ -147,9 +144,6 @@ public class EqualizerBandView extends LinearLayout {
             seekBar.setMax(max);
 
             int progress = bandLevel - minLevel;
-            if (mEqualizerViewModel.getEqualizerCurrentPreset() == 0) {
-                progress = center;
-            }
             seekBar.setProgress(progress);
 
             seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
