@@ -7,7 +7,7 @@
     <string name="snow_ui_button_save">保存</string>
     <string name="snow_ui_des_drop_down">下拉菜单</string>
     <string name="snow_ui_equalizer_preset_custom">自定义</string>
-    <string name="snow_ui_equalizer_preset_normal">原声</string>
+    <string name="snow_ui_equalizer_preset_normal">正常</string>
     <string name="snow_ui_equalizer_preset_classical">古典</string>
     <string name="snow_ui_equalizer_preset_dance">舞蹈</string>
     <string name="snow_ui_equalizer_preset_flat">低音</string>
