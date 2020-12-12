@@ -50,6 +50,11 @@ public class EqualizerBandView extends LinearLayout {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             setLayoutDirection(LAYOUT_DIRECTION_LTR);
         }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            // 因为点画线在低于 API 28 的版本中不支持硬件加速，因此需要关闭硬件加速才能生效
+            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
     }
 
     public void init(@NonNull EqualizerViewModel equalizerViewModel) {
