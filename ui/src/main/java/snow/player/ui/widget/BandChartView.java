@@ -10,6 +10,7 @@ import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -21,6 +22,7 @@ import androidx.annotation.ColorRes;
 import androidx.annotation.DimenRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import snow.player.ui.R;
 import snow.player.ui.equalizer.EqualizerViewModel;
@@ -63,6 +65,20 @@ public class BandChartView extends View {
 
     public BandChartView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        initView(context, attrs);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public BandChartView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        initView(context, attrs);
+    }
+
+    private void initView(Context context, @Nullable AttributeSet attrs) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            // 因为 DashPathEffect 在低于 API 28 的版本中不支持硬件加速，因此需要关闭硬件加速才能生效
+            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
         mLinePath = new Path();
