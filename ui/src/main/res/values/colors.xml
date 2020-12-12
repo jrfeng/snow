@@ -31,4 +31,9 @@
     <color name="snow_ui_colorProgressBackground">#EEEEEE</color>
     <color name="snow_ui_colorProgressDisable">#EEEEEE</color>
 
+    <!-- BandChartView -->
+    <color name="snow_ui_lineColor">#7E57C2</color>
+    <color name="snow_ui_lineDisableColor">#E0E0E0</color>
+    <color name="snow_ui_gridLineColor">#E0E0E0</color>
+
 </resources>

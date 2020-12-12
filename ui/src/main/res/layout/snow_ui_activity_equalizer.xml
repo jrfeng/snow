@@ -63,12 +63,18 @@
         </FrameLayout>
 
         <snow.player.ui.widget.BandChartView
-            android:id="@+id/lineChart"
+            android:id="@+id/bandChart"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginLeft="16dp"
+            android:layout_marginTop="16dp"
             android:layout_marginRight="16dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:enabled="@{equalizerViewModel.enabled}"
+            app:gridLineColor="@color/snow_ui_gridLineColor"
+            app:gridLineWidth="1.5dp"
+            app:lineColor="@color/snow_ui_lineColor"
+            app:lineDisableColor="@color/snow_ui_lineDisableColor" />
 
         <FrameLayout
             android:layout_width="match_parent"

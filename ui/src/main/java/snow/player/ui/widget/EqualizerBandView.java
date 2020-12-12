@@ -29,6 +29,8 @@ public class EqualizerBandView extends LinearLayout {
 
     @Nullable
     private OnBandChangeListener mOnBandChangeListener;
+    @Nullable
+    private OnEqualizerSettingChangeListener mOnEqualizerSettingChangeListener;
 
     public EqualizerBandView(Context context) {
         this(context, null);
@@ -65,9 +67,18 @@ public class EqualizerBandView extends LinearLayout {
         }
     }
 
+    public void setOnEqualizerSettingChangeListener(@Nullable OnEqualizerSettingChangeListener listener) {
+        mOnEqualizerSettingChangeListener = listener;
+
+        for (Band band : mAllBand) {
+            band.setOnEqualizerSettingChangeListener(mOnEqualizerSettingChangeListener);
+        }
+    }
+
     private void addBand(Band band) {
         mAllBand.add(band);
         band.setOnBandChangeListener(mOnBandChangeListener);
+        band.setOnEqualizerSettingChangeListener(mOnEqualizerSettingChangeListener);
         View itemView = band.createItemView(mLayoutInflater, this);
 
         LayoutParams layoutParams = new LayoutParams(0, LayoutParams.MATCH_PARENT);
@@ -100,6 +111,8 @@ public class EqualizerBandView extends LinearLayout {
 
         @Nullable
         private OnBandChangeListener mOnBandChangeListener;
+        @Nullable
+        private OnEqualizerSettingChangeListener mOnEqualizerSettingChangeListener;
 
         public Band(short band, @NonNull EqualizerViewModel equalizerViewModel) {
             mEqualizerViewModel = equalizerViewModel;
@@ -112,6 +125,10 @@ public class EqualizerBandView extends LinearLayout {
 
         public void setOnBandChangeListener(@Nullable OnBandChangeListener onBandChangeListener) {
             mOnBandChangeListener = onBandChangeListener;
+        }
+
+        public void setOnEqualizerSettingChangeListener(@Nullable OnEqualizerSettingChangeListener onEqualizerSettingChangeListener) {
+            mOnEqualizerSettingChangeListener = onEqualizerSettingChangeListener;
         }
 
         public void notifyItemDataChanged() {
@@ -152,6 +169,7 @@ public class EqualizerBandView extends LinearLayout {
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     if (fromUser) {
                         mEqualizerViewModel.setEqualizerBandLevel(mBand, (short) (progress - center));
+                        notifyEqualizerSettingChanged();
                     }
                 }
 
@@ -176,9 +194,19 @@ public class EqualizerBandView extends LinearLayout {
 
             tvText.setText(centerFreq / 1000 + "Hz");
         }
+
+        private void notifyEqualizerSettingChanged() {
+            if (mOnEqualizerSettingChangeListener != null) {
+                mOnEqualizerSettingChangeListener.onEqualizerSettingChanged();
+            }
+        }
     }
 
     public interface OnBandChangeListener {
         void onBandChanged();
+    }
+
+    public interface OnEqualizerSettingChangeListener {
+        void onEqualizerSettingChanged();
     }
 }

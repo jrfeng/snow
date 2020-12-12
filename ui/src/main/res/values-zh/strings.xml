@@ -18,4 +18,5 @@
     <string name="snow_ui_equalizer_preset_rock">摇滚</string>
     <string name="snow_ui_equalizer_preset_folk">民谣</string>
     <string name="snow_ui_toast_equalizer_not_enabled">均衡器未启用</string>
+    <string name="snow_ui_band_chart_hint">未初始化</string>
 </resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="BandChartView">
+        <attr name="lineColor" format="color|reference" />
+        <attr name="lineDisableColor" format="color|reference" />
+        <attr name="lineWidth" format="dimension|reference" />
+        <attr name="hintTextSize" format="dimension|reference" />
+        <attr name="hintTextColor" format="color|reference" />
+        <attr name="gridLineWidth" format="dimension|reference" />
+        <attr name="gridLineColor" format="color|reference" />
+    </declare-styleable>
+
+</resources>

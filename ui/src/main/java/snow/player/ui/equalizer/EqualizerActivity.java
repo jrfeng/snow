@@ -72,7 +72,7 @@ public class EqualizerActivity extends AppCompatActivity {
         mBinding.setEqualizerViewModel(mEqualizerViewModel);
         mBinding.setLifecycleOwner(this);
 
-        initLineChart();
+        initBandChart();
         initPresetSpinner();
         initEqualizerBands();
         initBassCroller();
@@ -106,8 +106,8 @@ public class EqualizerActivity extends AppCompatActivity {
         playerClient.connect();
     }
 
-    private void initLineChart() {
-        // TODO
+    private void initBandChart() {
+        mBinding.bandChart.init(mEqualizerViewModel);
     }
 
     private void initPresetSpinner() {
@@ -137,7 +137,7 @@ public class EqualizerActivity extends AppCompatActivity {
                 mEqualizerViewModel.equalizerUsePreset((short) (position - 1));
                 mEqualizerViewModel.applyChanges();
 
-                // TODO 刷新 LineChart
+                mBinding.bandChart.notifyEqualizerSettingChanged();
                 mBinding.equalizerBands.notifyEqualizerSettingChanged();
             }
 
@@ -161,7 +161,16 @@ public class EqualizerActivity extends AppCompatActivity {
         mBinding.equalizerBands.setOnBandChangeListener(new EqualizerBandView.OnBandChangeListener() {
             @Override
             public void onBandChanged() {
-                mBinding.presetSpinner.setSelection(0);
+                if (mBinding.presetSpinner.getSelectedItemPosition() != 0) {
+                    mBinding.presetSpinner.setSelection(0);
+                }
+            }
+        });
+
+        mBinding.equalizerBands.setOnEqualizerSettingChangeListener(new EqualizerBandView.OnEqualizerSettingChangeListener() {
+            @Override
+            public void onEqualizerSettingChanged() {
+                mBinding.bandChart.notifyEqualizerSettingChanged();
             }
         });
     }

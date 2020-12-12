@@ -25,4 +25,7 @@
 
     <string name="snow_ui_toast_equalizer_not_enabled">Equalizer not enabled</string>
 
+    <!-- BandChartView -->
+    <string name="snow_ui_band_chart_hint">Not init yet</string>
+
 </resources>
