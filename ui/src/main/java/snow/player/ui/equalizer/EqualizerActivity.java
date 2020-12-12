@@ -9,7 +9,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,7 +22,6 @@ import com.sdsmdg.harjot.crollerTest.Croller;
 import com.sdsmdg.harjot.crollerTest.OnCrollerChangeListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import snow.player.PlayerClient;
@@ -31,6 +29,7 @@ import snow.player.PlayerService;
 import snow.player.ui.R;
 import snow.player.ui.databinding.ActivityEqualizerBinding;
 import snow.player.ui.util.AndroidAudioEffectConfigUtil;
+import snow.player.ui.util.Preconditions;
 import snow.player.ui.widget.EqualizerBandView;
 
 public class EqualizerActivity extends AppCompatActivity {
@@ -40,6 +39,9 @@ public class EqualizerActivity extends AppCompatActivity {
     private ActivityEqualizerBinding mBinding;
 
     public static void start(@NonNull Context context, @NonNull Class<? extends PlayerService> playerService) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(playerService);
+
         Intent intent = new Intent(context, EqualizerActivity.class);
         intent.putExtra(KEY_PLAYER_SERVICE, playerService);
         context.startActivity(intent);
@@ -232,6 +234,8 @@ public class EqualizerActivity extends AppCompatActivity {
         private List<String> mAllPresetName;
 
         PresetAdapter(@NonNull List<String> allPresetName) {
+            Preconditions.checkNotNull(allPresetName);
+
             mAllPresetName = new ArrayList<>(allPresetName);
         }
 

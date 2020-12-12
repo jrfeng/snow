@@ -29,6 +29,9 @@ public final class AndroidAudioEffectConfigUtil {
      * @param equalizer 要恢复配置的 Equalizer 对象，不能为 null
      */
     public static void applySettings(@NonNull Bundle config, @NonNull Equalizer equalizer) {
+        Preconditions.checkNotNull(config);
+        Preconditions.checkNotNull(equalizer);
+
         String settings = config.getString(KEY_SETTING_EQUALIZER);
         if (settings == null || settings.isEmpty()) {
             return;
@@ -48,6 +51,9 @@ public final class AndroidAudioEffectConfigUtil {
      * @param bassBoost 要恢复配置的 BassBoost 对象，不能为 null
      */
     public static void applySettings(@NonNull Bundle config, @NonNull BassBoost bassBoost) {
+        Preconditions.checkNotNull(config);
+        Preconditions.checkNotNull(bassBoost);
+
         String settings = config.getString(KEY_SETTING_BASS_BOOST);
         if (settings == null || settings.isEmpty()) {
             return;
@@ -67,6 +73,9 @@ public final class AndroidAudioEffectConfigUtil {
      * @param virtualizer 要恢复配置的 Virtualizer 对象，不能为 null
      */
     public static void applySettings(@NonNull Bundle config, @NonNull Virtualizer virtualizer) {
+        Preconditions.checkNotNull(config);
+        Preconditions.checkNotNull(virtualizer);
+
         String settings = config.getString(KEY_SETTING_VIRTUALIZER);
         if (settings == null || settings.isEmpty()) {
             return;
@@ -86,6 +95,9 @@ public final class AndroidAudioEffectConfigUtil {
      * @param settings 最新的 Equalizer 配置，不能为 null
      */
     public static void updateSettings(@NonNull Bundle config, @NonNull Equalizer.Settings settings) {
+        Preconditions.checkNotNull(config);
+        Preconditions.checkNotNull(settings);
+
         config.putString(KEY_SETTING_EQUALIZER, settings.toString());
     }
 
@@ -96,6 +108,9 @@ public final class AndroidAudioEffectConfigUtil {
      * @param settings 最新的 BassBoost 配置，不能为 null
      */
     public static void updateSettings(@NonNull Bundle config, @NonNull BassBoost.Settings settings) {
+        Preconditions.checkNotNull(config);
+        Preconditions.checkNotNull(settings);
+
         config.putString(KEY_SETTING_BASS_BOOST, settings.toString());
     }
 
@@ -106,6 +121,9 @@ public final class AndroidAudioEffectConfigUtil {
      * @param settings 最新的 Virtualizer 配置，不能为 null
      */
     public static void updateSettings(@NonNull Bundle config, @NonNull Virtualizer.Settings settings) {
+        Preconditions.checkNotNull(config);
+        Preconditions.checkNotNull(settings);
+
         config.putString(KEY_SETTING_VIRTUALIZER, settings.toString());
     }
 

@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel;
 
 import snow.player.PlayerClient;
 import snow.player.ui.util.AndroidAudioEffectConfigUtil;
+import snow.player.ui.util.Preconditions;
 
 public class EqualizerViewModel extends ViewModel {
     public static final int AUDIO_EFFECT_PRIORITY = 1000;
@@ -30,6 +31,8 @@ public class EqualizerViewModel extends ViewModel {
     private MediaPlayer mFakeMediaPlayer;
 
     public void init(@NonNull PlayerClient playerClient) {
+        Preconditions.checkNotNull(playerClient);
+
         if (mInitialized) {
             return;
         }
