@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="navigation_album_icon_size">300dp</dimen>
+    <dimen name="player_album_icon_size">300dp</dimen>
+
+</resources>

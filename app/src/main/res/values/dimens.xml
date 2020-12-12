@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="image_button_size">48dp</dimen>
-    <dimen name="album_icon_size">300dp</dimen>
+    <dimen name="navigation_album_icon_size">272dp</dimen>
     <dimen name="album_icon_corner_radius">12dp</dimen>
     <dimen name="player_bottom_bar_icon_size">40dp</dimen>
     <dimen name="player_bottom_bar_icon_corner_size">4dp</dimen>
+    <dimen name="player_album_icon_size">256dp</dimen>
 
     <dimen name="action_bar_height">56dp</dimen>
     <dimen name="action_bar_title_text_size">18sp</dimen>
