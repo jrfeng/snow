@@ -16,6 +16,9 @@ import android.view.Gravity;
 import android.view.View;
 
 import androidx.annotation.AttrRes;
+import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
+import androidx.annotation.DimenRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -230,5 +233,99 @@ public class BandChartView extends View {
         float halfLineWith = (float) (lineWidth / 2.0);
 
         return (int) Math.min(Math.max(halfLineWith, result), mContentRect.height() - lineWidth);
+    }
+
+    public void setLineColor(@ColorInt int color) {
+        this.lineColor = color;
+        invalidate();
+    }
+
+    public void setLineColorRes(@ColorRes int resId) {
+        setLineColor(getResources().getColor(resId));
+    }
+
+    @ColorInt
+    public int getLineColor() {
+        return lineColor;
+    }
+
+    public void setLineDisableColor(@ColorInt int lineDisableColor) {
+        this.lineDisableColor = lineDisableColor;
+        invalidate();
+    }
+
+    public void setLineDisableColorRes(@ColorRes int resId) {
+        setLineDisableColor(getResources().getColor(resId));
+    }
+
+    @ColorInt
+    public int getLineDisableColor() {
+        return lineDisableColor;
+    }
+
+    public void setLineWidth(int lineWidth) {
+        this.lineWidth = lineWidth;
+        invalidate();
+    }
+
+    public void setLineWidthRes(@DimenRes int resId) {
+        setLineWidth(getResources().getDimensionPixelOffset(resId));
+    }
+
+    public int getLineWidth() {
+        return lineWidth;
+    }
+
+    public void setHintTextSize(int hintTextSize) {
+        this.hintTextSize = hintTextSize;
+        invalidate();
+    }
+
+    public void setHintTextSizeRes(@DimenRes int resId) {
+        setHintTextSize(getResources().getDimensionPixelOffset(resId));
+    }
+
+    public int getHintTextSize() {
+        return hintTextSize;
+    }
+
+    public void setHintTextColor(@ColorInt int hintTextColor) {
+        this.hintTextColor = hintTextColor;
+        invalidate();
+    }
+
+    public void setHintTextColorRes(@ColorRes int resId) {
+        setHintTextColor(getResources().getColor(resId));
+    }
+
+    public int getHintTextColor() {
+        return hintTextColor;
+    }
+
+    public void setGridLineWidth(int gridLineWidth) {
+        this.gridLineWidth = gridLineWidth;
+        invalidate();
+    }
+
+    public void setGridLineWidthRes(@DimenRes int resId) {
+        setGridLineWidth(getResources().getDimensionPixelOffset(resId));
+    }
+
+    public int getGridLineWidth() {
+        return gridLineWidth;
+    }
+
+    public void setGridLineColor(@ColorInt int gridLineColor) {
+        this.gridLineColor = gridLineColor;
+        invalidate();
+    }
+
+    public void setGridLineColorRes(@ColorRes int resId) {
+        setGridLineColor(getResources().getColor(resId));
+    }
+
+    @ColorInt
+    public int getGridLineColor() {
+        return gridLineColor;
     }
 }
