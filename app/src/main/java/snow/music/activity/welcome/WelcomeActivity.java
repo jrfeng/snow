@@ -41,7 +41,7 @@ public class WelcomeActivity extends AppCompatActivity {
             mTimerDisposable.isDisposed();
         }
 
-        mTimerDisposable = Observable.timer(1000, TimeUnit.MILLISECONDS)
+        mTimerDisposable = Observable.timer(300, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::startNavigationActivity);
     }
