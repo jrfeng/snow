@@ -104,6 +104,7 @@
 
         <service
             android:name=".service.AppPlayerService"
+            android:foregroundServiceType="mediaPlayback"
             tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
