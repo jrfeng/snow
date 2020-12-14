@@ -119,7 +119,8 @@ public class AppWidgetPlayerState implements Parcelable {
             MMKV.initialize(context);
         }
 
-        return MMKV.mmkvWithID(PlayerService.getPersistenceId(playerService), MMKV.MULTI_PROCESS_MODE);
+        String persistenceId = PlayerService.getPersistenceId(playerService);
+        return MMKV.mmkvWithID("AppWidgetPlayerState:" + persistenceId, MMKV.MULTI_PROCESS_MODE);
     }
 
     @NonNull
