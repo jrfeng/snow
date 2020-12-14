@@ -113,6 +113,11 @@ public class AppPlayerService extends PlayerService {
         }
 
         @Override
+        public int getSmallIconId() {
+            return R.mipmap.ic_notif_small_icon;
+        }
+
+        @Override
         protected void onBuildMediaStyle(androidx.media.app.NotificationCompat.MediaStyle mediaStyle) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 mediaStyle.setShowActionsInCompactView(1, 2, 3);
