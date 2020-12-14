@@ -46,6 +46,13 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     private boolean mStalled;
     private boolean mInvalid;
 
+    /**
+     * 创建一个 {@link ExoMusicPlayer} 对象。
+     *
+     * @param context            Context 对象，不能为 null
+     * @param mediaSourceFactory MediaSourceFactory 对象，不能为 null
+     * @param uri                要播放的 Uri，不能为 null
+     */
     public ExoMusicPlayer(@NonNull Context context, @NonNull MediaSourceFactory mediaSourceFactory, @NonNull Uri uri) {
         initEventListener();
         initExoPlayer(context);
@@ -54,10 +61,22 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
         mSimpleExoPlayer.setMediaSource(mediaSource);
     }
 
+    /**
+     * 创建一个 {@link ExoMusicPlayer} 对象。
+     *
+     * @param context Context 对象，不能为 null
+     * @param uri     要播放的 Uri，不能为 null
+     */
     public ExoMusicPlayer(@NonNull Context context, @NonNull Uri uri) {
         this(context, MediaItem.fromUri(uri));
     }
 
+    /**
+     * 创建一个 {@link ExoMusicPlayer} 对象。
+     *
+     * @param context   Context 对象，不能为 null
+     * @param mediaItem 要播放的 MediaItem，不能为 null
+     */
     public ExoMusicPlayer(@NonNull Context context, @NonNull MediaItem mediaItem) {
         initEventListener();
         initExoPlayer(context);
