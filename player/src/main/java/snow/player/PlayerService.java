@@ -27,7 +27,6 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -65,7 +64,6 @@ import io.reactivex.schedulers.Schedulers;
 import media.helper.HeadsetHookHelper;
 
 import snow.player.annotation.PersistenceId;
-import snow.player.appwidget.AppWidgetPreferences;
 import snow.player.effect.AudioEffectManager;
 import snow.player.audio.MediaMusicPlayer;
 import snow.player.audio.MusicItem;
@@ -287,7 +285,7 @@ public class PlayerService extends MediaBrowserServiceCompat
                 mPlayerConfig,
                 mPlayerState,
                 mPlaylistManager,
-                new AppWidgetPreferences(this, this.getClass()));
+                this.getClass());
     }
 
     private void initCustomActionDispatcher() {
@@ -1237,8 +1235,8 @@ public class PlayerService extends MediaBrowserServiceCompat
                          @NonNull PlayerConfig playerConfig,
                          @NonNull PlayerState playlistState,
                          @NonNull PlaylistManagerImp playlistManager,
-                         @NonNull AppWidgetPreferences pref) {
-            super(context, playerConfig, playlistState, playlistManager, pref);
+                         @NonNull Class<? extends PlayerService> playerService) {
+            super(context, playerConfig, playlistState, playlistManager, playerService);
         }
 
         @Override

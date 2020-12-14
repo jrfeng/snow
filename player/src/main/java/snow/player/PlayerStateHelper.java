@@ -1,31 +1,63 @@
 package snow.player;
 
+import android.content.Context;
 import android.os.SystemClock;
 
 import androidx.annotation.Nullable;
 
-import snow.player.appwidget.AppWidgetPreferences;
+import snow.player.appwidget.AppWidgetPlayerState;
 import snow.player.audio.ErrorCode;
 import snow.player.audio.MusicItem;
 
 class PlayerStateHelper {
     private final PlayerState mPlayerState;
-    @Nullable
-    private final AppWidgetPreferences mAppWidgetPreferences;
+
+    private boolean mRunOnService;
+    private final Context mContext;
+    private final Class<? extends PlayerService> mPlayerService;
 
     public PlayerStateHelper(PlayerState playerState) {
-        this(playerState, null);
+        mPlayerState = playerState;
+
+        mRunOnService = false;
+        mContext = null;
+        mPlayerService = null;
     }
 
     // 服务端专用
-    public PlayerStateHelper(PlayerState playerState, @Nullable AppWidgetPreferences preferences) {
+    public PlayerStateHelper(PlayerState playerState,
+                             Context context,
+                             Class<? extends PlayerService> playerService) {
         mPlayerState = playerState;
-        mAppWidgetPreferences = preferences;
+
+        mRunOnService = true;
+        mContext = context;
+        mPlayerService = playerService;
     }
 
-    public void updatePlayProgress(int progress, long updateTime) {
+    void updatePlayProgress(int progress, long updateTime) {
         mPlayerState.setPlayProgress(progress);
         mPlayerState.setPlayProgressUpdateTime(updateTime);
+    }
+
+    private void updateAppWidgetPlayerState() {
+        if (mContext == null || mPlayerService == null) {
+            return;
+        }
+
+        AppWidgetPlayerState playerState = new AppWidgetPlayerState(
+                mPlayerState.getPlaybackState(),
+                mPlayerState.getMusicItem(),
+                mPlayerState.getPlayMode(),
+                mPlayerState.getPlayProgress(),
+                mPlayerState.getPlayProgressUpdateTime(),
+                mPlayerState.isPreparing(),
+                mPlayerState.isPrepared(),
+                mPlayerState.isStalled(),
+                mPlayerState.getErrorMessage()
+        );
+
+        AppWidgetPlayerState.updatePlayerState(mContext, mPlayerService, playerState);
     }
 
     public void onPreparing() {
@@ -38,11 +70,8 @@ class PlayerStateHelper {
             mPlayerState.setErrorMessage("");
         }
 
-        if (mAppWidgetPreferences != null) {
-            mAppWidgetPreferences.edit()
-                    .setPreparing(true)
-                    .setPlaybackState(mPlayerState.getPlaybackState())
-                    .commit();
+        if (mRunOnService) {
+            updateAppWidgetPlayerState();
         }
     }
 
@@ -51,10 +80,8 @@ class PlayerStateHelper {
         mPlayerState.setPrepared(true);
         mPlayerState.setAudioSessionId(audioSessionId);
 
-        if (mAppWidgetPreferences != null) {
-            mAppWidgetPreferences.edit()
-                    .setPreparing(false)
-                    .commit();
+        if (mRunOnService) {
+            updateAppWidgetPlayerState();
         }
     }
 
@@ -68,13 +95,8 @@ class PlayerStateHelper {
         mPlayerState.setPlaybackState(PlaybackState.PLAYING);
         updatePlayProgress(progress, updateTime);
 
-        if (mAppWidgetPreferences != null) {
-            mAppWidgetPreferences.edit()
-                    .setPlaybackState(PlaybackState.PLAYING)
-                    .setPlayProgress(progress)
-                    .setPlayProgressUpdateTime(updateTime)
-                    .setStalled(stalled)
-                    .commit();
+        if (mRunOnService) {
+            updateAppWidgetPlayerState();
         }
     }
 
@@ -83,10 +105,8 @@ class PlayerStateHelper {
         mPlayerState.setPlayProgress(playProgress);
         mPlayerState.setPlayProgressUpdateTime(updateTime);
 
-        if (mAppWidgetPreferences != null) {
-            mAppWidgetPreferences.edit()
-                    .setPlaybackState(PlaybackState.PAUSED)
-                    .commit();
+        if (mRunOnService) {
+            updateAppWidgetPlayerState();
         }
     }
 
@@ -96,13 +116,8 @@ class PlayerStateHelper {
         updatePlayProgress(0, updateTime);
         clearPrepareState();
 
-        if (mAppWidgetPreferences != null) {
-            mAppWidgetPreferences.edit()
-                    .setPlaybackState(PlaybackState.STOPPED)
-                    .setPlayProgressUpdateTime(0)
-                    .setPlayProgressUpdateTime(updateTime)
-                    .setPreparing(false)
-                    .commit();
+        if (mRunOnService) {
+            updateAppWidgetPlayerState();
         }
     }
 
@@ -110,23 +125,16 @@ class PlayerStateHelper {
         mPlayerState.setStalled(stalled);
         updatePlayProgress(playProgress, updateTime);
 
-        if (mAppWidgetPreferences != null) {
-            mAppWidgetPreferences.edit()
-                    .setStalled(stalled)
-                    .setPlayProgress(playProgress)
-                    .setPlayProgressUpdateTime(updateTime)
-                    .commit();
+        if (mRunOnService) {
+            updateAppWidgetPlayerState();
         }
     }
 
     public void onRepeat(long repeatTime) {
         updatePlayProgress(0, repeatTime);
 
-        if (mAppWidgetPreferences != null) {
-            mAppWidgetPreferences.edit()
-                    .setPlayProgress(0)
-                    .setPlayProgressUpdateTime(repeatTime)
-                    .commit();
+        if (mRunOnService) {
+            updateAppWidgetPlayerState();
         }
     }
 
@@ -136,14 +144,8 @@ class PlayerStateHelper {
         mPlayerState.setErrorMessage(errorMessage);
         clearPrepareState();
 
-        if (mAppWidgetPreferences != null) {
-            mAppWidgetPreferences.edit()
-                    .setPlaybackState(PlaybackState.ERROR)
-                    .setErrorMessage(errorMessage)
-                    .setPlayProgress(mPlayerState.getPlayProgress())
-                    .setPlayProgressUpdateTime(mPlayerState.getPlayProgressUpdateTime())
-                    .setPreparing(false)
-                    .commit();
+        if (mRunOnService) {
+            updateAppWidgetPlayerState();
         }
     }
 
@@ -165,12 +167,8 @@ class PlayerStateHelper {
             mPlayerState.setErrorMessage("");
         }
 
-        if (mAppWidgetPreferences != null) {
-            mAppWidgetPreferences.edit()
-                    .setPlayingMusicItem(musicItem)
-                    .setPlayProgress(playProgress)
-                    .setPlayProgressUpdateTime(updateTime)
-                    .commit();
+        if (mRunOnService) {
+            updateAppWidgetPlayerState();
         }
     }
 
@@ -178,12 +176,8 @@ class PlayerStateHelper {
         updatePlayProgress(playProgress, updateTime);
         mPlayerState.setStalled(stalled);
 
-        if (mAppWidgetPreferences != null) {
-            mAppWidgetPreferences.edit()
-                    .setPlayProgress(playProgress)
-                    .setPlayProgressUpdateTime(updateTime)
-                    .setStalled(stalled)
-                    .commit();
+        if (mRunOnService) {
+            updateAppWidgetPlayerState();
         }
     }
 
@@ -194,10 +188,8 @@ class PlayerStateHelper {
     public void onPlayModeChanged(PlayMode playMode) {
         mPlayerState.setPlayMode(playMode);
 
-        if (mAppWidgetPreferences != null) {
-            mAppWidgetPreferences.edit()
-                    .setPlayMode(playMode)
-                    .commit();
+        if (mRunOnService) {
+            updateAppWidgetPlayerState();
         }
     }
 

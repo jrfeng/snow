@@ -34,7 +34,6 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import media.helper.AudioFocusHelper;
 import media.helper.BecomeNoiseHelper;
-import snow.player.appwidget.AppWidgetPreferences;
 import snow.player.audio.MusicItem;
 import snow.player.audio.MusicPlayer;
 import snow.player.helper.PhoneCallStateHelper;
@@ -110,24 +109,22 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      * @param playerConfig    {@link PlayerConfig} 对象，保存了播放器的初始配置信息，不能为 null
      * @param playerState     {@link PlayerState} 对象，保存了播放器的初始状态，不能为 null
      * @param playlistManager {@link PlaylistManagerImp} 对象，用于管理播放列表，不能为 null
-     * @param pref            {@link AppWidgetPreferences} 对象，用于在 PlayerService 与 AppWidget
-     *                        之间进行状态同步，不能为 null
      */
     public AbstractPlayer(@NonNull Context context,
                           @NonNull PlayerConfig playerConfig,
                           @NonNull PlayerState playerState,
                           @NonNull PlaylistManagerImp playlistManager,
-                          @NonNull AppWidgetPreferences pref) {
+                          @NonNull Class<? extends PlayerService> playerService) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerConfig);
         Preconditions.checkNotNull(playerState);
         Preconditions.checkNotNull(playlistManager);
-        Preconditions.checkNotNull(pref);
+        Preconditions.checkNotNull(playerService);
 
         mApplicationContext = context.getApplicationContext();
         mPlayerConfig = playerConfig;
         mPlayerState = playerState;
-        mPlayerStateHelper = new PlayerStateHelper(mPlayerState, pref);
+        mPlayerStateHelper = new PlayerStateHelper(mPlayerState, mApplicationContext, playerService);
         mPlaylistManager = playlistManager;
 
         initAllListener();
