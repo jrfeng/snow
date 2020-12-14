@@ -2120,7 +2120,7 @@ public class PlayerService extends MediaBrowserServiceCompat
          */
         @DrawableRes
         public int getSmallIconId() {
-            return R.drawable.snow_ic_notification_small_icon;
+            return R.mipmap.snow_ic_notif_small_icon;
         }
 
         /**
@@ -2143,15 +2143,15 @@ public class PlayerService extends MediaBrowserServiceCompat
          * 则你在覆盖该方法时可以不回调超类方法。
          */
         protected void onBuildNotification(NotificationCompat.Builder builder) {
-            builder.addAction(R.drawable.snow_ic_skip_previous, "skip_to_previous", doSkipToPrevious());
+            builder.addAction(R.mipmap.snow_ic_notif_skip_to_previous, "skip_to_previous", doSkipToPrevious());
 
             if (isPlayingState()) {
-                builder.addAction(R.drawable.snow_ic_pause, "pause", doPlayPause());
+                builder.addAction(R.mipmap.snow_ic_notif_pause, "pause", doPlayPause());
             } else {
-                builder.addAction(R.drawable.snow_ic_play, "play", doPlayPause());
+                builder.addAction(R.mipmap.snow_ic_notif_play, "play", doPlayPause());
             }
 
-            builder.addAction(R.drawable.snow_ic_skip_next, "skip_to_next", doSkipToNext());
+            builder.addAction(R.mipmap.snow_ic_notif_skip_to_next, "skip_to_next", doSkipToNext());
         }
     }
 
