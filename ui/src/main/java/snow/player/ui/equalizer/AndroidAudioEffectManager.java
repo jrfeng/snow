@@ -9,18 +9,22 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import snow.player.PlayerService;
 import snow.player.effect.AudioEffectManager;
 import snow.player.ui.util.AndroidAudioEffectConfigUtil;
 
 /**
  * Android 音频特效管理器。
  * <p>
- * 用于支持 Android 原生的音频特效：<br>
+ * 用于与 {@link EqualizerActivity} 配合使用，以支持 Android 原生的音频特效：<br>
  * <ul>
  *     <li>Equalizer：均衡器</li>
  *     <li>BassBoost：低音增强</li>
  *     <li>Virtualizer：环绕声</li>
  * </ul>
+ * <p>
+ * 要使用该类，请覆盖 {@link PlayerService} 的 {@code onCreateAudioEffectManager()} 方法，
+ * 并通过 {@link EqualizerActivity} 俩配置音频特效。
  */
 public final class AndroidAudioEffectManager implements AudioEffectManager {
     /**

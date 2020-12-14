@@ -32,12 +32,36 @@ import snow.player.ui.util.AndroidAudioEffectConfigUtil;
 import snow.player.ui.util.Preconditions;
 import snow.player.ui.widget.EqualizerBandView;
 
+/**
+ * 均衡器 Activity，用于配置播放器的音频特效。
+ * <p>
+ * 该 Activity 提供了以下 3 种音频特效：
+ * <ul>
+ *     <li>均衡器</li>
+ *     <li>低音增强</li>
+ *     <li>环绕音</li>
+ * </ul>
+ * <p>
+ * 要使用该音频特效，需要覆盖 {@link PlayerService} 的 {@code onCreateAudioEffectManager()} 方法，
+ * 并返回一个 {@link AndroidAudioEffectManager} 对象。
+ * <p>
+ * {@link AndroidAudioEffectManager} 类用于与当前 Activity 配合使用，共同实现音频特效功能。
+ * <p>
+ * <b>注意！要启动 {@link EqualizerActivity}，请使用 {@link #start(Context, Class)} 方法，
+ * 而不是直接使用 {@code Intent#startActivity()}。</b>
+ */
 public class EqualizerActivity extends AppCompatActivity {
     private static final String KEY_PLAYER_SERVICE = "PLAYER_SERVICE";
 
     private EqualizerViewModel mEqualizerViewModel;
     private ActivityEqualizerBinding mBinding;
 
+    /**
+     * 启动 {@link EqualizerActivity}。
+     *
+     * @param context       Context 对象，不能为 null
+     * @param playerService 你的 PlayerService 的 Class 对象，不能为 null
+     */
     public static void start(@NonNull Context context, @NonNull Class<? extends PlayerService> playerService) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerService);
@@ -47,6 +71,7 @@ public class EqualizerActivity extends AppCompatActivity {
         context.startActivity(intent);
     }
 
+    @SuppressWarnings("unchecked")
     private Class<? extends PlayerService> getPlayerServiceClazz() {
         Intent intent = getIntent();
         Class<? extends PlayerService> playerService = (Class<? extends PlayerService>) intent.getSerializableExtra(KEY_PLAYER_SERVICE);
@@ -240,7 +265,7 @@ public class EqualizerActivity extends AppCompatActivity {
     }
 
     private static class PresetAdapter extends BaseAdapter {
-        private List<String> mAllPresetName;
+        private final List<String> mAllPresetName;
 
         PresetAdapter(@NonNull List<String> allPresetName) {
             Preconditions.checkNotNull(allPresetName);
