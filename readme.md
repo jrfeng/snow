@@ -26,6 +26,11 @@ Android music player library. Compatible with MediaSession.
 
 * [**Download**](https://github.com/jrfeng/snow/releases/tag/1.0)
 
+**More:**
+
+* [**Wiki**](https://github.com/jrfeng/snow/wiki)
+* [**API Doc**](https://jrfeng.github.io/snow-doc/)
+
 ## Add dependency
 
 1. Make sure you have the jitpack repositories included in the `build.gradle` file in the root of your project.
@@ -67,10 +72,22 @@ dependencies {
 
 **Note: Android 6.0 (API level 23) need request `android.permission.READ_EXTERNAL_STORAGE` permission at runtime.**
 
-4. Config PlayerService.
+4. Create a PlayerService
+
+Create a class and let it extends the `snow.player.PlayerService`, and annotate it with `@PersistenceId` annotation. You don't need to override any methods of this class.
+
+```java
+@PersistenId("MyPlayerService")
+public MyPlayerService extends PlayerService {
+}
+```
+
+The `@PersistenceId` annotation is used to set a persistent ID for the current `PlayerService`, which will be used for the persistence of the `PlayerService` state. If you do not use the `@PersistenceId` annotation to set the persistent ID, the persistent ID defaults to the full class name of your `PlayerService` (such as `snow.demo.MyPlayerService`). It is recommended to set a persistent ID for your `PlayerService` so that even if the `PlayerService` is renamed, the state will not be lost.
+
+5. Register PlayerService on `AndroidManifest.xml`.
 
 ```xml
-<service android:name="snow.player.PlayerService">
+<service android:name="snow.demo.MyPlayerService">
     <intent-filter>
         <action android:name="android.media.browse.MediaBrowserService" />
     </intent-filter>
@@ -171,11 +188,6 @@ playerClient.setPlaylist(playlist, true);
 * `rewind()`
 * `setNextPlay(MusicItem musicItem)`
 * `setPlayMode(PlayMode playMode)`
-
-**More:**
-
-* [**Wiki**](https://github.com/jrfeng/snow/wiki)
-* [**API Doc**](https://jrfeng.github.io/snow-doc/)
 
 ## LICENSE
 

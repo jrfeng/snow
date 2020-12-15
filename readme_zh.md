@@ -26,6 +26,11 @@ Android 音乐播放器框架，兼容 MediaSession 。
 
 * [**下载**](https://github.com/jrfeng/snow/releases/tag/1.0)
 
+更多内容：
+
+* [**Wiki**](https://github.com/jrfeng/snow/wiki)
+* [**API Doc**](https://jrfeng.github.io/snow-doc/)
+
 ## 项目配置
 
 1. 将以下代码添加到项目根目录中的 `build.gradle` 中：
@@ -67,10 +72,24 @@ dependencies {
 
 **注意！在大于等于 `Android 6.0(API Level 23)` 的 `Android` 版本中，需要动态申请存储器访问权限：`"android.permission.READ_EXTERNAL_STORAGE"`。**
 
-4. 配置播放器
+4. 创建 PlayerService
+
+创建一个类并让其继承 `snow.player.PlayerService` 类，并且使用 `@PersistenceId` 注解对其进行标注。你不需要重写这个类的任何方法。
+
+**例：**
+
+```java
+@PersistenId("MyPlayerService")
+public MyPlayerService extends PlayerService {
+}
+```
+
+`@PersistenceId` 注解用于为当前 `PlayerService` 设置一个持久化 `ID`，该 `ID` 将用于 `PlayerService` 状态的持久化。如果你没有使用 `@PersistenceId` 注解设置持久化 `ID`，则持久化 `ID` 默认为你的 `PlayerService` 的完整类名（例如 `snow.demo.MyPlayerService`）。建议为你的 `PlayerService` 设置一个持久化 `ID`，这样即使重命名 `PlayerService` 也不会导致状态丢失。
+
+5. 注册 PlayerService
 
 ```xml
-<service android:name="snow.player.PlayerService">
+<service android:name="snow.demo.MyPlayerService">
     <intent-filter>
         <action android:name="android.media.browse.MediaBrowserService" />
     </intent-filter>
@@ -171,11 +190,6 @@ playerClient.setPlaylist(playlist, true);
 * `rewind()`：快退
 * `setNextPlay(MusicItem musicItem)`：下一首播放
 * `setPlayMode(PlayMode playMode)`：设置播放模式（共 `3` 种模式：顺序播放、单曲循环、随机播放）
-
-更多内容，请参考：
-
-* [**Wiki**](https://github.com/jrfeng/snow/wiki)
-* [**API Doc**](https://jrfeng.github.io/snow-doc/)
 
 ## LICENSE
 
