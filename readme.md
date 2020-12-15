@@ -22,6 +22,10 @@ Android music player library. Compatible with MediaSession.
 * [**Custom Notification**](https://github.com/jrfeng/snow/wiki/[EN]-3.Custom-Notification)
 * [**Use ExoPlayer**](https://github.com/jrfeng/snow/wiki/[EN]-4.Use-ExoPlayer)
 
+**Sample App:**
+
+* [**Download**](https://github.com/jrfeng/snow/releases/tag/1.0)
+
 ## Add dependency
 
 1. Make sure you have the jitpack repositories included in the `build.gradle` file in the root of your project.
@@ -39,7 +43,7 @@ allprojects {
 
 ```gradle
 dependencies {
-    implementation 'com.github.jrfeng.snow:player:0.1.20'
+    implementation 'com.github.jrfeng.snow:player:1.0'
 }
 ```
 

@@ -22,6 +22,10 @@ Android 音乐播放器框架，兼容 MediaSession 。
 * [**自定义 Notification**](https://github.com/jrfeng/snow/wiki/%5BZH%5D-3.%E8%87%AA%E5%AE%9A%E4%B9%89-Notification)
 * [**使用 ExoPlayer**](https://github.com/jrfeng/snow/wiki/[ZH]-4.%E4%BD%BF%E7%94%A8-ExoPlayer)
 
+**Sample App:**
+
+* [**下载**](https://github.com/jrfeng/snow/releases/tag/1.0)
+
 ## 项目配置
 
 1. 将以下代码添加到项目根目录中的 `build.gradle` 中：
@@ -39,7 +43,7 @@ allprojects {
 
 ```gradle
 dependencies {
-    implementation 'com.github.jrfeng.snow:player:0.1.20'
+    implementation 'com.github.jrfeng.snow:player:1.0'
 }
 ```
 
