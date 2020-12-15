@@ -108,7 +108,7 @@ public MyPlayerService extends PlayerService {
 
 ```java
 // 创建一个 PlayerClient 对象
-PlayerClient playerClient = PlayerClient.newInstance(context, PlayerService.class);
+PlayerClient playerClient = PlayerClient.newInstance(context, MyPlayerService.class);
 
 // 连接到 PlayerService
 playerClient.connect(new PlayerClient.OnConnectCallback() {

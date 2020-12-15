@@ -106,7 +106,7 @@ The `@PersistenceId` annotation is used to set a persistent ID for the current `
 
 ```java
 // create a PlayerClient instance
-PlayerClient playerClient = PlayerClient.newInstance(context, PlayerService.class);
+PlayerClient playerClient = PlayerClient.newInstance(context, MyPlayerService.class);
 
 // connect to PlayerService
 playerClient.connect(new PlayerClient.OnConnectCallback() {
