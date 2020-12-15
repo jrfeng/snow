@@ -1,0 +1,14 @@
+-keep public interface snow.player.Player { *; }
+-keep public interface snow.player.PlayerManager { *; }
+-keep public interface snow.player.PlayerStateListener { *; }
+-keep public interface snow.player.PlayerStateSynchronizer { *; }
+-keep public interface snow.player.PlayerStateSynchronizer$OnSyncPlayerStateListener { *; }
+-keep public interface snow.player.SleepTimer { *; }
+-keep public interface snow.player.SleepTimer$OnStateChangeListener { *; }
+-keep public interface snow.player.playlist.PlaylistEditor { *; }
+-keep class **__ChannelHelper { *; }
+-keep class **__ChannelHelper$Emitter { *; }
+-keep class **__ChannelHelper$Dispatcher { *; }
+
+-keep class snow.player.helper.VolumeEaseHelper { *; }
+-keep class snow.player.helper.VolumeEaseHelper$Callback { *; }
