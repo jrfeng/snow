@@ -21,6 +21,7 @@ Android music player library. Compatible with MediaSession.
 * [**Custom PlayerService**](https://github.com/jrfeng/snow/wiki/[EN]-2.Custom-PlayerService)
 * [**Custom Notification**](https://github.com/jrfeng/snow/wiki/[EN]-3.Custom-Notification)
 * [**Use ExoPlayer**](https://github.com/jrfeng/snow/wiki/[EN]-4.Use-ExoPlayer)
+* [**EqualizerActivity**](https://github.com/jrfeng/snow/wiki/[EN]-5.EqualizerActivity)
 
 **Sample App:**
 
