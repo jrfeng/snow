@@ -10,6 +10,8 @@ Android music player library. Compatible with MediaSession.
 * Custom music player (MediaPlayer, ExoPlayer)
 * Custom Notification
 * Custom audio effect engine
+* Only WiFi network
+* Sound quality/dynamic URL
 * Headset clicks
 * Sleep timer
 * Playback history

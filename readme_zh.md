@@ -10,6 +10,8 @@ Android 音乐播放器框架，兼容 MediaSession 。
 * 自定义播放器（`MediaPlayer`, `ExoPlayer`）
 * 自定义通知栏控制器
 * 自定义音频特效引擎
+* 仅 WiFi 网络播放
+* 切换音质/动态 URL
 * 线控播放
 * 睡眠定时器
 * 记录播放历史
