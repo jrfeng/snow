@@ -1,5 +1,6 @@
 ![API Level](https://img.shields.io/badge/Android-API%20Level%2016%2B-brightgreen)
 [![GitHub](https://img.shields.io/github/license/jrfeng/snow)](./license)
+[![](https://jitpack.io/v/jrfeng/snow.svg)](https://jitpack.io/#jrfeng/snow)
 
 [**中文**](./readme_zh.md)
 
@@ -47,11 +48,11 @@ allprojects {
 }
 ```
 
-2. Add a dependency in the `build.gradle` file of your app module --- [latest version](https://github.com/jrfeng/snow/releases)
+2. Add a dependency in the `build.gradle` file of your app module [![latest version](https://jitpack.io/v/jrfeng/snow.svg)](https://jitpack.io/#jrfeng/snow)
 
 ```gradle
 dependencies {
-    implementation 'com.github.jrfeng.snow:player:1.0'
+    implementation 'com.github.jrfeng.snow:player:1.0.1'
 }
 ```
 
