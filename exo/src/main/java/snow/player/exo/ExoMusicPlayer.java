@@ -13,6 +13,7 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.audio.AudioListener;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceFactory;
 
@@ -45,6 +46,10 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
 
     private boolean mStalled;
     private boolean mInvalid;
+
+    private boolean mPreparing;
+    private boolean mPlayerReady;
+    private boolean mAudioSessionIdGenerated;
 
     /**
      * 创建一个 {@link ExoMusicPlayer} 对象。
@@ -114,10 +119,8 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
             }
 
             private void onReady() {
-                if (mPreparedListener != null) {
-                    mPreparedListener.onPrepared(ExoMusicPlayer.this);
-                    mPreparedListener = null;
-                }
+                mPlayerReady = true;
+                tryNotifyPrepared();
 
                 if (isStalled()) {
                     setStalled(false);
@@ -162,7 +165,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
 
     private void setStalled(boolean stalled) {
         mStalled = stalled;
-        if (mStalledListener != null) {
+        if (isPrepared() && mStalledListener != null) {
             mStalledListener.onStalled(mStalled);
         }
     }
@@ -188,6 +191,34 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
                 .setLooper(Looper.getMainLooper())
                 .build();
         mSimpleExoPlayer.addListener(mEventListener);
+        mSimpleExoPlayer.addAudioListener(new AudioListener() {
+            @Override
+            public void onAudioSessionId(int audioSessionId) {
+                mAudioSessionIdGenerated = true;
+                tryNotifyPrepared();
+            }
+        });
+    }
+
+    private void tryNotifyPrepared() {
+        if (mPreparing && isPrepared()) {
+            mPreparing = false;
+            onPrepared();
+        }
+    }
+
+    private boolean isPrepared() {
+        return mPlayerReady && mAudioSessionIdGenerated;
+    }
+
+    private void onPrepared() {
+        if (mPreparedListener != null) {
+            mPreparedListener.onPrepared(ExoMusicPlayer.this);
+        }
+
+        if (mStalled && mStalledListener != null) {
+            mStalledListener.onStalled(true);
+        }
     }
 
     @Override
@@ -196,6 +227,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
             return;
         }
 
+        mPreparing = true;
         mSimpleExoPlayer.prepare();
     }
 
@@ -221,7 +253,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
 
     @Override
     public boolean isPlaying() {
-        return mSimpleExoPlayer.isPlaying() || mSimpleExoPlayer.getPlayWhenReady();
+        return isPrepared() && (mSimpleExoPlayer.isPlaying() || mSimpleExoPlayer.getPlayWhenReady());
     }
 
     @Override
