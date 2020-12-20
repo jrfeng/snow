@@ -824,11 +824,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 获取睡眠定时器的启动时间。
      * <p>
-     * 该方法的返回值只在睡眠定时器启动（{@link #isSleepTimerStarted()} 返回 true）时才有意义。
+     * 这个时间是基于 {@code SystemClock.elapsedRealtime()} 的，且该方法的返回值只在睡眠定时器启动
+     * （{@link #isSleepTimerStarted()} 返回 true）时才有意义。
      * <p>
-     * 使用当前的 System.currentTimeMillis() 减去这个时间，即可知道睡眠定时器已经走过的时间。
+     * 使用当前的 {@code SystemClock.elapsedRealtime()} 减去这个时间，即可知道睡眠定时器已经走过的时间。
      *
      * @return 睡眠定时器的启动时间。该方法的返回值只在睡眠定时器启动（{@link #isSleepTimerStarted()} 返回 true）时才有意义。
+     * @see #getSleepTimerElapsedTime()
      */
     public long getSleepTimerStartedTime() {
         return mPlayerState.getSleepTimerStartTime();
@@ -843,7 +845,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public long getSleepTimerElapsedTime() {
         if (isSleepTimerStarted()) {
-            return SystemClock.elapsedRealtime() - getSleepTimerTime();
+            return SystemClock.elapsedRealtime() - getSleepTimerStartedTime();
         }
 
         return 0;
