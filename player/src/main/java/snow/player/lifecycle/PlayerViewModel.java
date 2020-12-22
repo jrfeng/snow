@@ -605,7 +605,7 @@ public class PlayerViewModel extends ViewModel {
      * @return 客户端的连接结果，如果已成功连接，则返回 true，否则返回 false
      * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
      */
-    public MutableLiveData<Boolean> getConnected() throws IllegalStateException {
+    public LiveData<Boolean> getConnected() throws IllegalStateException {
         if (!isInitialized()) {
             throw new IllegalStateException("PlayerViewModel not initialized yet.");
         }
@@ -728,7 +728,7 @@ public class PlayerViewModel extends ViewModel {
      * 睡眠定时器是否已启动。
      */
     @NonNull
-    public MutableLiveData<Boolean> getSleepTimerStarted() {
+    public LiveData<Boolean> getSleepTimerStarted() {
         if (!isInitialized()) {
             throw new IllegalStateException("PlayerViewModel not initialized yet.");
         }
