@@ -28,7 +28,7 @@ Android music player library. Compatible with MediaSession.
 
 **Sample App:**
 
-* [**Download**](https://github.com/jrfeng/snow/releases/tag/1.0)
+* [**Download**](https://github.com/jrfeng/snow/releases/tag/1.0.4)
 
 **More:**
 
@@ -52,7 +52,7 @@ allprojects {
 
 ```gradle
 dependencies {
-    implementation 'com.github.jrfeng.snow:player:1.0.1'
+    implementation 'com.github.jrfeng.snow:player:1.0.4'
 }
 ```
 

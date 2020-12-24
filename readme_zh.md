@@ -28,7 +28,7 @@ Android 音乐播放器框架，兼容 MediaSession 。
 
 **Sample App:**
 
-* [**下载**](https://github.com/jrfeng/snow/releases/tag/1.0)
+* [**下载**](https://github.com/jrfeng/snow/releases/tag/1.0.4)
 
 更多内容：
 
@@ -52,7 +52,7 @@ allprojects {
 
 ```gradle
 dependencies {
-    implementation 'com.github.jrfeng.snow:player:1.0.1'
+    implementation 'com.github.jrfeng.snow:player:1.0.4'
 }
 ```
 
