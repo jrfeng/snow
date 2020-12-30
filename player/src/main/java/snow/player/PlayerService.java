@@ -92,6 +92,7 @@ public class PlayerService extends MediaBrowserServiceCompat
      * 默认的 root id，值为 `"root"`。
      */
     public static final String DEFAULT_MEDIA_ROOT_ID = "root";
+    public static long lastclick = 0;
 
     /**
      * 如果你直接使用 {@link MediaBrowserCompat} 连接 PlayerService, 你的客户端可以发送该
@@ -2038,11 +2039,11 @@ public class PlayerService extends MediaBrowserServiceCompat
         private static final String ACTION_SKIP_TO_PREVIOUS = "__skip_to_previous";
         private static final String ACTION_PLAY_PAUSE = "__play_pause";
         private static final String ACTION_SKIP_TO_NEXT = "__skip_to_next";
-
+        private static final String ACTION_CLOSE = "__close";
         private PendingIntent mSkipToPrevious;
         private PendingIntent mPlayPause;
         private PendingIntent mSkipToNext;
-
+        private PendingIntent mclose;
         @Override
         protected void onInit(Context context) {
             initAllPendingIntent();
@@ -2052,6 +2053,10 @@ public class PlayerService extends MediaBrowserServiceCompat
             mSkipToPrevious = buildCustomAction(ACTION_SKIP_TO_PREVIOUS, new CustomAction() {
                 @Override
                 public void doAction(@NonNull Player player, @Nullable Bundle extras) {
+                    if (SystemClock.elapsedRealtime() - lastclick < 1000){
+                        return;
+                    }
+                    lastclick = SystemClock.elapsedRealtime();
                     player.skipToPrevious();
                 }
             });
@@ -2066,7 +2071,17 @@ public class PlayerService extends MediaBrowserServiceCompat
             mSkipToNext = buildCustomAction(ACTION_SKIP_TO_NEXT, new CustomAction() {
                 @Override
                 public void doAction(@NonNull Player player, @Nullable Bundle extras) {
+                    if (SystemClock.elapsedRealtime() - lastclick < 1000){
+                        return;
+                    }
+                    lastclick = SystemClock.elapsedRealtime();
                     player.skipToNext();
+                }
+            });
+            mclose = buildCustomAction(ACTION_CLOSE, new CustomAction() {
+                @Override
+                public void doAction(@NonNull Player player, @Nullable Bundle extras) {
+                    player.stop();
                 }
             });
         }
@@ -2083,6 +2098,9 @@ public class PlayerService extends MediaBrowserServiceCompat
             return mSkipToNext;
         }
 
+        public final PendingIntent close() {
+            return mclose;
+        }
         @NonNull
         @Override
         public Notification onCreateNotification() {
