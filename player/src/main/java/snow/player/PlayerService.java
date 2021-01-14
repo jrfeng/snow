@@ -59,6 +59,7 @@ import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import media.helper.HeadsetHookHelper;
@@ -1497,8 +1498,13 @@ public class PlayerService extends MediaBrowserServiceCompat
         private MusicItem mPlayingMusicItem;
         private boolean mExpire;
 
+        private Bitmap mDefaultIcon;
+        private int mIconWidth;
+        private int mIconHeight;
+
         private Bitmap mIcon;
-        private IconLoader mIconLoader;
+        private BetterIconLoader mBetterIconLoader;
+        private Disposable mIconLoaderDisposable;
 
         private boolean mReleased;
 
@@ -1507,15 +1513,17 @@ public class PlayerService extends MediaBrowserServiceCompat
         void init(PlayerService playerService) {
             mPlayerService = playerService;
             mPlayingMusicItem = new MusicItem();
-            mIconLoader = onCreateIconLoader(mPlayerService);
-            mIcon = mIconLoader.getDefaultIcon();
+            mDefaultIcon = loadDefaultIcon();
+            mIcon = mDefaultIcon;
+            mBetterIconLoader = onCreateBetterIconLoader(playerService);
+            Preconditions.checkNotNull(mBetterIconLoader);
 
             setIconSize(playerService.getResources().getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
             onInit(mPlayerService);
         }
 
         @NonNull
-        private Bitmap getDefaultIcon() {
+        private Bitmap loadDefaultIcon() {
             Context context = getContext();
             BitmapDrawable drawable = (BitmapDrawable) ResourcesCompat.getDrawable(
                     context.getResources(),
@@ -1530,12 +1538,54 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         private void reloadIcon() {
-            mIconLoader.loadIcon(getPlayingMusicItem(), new IconLoader.Callback() {
+            disposeLastLoading();
+            mIconLoaderDisposable = Single.create(new SingleOnSubscribe<Bitmap>() {
                 @Override
-                public void onIconLoaded(Bitmap bitmap) {
-                    setIcon(bitmap);
+                public void subscribe(@NonNull final SingleEmitter<Bitmap> emitter) {
+                    mBetterIconLoader.loadIcon(getPlayingMusicItem(), mIconWidth, mIconHeight, new AsyncResult<Bitmap>() {
+                        @Override
+                        public void onSuccess(@NonNull Bitmap bitmap) {
+                            emitter.onSuccess(bitmap);
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable throwable) {
+                            throwable.printStackTrace();
+                            emitter.onSuccess(getDefaultIcon());
+                        }
+
+                        @Override
+                        public boolean isCancelled() {
+                            return emitter.isDisposed();
+                        }
+
+                        @Override
+                        public synchronized void setOnCancelListener(@Nullable OnCancelListener listener) {
+                            super.setOnCancelListener(listener);
+
+                            emitter.setCancellable(new Cancellable() {
+                                @Override
+                                public void cancel() {
+                                    notifyCancelled();
+                                }
+                            });
+                        }
+                    });
                 }
-            });
+            }).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Consumer<Bitmap>() {
+                        @Override
+                        public void accept(Bitmap bitmap) {
+                            setIcon(bitmap);
+                        }
+                    });
+        }
+
+        private void disposeLastLoading() {
+            if (mIconLoaderDisposable != null && !mIconLoaderDisposable.isDisposed()) {
+                mIconLoaderDisposable.dispose();
+            }
         }
 
         /**
@@ -1552,9 +1602,15 @@ public class PlayerService extends MediaBrowserServiceCompat
          * @param context Context 对象，不为 null
          * @return {@link IconLoader} 对象，不能为 null
          */
+        @Deprecated
         @NonNull
         protected IconLoader onCreateIconLoader(@NonNull Context context) {
             return new IconLoaderImp(context, getDefaultIcon());
+        }
+
+        @NonNull
+        protected BetterIconLoader onCreateBetterIconLoader(@NonNull Context context) {
+            return new IconLoaderCompat(onCreateIconLoader(context));
         }
 
         /**
@@ -1643,13 +1699,18 @@ public class PlayerService extends MediaBrowserServiceCompat
          * 建议子类覆盖 {@link #onInit(Context)} 方法，并在该方法中完成图标宽高尺寸的设置。
          */
         public final void setIconSize(int width, int height) {
-            mIconLoader.setWidth(width);
-            mIconLoader.setHeight(height);
+            mIconWidth = Math.max(0, width);
+            mIconHeight = Math.max(0, height);
         }
 
         public final void setDefaultIcon(@NonNull Bitmap bitmap) {
             Preconditions.checkNotNull(bitmap);
-            mIconLoader.setDefaultIcon(bitmap);
+            mDefaultIcon = bitmap;
+        }
+
+        @NonNull
+        public final Bitmap getDefaultIcon() {
+            return mDefaultIcon;
         }
 
         /**
@@ -1845,12 +1906,15 @@ public class PlayerService extends MediaBrowserServiceCompat
         void release() {
             onRelease();
             mReleased = true;
-            mIconLoader.cancel();
+            disposeLastLoading();
         }
 
         /**
+         * 已弃用，请使用 {@link BetterIconLoader} 代替。
+         * <p>
          * 用于加载 {@link MusicItem} 对象的 Icon 图片。
          */
+        @Deprecated
         public abstract static class IconLoader {
             private int mWidth;
             private int mHeight;
@@ -1918,6 +1982,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             /**
              * 回调接口。
              */
+            @Deprecated
             public interface Callback {
                 /**
                  * 图片加载成功或者失败时调用该方法。
@@ -1927,6 +1992,23 @@ public class PlayerService extends MediaBrowserServiceCompat
                  */
                 void onIconLoaded(Bitmap bitmap);
             }
+        }
+
+        /**
+         * 用于加载 {@link MusicItem} 对象的 Icon 图片。
+         */
+        public interface BetterIconLoader {
+            /**
+             * 加载 {@link MusicItem} 对象的 Icon 图片。
+             * <p>
+             * 该方法会在异步线程中调用，因此你可以在该方法中执行耗时任务，例如访问网络或者文件。
+             *
+             * @param musicItem 要加载图片的 {@link MusicItem} 对象，不为 null
+             * @param width     图片的期望宽度
+             * @param height    图片的期望高度
+             * @param result    用于接收异步任务的结果值，不为 null
+             */
+            void loadIcon(@NonNull MusicItem musicItem, int width, int height, @NonNull AsyncResult<Bitmap> result);
         }
 
         private static class IconLoaderImp extends IconLoader {
@@ -2040,6 +2122,33 @@ public class PlayerService extends MediaBrowserServiceCompat
                 if (mFutureTarget != null && !mFutureTarget.isDone()) {
                     mFutureTarget.cancel(true);
                 }
+            }
+        }
+
+        private static class IconLoaderCompat implements BetterIconLoader {
+            private IconLoader mIconLoader;
+
+            IconLoaderCompat(IconLoader iconLoader) {
+                mIconLoader = iconLoader;
+            }
+
+            @Override
+            public void loadIcon(@NonNull MusicItem musicItem, int width, int height, @NonNull final AsyncResult<Bitmap> result) {
+                mIconLoader.setWidth(width);
+                mIconLoader.setHeight(height);
+                mIconLoader.loadIcon(musicItem, new IconLoader.Callback() {
+                    @Override
+                    public void onIconLoaded(Bitmap bitmap) {
+                        result.onSuccess(bitmap);
+                    }
+                });
+
+                result.setOnCancelListener(new AsyncResult.OnCancelListener() {
+                    @Override
+                    public void onCancelled() {
+                        mIconLoader.cancel();
+                    }
+                });
             }
         }
     }
