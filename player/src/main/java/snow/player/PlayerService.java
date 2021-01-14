@@ -1037,7 +1037,7 @@ public class PlayerService extends MediaBrowserServiceCompat
      * @param result       用于接收异步任务的结果值
      */
     protected void isCached(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<Boolean> result) {
-        result.onSuccess(false);
+        result.onSuccess(isCached(musicItem, soundQuality));
     }
 
     /**
@@ -1094,7 +1094,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     protected void onRetrieveMusicItemUri(@NonNull MusicItem musicItem,
                                           @NonNull SoundQuality soundQuality,
                                           @NonNull AsyncResult<Uri> result) throws Exception {
-        result.onSuccess(Uri.parse(musicItem.getUri()));
+        result.onSuccess(onRetrieveMusicItemUri(musicItem, soundQuality));
     }
 
     /**
