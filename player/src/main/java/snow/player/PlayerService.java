@@ -1706,6 +1706,11 @@ public class PlayerService extends MediaBrowserServiceCompat
         public final void setDefaultIcon(@NonNull Bitmap bitmap) {
             Preconditions.checkNotNull(bitmap);
             mDefaultIcon = bitmap;
+
+            if (mBetterIconLoader instanceof IconLoaderCompat) {
+                IconLoaderCompat iconLoaderCompat = (IconLoaderCompat) mBetterIconLoader;
+                iconLoaderCompat.setDefaultIcon(bitmap);
+            }
         }
 
         @NonNull
@@ -2149,6 +2154,10 @@ public class PlayerService extends MediaBrowserServiceCompat
                         mIconLoader.cancel();
                     }
                 });
+            }
+
+            void setDefaultIcon(Bitmap defaultIcon) {
+                mIconLoader.setDefaultIcon(defaultIcon);
             }
         }
     }
