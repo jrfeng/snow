@@ -92,7 +92,7 @@ public class AppPlayerService extends PlayerService {
                 }
             });
 
-            setDefaultIcon(getDefaultIcon());
+            setDefaultIcon(loadDefaultIcon());
 
             Intent intent = new Intent(getContext(), PlayerActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -137,7 +137,7 @@ public class AppPlayerService extends PlayerService {
             builder.setContentIntent(mContentIntent);
         }
 
-        private Bitmap getDefaultIcon() {
+        private Bitmap loadDefaultIcon() {
             Context context = getContext();
             BitmapDrawable drawable = (BitmapDrawable) ResourcesCompat.getDrawable(
                     context.getResources(),
