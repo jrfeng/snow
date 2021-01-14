@@ -73,6 +73,7 @@ import snow.player.playlist.PlaylistEditor;
 import snow.player.audio.ErrorCode;
 import snow.player.playlist.PlaylistManager;
 import snow.player.util.MusicItemUtil;
+import snow.player.util.AsyncResult;
 
 /**
  * 提供了基本的 {@code player service} 实现，用于在后台播放音乐。
@@ -1011,6 +1012,8 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     /**
+     * 已弃用，请使用 {@link #isCached(MusicItem, SoundQuality, AsyncResult)} 方法代替。
+     * <p>
      * 查询具有 soundQuality 音质的 MusicItem 表示的的音乐是否已被缓存。
      * <p>
      * 该方法会在异步线程中被调用。
@@ -1019,8 +1022,22 @@ public class PlayerService extends MediaBrowserServiceCompat
      * @param soundQuality 音乐的音质
      * @return 如果已被缓存，则返回 true，否则返回 false
      */
+    @Deprecated
     protected boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
         return false;
+    }
+
+    /**
+     * 查询具有 soundQuality 音质的 MusicItem 表示的的音乐是否已被缓存。
+     * <p>
+     * 该方法会在异步线程中被调用。
+     *
+     * @param musicItem    要查询的 MusicItem 对象
+     * @param soundQuality 音乐的音质
+     * @param result       用于接收异步任务的结果值
+     */
+    protected void isCached(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<Boolean> result) {
+        result.onSuccess(false);
     }
 
     /**
@@ -1047,6 +1064,8 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     /**
+     * 已弃用，使用 {@link #onRetrieveMusicItemUri(MusicItem, SoundQuality, AsyncResult)} 方法代替。
+     * <p>
      * 获取音乐的播放链接。
      * <p>
      * 该方法会在异步线程中执行，因此可以执行各种耗时操作，例如访问网络。
@@ -1056,9 +1075,26 @@ public class PlayerService extends MediaBrowserServiceCompat
      * @return 音乐的播放链接
      * @throws Exception 获取音乐播放链接的过程中发生的任何异常
      */
+    @Deprecated
     @SuppressWarnings("RedundantThrows")
     protected Uri onRetrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception {
         return Uri.parse(musicItem.getUri());
+    }
+
+    /**
+     * 获取音乐的播放链接。
+     * <p>
+     * 该方法会在异步线程中执行，因此可以执行各种耗时操作，例如访问网络。
+     *
+     * @param musicItem    要播放的音乐
+     * @param soundQuality 要播放的音乐的音质
+     * @param result       用于接收异步任务的结果值
+     * @throws Exception 获取音乐播放链接的过程中发生的任何异常
+     */
+    protected void onRetrieveMusicItemUri(@NonNull MusicItem musicItem,
+                                          @NonNull SoundQuality soundQuality,
+                                          @NonNull AsyncResult<Uri> result) throws Exception {
+        result.onSuccess(Uri.parse(musicItem.getUri()));
     }
 
     /**
@@ -1240,8 +1276,8 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         @Override
-        protected boolean isCached(MusicItem musicItem, SoundQuality soundQuality) {
-            return PlayerService.this.isCached(musicItem, soundQuality);
+        protected void isCached(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<Boolean> result) {
+            PlayerService.this.isCached(musicItem, soundQuality, result);
         }
 
         @NonNull
@@ -1256,10 +1292,11 @@ public class PlayerService extends MediaBrowserServiceCompat
             return PlayerService.this.onCreateAudioFocusChangeListener();
         }
 
-        @Nullable
         @Override
-        protected Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception {
-            return PlayerService.this.onRetrieveMusicItemUri(musicItem, soundQuality);
+        protected void retrieveMusicItemUri(@NonNull MusicItem musicItem,
+                                            @NonNull SoundQuality soundQuality,
+                                            @NonNull AsyncResult<Uri> result) throws Exception {
+            PlayerService.this.onRetrieveMusicItemUri(musicItem, soundQuality, result);
         }
 
         @Override

@@ -30,6 +30,7 @@ import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import media.helper.AudioFocusHelper;
@@ -42,6 +43,7 @@ import snow.player.playlist.PlaylistEditor;
 import snow.player.playlist.PlaylistManager;
 import snow.player.audio.ErrorCode;
 import snow.player.helper.NetworkHelper;
+import snow.player.util.AsyncResult;
 
 /**
  * 该类实现了 {@link Player} 接口，并实现大部分音乐播放器功能。
@@ -142,9 +144,9 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      *
      * @param musicItem    要查询的 MusicItem 对象
      * @param soundQuality 音乐的音质
-     * @return 如果已被缓存，则返回 true，否则返回 false
+     * @param result       用于接收异步任务的结果值
      */
-    protected abstract boolean isCached(MusicItem musicItem, SoundQuality soundQuality);
+    protected abstract void isCached(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<Boolean> result);
 
     /**
      * 该方法会在创建 MusicPlayer 对象时调用。
@@ -161,11 +163,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      *
      * @param musicItem    要播放的音乐
      * @param soundQuality 要播放的音乐的音质
-     * @return 音乐的播放链接
+     * @param result       用于接收异步任务的结果
      * @throws Exception 获取音乐播放链接的过程中发生的任何异常
      */
-    @Nullable
-    protected abstract Uri retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality) throws Exception;
+    protected abstract void retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<Uri> result) throws Exception;
 
     /**
      * 可以通过覆盖该方法来提供一个自定义的 AudioManager.OnAudioFocusChangeListener
@@ -318,25 +319,35 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private Single<Uri> getMusicItemUri(@NonNull final MusicItem musicItem, @NonNull final SoundQuality soundQuality) {
         return Single.create(new SingleOnSubscribe<Uri>() {
             @Override
-            public void subscribe(@NonNull SingleEmitter<Uri> emitter) {
-                Uri uri = null;
+            public void subscribe(@NonNull final SingleEmitter<Uri> emitter) throws Exception {
+                retrieveMusicItemUri(musicItem, soundQuality, new AsyncResult<Uri>() {
+                    @Override
+                    public void onSuccess(@NonNull Uri uri) {
+                        emitter.onSuccess(uri);
+                    }
 
-                try {
-                    uri = retrieveMusicItemUri(musicItem, soundQuality);
-                } catch (Exception e) {
-                    emitter.onError(e);
-                }
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+                        emitter.onError(throwable);
+                    }
 
-                if (emitter.isDisposed()) {
-                    return;
-                }
+                    @Override
+                    public boolean isCancelled() {
+                        return emitter.isDisposed();
+                    }
 
-                if (uri == null) {
-                    emitter.onError(new IllegalStateException("get uri failed."));
-                    return;
-                }
+                    @Override
+                    public synchronized void setOnCancelListener(@Nullable OnCancelListener listener) {
+                        super.setOnCancelListener(listener);
 
-                emitter.onSuccess(uri);
+                        emitter.setCancellable(new Cancellable() {
+                            @Override
+                            public void cancel() {
+                                notifyCancelled();
+                            }
+                        });
+                    }
+                });
             }
         });
     }
@@ -1314,13 +1325,41 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private Single<Boolean> playingMusicIsCached() {
         return Single.create(new SingleOnSubscribe<Boolean>() {
             @Override
-            public void subscribe(@NonNull SingleEmitter<Boolean> emitter) {
-                boolean cached = isCached(getMusicItem(), mPlayerConfig.getSoundQuality());
-                if (emitter.isDisposed()) {
+            public void subscribe(@NonNull final SingleEmitter<Boolean> emitter) {
+                MusicItem musicItem = getMusicItem();
+                if (musicItem == null) {
+                    emitter.onSuccess(false);
                     return;
                 }
 
-                emitter.onSuccess(cached);
+                isCached(musicItem, mPlayerConfig.getSoundQuality(), new AsyncResult<Boolean>() {
+                    @Override
+                    public void onSuccess(@NonNull Boolean aBoolean) {
+                        emitter.onSuccess(aBoolean);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+                        emitter.onError(throwable);
+                    }
+
+                    @Override
+                    public boolean isCancelled() {
+                        return emitter.isDisposed();
+                    }
+
+                    @Override
+                    public synchronized void setOnCancelListener(@Nullable OnCancelListener listener) {
+                        super.setOnCancelListener(listener);
+
+                        emitter.setCancellable(new Cancellable() {
+                            @Override
+                            public void cancel() {
+                                notifyCancelled();
+                            }
+                        });
+                    }
+                });
             }
         });
     }
