@@ -1340,7 +1340,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
                     @Override
                     public void onError(@NonNull Throwable throwable) {
-                        emitter.onError(throwable);
+                        throwable.printStackTrace();
+                        emitter.onSuccess(false);
                     }
 
                     @Override
