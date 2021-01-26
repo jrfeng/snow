@@ -1169,6 +1169,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             assert mMusicPlayer != null;
             mSeekCompleteAction = seekCompleteAction;
             mMusicPlayer.seekTo(progress);
+            return;
+        }
+
+        if (getMusicItem() != null) {
+            notifySeekComplete(Math.min(progress, getMusicItemDuration()), SystemClock.elapsedRealtime(), false);
         }
     }
 
