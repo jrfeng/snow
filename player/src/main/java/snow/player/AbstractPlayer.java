@@ -299,7 +299,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         if (mPlayerConfig.isOnlyWifiNetwork() && !isWiFiNetwork()) {
-            onError(ErrorCode.ONLY_WIFI_NETWORK, ErrorCode.getErrorMessage(mApplicationContext, ErrorCode.ONLY_WIFI_NETWORK));
+            notifyError(ErrorCode.ONLY_WIFI_NETWORK, ErrorCode.getErrorMessage(mApplicationContext, ErrorCode.ONLY_WIFI_NETWORK));
             return;
         }
 
