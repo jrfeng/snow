@@ -157,6 +157,8 @@ public class PlayerService extends MediaBrowserServiceCompat
     private BroadcastReceiver mCustomActionReceiver;
     private PlayerStateSynchronizer mPlayerStateSynchronizer;
 
+    private AbstractPlayer.OnStateChangeListener mOnStateChangeListener;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -174,11 +176,12 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         initNotificationManager();
         initPlayerConfig();
-        initAudioEffectManager();
         initPlayerState();
         initPlaylistManager();
         initNotificationView();
+        initOnStateChangeListener();
         initPlayer();
+        initAudioEffectManager();
         initCustomActionDispatcher();
         initHeadsetHookHelper();
         initMediaSession();
@@ -282,12 +285,66 @@ public class PlayerService extends MediaBrowserServiceCompat
         mPlaylistManager = new PlaylistManagerImp(this, mPersistentId);
     }
 
+    private void initOnStateChangeListener() {
+        mOnStateChangeListener = new AbstractPlayer.OnStateChangeListener() {
+            @Override
+            public void onPreparing() {
+                PlayerService.this.updateNotificationView();
+                PlayerService.this.cancelIDLETimer();
+            }
+
+            @Override
+            public void onPrepared(int audioSessionId) {
+                PlayerService.this.updateNotificationView();
+            }
+
+            @Override
+            public void onPlaying(int progress, long updateTime) {
+                PlayerService.this.updateNotificationView();
+                PlayerService.this.cancelIDLETimer();
+            }
+
+            @Override
+            public void onPaused() {
+                PlayerService.this.updateNotificationView();
+                PlayerService.this.startIDLETimer();
+            }
+
+            @Override
+            public void onStalledChanged(boolean stalled) {
+                PlayerService.this.updateNotificationView();
+            }
+
+            @Override
+            public void onStopped() {
+                PlayerService.this.onStopped();
+                PlayerService.this.startIDLETimer();
+            }
+
+            @Override
+            public void onError(int errorCode, String errorMessage) {
+                PlayerService.this.updateNotificationView();
+            }
+
+            @Override
+            public void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
+                PlayerService.this.onPlayingMusicItemChanged(musicItem);
+            }
+
+            @Override
+            public void onPlayModeChanged(@NonNull PlayMode playMode) {
+                PlayerService.this.notifyPlayModeChanged(playMode);
+            }
+        };
+    }
+
     private void initPlayer() {
         mPlayer = new PlayerImp(this,
                 mPlayerConfig,
                 mPlayerState,
                 mPlaylistManager,
-                this.getClass());
+                this.getClass(),
+                mOnStateChangeListener);
     }
 
     private void initCustomActionDispatcher() {
@@ -369,6 +426,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         Bundle config = mPlayerConfig.getAudioEffectConfig();
         mAudioEffectManager.init(config);
+        mPlayer.setAudioEffectManager(mAudioEffectManager);
     }
 
     private void initHistoryRecorder() {
@@ -511,6 +569,7 @@ public class PlayerService extends MediaBrowserServiceCompat
      *
      * @param audioSessionId 当前正在播放的音乐的 audio session id。如果为 0，则可以忽略。
      */
+    @Deprecated
     protected void attachAudioEffect(int audioSessionId) {
         if (noAudioEffectManager()) {
             return;
@@ -522,6 +581,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     /**
      * 取消当前的音频特效。
      */
+    @Deprecated
     protected void detachAudioEffect() {
         if (noAudioEffectManager()) {
             return;
@@ -1272,8 +1332,9 @@ public class PlayerService extends MediaBrowserServiceCompat
                          @NonNull PlayerConfig playerConfig,
                          @NonNull PlayerState playlistState,
                          @NonNull PlaylistManagerImp playlistManager,
-                         @NonNull Class<? extends PlayerService> playerService) {
-            super(context, playerConfig, playlistState, playlistManager, playerService);
+                         @NonNull Class<? extends PlayerService> playerService,
+                         @NonNull AbstractPlayer.OnStateChangeListener listener) {
+            super(context, playerConfig, playlistState, playlistManager, playerService, listener);
         }
 
         @Override
@@ -1298,65 +1359,6 @@ public class PlayerService extends MediaBrowserServiceCompat
                                             @NonNull SoundQuality soundQuality,
                                             @NonNull AsyncResult<Uri> result) throws Exception {
             PlayerService.this.onRetrieveMusicItemUri(musicItem, soundQuality, result);
-        }
-
-        @Override
-        protected void onPreparing() {
-            PlayerService.this.updateNotificationView();
-            PlayerService.this.cancelIDLETimer();
-        }
-
-        @Override
-        protected void onPrepared(int audioSessionId) {
-            PlayerService.this.updateNotificationView();
-        }
-
-        @Override
-        protected void onPlaying(int progress, long updateTime) {
-            PlayerService.this.updateNotificationView();
-            PlayerService.this.cancelIDLETimer();
-        }
-
-        @Override
-        protected void onPaused() {
-            PlayerService.this.updateNotificationView();
-            PlayerService.this.startIDLETimer();
-        }
-
-        @Override
-        protected void onStalledChanged(boolean stalled) {
-            PlayerService.this.updateNotificationView();
-        }
-
-        @Override
-        protected void onStopped() {
-            PlayerService.this.onStopped();
-            PlayerService.this.startIDLETimer();
-        }
-
-        @Override
-        protected void onError(int errorCode, String errorMessage) {
-            PlayerService.this.updateNotificationView();
-        }
-
-        @Override
-        protected void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
-            PlayerService.this.onPlayingMusicItemChanged(musicItem);
-        }
-
-        @Override
-        protected void onPlayModeChanged(@NonNull PlayMode playMode) {
-            PlayerService.this.notifyPlayModeChanged(playMode);
-        }
-
-        @Override
-        protected void attachAudioEffect(int audioSessionId) {
-            PlayerService.this.attachAudioEffect(audioSessionId);
-        }
-
-        @Override
-        protected void detachAudioEffect() {
-            PlayerService.this.detachAudioEffect();
         }
     }
 

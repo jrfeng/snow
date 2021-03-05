@@ -37,6 +37,7 @@ import media.helper.AudioFocusHelper;
 import media.helper.BecomeNoiseHelper;
 import snow.player.audio.MusicItem;
 import snow.player.audio.MusicPlayer;
+import snow.player.effect.AudioEffectManager;
 import snow.player.helper.PhoneCallStateHelper;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistEditor;
@@ -105,6 +106,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private boolean mConfirmNextPlay;
     private boolean mResumePlay;
 
+    private final OnStateChangeListener mOnStateChangeListener;
+
+    @Nullable
+    private AudioEffectManager mAudioEffectManager;
+
     /**
      * 创建一个 {@link AbstractPlayer} 对象。
      *
@@ -117,18 +123,21 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                           @NonNull PlayerConfig playerConfig,
                           @NonNull PlayerState playerState,
                           @NonNull PlaylistManagerImp playlistManager,
-                          @NonNull Class<? extends PlayerService> playerService) {
+                          @NonNull Class<? extends PlayerService> playerService,
+                          @NonNull OnStateChangeListener listener) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerConfig);
         Preconditions.checkNotNull(playerState);
         Preconditions.checkNotNull(playlistManager);
         Preconditions.checkNotNull(playerService);
+        Preconditions.checkNotNull(listener);
 
         mApplicationContext = context.getApplicationContext();
         mPlayerConfig = playerConfig;
         mPlayerState = playerState;
         mPlayerStateHelper = new PlayerStateHelper(mPlayerState, mApplicationContext, playerService);
         mPlaylistManager = playlistManager;
+        mOnStateChangeListener = listener;
 
         initAllListener();
         initAllHelper();
@@ -136,6 +145,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         mNetworkHelper.subscribeNetworkState();
         reloadPlaylist();
+    }
+
+    void setAudioEffectManager(@Nullable AudioEffectManager audioEffectManager) {
+        mAudioEffectManager = audioEffectManager;
     }
 
     /**
@@ -176,81 +189,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      */
     @Nullable
     protected abstract AudioManager.OnAudioFocusChangeListener onCreateAudioFocusChangeListener();
-
-    /**
-     * 对指定的 audio session id 应用音频特效。
-     * <p>
-     * 子类可以覆盖该方法来对指定的 audio session id 应用音频特效。
-     *
-     * @param audioSessionId 当前正在播放的音乐的 audio session id。如果为 0，则可以忽略。
-     */
-    protected abstract void attachAudioEffect(int audioSessionId);
-
-    /**
-     * 取消当前的音频特效。
-     * <p>
-     * 子类可以覆盖该方法来取消指定的 audio session id 的音频特效。
-     */
-    protected abstract void detachAudioEffect();
-
-    /**
-     * 该方法会在开始准备音乐播放器时调用。
-     */
-    protected abstract void onPreparing();
-
-    /**
-     * 该方法会在音乐播放器准备完毕后调用。
-     *
-     * @param audioSessionId 当前正准备播放的音乐的 audio session id。
-     */
-    protected abstract void onPrepared(int audioSessionId);
-
-    /**
-     * 该方法会在开始播放时调用。
-     *
-     * @param progress   当前的播放进度。
-     * @param updateTime 播放进度的更新时间。
-     */
-    protected abstract void onPlaying(int progress, long updateTime);
-
-    /**
-     * 该方法会在暂停播放时调用。
-     */
-    protected abstract void onPaused();
-
-    /**
-     * 该方法会在 stalled 状态改变时调用。
-     * <p>
-     * 你可以根据 stalled 参数的值来显示或隐藏缓冲进度条。如果缓冲区没有足够的数据支撑继续播放时，则该参数为
-     * true，当缓冲区缓存了足够的数据可以继续播放时，该参数为 false。
-     *
-     * @param stalled 如果缓冲区没有足够的数据继续播放时，则该参数为 true，当缓冲区缓存了足够的数据可以继续
-     *                播放时，该参数为 false。
-     */
-    protected abstract void onStalledChanged(boolean stalled);
-
-    /**
-     * 该方法会在停止播放时调用。
-     */
-    protected abstract void onStopped();
-
-    /**
-     * 该方法会在错误发生时调用。
-     *
-     * @param errorCode    错误码
-     * @param errorMessage 错误信息
-     * @see ErrorCode
-     */
-    protected abstract void onError(int errorCode, String errorMessage);
-
-    /**
-     * 该方法会在当前播放的 MusicItem 对象改变时调用。
-     *
-     * @param musicItem 本次要播放的 MusicItem 对象（可能为 null）。
-     */
-    protected abstract void onPlayingMusicItemChanged(@Nullable MusicItem musicItem);
-
-    protected abstract void onPlayModeChanged(@NonNull PlayMode playMode);
 
     /**
      * 释放播放器所占用的资源。注意！调用该方法后，就不允许在使用当前 Player 对象了，否则会导致不可预见的错误。
@@ -399,8 +337,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
                 mp.setLooping(isLooping());
 
-                if (mPlayerConfig.isAudioEffectEnabled()) {
-                    attachAudioEffect(mp.getAudioSessionId());
+                if (mPlayerConfig.isAudioEffectEnabled() && mAudioEffectManager != null) {
+                    mAudioEffectManager.attachAudioEffect(mp.getAudioSessionId());
                 }
 
                 notifyPrepared(mp.getAudioSessionId());
@@ -856,7 +794,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         requireWakeLock();
         mPlayerStateHelper.onPreparing();
 
-        onPreparing();
+        mOnStateChangeListener.onPreparing();
 
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onPreparing();
@@ -866,7 +804,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private void notifyPrepared(int audioSessionId) {
         mPlayerStateHelper.onPrepared(audioSessionId);
 
-        onPrepared(audioSessionId);
+        mOnStateChangeListener.onPrepared(audioSessionId);
 
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onPrepared(audioSessionId);
@@ -884,7 +822,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         mBecomeNoiseHelper.registerBecomeNoiseReceiver();
 
-        onPlaying(progress, updateTime);
+        mOnStateChangeListener.onPlaying(progress, updateTime);
 
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onPlay(stalled, progress, updateTime);
@@ -910,7 +848,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
 
-        onPaused();
+        mOnStateChangeListener.onPaused();
 
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onPause(playProgress, updateTime);
@@ -929,7 +867,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mPhoneCallStateHelper.unregisterCallStateListener();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
 
-        onStopped();
+        mOnStateChangeListener.onStopped();
 
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onStop();
@@ -948,7 +886,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         mPlayerStateHelper.onStalled(stalled, playProgress, updateTime);
         updateMediaSessionPlaybackState(stalled);
-        onStalledChanged(stalled);
+        mOnStateChangeListener.onStalledChanged(stalled);
 
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onStalledChanged(stalled, playProgress, updateTime);
@@ -998,7 +936,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mPhoneCallStateHelper.unregisterCallStateListener();
         mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
 
-        onError(errorCode, errorMessage);
+        mOnStateChangeListener.onError(errorCode, errorMessage);
 
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onError(errorCode, errorMessage);
@@ -1038,7 +976,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
         mMediaSession.setMetadata(buildMediaMetadata());
 
-        onPlayingMusicItemChanged(musicItem);
+        mOnStateChangeListener.onPlayingMusicItemChanged(musicItem);
 
         if (mPlayerStateListener != null) {
             mPlayerStateListener.onPlayingMusicItemChanged(musicItem, position, mPlayerState.getPlayProgress());
@@ -1267,16 +1205,16 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      * {@link PlayerConfig#setAudioEffectEnabled(boolean)} 方法后调用。
      */
     public final void notifyAudioEffectEnableChanged() {
-        if (!isPrepared()) {
+        if (!isPrepared() || mAudioEffectManager == null) {
             return;
         }
 
         if (mPlayerConfig.isAudioEffectEnabled()) {
-            attachAudioEffect(getAudioSessionId());
+            mAudioEffectManager.attachAudioEffect(getAudioSessionId());
             return;
         }
 
-        detachAudioEffect();
+        mAudioEffectManager.detachAudioEffect();
     }
 
     /**
@@ -1432,7 +1370,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             mPlayerStateListener.onPlayModeChanged(playMode);
         }
 
-        onPlayModeChanged(playMode);
+        mOnStateChangeListener.onPlayModeChanged(playMode);
     }
 
     private void notifyPlaylistChanged(int position) {
@@ -1881,5 +1819,66 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                 .setExtra(playlist.getExtra())
                 .build();
         mPlaylistManager.save(mPlaylist, doOnSaved);
+    }
+
+    interface OnStateChangeListener {
+        /**
+         * 该方法会在开始准备音乐播放器时调用。
+         */
+        void onPreparing();
+
+        /**
+         * 该方法会在音乐播放器准备完毕后调用。
+         *
+         * @param audioSessionId 当前正准备播放的音乐的 audio session id。
+         */
+        void onPrepared(int audioSessionId);
+
+        /**
+         * 该方法会在开始播放时调用。
+         *
+         * @param progress   当前的播放进度。
+         * @param updateTime 播放进度的更新时间。
+         */
+        void onPlaying(int progress, long updateTime);
+
+        /**
+         * 该方法会在暂停播放时调用。
+         */
+        void onPaused();
+
+        /**
+         * 该方法会在 stalled 状态改变时调用。
+         * <p>
+         * 你可以根据 stalled 参数的值来显示或隐藏缓冲进度条。如果缓冲区没有足够的数据支撑继续播放时，则该参数为
+         * true，当缓冲区缓存了足够的数据可以继续播放时，该参数为 false。
+         *
+         * @param stalled 如果缓冲区没有足够的数据继续播放时，则该参数为 true，当缓冲区缓存了足够的数据可以继续
+         *                播放时，该参数为 false。
+         */
+        void onStalledChanged(boolean stalled);
+
+        /**
+         * 该方法会在停止播放时调用。
+         */
+        void onStopped();
+
+        /**
+         * 该方法会在错误发生时调用。
+         *
+         * @param errorCode    错误码
+         * @param errorMessage 错误信息
+         * @see ErrorCode
+         */
+        void onError(int errorCode, String errorMessage);
+
+        /**
+         * 该方法会在当前播放的 MusicItem 对象改变时调用。
+         *
+         * @param musicItem 本次要播放的 MusicItem 对象（可能为 null）。
+         */
+        void onPlayingMusicItemChanged(@Nullable MusicItem musicItem);
+
+        void onPlayModeChanged(@NonNull PlayMode playMode);
     }
 }
