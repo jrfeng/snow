@@ -195,7 +195,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             MediaButtonReceiver.handleIntent(mMediaSession, intent);
         }
 
-        return super.onStartCommand(intent, flags, startId);
+        return START_NOT_STICKY;
     }
 
     private void handleCustomAction(String action, Bundle extras) {
