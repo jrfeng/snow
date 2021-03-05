@@ -21,10 +21,11 @@ Android 音乐播放器框架，兼容 MediaSession 。
 **文档：**
 
 * [**快速上手**](https://github.com/jrfeng/snow/wiki/[ZH]-1.%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B)
-* [**自定义 PlayerService**](https://github.com/jrfeng/snow/wiki/%5BZH%5D-2.%E8%87%AA%E5%AE%9A%E4%B9%89-PlayerService)
-* [**自定义 Notification**](https://github.com/jrfeng/snow/wiki/%5BZH%5D-3.%E8%87%AA%E5%AE%9A%E4%B9%89-Notification)
-* [**使用 ExoPlayer**](https://github.com/jrfeng/snow/wiki/[ZH]-4.%E4%BD%BF%E7%94%A8-ExoPlayer)
-* [**EqualizerActivity**](https://github.com/jrfeng/snow/wiki/[ZH]-5.EqualizerActivity)
+* [**PlayerService**](https://github.com/jrfeng/snow/wiki/[ZH]-2.PlayerService)
+* [**自定义 PlayerService**](https://github.com/jrfeng/snow/wiki/[ZH]-3.%E8%87%AA%E5%AE%9A%E4%B9%89-PlayerService)
+* [**自定义 Notification**](https://github.com/jrfeng/snow/wiki/[ZH]-4.%E8%87%AA%E5%AE%9A%E4%B9%89-Notification)
+* [**使用 ExoPlayer**](https://github.com/jrfeng/snow/wiki/[ZH]-5.%E4%BD%BF%E7%94%A8-ExoPlayer)
+* [**EqualizerActivity**](https://github.com/jrfeng/snow/wiki/[ZH]-6.EqualizerActivity)
 
 **更多内容：**
 
