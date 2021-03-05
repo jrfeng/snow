@@ -103,6 +103,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private WifiManager.WifiLock mWifiLock;
 
     private boolean mConfirmNextPlay;
+    private boolean mResumePlay;
 
     /**
      * 创建一个 {@link AbstractPlayer} 对象。
@@ -551,8 +552,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         mAudioFocusHelper = new AudioFocusHelper(mApplicationContext, new AudioFocusHelper.OnAudioFocusChangeListener() {
-            private boolean mResumePlay;
-
             @Override
             public void onLoss() {
                 mResumePlay = false;
@@ -561,8 +560,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
             @Override
             public void onLossTransient() {
-                mResumePlay = isPlayingState();
+                boolean playing = isPlayingState();
                 pause();
+                // 因为调用 pause() 方法时会将 mResumePlay 设为 false，因此需要在调用 pause() 方法后再设置 mResumePlay 字段的值
+                mResumePlay = playing;
             }
 
             @Override
@@ -1101,6 +1102,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void pause() {
+        mResumePlay = false;
+
         if (isPreparing()) {
             mPlayOnPrepared = false;
             mPlayOnSeekComplete = false;
