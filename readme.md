@@ -21,7 +21,7 @@ Android music player framework. Compatible with MediaSession.
 **Document:**
 
 * [**Getting Started**](https://github.com/jrfeng/snow/wiki/[EN]-1.Getting-Started)
-* [**PlayerService**](https://github.com/jrfeng/snow/wiki/[EN]-2.PlayerService)
+* [**Advanced**](https://github.com/jrfeng/snow/wiki/[EN]-2.Advanced)
 * [**Custom PlayerService**](https://github.com/jrfeng/snow/wiki/[EN]-3.Custom-PlayerService)
 * [**Custom Notification**](https://github.com/jrfeng/snow/wiki/[EN]-4.Custom-Notification)
 * [**Use ExoPlayer**](https://github.com/jrfeng/snow/wiki/[EN]-5.Use-ExoPlayer)
