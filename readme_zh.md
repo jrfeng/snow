@@ -4,6 +4,8 @@
 
 [**English**](./readme.md)
 
+**如果克隆太慢，或者无法查看图片，请移步：[Gitee](https://gitee.com/jrfeng/snow)**
+
 Android 音乐播放器框架，兼容 MediaSession 。
 
 **支持的功能：**
