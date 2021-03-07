@@ -1150,12 +1150,17 @@ public class PlayerService extends MediaBrowserServiceCompat
      * @param musicItem    要播放的音乐
      * @param soundQuality 要播放的音乐的音质
      * @param result       用于接收异步任务的结果值
-     * @throws Exception 获取音乐播放链接的过程中发生的任何异常
      */
     protected void onRetrieveMusicItemUri(@NonNull MusicItem musicItem,
                                           @NonNull SoundQuality soundQuality,
-                                          @NonNull AsyncResult<Uri> result) throws Exception {
-        result.onSuccess(onRetrieveMusicItemUri(musicItem, soundQuality));
+                                          @NonNull AsyncResult<Uri> result) {
+        try {
+            result.onSuccess(onRetrieveMusicItemUri(musicItem, soundQuality));
+        } catch (Exception e) {
+            if (!result.isCancelled()) {
+                result.onError(e);
+            }
+        }
     }
 
     /**
