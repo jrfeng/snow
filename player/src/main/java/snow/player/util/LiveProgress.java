@@ -39,7 +39,7 @@ public class LiveProgress {
      * 创建一个 {@link LiveProgress} 对象。
      *
      * @param playerClient {@link PlayerClient} 对象，不能为 null
-     * @param listener     {@link OnUpdateListener} 对象，用于监听实时播放进度,不能为 null
+     * @param listener     {@link OnUpdateListener} 监听器，用于监听实时播放进度,不能为 null
      */
     public LiveProgress(@NonNull PlayerClient playerClient, @NonNull OnUpdateListener listener) {
         this(playerClient, listener, false);
@@ -49,8 +49,8 @@ public class LiveProgress {
      * 创建一个 {@link LiveProgress} 对象。
      *
      * @param playerClient {@link PlayerClient} 对象，不能为 null
+     * @param listener     {@link OnUpdateListener} 监听器，用于监听实时播放进度,不能为 null
      * @param countDown    是否是倒计时的实时播放进度。如果你需要倒计时的实时播放进度，则可以将该参数设为 true（默认为 false）
-     * @param listener     {@link OnUpdateListener} 对象，用于监听实时播放进度,不能为 null
      */
     public LiveProgress(@NonNull PlayerClient playerClient,
                         @NonNull OnUpdateListener listener,
@@ -99,9 +99,9 @@ public class LiveProgress {
                                 mPlayerClient.getPlayingMusicItemDuration());
                         break;
                     case STOPPED:
-                        updateLiveProgress(0);  // 注意！case 穿透！
-                    case PAUSED:                           // 注意！case 穿透！
-                    case ERROR:                            // 注意！case 穿透！
+                        updateLiveProgress(0);   // 注意！case 穿透！
+                    case PAUSED:                            // 注意！case 穿透！
+                    case ERROR:                             // 注意！case 穿透！
                         mProgressClock.cancel();
                         break;
                 }
@@ -211,10 +211,10 @@ public class LiveProgress {
     }
 
     /**
-     * 开始监听实时播放进度的更新。
+     * 开始监听播放器实时播放进度的更新。
      *
-     * <b>注意！当不再需要监听实时播放进度时，必须调用 {@link #unsubscribe()} 方法取消监听，否则可能会造成
-     * 内存泄漏</b>
+     * <b>注意！当不再需要监听播放器的实时播放进度时，必须调用 {@link #unsubscribe()} 方法取消监听，否则可能
+     * 会造成内存泄漏</b>
      *
      * @see #subscribe(LifecycleOwner)
      * @see #subscribe(LifecycleOwner, Lifecycle.State)
@@ -224,7 +224,7 @@ public class LiveProgress {
     }
 
     /**
-     * 开始监听实时播放进度的更新。
+     * 开始监听播放器实时播放进度的更新。
      *
      * <b>注意！如果 LifecycleOwner 参数为 null，则必须调用 {@link #unsubscribe()} 方法取消监听，否则可能
      * 会造成内存泄漏</b>
@@ -242,7 +242,7 @@ public class LiveProgress {
     }
 
     /**
-     * 开始监听实时播放进度的更新。
+     * 开始监听播放器实时播放进度的更新。
      *
      * <b>注意！如果 LifecycleOwner 参数为 null，则必须调用 {@link #unsubscribe()} 方法取消监听，否则可能
      * 会造成内存泄漏</b>
@@ -311,7 +311,7 @@ public class LiveProgress {
          * 播放器的实时播放进度每秒更新一次。
          *
          * @param progressSec  当前播放进度，单位：秒
-         * @param durationSec  歌曲的持续时长，单位：描述
+         * @param durationSec  歌曲的持续时长，单位：秒
          * @param textProgress 字符串格式的播放进度，格式为：00:00
          * @param textDuration 字符串格式的歌曲的持续时长，格式为：00:00
          */
