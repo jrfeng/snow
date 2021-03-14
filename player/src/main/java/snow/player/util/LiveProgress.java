@@ -23,7 +23,6 @@ public class LiveProgress {
 
     @Nullable
     private LifecycleOwner mLifecycleOwner;
-    private Lifecycle.State mAtLeastState;
     private LifecycleObserver mLifecycleObserver;
 
     private final ProgressClock mProgressClock;
@@ -172,7 +171,9 @@ public class LiveProgress {
     }
 
     private boolean atLeastState(@NonNull LifecycleOwner owner) {
-        return owner.getLifecycle().getCurrentState().isAtLeast(mAtLeastState);
+        return owner.getLifecycle()
+                .getCurrentState()
+                .isAtLeast(Lifecycle.State.STARTED);
     }
 
     private int getDurationSec() {
@@ -217,10 +218,9 @@ public class LiveProgress {
      * 会造成内存泄漏</b>
      *
      * @see #subscribe(LifecycleOwner)
-     * @see #subscribe(LifecycleOwner, Lifecycle.State)
      */
     public void subscribe() {
-        subscribe(null, null);
+        subscribe(null);
     }
 
     /**
@@ -229,48 +229,23 @@ public class LiveProgress {
      * <b>注意！如果 LifecycleOwner 参数为 null，则必须调用 {@link #unsubscribe()} 方法取消监听，否则可能
      * 会造成内存泄漏</b>
      *
-     * @param owner LifecycleOwner 对象。当实时播放进度改变时，只会在 Lifecycle 处于 RESUMED 状态时通知
-     *              监听器，该参数可为 null。如果该参数不为 null，则会在 Lifecycle 的 ON_DESTROYED
-     *              事件发生时自动调用 {@link #unsubscribe()} 方法取消监听实时播放进度。这样可以避免内存泄漏。
-     *              <b>如果该参数为 null，则必须手动调用 {@link #unsubscribe()} 方法取消监听，否则可能会
-     *              造成内存泄漏</b>。
+     * @param owner LifecycleOwner 对象。当实时播放进度改变时，只会在 Lifecycle 处于 atLeastState
+     *              参数指示的状态时通知监听器，该参数可为 null。如果该参数不为 null，则会在 Lifecycle
+     *              的 ON_DESTROYED 事件发生时自动调用 {@link #unsubscribe()} 方法取消监听实时
+     *              播放进度。这样可以避免内存泄漏。<b>如果该参数为 null，则必须手动调用
+     *              {@link #unsubscribe()} 方法取消监听，否则可能会造成内存泄漏</b>
      * @see #subscribe()
-     * @see #subscribe(LifecycleOwner, Lifecycle.State)
      */
     public void subscribe(@Nullable LifecycleOwner owner) {
-        subscribe(owner, null);
-    }
-
-    /**
-     * 开始监听播放器实时播放进度的更新。
-     *
-     * <b>注意！如果 LifecycleOwner 参数为 null，则必须调用 {@link #unsubscribe()} 方法取消监听，否则可能
-     * 会造成内存泄漏</b>
-     *
-     * @param owner        LifecycleOwner 对象。当实时播放进度改变时，只会在 Lifecycle 处于 atLeastState
-     *                     参数指示的状态时通知监听器，该参数可为 null。如果该参数不为 null，则会在 Lifecycle
-     *                     的 ON_DESTROYED 事件发生时自动调用 {@link #unsubscribe()} 方法取消监听实时
-     *                     播放进度。这样可以避免内存泄漏。<b>如果该参数为 null，则必须手动调用
-     *                     {@link #unsubscribe()} 方法取消监听，否则可能会造成内存泄漏</b>
-     * @param atLeastState Lifecycle.State 对象，可为 null。如果该参数不为 null，则会在 Lifecycle 至少
-     *                     处于该状态时才会通知 {@link OnUpdateListener} 监听器。
-     *                     如果该参数为 null，则默认为 RESUMED。
-     */
-    public void subscribe(@Nullable LifecycleOwner owner, @Nullable Lifecycle.State atLeastState) {
         if (owner != null && isDestroyed(owner)) {
             return;
         }
 
         mLifecycleOwner = owner;
-        mAtLeastState = atLeastState;
 
         if (mLifecycleOwner != null) {
             initLifecycleObserver();
             mLifecycleOwner.getLifecycle().addObserver(mLifecycleObserver);
-        }
-
-        if (atLeastState == null) {
-            mAtLeastState = Lifecycle.State.RESUMED;
         }
 
         addAllListener();
@@ -288,7 +263,6 @@ public class LiveProgress {
      *
      * @see #subscribe()
      * @see #subscribe(LifecycleOwner)
-     * @see #subscribe(LifecycleOwner, Lifecycle.State)
      */
     public void unsubscribe() {
         removeAllListener();
