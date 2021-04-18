@@ -2,6 +2,7 @@ package snow.player.audio;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
@@ -242,6 +243,17 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
     @Override
     public void setVolume(float leftVolume, float rightVolume) {
         mMediaPlayer.setVolume(leftVolume, rightVolume);
+    }
+
+    @Override
+    public void setSpeed(float speed) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+
+        PlaybackParams playbackParams = mMediaPlayer.getPlaybackParams();
+        playbackParams.setSpeed(speed);
+        mMediaPlayer.setPlaybackParams(playbackParams);
     }
 
     @Override

@@ -41,20 +41,22 @@ public class AppWidgetPlayerState implements Parcelable {
     private static final String KEY_PLAYER_STATE = "PLAYER_STATE";
     private static boolean sMMKVInitialized;
 
-    private PlaybackState mPlaybackState;
+    private final PlaybackState mPlaybackState;
     @Nullable
-    private MusicItem mPlayingMusicItem;
-    private PlayMode mPlayMode;
-    private long mPlayProgress;
-    private long mPlayProgressUpdateTime;
-    private boolean mPreparing;
-    private boolean mPrepared;
-    private boolean mStalled;
-    private String mErrorMessage;
+    private final MusicItem mPlayingMusicItem;
+    private final PlayMode mPlayMode;
+    private final long mPlayProgress;
+    private final float mSpeed;
+    private final long mPlayProgressUpdateTime;
+    private final boolean mPreparing;
+    private final boolean mPrepared;
+    private final boolean mStalled;
+    private final String mErrorMessage;
 
     public AppWidgetPlayerState(@NonNull PlaybackState playbackState,
                                 @Nullable MusicItem playingMusicItem,
                                 @NonNull PlayMode playMode,
+                                float speed,
                                 long playProgress,
                                 long playProgressUpdateTime,
                                 boolean preparing,
@@ -68,6 +70,7 @@ public class AppWidgetPlayerState implements Parcelable {
         mPlaybackState = playbackState;
         mPlayingMusicItem = playingMusicItem;
         mPlayMode = playMode;
+        mSpeed = speed;
         mPlayProgress = playProgress;
         mPlayProgressUpdateTime = playProgressUpdateTime;
         mPreparing = preparing;
@@ -81,6 +84,7 @@ public class AppWidgetPlayerState implements Parcelable {
                 PlaybackState.NONE,
                 new MusicItem(),
                 PlayMode.PLAYLIST_LOOP,
+                1.0F,
                 0,
                 0,
                 false,
@@ -138,6 +142,10 @@ public class AppWidgetPlayerState implements Parcelable {
         return mPlayMode;
     }
 
+    public float getSpeed() {
+        return mSpeed;
+    }
+
     public long getPlayProgress() {
         return mPlayProgress;
     }
@@ -186,6 +194,7 @@ public class AppWidgetPlayerState implements Parcelable {
         mPlaybackState = PlaybackState.values()[in.readInt()];
         mPlayingMusicItem = in.readParcelable(MusicItem.class.getClassLoader());
         mPlayMode = PlayMode.values()[in.readInt()];
+        mSpeed = in.readFloat();
         mPlayProgress = in.readLong();
         mPlayProgressUpdateTime = in.readLong();
         mPreparing = in.readByte() != 0;
@@ -199,6 +208,7 @@ public class AppWidgetPlayerState implements Parcelable {
         dest.writeInt(mPlaybackState.ordinal());
         dest.writeParcelable(mPlayingMusicItem, flags);
         dest.writeInt(mPlayMode.ordinal());
+        dest.writeFloat(mSpeed);
         dest.writeLong(mPlayProgress);
         dest.writeLong(mPlayProgressUpdateTime);
         dest.writeByte((byte) (mPreparing ? 1 : 0));

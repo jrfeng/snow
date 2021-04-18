@@ -12,7 +12,7 @@ import snow.player.audio.MusicItem;
 class PlayerStateHelper {
     private final PlayerState mPlayerState;
 
-    private boolean mRunOnService;
+    private final boolean mRunOnService;
     private final Context mContext;
     private final Class<? extends PlayerService> mPlayerService;
 
@@ -49,6 +49,7 @@ class PlayerStateHelper {
                 mPlayerState.getPlaybackState(),
                 mPlayerState.getMusicItem(),
                 mPlayerState.getPlayMode(),
+                mPlayerState.getSpeed(),
                 mPlayerState.getPlayProgress(),
                 mPlayerState.getPlayProgressUpdateTime(),
                 mPlayerState.isPreparing(),
@@ -187,6 +188,14 @@ class PlayerStateHelper {
 
     public void onPlayModeChanged(PlayMode playMode) {
         mPlayerState.setPlayMode(playMode);
+
+        if (mRunOnService) {
+            updateAppWidgetPlayerState();
+        }
+    }
+
+    public void onSpeedChanged(float speed) {
+        mPlayerState.setSpeed(speed);
 
         if (mRunOnService) {
             updateAppWidgetPlayerState();

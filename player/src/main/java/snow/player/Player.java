@@ -93,6 +93,13 @@ public interface Player {
     void setPlayMode(@UseOrdinal PlayMode playMode);
 
     /**
+     * 设置播放器播放速度。
+     *
+     * @param speed 播放速度。
+     */
+    void setSpeed(float speed);
+
+    /**
      * 播放器状态改变监听器。
      */
     interface OnPlaybackStateChangeListener {
@@ -232,6 +239,16 @@ public interface Player {
          * @see PlayMode#SHUFFLE
          */
         void onPlayModeChanged(@UseOrdinal PlayMode playMode);
+    }
+
+    /**
+     * 用于监听播放器播放速度改变事件。
+     */
+    interface OnSpeedChangeListener {
+        /**
+         * 当播放器的播放速度改变时会调用该方法。
+         */
+        void onSpeedChanged(float speed);
     }
 
     /**

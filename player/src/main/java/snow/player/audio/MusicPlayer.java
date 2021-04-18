@@ -109,6 +109,13 @@ public interface MusicPlayer {
     void setVolume(float leftVolume, float rightVolume);
 
     /**
+     * 设置音乐播放器的播放速度。
+     *
+     * @param speed 播放速度。
+     */
+    void setSpeed(float speed);
+
+    /**
      * 临时降低音量。
      * <p>
      * 音量应该降低到不足以影响到其他应用的音频清晰度，通常为当前音量的 0.2。

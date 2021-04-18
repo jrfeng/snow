@@ -26,10 +26,12 @@ public class ProgressClock {
     private boolean mEnabled;
     private final Callback mCallback;
 
-    private int mProgressSec;       // 单位：秒
+    private float mProgressSec;       // 单位：秒
     private int mDurationSec;       // 单位：秒
 
     private Disposable mDisposable;
+
+    private float mSpeed = 1.0F;
 
     /**
      * 创建一个 ProgressClock 对象。
@@ -62,7 +64,7 @@ public class ProgressClock {
     /**
      * 判断是否启用了进度条时钟。
      * <p>
-     * 如果返回 false，则会忽略对 {@link #start(int, long, int)} 方法的调用
+     * 如果返回 false，则会忽略对 {@link #start(int, long, int, float)} 方法的调用
      *
      * @return 是否启用了进度条时钟
      */
@@ -82,7 +84,7 @@ public class ProgressClock {
     /**
      * 设置是否启用进度条时钟。
      * <p>
-     * 如果参数为 false，则会忽略对 {@link #start(int, long, int)} 方法的调用。
+     * 如果参数为 false，则会忽略对 {@link #start(int, long, int, float)} 方法的调用。
      *
      * @param enabled 是否启用进度条时钟
      */
@@ -94,6 +96,19 @@ public class ProgressClock {
     }
 
     /**
+     * 设置速度倍数。
+     *
+     * @param speed 速度倍数（默认为 1.0F）。
+     */
+    public void setSpeed(float speed) {
+        mSpeed = speed;
+
+        if (speed <= 0) {
+            cancelTimer();
+        }
+    }
+
+    /**
      * 启动定时器。<b>注意！所有时间都是基于 {@code SystemClock.elapsedRealtime()} 的。</b>
      *
      * @param progress   歌曲的播放进度（单位：毫秒）
@@ -101,23 +116,43 @@ public class ProgressClock {
      * @param duration   歌曲的持续时间（单位：毫秒）
      * @throws IllegalArgumentException 在 updateTime 大于当前时间时抛出该异常
      */
-    public void start(int progress, long updateTime, int duration) throws IllegalArgumentException {
-        cancel();
+    public void start(int progress, long updateTime, int duration) {
+        start(progress, updateTime, duration, 1.0F);
+    }
+
+    /**
+     * 启动定时器。<b>注意！所有时间都是基于 {@code SystemClock.elapsedRealtime()} 的。</b>
+     *
+     * @param progress   歌曲的播放进度（单位：毫秒）
+     * @param updateTime 歌曲播放进度的更新时间（单位：毫秒）
+     * @param duration   歌曲的持续时间（单位：毫秒）
+     * @param speed      速度系数
+     * @throws IllegalArgumentException 在 updateTime 大于当前时间时抛出该异常
+     */
+    public void start(int progress, long updateTime, int duration, float speed) throws IllegalArgumentException {
+        cancelTimer();
+
+        mSpeed = speed;
 
         if (duration < 1) {
             mCallback.onUpdateProgress(0, 0);
             return;
         }
 
+        if (mSpeed <= 0) {
+            return;
+        }
+
         long currentTime = SystemClock.elapsedRealtime();
+
         if (updateTime > currentTime) {
             updateTime = currentTime;
-            Log.w(TAG, "updateTime > currentTime. " +
+            throw new IllegalArgumentException("updateTime > currentTime. " +
                     "updateTime=" + updateTime + ", " +
                     "currentTime=" + currentTime);
         }
 
-        long realProgress = progress + (currentTime - updateTime);
+        long realProgress = (long) (progress + (currentTime - updateTime));
 
         if (mCountDown) {
             mProgressSec = (int) Math.ceil((duration - realProgress) / 1000.0);
@@ -127,7 +162,7 @@ public class ProgressClock {
         mDurationSec = duration / 1000;
 
         if (!mEnabled) {
-            mCallback.onUpdateProgress(mProgressSec, mDurationSec);
+            mCallback.onUpdateProgress(Math.round(mProgressSec), mDurationSec);
             return;
         }
 
@@ -172,6 +207,10 @@ public class ProgressClock {
     }
 
     public void cancel() {
+        cancelTimer();
+    }
+
+    private void cancelTimer() {
         if (mDisposable != null && !mDisposable.isDisposed()) {
             mDisposable.dispose();
             mDisposable = null;
@@ -179,7 +218,7 @@ public class ProgressClock {
     }
 
     private void increase() {
-        int newProgress = mProgressSec + 1;
+        float newProgress = mProgressSec + (1 * mSpeed);
 
         if (newProgress >= mDurationSec) {
             cancel();
@@ -189,7 +228,7 @@ public class ProgressClock {
     }
 
     private void decrease() {
-        int newProgress = mProgressSec - 1;
+        float newProgress = mProgressSec - (1 * mSpeed);
 
         if (newProgress <= 0) {
             cancel();
@@ -198,9 +237,9 @@ public class ProgressClock {
         updateProgress(newProgress);
     }
 
-    private void updateProgress(int progressSec/*单位：秒*/) {
+    private void updateProgress(float progressSec/*单位：秒*/) {
         mProgressSec = progressSec;
-        mCallback.onUpdateProgress(mProgressSec, mDurationSec);
+        mCallback.onUpdateProgress(Math.min(Math.round(mProgressSec), mDurationSec), mDurationSec);
     }
 
     /**

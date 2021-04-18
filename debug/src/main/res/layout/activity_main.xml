@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
 
@@ -11,7 +11,7 @@
 
     </data>
 
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    <ScrollView
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -193,6 +193,18 @@
                     <TextView
                         android:layout_column="1"
                         android:text="@{viewModel.playMode.toString()}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
+                        android:text="Speed:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{viewModel.speed.toString()}" />
 
                 </TableRow>
 
@@ -445,6 +457,51 @@
                     android:layout_height="wrap_content"
                     android:onClick="@{() -> viewModel.cancelSleepTimer()}"
                     android:text="cancelSleepTimer"
+                    android:textAllCaps="false" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:text="Speed:"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.setSpeed(0.5F)}"
+                    android:text="0.5"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.setSpeed(1.0F)}"
+                    android:text="1.0"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.setSpeed(1.5F)}"
+                    android:text="1.5"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.setSpeed(2.0F)}"
+                    android:text="2.0"
                     android:textAllCaps="false" />
 
             </LinearLayout>

@@ -81,6 +81,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     private final List<PlayerClient.OnAudioSessionChangeListener> mAllAudioSessionChangeListener;
     private final List<SleepTimer.OnStateChangeListener> mAllSleepTimerStateChangeListener;
     private final List<Player.OnRepeatListener> mAllRepeatListener;
+    private final List<Player.OnSpeedChangeListener> mAllSpeedChangeListener;
 
     private final List<OnConnectStateChangeListener> mAllConnectStateChangeListener;
 
@@ -104,6 +105,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         mAllAudioSessionChangeListener = new ArrayList<>();
         mAllSleepTimerStateChangeListener = new ArrayList<>();
         mAllRepeatListener = new ArrayList<>();
+        mAllSpeedChangeListener = new ArrayList<>();
         mAllConnectStateChangeListener = new ArrayList<>();
 
         initMediaBrowser();
@@ -793,6 +795,15 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     /**
+     * 获取播放速度。
+     *
+     * @return 播放速度。
+     */
+    public float getSpeed() {
+        return mPlayerState.getSpeed();
+    }
+
+    /**
      * 获取当前播放列表的播放位置。
      *
      * @return 当前播放列表的播放位置
@@ -978,6 +989,21 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         }
 
         mPlayer.setPlayMode(playMode);
+    }
+
+    @Override
+    public void setSpeed(final float speed) {
+        if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    setSpeed(speed);
+                }
+            });
+            return;
+        }
+
+        mPlayer.setSpeed(speed);
     }
 
     private void tryAutoConnect(@Nullable Runnable connectedAction) {
@@ -1597,7 +1623,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         }
 
         mAllPlayModeChangeListener.add(listener);
-        notifyPlayModeChanged();
+        notifyPlayModeChanged(listener);
     }
 
     /**
@@ -1635,6 +1661,60 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public void removeOnPlayModeChangeListener(Player.OnPlayModeChangeListener listener) {
         mAllPlayModeChangeListener.remove(listener);
+    }
+
+    /**
+     * 添加一个用于监听播放速度改变的监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 要添加的监听器，不能为 null
+     */
+    public void addOnSpeedChangeListener(@NonNull Player.OnSpeedChangeListener listener) {
+        Preconditions.checkNotNull(listener);
+
+        if (mAllSpeedChangeListener.contains(listener)) {
+            return;
+        }
+
+        mAllSpeedChangeListener.add(listener);
+        notifySpeedChanged(listener);
+    }
+
+    /**
+     * 添加一个用于监听播放速度改变的监听器。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param listener 要添加的监听器，不能为 null
+     */
+    public void addOnSpeedChangeListener(@NonNull LifecycleOwner owner,
+                                         @NonNull final Player.OnSpeedChangeListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnSpeedChangeListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnSpeedChangeListener(listener);
+            }
+        }));
+    }
+
+    /**
+     * 移除一个用于监听播放模式改变的监听器。
+     *
+     * @param listener 要移除的事件监听器
+     */
+    public void removeOnSpeedChangeListener(Player.OnSpeedChangeListener listener) {
+        mAllSpeedChangeListener.remove(listener);
     }
 
     /**
@@ -2038,6 +2118,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
 
         notifyPlaylistChanged();
         notifyPlayModeChanged();
+        notifySpeedChanged();
         notifyPlayingMusicItemChanged();
         notifyPrepareStateChanged();
         notifyAudioSessionChanged();
@@ -2228,6 +2309,24 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         }
     }
 
+    private void notifySpeedChanged(Player.OnSpeedChangeListener listener) {
+        if (notConnected()) {
+            return;
+        }
+
+        listener.onSpeedChanged(mPlayerState.getSpeed());
+    }
+
+    private void notifySpeedChanged() {
+        if (notConnected()) {
+            return;
+        }
+
+        for (Player.OnSpeedChangeListener listener : mAllSpeedChangeListener) {
+            notifySpeedChanged(listener);
+        }
+    }
+
     private void notifyClientPlaybackStateChanged() {
         if (notConnected()) {
             return;
@@ -2414,6 +2513,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         public void onRepeat(@NonNull MusicItem musicItem, long repeatTime) {
             mPlayerStateHelper.onRepeat(repeatTime);
             notifyRepeat(musicItem, repeatTime);
+        }
+
+        @Override
+        public void onSpeedChanged(float speed) {
+            mPlayerStateHelper.onSpeedChanged(speed);
+            notifySpeedChanged();
         }
     }
 

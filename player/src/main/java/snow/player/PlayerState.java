@@ -22,6 +22,7 @@ class PlayerState implements Parcelable {
     private MusicItem musicItem;
     private int playPosition;
     private PlayMode playMode;
+    private float speed;
 
     // no persistent
     private long playProgressUpdateTime;
@@ -43,6 +44,7 @@ class PlayerState implements Parcelable {
         playProgressUpdateTime = 0;
         playPosition = 0;
         playMode = PlayMode.PLAYLIST_LOOP;
+        speed = 1.0F;
 
         playbackState = PlaybackState.NONE;
         preparing = false;
@@ -66,6 +68,7 @@ class PlayerState implements Parcelable {
         }
         playPosition = source.playPosition;
         playMode = source.playMode;
+        speed = source.speed;
 
         playbackState = source.playbackState;
         preparing = source.preparing;
@@ -181,6 +184,24 @@ class PlayerState implements Parcelable {
      */
     public void setPlayMode(@NonNull PlayMode playMode) {
         this.playMode = playMode;
+    }
+
+    /**
+     * 获取当前播放速度。
+     *
+     * @return 当前播放速度。
+     */
+    public float getSpeed() {
+        return speed;
+    }
+
+    /**
+     * 设置播放速度。
+     *
+     * @param speed 播放速度。
+     */
+    public void setSpeed(float speed) {
+        this.speed = speed;
     }
 
     /**
@@ -436,6 +457,7 @@ class PlayerState implements Parcelable {
                 && Objects.equal(musicItem, other.musicItem)
                 && Objects.equal(playPosition, other.playPosition)
                 && Objects.equal(playMode, other.playMode)
+                && Objects.equal(speed, other.speed)
                 && Objects.equal(playbackState, other.playbackState)
                 && Objects.equal(preparing, other.preparing)
                 && Objects.equal(prepared, other.prepared)
@@ -457,6 +479,7 @@ class PlayerState implements Parcelable {
                 musicItem,
                 playPosition,
                 playMode,
+                speed,
                 playbackState,
                 preparing,
                 prepared,
@@ -480,6 +503,7 @@ class PlayerState implements Parcelable {
                 ", musicItem=" + musicItem +
                 ", playPosition=" + playPosition +
                 ", playMode=" + playMode +
+                ", speed=" + speed +
                 ", playbackState=" + playbackState +
                 ", preparing=" + preparing +
                 ", prepared=" + prepared +
@@ -501,6 +525,7 @@ class PlayerState implements Parcelable {
         musicItem = in.readParcelable(Thread.currentThread().getContextClassLoader());
         playPosition = in.readInt();
         playMode = PlayMode.values()[in.readInt()];
+        speed = in.readFloat();
 
         playbackState = PlaybackState.values()[in.readInt()];
         preparing = in.readByte() != 0;
@@ -523,6 +548,7 @@ class PlayerState implements Parcelable {
         dest.writeParcelable(musicItem, flags);
         dest.writeInt(playPosition);
         dest.writeInt(playMode.ordinal());
+        dest.writeFloat(speed);
 
         dest.writeInt(playbackState.ordinal());
         dest.writeByte((byte) (preparing ? 1 : 0));

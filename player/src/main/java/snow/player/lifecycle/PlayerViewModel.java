@@ -46,6 +46,7 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<Integer> mSleepTimerProgress;   // 单位：秒
     private MutableLiveData<Integer> mPlayPosition;
     private MutableLiveData<PlayMode> mPlayMode;
+    private MutableLiveData<Float> mSpeed;
     private MutableLiveData<PlaybackState> mPlaybackState;
     private MutableLiveData<Boolean> mStalled;
     private MutableLiveData<Boolean> mConnected;
@@ -57,6 +58,7 @@ public class PlayerViewModel extends ViewModel {
     private Player.OnPlayingMusicItemChangeListener mPlayingMusicItemChangeListener;
     private Player.OnPlaylistChangeListener mPlaylistChangeListener;
     private Player.OnPlayModeChangeListener mPlayModeChangeListener;
+    private Player.OnSpeedChangeListener mSpeedChangeListener;
     private PlayerClient.OnPlaybackStateChangeListener mClientPlaybackStateChangeListener;
     private Player.OnBufferedProgressChangeListener mBufferedProgressChangeListener;
     private SleepTimer.OnStateChangeListener mSleepTimerStateChangeListener;
@@ -237,6 +239,14 @@ public class PlayerViewModel extends ViewModel {
             }
         };
 
+        mSpeedChangeListener = new Player.OnSpeedChangeListener() {
+            @Override
+            public void onSpeedChanged(float speed) {
+                mSpeed.setValue(speed);
+                mProgressClock.setSpeed(speed);
+            }
+        };
+
         mClientPlaybackStateChangeListener = new PlayerClient.OnPlaybackStateChangeListener() {
             @Override
             public void onPlaybackStateChanged(PlaybackState playbackState, boolean stalled) {
@@ -256,7 +266,8 @@ public class PlayerViewModel extends ViewModel {
                         }
                         mProgressClock.start(mPlayerClient.getPlayProgress(),
                                 mPlayerClient.getPlayProgressUpdateTime(),
-                                mPlayerClient.getPlayingMusicItemDuration());
+                                mPlayerClient.getPlayingMusicItemDuration(),
+                                mPlayerClient.getSpeed());
                         break;
                     case STOPPED:
                         mPreparing.setValue(false);
@@ -300,7 +311,10 @@ public class PlayerViewModel extends ViewModel {
                 mPlayProgress.setValue(progress / 1000);
 
                 if (PlaybackState.PLAYING == mPlaybackState.getValue() && !stalled) {
-                    mProgressClock.start(progress, updateTime, mPlayerClient.getPlayingMusicItemDuration());
+                    mProgressClock.start(progress,
+                            updateTime,
+                            mPlayerClient.getPlayingMusicItemDuration(),
+                            mPlayerClient.getSpeed());
                 }
             }
         };
@@ -316,7 +330,10 @@ public class PlayerViewModel extends ViewModel {
                 }
 
                 if (mPlayerClient.isPlaying()) {
-                    mProgressClock.start(playProgress, updateTime, mPlayerClient.getPlayingMusicItemDuration());
+                    mProgressClock.start(playProgress,
+                            updateTime,
+                            mPlayerClient.getPlayingMusicItemDuration(),
+                            mPlayerClient.getSpeed());
                 }
             }
         };
@@ -348,7 +365,10 @@ public class PlayerViewModel extends ViewModel {
         mRepeatListener = new Player.OnRepeatListener() {
             @Override
             public void onRepeat(@NonNull MusicItem musicItem, long repeatTime) {
-                mProgressClock.start(0, repeatTime, musicItem.getDuration());
+                mProgressClock.start(0,
+                        repeatTime,
+                        musicItem.getDuration(),
+                        mPlayerClient.getSpeed());
             }
         };
     }
@@ -374,6 +394,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.addOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
         mPlayerClient.addOnPlaylistChangeListener(mPlaylistChangeListener);
         mPlayerClient.addOnPlayModeChangeListener(mPlayModeChangeListener);
+        mPlayerClient.addOnSpeedChangeListener(mSpeedChangeListener);
         mPlayerClient.addOnPlaybackStateChangeListener(mClientPlaybackStateChangeListener);
         mPlayerClient.addOnBufferedProgressChangeListener(mBufferedProgressChangeListener);
         mPlayerClient.addOnSleepTimerStateChangeListener(mSleepTimerStateChangeListener);
@@ -388,6 +409,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.removeOnPlayingMusicItemChangeListener(mPlayingMusicItemChangeListener);
         mPlayerClient.removeOnPlaylistChangeListener(mPlaylistChangeListener);
         mPlayerClient.removeOnPlayModeChangeListener(mPlayModeChangeListener);
+        mPlayerClient.removeOnSpeedChangeListener(mSpeedChangeListener);
         mPlayerClient.removeOnPlaybackStateChangeListener(mClientPlaybackStateChangeListener);
         mPlayerClient.removeOnBufferedProgressChangeListener(mBufferedProgressChangeListener);
         mPlayerClient.removeOnSleepTimerStateChangeListener(mSleepTimerStateChangeListener);
@@ -567,6 +589,19 @@ public class PlayerViewModel extends ViewModel {
         }
 
         return mPlayMode;
+    }
+
+    /**
+     * 播放器播放速度。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     */
+    public LiveData<Float> getSpeed() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
+        return mSpeed;
     }
 
     /**
@@ -960,6 +995,18 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
+     * 设置播放速度。
+     *
+     * @param speed 要设置的播放速度。
+     */
+    public void setSpeed(float speed) {
+        if (isInitialized()) {
+            mPlayerClient.setSpeed(speed);
+            mProgressClock.setSpeed(speed);
+        }
+    }
+
+    /**
      * 调整音乐播放进度（单位：毫秒）。
      * <p>
      * 注意！seekTo 方法接收的参数的单位是 <b>毫秒</b>，而 PlayProgress 的单位是 <b>秒</b>。如果使用
@@ -1058,7 +1105,11 @@ public class PlayerViewModel extends ViewModel {
             return;
         }
 
-        mProgressClock.start(mPlayerClient.getPlayProgress(), mPlayerClient.getPlayProgressUpdateTime(), mPlayerClient.getPlayingMusicItemDuration());
+        mProgressClock.start(
+                mPlayerClient.getPlayProgress(),
+                mPlayerClient.getPlayProgressUpdateTime(),
+                mPlayerClient.getPlayingMusicItemDuration(),
+                mPlayerClient.getSpeed());
     }
 
     private void initAllLiveData() {
@@ -1074,6 +1125,7 @@ public class PlayerViewModel extends ViewModel {
         mSleepTimerProgress = new MutableLiveData<>((int) (mPlayerClient.getSleepTimerElapsedTime() / 1000));
         mPlayPosition = new MutableLiveData<>(mPlayerClient.getPlayPosition());
         mPlayMode = new MutableLiveData<>(mPlayerClient.getPlayMode());
+        mSpeed = new MutableLiveData<>(mPlayerClient.getSpeed());
         mPlaybackState = new MutableLiveData<>(mPlayerClient.getPlaybackState());
         mStalled = new MutableLiveData<>(mPlayerClient.isStalled());
         mConnected = new MutableLiveData<>(mPlayerClient.isConnected());

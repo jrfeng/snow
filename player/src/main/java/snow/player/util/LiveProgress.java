@@ -33,6 +33,7 @@ public class LiveProgress {
     private Player.OnStalledChangeListener mOnStalledChangeListener;
     private PlayerClient.OnConnectStateChangeListener mOnConnectStateChangeListener;
     private Player.OnRepeatListener mOnRepeatListener;
+    private Player.OnSpeedChangeListener mSpeedChangeListener;
 
     /**
      * 创建一个 {@link LiveProgress} 对象。
@@ -95,7 +96,8 @@ public class LiveProgress {
                         }
                         mProgressClock.start(mPlayerClient.getPlayProgress(),
                                 mPlayerClient.getPlayProgressUpdateTime(),
-                                mPlayerClient.getPlayingMusicItemDuration());
+                                mPlayerClient.getPlayingMusicItemDuration(),
+                                mPlayerClient.getSpeed());
                         break;
                     case STOPPED:
                         updateLiveProgress(0);   // 注意！case 穿透！
@@ -113,7 +115,10 @@ public class LiveProgress {
                 updateLiveProgress(progress / 1000);
 
                 if (mPlayerClient.isPlaying() && !stalled) {
-                    mProgressClock.start(progress, updateTime, mPlayerClient.getPlayingMusicItemDuration());
+                    mProgressClock.start(progress,
+                            updateTime,
+                            mPlayerClient.getPlayingMusicItemDuration(),
+                            mPlayerClient.getSpeed());
                 }
             }
         };
@@ -127,7 +132,10 @@ public class LiveProgress {
                 }
 
                 if (mPlayerClient.isPlaying()) {
-                    mProgressClock.start(playProgress, updateTime, mPlayerClient.getPlayingMusicItemDuration());
+                    mProgressClock.start(playProgress,
+                            updateTime,
+                            mPlayerClient.getPlayingMusicItemDuration(),
+                            mPlayerClient.getSpeed());
                 }
             }
         };
@@ -144,7 +152,17 @@ public class LiveProgress {
         mOnRepeatListener = new Player.OnRepeatListener() {
             @Override
             public void onRepeat(@NonNull MusicItem musicItem, long repeatTime) {
-                mProgressClock.start(0, repeatTime, musicItem.getDuration());
+                mProgressClock.start(0,
+                        repeatTime,
+                        musicItem.getDuration(),
+                        mPlayerClient.getSpeed());
+            }
+        };
+
+        mSpeedChangeListener = new Player.OnSpeedChangeListener() {
+            @Override
+            public void onSpeedChanged(float speed) {
+                mProgressClock.setSpeed(speed);
             }
         };
     }

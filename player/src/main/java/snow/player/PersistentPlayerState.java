@@ -18,6 +18,7 @@ class PersistentPlayerState extends PlayerState {
     private static final String KEY_MUSIC_ITEM = "music_item";
     private static final String KEY_PLAY_POSITION = "position";
     private static final String KEY_PLAY_MODE = "play_mode";
+    private static final String KEY_SPEED = "speed";
 
     private final MMKV mMMKV;
 
@@ -32,6 +33,7 @@ class PersistentPlayerState extends PlayerState {
         super.setMusicItem(mMMKV.decodeParcelable(KEY_MUSIC_ITEM, MusicItem.class));
         super.setPlayPosition(mMMKV.decodeInt(KEY_PLAY_POSITION, 0));
         super.setPlayMode(PlayMode.values()[mMMKV.decodeInt(KEY_PLAY_MODE, 0)]);
+        super.setSpeed(mMMKV.getFloat(KEY_SPEED, 1.0F));
 
         if (isForbidSeek()) {
             super.setPlayProgress(0);
@@ -77,5 +79,12 @@ class PersistentPlayerState extends PlayerState {
         super.setPlayMode(playMode);
 
         mMMKV.encode(KEY_PLAY_MODE, playMode.ordinal());
+    }
+
+    @Override
+    public void setSpeed(float speed) {
+        super.setSpeed(speed);
+
+        mMMKV.encode(KEY_SPEED, speed);
     }
 }

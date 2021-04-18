@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.audio.AudioListener;
@@ -289,6 +290,12 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     @Override
     public void setVolume(float leftVolume, float rightVolume) {
         mSimpleExoPlayer.setVolume(Math.max(leftVolume, rightVolume));
+    }
+
+    @Override
+    public void setSpeed(float speed) {
+        PlaybackParameters parameters = new PlaybackParameters(speed);
+        mSimpleExoPlayer.setPlaybackParameters(parameters);
     }
 
     @Override

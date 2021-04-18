@@ -336,6 +336,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                 }
 
                 mp.setLooping(isLooping());
+                mp.setSpeed(mPlayerState.getSpeed());
 
                 if (mPlayerConfig.isAudioEffectEnabled() && mAudioEffectManager != null) {
                     mAudioEffectManager.attachAudioEffect(mp.getAudioSessionId());
@@ -1373,6 +1374,14 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mOnStateChangeListener.onPlayModeChanged(playMode);
     }
 
+    private void notifySpeedChanged(float speed) {
+        mPlayerStateHelper.onSpeedChanged(speed);
+
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onSpeedChanged(speed);
+        }
+    }
+
     private void notifyPlaylistChanged(int position) {
         mPlayerStateHelper.onPlaylistChanged(position);
 
@@ -1529,6 +1538,24 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         notifyPlayModeChanged(playMode);
+    }
+
+    @Override
+    public void setSpeed(float speed) {
+        if (speed < 0) {
+            speed = 0;
+        }
+
+        if (speed == mPlayerState.getSpeed()) {
+            return;
+        }
+
+        if (isPrepared()) {
+            assert mMusicPlayer != null;
+            mMusicPlayer.setSpeed(speed);
+        }
+
+        notifySpeedChanged(speed);
     }
 
     @Override
