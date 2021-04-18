@@ -72,54 +72,59 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.btnConnect:
-                mPlayerClient.connect(new PlayerClient.OnConnectCallback() {
-                    @Override
-                    public void onConnected(boolean success) {
-                        if (success && mPlayerClient.getMediaController() != null) {
-                            testMediaSession(mPlayerClient.getMediaController());
-                        }
-
-                        // DEBUG
-                        Log.d(TAG, "OnConnectCallback: PlayingMusicItem: " + mPlayerClient.getPlayingMusicItem());
+        int id = view.getId();
+        if (id == R.id.btnConnect) {
+            mPlayerClient.connect(new PlayerClient.OnConnectCallback() {
+                @Override
+                public void onConnected(boolean success) {
+                    if (success && mPlayerClient.getMediaController() != null) {
+                        testMediaSession(mPlayerClient.getMediaController());
                     }
-                });
-                break;
-            case R.id.btnDisconnect:
-                mPlayerClient.disconnect();
-                break;
-            case R.id.btnShutdown:
-                mPlayerClient.shutdown();
-                break;
-            case R.id.btnSetPlaylist:
-                mPlayerClient.setPlaylist(createPlaylist());
-                break;
+
+                    // DEBUG
+                    Log.d(TAG, "OnConnectCallback: PlayingMusicItem: " + mPlayerClient.getPlayingMusicItem());
+                }
+            });
+            return;
+        }
+
+        if (id == R.id.btnDisconnect) {
+            mPlayerClient.disconnect();
+            return;
+        }
+
+        if (id == R.id.btnShutdown) {
+            mPlayerClient.shutdown();
+            return;
+        }
+
+        if (id == R.id.btnSetPlaylist) {
+            mPlayerClient.setPlaylist(createPlaylist());
         }
     }
 
     private Playlist createPlaylist() {
         MusicItem song1 = new MusicItem.Builder()
-                .setTitle("逍遥叹")
-                .setArtist("胡歌")
+                .setTitle("莫失莫忘")
+                .setArtist("麦振鸿")
                 .setAlbum("仙剑奇侠传")
-                .setDuration(313520)
-                .setUri("http://music.163.com/song/media/outer/url?id=4875306")
+                .setDuration(199180)
+                .setUri("http://music.163.com/song/media/outer/url?id=1427788848")
                 .setIconUri("http://p1.music.126.net/4tTN8CnR7wG4E1cauIPCvQ==/109951163240682406.jpg")
                 .build();
 
         MusicItem song2 = new MusicItem.Builder()
-                .setTitle("终于明白")
-                .setArtist("动力火车")
-                .setDuration(267786)
-                .setUri("http://music.163.com/song/media/outer/url?id=4875305")
+                .setTitle("偏爱")
+                .setArtist("张芸京")
+                .setDuration(213000)
+                .setUri("http://music.163.com/song/media/outer/url?id=5238992")
                 .build();
 
         MusicItem song3 = new MusicItem.Builder()
-                .setTitle("千年泪")
-                .setDuration(260946)
-                .setUri("http://music.163.com/song/media/outer/url?id=150371")
-                .setIconUri("http://p2.music.126.net/0543F-ln2Apdiopez_jbsA==/109951163244853571.jpg")
+                .setTitle("雪见-落凡尘")
+                .setDuration(289973)
+                .setUri("http://music.163.com/song/media/outer/url?id=1427193969")
+                .setIconUri("http://p1.music.126.net/ADQQb9gmj8j4pv_0HZ9lIA==/109951164755909058.jpg")
                 .build();
 
         MusicItem song4 = new MusicItem.Builder()
