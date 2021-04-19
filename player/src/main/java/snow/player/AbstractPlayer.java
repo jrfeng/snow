@@ -336,7 +336,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                 }
 
                 mp.setLooping(isLooping());
-                mp.setSpeed(mPlayerState.getSpeed());
 
                 if (mPlayerConfig.isAudioEffectEnabled() && mAudioEffectManager != null) {
                     mAudioEffectManager.attachAudioEffect(mp.getAudioSessionId());
@@ -1031,6 +1030,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mMediaSession.setActive(true);
         if (isPrepared()) {
             assert mMusicPlayer != null;
+            mMusicPlayer.setSpeed(mPlayerState.getSpeed());
             mMusicPlayer.start();
             notifyPlaying(mMusicPlayer.isStalled(), mMusicPlayer.getProgress(), SystemClock.elapsedRealtime());
             return;
