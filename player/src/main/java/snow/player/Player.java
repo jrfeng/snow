@@ -95,7 +95,7 @@ public interface Player {
     /**
      * 设置播放器播放速度。
      *
-     * @param speed 播放速度。
+     * @param speed 播放速度，最小值为 0.1，最大值为 10。
      */
     void setSpeed(float speed);
 

@@ -111,7 +111,7 @@ public interface MusicPlayer {
     /**
      * 设置音乐播放器的播放速度。
      *
-     * @param speed 播放速度。
+     * @param speed 播放速度，最小值为 0.1。
      */
     void setSpeed(float speed);
 

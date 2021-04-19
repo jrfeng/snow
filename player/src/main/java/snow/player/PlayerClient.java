@@ -991,6 +991,11 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         mPlayer.setPlayMode(playMode);
     }
 
+    /**
+     * 设置播放速度。
+     *
+     * @param speed 播放速度，最小值为 0.1，最大值为 10。
+     */
     @Override
     public void setSpeed(final float speed) {
         if (notConnected()) {

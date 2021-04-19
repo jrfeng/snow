@@ -1542,8 +1542,12 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void setSpeed(float speed) {
-        if (speed < 0) {
-            speed = 0;
+        if (speed < 0.1F) {
+            speed = 0.1F;
+        }
+
+        if (speed > 10.0F) {
+            speed = 10.0F;
         }
 
         if (speed == mPlayerState.getSpeed()) {
