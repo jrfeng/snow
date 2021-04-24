@@ -142,7 +142,7 @@ public class AudioScanner<T> {
                     }
 
                     notifyProgressUpdate(Math.round(progress * 1.0F / cursor.getCount()));
-                } while (cursor.moveToNext() || !mCancelled.get());
+                } while (cursor.moveToNext() && !mCancelled.get());
 
                 cursor.close();
 
