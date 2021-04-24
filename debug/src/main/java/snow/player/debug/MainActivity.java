@@ -1,18 +1,28 @@
 package snow.player.debug;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.permissionx.guolindev.PermissionX;
+import com.permissionx.guolindev.callback.RequestCallback;
+
+import java.util.List;
 
 import snow.player.Player;
 import snow.player.PlayerClient;
@@ -21,12 +31,18 @@ import snow.player.debug.databinding.ActivityMainBinding;
 import snow.player.lifecycle.PlayerViewModel;
 import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
+import snow.player.util.AudioScanner;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private TextView tvMediaSessionState;
 
     private PlayerClient mPlayerClient;
+
+    private AudioScanner<AudioScanner.AudioItem> mAudioScanner;
+    private boolean mStartScannerOnGranted;
+
+    private ProgressBar mScannerProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
         binding.setViewModel(playerViewModel);
 
         tvMediaSessionState = binding.tvMediaSessionState;
+
+        mAudioScanner = new AudioScanner<>(this, new AudioScanner.AudioItemConverter());
+        mScannerProgress = findViewById(R.id.scanner_progress);
 
         if (playerViewModel.isInitialized()) {
             mPlayerClient = playerViewModel.getPlayerClient();
@@ -70,6 +89,26 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void requestPermission() {
+        PermissionX.init(this)
+                .permissions(Manifest.permission.READ_EXTERNAL_STORAGE)
+                .request(new RequestCallback() {
+                    @Override
+                    public void onResult(boolean allGranted, List<String> grantedList, List<String> deniedList) {
+                        if (deniedList.contains(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                            Toast.makeText(MainActivity.this,
+                                    "Need permission: READ_EXTERNAL_STORAGE",
+                                    Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        if (mStartScannerOnGranted) {
+                            startAudioScanner();
+                        }
+                    }
+                });
+    }
+
     @SuppressLint("SetTextI18n")
     public void onClick(View view) {
         int id = view.getId();
@@ -100,7 +139,49 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.btnSetPlaylist) {
             mPlayerClient.setPlaylist(createPlaylist());
+            return;
         }
+
+        if (id == R.id.btn_start_scanner) {
+            if (!PermissionX.isGranted(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                mStartScannerOnGranted = true;
+                requestPermission();
+                return;
+            }
+
+            startAudioScanner();
+            return;
+        }
+
+        if (id == R.id.btn_cancel_scanner) {
+            mAudioScanner.cancel();
+        }
+    }
+
+    private void startAudioScanner() {
+        mAudioScanner.scan(new AudioScanner.OnProgressUpdateListener<AudioScanner.AudioItem>() {
+            @Override
+            public void onStart() {
+                mScannerProgress.setProgress(0);
+            }
+
+            @Override
+            public void onProgressUpdate(int progress) {
+                mScannerProgress.setProgress(progress);
+            }
+
+            @Override
+            public void onEnd(@NonNull List<AudioScanner.AudioItem> audioList, boolean cancelled) {
+                // DEBUG
+                Log.d("DEBUG", "***************************************************");
+                Log.d("DEBUG", "cancelled: " + cancelled);
+                Log.d("DEBUG", "size     : " + audioList.size());
+                for (AudioScanner.AudioItem audioItem : audioList) {
+                    Log.d("DEBUG", "item     : " + audioItem.toString());
+                }
+                Log.d("DEBUG", "***************************************************");
+            }
+        });
     }
 
     private Playlist createPlaylist() {
