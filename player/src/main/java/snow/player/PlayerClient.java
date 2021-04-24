@@ -535,8 +535,10 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 关闭播放器。
      * <p>
-     * 调用该方法后，后台的播放器会自动关闭，并断开所有客户端的连接。通常不建议客户端调用此方法，如果客户端需要
-     * 断开与播放器的连接，注意 {@link #disconnect()} 方法即可。
+     * 调用该方法后，后台的播放器会自动关闭，并断开所有客户端的连接。如果客户端仅仅只需要断开与播放器的连接，
+     * 使用 {@link #disconnect()} 方法即可。
+     *
+     * @see #disconnect()
      */
     @Override
     public void shutdown() {
