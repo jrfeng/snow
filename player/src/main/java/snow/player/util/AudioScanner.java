@@ -132,6 +132,7 @@ public class AudioScanner<T> {
                 }
 
                 int progress = 0;
+                int count = cursor.getCount();
 
                 do {
                     progress++;
@@ -141,7 +142,7 @@ public class AudioScanner<T> {
                         result.add(item);
                     }
 
-                    notifyProgressUpdate(Math.round(progress * 1.0F / cursor.getCount()));
+                    notifyProgressUpdate(Math.round((progress * 1.0F / count) * 100));
                 } while (cursor.moveToNext() && !mCancelled.get());
 
                 cursor.close();
