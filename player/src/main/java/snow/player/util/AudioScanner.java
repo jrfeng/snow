@@ -31,11 +31,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 /**
- * 音频文件扫描器。
- * <p>
- * 用于帮助扫描本地设备中的音频文件。
+ * 音频文件扫描器。用于帮助扫描本地设备中的音频文件。
  *
- * @param <T>
+ * @param <T> 音频文件数据将被转换到的实体类型。
  */
 public class AudioScanner<T> {
     private final Context mContext;
@@ -60,7 +58,7 @@ public class AudioScanner<T> {
      * 创建一个 {@link AudioScanner} 对象。
      *
      * @param context   Context 对象，不能为 null
-     * @param converter 转换器，用于将扫描到的音频数据转换为一个实体类，不能为 null
+     * @param converter 转换器，不能为 null。用于将扫描到的音频数据转换为一个实体对象。
      */
     public AudioScanner(@NonNull Context context, @NonNull Converter<T> converter) {
         Preconditions.checkNotNull(context);
@@ -81,6 +79,11 @@ public class AudioScanner<T> {
         });
     }
 
+    /**
+     * 设置查询参数。
+     * <p>
+     * 关于参数的具体功能，请参考 <a href="https://developer.android.google.cn/reference/android/content/ContentResolver#query(android.net.Uri,%20java.lang.String[],%20java.lang.String,%20java.lang.String[],%20java.lang.String)">{@code ContentResolver#query()}</a> 方法。
+     */
     public void setQueryParams(String[] projection,
                                String selection,
                                String[] selectionArgs,
@@ -94,11 +97,15 @@ public class AudioScanner<T> {
     /**
      * 开始扫描本地音频文件。
      * <p>
-     * 注意！如果当前扫描器运行，调用此方法时将被忽略。除非上次扫描过程已完成，或者被取消。
+     * 注意！如果当前扫描器运行，调用此方法时将被忽略，除非上次扫描过程已完成或者已被取消。可以使用
+     * {@link #isScanning()} 方法检查扫描器当前是否正在运行。
      *
-     * @param listener 用于接收扫描结果和监听扫描进度。
+     * @param listener 用于接收扫描结果和监听扫描进度，不能为 null。
+     * @see #isScanning()
      */
     public void scan(@NonNull OnProgressUpdateListener<T> listener) {
+        Preconditions.checkNotNull(listener);
+
         if (isScanning()) {
             return;
         }
@@ -176,6 +183,11 @@ public class AudioScanner<T> {
         mHandler.sendMessage(message);
     }
 
+    /**
+     * 扫描器当前是否正在运行。
+     *
+     * @return 如果扫描器当前正在运行，则返回 true，否则返回 false。
+     */
     public boolean isScanning() {
         return mScanning.get();
     }
@@ -396,19 +408,19 @@ public class AudioScanner<T> {
     }
 
     /**
-     * 转换器，用于将扫描到是的音频文件数据转换成一个实体类。
+     * 转换器，用于将扫描到的音频文件数据转换成一个实体对象。
      *
-     * @param <T>
+     * @param <T> 音频文件数据将被转换到的实体类型。
      */
     public interface Converter<T> {
 
         /**
-         * 将扫描到的音频数据转换成一个实体类。
+         * 将扫描到的音频文件数据转换成一个实体对象。
          * <p>
-         * 注意！返回 null 时歌曲将不会被添加到扫描结果中。
+         * 注意！返回 null 时，将忽略当前音频文件。
          *
          * @param cursor Cursor 对象，不为 null
-         * @return 实体对象，返回 null 时歌曲将不会被添加到扫描结果中。
+         * @return 实体对象，可为 null。返回 null 时，将忽略当前音频文件。
          */
         @Nullable
         T convert(@NonNull Cursor cursor);
@@ -446,11 +458,11 @@ public class AudioScanner<T> {
     }
 
     /**
-     * 默认的音频项实体类。
+     * 默认的音频实体类。
      * <p>
-     * 如果默认的 {@link AudioItem} 无法满足你的需求，你可以创建一个自定义的实体类型，然后使用自定义的
-     * {@link Converter} 扫描本地音乐即可。创建自定义 {@link Converter} 非常的简单，具体请参考
-     * {@link AudioItemConverter} 类的源码。
+     * 如果默认的 {@link AudioItem} 无法满足你的需求，可以创建一个自定义的实体类型，然后使用自定义的
+     * {@link Converter} 将音频文件数据转换成自定义的实体对象即可。创建自定义
+     * {@link Converter} 非常简单，具体请参考 {@link AudioItemConverter} 类的源码。
      *
      * @see AudioItemConverter
      */
@@ -741,9 +753,7 @@ public class AudioScanner<T> {
     }
 
     /**
-     * {@link AudioItem} 转换器，用于将音频数据转换成对应的 {@link AudioItem} 对象。
-     *
-     * @see AudioItem
+     * 默认的转换器，用于将扫描到的音频数据转换成 {@link AudioItem} 对象。
      */
     public static class AudioItemConverter implements Converter<AudioScanner.AudioItem> {
         @Nullable
