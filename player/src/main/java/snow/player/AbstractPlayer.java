@@ -372,6 +372,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                     return;
                 }
 
+                if (mPlayerState.getPlayMode() == PlayMode.SINGLE_ONCE) {
+                    notifyPlayOnceComplete();
+                    return;
+                }
+
                 skipToNext();
             }
         };
@@ -529,6 +534,37 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                 }
             }
         });
+    }
+
+    private void notifyPlayOnceComplete() {
+        cancelRecordProgress();
+        releaseWakeLock();
+
+        int playProgress = mPlayerState.getPlayProgress();
+        long updateTime = mPlayerState.getPlayProgressUpdateTime();
+
+        if (isPrepared()) {
+            assert mMusicPlayer != null;
+            playProgress = mMusicPlayer.getProgress();
+            updateTime = SystemClock.elapsedRealtime();
+
+            releaseMusicPlayer();
+        }
+
+        mPlayerStateHelper.onPaused(playProgress, updateTime);
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PAUSED));
+
+        // 需要将服务端保存的播放进度设置为 0，以便下次调用 play() 方法时，可以从初始位置开始播放
+        mPlayerState.setPlayProgress(0);
+        mPlayerState.setPlayProgressUpdateTime(updateTime);
+
+        mBecomeNoiseHelper.unregisterBecomeNoiseReceiver();
+
+        mOnStateChangeListener.onPaused();
+
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onPause(playProgress, updateTime);
+        }
     }
 
     /**
@@ -1053,10 +1089,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (isPlaying()) {
-            assert mMusicPlayer != null;
-            mMusicPlayer.pause();
-        }
+        assert mMusicPlayer != null;
+        mMusicPlayer.pause();
 
         notifyPaused();
     }
@@ -1451,7 +1485,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     private int getNextPosition(int currentPosition) {
         PlayMode playMode = mPlayerState.getPlayMode();
-        if (mConfirmNextPlay || playMode == PlayMode.PLAYLIST_LOOP || playMode == PlayMode.LOOP) {
+        if (mConfirmNextPlay || playMode == PlayMode.PLAYLIST_LOOP || playMode == PlayMode.LOOP || playMode == PlayMode.SINGLE_ONCE) {
             mConfirmNextPlay = false;
             int position = currentPosition + 1;
             if (position >= getPlaylistSize()) {
