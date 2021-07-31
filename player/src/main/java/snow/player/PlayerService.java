@@ -268,9 +268,9 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void preparePlayer() {
-        mPlayer.prepare(new AbstractPlayer.OnPreparedListener() {
+        mPlayer.initialize(new AbstractPlayer.OnInitializedListener() {
             @Override
-            public void onPrepared() {
+            public void onInitialized() {
                 mPlayerPrepareLatch.countDown();
             }
         });

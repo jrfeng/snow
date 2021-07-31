@@ -108,6 +108,9 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private boolean mConfirmNextPlay;
     private boolean mResumePlay;
 
+    private boolean mInitialized;
+    private OnInitializedListener mOnInitializedListener;
+
     private final OnStateChangeListener mOnStateChangeListener;
 
     @Nullable
@@ -152,38 +155,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mAudioEffectManager = audioEffectManager;
     }
 
-    public void prepare(@NonNull final OnPreparedListener listener) {
-        mPlaylistLoadedAction = new Runnable() {
-            @Override
-            public void run() {
-                if (mPlaylist.isEmpty()) {
-                    listener.onPrepared();
-                    return;
-                }
-
-                prepareMusicItemAsync(mPlaylist.get(mPlayerState.getPlayPosition()))
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new SingleObserver<MusicItem>() {
-                            @Override
-                            public void onSubscribe(@NonNull Disposable d) {
-                                mPrepareMusicItemDisposable = d;
-                            }
-
-                            @Override
-                            public void onSuccess(@NonNull MusicItem musicItem) {
-                                mPlayerState.setMusicItem(musicItem);
-                                listener.onPrepared();
-                            }
-
-                            @Override
-                            public void onError(@NonNull Throwable e) {
-                                notifyError(ErrorCode.PREPARE_MUSIC_ITEM_ERROR, ErrorCode.getErrorMessage(mApplicationContext, ErrorCode.PREPARE_MUSIC_ITEM_ERROR));
-                            }
-                        });
-            }
-        };
-
+    public void initialize(@NonNull final OnInitializedListener listener) {
+        mOnInitializedListener = listener;
         reloadPlaylist();
     }
 
@@ -1499,12 +1472,45 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                 mPlaylist = playlist;
                 mLoadingPlaylist = false;
 
+                if (!mInitialized) {
+                    mInitialized = true;
+                    notifyInitialized();
+                }
+
                 if (mPlaylistLoadedAction != null) {
                     mPlaylistLoadedAction.run();
                     mPlaylistLoadedAction = null;
                 }
             }
         });
+    }
+
+    private void notifyInitialized() {
+        if (mPlaylist.isEmpty()) {
+            mOnInitializedListener.onInitialized();
+            return;
+        }
+
+        prepareMusicItemAsync(mPlaylist.get(mPlayerState.getPlayPosition()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<MusicItem>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        mPrepareMusicItemDisposable = d;
+                    }
+
+                    @Override
+                    public void onSuccess(@NonNull MusicItem musicItem) {
+                        mPlayerState.setMusicItem(musicItem);
+                        mOnInitializedListener.onInitialized();
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        notifyError(ErrorCode.PREPARE_MUSIC_ITEM_ERROR, ErrorCode.getErrorMessage(mApplicationContext, ErrorCode.PREPARE_MUSIC_ITEM_ERROR));
+                    }
+                });
     }
 
     private int getRandomPosition(int exclude) {
@@ -2075,12 +2081,12 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     }
 
     /**
-     * 监听 {@link AbstractPlayer} 的准备状态。
+     * 监听 {@link AbstractPlayer} 的初始化状态。
      */
-    public interface OnPreparedListener {
+    interface OnInitializedListener {
         /**
-         * 该方法会在 {@link AbstractPlayer} 准备完毕时调用。
+         * 该方法会在 {@link AbstractPlayer} 初始化完毕后调用。
          */
-        void onPrepared();
+        void onInitialized();
     }
 }
