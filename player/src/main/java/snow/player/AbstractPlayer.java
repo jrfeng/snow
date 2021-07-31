@@ -394,6 +394,12 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
                 notifyPrepared(mp.getAudioSessionId(), mp.getDuration());
 
+                MusicItem musicItem = mPlayerState.getMusicItem();
+                assert musicItem != null;
+                if (musicItem.isDelayDuration()) {
+                    mMediaSession.setMetadata(buildMediaMetadata());
+                }
+
                 if (!mPlayerState.isForbidSeek() && mPlayerState.getPlayProgress() > 0) {
                     mPlayOnSeekComplete = mPlayOnPrepared;
                     mPlayOnPrepared = false;
@@ -753,7 +759,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                     .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicItem.getArtist())
                     .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, musicItem.getAlbum())
                     .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, musicItem.getIconUri())
-                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, musicItem.getDuration())
+                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mPlayerState.getDuration())
                     .build();
         }
 
