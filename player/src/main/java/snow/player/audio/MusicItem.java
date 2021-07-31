@@ -35,7 +35,7 @@ public final class MusicItem implements Parcelable {
 
     // version 1
     private static final String VERSION_1 = "v1";
-    private boolean delayDuration;
+    private boolean autoDuration;
 
     /**
      * 构造一个 MusicItem 对象。建议使用 {@link Builder} 构造器来创建 {@link MusicItem} 对象，
@@ -51,7 +51,7 @@ public final class MusicItem implements Parcelable {
         this.duration = 0;
         this.extra = null;
         this.forbidSeek = false;
-        this.delayDuration = false;
+        this.autoDuration = false;
     }
 
     /**
@@ -70,7 +70,7 @@ public final class MusicItem implements Parcelable {
         iconUri = source.iconUri;
         duration = source.duration;
         forbidSeek = source.forbidSeek;
-        delayDuration = source.delayDuration;
+        autoDuration = source.autoDuration;
         if (source.extra != null) {
             extra = new Bundle(source.extra);
         }
@@ -224,8 +224,8 @@ public final class MusicItem implements Parcelable {
      *
      * @return 如果延迟到播放器准备完毕时再获取歌曲的播放时长，则返回 true，否则返回 false。
      */
-    public boolean isDelayDuration() {
-        return delayDuration;
+    public boolean isAutoDuration() {
+        return autoDuration;
     }
 
     /**
@@ -236,10 +236,10 @@ public final class MusicItem implements Parcelable {
      * <p>
      * 如果设置了延迟获取歌曲的 duration，则歌曲的 duration 将延迟播放器准备完毕后再获取。
      *
-     * @param delayDuration 是否获取歌曲的播放时长。
+     * @param autoDuration 是否获取歌曲的播放时长。
      */
-    public void setDelayDuration(boolean delayDuration) {
-        this.delayDuration = delayDuration;
+    public void setAutoDuration(boolean autoDuration) {
+        this.autoDuration = autoDuration;
     }
 
     /**
@@ -299,7 +299,8 @@ public final class MusicItem implements Parcelable {
                 Objects.equal(uri, other.uri) &&
                 Objects.equal(iconUri, other.iconUri) &&
                 Objects.equal(duration, other.duration) &&
-                Objects.equal(forbidSeek, other.forbidSeek);
+                Objects.equal(forbidSeek, other.forbidSeek) &&
+                Objects.equal(autoDuration, other.autoDuration);
     }
 
     /**
@@ -314,7 +315,8 @@ public final class MusicItem implements Parcelable {
                 uri,
                 iconUri,
                 duration,
-                forbidSeek);
+                forbidSeek,
+                autoDuration);
     }
 
     @Override
@@ -328,7 +330,7 @@ public final class MusicItem implements Parcelable {
                 ", iconUri='" + iconUri + '\'' +
                 ", duration=" + duration +
                 ", forbidSeek=" + forbidSeek +
-                ", delayDuration=" + delayDuration +
+                ", autoDuration=" + autoDuration +
                 '}';
     }
 
@@ -351,7 +353,7 @@ public final class MusicItem implements Parcelable {
 
         // version 1
         dest.writeString(VERSION_1);
-        dest.writeByte((byte) (this.delayDuration ? 1 : 0));
+        dest.writeByte((byte) (this.autoDuration ? 1 : 0));
     }
 
     /**
@@ -372,7 +374,7 @@ public final class MusicItem implements Parcelable {
         deserializeByVersion(in, VERSION_1, new Deserialization() {
             @Override
             public void deserialization(Parcel in) {
-                delayDuration = in.readByte() == 1;
+                autoDuration = in.readByte() == 1;
             }
         });
     }
@@ -416,7 +418,7 @@ public final class MusicItem implements Parcelable {
         private int duration;
         private boolean forbidSeek = false;
         private Bundle extra;
-        private boolean delayDuration = false;
+        private boolean autoDuration = false;
 
         public Builder() {
         }
@@ -517,10 +519,10 @@ public final class MusicItem implements Parcelable {
          * <p>
          * 如果设置了延迟获取歌曲的 duration，则歌曲的 duration 将延迟播放器准备完毕后再获取。
          *
-         * @see #setDelayDuration(boolean)
+         * @see #setAutoDuration(boolean)
          */
-        public Builder delayDuration() {
-            return this.setDelayDuration(true);
+        public Builder autoDuration() {
+            return this.setAutoDuration(true);
         }
 
         /**
@@ -531,11 +533,11 @@ public final class MusicItem implements Parcelable {
          * <p>
          * 如果设置了延迟获取歌曲的 duration，则歌曲的 duration 将延迟播放器准备完毕后再获取。
          *
-         * @param delayDuration 是否获取歌曲的播放时长。
-         * @see #delayDuration()
+         * @param autoDuration 是否获取歌曲的播放时长。
+         * @see #autoDuration()
          */
-        public Builder setDelayDuration(boolean delayDuration) {
-            this.delayDuration = delayDuration;
+        public Builder setAutoDuration(boolean autoDuration) {
+            this.autoDuration = autoDuration;
             return this;
         }
 
@@ -569,7 +571,7 @@ public final class MusicItem implements Parcelable {
             musicItem.setDuration(duration);
             musicItem.setForbidSeek(forbidSeek);
             musicItem.setExtra(extra);
-            musicItem.setDelayDuration(delayDuration);
+            musicItem.setAutoDuration(autoDuration);
 
             return musicItem;
         }

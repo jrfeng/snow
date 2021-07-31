@@ -452,7 +452,7 @@ class PlayerState implements Parcelable {
             return 0;
         }
 
-        if (musicItem.isDelayDuration()) {
+        if (musicItem.isAutoDuration()) {
             return duration;
         }
 

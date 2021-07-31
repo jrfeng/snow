@@ -369,7 +369,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
                 MusicItem musicItem = mPlayerState.getMusicItem();
                 assert musicItem != null;
-                if (musicItem.isDelayDuration()) {
+                if (musicItem.isAutoDuration()) {
                     mMediaSession.setMetadata(buildMediaMetadata());
                 }
 

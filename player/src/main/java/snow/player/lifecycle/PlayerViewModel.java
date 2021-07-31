@@ -221,7 +221,7 @@ public class PlayerViewModel extends ViewModel {
 
                 mIconUri.setValue(musicItem.getIconUri());
 
-                if (!musicItem.isDelayDuration()) {
+                if (!musicItem.isAutoDuration()) {
                     mPlayProgress.setValue(playProgress / 1000);
                     mDuration.setValue(getDurationSec());
                     return;
@@ -363,7 +363,7 @@ public class PlayerViewModel extends ViewModel {
                 MusicItem musicItem = mPlayerClient.getPlayingMusicItem();
                 assert musicItem != null;
 
-                if (musicItem.isDelayDuration()) {
+                if (musicItem.isAutoDuration()) {
                     mPlayProgress.setValue(mPlayerClient.getPlayProgress());
                     mDuration.setValue(getDurationSec());
                 }

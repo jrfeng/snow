@@ -83,7 +83,7 @@ public class LiveProgress {
                     return;
                 }
 
-                if (!musicItem.isDelayDuration()) {
+                if (!musicItem.isAutoDuration()) {
                     updateLiveProgress(playProgress / 1000, getDurationSec());
                     return;
                 }
@@ -108,7 +108,7 @@ public class LiveProgress {
                 MusicItem musicItem = mPlayerClient.getPlayingMusicItem();
                 assert musicItem != null;
 
-                if (musicItem.isDelayDuration()) {
+                if (musicItem.isAutoDuration()) {
                     updateLiveProgress(mPlayerClient.getPlayProgress() / 1000, getDurationSec());
                 }
             }

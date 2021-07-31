@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -195,9 +194,9 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         MusicItem song2 = new MusicItem.Builder()
-                .setTitle("偏爱-delayDuration")
+                .setTitle("偏爱-autoDuration")
                 .setArtist("张芸京")
-                .delayDuration()
+                .autoDuration()
                 .setUri("http://music.163.com/song/media/outer/url?id=5238992")
                 .build();
 
