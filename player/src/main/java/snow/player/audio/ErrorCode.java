@@ -45,6 +45,12 @@ public final class ErrorCode {
      * 未知错误。
      */
     public static final int UNKNOWN_ERROR = 8;
+    /**
+     * 在准备 MusicItem 时出错。
+     * <p>
+     * 如果发生了该错误，请检查你的 {@code PlayerService} 的 {@code onPrepareMusicItem(MusicItem, SoundQuality, AsyncResult)} 方法。
+     */
+    public static final int PREPARE_MUSIC_ITEM_ERROR = 9;
 
     private ErrorCode() {
         throw new AssertionError();
@@ -78,6 +84,8 @@ public final class ErrorCode {
             case OUT_OF_MEMORY:
                 return res.getString(R.string.snow_error_out_of_memory);
             case UNKNOWN_ERROR:
+                return res.getString(R.string.snow_error_unknown_error);
+            case PREPARE_MUSIC_ITEM_ERROR:
                 return res.getString(R.string.snow_error_unknown_error);
             default:
                 return res.getString(R.string.snow_error_unknown_error);

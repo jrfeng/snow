@@ -19,7 +19,10 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.SystemClock;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -44,6 +47,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -159,6 +163,10 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private AbstractPlayer.OnStateChangeListener mOnStateChangeListener;
 
+    private HandlerThread mSyncPlayerStateHandlerThread;
+    private Handler mSyncPlayerStateHandler;
+    private CountDownLatch mPlayerPrepareLatch;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -167,10 +175,13 @@ public class PlayerService extends MediaBrowserServiceCompat
         mAllCustomAction = new HashMap<>();
         mKeepAliveIntent = new Intent(this, this.getClass());
         mKeepAliveConnection = new KeepAliveConnection();
+        mPlayerPrepareLatch = new CountDownLatch(1);
         mPlayerStateSynchronizer = new PlayerStateSynchronizer() {
             @Override
             public void syncPlayerState(String clientToken) {
-                mSyncPlayerStateListener.onSyncPlayerState(clientToken, new PlayerState(mPlayerState));
+                Message message = mSyncPlayerStateHandler.obtainMessage();
+                message.obj = clientToken;
+                mSyncPlayerStateHandler.sendMessage(message);
             }
         };
 
@@ -188,7 +199,9 @@ public class PlayerService extends MediaBrowserServiceCompat
         initSessionEventEmitter();
         initHistoryRecorder();
         initCustomActionReceiver();
+        initSyncPlayerStateHandler();
 
+        preparePlayer();
         keepServiceAlive();
     }
 
@@ -223,6 +236,8 @@ public class PlayerService extends MediaBrowserServiceCompat
     public void onDestroy() {
         super.onDestroy();
 
+        mSyncPlayerStateHandlerThread.quit();
+
         if (!noNotificationView()) {
             stopForegroundEx(true);
             mNotificationView.release();
@@ -250,6 +265,15 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         mKeepServiceAlive = true;
         bindService(mKeepAliveIntent, mKeepAliveConnection, BIND_AUTO_CREATE);
+    }
+
+    private void preparePlayer() {
+        mPlayer.prepare(new AbstractPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared() {
+                mPlayerPrepareLatch.countDown();
+            }
+        });
     }
 
     private void dismissKeepServiceAlive() {
@@ -445,6 +469,23 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         IntentFilter filter = new IntentFilter(this.getClass().getName());
         registerReceiver(mCustomActionReceiver, filter);
+    }
+
+    private void initSyncPlayerStateHandler() {
+        mSyncPlayerStateHandlerThread = new HandlerThread("PlayerStateSyncThread");
+        mSyncPlayerStateHandlerThread.start();
+
+        mSyncPlayerStateHandler = new Handler(mSyncPlayerStateHandlerThread.getLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                try {
+                    mPlayerPrepareLatch.await();
+                    mSyncPlayerStateListener.onSyncPlayerState((String) msg.obj, new PlayerState(mPlayerState));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
     }
 
     /**
@@ -1164,6 +1205,32 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     /**
+     * 准备 {@link MusicItem} 对象。
+     * <p>
+     * 该方法会在歌曲即将播放前调用，你可以在该方法中对 {@link MusicItem} 对象进行修改。
+     * 例如，从服务器获取歌曲的播放时长、播放链接，并使用这些数据更新 {@link MusicItem} 对象。
+     * <p>
+     * 对 {@link MusicItem} 对象的修改可能会被持久化保存到本地，请务必注意这一点。
+     * <p>
+     * 该方法会在异步线程中执行，因此可以执行各种耗时操作，例如访问网络。
+     * <p>
+     * 注意！如果你在该方法中获取并修改了 {@link MusicItem} 的播放链接，但你同时又重写了
+     * {@link #onRetrieveMusicItemUri(MusicItem, SoundQuality, AsyncResult)} 方法来获取歌曲的最新播放链接，
+     * 则在播放歌曲时，会优先使用 {@link #onRetrieveMusicItemUri(MusicItem, SoundQuality, AsyncResult)}
+     * 方法获取到的播放链接。如果你仅仅只需要在播放时获取歌曲的最新播放链接，建议重写
+     * {@link #onRetrieveMusicItemUri(MusicItem, SoundQuality, AsyncResult)} 方法即可。
+     *
+     * @param musicItem    即将播放的 {@link MusicItem} 对象，不为 null。
+     * @param soundQuality 即将播放的音乐的音质
+     * @param result       用于接收修正后的 {@link MusicItem} 对象，不为 null。
+     */
+    protected void onPrepareMusicItem(@NonNull MusicItem musicItem,
+                                      @NonNull SoundQuality soundQuality,
+                                      @NonNull AsyncResult<MusicItem> result) {
+        result.onSuccess(musicItem);
+    }
+
+    /**
      * 获取播放器的 Player 对象。可用于对播放器进行控制。
      */
     @NonNull
@@ -1351,6 +1418,11 @@ public class PlayerService extends MediaBrowserServiceCompat
         @Override
         protected MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
             return PlayerService.this.onCreateMusicPlayer(context, musicItem, uri);
+        }
+
+        @Override
+        protected void prepareMusicItem(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<MusicItem> result) {
+            PlayerService.this.onPrepareMusicItem(musicItem, soundQuality, result);
         }
 
         @Nullable

@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
+import io.reactivex.SingleObserver;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -88,6 +89,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private Playlist mPlaylist;
 
     private Random mRandom;
+    private Disposable mPrepareMusicItemDisposable;
     private Disposable mRetrieveUriDisposable;
 
     private boolean mReleased;
@@ -144,11 +146,44 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         initWakeLock();
 
         mNetworkHelper.subscribeNetworkState();
-        reloadPlaylist();
     }
 
     void setAudioEffectManager(@Nullable AudioEffectManager audioEffectManager) {
         mAudioEffectManager = audioEffectManager;
+    }
+
+    public void prepare(@NonNull final OnPreparedListener listener) {
+        mPlaylistLoadedAction = new Runnable() {
+            @Override
+            public void run() {
+                if (mPlaylist.isEmpty()) {
+                    return;
+                }
+
+                prepareMusicItemAsync(mPlaylist.get(mPlayerState.getPlayPosition()))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new SingleObserver<MusicItem>() {
+                            @Override
+                            public void onSubscribe(@NonNull Disposable d) {
+                                mPrepareMusicItemDisposable = d;
+                            }
+
+                            @Override
+                            public void onSuccess(@NonNull MusicItem musicItem) {
+                                mPlayerState.setMusicItem(musicItem);
+                                listener.onPrepared();
+                            }
+
+                            @Override
+                            public void onError(@NonNull Throwable e) {
+                                notifyError(ErrorCode.PREPARE_MUSIC_ITEM_ERROR, ErrorCode.getErrorMessage(mApplicationContext, ErrorCode.PREPARE_MUSIC_ITEM_ERROR));
+                            }
+                        });
+            }
+        };
+
+        reloadPlaylist();
     }
 
     /**
@@ -169,6 +204,20 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      */
     @NonNull
     protected abstract MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri);
+
+    /**
+     * 准备 {@link MusicItem} 对象。
+     * <p>
+     * 该方法会在歌曲即将播放前调用，你可以在该方法中对 {@link MusicItem} 对象进行修正。
+     * 例如，从服务器获取歌曲的播放时长、播放链接，并将这些数据重新设置给 {@link MusicItem} 对象即可。
+     * <p>
+     * 该方法会在异步线程中执行，因此可以执行各种耗时操作，例如访问网络。
+     *
+     * @param musicItem    即将播放的 {@link MusicItem} 对象，不为 null。
+     * @param soundQuality 即将播放的音乐的音质
+     * @param result       用于接收修正后的 {@link MusicItem} 对象，不为 null。
+     */
+    protected abstract void prepareMusicItem(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<MusicItem> result);
 
     /**
      * 获取音乐的播放链接。
@@ -195,6 +244,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      */
     public void release() {
         mReleased = true;
+        disposePrepareMusicItem();
         disposeRetrieveUri();
         releaseMusicPlayer();
         releaseWakeLock();
@@ -1002,9 +1052,79 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
     }
 
-    private void notifyPlayingMusicItemChanged(@Nullable MusicItem musicItem, int position, boolean play) {
+    private void notifyPlayingMusicItemChanged(@Nullable MusicItem musicItem, final int position, final boolean play) {
+        disposePrepareMusicItem();
         releaseMusicPlayer();
 
+        if (musicItem == null) {
+            onPlayingMusicItemChanged(null, position, false);
+            return;
+        }
+
+        prepareMusicItemAsync(musicItem)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<MusicItem>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        mPrepareMusicItemDisposable = d;
+                    }
+
+                    @Override
+                    public void onSuccess(@NonNull MusicItem musicItem) {
+                        onPlayingMusicItemChanged(musicItem, position, play);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        notifyError(ErrorCode.PREPARE_MUSIC_ITEM_ERROR, ErrorCode.getErrorMessage(mApplicationContext, ErrorCode.PREPARE_MUSIC_ITEM_ERROR));
+                    }
+                });
+    }
+
+    private Single<MusicItem> prepareMusicItemAsync(@NonNull final MusicItem musicItem) {
+        return Single.create(new SingleOnSubscribe<MusicItem>() {
+            @Override
+            public void subscribe(@NonNull final SingleEmitter<MusicItem> emitter) {
+                prepareMusicItem(musicItem, mPlayerConfig.getSoundQuality(), new AsyncResult<MusicItem>() {
+                    @Override
+                    public void onSuccess(@NonNull MusicItem item) {
+                        emitter.onSuccess(item);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable throwable) {
+                        emitter.onError(throwable);
+                    }
+
+                    @Override
+                    public boolean isCancelled() {
+                        return emitter.isDisposed();
+                    }
+
+                    @Override
+                    public synchronized void setOnCancelListener(@Nullable OnCancelListener listener) {
+                        super.setOnCancelListener(listener);
+
+                        emitter.setCancellable(new Cancellable() {
+                            @Override
+                            public void cancel() {
+                                notifyCancelled();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    private void disposePrepareMusicItem() {
+        if (mPrepareMusicItemDisposable != null && !mPrepareMusicItemDisposable.isDisposed()) {
+            mPrepareMusicItemDisposable.dispose();
+        }
+    }
+
+    private void onPlayingMusicItemChanged(@Nullable MusicItem musicItem, int position, boolean play) {
         mPlayerStateHelper.onPlayingMusicItemChanged(musicItem, position, 0);
 
         if (musicItem == null) {
@@ -1945,5 +2065,15 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         void onPlayingMusicItemChanged(@Nullable MusicItem musicItem);
 
         void onPlayModeChanged(@NonNull PlayMode playMode);
+    }
+
+    /**
+     * 监听 {@link AbstractPlayer} 的准备状态。
+     */
+    public interface OnPreparedListener {
+        /**
+         * 该方法会在 {@link AbstractPlayer} 准备完毕时调用。
+         */
+        void onPrepared();
     }
 }
