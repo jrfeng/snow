@@ -205,6 +205,7 @@ public class LiveProgress {
         mPlayerClient.addOnStalledChangeListener(mOnStalledChangeListener);
         mPlayerClient.addOnConnectStateChangeListener(mOnConnectStateChangeListener);
         mPlayerClient.addOnRepeatListener(mOnRepeatListener);
+        mPlayerClient.addOnSpeedChangeListener(mSpeedChangeListener);
     }
 
     private void removeAllListener() {
@@ -214,6 +215,7 @@ public class LiveProgress {
         mPlayerClient.removeOnStalledChangeListener(mOnStalledChangeListener);
         mPlayerClient.removeOnConnectStateChangeListener(mOnConnectStateChangeListener);
         mPlayerClient.removeOnRepeatListener(mOnRepeatListener);
+        mPlayerClient.removeOnSpeedChangeListener(mSpeedChangeListener);
     }
 
     private void initLifecycleObserver() {
