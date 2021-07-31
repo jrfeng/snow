@@ -157,6 +157,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             @Override
             public void run() {
                 if (mPlaylist.isEmpty()) {
+                    listener.onPrepared();
                     return;
                 }
 
@@ -296,7 +297,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mRetrieveUriDisposable = getMusicItemUri(musicItem, mPlayerConfig.getSoundQuality())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(prepare(musicItem, preparedAction), notifyGetUrlFailed());
+                .subscribe(prepareMusicPlayer(musicItem, preparedAction), notifyGetUrlFailed());
     }
 
     private void disposeRetrieveUri() {
@@ -341,7 +342,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         });
     }
 
-    private Consumer<Uri> prepare(@NonNull final MusicItem musicItem, @Nullable final Runnable preparedAction) {
+    private Consumer<Uri> prepareMusicPlayer(@NonNull final MusicItem musicItem, @Nullable final Runnable preparedAction) {
         return new Consumer<Uri>() {
             @Override
             public void accept(Uri uri) {
@@ -391,7 +392,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                     mAudioEffectManager.attachAudioEffect(mp.getAudioSessionId());
                 }
 
-                notifyPrepared(mp.getAudioSessionId());
+                notifyPrepared(mp.getAudioSessionId(), mp.getDuration());
 
                 if (!mPlayerState.isForbidSeek() && mPlayerState.getPlayProgress() > 0) {
                     mPlayOnSeekComplete = mPlayOnPrepared;
@@ -887,13 +888,13 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
     }
 
-    private void notifyPrepared(int audioSessionId) {
-        mPlayerStateHelper.onPrepared(audioSessionId);
+    private void notifyPrepared(int audioSessionId, int duration) {
+        mPlayerStateHelper.onPrepared(audioSessionId, duration);
 
         mOnStateChangeListener.onPrepared(audioSessionId);
 
         if (mPlayerStateListener != null) {
-            mPlayerStateListener.onPrepared(audioSessionId);
+            mPlayerStateListener.onPrepared(audioSessionId, duration);
         }
     }
 

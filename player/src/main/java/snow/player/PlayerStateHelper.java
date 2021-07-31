@@ -76,10 +76,11 @@ class PlayerStateHelper {
         }
     }
 
-    public void onPrepared(int audioSessionId) {
+    public void onPrepared(int audioSessionId, int duration) {
         mPlayerState.setPreparing(false);
         mPlayerState.setPrepared(true);
         mPlayerState.setAudioSessionId(audioSessionId);
+        mPlayerState.setDuration(duration);
 
         if (mRunOnService) {
             updateAppWidgetPlayerState();

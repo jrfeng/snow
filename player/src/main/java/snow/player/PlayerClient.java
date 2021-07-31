@@ -686,12 +686,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * @return 当前正在播放的音乐的持续时间。如果当前没有任何播放的音乐（播放列表为空，或者还没有建立连接），则返回 0
      */
     public int getPlayingMusicItemDuration() {
-        MusicItem musicItem = getPlayingMusicItem();
-        if (musicItem == null) {
-            return 0;
-        }
-
-        return musicItem.getDuration();
+        return mPlayerState.getDuration();
     }
 
     /**
@@ -2193,6 +2188,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
 
         if (mPlayerState.isPrepared()) {
             listener.onPrepared(mPlayerState.getAudioSessionId());
+            listener.onPrepared(mPlayerState.getAudioSessionId(), mPlayerState.getDuration());
         }
     }
 
@@ -2418,7 +2414,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
 
         @Override
         public void onPrepared(int audioSessionId) {
-            mPlayerStateHelper.onPrepared(audioSessionId);
+            // deprecated
+        }
+
+        @Override
+        public void onPrepared(int audioSessionId, int duration) {
+            mPlayerStateHelper.onPrepared(audioSessionId, duration);
 
             notifyPrepareStateChanged();
             notifyAudioSessionChanged();

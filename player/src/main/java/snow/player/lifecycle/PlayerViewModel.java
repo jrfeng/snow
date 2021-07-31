@@ -220,8 +220,15 @@ public class PlayerViewModel extends ViewModel {
                 mAlbum.setValue(MusicItemUtil.getAlbum(musicItem, mDefaultAlbum));
 
                 mIconUri.setValue(musicItem.getIconUri());
-                mDuration.setValue(getDurationSec());
-                mPlayProgress.setValue(playProgress / 1000);
+
+                if (!musicItem.isDelayDuration()) {
+                    mPlayProgress.setValue(playProgress / 1000);
+                    mDuration.setValue(getDurationSec());
+                    return;
+                }
+
+                mPlayProgress.setValue(0);
+                mDuration.setValue(0);
             }
         };
 
@@ -346,7 +353,20 @@ public class PlayerViewModel extends ViewModel {
 
             @Override
             public void onPrepared(int audioSessionId) {
+                // deprecated
+            }
+
+            @Override
+            public void onPrepared(int audioSessionId, int duration) {
                 mPreparing.setValue(false);
+
+                MusicItem musicItem = mPlayerClient.getPlayingMusicItem();
+                assert musicItem != null;
+
+                if (musicItem.isDelayDuration()) {
+                    mPlayProgress.setValue(mPlayerClient.getPlayProgress());
+                    mDuration.setValue(getDurationSec());
+                }
             }
         };
 

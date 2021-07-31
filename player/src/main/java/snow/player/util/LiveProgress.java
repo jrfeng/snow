@@ -28,6 +28,7 @@ public class LiveProgress {
     private final ProgressClock mProgressClock;
 
     private Player.OnPlayingMusicItemChangeListener mOnPlayingMusicItemChangeListener;
+    private Player.OnPrepareListener mOnPrepareListener;
     private PlayerClient.OnPlaybackStateChangeListener mOnPlaybackStateChangeListener;
     private Player.OnSeekCompleteListener mOnSeekCompleteListener;
     private Player.OnStalledChangeListener mOnStalledChangeListener;
@@ -82,7 +83,34 @@ public class LiveProgress {
                     return;
                 }
 
-                updateLiveProgress(playProgress / 1000, getDurationSec());
+                if (!musicItem.isDelayDuration()) {
+                    updateLiveProgress(playProgress / 1000, getDurationSec());
+                    return;
+                }
+
+                updateLiveProgress(0, 0);
+            }
+        };
+
+        mOnPrepareListener = new Player.OnPrepareListener() {
+            @Override
+            public void onPreparing() {
+                // ignore
+            }
+
+            @Override
+            public void onPrepared(int audioSessionId) {
+                // deprecated
+            }
+
+            @Override
+            public void onPrepared(int audioSessionId, int duration) {
+                MusicItem musicItem = mPlayerClient.getPlayingMusicItem();
+                assert musicItem != null;
+
+                if (musicItem.isDelayDuration()) {
+                    updateLiveProgress(mPlayerClient.getPlayProgress() / 1000, getDurationSec());
+                }
             }
         };
 
@@ -200,6 +228,7 @@ public class LiveProgress {
 
     private void addAllListener() {
         mPlayerClient.addOnPlayingMusicItemChangeListener(mOnPlayingMusicItemChangeListener);
+        mPlayerClient.addOnPrepareListener(mOnPrepareListener);
         mPlayerClient.addOnPlaybackStateChangeListener(mOnPlaybackStateChangeListener);
         mPlayerClient.addOnSeekCompleteListener(mOnSeekCompleteListener);
         mPlayerClient.addOnStalledChangeListener(mOnStalledChangeListener);
@@ -210,6 +239,7 @@ public class LiveProgress {
 
     private void removeAllListener() {
         mPlayerClient.removeOnPlayingMusicItemChangeListener(mOnPlayingMusicItemChangeListener);
+        mPlayerClient.removeOnPrepareListener(mOnPrepareListener);
         mPlayerClient.removeOnPlaybackStateChangeListener(mOnPlaybackStateChangeListener);
         mPlayerClient.removeOnSeekCompleteListener(mOnSeekCompleteListener);
         mPlayerClient.removeOnStalledChangeListener(mOnStalledChangeListener);

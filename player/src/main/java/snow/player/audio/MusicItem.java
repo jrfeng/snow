@@ -33,6 +33,10 @@ public final class MusicItem implements Parcelable {
     @Nullable
     private Bundle extra;
 
+    // version 1
+    private static final String VERSION_1 = "v1";
+    private boolean delayDuration;
+
     /**
      * 构造一个 MusicItem 对象。建议使用 {@link Builder} 构造器来创建 {@link MusicItem} 对象，
      * 而不是使用构造方法。
@@ -46,7 +50,8 @@ public final class MusicItem implements Parcelable {
         this.iconUri = "";
         this.duration = 0;
         this.extra = null;
-        forbidSeek = false;
+        this.forbidSeek = false;
+        this.delayDuration = false;
     }
 
     /**
@@ -65,6 +70,7 @@ public final class MusicItem implements Parcelable {
         iconUri = source.iconUri;
         duration = source.duration;
         forbidSeek = source.forbidSeek;
+        delayDuration = source.delayDuration;
         if (source.extra != null) {
             extra = new Bundle(source.extra);
         }
@@ -214,6 +220,29 @@ public final class MusicItem implements Parcelable {
     }
 
     /**
+     * 是否获取歌曲的播放时长。
+     *
+     * @return 如果延迟到播放器准备完毕时再获取歌曲的播放时长，则返回 true，否则返回 false。
+     */
+    public boolean isDelayDuration() {
+        return delayDuration;
+    }
+
+    /**
+     * 设置是否延迟获取歌曲的播放时长。
+     * <p>
+     * 在某些情况下，可能无法在创建 {@link snow.player.audio.MusicItem} 对象时提供歌曲的 duration。
+     * 这种情况下，实时播放进度功能将无法正常使用。在这种情况下，可以调用该方法并传入 true 来延迟获取歌曲的 duration。
+     * <p>
+     * 如果设置了延迟获取歌曲的 duration，则歌曲的 duration 将延迟播放器准备完毕后再获取。
+     *
+     * @param delayDuration 是否获取歌曲的播放时长。
+     */
+    public void setDelayDuration(boolean delayDuration) {
+        this.delayDuration = delayDuration;
+    }
+
+    /**
      * 判断是否禁用了所有的 seek 操作。
      * <p>
      * 默认为 false，如果该方法返回 true，则会同时禁用 seekTo、fastForward、rewind 操作。
@@ -299,6 +328,7 @@ public final class MusicItem implements Parcelable {
                 ", iconUri='" + iconUri + '\'' +
                 ", duration=" + duration +
                 ", forbidSeek=" + forbidSeek +
+                ", delayDuration=" + delayDuration +
                 '}';
     }
 
@@ -318,6 +348,10 @@ public final class MusicItem implements Parcelable {
         dest.writeInt(this.duration);
         dest.writeByte((byte) (this.forbidSeek ? 1 : 0));
         dest.writeParcelable(extra, 0);
+
+        // version 1
+        dest.writeString(VERSION_1);
+        dest.writeByte((byte) (this.delayDuration ? 1 : 0));
     }
 
     /**
@@ -333,6 +367,28 @@ public final class MusicItem implements Parcelable {
         this.duration = in.readInt();
         this.forbidSeek = in.readByte() == 1;
         this.extra = in.readParcelable(Thread.currentThread().getContextClassLoader());
+
+        // version 1
+        deserializeByVersion(in, VERSION_1, new Deserialization() {
+            @Override
+            public void deserialization(Parcel in) {
+                delayDuration = in.readByte() == 1;
+            }
+        });
+    }
+
+    private void deserializeByVersion(Parcel in, String version, Deserialization deserialization) {
+        int pos = in.dataPosition();
+        String versionString = in.readString();
+        if (version.equals(versionString)) {
+            deserialization.deserialization(in);
+        } else {
+            in.setDataPosition(pos);
+        }
+    }
+
+    private interface Deserialization {
+        void deserialization(Parcel in);
     }
 
     public static final Creator<MusicItem> CREATOR = new Creator<MusicItem>() {
@@ -360,6 +416,7 @@ public final class MusicItem implements Parcelable {
         private int duration;
         private boolean forbidSeek = false;
         private Bundle extra;
+        private boolean delayDuration = false;
 
         public Builder() {
         }
@@ -453,6 +510,36 @@ public final class MusicItem implements Parcelable {
         }
 
         /**
+         * 设置是否延迟获取歌曲的播放时长。
+         * <p>
+         * 在某些情况下，可能无法在创建 {@link snow.player.audio.MusicItem} 对象时提供歌曲的 duration。
+         * 这种情况下，实时播放进度功能将无法正常使用。在这种情况下，可以调用该方法来延迟获取歌曲的 duration。
+         * <p>
+         * 如果设置了延迟获取歌曲的 duration，则歌曲的 duration 将延迟播放器准备完毕后再获取。
+         *
+         * @see #setDelayDuration(boolean)
+         */
+        public Builder delayDuration() {
+            return this.setDelayDuration(true);
+        }
+
+        /**
+         * 设置是否延迟获取歌曲的播放时长。
+         * <p>
+         * 在某些情况下，可能无法在创建 {@link snow.player.audio.MusicItem} 对象时提供歌曲的 duration。
+         * 这种情况下，实时播放进度功能将无法正常使用。在这种情况下，可以调用该方法并传入 true 来延迟获取歌曲的 duration。
+         * <p>
+         * 如果设置了延迟获取歌曲的 duration，则歌曲的 duration 将延迟播放器准备完毕后再获取。
+         *
+         * @param delayDuration 是否获取歌曲的播放时长。
+         * @see #delayDuration()
+         */
+        public Builder setDelayDuration(boolean delayDuration) {
+            this.delayDuration = delayDuration;
+            return this;
+        }
+
+        /**
          * 设置是否禁用 seekTo 操作。
          *
          * @param forbidSeek 如果为 true，则会同时禁用 seekTo、fastForward、rewind 操作。
@@ -482,6 +569,7 @@ public final class MusicItem implements Parcelable {
             musicItem.setDuration(duration);
             musicItem.setForbidSeek(forbidSeek);
             musicItem.setExtra(extra);
+            musicItem.setDelayDuration(delayDuration);
 
             return musicItem;
         }

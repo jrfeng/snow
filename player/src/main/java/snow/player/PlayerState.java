@@ -38,6 +38,7 @@ class PlayerState implements Parcelable {
     private long sleepTimerTime;
     private long sleepTimerStartTime;
     private SleepTimer.TimeoutAction timeoutAction;
+    private int duration;
 
     public PlayerState() {
         playProgress = 0;
@@ -82,6 +83,7 @@ class PlayerState implements Parcelable {
         sleepTimerTime = source.sleepTimerTime;
         sleepTimerStartTime = source.sleepTimerStartTime;
         timeoutAction = source.timeoutAction;
+        duration = source.duration;
     }
 
     /**
@@ -445,6 +447,22 @@ class PlayerState implements Parcelable {
         this.timeoutAction = action;
     }
 
+    public int getDuration() {
+        if (musicItem == null) {
+            return 0;
+        }
+
+        if (musicItem.isDelayDuration()) {
+            return duration;
+        }
+
+        return musicItem.getDuration();
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -469,6 +487,7 @@ class PlayerState implements Parcelable {
                 && Objects.equal(sleepTimerStarted, other.sleepTimerStarted)
                 && Objects.equal(sleepTimerTime, other.sleepTimerTime)
                 && Objects.equal(sleepTimerStartTime, other.sleepTimerStartTime)
+                && Objects.equal(duration, other.duration)
                 && Objects.equal(timeoutAction, other.timeoutAction);
     }
 
@@ -491,7 +510,9 @@ class PlayerState implements Parcelable {
                 sleepTimerStarted,
                 sleepTimerTime,
                 sleepTimerStartTime,
-                timeoutAction);
+                timeoutAction,
+                duration
+        );
     }
 
     @NonNull
@@ -516,6 +537,7 @@ class PlayerState implements Parcelable {
                 ", sleepTimerTime=" + sleepTimerTime +
                 ", sleepTimerStartTime=" + sleepTimerStartTime +
                 ", timeoutAction=" + timeoutAction +
+                ", duration=" + duration +
                 '}';
     }
 
@@ -539,6 +561,7 @@ class PlayerState implements Parcelable {
         sleepTimerTime = in.readLong();
         sleepTimerStartTime = in.readLong();
         timeoutAction = SleepTimer.TimeoutAction.values()[in.readInt()];
+        duration = in.readInt();
     }
 
     @Override
@@ -562,6 +585,7 @@ class PlayerState implements Parcelable {
         dest.writeLong(sleepTimerTime);
         dest.writeLong(sleepTimerStartTime);
         dest.writeInt(timeoutAction.ordinal());
+        dest.writeInt(duration);
     }
 
     @Override

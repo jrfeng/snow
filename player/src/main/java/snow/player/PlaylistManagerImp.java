@@ -9,8 +9,6 @@ import androidx.annotation.Nullable;
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
 
-import java.util.ArrayList;
-
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
@@ -18,7 +16,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
 import snow.player.playlist.PlaylistManager;
 

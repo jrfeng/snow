@@ -148,8 +148,22 @@ public interface Player {
          * 当播放器的状态变为 “准备完毕” 时会回调该方法。
          *
          * @param audioSessionId 当前音乐的 audio session id
+         * @deprecated 已弃用，请使用 {@link #onPrepared(int, int)} 方法代替。
          */
+        @Deprecated
         void onPrepared(int audioSessionId);
+
+        /**
+         * 当播放器的状态变为 “准备完毕” 时会回调该方法。
+         * <p>
+         * 在某些情况下，可能无法在创建 {@link snow.player.audio.MusicItem} 对象时提供歌曲的 duration。
+         * 这种情况下，实时播放进度功能将无法正常使用，出于该情况考虑，增加了该方法，用于处理在无法在创建
+         * {@link snow.player.audio.MusicItem} 对象时提供歌曲的 duration 的情况。
+         *
+         * @param audioSessionId 当前音乐的 audio session id
+         * @param duration       当前音乐的持续时长
+         */
+        void onPrepared(int audioSessionId, int duration);
     }
 
     /**
