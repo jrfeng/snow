@@ -195,9 +195,9 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         MusicItem song2 = new MusicItem.Builder()
-                .setTitle("偏爱")
+                .setTitle("偏爱-delayDuration")
                 .setArtist("张芸京")
-                .setDuration(213000)
+                .delayDuration()
                 .setUri("http://music.163.com/song/media/outer/url?id=5238992")
                 .build();
 
