@@ -220,23 +220,25 @@ public final class MusicItem implements Parcelable {
     }
 
     /**
-     * 是否获取歌曲的播放时长。
+     * 是否由播放器自动获取歌曲的播放时长。
+     * <p>
+     * 如果由播放器自动获取歌曲的播放时长，则歌曲的播放时长将延迟播放器准备完毕后再获取。
      *
-     * @return 如果延迟到播放器准备完毕时再获取歌曲的播放时长，则返回 true，否则返回 false。
+     * @return 如果由播放器自动获取歌曲的播放时长，则返回 true，否则返回 false。
      */
     public boolean isAutoDuration() {
         return autoDuration;
     }
 
     /**
-     * 设置是否延迟获取歌曲的播放时长。
+     * 设置是否由播放器自动获取歌曲的播放时长。
      * <p>
-     * 在某些情况下，可能无法在创建 {@link snow.player.audio.MusicItem} 对象时提供歌曲的 duration。
-     * 这种情况下，实时播放进度功能将无法正常使用。在这种情况下，可以调用该方法并传入 true 来延迟获取歌曲的 duration。
+     * 如果由播放器自动获取歌曲的播放时长，则歌曲的播放时长将延迟播放器准备完毕后再获取。
      * <p>
-     * 如果设置了延迟获取歌曲的 duration，则歌曲的 duration 将延迟播放器准备完毕后再获取。
+     * 在某些情况下，可能无法在创建 {@link snow.player.audio.MusicItem} 对象时提供歌曲的播放时长。
+     * 这种情况下，实时播放进度功能将无法正常使用。在这种情况下，可以调用该方法并传入 true 来延迟获取歌曲的播放时长。
      *
-     * @param autoDuration 是否获取歌曲的播放时长。
+     * @param autoDuration 是否由播放器自动获取歌曲的播放时长。
      */
     public void setAutoDuration(boolean autoDuration) {
         this.autoDuration = autoDuration;
@@ -512,12 +514,13 @@ public final class MusicItem implements Parcelable {
         }
 
         /**
-         * 设置是否延迟获取歌曲的播放时长。
+         * 设置由播放器自动获取歌曲的播放时长。
          * <p>
-         * 在某些情况下，可能无法在创建 {@link snow.player.audio.MusicItem} 对象时提供歌曲的 duration。
-         * 这种情况下，实时播放进度功能将无法正常使用。在这种情况下，可以调用该方法来延迟获取歌曲的 duration。
+         * 如果由播放器自动获取歌曲的播放时长，则歌曲的播放时长将延迟播放器准备完毕后再获取。
          * <p>
-         * 如果设置了延迟获取歌曲的 duration，则歌曲的 duration 将延迟播放器准备完毕后再获取。
+         * 在某些情况下，可能无法在创建 {@link snow.player.audio.MusicItem} 对象时提供歌曲的播放时长。
+         * 这种情况下，实时播放进度功能将无法正常使用。此时，可以在使用 {@link Builder} 构建 {@link MusicItem}
+         * 对象时调用该方法，以延迟到播放器准备完毕后由播放器自动获取歌曲的播放时长。
          *
          * @see #setAutoDuration(boolean)
          */
@@ -526,14 +529,14 @@ public final class MusicItem implements Parcelable {
         }
 
         /**
-         * 设置是否延迟获取歌曲的播放时长。
+         * 设置是否由播放器自动获取歌曲的播放时长。
          * <p>
-         * 在某些情况下，可能无法在创建 {@link snow.player.audio.MusicItem} 对象时提供歌曲的 duration。
-         * 这种情况下，实时播放进度功能将无法正常使用。在这种情况下，可以调用该方法并传入 true 来延迟获取歌曲的 duration。
+         * 如果由播放器自动获取歌曲的播放时长，则歌曲的播放时长将延迟播放器准备完毕后再获取。
          * <p>
-         * 如果设置了延迟获取歌曲的 duration，则歌曲的 duration 将延迟播放器准备完毕后再获取。
+         * 在某些情况下，可能无法在创建 {@link snow.player.audio.MusicItem} 对象时提供歌曲的播放时长。
+         * 这种情况下，实时播放进度功能将无法正常使用。此时，可以调用该方法并传入 true 来延迟获取歌曲的播放时长。
          *
-         * @param autoDuration 是否获取歌曲的播放时长。
+         * @param autoDuration 是否由播放器自动获取歌曲的播放时长。
          * @see #autoDuration()
          */
         public Builder setAutoDuration(boolean autoDuration) {
