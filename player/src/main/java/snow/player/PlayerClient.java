@@ -35,7 +35,9 @@ import snow.player.playlist.PlaylistManager;
 import snow.player.audio.ErrorCode;
 
 /**
- * 播放器客户端，用于向播放器发送各种控制命令。
+ * 播放器客户端，用于向 {@link PlayerService} 发送各种控制命令，已经监听 {@link PlayerService} 的状态改变。
+ *
+ * @see PlayerService
  */
 public class PlayerClient implements Player, PlayerManager, PlaylistManager, PlaylistEditor, SleepTimer {
     private final Context mApplicationContext;
@@ -120,9 +122,9 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 创建一个 PlayerClient 对象。
      *
-     * @param context       Context 对象，不能为 null
-     * @param playerService PlayerService 或者其子类的 Class 对象，不能为 null
-     * @return PlayerClient 对象
+     * @param context       Context 对象，不能为 null。
+     * @param playerService PlayerService 或者其子类的 Class 对象，不能为 null。
+     * @return PlayerClient 对象。
      */
     public static PlayerClient newInstance(@NonNull Context context,
                                            @NonNull Class<? extends PlayerService> playerService) {
@@ -258,9 +260,9 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     /**
-     * 连接播放器
+     * 连接播放器。
      *
-     * @param callback 回调接口，用于接收连接结果
+     * @param callback 回调接口，用于接收连接结果。
      */
     public void connect(OnConnectCallback callback) {
         if (isConnected()) {
@@ -290,7 +292,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 判断播放器是否已连接。
      *
-     * @return 如果播放器已连接则返回 true，否则返回 false
+     * @return 如果播放器已连接则返回 true，否则返回 false。
      */
     public boolean isConnected() {
         return mMediaBrowser.isConnected();
@@ -324,7 +326,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 添加一个监听器用来监听 PlayerClient 连接断开事件。
      *
-     * @param listener 要添加的事件监听器，如果已添加，则会忽略本次调用
+     * @param listener 要添加的事件监听器，如果已添加，则会忽略本次调用。
      */
     public void addOnConnectStateChangeListener(@NonNull OnConnectStateChangeListener listener) {
         Preconditions.checkNotNull(listener);
@@ -340,8 +342,8 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 添加一个 {@link OnConnectStateChangeListener} 监听器用来监听 {@link PlayerClient} 的连接成功与断开连接事件。
      *
-     * @param owner    LifecycleOwner 对象。监听器会在该 LifecycleOwner 对象销毁时自动注销，避免内存泄露
-     * @param listener 要添加的事件监听器，如果已添加，则会忽略本次调用
+     * @param owner    LifecycleOwner 对象。监听器会在该 LifecycleOwner 对象销毁时自动注销，避免内存泄露。
+     * @param listener 要添加的事件监听器，如果已添加，则会忽略本次调用。
      */
     public void addOnConnectStateChangeListener(@NonNull LifecycleOwner owner,
                                                 @NonNull final OnConnectStateChangeListener listener) {
@@ -364,7 +366,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 移除已添加的 {@link OnConnectStateChangeListener} 监听器对象。
      *
-     * @param listener 要移除的监听器
+     * @param listener 要移除的监听器。
      */
     public void removeOnConnectStateChangeListener(OnConnectStateChangeListener listener) {
         mAllConnectStateChangeListener.remove(listener);
@@ -374,7 +376,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * 获取 {@link MediaControllerCompat} 对象。
      *
      * @return {@link MediaControllerCompat} 对象，如果还没有建立连接（{@link #isConnected()} 返回
-     * {@code false}），那么该方法可能会返回 null
+     * {@code false}），那么该方法可能会返回 null。
      */
     @Nullable
     public MediaControllerCompat getMediaController() {
@@ -386,8 +388,8 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 你可以通过覆盖 {@link PlayerService#onCustomAction(String, Bundle)} 方法来响应自定义动作。
      *
-     * @param action 自定义动作的名称，不能为 null
-     * @param args   要携带的额外参数，可为 null
+     * @param action 自定义动作的名称，不能为 null。
+     * @param args   要携带的额外参数，可为 null。
      */
     public void sendCustomAction(@NonNull String action, @Nullable Bundle args) {
         Preconditions.checkNotNull(action);
@@ -404,7 +406,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
      *
-     * @param soundQuality 要设置的音质，不能为 null
+     * @param soundQuality 要设置的音质，不能为 null。
      * @see SoundQuality#STANDARD
      * @see SoundQuality#LOW
      * @see SoundQuality#HIGH
@@ -424,7 +426,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 修改音频特效的配置。
      *
-     * @param config 要设置的音频特效配置，不能为 null
+     * @param config 要设置的音频特效配置，不能为 null。
      */
     @Override
     public void setAudioEffectConfig(@NonNull Bundle config) {
@@ -441,7 +443,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
      *
-     * @param enabled 是否启用音频特效
+     * @param enabled 是否启用音频特效。
      * @see #isAudioEffectEnabled()
      */
     @Override
@@ -458,7 +460,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
      *
-     * @param onlyWifiNetwork 是否只允许在 WiFi 网络下播放音乐
+     * @param onlyWifiNetwork 是否只允许在 WiFi 网络下播放音乐。
      * @see #isOnlyWifiNetwork()
      */
     @Override
@@ -498,7 +500,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 为了确保返回正确的值，请在连接成功后再调用该方法。
      *
-     * @return 音频特效的配置
+     * @return 音频特效的配置。
      */
     @NonNull
     public Bundle getAudioEffectConfig() {
@@ -566,7 +568,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 设置一个新的播放列表。
      *
-     * @param playlist 播放列表（不能为 null）
+     * @param playlist 播放列表（不能为 null）。
      */
     public void setPlaylist(@NonNull Playlist playlist) {
         setPlaylist(playlist, 0, false);
@@ -575,8 +577,8 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 设置一个新的播放列表。
      *
-     * @param playlist 播放列表（不能为 null）
-     * @param play     是否立即播放列表中的音乐
+     * @param playlist 播放列表（不能为 null）。
+     * @param play     是否立即播放列表中的音乐。
      */
     public void setPlaylist(@NonNull Playlist playlist, boolean play) {
         setPlaylist(playlist, 0, play);
@@ -585,10 +587,10 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 设置一个新的播放列表。
      *
-     * @param playlist 播放列表（不能为 null）
-     * @param position 播放列表中要播放的歌曲的位置
-     * @param play     是否立即播放 {@code position} 参数指定处的音乐
-     * @throws IllegalArgumentException 如果 position 的值小于 0，则抛出该异常
+     * @param playlist 播放列表（不能为 null）。
+     * @param position 播放列表中要播放的歌曲的位置。
+     * @param play     是否立即播放 {@code position} 参数指定处的音乐。
+     * @throws IllegalArgumentException 如果 position 的值小于 0，则抛出该异常。
      */
     @Override
     public void setPlaylist(@NonNull final Playlist playlist, final int position, final boolean play) throws IllegalArgumentException {
@@ -646,7 +648,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 获取播放进度（单位：毫秒）。
      *
-     * @return 播放进度
+     * @return 播放进度。
      */
     public int getPlayProgress() {
         return mPlayerState.getPlayProgress();
@@ -655,7 +657,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 获取播放进度的更新时间。<b>注意！这是基于 SystemClock.elapsedRealtime() 的时间。</b>
      *
-     * @return 播放进度的更新时间
+     * @return 播放进度的更新时间。
      */
     public long getPlayProgressUpdateTime() {
         return mPlayerState.getPlayProgressUpdateTime();
@@ -664,7 +666,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 是否单曲循环播放。
      *
-     * @return 当播放模式为 {@link PlayMode#LOOP} 时返回 true，否则返回 false
+     * @return 当播放模式为 {@link PlayMode#LOOP} 时返回 true，否则返回 false。
      */
     public boolean isLooping() {
         return getPlayMode() == PlayMode.LOOP;
@@ -673,7 +675,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 获取当前正在播放的音乐。
      *
-     * @return 当前正在播放的音乐。如果当前没有任何播放的音乐（播放列表为空，或者还没有建立连接），则返回 null
+     * @return 当前正在播放的音乐。如果当前没有任何播放的音乐（播放列表为空，或者还没有建立连接），则返回 null。
      */
     @Nullable
     public MusicItem getPlayingMusicItem() {
@@ -683,7 +685,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 获取当前正在播放的音乐的持续时间。
      *
-     * @return 当前正在播放的音乐的持续时间。如果当前没有任何播放的音乐（播放列表为空，或者还没有建立连接），则返回 0
+     * @return 当前正在播放的音乐的持续时间。如果当前没有任何播放的音乐（播放列表为空，或者还没有建立连接），则返回 0。
      */
     public int getPlayingMusicItemDuration() {
         return mPlayerState.getDuration();
@@ -692,7 +694,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 获取当前播放状态。
      *
-     * @return 当前播放状态
+     * @return 当前播放状态。
      * @see PlaybackState
      */
     public PlaybackState getPlaybackState() {
@@ -702,7 +704,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 获取 audio session id。
      *
-     * @return 如果 audio session id 不可用，则返回 0
+     * @return 如果 audio session id 不可用，则返回 0。
      */
     public int getAudioSessionId() {
         return mPlayerState.getAudioSessionId();
@@ -711,7 +713,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 获取当前的缓存进度。
      *
-     * @return 当前缓存进度，使用整数表示的百分比值，范围为 [0, 100]
+     * @return 当前缓存进度，使用整数表示的百分比值，范围为 [0, 100]。
      */
     public int getBufferedProgress() {
         return mPlayerState.getBufferedProgress();
@@ -720,7 +722,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 播放器当前是否处于 {@link PlaybackState#PLAYING} 状态。
      *
-     * @return 如果播放器当前处于 {@link PlaybackState#PLAYING} 状态则返回 true，否则返回 false
+     * @return 如果播放器当前处于 {@link PlaybackState#PLAYING} 状态则返回 true，否则返回 false。
      */
     public boolean isPlaying() {
         return mPlayerState.getPlaybackState() == PlaybackState.PLAYING;
@@ -739,7 +741,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 播放器是否正在准备中。
      *
-     * @return 如果播放器正在准备中，则返回 true，否则返回 false
+     * @return 如果播放器正在准备中，则返回 true，否则返回 false。
      */
     public boolean isPreparing() {
         return mPlayerState.isPreparing();
@@ -748,7 +750,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 播放器是否准备完毕。
      *
-     * @return 如果播放器已准备完毕，则返回 true，否则返回 false
+     * @return 如果播放器已准备完毕，则返回 true，否则返回 false。
      */
     public boolean isPrepared() {
         return mPlayerState.isPrepared();
@@ -764,7 +766,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 获取错误码。
      *
-     * @return 错误码。如果播放器没有发生错误，则返回 {@link ErrorCode#NO_ERROR}
+     * @return 错误码。如果播放器没有发生错误，则返回 {@link ErrorCode#NO_ERROR}。
      * @see ErrorCode
      */
     public int getErrorCode() {
@@ -774,7 +776,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 获取错误信息。
      *
-     * @return 错误信息。该方法的返回值只在错误发生时才有意义
+     * @return 错误信息。该方法的返回值只在错误发生时才有意义。
      * @see #isError()
      * @see #getErrorCode()
      */
@@ -803,7 +805,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 获取当前播放列表的播放位置。
      *
-     * @return 当前播放列表的播放位置
+     * @return 当前播放列表的播放位置。
      */
     public int getPlayPosition() {
         return mPlayerState.getPlayPosition();
@@ -812,7 +814,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 查询睡眠定时器是否已启动。
      *
-     * @return 睡眠定时器是否已启动，如果已启动则返回 true，否则返回 false
+     * @return 睡眠定时器是否已启动，如果已启动则返回 true，否则返回 false。
      */
     public boolean isSleepTimerStarted() {
         return mPlayerState.isSleepTimerStarted();
@@ -970,7 +972,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
      *
-     * @param playMode 播放模式
+     * @param playMode 播放模式。
      */
     @Override
     public void setPlayMode(@NonNull final PlayMode playMode) {
@@ -1107,7 +1109,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
      *
-     * @param progress 要调整到的播放进度（单位：毫秒）
+     * @param progress 要调整到的播放进度（单位：毫秒）。
      */
     @Override
     public void seekTo(final int progress) {
@@ -1125,11 +1127,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     /**
-     * 判断是否禁用了所有的 seek 操作。
+     * 当前正在播放的歌曲是否禁用了所有 seek 操作。
      * <p>
-     * 默认为 false，如果该方法返回 true，则会同时禁用 seekTo、fastForward、rewind 操作。
+     * 如果该方法返回 true，则会表示当前正在播放的歌曲同时禁用 seekTo、fastForward、rewind 操作。
      *
-     * @return 是否禁用了所有的 seek 操作
+     * @return 是否禁用了所有的 seek 操作。
+     * @see MusicItem#setForbidSeek(boolean)
+     * @see MusicItem#isForbidSeek()
      */
     public boolean isForbidSeek() {
         if (notConnected()) {
@@ -1183,7 +1187,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * 启动睡眠定时器。
      *
      * @param time 睡眠时间（单位：毫秒）。播放器会在经过 time 时间后暂停播放。
-     * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常
+     * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常。
      */
     public void startSleepTimer(long time) throws IllegalArgumentException {
         startSleepTimer(time, SleepTimer.TimeoutAction.PAUSE);
@@ -1194,7 +1198,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      *
      * @param time   睡眠时间（单位：毫秒）。播放器会在经过 time 时间后暂停播放。
      * @param action 定时器的的时间到时要执行的操作。
-     * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常
+     * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常。
      */
     @Override
     public void startSleepTimer(long time, @NonNull SleepTimer.TimeoutAction action) throws IllegalArgumentException {
@@ -1227,7 +1231,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 如果监听器已添加，则忽略本次调用。
      *
-     * @param listener 播放器播放状态监听器
+     * @param listener 播放器播放状态监听器。
      * @see Player.OnPlaybackStateChangeListener
      */
     public void addOnPlaybackStateChangeListener(@NonNull Player.OnPlaybackStateChangeListener listener) {
@@ -1248,8 +1252,8 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
-     * @param owner    LifecycleOwner 对象
-     * @param listener 播放器播放状态监听器
+     * @param owner    LifecycleOwner 对象。
+     * @param listener 播放器播放状态监听器。
      * @see Player.OnPlaybackStateChangeListener
      */
     public void addOnPlaybackStateChangeListener(@NonNull LifecycleOwner owner,
@@ -1282,7 +1286,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 添加一个播放器准备（prepare）状态监听器。
      *
-     * @param listener 如果监听器已存在，则忽略本次添加
+     * @param listener 如果监听器已存在，则忽略本次添加。
      */
     public void addOnPrepareListener(@NonNull Player.OnPrepareListener listener) {
         Preconditions.checkNotNull(listener);
@@ -1300,8 +1304,8 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
-     * @param owner    LifecycleOwner 对象
-     * @param listener 如果监听器已存在，则忽略本次添加
+     * @param owner    LifecycleOwner 对象。
+     * @param listener 如果监听器已存在，则忽略本次添加。
      */
     public void addOnPrepareListener(@NonNull LifecycleOwner owner, @NonNull final Player.OnPrepareListener listener) {
         Preconditions.checkNotNull(owner);
@@ -1323,7 +1327,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 移除一个播放器准备（prepare）状态监听器。
      *
-     * @param listener 要移除的监听器
+     * @param listener 要移除的监听器。
      */
     public void removeOnPrepareListener(Player.OnPrepareListener listener) {
         mAllPrepareListener.remove(listener);
@@ -1334,7 +1338,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 如果监听器已添加，则忽略本次调用。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      * @see Player.OnStalledChangeListener
      */
     public void addOnStalledChangeListener(@NonNull Player.OnStalledChangeListener listener) {
@@ -1355,7 +1359,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      * @see Player.OnStalledChangeListener
      */
     public void addOnStalledChangeListener(@NonNull LifecycleOwner owner,
@@ -1390,7 +1394,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 如果监听器已添加，则忽略本次调用。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      * @see Player.OnBufferedProgressChangeListener
      */
     public void addOnBufferedProgressChangeListener(@NonNull OnBufferedProgressChangeListener listener) {
@@ -1411,8 +1415,8 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
-     * @param owner    LifecycleOwner 对象
-     * @param listener 要添加的监听器
+     * @param owner    LifecycleOwner 对象。
+     * @param listener 要添加的监听器。
      */
     public void addOnBufferedProgressChangeListener(@NonNull LifecycleOwner owner,
                                                     @NonNull final OnBufferedProgressChangeListener listener) {
@@ -1435,7 +1439,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 移除缓存进度监听器。
      *
-     * @param listener 要移除的监听器
+     * @param listener 要移除的监听器。
      */
     public void removeOnBufferedProgressChangeListener(OnBufferedProgressChangeListener listener) {
         mAllBufferedProgressChangeListener.remove(listener);
@@ -1446,7 +1450,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 如果监听器已添加，则忽略本次调用。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      * @see Player.OnPlayingMusicItemChangeListener
      */
     public void addOnPlayingMusicItemChangeListener(@NonNull Player.OnPlayingMusicItemChangeListener listener) {
@@ -1467,7 +1471,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      * @see Player.OnPlayingMusicItemChangeListener
      */
     public void addOnPlayingMusicItemChangeListener(@NonNull LifecycleOwner owner,
@@ -1489,9 +1493,9 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     /**
-     * 移除当前播放的 MusicItem 改变事件监听器
+     * 移除当前播放的 MusicItem 改变事件监听器。
      *
-     * @param listener 要移除的监听器
+     * @param listener 要移除的监听器。
      */
     public void removeOnPlayingMusicItemChangeListener(Player.OnPlayingMusicItemChangeListener listener) {
         mAllPlayingMusicItemChangeListener.remove(listener);
@@ -1502,7 +1506,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 如果监听器已添加，则忽略本次调用。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      * @see Player.OnSeekCompleteListener
      */
     public void addOnSeekCompleteListener(@NonNull OnSeekCompleteListener listener) {
@@ -1523,7 +1527,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      * @see Player.OnSeekCompleteListener
      */
     public void addOnSeekCompleteListener(@NonNull LifecycleOwner owner,
@@ -1547,7 +1551,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 移除用于监听播放器播放进度调整完毕的监听器。
      *
-     * @param listener 要移除的监听器
+     * @param listener 要移除的监听器。
      */
     public void removeOnSeekCompleteListener(OnSeekCompleteListener listener) {
         mAllSeekListener.remove(listener);
@@ -1558,7 +1562,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 如果监听器已添加，则忽略本次调用。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      * @see Player.OnPlaylistChangeListener
      */
     public void addOnPlaylistChangeListener(@NonNull Player.OnPlaylistChangeListener listener) {
@@ -1579,7 +1583,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      * @see Player.OnPlaylistChangeListener
      */
     public void addOnPlaylistChangeListener(@NonNull LifecycleOwner owner,
@@ -1603,7 +1607,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 移除用于监听播放列表改变事件的监听器。
      *
-     * @param listener 要移除的监听器
+     * @param listener 要移除的监听器。
      */
     public void removeOnPlaylistChangeListener(Player.OnPlaylistChangeListener listener) {
         mAllPlaylistChangeListener.remove(listener);
@@ -1614,7 +1618,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 如果监听器已添加，则忽略本次调用。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      * @see Player.OnPlayModeChangeListener
      */
     public void addOnPlayModeChangeListener(@NonNull Player.OnPlayModeChangeListener listener) {
@@ -1635,7 +1639,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      * @see Player.OnPlayModeChangeListener
      */
     public void addOnPlayModeChangeListener(@NonNull LifecycleOwner owner,
@@ -1659,7 +1663,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 移除一个用于监听播放模式改变的监听器。
      *
-     * @param listener 要移除的事件监听器
+     * @param listener 要移除的事件监听器。
      */
     public void removeOnPlayModeChangeListener(Player.OnPlayModeChangeListener listener) {
         mAllPlayModeChangeListener.remove(listener);
@@ -1670,7 +1674,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 如果监听器已添加，则忽略本次调用。
      *
-     * @param listener 要添加的监听器，不能为 null
+     * @param listener 要添加的监听器，不能为 null。
      */
     public void addOnSpeedChangeListener(@NonNull Player.OnSpeedChangeListener listener) {
         Preconditions.checkNotNull(listener);
@@ -1690,7 +1694,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
-     * @param listener 要添加的监听器，不能为 null
+     * @param listener 要添加的监听器，不能为 null。
      */
     public void addOnSpeedChangeListener(@NonNull LifecycleOwner owner,
                                          @NonNull final Player.OnSpeedChangeListener listener) {
@@ -1713,7 +1717,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 移除一个用于监听播放模式改变的监听器。
      *
-     * @param listener 要移除的事件监听器
+     * @param listener 要移除的事件监听器。
      */
     public void removeOnSpeedChangeListener(Player.OnSpeedChangeListener listener) {
         mAllSpeedChangeListener.remove(listener);
@@ -1724,7 +1728,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 如果监听器已添加，则忽略本次调用。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      */
     public void addOnPlaybackStateChangeListener(@NonNull OnPlaybackStateChangeListener listener) {
         Preconditions.checkNotNull(listener);
@@ -1744,7 +1748,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      */
     public void addOnPlaybackStateChangeListener(@NonNull LifecycleOwner owner,
                                                  @NonNull final OnPlaybackStateChangeListener listener) {
@@ -1767,7 +1771,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 移除播放器状态监听器。
      *
-     * @param listener 要移除的监听器
+     * @param listener 要移除的监听器。
      */
     public void removeOnPlaybackStateChangeListener(OnPlaybackStateChangeListener listener) {
         mClientAllPlaybackStateChangeListener.remove(listener);
@@ -1778,7 +1782,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 如果监听器已添加，则忽略本次调用。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      */
     public void addOnAudioSessionChangeListener(@NonNull OnAudioSessionChangeListener listener) {
         Preconditions.checkNotNull(listener);
@@ -1798,7 +1802,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      */
     public void addOnAudioSessionChangeListener(@NonNull LifecycleOwner owner,
                                                 @NonNull final OnAudioSessionChangeListener listener) {
@@ -1821,7 +1825,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 移除 audio session id 监听器。
      *
-     * @param listener 要移除的监听器
+     * @param listener 要移除的监听器。
      */
     public void removeOnAudioSessionChangeListener(OnAudioSessionChangeListener listener) {
         mAllAudioSessionChangeListener.remove(listener);
@@ -1832,7 +1836,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 如果监听器已添加，则忽略本次调用。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      */
     public void addOnSleepTimerStateChangeListener(@NonNull SleepTimer.OnStateChangeListener listener) {
         Preconditions.checkNotNull(listener);
@@ -1854,7 +1858,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
-     * @param listener 要添加的监听器
+     * @param listener 要添加的监听器。
      */
     public void addOnSleepTimerStateChangeListener(@NonNull LifecycleOwner owner,
                                                    @NonNull final SleepTimer.OnStateChangeListener listener) {
@@ -1877,7 +1881,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 移除已注册的睡眠定时器状态监听器。
      *
-     * @param listener 要移除的监听器
+     * @param listener 要移除的监听器。
      */
     public void removeOnSleepTimerStateChangeListener(SleepTimer.OnStateChangeListener listener) {
         mAllSleepTimerStateChangeListener.remove(listener);
@@ -1888,7 +1892,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 如果监听器已添加，则忽略本次调用。
      *
-     * @param listener 要添加的监听器，不能为 null
+     * @param listener 要添加的监听器，不能为 null。
      */
     public void addOnRepeatListener(@NonNull Player.OnRepeatListener listener) {
         Preconditions.checkNotNull(listener);
@@ -1907,7 +1911,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
      *
-     * @param listener 要添加的监听器，不能为 null
+     * @param listener 要添加的监听器，不能为 null。
      */
     public void addOnRepeatListener(@NonNull LifecycleOwner owner,
                                     @NonNull final Player.OnRepeatListener listener) {
@@ -1943,9 +1947,9 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 如果播放列表中已包含指定歌曲，则会将它移动到 position 位置，如果不存在，则会将歌曲插入到 position 位置。
      *
-     * @param position  歌曲插入的位置
-     * @param musicItem 要插入的歌曲，不能为 null
-     * @throws IllegalArgumentException 如果 position 的值小于 0，则抛出该异常
+     * @param position  歌曲插入的位置。
+     * @param musicItem 要插入的歌曲，不能为 null。
+     * @throws IllegalArgumentException 如果 position 的值小于 0，则抛出该异常。
      */
     @Override
     public void insertMusicItem(final int position, @NonNull final MusicItem musicItem) throws IllegalArgumentException {
@@ -1986,9 +1990,9 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     /**
      * 移动播放列表中某首歌曲的位置。
      *
-     * @param fromPosition 歌曲在列表中的位置
-     * @param toPosition   歌曲要移动到的位置。如果 {@code toPosition == fromPosition}，则会忽略本次调用
-     * @throws IndexOutOfBoundsException 如果 fromPosition 或者 toPosition 超出播放列表索引的范围，则抛出该异常
+     * @param fromPosition 歌曲在列表中的位置。
+     * @param toPosition   歌曲要移动到的位置。如果 {@code toPosition == fromPosition}，则会忽略本次调用。
+     * @throws IndexOutOfBoundsException 如果 fromPosition 或者 toPosition 超出播放列表索引的范围，则抛出该异常。
      */
     @Override
     public void moveMusicItem(final int fromPosition, final int toPosition) throws IndexOutOfBoundsException {
@@ -2068,7 +2072,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         /**
          * 该方法会在连接成功或失败时调用。
          *
-         * @param success 如果为 true，则表示连接成功，否则为 false
+         * @param success 如果为 true，则表示连接成功，否则为 false。
          */
         void onConnected(boolean success);
     }
@@ -2080,7 +2084,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         /**
          * 当 PlayerClient 连接成功或者断开连接时会回调该方法。
          *
-         * @param connected 是否已连接
+         * @param connected 是否已连接。
          */
         void onConnectStateChanged(boolean connected);
     }
@@ -2092,9 +2096,9 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         /**
          * 该方法会在播放器的播放状态发生改变时调用。
          *
-         * @param playbackState 当前的播放器状态
+         * @param playbackState 当前的播放器状态。
          * @param stalled       当前播放器是否处于 stalled 状态。当缓冲区没有足够的数据继续播放时，
-         *                      该参数为 true，否则为 false
+         *                      该参数为 true，否则为 false。
          */
         void onPlaybackStateChanged(PlaybackState playbackState, boolean stalled);
     }
@@ -2108,7 +2112,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         /**
          * 该方法会在播放器的 audio session id 发生改变时调用。
          *
-         * @param audioSessionId 最新的 audio session id
+         * @param audioSessionId 最新的 audio session id。
          */
         void onAudioSessionChanged(int audioSessionId);
     }
