@@ -103,9 +103,9 @@ public class PlayerViewModel extends ViewModel {
      * 默认标题为 "未知标题"；默认歌手为 "未知歌手"；默认专辑为 "未知专辑"。这些默认值会在正在播放的
      * {@link MusicItem} 对应的字段为空时展示。
      *
-     * @param context             Context 对象，不能为 null
-     * @param playerClient        PlayerClient 对象，不能为 null
-     * @param enableProgressClock 是否启用进度条时钟（用于实时更新播放进度）
+     * @param context             Context 对象，不能为 null。
+     * @param playerClient        PlayerClient 对象，不能为 null。
+     * @param enableProgressClock 是否启用进度条时钟（用于实时更新播放进度）。
      */
     public void init(@NonNull Context context, @NonNull PlayerClient playerClient, boolean enableProgressClock) {
         Preconditions.checkNotNull(context);
@@ -123,10 +123,10 @@ public class PlayerViewModel extends ViewModel {
      * <p>
      * 默认启用了进度条时钟（用于实时更新播放进度）。
      *
-     * @param playerClient  PlayerClient 对象，不能为 null
-     * @param defaultTitle  默认标题，会在正在播放的歌曲的标题为空时展示，不能为 null
-     * @param defaultArtist 默认艺术家，会在正在播放的歌曲的艺术家为空时展示，不能为 null
-     * @param defaultAlbum  默认专辑，会在正在播放的歌曲的专辑为空时展示，不能为 null
+     * @param playerClient  PlayerClient 对象，不能为 null。
+     * @param defaultTitle  默认标题，会在正在播放的歌曲的标题为空时展示，不能为 null。
+     * @param defaultArtist 默认艺术家，会在正在播放的歌曲的艺术家为空时展示，不能为 null。
+     * @param defaultAlbum  默认专辑，会在正在播放的歌曲的专辑为空时展示，不能为 null。
      */
     public void init(@NonNull PlayerClient playerClient,
                      @NonNull String defaultTitle,
@@ -143,11 +143,12 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 初始化 {@link PlayerViewModel} 对象。
      *
-     * @param playerClient        PlayerClient 对象，不能为 null
-     * @param defaultTitle        默认标题，会在正在播放的歌曲的标题为空时展示，不能为 null
-     * @param defaultArtist       默认艺术家，会在正在播放的歌曲的艺术家为空时展示，不能为 null
-     * @param defaultAlbum        默认专辑，会在正在播放的歌曲的专辑为空时展示，不能为 null
-     * @param enableProgressClock 是否启用进度条时钟（用于实时更新播放进度）
+     * @param playerClient        PlayerClient 对象，不能为 null。
+     * @param defaultTitle        默认标题，会在正在播放的歌曲的标题为空时展示，不能为 null。
+     * @param defaultArtist       默认艺术家，会在正在播放的歌曲的艺术家为空时展示，不能为 null。
+     * @param defaultAlbum        默认专辑，会在正在播放的歌曲的专辑为空时展示，不能为 null。
+     * @param enableProgressClock 是否启用进度条时钟。用于实时更新播放进度，默认为 true。
+     *                            如果你不需要展示实时播放进度，则可以将该参数设置为 false。
      */
     public void init(@NonNull PlayerClient playerClient,
                      @NonNull String defaultTitle,
@@ -184,6 +185,9 @@ public class PlayerViewModel extends ViewModel {
 
     /**
      * 该方法会在 {@link PlayerViewModel} 初始化完成后调用。
+     * <p>
+     * 如果你创建了子类并让其继承了 {@link PlayerViewModel} 类，且打算在该子类中对 {@link PlayerViewModel}
+     * 进行控制，请务必等待到 {@link PlayerViewModel} 的初始化完成。
      */
     protected void onInitialized() {
     }
@@ -191,7 +195,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 设置是否在 ViewModel 被清理时自动断开 PlayerClient 的连接。
      *
-     * @param autoDisconnect 如果为 true，则会在 ViewModel 被清理时自动断开 PlayerClient 的连接
+     * @param autoDisconnect 如果为 true，则会在 ViewModel 被清理时自动断开 PlayerClient 的连接，默认为 false。
      */
     public void setAutoDisconnect(boolean autoDisconnect) {
         mAutoDisconnect = autoDisconnect;
@@ -465,7 +469,7 @@ public class PlayerViewModel extends ViewModel {
      * 是否已完成初始化。
      *
      * @return 如果返回 false，则必须先调用 {@link #init(Context, PlayerClient)} 方法进行初始化后
-     * 才能正常使用当前 {@link PlayerViewModel} 对象
+     * 才能正常使用当前 {@link PlayerViewModel} 对象。
      */
     public boolean isInitialized() {
         return mInitialized;
@@ -474,7 +478,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 获取当前 {@link PlayerViewModel}关联到的 {@link PlayerClient} 对象。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public PlayerClient getPlayerClient() throws IllegalStateException {
@@ -488,7 +492,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 正在播放的歌曲的标题。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<String> getTitle() throws IllegalStateException {
@@ -502,7 +506,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 正在播放的歌曲的艺术家（歌手）。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<String> getArtist() throws IllegalStateException {
@@ -516,7 +520,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 正在播放的歌曲所属的专辑。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<String> getAlbum() throws IllegalStateException {
@@ -528,9 +532,9 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 正在播放的歌曲的图标的 Uri
+     * 正在播放的歌曲的图标的 Uri。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<String> getIconUri() throws IllegalStateException {
@@ -544,7 +548,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 正在播放的歌曲的持续时间（单位：秒）。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<Integer> getDuration() throws IllegalStateException {
@@ -558,7 +562,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 正在播放歌曲的实时播放进度（单位：秒），支持双向绑定。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public MutableLiveData<Integer> getPlayProgress() throws IllegalStateException {
@@ -572,7 +576,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 正在播放歌曲的缓存进度（单位：秒）。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<Integer> getBufferedProgress() throws IllegalStateException {
@@ -586,7 +590,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 正在播放歌曲在列表中的位置。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<Integer> getPlayPosition() throws IllegalStateException {
@@ -600,7 +604,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 播放器的播放模式。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<PlayMode> getPlayMode() throws IllegalStateException {
@@ -614,7 +618,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 播放器播放速度。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     public LiveData<Float> getSpeed() throws IllegalStateException {
         if (!isInitialized()) {
@@ -627,7 +631,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 播放器的播放状态。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<PlaybackState> getPlaybackState() throws IllegalStateException {
@@ -641,9 +645,9 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 播放器是否处于 stalled 状态。
      * <p>
-     * 当缓冲去没有足够的数据支持播放器继续播放时，该值为 true。
+     * 当缓冲区没有足够的数据支持播放器继续播放时，stalled 状态为 true，否则为 false。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<Boolean> getStalled() throws IllegalStateException {
@@ -657,8 +661,8 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 获取客户端的连接结果。
      *
-     * @return 客户端的连接结果，如果已成功连接，则返回 true，否则返回 false
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @return 客户端的连接结果，如果已成功连接，则返回 true，否则返回 false。
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     public LiveData<Boolean> getConnected() throws IllegalStateException {
         if (!isInitialized()) {
@@ -671,8 +675,8 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 播放器是否正在准备中。
      *
-     * @return 如果播放器正在准备中，则为 true，否则为 false
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @return 如果播放器正在准备中，则为 true，否则为 false。
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     public LiveData<Boolean> getPreparing() throws IllegalStateException {
         if (!isInitialized()) {
@@ -685,7 +689,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 是否发生了错误。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<Boolean> isError() throws IllegalStateException {
@@ -704,7 +708,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 错误信息，只在发生错误时该值才有意义。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<String> getErrorMessage() throws IllegalStateException {
@@ -718,8 +722,8 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 获取当前只在播放的音乐。
      *
-     * @return 返回当前只在播放的音乐。如果播放列表为空，或者还没有建立连接，则当前只在播放的音乐可能为 null
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @return 返回当前正在播放的 `MusicItem` 对象。如果播放列表为空，或者 {@link PlayerClient} 没有与任意一个 {@link snow.player.PlayerService} 建立连接，则可能返回 null。
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<MusicItem> getPlayingMusicItem() throws IllegalStateException {
@@ -742,9 +746,9 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 获取歌曲的持续时间（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"
+     * 获取歌曲的持续时间（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<String> getTextDuration() throws IllegalStateException {
@@ -761,9 +765,9 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 获取歌曲的实时播放进度（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"
+     * 获取歌曲的实时播放进度（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<String> getTextPlayProgress() throws IllegalStateException {
@@ -794,7 +798,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 获取睡眠定时器的时长（单位：秒）。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<Integer> getSleepTimerTime() throws IllegalStateException {
@@ -806,9 +810,9 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 获取睡眠定时器的时长（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"
+     * 获取睡眠定时器的时长（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<String> getTextSleepTimerTime() throws IllegalStateException {
@@ -829,7 +833,7 @@ public class PlayerViewModel extends ViewModel {
      * <p>
      * 睡眠定时器的进度是个倒计时。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<Integer> getSleepTimerProgress() throws IllegalStateException {
@@ -841,11 +845,11 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 获取睡眠定时器进度（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"
+     * 获取睡眠定时器进度（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"。
      * <p>
      * 睡眠定时器的进度是个倒计时。
      *
-     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
      */
     @NonNull
     public LiveData<String> getTextSleepTimerProgress() throws IllegalStateException {
@@ -864,7 +868,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 设置播放列表。
      *
-     * @param playlist 新的播放列表
+     * @param playlist 新的播放列表。
      */
     public void setPlaylist(Playlist playlist) {
         if (isInitialized()) {
@@ -875,8 +879,8 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 设置播放列表，并决定是否立即播放列表的第 1 首音乐。
      *
-     * @param playlist 新的播放列表
-     * @param play     是否立即播放列表的第 1 首音乐
+     * @param playlist 新的播放列表。
+     * @param play     是否立即播放列表的第 1 首音乐。
      */
     public void setPlaylist(Playlist playlist, boolean play) {
         if (isInitialized()) {
@@ -887,9 +891,9 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 设置播放列表，并决定是否立即播放列表的 position 位置处音乐。
      *
-     * @param playlist 新的播放列表
-     * @param position 要播放的歌曲的位置
-     * @param play     是否立即播放列表的 position 位置处音乐
+     * @param playlist 新的播放列表。
+     * @param position 要播放的歌曲的位置。
+     * @param play     是否立即播放列表的 position 位置处音乐。
      */
     public void setPlaylist(Playlist playlist, int position, boolean play) {
         if (isInitialized()) {
@@ -898,7 +902,7 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 播放
+     * 播放。
      */
     public void play() {
         if (isInitialized()) {
@@ -907,7 +911,7 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 暂停
+     * 暂停。
      */
     public void pause() {
         if (isInitialized()) {
@@ -916,7 +920,7 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 播放/暂停
+     * 播放/暂停。
      */
     public void playPause() {
         if (isInitialized()) {
@@ -936,7 +940,7 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 停止
+     * 停止。
      */
     public void stop() {
         if (isInitialized()) {
@@ -945,7 +949,7 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 上一曲
+     * 上一曲。
      */
     public void skipToPrevious() {
         if (isInitialized()) {
@@ -990,10 +994,10 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
-     * 设置指定歌曲 “下一次播放”。
+     * 设置指定歌曲 “下一曲播放”。
      *
-     * @param musicItem 要设定为 “下一次播放” 的歌曲，如果歌曲已存在播放列表中，则会移动到 “下一曲播放” 的位
-     *                  置，如果歌曲不存在，则插入到 “下一曲播放” 位置
+     * @param musicItem 要设定为 “下一曲播放” 的歌曲，如果歌曲已存在播放列表中，则会移动到 “下一曲播放” 的位
+     *                  置，如果歌曲不存在，则 musicItem 会被插入到播放列表的 “下一曲播放” 位置。
      */
     public void setNextPlay(@NonNull MusicItem musicItem) {
         Preconditions.checkNotNull(musicItem);
@@ -1005,7 +1009,7 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 设置播放模式。
      *
-     * @param playMode 播放模式
+     * @param playMode 播放模式。
      */
     public void setPlayMode(@NonNull PlayMode playMode) {
         Preconditions.checkNotNull(playMode);
@@ -1029,8 +1033,8 @@ public class PlayerViewModel extends ViewModel {
     /**
      * 调整音乐播放进度（单位：毫秒）。
      * <p>
-     * 注意！seekTo 方法接收的参数的单位是 <b>毫秒</b>，而 PlayProgress 的单位是 <b>秒</b>。如果使用
-     * PlayProgress 值来调整播放进度，则需要乘以 1000。
+     * 注意！seekTo 方法接收的参数的单位是 <b>毫秒</b>，请注意与 {@link #getPlayProgress()}、
+     * {@link #getDuration()} 方法的值进行区分，这两者的单位是 <b>秒</b>。
      *
      * @param progress 要调整到的播放进度（单位：毫秒）
      */
@@ -1054,7 +1058,7 @@ public class PlayerViewModel extends ViewModel {
      * 启动睡眠定时器。
      *
      * @param time 睡眠时间（单位：毫秒）。播放器会在经过 time 时间后暂停播放。
-     * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常
+     * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常。
      */
     public void startSleepTimer(long time) throws IllegalArgumentException {
         if (isInitialized()) {
@@ -1067,7 +1071,7 @@ public class PlayerViewModel extends ViewModel {
      *
      * @param time   睡眠时间（单位：毫秒）。播放器会在经过 time 时间后暂停播放。
      * @param action 定时器的的时间到时要执行的操作。
-     * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常
+     * @throws IllegalArgumentException 如果定时时间小于 0，则抛出该异常。
      */
     public void startSleepTimer(long time, SleepTimer.TimeoutAction action) throws IllegalArgumentException {
         if (isInitialized()) {
