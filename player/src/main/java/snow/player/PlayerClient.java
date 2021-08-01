@@ -1144,6 +1144,24 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     /**
+     * 当前正在播放的歌曲的时长是否由播放器自动获取。
+     *
+     * @return 如果当前正在播放的歌曲的时长由播放器自动获取，则返回 true，否则返回 false。
+     */
+    public boolean isAutoDuration() {
+        if (notConnected()) {
+            return false;
+        }
+
+        MusicItem musicItem = mPlayerState.getMusicItem();
+        if (musicItem == null) {
+            return false;
+        }
+
+        return musicItem.isAutoDuration();
+    }
+
+    /**
      * 快进。
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
