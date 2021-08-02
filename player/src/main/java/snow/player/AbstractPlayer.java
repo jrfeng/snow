@@ -140,7 +140,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mApplicationContext = context.getApplicationContext();
         mPlayerConfig = playerConfig;
         mPlayerState = playerState;
-        mPlayerStateHelper = new PlayerStateHelper(mPlayerState, mApplicationContext, playerService);
+        mPlayerStateHelper = new ServicePlayerStateHelper(mPlayerState, mApplicationContext, playerService);
         mPlaylistManager = playlistManager;
         mOnStateChangeListener = listener;
 
