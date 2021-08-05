@@ -185,35 +185,37 @@ public class MainActivity extends AppCompatActivity {
 
     private Playlist createPlaylist() {
         MusicItem song1 = new MusicItem.Builder()
-                .setTitle("莫失莫忘")
-                .setArtist("麦振鸿")
-                .setAlbum("仙剑奇侠传")
-                .setDuration(199180)
-                .setUri("http://music.163.com/song/media/outer/url?id=1427788848")
-                .setIconUri("http://p1.music.126.net/4tTN8CnR7wG4E1cauIPCvQ==/109951163240682406.jpg")
+                .setTitle("太阳照常升起")
+                .setArtist("久石让")
+                .setAlbum("太阳照常升起 电影原声大碟")
+                .setDuration(224013)
+                .setUri("http://music.163.com/song/media/outer/url?id=441722")
+                .setIconUri("http://p2.music.126.net/drqGdK7zgW7B7IFl4lWpoQ==/109951163369835547.jpg")
                 .build();
 
         MusicItem song2 = new MusicItem.Builder()
-                .setTitle("偏爱-autoDuration")
-                .setArtist("张芸京")
+                .setTitle("钢铁洪流进行曲[auto duration]")
+                .setArtist("李旭昊")
+                .setAlbum("国庆70周年阅兵BGM")
                 .autoDuration()
-                .setUri("http://music.163.com/song/media/outer/url?id=5238992")
+                .setUri("http://music.163.com/song/media/outer/url?id=1394369908")
+                .setIconUri("http://p2.music.126.net/KnC_YJjnRTNvCF82_2leCg==/109951164930615683.jpg")
                 .build();
 
         MusicItem song3 = new MusicItem.Builder()
-                .setTitle("雪见-落凡尘")
-                .setDuration(289973)
-                .setUri("http://music.163.com/song/media/outer/url?id=1427193969")
-                .setIconUri("http://p1.music.126.net/ADQQb9gmj8j4pv_0HZ9lIA==/109951164755909058.jpg")
+                .setTitle("国际歌-钢琴")
+                .setArtist("曹伟健")
+                .setAlbum("音迹")
+                .setDuration(141369)
+                .setUri("http://music.163.com/song/media/outer/url?id=1857796913")
                 .build();
 
         MusicItem song4 = new MusicItem.Builder()
-                .setTitle("此生不换[Forbid Seek]")
-                .setArtist("青鸟飞鱼")
-                .setDuration(265000)
+                .setTitle("我爱你中国[Forbid Seek]")
+                .setDuration(136000)
                 // cross-protocol redirects
-                .setUri("https://music.163.com/song/media/outer/url?id=25638340")
-                .setIconUri("http://p2.music.126.net/UyDVlWWgOn8p8U8uQ_I1xQ==/7934075907687518.jpg")
+                .setUri("https://music.163.com/song/media/outer/url?id=174451")
+                .setIconUri("http://p2.music.126.net/x6pVwc6ysKZ9S01jYlYiAw==/97856534887060.jpg")
                 // forbid seek
                 .setForbidSeek(true)
                 .build();
