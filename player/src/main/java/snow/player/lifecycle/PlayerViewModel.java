@@ -225,14 +225,8 @@ public class PlayerViewModel extends ViewModel {
 
                 mIconUri.setValue(musicItem.getIconUri());
 
-                if (!musicItem.isAutoDuration()) {
-                    mPlayProgress.setValue(playProgress / 1000);
-                    mDuration.setValue(getDurationSec());
-                    return;
-                }
-
-                mPlayProgress.setValue(0);
-                mDuration.setValue(0);
+                mPlayProgress.setValue(playProgress / 1000);
+                mDuration.setValue(getDurationSec());
             }
         };
 

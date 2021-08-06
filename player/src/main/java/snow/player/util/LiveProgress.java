@@ -83,12 +83,7 @@ public class LiveProgress {
                     return;
                 }
 
-                if (!musicItem.isAutoDuration()) {
-                    updateLiveProgress(playProgress / 1000, getDurationSec());
-                    return;
-                }
-
-                updateLiveProgress(0, 0);
+                updateLiveProgress(playProgress / 1000, getDurationSec());
             }
         };
 
