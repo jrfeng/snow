@@ -19,6 +19,7 @@ class PersistentPlayerState extends PlayerState {
     private static final String KEY_PLAY_POSITION = "position";
     private static final String KEY_PLAY_MODE = "play_mode";
     private static final String KEY_SPEED = "speed";
+    private static final String KEY_DURATION = "duration";
 
     private final MMKV mMMKV;
 
@@ -34,6 +35,7 @@ class PersistentPlayerState extends PlayerState {
         super.setPlayPosition(mMMKV.decodeInt(KEY_PLAY_POSITION, 0));
         super.setPlayMode(PlayMode.getBySerialId(mMMKV.decodeInt(KEY_PLAY_MODE, 0)));
         super.setSpeed(mMMKV.getFloat(KEY_SPEED, 1.0F));
+        super.setDuration(mMMKV.getInt(KEY_DURATION, 0));
 
         if (isForbidSeek()) {
             super.setPlayProgress(0);
@@ -86,5 +88,12 @@ class PersistentPlayerState extends PlayerState {
         super.setSpeed(speed);
 
         mMMKV.encode(KEY_SPEED, speed);
+    }
+
+    @Override
+    public void setDuration(int duration) {
+        super.setDuration(duration);
+
+        mMMKV.encode(KEY_DURATION, duration);
     }
 }
