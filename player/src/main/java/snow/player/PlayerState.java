@@ -23,6 +23,7 @@ class PlayerState implements Parcelable {
     private int playPosition;
     private PlayMode playMode;
     private float speed;
+    private int duration;
 
     // no persistent
     private long playProgressUpdateTime;
@@ -38,7 +39,6 @@ class PlayerState implements Parcelable {
     private long sleepTimerTime;
     private long sleepTimerStartTime;
     private SleepTimer.TimeoutAction timeoutAction;
-    private int duration;
 
     public PlayerState() {
         playProgress = 0;
