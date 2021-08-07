@@ -302,7 +302,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private void initPlayerState() {
         mPlayerState = new PersistentPlayerState(this, mPersistentId);
-        mPlayerStateHelper = new PlayerStateHelper(mPlayerState);
+        mPlayerStateHelper = new ServicePlayerStateHelper(mPlayerState, getApplicationContext(), this.getClass());
     }
 
     private void initPlaylistManager() {
