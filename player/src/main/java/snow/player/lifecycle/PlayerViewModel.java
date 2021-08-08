@@ -362,7 +362,7 @@ public class PlayerViewModel extends ViewModel {
                 assert musicItem != null;
 
                 if (musicItem.isAutoDuration()) {
-                    mPlayProgress.setValue(mPlayerClient.getPlayProgress());
+                    mPlayProgress.setValue(getPlayProgressSec());
                     mDuration.setValue(getDurationSec());
                 }
             }
@@ -1163,7 +1163,7 @@ public class PlayerViewModel extends ViewModel {
             return (int) (realProgress / 1000);
         }
 
-        return mPlayerClient.getPlayProgress();
+        return mPlayerClient.getPlayProgress() / 1000;
     }
 
     private int getBufferedProgressSec() {
