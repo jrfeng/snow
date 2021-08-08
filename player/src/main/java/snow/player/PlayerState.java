@@ -24,6 +24,7 @@ class PlayerState implements Parcelable {
     private PlayMode playMode;
     private float speed;
     private int duration;
+    private boolean waitPlayComplete;
 
     // no persistent
     private long playProgressUpdateTime;
@@ -39,6 +40,8 @@ class PlayerState implements Parcelable {
     private long sleepTimerTime;
     private long sleepTimerStartTime;
     private SleepTimer.TimeoutAction timeoutAction;
+    private boolean timeoutActionComplete;
+    private boolean sleepTimerTimeout;
 
     public PlayerState() {
         playProgress = 0;
@@ -59,6 +62,10 @@ class PlayerState implements Parcelable {
         sleepTimerTime = 0;
         sleepTimerStartTime = 0;
         timeoutAction = SleepTimer.TimeoutAction.PAUSE;
+        duration = 0;
+        waitPlayComplete = false;
+        timeoutActionComplete = true;
+        sleepTimerTimeout = false;
     }
 
     public PlayerState(PlayerState source) {
@@ -84,6 +91,9 @@ class PlayerState implements Parcelable {
         sleepTimerStartTime = source.sleepTimerStartTime;
         timeoutAction = source.timeoutAction;
         duration = source.duration;
+        waitPlayComplete = source.waitPlayComplete;
+        timeoutActionComplete = source.timeoutActionComplete;
+        sleepTimerTimeout = source.sleepTimerTimeout;
     }
 
     /**
@@ -447,6 +457,65 @@ class PlayerState implements Parcelable {
         this.timeoutAction = action;
     }
 
+    /**
+     * 睡眠定时器是否等到当前正在播放的歌曲播放完成后，再执行指定的动作。
+     *
+     * @return 睡眠定时器是否等到当前正在播放的歌曲播放完成后，再执行指定的动作。
+     */
+    public boolean isWaitPlayComplete() {
+        return waitPlayComplete;
+    }
+
+    /**
+     * 设置睡眠定时器是否等到当前正在播放的歌曲播放完成后，再执行指定的动作。
+     *
+     * @param waitPlayComplete 睡眠定时器是否等到当前正在播放的歌曲播放完成后，再执行指定的动作。
+     */
+    public void setWaitPlayComplete(boolean waitPlayComplete) {
+        this.waitPlayComplete = waitPlayComplete;
+    }
+
+    /**
+     * 睡眠定时器的定时任务是否已完成。
+     *
+     * @return 睡眠定时器的定时任务是否已完成。
+     */
+    public boolean isTimeoutActionComplete() {
+        return timeoutActionComplete;
+    }
+
+    /**
+     * 设置睡眠定时器的定时任务是否已完成。
+     *
+     * @param timeoutActionComplete 睡眠定时器的定时任务是否已完成。
+     */
+    public void setTimeoutActionComplete(boolean timeoutActionComplete) {
+        this.timeoutActionComplete = timeoutActionComplete;
+    }
+
+    /**
+     * 是否已到达睡眠定时器的定时时间。
+     *
+     * @return 是否已到达睡眠定时器的定时时间。
+     */
+    public boolean isSleepTimerTimeout() {
+        return sleepTimerTimeout;
+    }
+
+    /**
+     * 设置是否已到达睡眠定时器的定时时间。
+     *
+     * @param sleepTimerTimeout 是否已到达睡眠定时器的定时时间。
+     */
+    public void setSleepTimerTimeout(boolean sleepTimerTimeout) {
+        this.sleepTimerTimeout = sleepTimerTimeout;
+    }
+
+    /**
+     * 获取当前正在播放的歌曲的时长。
+     *
+     * @return 返回当前正在播放的歌曲的时长。如果当前没有播放任何歌曲，则返回 0。
+     */
     public int getDuration() {
         if (musicItem == null) {
             return 0;
@@ -459,6 +528,11 @@ class PlayerState implements Parcelable {
         return musicItem.getDuration();
     }
 
+    /**
+     * 设置当前正在播放的歌曲的时长。
+     *
+     * @param duration 当前正在播放的歌曲的时长。
+     */
     public void setDuration(int duration) {
         this.duration = duration;
     }
@@ -488,7 +562,10 @@ class PlayerState implements Parcelable {
                 && Objects.equal(sleepTimerTime, other.sleepTimerTime)
                 && Objects.equal(sleepTimerStartTime, other.sleepTimerStartTime)
                 && Objects.equal(duration, other.duration)
-                && Objects.equal(timeoutAction, other.timeoutAction);
+                && Objects.equal(timeoutAction, other.timeoutAction)
+                && Objects.equal(waitPlayComplete, other.waitPlayComplete)
+                && Objects.equal(timeoutActionComplete, other.timeoutActionComplete)
+                && Objects.equal(sleepTimerTimeout, other.sleepTimerTimeout);
     }
 
     @Override
@@ -511,7 +588,10 @@ class PlayerState implements Parcelable {
                 sleepTimerTime,
                 sleepTimerStartTime,
                 timeoutAction,
-                duration
+                duration,
+                waitPlayComplete,
+                timeoutActionComplete,
+                sleepTimerTimeout
         );
     }
 
@@ -537,6 +617,9 @@ class PlayerState implements Parcelable {
                 ", sleepTimerTime=" + sleepTimerTime +
                 ", sleepTimerStartTime=" + sleepTimerStartTime +
                 ", timeoutAction=" + timeoutAction +
+                ", sleepTimerWaitPlayComplete=" + waitPlayComplete +
+                ", timeoutActionComplete=" + timeoutActionComplete +
+                ", sleepTimerTimeout=" + sleepTimerTimeout +
                 ", duration=" + duration +
                 '}';
     }
@@ -562,6 +645,9 @@ class PlayerState implements Parcelable {
         sleepTimerStartTime = in.readLong();
         timeoutAction = SleepTimer.TimeoutAction.values()[in.readInt()];
         duration = in.readInt();
+        waitPlayComplete = in.readByte() != 0;
+        timeoutActionComplete = in.readByte() != 0;
+        sleepTimerTimeout = in.readByte() != 0;
     }
 
     @Override
@@ -586,6 +672,9 @@ class PlayerState implements Parcelable {
         dest.writeLong(sleepTimerStartTime);
         dest.writeInt(timeoutAction.ordinal());
         dest.writeInt(duration);
+        dest.writeByte((byte) (waitPlayComplete ? 1 : 0));
+        dest.writeByte((byte) (timeoutActionComplete ? 1 : 0));
+        dest.writeByte((byte) (sleepTimerTimeout ? 1 : 0));
     }
 
     @Override

@@ -127,11 +127,27 @@ class PlayerStateHelper {
         mPlayerState.setSleepTimerTime(time);
         mPlayerState.setSleepTimerStartTime(startTime);
         mPlayerState.setTimeoutAction(action);
+        mPlayerState.setTimeoutActionComplete(false);
+        mPlayerState.setSleepTimerTimeout(false);
+    }
+
+    public void onSleepTimerTimeout(boolean actionComplete) {
+        mPlayerState.setSleepTimerTimeout(true);
+        mPlayerState.setTimeoutActionComplete(actionComplete);
     }
 
     public void onSleepTimerEnd() {
         mPlayerState.setSleepTimerStarted(false);
         mPlayerState.setSleepTimerTime(0);
         mPlayerState.setSleepTimerStartTime(0);
+    }
+
+    public void onSleepTimerActionComplete() {
+        onSleepTimerEnd();
+        mPlayerState.setTimeoutActionComplete(true);
+    }
+
+    public void onWaitPlayCompleteChanged(boolean waitPlayComplete) {
+        mPlayerState.setWaitPlayComplete(waitPlayComplete);
     }
 }

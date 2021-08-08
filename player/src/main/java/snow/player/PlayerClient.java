@@ -82,6 +82,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     private final List<PlayerClient.OnPlaybackStateChangeListener> mClientAllPlaybackStateChangeListener;
     private final List<PlayerClient.OnAudioSessionChangeListener> mAllAudioSessionChangeListener;
     private final List<SleepTimer.OnStateChangeListener> mAllSleepTimerStateChangeListener;
+    private final List<SleepTimer.OnWaitPlayCompleteChangeListener> mAllWaitPlayCompleteChangeListener;
     private final List<Player.OnRepeatListener> mAllRepeatListener;
     private final List<Player.OnSpeedChangeListener> mAllSpeedChangeListener;
 
@@ -106,6 +107,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         mClientAllPlaybackStateChangeListener = new ArrayList<>();
         mAllAudioSessionChangeListener = new ArrayList<>();
         mAllSleepTimerStateChangeListener = new ArrayList<>();
+        mAllWaitPlayCompleteChangeListener = new ArrayList<>();
         mAllRepeatListener = new ArrayList<>();
         mAllSpeedChangeListener = new ArrayList<>();
         mAllConnectStateChangeListener = new ArrayList<>();
@@ -219,7 +221,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         mSessionEventDispatcher = new SessionEventPipe(DispatcherUtil.merge(
                 ChannelHelper.newDispatcher(PlayerStateSynchronizer.OnSyncPlayerStateListener.class, mSyncPlayerStateListener),
                 ChannelHelper.newDispatcher(PlayerStateListener.class, mPlayerStateListener),
-                ChannelHelper.newDispatcher(SleepTimer.OnStateChangeListener.class, mPlayerStateListener)
+                ChannelHelper.newDispatcher(SleepTimer.OnStateChangeListener2.class, mPlayerStateListener)
         ));
     }
 
@@ -1244,6 +1246,31 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         mSleepTimer.cancelSleepTimer();
     }
 
+    @Override
+    public void setWaitPlayComplete(boolean waitPlayComplete) {
+        if (notConnected()) {
+            return;
+        }
+
+        mSleepTimer.setWaitPlayComplete(waitPlayComplete);
+    }
+
+    /**
+     * 睡眠定时器的定时任务是否已完成。
+     * <p>
+     * 如果睡眠定时器的定时任务已执行，或者没有启动睡眠定时器，则返回 true；如果已经启动了睡眠定时器，
+     * 且睡眠定时器的任务并未完成，则返回 false。
+     *
+     * @return 睡眠定时器的定时任务是否已完成。
+     */
+    public boolean isTimeoutActionComplete() {
+        if (notConnected()) {
+            return true;
+        }
+
+        return mPlayerState.isTimeoutActionComplete();
+    }
+
     /**
      * 添加一个播放器播放状态监听器。
      * <p>
@@ -1864,8 +1891,18 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         }
 
         mAllSleepTimerStateChangeListener.add(listener);
+
         if (mPlayerState.isSleepTimerStarted()) {
-            notifySleepTimerStateChanged(listener);
+            notifySleepTimerStarted();
+
+            if (mPlayerState.isSleepTimerTimeout()) {
+                notifySleepTimerTimeout(listener);
+            }
+        }
+
+        if (mPlayerState.isTimeoutActionComplete()) {
+            notifySleepTimerActionComplete(listener);
+            notifySleepTimerEnd(listener);
         }
     }
 
@@ -1903,6 +1940,60 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public void removeOnSleepTimerStateChangeListener(SleepTimer.OnStateChangeListener listener) {
         mAllSleepTimerStateChangeListener.remove(listener);
+    }
+
+    /**
+     * 添加一个监听器用于监听睡眠定时器的 waitPlayComplete 状态的改变。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     *
+     * @param listener 要添加的监听器。
+     */
+    public void addOnWaitPlayCompleteChangeListener(@NonNull SleepTimer.OnWaitPlayCompleteChangeListener listener) {
+        Preconditions.checkNotNull(listener);
+
+        if (mAllWaitPlayCompleteChangeListener.contains(listener)) {
+            return;
+        }
+
+        mAllWaitPlayCompleteChangeListener.add(listener);
+        notifyWaitPlayCompleteChanged(listener);
+    }
+
+    /**
+     * 添加一个监听器用于监听睡眠定时器的 waitPlayComplete 状态的改变。
+     * <p>
+     * 如果监听器已添加，则忽略本次调用。
+     * <p>
+     * 事件监听器会在 LifecycleOwner 销毁时自动注销，以避免发生内容泄露。
+     *
+     * @param listener 要添加的监听器。
+     */
+    public void addOnWaitPlayCompleteChangeListener(@NonNull LifecycleOwner owner,
+                                                    @NonNull final SleepTimer.OnWaitPlayCompleteChangeListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnWaitPlayCompleteChangeListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(new Runnable() {
+            @Override
+            public void run() {
+                removeOnWaitPlayCompleteChangeListener(listener);
+            }
+        }));
+    }
+
+    /**
+     * 移除已注册的睡眠定时器的 waitPlayComplete 状态监听器。
+     *
+     * @param listener 要移除的监听器。
+     */
+    public void removeOnWaitPlayCompleteChangeListener(SleepTimer.OnWaitPlayCompleteChangeListener listener) {
+        mAllWaitPlayCompleteChangeListener.remove(listener);
     }
 
     /**
@@ -2154,7 +2245,16 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         }
 
         if (mPlayerState.isSleepTimerStarted()) {
-            notifySleepTimerStateChanged();
+            notifySleepTimerStarted();
+
+            if (mPlayerState.isSleepTimerTimeout()) {
+                notifySleepTimerTimeout();
+            }
+        }
+
+        if (mPlayerState.isTimeoutActionComplete()) {
+            notifySleepTimerActionComplete();
+            notifySleepTimerEnd();
         }
     }
 
@@ -2390,29 +2490,85 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         listener.onAudioSessionChanged(mPlayerState.getAudioSessionId());
     }
 
-    private void notifySleepTimerStateChanged() {
+    private void notifySleepTimerStarted() {
         if (notConnected()) {
             return;
         }
 
         for (SleepTimer.OnStateChangeListener listener : mAllSleepTimerStateChangeListener) {
-            notifySleepTimerStateChanged(listener);
+            notifySleepTimerStarted(listener);
         }
     }
 
-    private void notifySleepTimerStateChanged(SleepTimer.OnStateChangeListener listener) {
+    private void notifySleepTimerStarted(SleepTimer.OnStateChangeListener listener) {
+        listener.onTimerStart(
+                mPlayerState.getSleepTimerTime(),
+                mPlayerState.getSleepTimerStartTime(),
+                mPlayerState.getTimeoutAction());
+    }
+
+    private void notifySleepTimerEnd() {
         if (notConnected()) {
             return;
         }
 
-        if (mPlayerState.isSleepTimerStarted()) {
-            listener.onTimerStart(
-                    mPlayerState.getSleepTimerTime(),
-                    mPlayerState.getSleepTimerStartTime(),
-                    mPlayerState.getTimeoutAction());
-        } else {
-            listener.onTimerEnd();
+        for (SleepTimer.OnStateChangeListener listener : mAllSleepTimerStateChangeListener) {
+            notifySleepTimerEnd(listener);
         }
+    }
+
+    private void notifySleepTimerEnd(SleepTimer.OnStateChangeListener listener) {
+        listener.onTimerEnd();
+    }
+
+    private void notifySleepTimerTimeout() {
+        if (notConnected()) {
+            return;
+        }
+
+        for (SleepTimer.OnStateChangeListener listener : mAllSleepTimerStateChangeListener) {
+            notifySleepTimerTimeout(listener);
+        }
+    }
+
+    private void notifySleepTimerTimeout(SleepTimer.OnStateChangeListener listener) {
+        if (listener instanceof SleepTimer.OnStateChangeListener2) {
+            ((SleepTimer.OnStateChangeListener2) listener).onTimeout(mPlayerState.isTimeoutActionComplete());
+        }
+    }
+
+    private void notifySleepTimerActionComplete() {
+        if (notConnected()) {
+            return;
+        }
+
+        for (SleepTimer.OnStateChangeListener listener : mAllSleepTimerStateChangeListener) {
+            notifySleepTimerActionComplete(listener);
+        }
+    }
+
+    private void notifySleepTimerActionComplete(SleepTimer.OnStateChangeListener listener) {
+        if (listener instanceof SleepTimer.OnStateChangeListener2) {
+            ((SleepTimer.OnStateChangeListener2) listener).onActionComplete(mPlayerState.getTimeoutAction());
+        }
+    }
+
+    private void notifyWaitPlayCompleteChanged() {
+        if (notConnected()) {
+            return;
+        }
+
+        for (SleepTimer.OnWaitPlayCompleteChangeListener listener : mAllWaitPlayCompleteChangeListener) {
+            notifyWaitPlayCompleteChanged(listener);
+        }
+    }
+
+    private void notifyWaitPlayCompleteChanged(SleepTimer.OnWaitPlayCompleteChangeListener listener) {
+        if (notConnected()) {
+            return;
+        }
+
+        listener.onWaitPlayCompleteChanged(mPlayerState.isWaitPlayComplete());
     }
 
     private void notifyRepeat(@NonNull MusicItem musicItem, long repeatTime) {
@@ -2422,7 +2578,9 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     // 用于管理与同步播放器状态
-    private class PlayerStateListenerImpl implements PlayerStateListener, SleepTimer.OnStateChangeListener {
+    private class PlayerStateListenerImpl implements PlayerStateListener,
+            SleepTimer.OnStateChangeListener2,
+            SleepTimer.OnWaitPlayCompleteChangeListener {
 
         @Override
         public void onPreparing() {
@@ -2526,14 +2684,13 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
 
         @Override
         public void onTimerStart(long time, long startTime, SleepTimer.TimeoutAction action) {
-            mPlayerStateHelper.onSleepTimerStart(time, startTime, action);
-            notifySleepTimerStateChanged();
+            // ignore
         }
 
         @Override
         public void onTimerEnd() {
             mPlayerStateHelper.onSleepTimerEnd();
-            notifySleepTimerStateChanged();
+            notifySleepTimerEnd();
         }
 
         @Override
@@ -2551,6 +2708,30 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         public void onSpeedChanged(float speed) {
             mPlayerStateHelper.onSpeedChanged(speed);
             notifySpeedChanged();
+        }
+
+        @Override
+        public void onTimerStart(long time, long startTime, TimeoutAction action, boolean waitPlayComplete) {
+            mPlayerStateHelper.onSleepTimerStart(time, startTime, action);
+            notifySleepTimerStarted();
+        }
+
+        @Override
+        public void onWaitPlayCompleteChanged(boolean waitPlayComplete) {
+            mPlayerStateHelper.onWaitPlayCompleteChanged(waitPlayComplete);
+            notifyWaitPlayCompleteChanged();
+        }
+
+        @Override
+        public void onTimeout(boolean actionComplete) {
+            mPlayerStateHelper.onSleepTimerTimeout(actionComplete);
+            notifySleepTimerTimeout();
+        }
+
+        @Override
+        public void onActionComplete(TimeoutAction action) {
+            mPlayerStateHelper.onSleepTimerActionComplete();
+            notifySleepTimerActionComplete();
         }
     }
 

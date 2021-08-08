@@ -214,6 +214,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     protected abstract AudioManager.OnAudioFocusChangeListener onCreateAudioFocusChangeListener();
 
     /**
+     * 当歌曲播放完成，或者再次重复播放时，会调用该方法。
+     */
+    protected abstract void onPlayCompleteOrRepeat();
+
+    /**
      * 释放播放器所占用的资源。注意！调用该方法后，就不允许在使用当前 Player 对象了，否则会导致不可预见的错误。
      */
     public void release() {
@@ -398,12 +403,18 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mCompletionListener = new MusicPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MusicPlayer mp) {
+                onPlayCompleteOrRepeat();
+
                 if (mPlayerState.getPlayMode() == PlayMode.LOOP) {
                     return;
                 }
 
                 if (mPlayerState.getPlayMode() == PlayMode.SINGLE_ONCE) {
                     notifyPlayOnceComplete();
+                    return;
+                }
+
+                if (getPlaybackState() != PlaybackState.PLAYING) {
                     return;
                 }
 
@@ -414,6 +425,12 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mRepeatListener = new MusicPlayer.OnRepeatListener() {
             @Override
             public void onRepeat(MusicPlayer mp) {
+                onPlayCompleteOrRepeat();
+
+                if (getPlaybackState() != PlaybackState.PLAYING) {
+                    return;
+                }
+
                 notifyRepeat(SystemClock.elapsedRealtime());
             }
         };
@@ -789,13 +806,22 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         return mPlayerState.isPreparing();
     }
 
-    private boolean isPlaying() {
+    public boolean isPlaying() {
         if (isPrepared()) {
             assert mMusicPlayer != null;
             return mMusicPlayer.isPlaying();
         }
 
         return false;
+    }
+
+    public int getDuration() {
+        if (isPrepared()) {
+            assert mMusicPlayer != null;
+            return mMusicPlayer.getDuration();
+        }
+
+        return 0;
     }
 
     private boolean isPlayingState() {

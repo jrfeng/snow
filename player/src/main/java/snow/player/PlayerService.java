@@ -30,6 +30,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -147,9 +148,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     @Nullable
     private HistoryRecorder mHistoryRecorder;
 
-    private OnStateChangeListener mSleepTimerStateChangedListener;
-    private Disposable mSleepTimerDisposable;
-    private PlayerStateHelper mPlayerStateHelper;
+    private SleepTimerImp mSleepTimer;
 
     private int mMaxIDLEMinutes = -1;
     private Disposable mIDLETimerDisposable;
@@ -257,6 +256,10 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
     }
 
+    boolean isPlaying() {
+        return mPlayer.isPlaying();
+    }
+
     // 避免因所有客户端都断开连接而导致 Service 终止
     private void keepServiceAlive() {
         if (mKeepServiceAlive) {
@@ -302,7 +305,6 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private void initPlayerState() {
         mPlayerState = new PersistentPlayerState(this, mPersistentId);
-        mPlayerStateHelper = new ServicePlayerStateHelper(mPlayerState, getApplicationContext(), this.getClass());
     }
 
     private void initPlaylistManager() {
@@ -438,7 +440,9 @@ public class PlayerService extends MediaBrowserServiceCompat
         mSyncPlayerStateListener = ChannelHelper.newEmitter(PlayerStateSynchronizer.OnSyncPlayerStateListener.class, sessionEventEmitter);
 
         mPlayer.setPlayerStateListener(mPlayerStateListener);
-        mSleepTimerStateChangedListener = ChannelHelper.newEmitter(OnStateChangeListener.class, sessionEventEmitter);
+
+        initSleepTimer(ChannelHelper.newEmitter(OnStateChangeListener2.class, sessionEventEmitter),
+                ChannelHelper.newEmitter(OnWaitPlayCompleteChangeListener.class, sessionEventEmitter));
     }
 
     private void initAudioEffectManager() {
@@ -486,6 +490,16 @@ public class PlayerService extends MediaBrowserServiceCompat
                 }
             }
         };
+    }
+
+    private void initSleepTimer(SleepTimer.OnStateChangeListener2 onStateChangeListener2,
+                                SleepTimer.OnWaitPlayCompleteChangeListener onWaitPlayCompleteChangeListener) {
+        mSleepTimer = new SleepTimerImp(
+                this,
+                mPlayerState,
+                onStateChangeListener2,
+                onWaitPlayCompleteChangeListener
+        );
     }
 
     /**
@@ -1329,45 +1343,7 @@ public class PlayerService extends MediaBrowserServiceCompat
      */
     @Override
     public void startSleepTimer(long time, @NonNull final TimeoutAction action) throws IllegalArgumentException {
-        if (time < 0) {
-            throw new IllegalArgumentException("time must >= 0");
-        }
-        Preconditions.checkNotNull(action);
-
-        disposeLastSleepTimer();
-
-        if (getPlayingMusicItem() == null) {
-            return;
-        }
-
-        if (time == 0) {
-            getPlayer().pause();
-            return;
-        }
-
-        mSleepTimerDisposable = Observable.timer(time, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Long>() {
-                    @Override
-                    public void accept(Long aLong) {
-                        switch (action) {
-                            case PAUSE:
-                                PlayerService.this.getPlayer().pause();
-                                break;
-                            case STOP:
-                                PlayerService.this.getPlayer().stop();
-                                break;
-                            case SHUTDOWN:
-                                PlayerService.this.shutdown();
-                                break;
-                        }
-                        notifySleepTimerEnd();
-                    }
-                });
-
-        long startTime = SystemClock.elapsedRealtime();
-        mPlayerStateHelper.onSleepTimerStart(time, startTime, action);
-        mSleepTimerStateChangedListener.onTimerStart(time, startTime, action);
+        mSleepTimer.startSleepTimer(time, action);
     }
 
     /**
@@ -1375,21 +1351,12 @@ public class PlayerService extends MediaBrowserServiceCompat
      */
     @Override
     public void cancelSleepTimer() {
-        disposeLastSleepTimer();
-        notifySleepTimerEnd();
+        mSleepTimer.cancelSleepTimer();
     }
 
-    private void disposeLastSleepTimer() {
-        if (mSleepTimerDisposable == null || mSleepTimerDisposable.isDisposed()) {
-            return;
-        }
-
-        mSleepTimerDisposable.dispose();
-    }
-
-    private void notifySleepTimerEnd() {
-        mPlayerStateHelper.onSleepTimerEnd();
-        mSleepTimerStateChangedListener.onTimerEnd();
+    @Override
+    public void setWaitPlayComplete(boolean waitPlayComplete) {
+        mSleepTimer.setWaitPlayComplete(waitPlayComplete);
     }
 
     private void notifyPlayModeChanged(@NonNull PlayMode playMode) {
@@ -1429,6 +1396,11 @@ public class PlayerService extends MediaBrowserServiceCompat
         @Override
         protected AudioManager.OnAudioFocusChangeListener onCreateAudioFocusChangeListener() {
             return PlayerService.this.onCreateAudioFocusChangeListener();
+        }
+
+        @Override
+        protected void onPlayCompleteOrRepeat() {
+            PlayerService.this.mSleepTimer.notifyPlayComplete();
         }
 
         @Override
@@ -1720,10 +1692,18 @@ public class PlayerService extends MediaBrowserServiceCompat
             mPendingIntentRequestCode += 1;
 
             Intent intent = mPlayerService.buildCustomActionIntent(actionName);
+
+            int flags;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
+            } else {
+                flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            }
+
             return PendingIntent.getBroadcast(getContext(),
                     mPendingIntentRequestCode,
                     intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
+                    flags);
         }
 
         /**
