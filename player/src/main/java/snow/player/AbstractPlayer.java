@@ -1287,14 +1287,9 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (isPrepared()) {
-            assert mMusicPlayer != null;
-            int progress = Math.min(mMusicPlayer.getDuration(),
-                    mMusicPlayer.getProgress() + FORWARD_STEP);
-
-            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_FAST_FORWARDING));
-            seekTo(progress);
-        }
+        int progress = Math.min(mPlayerState.getDuration(), mPlayerState.getPlayProgress() + FORWARD_STEP);
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_FAST_FORWARDING));
+        seekTo(progress);
     }
 
     @Override
@@ -1313,13 +1308,9 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (isPrepared()) {
-            assert mMusicPlayer != null;
-            int progress = Math.max(0, mMusicPlayer.getProgress() - FORWARD_STEP);
-
-            mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_REWINDING));
-            seekTo(progress);
-        }
+        int progress = Math.min(mPlayerState.getDuration(), mPlayerState.getPlayProgress() - FORWARD_STEP);
+        mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_REWINDING));
+        seekTo(progress);
     }
 
     /**
