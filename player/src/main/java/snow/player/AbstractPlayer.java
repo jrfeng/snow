@@ -558,8 +558,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
             @Override
             public void onLossTransientCanDuck() {
-                mResumePlay = isPlaying();
-                if (isPlaying() && mResumePlay) {
+                mResumePlay = isMusicPlayerPlaying();
+                if (isMusicPlayerPlaying()) {
                     assert mMusicPlayer != null;
                     mMusicPlayer.quiet();
                 }
@@ -576,7 +576,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                     return;
                 }
 
-                if (mMusicPlayer != null && lossTransientCanDuck && isPlaying()) {
+                if (mMusicPlayer != null && lossTransientCanDuck && isMusicPlayerPlaying()) {
                     mMusicPlayer.dismissQuiet();
                 }
             }
@@ -806,22 +806,13 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         return mPlayerState.isPreparing();
     }
 
-    public boolean isPlaying() {
+    public boolean isMusicPlayerPlaying() {
         if (isPrepared()) {
             assert mMusicPlayer != null;
             return mMusicPlayer.isPlaying();
         }
 
         return false;
-    }
-
-    public int getDuration() {
-        if (isPrepared()) {
-            assert mMusicPlayer != null;
-            return mMusicPlayer.getDuration();
-        }
-
-        return 0;
     }
 
     private boolean isPlayingState() {
@@ -970,7 +961,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         int playProgress = mPlayerState.getPlayProgress();
         long updateTime = mPlayerState.getPlayProgressUpdateTime();
 
-        if (isPlaying()) {
+        if (isMusicPlayerPlaying()) {
             assert mMusicPlayer != null;
             playProgress = mMusicPlayer.getProgress();
             updateTime = SystemClock.elapsedRealtime();
@@ -1036,12 +1027,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     }
 
     private int getMusicItemDuration() {
-        MusicItem musicItem = getMusicItem();
-        if (musicItem == null) {
-            return 0;
-        }
-
-        return musicItem.getDuration();
+        return mPlayerState.getDuration();
     }
 
     private void notifyBufferedChanged(int buffered, boolean isPercent) {
@@ -1162,7 +1148,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (isPlaying()) {
+        if (isMusicPlayerPlaying()) {
             mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
         } else {
             notifyPaused();
@@ -1171,7 +1157,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void play() {
-        if (getMusicItem() == null || isPlaying()) {
+        if (getMusicItem() == null || isMusicPlayerPlaying()) {
             return;
         }
 
@@ -1211,12 +1197,13 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (!isPlaying()) {
+        if (!isPlayingState()) {
             return;
         }
 
-        assert mMusicPlayer != null;
-        mMusicPlayer.pause();
+        if (mMusicPlayer != null && mMusicPlayer.isPlaying()) {
+            mMusicPlayer.pause();
+        }
 
         notifyPaused();
     }
@@ -1243,7 +1230,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (isPlaying()) {
+        if (isPlayingState()) {
             pause();
         } else {
             play();
@@ -1982,7 +1969,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
                 if (index == oldPlayPosition) {
                     playPosition = playPosition < mPlaylist.size() ? playPosition : 0;
-                    notifyPlayingMusicItemChanged(mPlaylist.get(playPosition), playPosition, isPlaying());
+                    notifyPlayingMusicItemChanged(mPlaylist.get(playPosition), playPosition, isMusicPlayerPlaying());
                 }
             }
         });

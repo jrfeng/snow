@@ -23,14 +23,12 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.SystemClock;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -257,7 +255,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     boolean isPlaying() {
-        return mPlayer.isPlaying();
+        return mPlayer.isMusicPlayerPlaying();
     }
 
     // 避免因所有客户端都断开连接而导致 Service 终止
