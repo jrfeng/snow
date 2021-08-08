@@ -2077,6 +2077,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
          */
         void onPlayingMusicItemChanged(@Nullable MusicItem musicItem);
 
+        /**
+         * 该方法会在播放器的播放模式发生改变时调用。
+         *
+         * @param playMode 播放器当前的播放模式。
+         */
         void onPlayModeChanged(@NonNull PlayMode playMode);
     }
 
