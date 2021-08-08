@@ -87,7 +87,7 @@ public class LiveProgress {
             }
         };
 
-        mOnPrepareListener = new Player.OnPrepareListener() {
+        mOnPrepareListener = new Player.OnPrepareListener2() {
             @Override
             public void onPreparing() {
                 // ignore
@@ -95,7 +95,7 @@ public class LiveProgress {
 
             @Override
             public void onPrepared(int audioSessionId) {
-                // deprecated
+                // ignore
             }
 
             @Override

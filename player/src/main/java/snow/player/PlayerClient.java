@@ -2210,7 +2210,9 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
 
         if (mPlayerState.isPrepared()) {
             listener.onPrepared(mPlayerState.getAudioSessionId());
-            listener.onPrepared(mPlayerState.getAudioSessionId(), mPlayerState.getDuration());
+            if (listener instanceof Player.OnPrepareListener2) {
+                ((Player.OnPrepareListener2) listener).onPrepared(mPlayerState.getAudioSessionId(), mPlayerState.getDuration());
+            }
         }
     }
 
@@ -2436,7 +2438,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
 
         @Override
         public void onPrepared(int audioSessionId) {
-            // deprecated
+            // ignore
         }
 
         @Override

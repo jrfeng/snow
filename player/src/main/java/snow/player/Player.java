@@ -148,11 +148,16 @@ public interface Player {
          * 当播放器的状态变为 “准备完毕” 时会回调该方法。
          *
          * @param audioSessionId 当前音乐的 audio session id
-         * @deprecated 已弃用，请使用 {@link #onPrepared(int, int)} 方法代替。
          */
-        @Deprecated
         void onPrepared(int audioSessionId);
+    }
 
+    /**
+     * 用于监听播放器的准备状态。
+     * <p>
+     * {@link OnPrepareListener} 的升级版，增加了一个回调方法 {@link OnPrepareListener2#onPrepared(int, int)}
+     */
+    interface OnPrepareListener2 extends OnPrepareListener {
         /**
          * 当播放器的状态变为 “准备完毕” 时会回调该方法。
          * <p>

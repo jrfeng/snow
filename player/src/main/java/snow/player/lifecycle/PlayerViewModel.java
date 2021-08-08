@@ -343,7 +343,7 @@ public class PlayerViewModel extends ViewModel {
             }
         };
 
-        mPrepareListener = new Player.OnPrepareListener() {
+        mPrepareListener = new Player.OnPrepareListener2() {
             @Override
             public void onPreparing() {
                 mPreparing.setValue(true);
@@ -351,7 +351,7 @@ public class PlayerViewModel extends ViewModel {
 
             @Override
             public void onPrepared(int audioSessionId) {
-                // deprecated
+                // ignore
             }
 
             @Override
