@@ -123,9 +123,14 @@ public class LiveProgress {
                                 mPlayerClient.getSpeed());
                         break;
                     case STOPPED:
-                        updateLiveProgress(0);   // 注意！case 穿透！
-                    case PAUSED:                            // 注意！case 穿透！
-                    case ERROR:                             // 注意！case 穿透！
+                        updateLiveProgress(0);
+                        mProgressClock.cancel();
+                        break;
+                    case PAUSED:
+                        updateLiveProgress(mPlayerClient.getPlayProgress() / 1000);
+                        mProgressClock.cancel();
+                        break;
+                    case ERROR:
                         mProgressClock.cancel();
                         break;
                 }

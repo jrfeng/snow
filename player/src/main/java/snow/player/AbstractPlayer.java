@@ -113,6 +113,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     private final OnStateChangeListener mOnStateChangeListener;
 
+    private SleepTimerImp mSleepTimer;
+
     @Nullable
     private AudioEffectManager mAudioEffectManager;
 
@@ -212,11 +214,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
      */
     @Nullable
     protected abstract AudioManager.OnAudioFocusChangeListener onCreateAudioFocusChangeListener();
-
-    /**
-     * 当歌曲播放完成，或者再次重复播放时，会调用该方法。
-     */
-    protected abstract void onPlayCompleteOrRepeat();
 
     /**
      * 释放播放器所占用的资源。注意！调用该方法后，就不允许在使用当前 Player 对象了，否则会导致不可预见的错误。
@@ -403,8 +400,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mCompletionListener = new MusicPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MusicPlayer mp) {
-                onPlayCompleteOrRepeat();
-
                 if (mPlayerState.getPlayMode() == PlayMode.LOOP) {
                     return;
                 }
@@ -418,6 +413,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                     return;
                 }
 
+                if (performSleepTimerAction()) {
+                    return;
+                }
+
                 skipToNext();
             }
         };
@@ -425,9 +424,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mRepeatListener = new MusicPlayer.OnRepeatListener() {
             @Override
             public void onRepeat(MusicPlayer mp) {
-                onPlayCompleteOrRepeat();
-
-                if (getPlaybackState() != PlaybackState.PLAYING) {
+                if (performSleepTimerAction()) {
                     return;
                 }
 
@@ -478,6 +475,24 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                 notifyError(errorCode, ErrorCode.getErrorMessage(mApplicationContext, errorCode));
             }
         };
+    }
+
+    private boolean performSleepTimerAction() {
+        if (mPlayerState.isWaitPlayComplete()
+                && mPlayerState.isSleepTimerStarted()
+                && mPlayerState.isSleepTimerTimeout()
+                && !mPlayerState.isTimeoutActionComplete()) {
+
+            releaseMusicPlayer();
+
+            mPlayerState.setPlayProgress(0);
+            mPlayerState.setPlayProgressUpdateTime(SystemClock.elapsedRealtime());
+
+            mSleepTimer.performAction();
+            return true;
+        }
+
+        return false;
     }
 
     private void initAllHelper() {
@@ -687,6 +702,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             mWifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, tag);
             mWifiLock.setReferenceCounted(false);
         }
+    }
+
+    public void setSleepTimer(SleepTimerImp sleepTimerImp) {
+        mSleepTimer = sleepTimerImp;
     }
 
     private void requireWakeLock() {

@@ -44,6 +44,7 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<Boolean> mSleepTimerStarted;
     private MutableLiveData<Integer> mSleepTimerTime;       // 单位：秒
     private MutableLiveData<Integer> mSleepTimerProgress;   // 单位：秒
+    private MutableLiveData<Boolean> mWaitPlayComplete;
     private MutableLiveData<Integer> mPlayPosition;
     private MutableLiveData<PlayMode> mPlayMode;
     private MutableLiveData<Float> mSpeed;
@@ -62,6 +63,7 @@ public class PlayerViewModel extends ViewModel {
     private PlayerClient.OnPlaybackStateChangeListener mClientPlaybackStateChangeListener;
     private Player.OnBufferedProgressChangeListener mBufferedProgressChangeListener;
     private SleepTimer.OnStateChangeListener mSleepTimerStateChangeListener;
+    private SleepTimer.OnWaitPlayCompleteChangeListener mWaitPlayCompleteChangeListener;
     private Player.OnSeekCompleteListener mSeekCompleteListener;
     private Player.OnStalledChangeListener mStalledChangeListener;
     private Player.OnPrepareListener mPrepareListener;
@@ -276,9 +278,16 @@ public class PlayerViewModel extends ViewModel {
                         break;
                     case STOPPED:
                         mPreparing.setValue(false);
-                        mPlayProgress.setValue(0);  // 注意！case 穿透！
-                    case PAUSED:                    // 注意！case 穿透！
-                    case ERROR:                     // 注意！case 穿透！
+                        mPlayProgress.setValue(0);
+                        mPreparing.setValue(false);
+                        mProgressClock.cancel();
+                        break;
+                    case PAUSED:
+                        mPlayProgress.setValue(mPlayerClient.getPlayProgress() / 1000);
+                        mPreparing.setValue(false);
+                        mProgressClock.cancel();
+                        break;
+                    case ERROR:
                         mPreparing.setValue(false);
                         mProgressClock.cancel();
                         break;
@@ -307,6 +316,13 @@ public class PlayerViewModel extends ViewModel {
                 mSleepTimerProgressClock.cancel();
                 mSleepTimerTime.setValue(0);
                 mSleepTimerProgress.setValue(0);
+            }
+        };
+
+        mWaitPlayCompleteChangeListener = new SleepTimer.OnWaitPlayCompleteChangeListener() {
+            @Override
+            public void onWaitPlayCompleteChanged(boolean waitPlayComplete) {
+                mWaitPlayComplete.setValue(waitPlayComplete);
             }
         };
 
@@ -416,6 +432,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.addOnPlaybackStateChangeListener(mClientPlaybackStateChangeListener);
         mPlayerClient.addOnBufferedProgressChangeListener(mBufferedProgressChangeListener);
         mPlayerClient.addOnSleepTimerStateChangeListener(mSleepTimerStateChangeListener);
+        mPlayerClient.addOnWaitPlayCompleteChangeListener(mWaitPlayCompleteChangeListener);
         mPlayerClient.addOnSeekCompleteListener(mSeekCompleteListener);
         mPlayerClient.addOnStalledChangeListener(mStalledChangeListener);
         mPlayerClient.addOnPrepareListener(mPrepareListener);
@@ -431,6 +448,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.removeOnPlaybackStateChangeListener(mClientPlaybackStateChangeListener);
         mPlayerClient.removeOnBufferedProgressChangeListener(mBufferedProgressChangeListener);
         mPlayerClient.removeOnSleepTimerStateChangeListener(mSleepTimerStateChangeListener);
+        mPlayerClient.removeOnWaitPlayCompleteChangeListener(mWaitPlayCompleteChangeListener);
         mPlayerClient.removeOnSeekCompleteListener(mSeekCompleteListener);
         mPlayerClient.removeOnStalledChangeListener(mStalledChangeListener);
         mPlayerClient.removeOnPrepareListener(mPrepareListener);
@@ -839,6 +857,20 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
+     * 睡眠定时器是否等到当前正在播放的歌曲播放完成后，再执行指定的动作。
+     *
+     * @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
+     */
+    @NonNull
+    public LiveData<Boolean> getWaitPlayComplete() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
+        return mWaitPlayComplete;
+    }
+
+    /**
      * 获取睡眠定时器进度（单位：秒）对应的文本值，例如 82 秒对应的文本值为 "01:22"。
      * <p>
      * 睡眠定时器的进度是个倒计时。
@@ -1117,6 +1149,14 @@ public class PlayerViewModel extends ViewModel {
         seekTo(seekBar.getProgress() * 1000);
     }
 
+    public void setWaitPlayComplete(boolean waitPlayComplete) {
+        if (!isInitialized()) {
+            return;
+        }
+
+        mPlayerClient.setWaitPlayComplete(waitPlayComplete);
+    }
+
     private void restorePlayProgress() {
         if (!mPlayerClient.isPlaying() || mPlayerClient.isStalled()) {
             mPlayProgress.setValue(mPlayerClient.getPlayProgress() / 1000);
@@ -1151,6 +1191,7 @@ public class PlayerViewModel extends ViewModel {
         mErrorMessage = new MutableLiveData<>(mPlayerClient.getErrorMessage());
         mPlayingMusicItem = new MutableLiveData<>(mPlayerClient.getPlayingMusicItem());
         mPlayingNoStalled = new MutableLiveData<>(mPlayerClient.isPlaying() && !mPlayerClient.isStalled());
+        mWaitPlayComplete = new MutableLiveData<>(mPlayerClient.isWaitPlayComplete());
     }
 
     private int getDurationSec() {

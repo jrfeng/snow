@@ -1256,6 +1256,19 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     /**
+     * 睡眠定时器是否等到当前正在播放的歌曲播放完成后，再执行指定的动作。
+     *
+     * @return 睡眠定时器是否等到当前正在播放的歌曲播放完成后，再执行指定的动作。
+     */
+    public boolean isWaitPlayComplete() {
+        if (notConnected()) {
+            return false;
+        }
+
+        return mPlayerState.isWaitPlayComplete();
+    }
+
+    /**
      * 睡眠定时器的定时任务是否已完成。
      * <p>
      * 如果睡眠定时器的定时任务已执行，或者没有启动睡眠定时器，则返回 true；如果已经启动了睡眠定时器，
@@ -2256,6 +2269,8 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
             notifySleepTimerActionComplete();
             notifySleepTimerEnd();
         }
+
+        notifyWaitPlayCompleteChanged();
     }
 
     void initPlayerState(PlayerState playerState) {

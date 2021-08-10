@@ -77,8 +77,8 @@ class SleepTimerImp implements SleepTimer {
             return;
         }
 
-        mWaitPlayCompleteChangeListener.onWaitPlayCompleteChanged(waitPlayComplete);
         mPlayerStateHelper.onWaitPlayCompleteChanged(waitPlayComplete);
+        mWaitPlayCompleteChangeListener.onWaitPlayCompleteChanged(waitPlayComplete);
     }
 
     private void onTimeout() {
@@ -94,7 +94,7 @@ class SleepTimerImp implements SleepTimer {
         mSleepTimerStateChangedListener.onTimerEnd();
     }
 
-    public void notifyPlayComplete() {
+    public void performAction() {
         if (mPlayerState.isTimeoutActionComplete()) {
             return;
         }

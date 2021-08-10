@@ -437,10 +437,15 @@ public class PlayerService extends MediaBrowserServiceCompat
         mPlayerStateListener = ChannelHelper.newEmitter(PlayerStateListener.class, sessionEventEmitter);
         mSyncPlayerStateListener = ChannelHelper.newEmitter(PlayerStateSynchronizer.OnSyncPlayerStateListener.class, sessionEventEmitter);
 
-        mPlayer.setPlayerStateListener(mPlayerStateListener);
+        mSleepTimer = new SleepTimerImp(
+                this,
+                mPlayerState,
+                ChannelHelper.newEmitter(OnStateChangeListener2.class, sessionEventEmitter),
+                ChannelHelper.newEmitter(OnWaitPlayCompleteChangeListener.class, sessionEventEmitter)
+        );
 
-        initSleepTimer(ChannelHelper.newEmitter(OnStateChangeListener2.class, sessionEventEmitter),
-                ChannelHelper.newEmitter(OnWaitPlayCompleteChangeListener.class, sessionEventEmitter));
+        mPlayer.setPlayerStateListener(mPlayerStateListener);
+        mPlayer.setSleepTimer(mSleepTimer);
     }
 
     private void initAudioEffectManager() {
@@ -490,15 +495,6 @@ public class PlayerService extends MediaBrowserServiceCompat
         };
     }
 
-    private void initSleepTimer(SleepTimer.OnStateChangeListener2 onStateChangeListener2,
-                                SleepTimer.OnWaitPlayCompleteChangeListener onWaitPlayCompleteChangeListener) {
-        mSleepTimer = new SleepTimerImp(
-                this,
-                mPlayerState,
-                onStateChangeListener2,
-                onWaitPlayCompleteChangeListener
-        );
-    }
 
     /**
      * 设置 MediaSessionCompat 的 Flags。
@@ -1394,11 +1390,6 @@ public class PlayerService extends MediaBrowserServiceCompat
         @Override
         protected AudioManager.OnAudioFocusChangeListener onCreateAudioFocusChangeListener() {
             return PlayerService.this.onCreateAudioFocusChangeListener();
-        }
-
-        @Override
-        protected void onPlayCompleteOrRepeat() {
-            PlayerService.this.mSleepTimer.notifyPlayComplete();
         }
 
         @Override
