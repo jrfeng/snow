@@ -140,10 +140,6 @@ class PlayerStateHelper {
         mPlayerState.setSleepTimerStarted(false);
         mPlayerState.setSleepTimerTime(0);
         mPlayerState.setSleepTimerStartTime(0);
-    }
-
-    public void onSleepTimerActionComplete() {
-        onSleepTimerEnd();
         mPlayerState.setTimeoutActionComplete(true);
     }
 

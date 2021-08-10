@@ -1914,7 +1914,6 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         }
 
         if (mPlayerState.isTimeoutActionComplete()) {
-            notifySleepTimerActionComplete(listener);
             notifySleepTimerEnd(listener);
         }
     }
@@ -2266,7 +2265,6 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         }
 
         if (mPlayerState.isTimeoutActionComplete()) {
-            notifySleepTimerActionComplete();
             notifySleepTimerEnd();
         }
 
@@ -2552,22 +2550,6 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         }
     }
 
-    private void notifySleepTimerActionComplete() {
-        if (notConnected()) {
-            return;
-        }
-
-        for (SleepTimer.OnStateChangeListener listener : mAllSleepTimerStateChangeListener) {
-            notifySleepTimerActionComplete(listener);
-        }
-    }
-
-    private void notifySleepTimerActionComplete(SleepTimer.OnStateChangeListener listener) {
-        if (listener instanceof SleepTimer.OnStateChangeListener2) {
-            ((SleepTimer.OnStateChangeListener2) listener).onActionComplete(mPlayerState.getTimeoutAction());
-        }
-    }
-
     private void notifyWaitPlayCompleteChanged() {
         if (notConnected()) {
             return;
@@ -2741,12 +2723,6 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         public void onTimeout(boolean actionComplete) {
             mPlayerStateHelper.onSleepTimerTimeout(actionComplete);
             notifySleepTimerTimeout();
-        }
-
-        @Override
-        public void onActionComplete(TimeoutAction action) {
-            mPlayerStateHelper.onSleepTimerActionComplete();
-            notifySleepTimerActionComplete();
         }
     }
 

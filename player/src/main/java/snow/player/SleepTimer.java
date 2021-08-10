@@ -99,13 +99,6 @@ public interface SleepTimer {
          * @see #cancelSleepTimer()
          */
         void onTimeout(boolean actionComplete);
-
-        /**
-         * 当睡眠定时器设置的动作执行完成后，会调用该方法。
-         *
-         * @param action 睡眠定时器已执行的动作。
-         */
-        void onActionComplete(@UseOrdinal TimeoutAction action);
     }
 
     /**
