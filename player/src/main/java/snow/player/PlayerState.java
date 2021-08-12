@@ -40,7 +40,7 @@ class PlayerState implements Parcelable {
     private long sleepTimerTime;
     private long sleepTimerStartTime;
     private SleepTimer.TimeoutAction timeoutAction;
-    private boolean timeoutActionComplete;
+    private boolean sleepTimerEnd;
     private boolean sleepTimerTimeout;
 
     public PlayerState() {
@@ -64,7 +64,7 @@ class PlayerState implements Parcelable {
         timeoutAction = SleepTimer.TimeoutAction.PAUSE;
         duration = 0;
         waitPlayComplete = false;
-        timeoutActionComplete = true;
+        sleepTimerEnd = true;
         sleepTimerTimeout = false;
     }
 
@@ -92,7 +92,7 @@ class PlayerState implements Parcelable {
         timeoutAction = source.timeoutAction;
         duration = source.duration;
         waitPlayComplete = source.waitPlayComplete;
-        timeoutActionComplete = source.timeoutActionComplete;
+        sleepTimerEnd = source.sleepTimerEnd;
         sleepTimerTimeout = source.sleepTimerTimeout;
     }
 
@@ -480,17 +480,17 @@ class PlayerState implements Parcelable {
      *
      * @return 睡眠定时器的定时任务是否已完成。
      */
-    public boolean isTimeoutActionComplete() {
-        return timeoutActionComplete;
+    public boolean isSleepTimerEnd() {
+        return sleepTimerEnd;
     }
 
     /**
      * 设置睡眠定时器的定时任务是否已完成。
      *
-     * @param timeoutActionComplete 睡眠定时器的定时任务是否已完成。
+     * @param sleepTimerEnd 睡眠定时器的定时任务是否已完成。
      */
-    public void setTimeoutActionComplete(boolean timeoutActionComplete) {
-        this.timeoutActionComplete = timeoutActionComplete;
+    public void setSleepTimerEnd(boolean sleepTimerEnd) {
+        this.sleepTimerEnd = sleepTimerEnd;
     }
 
     /**
@@ -564,7 +564,7 @@ class PlayerState implements Parcelable {
                 && Objects.equal(duration, other.duration)
                 && Objects.equal(timeoutAction, other.timeoutAction)
                 && Objects.equal(waitPlayComplete, other.waitPlayComplete)
-                && Objects.equal(timeoutActionComplete, other.timeoutActionComplete)
+                && Objects.equal(sleepTimerEnd, other.sleepTimerEnd)
                 && Objects.equal(sleepTimerTimeout, other.sleepTimerTimeout);
     }
 
@@ -590,7 +590,7 @@ class PlayerState implements Parcelable {
                 timeoutAction,
                 duration,
                 waitPlayComplete,
-                timeoutActionComplete,
+                sleepTimerEnd,
                 sleepTimerTimeout
         );
     }
@@ -618,7 +618,7 @@ class PlayerState implements Parcelable {
                 ", sleepTimerStartTime=" + sleepTimerStartTime +
                 ", timeoutAction=" + timeoutAction +
                 ", sleepTimerWaitPlayComplete=" + waitPlayComplete +
-                ", timeoutActionComplete=" + timeoutActionComplete +
+                ", timeoutActionComplete=" + sleepTimerEnd +
                 ", sleepTimerTimeout=" + sleepTimerTimeout +
                 ", duration=" + duration +
                 '}';
@@ -646,7 +646,7 @@ class PlayerState implements Parcelable {
         timeoutAction = SleepTimer.TimeoutAction.values()[in.readInt()];
         duration = in.readInt();
         waitPlayComplete = in.readByte() != 0;
-        timeoutActionComplete = in.readByte() != 0;
+        sleepTimerEnd = in.readByte() != 0;
         sleepTimerTimeout = in.readByte() != 0;
     }
 
@@ -673,7 +673,7 @@ class PlayerState implements Parcelable {
         dest.writeInt(timeoutAction.ordinal());
         dest.writeInt(duration);
         dest.writeByte((byte) (waitPlayComplete ? 1 : 0));
-        dest.writeByte((byte) (timeoutActionComplete ? 1 : 0));
+        dest.writeByte((byte) (sleepTimerEnd ? 1 : 0));
         dest.writeByte((byte) (sleepTimerTimeout ? 1 : 0));
     }
 

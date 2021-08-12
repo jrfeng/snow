@@ -1269,16 +1269,18 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
     }
 
     /**
-     * 睡眠定时器的定时任务是否已完成。
+     * 睡眠定时器的定时任务是否已完成或者被取消。
+     * <p>
+     * <b>注意！该方法的返回值仅在睡眠定时器启动（{@link #isSleepTimerStarted()} 方法返回 true）时才有意义。</b>
      *
-     * @return 睡眠定时器的定时任务是否已完成。
+     * @return 如果睡眠定时器的定时任务已完成或者被取消，则返回 true，否则返回 false。
      */
-    public boolean isTimeoutActionComplete() {
+    public boolean isSleepTimerEnd() {
         if (notConnected()) {
             return true;
         }
 
-        return mPlayerState.isTimeoutActionComplete();
+        return mPlayerState.isSleepTimerEnd();
     }
 
     /**
@@ -1925,7 +1927,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
             }
         }
 
-        if (mPlayerState.isTimeoutActionComplete()) {
+        if (mPlayerState.isSleepTimerEnd()) {
             notifySleepTimerEnd(listener);
         }
     }
@@ -2276,7 +2278,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
             }
         }
 
-        if (mPlayerState.isTimeoutActionComplete()) {
+        if (mPlayerState.isSleepTimerEnd()) {
             notifySleepTimerEnd();
         }
 
@@ -2568,7 +2570,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
 
     private void notifySleepTimerTimeout(SleepTimer.OnStateChangeListener listener) {
         if (listener instanceof SleepTimer.OnStateChangeListener2) {
-            ((SleepTimer.OnStateChangeListener2) listener).onTimeout(mPlayerState.isTimeoutActionComplete());
+            ((SleepTimer.OnStateChangeListener2) listener).onTimeout(mPlayerState.isSleepTimerEnd());
         }
     }
 

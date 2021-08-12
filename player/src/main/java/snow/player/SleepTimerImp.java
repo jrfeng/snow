@@ -83,7 +83,7 @@ class SleepTimerImp implements SleepTimer {
         if (!waitPlayComplete
                 && mPlayerState.isSleepTimerStarted()
                 && mPlayerState.isSleepTimerTimeout()
-                && !mPlayerState.isTimeoutActionComplete()) {
+                && !mPlayerState.isSleepTimerEnd()) {
             cancelSleepTimer();
         }
     }
@@ -102,7 +102,7 @@ class SleepTimerImp implements SleepTimer {
     }
 
     public void performAction() {
-        if (mPlayerState.isTimeoutActionComplete()) {
+        if (mPlayerState.isSleepTimerEnd()) {
             return;
         }
 

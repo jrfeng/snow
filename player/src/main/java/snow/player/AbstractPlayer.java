@@ -481,7 +481,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         if (mPlayerState.isWaitPlayComplete()
                 && mPlayerState.isSleepTimerStarted()
                 && mPlayerState.isSleepTimerTimeout()
-                && !mPlayerState.isTimeoutActionComplete()) {
+                && !mPlayerState.isSleepTimerEnd()) {
 
             releaseMusicPlayer();
 
