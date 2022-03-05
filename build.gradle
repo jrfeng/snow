@@ -1,13 +1,11 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.objectboxVersion = '2.7.1'
+    ext.objectboxVersion = '3.1.2'
     
     repositories {
         google()
         mavenCentral()
-        jcenter()
-        
     }
 
     dependencies {
@@ -25,7 +23,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        jcenter()
         maven { url 'https://jitpack.io' }
     }
 
@@ -41,7 +38,7 @@ allprojects {
         mediaHelperVersion = "1.1"
 
         // MMKV
-        mmkvVersion = "1.1.1"
+        mmkvVersion = "1.2.12"
 
         // Glide
         glideVersion = "4.11.0"

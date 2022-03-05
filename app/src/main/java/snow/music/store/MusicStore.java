@@ -80,8 +80,8 @@ public class MusicStore {
     private void loadAllMusicListName() {
         Single.create(emitter -> {
             String[] allName = mMusicListEntityBox.query()
-                    .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC)
-                    .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
+                    .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC, QueryBuilder.StringOrder.CASE_SENSITIVE)
+                    .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE, QueryBuilder.StringOrder.CASE_SENSITIVE)
                     .build()
                     .property(MusicListEntity_.name)
                     .findStrings();
@@ -215,8 +215,8 @@ public class MusicStore {
         Preconditions.checkNotNull(music);
 
         QueryBuilder<MusicListEntity> builder = mMusicListEntityBox.query()
-                .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC)
-                .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE);
+                .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC, QueryBuilder.StringOrder.CASE_SENSITIVE)
+                .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE, QueryBuilder.StringOrder.CASE_SENSITIVE);
 
         builder.link(MusicListEntity_.musicElements)
                 .equal(Music_.id, music.getId());
@@ -245,7 +245,7 @@ public class MusicStore {
         checkThread();
 
         long count = mMusicListEntityBox.query()
-                .equal(MusicListEntity_.name, name)
+                .equal(MusicListEntity_.name, name, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .build()
                 .count();
 
@@ -305,7 +305,7 @@ public class MusicStore {
         }
 
         MusicListEntity entity = mMusicListEntityBox.query()
-                .equal(MusicListEntity_.name, name)
+                .equal(MusicListEntity_.name, name, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .build()
                 .findUnique();
 
@@ -371,7 +371,7 @@ public class MusicStore {
         }
 
         mMusicListEntityBox.query()
-                .equal(MusicListEntity_.name, name)
+                .equal(MusicListEntity_.name, name, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .build()
                 .remove();
     }
@@ -407,9 +407,9 @@ public class MusicStore {
         checkThread();
 
         List<MusicListEntity> allEntity = mMusicListEntityBox.query()
-                .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC)
+                .notEqual(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .and()
-                .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE)
+                .notEqual(MusicListEntity_.name, MUSIC_LIST_FAVORITE, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .build()
                 .find();
 
@@ -495,7 +495,7 @@ public class MusicStore {
 
         QueryBuilder<Music> builder = mMusicBox.query().equal(Music_.id, musicId);
         builder.backlink(MusicListEntity_.musicElements)
-                .equal(MusicListEntity_.name, MUSIC_LIST_FAVORITE);
+                .equal(MusicListEntity_.name, MUSIC_LIST_FAVORITE, QueryBuilder.StringOrder.CASE_SENSITIVE);
 
         return builder.build().count() > 0;
     }
@@ -865,7 +865,7 @@ public class MusicStore {
         Preconditions.checkNotNull(uri);
 
         Long id = mMusicBox.query()
-                .equal(Music_.uri, uri)
+                .equal(Music_.uri, uri, QueryBuilder.StringOrder.CASE_INSENSITIVE)
                 .build()
                 .property(Music_.id)
                 .findLong();
@@ -887,10 +887,10 @@ public class MusicStore {
         Preconditions.checkNotNull(uri);
 
         QueryBuilder<Music> builder = mMusicBox.query()
-                .equal(Music_.uri, uri);
+                .equal(Music_.uri, uri, QueryBuilder.StringOrder.CASE_INSENSITIVE);
 
         builder.backlink(MusicListEntity_.musicElements)
-                .equal(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC);
+                .equal(MusicListEntity_.name, MUSIC_LIST_LOCAL_MUSIC, QueryBuilder.StringOrder.CASE_SENSITIVE);
 
         return builder.build().count() > 0;
     }
@@ -933,7 +933,7 @@ public class MusicStore {
         checkThread();
 
         return mMusicBox.query()
-                .equal(Music_.artist, artist)
+                .equal(Music_.artist, artist, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .build()
                 .find();
     }
@@ -949,7 +949,7 @@ public class MusicStore {
         checkThread();
 
         return mMusicBox.query()
-                .equal(Music_.artist, artist)
+                .equal(Music_.artist, artist, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .build()
                 .find(offset, limit);
     }
@@ -966,7 +966,7 @@ public class MusicStore {
         checkThread();
 
         return mMusicBox.query()
-                .equal(Music_.album, album)
+                .equal(Music_.album, album, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .build()
                 .find();
     }
@@ -982,7 +982,7 @@ public class MusicStore {
         checkThread();
 
         return mMusicBox.query()
-                .equal(Music_.album, album)
+                .equal(Music_.album, album, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .build()
                 .find(offset, limit);
     }
@@ -994,7 +994,7 @@ public class MusicStore {
         }
 
         MusicListEntity entity = mMusicListEntityBox.query()
-                .equal(MusicListEntity_.name, name)
+                .equal(MusicListEntity_.name, name, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .build()
                 .findUnique();
 
@@ -1048,9 +1048,9 @@ public class MusicStore {
         QueryBuilder<Music> builder = mMusicBox.query();
 
         builder.backlink(MusicListEntity_.musicElements)
-                .equal(MusicListEntity_.name, musicListName);
+                .equal(MusicListEntity_.name, musicListName, QueryBuilder.StringOrder.CASE_SENSITIVE);
 
-        return builder.contains(Music_.title, key)
+        return builder.contains(Music_.title, key, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .build()
                 .find();
     }
@@ -1074,9 +1074,9 @@ public class MusicStore {
         }
 
         return mMusicBox.query()
-                .equal(Music_.artist, artistName)
+                .equal(Music_.artist, artistName, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .and()
-                .contains(Music_.title, key)
+                .contains(Music_.title, key, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .build()
                 .find();
     }
@@ -1100,9 +1100,9 @@ public class MusicStore {
         }
 
         return mMusicBox.query()
-                .equal(Music_.album, albumName)
+                .equal(Music_.album, albumName, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .and()
-                .contains(Music_.title, key)
+                .contains(Music_.title, key, QueryBuilder.StringOrder.CASE_SENSITIVE)
                 .build()
                 .find();
     }

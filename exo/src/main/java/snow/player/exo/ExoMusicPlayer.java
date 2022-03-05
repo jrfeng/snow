@@ -10,11 +10,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.audio.AudioListener;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceFactory;
 
@@ -27,8 +27,8 @@ import snow.player.audio.ErrorCode;
 public class ExoMusicPlayer extends AbstractMusicPlayer {
     private static final String TAG = "ExoMusicPlayer";
 
-    private SimpleExoPlayer mSimpleExoPlayer;
-    private Player.EventListener mEventListener;
+    private ExoPlayer mExoPlayer;
+    private Player.Listener mEventListener;
 
     @Nullable
     private OnPreparedListener mPreparedListener;
@@ -64,7 +64,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
         initExoPlayer(context);
 
         MediaSource mediaSource = mediaSourceFactory.createMediaSource(MediaItem.fromUri(uri));
-        mSimpleExoPlayer.setMediaSource(mediaSource);
+        mExoPlayer.setMediaSource(mediaSource);
     }
 
     /**
@@ -87,16 +87,16 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
         initEventListener();
         initExoPlayer(context);
 
-        mSimpleExoPlayer.setMediaItem(mediaItem);
+        mExoPlayer.setMediaItem(mediaItem);
     }
 
     private void initEventListener() {
-        mEventListener = new Player.EventListener() {
+        mEventListener = new Player.Listener() {
             @Override
             public void onIsLoadingChanged(boolean isLoading) {
                 if (mBufferingUpdateListener != null) {
                     mBufferingUpdateListener.onBufferingUpdate(ExoMusicPlayer.this,
-                            (int) mSimpleExoPlayer.getBufferedPosition(),
+                            (int) mExoPlayer.getBufferedPosition(),
                             false);
                 }
             }
@@ -135,7 +135,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
             }
 
             @Override
-            public void onPlayerError(ExoPlaybackException error) {
+            public void onPlayerError(@NonNull PlaybackException error) {
                 setInvalid();
 
                 Log.e(TAG, error.toString());
@@ -147,7 +147,11 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
             }
 
             @Override
-            public void onPositionDiscontinuity(int reason) {
+            public void onPositionDiscontinuity(
+                    @NonNull Player.PositionInfo oldPosition,
+                    @NonNull Player.PositionInfo newPosition,
+                    int reason
+            ) {
                 if (reason == Player.DISCONTINUITY_REASON_SEEK
                         && mSeekCompleteListener != null) {
                     mSeekCompleteListener.onSeekComplete(ExoMusicPlayer.this);
@@ -161,6 +165,12 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
                     mRepeatListener.onRepeat(ExoMusicPlayer.this);
                 }
             }
+
+            @Override
+            public void onAudioSessionIdChanged(int audioSessionId) {
+                mAudioSessionIdGenerated = true;
+                tryNotifyPrepared();
+            }
         };
     }
 
@@ -172,14 +182,16 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     }
 
     @SuppressLint("SwitchIntDef")
-    private int toErrorCode(ExoPlaybackException error) {
-        switch (error.type) {
+    private int toErrorCode(PlaybackException error) {
+        if (!(error instanceof ExoPlaybackException)) {
+            return ErrorCode.UNKNOWN_ERROR;
+        }
+
+        switch (((ExoPlaybackException) error).type) {
             case ExoPlaybackException.TYPE_SOURCE:
                 return ErrorCode.DATA_LOAD_FAILED;
             case ExoPlaybackException.TYPE_REMOTE:
                 return ErrorCode.NETWORK_ERROR;
-            case ExoPlaybackException.TYPE_OUT_OF_MEMORY:
-                return ErrorCode.OUT_OF_MEMORY;
             case ExoPlaybackException.TYPE_RENDERER:
                 return ErrorCode.PLAYER_ERROR;
             default:
@@ -188,17 +200,10 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     }
 
     private void initExoPlayer(Context context) {
-        mSimpleExoPlayer = new SimpleExoPlayer.Builder(context)
+        mExoPlayer = new ExoPlayer.Builder(context)
                 .setLooper(Looper.getMainLooper())
                 .build();
-        mSimpleExoPlayer.addListener(mEventListener);
-        mSimpleExoPlayer.addAudioListener(new AudioListener() {
-            @Override
-            public void onAudioSessionId(int audioSessionId) {
-                mAudioSessionIdGenerated = true;
-                tryNotifyPrepared();
-            }
-        });
+        mExoPlayer.addListener(mEventListener);
     }
 
     private void tryNotifyPrepared() {
@@ -229,22 +234,22 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
         }
 
         mPreparing = true;
-        mSimpleExoPlayer.prepare();
+        mExoPlayer.prepare();
     }
 
     @Override
     public void setLooping(boolean looping) {
         if (looping) {
-            mSimpleExoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
+            mExoPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
             return;
         }
 
-        mSimpleExoPlayer.setRepeatMode(Player.REPEAT_MODE_OFF);
+        mExoPlayer.setRepeatMode(Player.REPEAT_MODE_OFF);
     }
 
     @Override
     public boolean isLooping() {
-        return mSimpleExoPlayer.getRepeatMode() == Player.REPEAT_MODE_ONE;
+        return mExoPlayer.getRepeatMode() == Player.REPEAT_MODE_ONE;
     }
 
     @Override
@@ -254,54 +259,54 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
 
     @Override
     public boolean isPlaying() {
-        return isPrepared() && (mSimpleExoPlayer.isPlaying() || mSimpleExoPlayer.getPlayWhenReady());
+        return isPrepared() && (mExoPlayer.isPlaying() || mExoPlayer.getPlayWhenReady());
     }
 
     @Override
     public int getDuration() {
-        return (int) mSimpleExoPlayer.getDuration();
+        return (int) mExoPlayer.getDuration();
     }
 
     @Override
     public int getProgress() {
-        return (int) mSimpleExoPlayer.getCurrentPosition();
+        return (int) mExoPlayer.getCurrentPosition();
     }
 
     @Override
     public void startEx() {
-        mSimpleExoPlayer.setPlayWhenReady(true);
+        mExoPlayer.setPlayWhenReady(true);
     }
 
     @Override
     public void pauseEx() {
-        mSimpleExoPlayer.setPlayWhenReady(false);
+        mExoPlayer.setPlayWhenReady(false);
     }
 
     @Override
     public void stopEx() {
-        mSimpleExoPlayer.stop();
+        mExoPlayer.stop();
     }
 
     @Override
     public void seekTo(int pos) {
-        mSimpleExoPlayer.seekTo(pos);
+        mExoPlayer.seekTo(pos);
     }
 
     @Override
     public void setVolume(float leftVolume, float rightVolume) {
-        mSimpleExoPlayer.setVolume(Math.max(leftVolume, rightVolume));
+        mExoPlayer.setVolume(Math.max(leftVolume, rightVolume));
     }
 
     @Override
     public void setSpeed(float speed) {
         PlaybackParameters parameters = new PlaybackParameters(speed);
-        mSimpleExoPlayer.setPlaybackParameters(parameters);
+        mExoPlayer.setPlaybackParameters(parameters);
     }
 
     @Override
     public void releaseEx() {
         setInvalid();
-        mSimpleExoPlayer.release();
+        mExoPlayer.release();
     }
 
     @Override
@@ -315,7 +320,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
 
     @Override
     public int getAudioSessionId() {
-        return mSimpleExoPlayer.getAudioSessionId();
+        return mExoPlayer.getAudioSessionId();
     }
 
     @Override
