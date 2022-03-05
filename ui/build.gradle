@@ -1,16 +1,12 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-group='com.github.jrfeng'
+apply plugin: 'maven-publish'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "30.0.2"
 
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
 
         vectorDrawables.useSupportLibrary = true
 
@@ -27,6 +23,20 @@ android {
 
     dataBinding {
         enabled = true
+    }
+}
+
+afterEvaluate {
+    publishing  {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = publishGroupId
+                artifactId = "ui"
+                version = publishVersion
+            }
+        }
     }
 }
 

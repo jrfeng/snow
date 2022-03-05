@@ -1,16 +1,12 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-group='com.github.jrfeng'
+apply plugin: 'maven-publish'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "30.0.2"
 
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -25,6 +21,20 @@ android {
 
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+afterEvaluate {
+    publishing  {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = publishGroupId
+                artifactId = "exo"
+                version = publishVersion
+            }
+        }
     }
 }
 

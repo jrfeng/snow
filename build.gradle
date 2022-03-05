@@ -11,8 +11,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.3'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+        classpath 'com.android.tools.build:gradle:7.1.2'
 
         // ObjectBox
         classpath "io.objectbox:objectbox-gradle-plugin:$objectboxVersion"
@@ -46,6 +45,10 @@ allprojects {
 
         // Glide
         glideVersion = "4.11.0"
+
+        // Maven Gradle Publish
+        publishGroupId = "snow.player"
+        publishVersion = "1.1"
     }
 }
 
