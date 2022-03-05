@@ -45,5 +45,5 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-hls:2.17.0'
     implementation 'com.android.support:multidex:1.0.3'
 
-    implementation 'com.permissionx.guolindev:permissionx:1.4.0'
+    implementation 'com.guolindev.permissionx:permissionx:1.6.1'
 }
