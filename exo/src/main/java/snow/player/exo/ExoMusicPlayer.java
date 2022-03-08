@@ -50,7 +50,6 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
 
     private boolean mPreparing;
     private boolean mPlayerReady;
-    private boolean mAudioSessionIdGenerated;
 
     /**
      * 创建一个 {@link ExoMusicPlayer} 对象。
@@ -59,12 +58,23 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
      * @param mediaSourceFactory MediaSourceFactory 对象，不能为 null
      * @param uri                要播放的 Uri，不能为 null
      */
+    @Deprecated
     public ExoMusicPlayer(@NonNull Context context, @NonNull MediaSourceFactory mediaSourceFactory, @NonNull Uri uri) {
-        initEventListener();
-        initExoPlayer(context);
+        this(context, (MediaSource.Factory) mediaSourceFactory, uri);
+    }
 
-        MediaSource mediaSource = mediaSourceFactory.createMediaSource(MediaItem.fromUri(uri));
-        mExoPlayer.setMediaSource(mediaSource);
+    /**
+     * 创建一个 {@link ExoMusicPlayer} 对象。
+     *
+     * @param context            Context 对象，不能为 null
+     * @param mediaSourceFactory MediaSourceFactory 对象，不能为 null
+     * @param uri                要播放的 Uri，不能为 null
+     */
+    public ExoMusicPlayer(@NonNull Context context, @NonNull MediaSource.Factory mediaSourceFactory, @NonNull Uri uri) {
+        initEventListener();
+        initExoPlayer(context, mediaSourceFactory);
+
+        mExoPlayer.setMediaItem(MediaItem.fromUri(uri));
     }
 
     /**
@@ -85,7 +95,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
      */
     public ExoMusicPlayer(@NonNull Context context, @NonNull MediaItem mediaItem) {
         initEventListener();
-        initExoPlayer(context);
+        initExoPlayer(context, null);
 
         mExoPlayer.setMediaItem(mediaItem);
     }
@@ -121,7 +131,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
 
             private void onReady() {
                 mPlayerReady = true;
-                tryNotifyPrepared();
+                notifyPrepared();
 
                 if (isStalled()) {
                     setStalled(false);
@@ -165,12 +175,6 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
                     mRepeatListener.onRepeat(ExoMusicPlayer.this);
                 }
             }
-
-            @Override
-            public void onAudioSessionIdChanged(int audioSessionId) {
-                mAudioSessionIdGenerated = true;
-                tryNotifyPrepared();
-            }
         };
     }
 
@@ -199,14 +203,19 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
         }
     }
 
-    private void initExoPlayer(Context context) {
-        mExoPlayer = new ExoPlayer.Builder(context)
-                .setLooper(Looper.getMainLooper())
-                .build();
+    private void initExoPlayer(Context context, @Nullable MediaSource.Factory mediaSourceFactory) {
+        ExoPlayer.Builder builder = new ExoPlayer.Builder(context)
+                .setLooper(Looper.getMainLooper());
+
+        if (mediaSourceFactory != null) {
+            builder.setMediaSourceFactory(mediaSourceFactory);
+        }
+
+        mExoPlayer = builder.build();
         mExoPlayer.addListener(mEventListener);
     }
 
-    private void tryNotifyPrepared() {
+    private void notifyPrepared() {
         if (mPreparing && isPrepared()) {
             mPreparing = false;
             onPrepared();
@@ -214,7 +223,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     }
 
     private boolean isPrepared() {
-        return mPlayerReady && mAudioSessionIdGenerated;
+        return mPlayerReady;
     }
 
     private void onPrepared() {
