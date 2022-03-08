@@ -39,6 +39,8 @@ afterEvaluate {
 }
 
 dependencies {
+    def exoplayer_version = "2.17.0"
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation project(path: ':player')
@@ -47,7 +49,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     // exoplayer-core
-    api 'com.google.android.exoplayer:exoplayer-core:2.17.0'
+    api "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
+
     // extension-okhttp
-    api 'com.google.android.exoplayer:extension-okhttp:2.17.0'
+    api "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
 }
