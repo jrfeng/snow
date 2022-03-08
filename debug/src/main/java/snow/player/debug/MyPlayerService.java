@@ -5,15 +5,16 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory;
+import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.util.Util;
 
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import snow.player.PlayerService;
 import snow.player.exo.ExoMusicPlayer;
 import snow.player.exo.util.OkHttpUtil;
@@ -41,10 +42,20 @@ public class MyPlayerService extends PlayerService {
 
         OkHttpUtil.enableTls12OnPreLollipop(builder, true);
 
-        OkHttpDataSourceFactory httpDataSourceFactory =
-                new OkHttpDataSourceFactory(builder.build(), Util.getUserAgent(this, this.getPackageName()));
+        OkHttpClient okHttpClient = builder.build();
 
-        DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(
+        OkHttpDataSource.Factory httpDataSourceFactory = new OkHttpDataSource.Factory(
+                request -> {
+                    Request rq = new Request.Builder(request)
+                            // Note: must add head: 'user-agent'
+                            .addHeader("user-agent", Util.getUserAgent(getApplicationContext(), getPackageName()))
+                            .build();
+
+                    return okHttpClient.newCall(rq);
+                }
+        );
+
+        DefaultDataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(
                 this, httpDataSourceFactory);
 
         mProgressiveMediaSourceFactory = new ProgressiveMediaSource.Factory(dataSourceFactory);
