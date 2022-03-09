@@ -98,7 +98,14 @@ public class AppPlayerService extends PlayerService {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra(PlayerActivity.KEY_START_BY_PENDING_INTENT, true);
 
-            mContentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            int flags;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
+            } else {
+                flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            }
+
+            mContentIntent = PendingIntent.getActivity(context, 0, intent, flags);
         }
 
         @Override

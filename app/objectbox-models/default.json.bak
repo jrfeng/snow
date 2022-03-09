@@ -44,14 +44,12 @@
         {
           "id": "7:8233111239104405919",
           "name": "duration",
-          "type": 5,
-          "flags": 4
+          "type": 5
         },
         {
           "id": "8:1813883673919228300",
           "name": "addTime",
-          "type": 6,
-          "flags": 4
+          "type": 6
         }
       ],
       "relations": []
@@ -82,14 +80,12 @@
         {
           "id": "5:5122587991808729882",
           "name": "size",
-          "type": 5,
-          "flags": 4
+          "type": 5
         },
         {
           "id": "6:7368343324959184704",
           "name": "sortOrder",
-          "type": 5,
-          "flags": 2
+          "type": 5
         }
       ],
       "relations": [
@@ -116,14 +112,14 @@
           "name": "timestamp",
           "indexId": "4:4599596560928431067",
           "type": 6,
-          "flags": 12
+          "flags": 8
         },
         {
           "id": "3:2194668822285168520",
           "name": "musicId",
           "indexId": "5:5691205513405041255",
           "type": 11,
-          "flags": 1548,
+          "flags": 520,
           "relationTarget": "Music"
         }
       ],
