@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -985,8 +986,18 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         mForeground = true;
-        startForeground(mNotificationView.getNotificationId(),
-                mNotificationView.createNotification());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(
+                    mNotificationView.getNotificationId(),
+                    mNotificationView.createNotification(),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+            );
+        } else {
+            startForeground(
+                    mNotificationView.getNotificationId(),
+                    mNotificationView.createNotification()
+            );
+        }
     }
 
     private boolean isBackgroundRestricted() {
