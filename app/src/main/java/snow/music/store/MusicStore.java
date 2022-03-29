@@ -1050,7 +1050,7 @@ public class MusicStore {
         builder.backlink(MusicListEntity_.musicElements)
                 .equal(MusicListEntity_.name, musicListName, QueryBuilder.StringOrder.CASE_SENSITIVE);
 
-        return builder.contains(Music_.title, key, QueryBuilder.StringOrder.CASE_SENSITIVE)
+        return builder.contains(Music_.title, key, QueryBuilder.StringOrder.CASE_INSENSITIVE)
                 .build()
                 .find();
     }
