@@ -1,13 +1,15 @@
 package snow.player.helper;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
-
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import snow.player.audio.MusicPlayer;
 
 /**
@@ -97,9 +99,12 @@ public class VolumeEaseHelper {
     private final MusicPlayer mMusicPlayer;
     private final Callback mCallback;
 
-    private ObjectAnimator mStartVolumeAnimator;
-    private ObjectAnimator mPauseVolumeAnimator;
-    private ObjectAnimator mDismissQuietVolumeAnimator;
+    @Nullable
+    private Disposable mStartDisposable;
+    @Nullable
+    private Disposable mPauseDisposable;
+    @Nullable
+    private Disposable mDismissQuietDisposable;
 
     private boolean mQuiet;
 
@@ -115,15 +120,16 @@ public class VolumeEaseHelper {
 
         mMusicPlayer = musicPlayer;
         mCallback = callback;
-
-        initVolumeAnimator();
     }
 
     public void start() {
         cancel();
         setVolume(0.0F);
         mCallback.start();
-        mStartVolumeAnimator.start();
+
+        mStartDisposable = Observable.intervalRange(0, 10, 200, 100, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aLong -> setVolume(aLong * 0.1F));
     }
 
     public void pause() {
@@ -134,7 +140,11 @@ public class VolumeEaseHelper {
             return;
         }
 
-        mPauseVolumeAnimator.start();
+        mPauseDisposable = Observable.intervalRange(0, 10, 0, 60, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aLong -> setVolume(1.0F - (aLong * 0.1F)), (throwable) -> {
+                    // ignore
+                }, mCallback::pause);
     }
 
     public void quiet() {
@@ -144,49 +154,16 @@ public class VolumeEaseHelper {
 
     public void dismissQuiet() {
         mQuiet = false;
-        if (mPauseVolumeAnimator.isStarted()) {
+        if (mPauseDisposable != null && !mPauseDisposable.isDisposed()) {
             // 避免和 pause 冲突
             return;
         }
 
         cancel();
-        mDismissQuietVolumeAnimator.start();
-    }
 
-    private void initVolumeAnimator() {
-        long volumeAnimDuration = 400L;
-
-        mStartVolumeAnimator = ObjectAnimator.ofFloat(this, "volume", 0.0F, 1.0F);
-        mStartVolumeAnimator.setDuration(1000L);
-        mStartVolumeAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                setVolume(1.0F);
-            }
-        });
-
-        mPauseVolumeAnimator = ObjectAnimator.ofFloat(this, "volume", 1.0F, 0.0F);
-        mPauseVolumeAnimator.setDuration(volumeAnimDuration);
-        mPauseVolumeAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                mCallback.pause();
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mCallback.pause();
-            }
-        });
-
-        mDismissQuietVolumeAnimator = ObjectAnimator.ofFloat(this, "volume", 0.2F, 1.0F);
-        mDismissQuietVolumeAnimator.setDuration(volumeAnimDuration);
-        mDismissQuietVolumeAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                setVolume(1.0F);
-            }
-        });
+        mDismissQuietDisposable = Observable.intervalRange(2, 10, 0, 60, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aLong -> setVolume(aLong * 0.1F));
     }
 
     /**
@@ -197,16 +174,16 @@ public class VolumeEaseHelper {
     }
 
     public void cancel() {
-        if (mStartVolumeAnimator.isStarted()) {
-            mStartVolumeAnimator.cancel();
+        if (mStartDisposable != null) {
+            mStartDisposable.dispose();
         }
 
-        if (mPauseVolumeAnimator.isStarted()) {
-            mPauseVolumeAnimator.cancel();
+        if (mPauseDisposable != null) {
+            mPauseDisposable.dispose();
         }
 
-        if (mDismissQuietVolumeAnimator.isStarted()) {
-            mDismissQuietVolumeAnimator.cancel();
+        if (mDismissQuietDisposable != null) {
+            mDismissQuietDisposable.dispose();
         }
     }
 
