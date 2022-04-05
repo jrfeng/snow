@@ -118,8 +118,9 @@ class PlayerStateHelper {
         mPlayerState.setPlayMode(playMode);
     }
 
-    public void onSpeedChanged(float speed) {
+    public void onSpeedChanged(float speed, int progress, long updateTime) {
         mPlayerState.setSpeed(speed);
+        updatePlayProgress(progress, updateTime);
     }
 
     public void onSleepTimerStart(long time, long startTime, SleepTimer.TimeoutAction action) {

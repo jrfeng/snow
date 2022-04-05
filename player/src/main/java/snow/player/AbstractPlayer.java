@@ -740,22 +740,22 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     private PlaybackStateCompat buildPlaybackState(int state) {
         if (mPlayerState.isForbidSeek()) {
-            return mForbidSeekPlaybackStateBuilder.setState(state, mPlayerState.getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
+            return mForbidSeekPlaybackStateBuilder.setState(state, mPlayerState.getPlayProgress(), mPlayerState.getSpeed(), mPlayerState.getPlayProgressUpdateTime())
                     .build();
         }
 
-        return mPlaybackStateBuilder.setState(state, mPlayerState.getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
+        return mPlaybackStateBuilder.setState(state, mPlayerState.getPlayProgress(), mPlayerState.getSpeed(), mPlayerState.getPlayProgressUpdateTime())
                 .build();
     }
 
     private PlaybackStateCompat buildErrorState(String errorMessage) {
         if (mPlayerState.isForbidSeek()) {
-            return mForbidSeekPlaybackStateBuilder.setState(PlaybackStateCompat.STATE_ERROR, mPlayerState.getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
+            return mForbidSeekPlaybackStateBuilder.setState(PlaybackStateCompat.STATE_ERROR, mPlayerState.getPlayProgress(), mPlayerState.getSpeed(), mPlayerState.getPlayProgressUpdateTime())
                     .setErrorMessage(PlaybackStateCompat.ERROR_CODE_APP_ERROR, errorMessage)
                     .build();
         }
 
-        return mPlaybackStateBuilder.setState(PlaybackStateCompat.STATE_ERROR, mPlayerState.getPlayProgress(), 1.0F, mPlayerState.getPlayProgressUpdateTime())
+        return mPlaybackStateBuilder.setState(PlaybackStateCompat.STATE_ERROR, mPlayerState.getPlayProgress(), mPlayerState.getSpeed(), mPlayerState.getPlayProgressUpdateTime())
                 .setErrorMessage(PlaybackStateCompat.ERROR_CODE_APP_ERROR, errorMessage)
                 .build();
     }
@@ -1564,11 +1564,13 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mOnStateChangeListener.onPlayModeChanged(playMode);
     }
 
-    private void notifySpeedChanged(float speed) {
-        mPlayerStateHelper.onSpeedChanged(speed);
+    private void notifySpeedChanged(float speed, int progress, long updateTime) {
+        mPlayerStateHelper.onSpeedChanged(speed, progress, updateTime);
+
+        mMediaSession.setPlaybackState(buildPlaybackState(mMediaSession.getController().getPlaybackState().getState()));
 
         if (mPlayerStateListener != null) {
-            mPlayerStateListener.onSpeedChanged(speed);
+            mPlayerStateListener.onSpeedChanged(speed, progress, updateTime);
         }
     }
 
@@ -1747,9 +1749,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         if (isPrepared()) {
             assert mMusicPlayer != null;
             mMusicPlayer.setSpeed(speed);
+            notifySpeedChanged(speed, mMusicPlayer.getProgress(), SystemClock.elapsedRealtime());
+            return;
         }
 
-        notifySpeedChanged(speed);
+        notifySpeedChanged(speed, mPlayerState.getPlayProgress(), SystemClock.elapsedRealtime());
     }
 
     @Override
@@ -1814,7 +1818,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        mRecordProgressDisposable = Observable.interval(3, 3, TimeUnit.SECONDS, Schedulers.io())
+        mRecordProgressDisposable = Observable.interval(0, 1, TimeUnit.SECONDS, Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Long>() {
                     @Override

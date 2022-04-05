@@ -152,7 +152,7 @@ public class ProgressClock {
                     "currentTime=" + currentTime);
         }
 
-        long realProgress = (long) (progress + (currentTime - updateTime));
+        long realProgress = (long) (progress + (currentTime - updateTime) * speed);
 
         if (mCountDown) {
             mProgressSec = (int) Math.ceil((duration - realProgress) / 1000.0);

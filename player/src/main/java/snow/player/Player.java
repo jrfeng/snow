@@ -267,7 +267,7 @@ public interface Player {
         /**
          * 当播放器的播放速度改变时会调用该方法。
          */
-        void onSpeedChanged(float speed);
+        void onSpeedChanged(float speed, int playProgress, long playProgressUpdateTime);
     }
 
     /**

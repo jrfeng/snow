@@ -649,6 +649,8 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
 
     /**
      * 获取播放进度（单位：毫秒）。
+     * <p>
+     * 注意！该方法获取到的不是实时播放进度。
      *
      * @return 播放进度。
      */
@@ -2468,7 +2470,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
             return;
         }
 
-        listener.onSpeedChanged(mPlayerState.getSpeed());
+        listener.onSpeedChanged(mPlayerState.getSpeed(), mPlayerState.getPlayProgress(), mPlayerState.getPlayProgressUpdateTime());
     }
 
     private void notifySpeedChanged() {
@@ -2726,8 +2728,8 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         }
 
         @Override
-        public void onSpeedChanged(float speed) {
-            mPlayerStateHelper.onSpeedChanged(speed);
+        public void onSpeedChanged(float speed, int playProgress, long playProgressUpdateTime) {
+            mPlayerStateHelper.onSpeedChanged(speed, playProgress, playProgressUpdateTime);
             notifySpeedChanged();
         }
 

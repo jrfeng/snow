@@ -248,7 +248,7 @@ public class PlayerViewModel extends ViewModel {
 
         mSpeedChangeListener = new Player.OnSpeedChangeListener() {
             @Override
-            public void onSpeedChanged(float speed) {
+            public void onSpeedChanged(float speed, int playProgress, long playProgressUpdateTime) {
                 mSpeed.setValue(speed);
                 mProgressClock.setSpeed(speed);
             }

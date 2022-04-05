@@ -120,8 +120,8 @@ class ServicePlayerStateHelper extends PlayerStateHelper {
     }
 
     @Override
-    public void onSpeedChanged(float speed) {
-        super.onSpeedChanged(speed);
+    public void onSpeedChanged(float speed, int progress, long updateTime) {
+        super.onSpeedChanged(speed, progress, updateTime);
 
         updateAppWidgetPlayerState();
     }

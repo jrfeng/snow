@@ -189,7 +189,7 @@ public class LiveProgress {
 
         mSpeedChangeListener = new Player.OnSpeedChangeListener() {
             @Override
-            public void onSpeedChanged(float speed) {
+            public void onSpeedChanged(float speed, int playProgress, long playProgressUpdateTime) {
                 mProgressClock.setSpeed(speed);
             }
         };
