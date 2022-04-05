@@ -127,9 +127,9 @@ public class VolumeEaseHelper {
         setVolume(0.0F);
         mCallback.start();
 
-        mStartDisposable = Observable.intervalRange(0, 10, 200, 100, TimeUnit.MILLISECONDS)
+        mStartDisposable = Observable.intervalRange(1, 20, 200, 50, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aLong -> setVolume(aLong * 0.1F));
+                .subscribe(aLong -> setVolume(aLong * 0.05F));
     }
 
     public void pause() {
@@ -140,9 +140,9 @@ public class VolumeEaseHelper {
             return;
         }
 
-        mPauseDisposable = Observable.intervalRange(0, 10, 0, 60, TimeUnit.MILLISECONDS)
+        mPauseDisposable = Observable.intervalRange(1, 20, 0, 30, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aLong -> setVolume(1.0F - (aLong * 0.1F)), (throwable) -> {
+                .subscribe(aLong -> setVolume(1.0F - (aLong * 0.05F)), (throwable) -> {
                     // ignore
                 }, mCallback::pause);
     }
@@ -161,9 +161,9 @@ public class VolumeEaseHelper {
 
         cancel();
 
-        mDismissQuietDisposable = Observable.intervalRange(2, 10, 0, 60, TimeUnit.MILLISECONDS)
+        mDismissQuietDisposable = Observable.intervalRange(2, 20, 0, 30, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aLong -> setVolume(aLong * 0.1F));
+                .subscribe(aLong -> setVolume(aLong * 0.05F));
     }
 
     /**
