@@ -956,6 +956,10 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private boolean shouldBeForeground() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            return true;
+        }
+
         return mPlayer.getPlaybackState() == PlaybackState.PLAYING;
     }
 
