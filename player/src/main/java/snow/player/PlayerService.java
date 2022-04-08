@@ -20,6 +20,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -30,6 +31,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -43,10 +45,15 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.FutureTarget;
 import com.google.common.base.Preconditions;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -930,6 +937,10 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
+        if (mNotificationView.ignoreUpdate()) {
+            return;
+        }
+
         MusicItem musicItem = getPlayingMusicItem();
         if (musicItem == null || shouldClearNotification()) {
             stopForegroundEx(true);
@@ -950,6 +961,10 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private void updateNotificationViewAPI31() {
         if (noNotificationView()) {
+            return;
+        }
+
+        if (mNotificationView.ignoreUpdate()) {
             return;
         }
 
@@ -1606,7 +1621,11 @@ public class PlayerService extends MediaBrowserServiceCompat
             return drawable.getBitmap();
         }
 
-        private void reloadIcon() {
+        protected boolean isIconExpired() {
+            return mExpire;
+        }
+
+        protected void reloadIcon() {
             disposeLastLoading();
             mIconLoaderDisposable = Single.create(new SingleOnSubscribe<Bitmap>() {
                 @Override
@@ -1698,6 +1717,23 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         /**
+         * 是否忽略更新。
+         * <p>
+         * 你可以忽略某次更新，然后得到条件满足后，再调用 {@link #invalidate()} 触发更新即可。
+         *
+         * @return 如果忽略更新，则返回 true，否则返回 false。
+         */
+        protected boolean ignoreUpdate() {
+            return false;
+        }
+
+        protected void onPlayingMusicItemChanged(@NonNull MusicItem musicItem) {
+        }
+
+        protected void onIconLoaded() {
+        }
+
+        /**
          * 构建一个可附件到通知控件上的 PendingIntent 自定义动作。
          *
          * @param actionName   自定义动作名称。
@@ -1758,6 +1794,7 @@ public class PlayerService extends MediaBrowserServiceCompat
          */
         public final void setIcon(@NonNull Bitmap icon) {
             mIcon = icon;
+            onIconLoaded();
             invalidate();
         }
 
@@ -1983,6 +2020,8 @@ public class PlayerService extends MediaBrowserServiceCompat
 
             mPlayingMusicItem = musicItem;
             mExpire = true;
+
+            onPlayingMusicItemChanged(mPlayingMusicItem);
         }
 
         void release() {
@@ -2267,6 +2306,8 @@ public class PlayerService extends MediaBrowserServiceCompat
      * 更多信息，请参考官方文档： <a target="_blank" href="https://developer.android.google.cn/training/notify-user/expanded#media-style">https://developer.android.google.cn/training/notify-user/expanded#media-style</a>
      */
     public static class MediaNotificationView extends NotificationView {
+        private static final String TAG = "MediaNotificationView";
+
         private static final String ACTION_SKIP_TO_PREVIOUS = "__skip_to_previous";
         private static final String ACTION_PLAY_PAUSE = "__play_pause";
         private static final String ACTION_SKIP_TO_NEXT = "__skip_to_next";
@@ -2274,6 +2315,11 @@ public class PlayerService extends MediaBrowserServiceCompat
         private PendingIntent mSkipToPrevious;
         private PendingIntent mPlayPause;
         private PendingIntent mSkipToNext;
+
+        // 用于适配 MIUI，其他系统不关心该属性
+        private boolean mMIUIIgnoreUpdate = isMIUI13();
+        private static boolean isInfoReaded;
+        private static String sMiuiVersionName;
 
         @Override
         protected void onInit(Context context) {
@@ -2313,6 +2359,95 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         public final PendingIntent doSkipToNext() {
             return mSkipToNext;
+        }
+
+        @Override
+        protected boolean ignoreUpdate() {
+            if (isMIUI13()) {
+                if (isIconExpired()) {
+                    reloadIcon();
+                }
+
+                return mMIUIIgnoreUpdate;
+            }
+
+            return false;
+        }
+
+        @Override
+        protected void onPlayingMusicItemChanged(@NonNull MusicItem musicItem) {
+            super.onPlayingMusicItemChanged(musicItem);
+
+            mMIUIIgnoreUpdate = true;
+        }
+
+        @Override
+        protected void onIconLoaded() {
+            mMIUIIgnoreUpdate = false;
+        }
+
+        /**
+         * 是否是 MIUI 13。
+         *
+         * MIUI 13 通知栏图标更新有问题，需要特殊对待。
+         */
+        private static boolean isMIUI13() {
+            checkReadInfo();
+            return "v130".equals(sMiuiVersionName);
+        }
+
+        /**
+         * 代码参考自 QMUI_Android 的 QMUIDeviceHelper 类。
+         */
+        private static void checkReadInfo() {
+            if (isInfoReaded) {
+                return;
+            }
+            isInfoReaded = true;
+            Properties properties = new Properties();
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                // android 8.0，读取 /system/uild.prop 会报 permission denied
+                FileInputStream fileInputStream = null;
+                try {
+                    fileInputStream = new FileInputStream(new File(Environment.getRootDirectory(), "build.prop"));
+                    properties.load(fileInputStream);
+                } catch (Exception e) {
+                    Log.e(TAG, "read file error");
+                } finally {
+                    if (fileInputStream != null) {
+                        try {
+                            fileInputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+
+            Class<?> clzSystemProperties;
+            try {
+                clzSystemProperties = Class.forName("android.os.SystemProperties");
+                Method getMethod = clzSystemProperties.getDeclaredMethod("get", String.class);
+                // miui
+                sMiuiVersionName = getLowerCaseName(properties, getMethod);
+            } catch (Exception e) {
+                Log.e(TAG, "read SystemProperties error");
+            }
+        }
+
+        @Nullable
+        private static String getLowerCaseName(Properties p, Method get) {
+            String key = "ro.miui.ui.version.name";
+            String name = p.getProperty(key);
+            if (name == null) {
+                try {
+                    name = (String) get.invoke(null, key);
+                } catch (Exception ignored) {
+                }
+            }
+            if (name != null) name = name.toLowerCase();
+            return name;
         }
 
         @NonNull
