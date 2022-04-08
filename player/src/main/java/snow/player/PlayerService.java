@@ -342,7 +342,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
             @Override
             public void onStopped() {
-                PlayerService.this.onStopped();
+                PlayerService.this.updateNotificationView();
                 PlayerService.this.startIDLETimer();
             }
 
@@ -921,6 +921,11 @@ public class PlayerService extends MediaBrowserServiceCompat
      * 要求 Service 更新 NotificationView，如果没有设置 NotificationView，则忽略本次操作。
      */
     public final void updateNotificationView() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            updateNotificationViewAPI31();
+            return;
+        }
+
         if (noNotificationView()) {
             return;
         }
@@ -943,6 +948,25 @@ public class PlayerService extends MediaBrowserServiceCompat
         updateNotification();
     }
 
+    private void updateNotificationViewAPI31() {
+        if (noNotificationView()) {
+            return;
+        }
+
+        MusicItem musicItem = getPlayingMusicItem();
+        if (musicItem == null) {
+            stopForegroundEx(true);
+            return;
+        }
+
+        if (!isForeground()) {
+            startForeground();
+            return;
+        }
+
+        updateNotification();
+    }
+
     private boolean shouldClearNotification() {
         if (mNotificationView == null) {
             return true;
@@ -956,10 +980,6 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private boolean shouldBeForeground() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            return true;
-        }
-
         return mPlayer.getPlaybackState() == PlaybackState.PLAYING;
     }
 
@@ -1132,8 +1152,10 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
-        mNotificationManager.notify(mNotificationView.getNotificationId(),
-                mNotificationView.createNotification());
+        mNotificationManager.notify(
+                mNotificationView.getNotificationId(),
+                mNotificationView.createNotification()
+        );
     }
 
     /**
@@ -1259,14 +1281,6 @@ public class PlayerService extends MediaBrowserServiceCompat
     @NonNull
     public final Player getPlayer() {
         return mPlayer;
-    }
-
-    private void onStopped() {
-        if (noNotificationView()) {
-            return;
-        }
-
-        stopForegroundEx(true);
     }
 
     private void onPlayingMusicItemChanged(@Nullable MusicItem musicItem) {
