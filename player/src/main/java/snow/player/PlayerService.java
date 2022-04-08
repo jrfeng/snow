@@ -2390,6 +2390,8 @@ public class PlayerService extends MediaBrowserServiceCompat
          * 是否是 MIUI 13。
          *
          * MIUI 13 通知栏图标更新有问题，需要特殊对待。
+         *
+         * 解决方案：等待图标加载完成后再更新通知，否则通知的图标显示异常。
          */
         private static boolean isMIUI13() {
             checkReadInfo();
