@@ -1621,7 +1621,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             return drawable.getBitmap();
         }
 
-        protected boolean isIconExpired() {
+        protected boolean isIconExpire() {
             return mExpire;
         }
 
@@ -2364,7 +2364,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         @Override
         protected boolean ignoreUpdate() {
             if (isMIUI13()) {
-                if (isIconExpired()) {
+                if (isIconExpire()) {
                     reloadIcon();
                 }
 
