@@ -20,7 +20,6 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -31,7 +30,6 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -45,15 +43,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.FutureTarget;
 import com.google.common.base.Preconditions;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -86,6 +79,7 @@ import snow.player.audio.ErrorCode;
 import snow.player.playlist.PlaylistManager;
 import snow.player.util.MusicItemUtil;
 import snow.player.util.AsyncResult;
+import snow.player.util.Util;
 
 /**
  * 提供了基本的 {@code player service} 实现，用于在后台播放音乐。
@@ -2306,8 +2300,6 @@ public class PlayerService extends MediaBrowserServiceCompat
      * 更多信息，请参考官方文档： <a target="_blank" href="https://developer.android.google.cn/training/notify-user/expanded#media-style">https://developer.android.google.cn/training/notify-user/expanded#media-style</a>
      */
     public static class MediaNotificationView extends NotificationView {
-        private static final String TAG = "MediaNotificationView";
-
         private static final String ACTION_SKIP_TO_PREVIOUS = "__skip_to_previous";
         private static final String ACTION_PLAY_PAUSE = "__play_pause";
         private static final String ACTION_SKIP_TO_NEXT = "__skip_to_next";
@@ -2316,10 +2308,9 @@ public class PlayerService extends MediaBrowserServiceCompat
         private PendingIntent mPlayPause;
         private PendingIntent mSkipToNext;
 
-        // 用于适配 MIUI，其他系统不关心该属性
-        private boolean mMIUIIgnoreUpdate = isMIUI13();
-        private static boolean isInfoReaded;
-        private static String sMiuiVersionName;
+        // MIUI 13 通知栏图标更新有问题，需要特殊对待。
+        // 解决方案：等待图标加载完成后再更新通知，否则通知的图标显示异常。
+        private boolean mMIUIIgnoreUpdate = Util.isMIUI13();
 
         @Override
         protected void onInit(Context context) {
@@ -2363,7 +2354,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         @Override
         protected boolean ignoreUpdate() {
-            if (isMIUI13()) {
+            if (Util.isMIUI13()) {
                 if (isIconExpire()) {
                     reloadIcon();
                 }
@@ -2384,72 +2375,6 @@ public class PlayerService extends MediaBrowserServiceCompat
         @Override
         protected void onIconLoaded() {
             mMIUIIgnoreUpdate = false;
-        }
-
-        /**
-         * 是否是 MIUI 13。
-         *
-         * MIUI 13 通知栏图标更新有问题，需要特殊对待。
-         *
-         * 解决方案：等待图标加载完成后再更新通知，否则通知的图标显示异常。
-         */
-        private static boolean isMIUI13() {
-            checkReadInfo();
-            return "v130".equals(sMiuiVersionName);
-        }
-
-        /**
-         * 代码参考自 QMUI_Android 的 QMUIDeviceHelper 类。
-         */
-        private static void checkReadInfo() {
-            if (isInfoReaded) {
-                return;
-            }
-            isInfoReaded = true;
-            Properties properties = new Properties();
-
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                // android 8.0，读取 /system/uild.prop 会报 permission denied
-                FileInputStream fileInputStream = null;
-                try {
-                    fileInputStream = new FileInputStream(new File(Environment.getRootDirectory(), "build.prop"));
-                    properties.load(fileInputStream);
-                } catch (Exception e) {
-                    Log.e(TAG, "read file error");
-                } finally {
-                    if (fileInputStream != null) {
-                        try {
-                            fileInputStream.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-
-            Class<?> clzSystemProperties;
-            try {
-                clzSystemProperties = Class.forName("android.os.SystemProperties");
-                Method getMethod = clzSystemProperties.getDeclaredMethod("get", String.class);
-                // miui
-                sMiuiVersionName = getLowerCaseName(properties, getMethod);
-            } catch (Exception e) {
-                Log.e(TAG, "read SystemProperties error");
-            }
-        }
-
-        @Nullable
-        private static String getLowerCaseName(Properties p, Method get) {
-            String key = "ro.miui.ui.version.name";
-            String name = p.getProperty(key);
-            if (name == null) {
-                try {
-                    name = (String) get.invoke(null, key);
-                } catch (Exception ignored) {
-                }
-            }
-            if (name != null) name = name.toLowerCase();
-            return name;
         }
 
         @NonNull
