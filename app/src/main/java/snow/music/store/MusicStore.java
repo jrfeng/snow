@@ -448,6 +448,8 @@ public class MusicStore {
         }
 
         mMusicListEntityBox.put(entityList);
+
+        notifyCustomMusicListUpdated(allMusicListName);
     }
 
     /**
@@ -472,6 +474,8 @@ public class MusicStore {
         }
 
         mMusicListEntityBox.put(entityList);
+
+        notifyCustomMusicListUpdated(allMusicListName);
     }
 
     /**
@@ -579,6 +583,16 @@ public class MusicStore {
         mMainHandler.post(() -> {
             for (OnCustomMusicListUpdateListener listener : mAllCustomMusicListUpdateListener) {
                 listener.onCustomMusicListUpdate(name);
+            }
+        });
+    }
+
+    private void notifyCustomMusicListUpdated(List<String> nameList) {
+        mMainHandler.post(() -> {
+            for (String name : nameList) {
+                for (OnCustomMusicListUpdateListener listener : mAllCustomMusicListUpdateListener) {
+                    listener.onCustomMusicListUpdate(name);
+                }
             }
         });
     }
