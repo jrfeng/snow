@@ -1,7 +1,6 @@
 package snow.player;
 
 import android.content.Context;
-
 import org.junit.Test;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -32,13 +31,39 @@ public class PersistentPlayerStateTest {
 
         final String id = "PersistentPlayerStateTest";
         PersistentPlayerState persistentPlayerState = new PersistentPlayerState(getContext(), id);
-        persistentPlayerState.setPlayProgress(playProgress);
         persistentPlayerState.setMusicItem(musicItem);
+        persistentPlayerState.setPlayProgress(playProgress);    // 应该在调用该方法前调用 setMusicItem 方法
         persistentPlayerState.setPlayPosition(position);
         persistentPlayerState.setPlayMode(playMode);
 
         PersistentPlayerState other = new PersistentPlayerState(getContext(), id);
         assertEquals(playProgress, other.getPlayProgress());
+        assertEquals(musicItem, other.getMusicItem());
+        assertEquals(position, other.getPlayPosition());
+        assertEquals(playMode, other.getPlayMode());
+    }
+
+    @Test
+    public void forbidSeekTest() {
+        final int playProgress = 1024;
+        final MusicItem musicItem = new MusicItem();
+        musicItem.setTitle("PersistentPlayerStateTest");
+        musicItem.setArtist("PersistentPlayerStateTest");
+        musicItem.setUri("https://www.persistent_test.com/test.mp3");
+        musicItem.setForbidSeek(true);
+
+        final int position = 100;
+        final PlayMode playMode = PlayMode.SHUFFLE;
+
+        final String id = "PersistentPlayerStateTest";
+        PersistentPlayerState persistentPlayerState = new PersistentPlayerState(getContext(), id);
+        persistentPlayerState.setMusicItem(musicItem);
+        persistentPlayerState.setPlayProgress(playProgress);    // 应该在调用该方法前调用 setMusicItem 方法
+        persistentPlayerState.setPlayPosition(position);
+        persistentPlayerState.setPlayMode(playMode);
+
+        PersistentPlayerState other = new PersistentPlayerState(getContext(), id);
+        assertEquals(0, other.getPlayProgress());
         assertEquals(musicItem, other.getMusicItem());
         assertEquals(position, other.getPlayPosition());
         assertEquals(playMode, other.getPlayMode());
