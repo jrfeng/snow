@@ -47,6 +47,13 @@ class PersistentPlayerState extends PlayerState {
         super.setPlayProgress(mMMKV.decodeInt(KEY_PLAY_PROGRESS, 0));
     }
 
+    /**
+     * 注意！如果没有正在播放的歌曲，该方法会忽略设置的 playProgress 参数，并且会将播放进度设为 0。
+     * 因此，如果你需要同时设置正在播放的歌曲（{@link #setMusicItem(MusicItem)}）与播放进度（当前方法），
+     * 请务必在调用该方法前调用 {@link #setMusicItem(MusicItem)} 方法，否则可能会导致该方法调用失败。
+     *
+     * @param playProgress 播放进度（小于 0 时，相当于设置为 0）。
+     */
     @Override
     public void setPlayProgress(int playProgress) {
         super.setPlayProgress(playProgress);
