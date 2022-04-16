@@ -32,13 +32,13 @@ public class MusicListBrowserViewModel extends ViewModel {
     private Disposable mLoadMusicListDisposable;
     private Disposable mCreateMusicListDisposable;
 
-    private MusicStore.OnCustomMusicListUpdateListener mOnCustomMusicListUpdateListener;
+    private final MusicStore.OnCustomMusicListUpdateListener mOnCustomMusicListUpdateListener;
     private Disposable mReloadMusicListDisposable;
 
     public MusicListBrowserViewModel() {
         mAllMusicList = new MutableLiveData<>(Collections.emptyList());
         mMusicListComparator = new Comparator<MusicList>() {
-            private PinyinComparator pinyinComparator = new PinyinComparator();
+            private final PinyinComparator pinyinComparator = new PinyinComparator();
             @Override
             public int compare(MusicList o1, MusicList o2) {
                 return pinyinComparator.compare(o1.getName(), o2.getName());
@@ -174,8 +174,14 @@ public class MusicListBrowserViewModel extends ViewModel {
         List<MusicList> allMusicList = new ArrayList<>(Objects.requireNonNull(mAllMusicList.getValue()));
 
         int index = allMusicList.indexOf(musicList);
-        allMusicList.remove(index);
-        allMusicList.add(index, musicList);
+
+        if (index < 0) {
+            allMusicList.add(musicList);
+            Collections.sort(allMusicList, mMusicListComparator);
+        } else {
+            allMusicList.remove(index);
+            allMusicList.add(index, musicList);
+        }
 
         mAllMusicList.setValue(allMusicList);
     }
