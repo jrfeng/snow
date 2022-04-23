@@ -125,8 +125,6 @@ public class BottomBarFragment extends Fragment {
     }
 
     public void showPlaylist(View view) {
-        Preconditions.checkNotNull(view);
-
         PlaylistDialog.newInstance()
                 .show(getParentFragmentManager(), "PlaylistDialog");
     }

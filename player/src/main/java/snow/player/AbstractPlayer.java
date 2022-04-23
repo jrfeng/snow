@@ -1368,11 +1368,20 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         }
 
         if (mPlayerConfig.isAudioEffectEnabled()) {
-            mAudioEffectManager.attachAudioEffect(getAudioSessionId());
+            attachAudioEffect(mAudioEffectManager);
             return;
         }
 
         mAudioEffectManager.detachAudioEffect();
+    }
+
+    private void attachAudioEffect(AudioEffectManager audioEffectManager) {
+        int audioSessionId = getAudioSessionId();
+        if (audioSessionId < 1) {
+            return;
+        }
+
+        audioEffectManager.attachAudioEffect(audioSessionId);
     }
 
     /**

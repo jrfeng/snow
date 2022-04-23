@@ -1,10 +1,10 @@
 package snow.player.ui.equalizer;
 
-import android.media.audiofx.AudioEffect;
 import android.media.audiofx.BassBoost;
 import android.media.audiofx.Equalizer;
 import android.media.audiofx.Virtualizer;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,14 +27,22 @@ import snow.player.ui.util.AndroidAudioEffectConfigUtil;
  * 并通过 {@link EqualizerActivity} 俩配置音频特效。
  */
 public final class AndroidAudioEffectManager implements AudioEffectManager {
+    private static final String TAG = "AudioEffectManager";
+
     /**
      * 音频特效的优先级。
      * <p>
      * 值为：1
+     *
+     * 注意！该属性已弃用，请不要再使用，并且将在下个版本移除。
      */
+    @Deprecated()
     public static final int PRIORITY = 1;
 
     private Bundle mConfig;
+
+    private boolean mAudioEffectAvailable;
+    private int mAudioSessionId;
 
     @Nullable
     private Equalizer mEqualizer;
@@ -45,12 +53,28 @@ public final class AndroidAudioEffectManager implements AudioEffectManager {
 
     @Override
     public void init(@NonNull Bundle config) {
-        mConfig = new Bundle(config);
+        mConfig = config;
     }
 
     @Override
     public void updateConfig(@NonNull Bundle config) {
-        mConfig = new Bundle(config);
+        mConfig = config;
+
+        boolean takeControl = AndroidAudioEffectConfigUtil.isTakeControl(mConfig);
+
+        if (takeControl) {
+            return;
+        }
+
+        int priority = AndroidAudioEffectConfigUtil.getUIPriority(mConfig) + 1;
+
+        if (!mAudioEffectAvailable && mAudioSessionId > 0) {
+            mAudioEffectAvailable = initAudioEffect(mAudioSessionId, priority);
+        }
+
+        if (mAudioEffectAvailable) {
+            AndroidAudioEffectConfigUtil.setPriority(mConfig, priority);
+        }
 
         if (mEqualizer != null && mEqualizer.hasControl()) {
             AndroidAudioEffectConfigUtil.applySettings(mConfig, mEqualizer);
@@ -69,57 +93,50 @@ public final class AndroidAudioEffectManager implements AudioEffectManager {
     public void attachAudioEffect(int audioSessionId) {
         releaseAudioEffect();
 
-        mEqualizer = new Equalizer(PRIORITY, audioSessionId);
-        mBassBoost = new BassBoost(PRIORITY, audioSessionId);
-        mVirtualizer = new Virtualizer(PRIORITY, audioSessionId);
+        mAudioSessionId = audioSessionId;
+        mAudioEffectAvailable = initAudioEffect(audioSessionId, AndroidAudioEffectConfigUtil.getPriority(mConfig));
+    }
 
-        AndroidAudioEffectConfigUtil.applySettings(mConfig, mEqualizer);
-        AndroidAudioEffectConfigUtil.applySettings(mConfig, mBassBoost);
-        AndroidAudioEffectConfigUtil.applySettings(mConfig, mVirtualizer);
+    private boolean initAudioEffect(int audioSessionId, int priority) {
+        try {
+            mEqualizer = new Equalizer(priority, audioSessionId);
+            mBassBoost = new BassBoost(priority, audioSessionId);
+            mVirtualizer = new Virtualizer(priority, audioSessionId);
 
-        mEqualizer.setControlStatusListener(new AudioEffect.OnControlStatusChangeListener() {
-            @Override
-            public void onControlStatusChange(AudioEffect effect, boolean controlGranted) {
-                if (mEqualizer != null) {
-                    AndroidAudioEffectConfigUtil.applySettings(mConfig, mEqualizer);
-                }
-            }
-        });
+            AndroidAudioEffectConfigUtil.applySettings(mConfig, mEqualizer);
+            AndroidAudioEffectConfigUtil.applySettings(mConfig, mBassBoost);
+            AndroidAudioEffectConfigUtil.applySettings(mConfig, mVirtualizer);
 
-        mBassBoost.setControlStatusListener(new AudioEffect.OnControlStatusChangeListener() {
-            @Override
-            public void onControlStatusChange(AudioEffect effect, boolean controlGranted) {
-                if (mBassBoost != null) {
-                    AndroidAudioEffectConfigUtil.applySettings(mConfig, mBassBoost);
-                }
-            }
-        });
+            mEqualizer.setEnabled(true);
+            mBassBoost.setEnabled(true);
+            mVirtualizer.setEnabled(true);
+        } catch (Exception e) {
+            Log.e(TAG, "audio effect init failed", e);
+            return false;
+        }
 
-        mVirtualizer.setControlStatusListener(new AudioEffect.OnControlStatusChangeListener() {
-            @Override
-            public void onControlStatusChange(AudioEffect effect, boolean controlGranted) {
-                if (mVirtualizer != null) {
-                    AndroidAudioEffectConfigUtil.applySettings(mConfig, mVirtualizer);
-                }
-            }
-        });
-
-        mEqualizer.setEnabled(true);
-        mBassBoost.setEnabled(true);
-        mVirtualizer.setEnabled(true);
+        return true;
     }
 
     @Override
     public void detachAudioEffect() {
+        mAudioSessionId = 0;
+
+        AndroidAudioEffectConfigUtil.setPriority(mConfig, 1);
+        AndroidAudioEffectConfigUtil.releaseControl(mConfig, 1);
+
         releaseAudioEffect();
     }
 
     @Override
     public void release() {
+        mAudioSessionId = 0;
         releaseAudioEffect();
     }
 
     private void releaseAudioEffect() {
+        mAudioEffectAvailable = false;
+
         if (mEqualizer != null) {
             mEqualizer.release();
             mEqualizer = null;

@@ -19,7 +19,7 @@ public interface AudioEffectManager {
     /**
      * 更新音频特效的配置。
      *
-     * @param config 新的音频特效配置
+     * @param config 新的音频特效配置。该参数会被持久化保存，如果你有某些与音频特效相关的需要持久化保存的值，可以存入该参数中。
      */
     void updateConfig(@NonNull Bundle config);
 

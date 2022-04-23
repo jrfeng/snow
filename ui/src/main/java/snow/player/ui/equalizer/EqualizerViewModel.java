@@ -4,9 +4,13 @@ import android.media.MediaPlayer;
 import android.media.audiofx.BassBoost;
 import android.media.audiofx.Equalizer;
 import android.media.audiofx.Virtualizer;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -15,6 +19,10 @@ import snow.player.ui.util.AndroidAudioEffectConfigUtil;
 import snow.player.ui.util.Preconditions;
 
 public class EqualizerViewModel extends ViewModel {
+    /**
+     * 注意！该属性已弃用，请不要再使用，并且将在下个版本移除。
+     */
+    @Deprecated
     public static final int AUDIO_EFFECT_PRIORITY = 1000;
 
     private MutableLiveData<Boolean> mEnabled;
@@ -29,6 +37,9 @@ public class EqualizerViewModel extends ViewModel {
     private Bundle mAudioEffectConfig;
 
     private MediaPlayer mFakeMediaPlayer;
+
+    private int mPriority;
+    private Handler mHandler = new Handler(Looper.getMainLooper());
 
     public void init(@NonNull PlayerClient playerClient) {
         Preconditions.checkNotNull(playerClient);
@@ -73,7 +84,13 @@ public class EqualizerViewModel extends ViewModel {
         mPlayerClient.disconnect();
         mPlayerClient.removeOnAudioSessionChangeListener(mOnAudioSessionChangeListener);
 
-        releaseAllEffect();
+        applyChangesInternal(false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            releaseAllEffectAPI31();
+        } else {
+            releaseAllEffect();
+        }
     }
 
     public void setAudioEffectEnabled(boolean enabled) {
@@ -228,9 +245,11 @@ public class EqualizerViewModel extends ViewModel {
             audioSessionId = getFakeAudioSessionId();
         }
 
-        mEqualizer = new Equalizer(AUDIO_EFFECT_PRIORITY, audioSessionId);
-        mBassBoost = new BassBoost(AUDIO_EFFECT_PRIORITY, audioSessionId);
-        mVirtualizer = new Virtualizer(AUDIO_EFFECT_PRIORITY, audioSessionId);
+        mPriority = AndroidAudioEffectConfigUtil.getPriority(mAudioEffectConfig) + 1;
+
+        mEqualizer = new Equalizer(mPriority, audioSessionId);
+        mBassBoost = new BassBoost(mPriority, audioSessionId);
+        mVirtualizer = new Virtualizer(mPriority, audioSessionId);
 
         AndroidAudioEffectConfigUtil.applySettings(mAudioEffectConfig, mEqualizer);
         AndroidAudioEffectConfigUtil.applySettings(mAudioEffectConfig, mBassBoost);
@@ -247,6 +266,10 @@ public class EqualizerViewModel extends ViewModel {
      * 保存所有对音频特效配置的修改。
      */
     public void applyChanges() {
+        applyChangesInternal(true);
+    }
+
+    private void applyChangesInternal(boolean takeControl) {
         if (!mInitialized) {
             throw new IllegalStateException("EqualizerViewModel not init yet.");
         }
@@ -254,6 +277,12 @@ public class EqualizerViewModel extends ViewModel {
         AndroidAudioEffectConfigUtil.updateSettings(mAudioEffectConfig, mEqualizer.getProperties());
         AndroidAudioEffectConfigUtil.updateSettings(mAudioEffectConfig, mBassBoost.getProperties());
         AndroidAudioEffectConfigUtil.updateSettings(mAudioEffectConfig, mVirtualizer.getProperties());
+
+        if (takeControl) {
+            AndroidAudioEffectConfigUtil.takeControl(mAudioEffectConfig);
+        } else {
+            AndroidAudioEffectConfigUtil.releaseControl(mAudioEffectConfig, mPriority);
+        }
 
         if (mPlayerClient.isConnected()) {
             mPlayerClient.setAudioEffectConfig(mAudioEffectConfig);
@@ -280,5 +309,10 @@ public class EqualizerViewModel extends ViewModel {
         if (mVirtualizer != null) {
             mVirtualizer.release();
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private void releaseAllEffectAPI31() {
+        mHandler.postDelayed(this::releaseAllEffect, 1000);
     }
 }

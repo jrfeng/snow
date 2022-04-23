@@ -52,7 +52,7 @@ public abstract class BaseMusicListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mContext = getContext();
 
-        ViewModelProvider viewModelProvider = new ViewModelProvider(Objects.requireNonNull(getActivity()));
+        ViewModelProvider viewModelProvider = new ViewModelProvider(requireActivity());
 
         mPlayerViewModel = viewModelProvider.get(PlayerViewModel.class);
         mMusicListViewModel = onCreateMusicListViewModel(viewModelProvider);
@@ -70,8 +70,8 @@ public abstract class BaseMusicListFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         observeMusicListItems();
         observePlayPosition();

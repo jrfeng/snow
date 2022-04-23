@@ -17,6 +17,17 @@ public final class AndroidAudioEffectConfigUtil {
     public static final String KEY_SETTING_EQUALIZER = "setting_equalizer";
     public static final String KEY_SETTING_BASS_BOOST = "setting_bass_boost";
     public static final String KEY_SETTING_VIRTUALIZER = "setting_virtualizer";
+    public static final String KEY_TAKE_CONTROL = "take_control";
+
+    /**
+     * 在 Service 端运行的音频特效的优先级。
+     */
+    public static final String KEY_PRIORITY = "priority";
+
+    /**
+     * UI 控制权的音频特效的优先级。
+     */
+    public static final String KEY_UI_PRIORITY = "ui_priority";
 
     private AndroidAudioEffectConfigUtil() {
         throw new AssertionError();
@@ -42,6 +53,81 @@ public final class AndroidAudioEffectConfigUtil {
         } catch (IllegalArgumentException | IllegalStateException | UnsupportedOperationException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 设置播放器的 AudioEffect 的优先级。
+     *
+     * 当在 Service 端运行的音频特效重新生效时，将使用该方法更新 priority 值，以便下次启动
+     * {@link snow.player.ui.equalizer.EqualizerActivity} 可以获取到正确的 priority 值。
+     *
+     * @see #getPriority(Bundle)
+     */
+    public static void setPriority(@NonNull Bundle config, int priority) {
+        Preconditions.checkNotNull(config);
+        config.putInt(KEY_PRIORITY, priority);
+    }
+
+    /**
+     * 获取播放器的 AudioEffect 的优先级。
+     * <p>
+     * {@link snow.player.ui.equalizer.EqualizerActivity} 需要使用该参数来实时修改音频特效。
+     *
+     * @see #setPriority(Bundle, int)
+     */
+    public static int getPriority(@NonNull Bundle config) {
+        Preconditions.checkNotNull(config);
+        return config.getInt(KEY_PRIORITY, 1);
+    }
+
+    /**
+     * 获取 UI 控制器的 AudioEffect 的优先级。
+     * <p>
+     * 在 Service 端运行的 {@link snow.player.ui.equalizer.AndroidAudioEffectManager} 需要使用该参数来保证在退出 UI 后已设置的音频特效依然生效。
+     */
+    public static int getUIPriority(@NonNull Bundle config) {
+        Preconditions.checkNotNull(config);
+        return config.getInt(KEY_UI_PRIORITY, 0);
+    }
+
+    /**
+     * 是否获取 AudioEffect 控制权。
+     * <p>
+     * <p>
+     * 当 {@link snow.player.ui.equalizer.EqualizerActivity} 被启动后，使用该方法获取音频特效控制权。
+     */
+    public static boolean isTakeControl(@NonNull Bundle config) {
+        Preconditions.checkNotNull(config);
+        return config.getBoolean(KEY_TAKE_CONTROL, false);
+    }
+
+
+    /**
+     * 获取音频特效的控制权。
+     * <p>
+     * 当 {@link snow.player.ui.equalizer.EqualizerActivity} 被启动后，当 UI 端使用该方法获取音频特效控制权。
+     * 此时在 Service 端运行的 {@link snow.player.ui.equalizer.AndroidAudioEffectManager} 将会忽略
+     * 音频特效的更新，直到重新获取到控制权。
+     *
+     * @see #releaseControl(Bundle, int)
+     */
+    public static void takeControl(@NonNull Bundle config) {
+        Preconditions.checkNotNull(config);
+        config.putBoolean(KEY_TAKE_CONTROL, true);
+    }
+
+    /**
+     * 释放音频特效的控制权。
+     * <p>
+     * 当 UI 端使用该方法释放音频特效控制权后，在 Service 端运行的 {@link snow.player.ui.equalizer.AndroidAudioEffectManager}
+     * 将会恢复响应音频特效的更新。
+     *
+     * @see #takeControl(Bundle)
+     */
+    public static void releaseControl(@NonNull Bundle config, int uiPriority) {
+        Preconditions.checkNotNull(config);
+        config.putBoolean(KEY_TAKE_CONTROL, false);
+        config.putInt(KEY_UI_PRIORITY, uiPriority);
     }
 
     /**

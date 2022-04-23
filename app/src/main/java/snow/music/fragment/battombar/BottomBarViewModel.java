@@ -24,7 +24,6 @@ import snow.player.PlayerClient;
 import snow.player.lifecycle.PlayerViewModel;
 
 public class BottomBarViewModel extends ViewModel {
-    private static final String TAG = "PlayerBottomBar";
     private PlayerViewModel mPlayerViewModel;
     private boolean mInitialized;
 
