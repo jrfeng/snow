@@ -28,13 +28,13 @@
                 android:orientation="horizontal">
 
                 <ImageButton
+                    android:id="@+id/btn_back"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:background="@null"
                     android:contentDescription="@string/snow_ui_des_back"
-                    android:onClick="finishSelf"
                     android:scaleType="centerInside"
-                    android:tint="?android:textColor"
+                    app:tint="?android:textColor"
                     app:srcCompat="@drawable/snow_ui_ic_back" />
 
                 <TextView

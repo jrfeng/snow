@@ -102,6 +102,8 @@ public class EqualizerActivity extends AppCompatActivity {
         initEqualizerBands();
         initBassCroller();
         initVirtualizerCroller();
+
+        mBinding.btnBack.setOnClickListener(this::finishSelf);
     }
 
     @Override
