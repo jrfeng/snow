@@ -933,7 +933,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
-        if (mNotificationView.ignoreUpdate()) {
+        if (mNotificationView.interceptUpdateNotification()) {
             return;
         }
 
@@ -960,7 +960,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
-        if (mNotificationView.ignoreUpdate()) {
+        if (mNotificationView.interceptUpdateNotification()) {
             return;
         }
 
@@ -1714,13 +1714,13 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         /**
-         * 是否忽略更新。
+         * 是否拦截通知更新。
          * <p>
-         * 你可以忽略某次更新，然后得到条件满足后，再调用 {@link #invalidate()} 触发更新即可。
+         * 你可以拦截并忽略某次更新，然后等到条件满足后，再调用 {@link #invalidate()} 触发更新即可。
          *
-         * @return 如果忽略更新，则返回 true，否则返回 false。
+         * @return 如果需要拦截通知更新，则返回 true，否则返回 false。
          */
-        protected boolean ignoreUpdate() {
+        protected boolean interceptUpdateNotification() {
             return false;
         }
 
@@ -2316,7 +2316,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         // MIUI 13 通知栏图标更新有问题，需要特殊对待。
         // 解决方案：等待图标加载完成后再更新通知，否则通知的图标显示异常。
-        private boolean mMIUIIgnoreUpdate = Util.isMIUI13();
+        private boolean mMIUIInterceptUpdate = Util.isMIUI13();
 
         @Override
         protected void onInit(Context context) {
@@ -2359,13 +2359,13 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         @Override
-        protected boolean ignoreUpdate() {
+        protected boolean interceptUpdateNotification() {
             if (Util.isMIUI13()) {
                 if (isIconExpire()) {
                     reloadIcon();
                 }
 
-                return mMIUIIgnoreUpdate;
+                return mMIUIInterceptUpdate;
             }
 
             return false;
@@ -2375,12 +2375,12 @@ public class PlayerService extends MediaBrowserServiceCompat
         protected void onPlayingMusicItemChanged(@NonNull MusicItem musicItem) {
             super.onPlayingMusicItemChanged(musicItem);
 
-            mMIUIIgnoreUpdate = true;
+            mMIUIInterceptUpdate = true;
         }
 
         @Override
         protected void onIconLoaded() {
-            mMIUIIgnoreUpdate = false;
+            mMIUIInterceptUpdate = false;
         }
 
         @NonNull
