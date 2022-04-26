@@ -1576,7 +1576,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         private PlayerService mPlayerService;
 
         private MusicItem mPlayingMusicItem;
-        private boolean mExpire;
+        private boolean mIconExpire;
 
         private Bitmap mDefaultIcon;
         private int mIconWidth;
@@ -1618,7 +1618,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         protected boolean isIconExpire() {
-            return mExpire;
+            return mIconExpire;
         }
 
         protected void reloadIcon() {
@@ -1789,6 +1789,7 @@ public class PlayerService extends MediaBrowserServiceCompat
          * 调用该方法后会自动更新通知栏控制器，以应用最新设置的图标。
          */
         public final void setIcon(@NonNull Bitmap icon) {
+            mIconExpire = false;
             mIcon = icon;
             onIconLoaded();
             invalidate();
@@ -1984,7 +1985,7 @@ public class PlayerService extends MediaBrowserServiceCompat
          * 则你应该重新获取与当前正在播放的歌曲相关的信息，例如重新获取歌曲的封面图片。
          */
         public final boolean isExpire() {
-            return mExpire;
+            return mIconExpire;
         }
 
         /**
@@ -2000,12 +2001,11 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         @NonNull
         Notification createNotification() {
-            if (mExpire) {
+            if (mIconExpire) {
                 reloadIcon();
             }
-            Notification notification = onCreateNotification();
-            mExpire = false;
-            return notification;
+
+            return onCreateNotification();
         }
 
         void setPlayingMusicItem(@NonNull MusicItem musicItem) {
@@ -2015,7 +2015,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             }
 
             mPlayingMusicItem = musicItem;
-            mExpire = true;
+            mIconExpire = true;
 
             onPlayingMusicItemChanged(mPlayingMusicItem);
         }

@@ -1153,6 +1153,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         if (play) {
             play();
+        } else {
+            stop();
         }
     }
 
@@ -1771,7 +1773,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         updatePlaylist(playlist, playlist.getAllMusicItem(), new Runnable() {
             @Override
             public void run() {
-                stop();
                 notifyPlaylistChanged(position);
                 notifyPlayingMusicItemChanged(musicItem, position, play);
             }
