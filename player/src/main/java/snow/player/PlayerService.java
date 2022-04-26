@@ -1576,6 +1576,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         private PlayerService mPlayerService;
 
         private MusicItem mPlayingMusicItem;
+        private boolean mExpire;
         private boolean mIconExpire;
 
         private Bitmap mDefaultIcon;
@@ -1985,7 +1986,7 @@ public class PlayerService extends MediaBrowserServiceCompat
          * 则你应该重新获取与当前正在播放的歌曲相关的信息，例如重新获取歌曲的封面图片。
          */
         public final boolean isExpire() {
-            return mIconExpire;
+            return mExpire;
         }
 
         /**
@@ -2001,9 +2002,11 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         @NonNull
         Notification createNotification() {
-            if (mIconExpire) {
+            if (mExpire) {
                 reloadIcon();
             }
+
+            mExpire = false;
 
             return onCreateNotification();
         }
@@ -2015,6 +2018,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             }
 
             mPlayingMusicItem = musicItem;
+            mExpire = true;
             mIconExpire = true;
 
             onPlayingMusicItemChanged(mPlayingMusicItem);
