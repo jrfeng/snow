@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -430,7 +431,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         mMediaSession = new MediaSessionCompat(this, this.getClass().getName());
         mPlayer.setMediaSession(mMediaSession);
 
-        mMediaSession.setCallback(onCreateMediaSessionCallback());
+        mMediaSession.setCallback(onCreateMediaSessionCallback(), new Handler(Looper.getMainLooper()));
 
         setSessionToken(mMediaSession.getSessionToken());
     }
