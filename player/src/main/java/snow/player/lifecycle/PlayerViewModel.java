@@ -950,7 +950,7 @@ public class PlayerViewModel extends ViewModel {
      */
     public void playPause() {
         if (isInitialized()) {
-            mPlayerClient.playPause();
+            mPlayerClient.playPause(5);
         }
     }
 

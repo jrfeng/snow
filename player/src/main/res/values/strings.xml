@@ -10,6 +10,7 @@
     <string name="snow_error_get_url_failed">Get url failed</string>
     <string name="snow_error_out_of_memory">Out of memory</string>
     <string name="snow_error_prepare_music_item_failed">Prepare music item failed</string>
+    <string name="snow_error_play_position_out_of_bounds">Play position out of bounds</string>
 
     <string name="snow_preparing">Preparing…</string>
     <string name="snow_buffering">Buffering…</string>

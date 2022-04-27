@@ -949,7 +949,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      * <p>
      * 该方法只在连接到播放器后（{@link #isConnected()} 返回 true）才有效。
      *
-     * @param position 目标位置。
+     * @param position 目标位置。如果 position 的值超出播放列表的范围，则会忽略本次调用，并在会输出一条错误日志 。
      * @throws IllegalArgumentException 如果 position 的值小于 0，则会抛出该异常。
      */
     @Override

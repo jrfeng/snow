@@ -16,4 +16,5 @@
     <string name="snow_music_item_unknown_artist">未知歌手</string>
     <string name="snow_music_item_unknown_album">未知专辑</string>
     <string name="snow_error_prepare_music_item_failed">歌曲准备失败</string>
+    <string name="snow_error_play_position_out_of_bounds">播放位置超出范围</string>
 </resources>

@@ -1719,6 +1719,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             return;
         }
 
+        if (position < 0 || position >= mPlaylist.size()) {
+            notifyError(ErrorCode.PLAY_POSITION_OUT_OF_BOUNDS, ErrorCode.getErrorMessage(mApplicationContext, ErrorCode.PLAY_POSITION_OUT_OF_BOUNDS));
+            return;
+        }
+
         if (position == mPlayerState.getPlayPosition()) {
             playPause();
             return;
@@ -1769,6 +1774,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void setPlaylist(Playlist playlist, final int position, final boolean play) {
+        if (position < 0 || position >= playlist.size()) {
+            notifyError(ErrorCode.PLAY_POSITION_OUT_OF_BOUNDS, ErrorCode.getErrorMessage(mApplicationContext, ErrorCode.PLAY_POSITION_OUT_OF_BOUNDS));
+            return;
+        }
+
         final MusicItem musicItem = playlist.get(position);
         updatePlaylist(playlist, playlist.getAllMusicItem(), new Runnable() {
             @Override

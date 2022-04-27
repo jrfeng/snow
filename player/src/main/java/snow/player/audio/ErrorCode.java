@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 
 import snow.player.R;
+import snow.player.playlist.Playlist;
 
 /**
  * 预定义错误码。
@@ -52,6 +53,19 @@ public final class ErrorCode {
      */
     public static final int PREPARE_MUSIC_ITEM_ERROR = 9;
 
+    /**
+     * position 参数的值超出播放列表的范围。
+     * <p>
+     * 如果发生该错误，请检查你使用使用了正确的 position 参数调用 {@link snow.player.PlayerClient#playPause(int)} 方法或者
+     * {@link snow.player.PlayerClient#setPlaylist(Playlist, int, boolean)} 方法。
+     * <p>
+     * The value of position params out of bounds. If this error occurs,
+     * please check that you used the correct position parameter to call the
+     * {@link snow.player.PlayerClient#playPause(int)} or
+     * {@link snow.player.PlayerClient#setPlaylist(Playlist, int, boolean)}.
+     */
+    public static final int PLAY_POSITION_OUT_OF_BOUNDS = 10;
+
     private ErrorCode() {
         throw new AssertionError();
     }
@@ -83,10 +97,10 @@ public final class ErrorCode {
                 return res.getString(R.string.snow_error_get_url_failed);
             case OUT_OF_MEMORY:
                 return res.getString(R.string.snow_error_out_of_memory);
-            case UNKNOWN_ERROR:
-                return res.getString(R.string.snow_error_unknown_error);
             case PREPARE_MUSIC_ITEM_ERROR:
-                return res.getString(R.string.snow_error_unknown_error);
+                return res.getString(R.string.snow_error_prepare_music_item_failed);
+            case PLAY_POSITION_OUT_OF_BOUNDS:
+                return res.getString(R.string.snow_error_play_position_out_of_bounds);
             default:
                 return res.getString(R.string.snow_error_unknown_error);
         }
