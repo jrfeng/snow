@@ -30,6 +30,7 @@ import snow.player.debug.databinding.ActivityMainBinding;
 import snow.player.lifecycle.PlayerViewModel;
 import snow.player.audio.MusicItem;
 import snow.player.playlist.Playlist;
+import snow.player.ui.equalizer.EqualizerActivity;
 import snow.player.util.AudioScanner;
 
 public class MainActivity extends AppCompatActivity {
@@ -56,6 +57,13 @@ public class MainActivity extends AppCompatActivity {
 
         mAudioScanner = new AudioScanner<>(this, new AudioScanner.AudioItemConverter());
         mScannerProgress = findViewById(R.id.scanner_progress);
+
+        binding.btnStartAudioEffect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                EqualizerActivity.start(MainActivity.this, MyPlayerService.class);
+            }
+        });
 
         if (playerViewModel.isInitialized()) {
             mPlayerClient = playerViewModel.getPlayerClient();

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
@@ -16,10 +17,12 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import snow.player.PlayerService;
+import snow.player.effect.AudioEffectManager;
 import snow.player.exo.ExoMusicPlayer;
 import snow.player.exo.util.OkHttpUtil;
 import snow.player.audio.MusicItem;
 import snow.player.audio.MusicPlayer;
+import snow.player.ui.equalizer.AndroidAudioEffectManager;
 
 public class MyPlayerService extends PlayerService {
     private ProgressiveMediaSource.Factory mProgressiveMediaSourceFactory;
@@ -72,5 +75,11 @@ public class MyPlayerService extends PlayerService {
         }
 
         return new ExoMusicPlayer(context, mProgressiveMediaSourceFactory, uri);
+    }
+
+    @Nullable
+    @Override
+    protected AudioEffectManager onCreateAudioEffectManager() {
+        return new AndroidAudioEffectManager();
     }
 }

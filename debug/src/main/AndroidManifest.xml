@@ -30,6 +30,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="snow.player.ui.equalizer.EqualizerActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:theme="@style/EqualizerTheme" />
+
         <service
             android:name=".MyPlayerService"
             android:exported="true"
