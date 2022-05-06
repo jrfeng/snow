@@ -111,7 +111,7 @@ public final class AndroidAudioEffectManager implements AudioEffectManager {
             mBassBoost.setEnabled(true);
             mVirtualizer.setEnabled(true);
         } catch (Exception e) {
-            Log.e(TAG, "audio effect init failed", e);
+            Log.w(TAG, "audio effect init failed");
             return false;
         }
 
