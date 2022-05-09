@@ -219,7 +219,14 @@ public class EqualizerActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(Croller croller, int progress) {
                 short strength = (short) ((progress - min) * (1000 / rangeSize));
-                mEqualizerViewModel.setBassBoostStrength(strength);
+
+                if (strength < 0) {
+                    mEqualizerViewModel.setBassBoostStrength((short) 0);
+                } else if (strength > 1000) {
+                    mEqualizerViewModel.setBassBoostStrength((short) 1000);
+                } else {
+                    mEqualizerViewModel.setBassBoostStrength(strength);
+                }
             }
 
             @Override
@@ -251,7 +258,14 @@ public class EqualizerActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(Croller croller, int progress) {
                 short strength = (short) ((progress - min) * (1000 / rangeSize));
-                mEqualizerViewModel.setVirtualizerStrength(strength);
+
+                if (strength < 0) {
+                    mEqualizerViewModel.setVirtualizerStrength((short) 0);
+                } else if (strength > 1000) {
+                    mEqualizerViewModel.setVirtualizerStrength((short) 1000);
+                } else {
+                    mEqualizerViewModel.setVirtualizerStrength(strength);
+                }
             }
 
             @Override
