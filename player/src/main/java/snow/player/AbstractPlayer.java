@@ -915,6 +915,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     private void notifyPlaying(boolean stalled, int progress, long updateTime) {
         mPlayerStateHelper.onPlay(stalled, progress, updateTime);
+        requireWakeLock();
 
         if (!stalled) {
             mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));

@@ -5,6 +5,7 @@ import android.media.MediaPlayer;
 import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.Build;
+import android.os.PowerManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -70,6 +71,8 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
 
         mMediaPlayer = new MediaPlayer();
         mInvalid = false;
+
+        mMediaPlayer.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
 
         mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override

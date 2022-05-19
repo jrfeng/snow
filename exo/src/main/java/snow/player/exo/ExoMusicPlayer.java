@@ -1,5 +1,7 @@
 package snow.player.exo;
 
+import static com.google.android.exoplayer2.C.WAKE_MODE_NETWORK;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
@@ -205,6 +207,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
 
     private void initExoPlayer(Context context, @Nullable MediaSource.Factory mediaSourceFactory) {
         ExoPlayer.Builder builder = new ExoPlayer.Builder(context)
+                .setWakeMode(WAKE_MODE_NETWORK)
                 .setLooper(Looper.getMainLooper());
 
         if (mediaSourceFactory != null) {
