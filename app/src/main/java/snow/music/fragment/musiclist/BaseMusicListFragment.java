@@ -180,7 +180,7 @@ public abstract class BaseMusicListFragment extends Fragment {
 
     private void onMusicListItemClicked(int position) {
         if (matchPlaylistName() && (matchPlaylistToken() || isPlayingMusic(position))) {
-            mPlayerViewModel.getPlayerClient().playPause(position);
+            mPlayerViewModel.getPlayerClient().playPause();
             return;
         }
 
