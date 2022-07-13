@@ -81,7 +81,6 @@ import snow.player.audio.ErrorCode;
 import snow.player.playlist.PlaylistManager;
 import snow.player.util.MusicItemUtil;
 import snow.player.util.AsyncResult;
-import snow.player.util.Util;
 
 /**
  * 提供了基本的 {@code player service} 实现，用于在后台播放音乐。
@@ -933,7 +932,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
-        if (mNotificationView.interceptUpdateNotification()) {
+        if (mNotificationView.checkIconExpired()) {
             return;
         }
 
@@ -960,7 +959,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
-        if (mNotificationView.interceptUpdateNotification()) {
+        if (mNotificationView.checkIconExpired()) {
             return;
         }
 
@@ -1577,7 +1576,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         private MusicItem mPlayingMusicItem;
         private boolean mExpire;
-        private boolean mIconExpire;
+        private boolean mIconExpired;
 
         private Bitmap mDefaultIcon;
         private int mIconWidth;
@@ -1619,45 +1618,45 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         protected boolean isIconExpire() {
-            return mIconExpire;
+            return mIconExpired;
         }
 
         protected void reloadIcon() {
             disposeLastLoading();
             mIconLoaderDisposable = Single.create(new SingleOnSubscribe<Bitmap>() {
-                @Override
-                public void subscribe(@NonNull final SingleEmitter<Bitmap> emitter) {
-                    mBetterIconLoader.loadIcon(getPlayingMusicItem(), mIconWidth, mIconHeight, new AsyncResult<Bitmap>() {
                         @Override
-                        public void onSuccess(@NonNull Bitmap bitmap) {
-                            emitter.onSuccess(bitmap);
-                        }
-
-                        @Override
-                        public void onError(@NonNull Throwable throwable) {
-                            throwable.printStackTrace();
-                            emitter.onSuccess(getDefaultIcon());
-                        }
-
-                        @Override
-                        public boolean isCancelled() {
-                            return emitter.isDisposed();
-                        }
-
-                        @Override
-                        public synchronized void setOnCancelListener(@Nullable OnCancelListener listener) {
-                            super.setOnCancelListener(listener);
-
-                            emitter.setCancellable(new Cancellable() {
+                        public void subscribe(@NonNull final SingleEmitter<Bitmap> emitter) {
+                            mBetterIconLoader.loadIcon(getPlayingMusicItem(), mIconWidth, mIconHeight, new AsyncResult<Bitmap>() {
                                 @Override
-                                public void cancel() {
-                                    notifyCancelled();
+                                public void onSuccess(@NonNull Bitmap bitmap) {
+                                    emitter.onSuccess(bitmap);
+                                }
+
+                                @Override
+                                public void onError(@NonNull Throwable throwable) {
+                                    throwable.printStackTrace();
+                                    emitter.onSuccess(getDefaultIcon());
+                                }
+
+                                @Override
+                                public boolean isCancelled() {
+                                    return emitter.isDisposed();
+                                }
+
+                                @Override
+                                public synchronized void setOnCancelListener(@Nullable OnCancelListener listener) {
+                                    super.setOnCancelListener(listener);
+
+                                    emitter.setCancellable(new Cancellable() {
+                                        @Override
+                                        public void cancel() {
+                                            notifyCancelled();
+                                        }
+                                    });
                                 }
                             });
                         }
-                    });
-                }
-            }).subscribeOn(Schedulers.io())
+                    }).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Consumer<Bitmap>() {
                         @Override
@@ -1714,14 +1713,18 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         /**
-         * 是否拦截通知更新。
+         * 检查图标是否已过期，如果已过期，则会重新加载图标。
          * <p>
-         * 你可以拦截并忽略某次更新，然后等到条件满足后，再调用 {@link #invalidate()} 触发更新即可。
+         * 仅在图标完成加载后才会更新 Notification。
          *
-         * @return 如果需要拦截通知更新，则返回 true，否则返回 false。
+         * @return 如果图标已完成加载，则返回 true，否则返回 false。
          */
-        protected boolean interceptUpdateNotification() {
-            return false;
+        boolean checkIconExpired() {
+            if (isIconExpire()) {
+                reloadIcon();
+            }
+
+            return mIconExpired;
         }
 
         protected void onPlayingMusicItemChanged(@NonNull MusicItem musicItem) {
@@ -1790,7 +1793,7 @@ public class PlayerService extends MediaBrowserServiceCompat
          * 调用该方法后会自动更新通知栏控制器，以应用最新设置的图标。
          */
         public final void setIcon(@NonNull Bitmap icon) {
-            mIconExpire = false;
+            mIconExpired = false;
             mIcon = icon;
             onIconLoaded();
             invalidate();
@@ -2019,7 +2022,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
             mPlayingMusicItem = musicItem;
             mExpire = true;
-            mIconExpire = true;
+            mIconExpired = true;
 
             onPlayingMusicItemChanged(mPlayingMusicItem);
         }
@@ -2146,39 +2149,39 @@ public class PlayerService extends MediaBrowserServiceCompat
             public void loadIcon(@NonNull final MusicItem musicItem, @NonNull final Callback callback) {
                 cancelLastLoading();
                 mLoadIconDisposable = Single.create(new SingleOnSubscribe<Bitmap>() {
-                    @Override
-                    public void subscribe(@NonNull SingleEmitter<Bitmap> emitter) {
-                        // 1. load icon from internet
-                        Bitmap bitmap = loadIconFromInternet(musicItem);
+                            @Override
+                            public void subscribe(@NonNull SingleEmitter<Bitmap> emitter) {
+                                // 1. load icon from internet
+                                Bitmap bitmap = loadIconFromInternet(musicItem);
 
-                        // check disposed
-                        if (emitter.isDisposed()) {
-                            return;
-                        }
+                                // check disposed
+                                if (emitter.isDisposed()) {
+                                    return;
+                                }
 
-                        // 2. load embedded picture
-                        if (bitmap == null) {
-                            bitmap = loadEmbeddedPicture(musicItem);
-                        }
+                                // 2. load embedded picture
+                                if (bitmap == null) {
+                                    bitmap = loadEmbeddedPicture(musicItem);
+                                }
 
-                        // check disposed
-                        if (emitter.isDisposed()) {
-                            return;
-                        }
+                                // check disposed
+                                if (emitter.isDisposed()) {
+                                    return;
+                                }
 
-                        // 3. load default icon
-                        if (bitmap == null) {
-                            bitmap = getDefaultIcon();
-                        }
+                                // 3. load default icon
+                                if (bitmap == null) {
+                                    bitmap = getDefaultIcon();
+                                }
 
-                        // check disposed
-                        if (emitter.isDisposed()) {
-                            return;
-                        }
+                                // check disposed
+                                if (emitter.isDisposed()) {
+                                    return;
+                                }
 
-                        emitter.onSuccess(bitmap);
-                    }
-                }).subscribeOn(Schedulers.io())
+                                emitter.onSuccess(bitmap);
+                            }
+                        }).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Consumer<Bitmap>() {
                             @Override
@@ -2314,10 +2317,6 @@ public class PlayerService extends MediaBrowserServiceCompat
         private PendingIntent mPlayPause;
         private PendingIntent mSkipToNext;
 
-        // MIUI 13 通知栏图标更新有问题，需要特殊对待。
-        // 解决方案：等待图标加载完成后再更新通知，否则通知的图标显示异常。
-        private boolean mMIUIInterceptUpdate = Util.isMIUI13();
-
         @Override
         protected void onInit(Context context) {
             initAllPendingIntent();
@@ -2356,31 +2355,6 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         public final PendingIntent doSkipToNext() {
             return mSkipToNext;
-        }
-
-        @Override
-        protected boolean interceptUpdateNotification() {
-            if (Util.isMIUI13()) {
-                if (isIconExpire()) {
-                    reloadIcon();
-                }
-
-                return mMIUIInterceptUpdate;
-            }
-
-            return false;
-        }
-
-        @Override
-        protected void onPlayingMusicItemChanged(@NonNull MusicItem musicItem) {
-            super.onPlayingMusicItemChanged(musicItem);
-
-            mMIUIInterceptUpdate = true;
-        }
-
-        @Override
-        protected void onIconLoaded() {
-            mMIUIInterceptUpdate = false;
         }
 
         @NonNull
