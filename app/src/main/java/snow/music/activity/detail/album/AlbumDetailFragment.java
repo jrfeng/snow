@@ -5,8 +5,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
 
-import java.util.Objects;
-
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -85,7 +83,7 @@ public class AlbumDetailFragment extends BaseMusicListFragment {
             favoriteTitleRes = R.string.menu_item_remove_from_favorite;
         }
 
-        BottomDialog bottomDialog = new BottomMenuDialog.Builder(Objects.requireNonNull(getContext()))
+        BottomDialog bottomDialog = new BottomMenuDialog.Builder(requireContext())
                 .setTitle(music.getTitle())
                 .addMenuItem(R.drawable.ic_menu_item_next_play, R.string.menu_item_next_play)
                 .addMenuItem(favoriteIconRes, favoriteTitleRes)

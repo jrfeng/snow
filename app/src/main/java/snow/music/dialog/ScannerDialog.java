@@ -227,7 +227,7 @@ public class ScannerDialog extends BottomDialog {
         mDelayDismissDisposable = Observable.timer(800, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(aLong -> {
-                    FragmentActivity activity = Objects.requireNonNull(getActivity());
+                    FragmentActivity activity = requireActivity();
                     dismiss();
                     if (mScannerViewModel.isStarted()) {
                         showScanResultDialog(activity, mScannerViewModel.getScannedMusic());
@@ -253,11 +253,22 @@ public class ScannerDialog extends BottomDialog {
             return;
         }
 
-        requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+        if (Build.VERSION.SDK_INT >= 33) {
+            requestPermissions(new String[]{Manifest.permission.READ_MEDIA_AUDIO}, PERMISSION_REQUEST_CODE);
+        } else {
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+        }
     }
 
     private boolean havePermission() {
-        int result = ContextCompat.checkSelfPermission(Objects.requireNonNull(getContext()), Manifest.permission.READ_EXTERNAL_STORAGE);
+        int result;
+
+        if (Build.VERSION.SDK_INT >= 33) {
+            result = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_MEDIA_AUDIO);
+        } else {
+            result = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
+
         return result == PackageManager.PERMISSION_GRANTED;
     }
 

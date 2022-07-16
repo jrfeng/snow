@@ -178,6 +178,7 @@ public class PlaylistDialog extends BottomDialog {
             mSelectableHelper.setSelect(playPosition, true);
         }
 
+        @SuppressLint("NotifyDataSetChanged")
         public void setPlaylist(@NonNull Playlist playlist, int playPosition) {
             Preconditions.checkNotNull(playlist);
 

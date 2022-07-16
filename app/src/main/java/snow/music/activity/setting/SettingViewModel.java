@@ -12,8 +12,8 @@ import snow.music.util.NightModeUtil;
 import snow.player.lifecycle.PlayerViewModel;
 
 public class SettingViewModel extends AndroidViewModel {
-    private MutableLiveData<NightModeUtil.Mode> mNightMode;
-    private MutableLiveData<Boolean> mPlayWithOtherApp;
+    private final MutableLiveData<NightModeUtil.Mode> mNightMode;
+    private final MutableLiveData<Boolean> mPlayWithOtherApp;
 
     private PlayerViewModel mPlayerViewModel;
     private boolean mInitialized;

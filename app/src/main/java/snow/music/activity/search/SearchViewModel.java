@@ -38,7 +38,7 @@ public class SearchViewModel extends AndroidViewModel {
     private boolean mInitialized;
 
     private Disposable mSearchDisposable;
-    private Comparator<Music> mMusicComparator;
+    private final Comparator<Music> mMusicComparator;
 
     public SearchViewModel(Application application) {
         super(application);
@@ -48,7 +48,7 @@ public class SearchViewModel extends AndroidViewModel {
         mEmptyMessage = new MutableLiveData<>("");
 
         mMusicComparator = new Comparator<Music>() {
-            private PinyinComparator pinyinComparator = new PinyinComparator();
+            private final PinyinComparator pinyinComparator = new PinyinComparator();
 
             @Override
             public int compare(Music o1, Music o2) {

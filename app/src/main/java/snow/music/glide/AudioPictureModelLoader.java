@@ -18,6 +18,7 @@ import com.bumptech.glide.signature.ObjectKey;
 import com.google.common.base.Preconditions;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class AudioPictureModelLoader implements ModelLoader<String, ByteBuffer> {
@@ -81,7 +82,11 @@ public class AudioPictureModelLoader implements ModelLoader<String, ByteBuffer> 
 
         @Override
         public void cleanup() {
-            mMediaMetadataRetriever.release();
+            try {
+                mMediaMetadataRetriever.release();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override

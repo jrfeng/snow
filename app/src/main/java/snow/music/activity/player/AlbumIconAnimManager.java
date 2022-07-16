@@ -7,10 +7,8 @@ import android.view.animation.LinearInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.OnLifecycleEvent;
 
 import com.google.common.base.Preconditions;
 
@@ -20,10 +18,10 @@ import snow.player.lifecycle.PlayerViewModel;
 /**
  * 管理布局中 {@link snow.music.R.id#ivDisk } 的动画。
  */
-public class AlbumIconAnimManager implements LifecycleObserver {
-    private View mTarget;
-    private LifecycleOwner mLifecycleOwner;
-    private PlayerViewModel mPlayerViewModel;
+public class AlbumIconAnimManager implements DefaultLifecycleObserver {
+    private final View mTarget;
+    private final LifecycleOwner mLifecycleOwner;
+    private final PlayerViewModel mPlayerViewModel;
 
     private ObjectAnimator mDiskRotateAnimator;
     private long mDiskAnimPlayTime;
@@ -55,20 +53,20 @@ public class AlbumIconAnimManager implements LifecycleObserver {
         resumeAnim();
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    public void onStart() {
+    @Override
+    public void onStart(@NonNull LifecycleOwner owner) {
         mActivityStopped = false;
         resumeAnim();
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    public void onStop() {
+    @Override
+    public void onStop(@NonNull LifecycleOwner owner) {
         mActivityStopped = true;
         pauseAnim();
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    public void onDestroy() {
+    @Override
+    public void onDestroy(@NonNull LifecycleOwner owner) {
         mDiskRotateAnimator.cancel();
     }
 

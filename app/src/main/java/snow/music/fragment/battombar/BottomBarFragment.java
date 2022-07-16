@@ -18,7 +18,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.google.common.base.Preconditions;
 
 import snow.music.GlideApp;
 import snow.music.R;

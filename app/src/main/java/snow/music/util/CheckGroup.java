@@ -1,13 +1,12 @@
 package snow.music.util;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class CheckGroup {
-    private Set<CheckItem> mCheckItems;
+    private final Set<CheckItem> mCheckItems;
     private int mCheckedItemId;
 
     @Nullable
@@ -52,7 +51,7 @@ public class CheckGroup {
     }
 
     public static abstract class CheckItem {
-        private int mItemId;
+        private final int mItemId;
 
         @Nullable
         private CheckGroup mCheckGroup;

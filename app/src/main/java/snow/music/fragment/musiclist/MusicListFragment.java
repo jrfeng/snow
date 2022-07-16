@@ -7,8 +7,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.common.base.Preconditions;
 
-import java.util.Objects;
-
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;

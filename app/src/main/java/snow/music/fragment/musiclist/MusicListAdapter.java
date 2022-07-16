@@ -45,6 +45,7 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         mPositionHelper = new PositionHelper<>(this);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setMusicList(@NonNull List<Music> musicList, boolean ignoreDiffUtil) {
         Preconditions.checkNotNull(musicList);
 

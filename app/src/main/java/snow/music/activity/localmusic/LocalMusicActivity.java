@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
@@ -71,7 +72,14 @@ public class LocalMusicActivity extends ListActivity {
     }
 
     private boolean noPermission() {
-        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        int result;
+
+        if (Build.VERSION.SDK_INT >= 33) {
+            result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO);
+        } else {
+            result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
+
         return result == PackageManager.PERMISSION_DENIED;
     }
 
@@ -80,6 +88,10 @@ public class LocalMusicActivity extends ListActivity {
     }
 
     private boolean shouldShowRequestPermissionRationale() {
+        if (Build.VERSION.SDK_INT >= 33) {
+            return ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_AUDIO);
+        }
+
         return ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE);
     }
 

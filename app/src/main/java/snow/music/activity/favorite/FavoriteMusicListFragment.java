@@ -28,7 +28,7 @@ public class FavoriteMusicListFragment extends BaseMusicListFragment {
 
     @Override
     protected void showItemOptionMenu(@NonNull Music music) {
-        BottomDialog bottomDialog = new BottomMenuDialog.Builder(Objects.requireNonNull(getContext()))
+        BottomDialog bottomDialog = new BottomMenuDialog.Builder(requireContext())
                 .setTitle(music.getTitle())
                 .addMenuItem(R.drawable.ic_menu_item_next_play, R.string.menu_item_next_play)
                 .addMenuItem(R.drawable.ic_menu_item_add, R.string.menu_item_add_to_music_list)

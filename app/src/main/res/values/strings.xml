@@ -113,6 +113,7 @@
     <string name="toast_set_successfully">Set successfully</string>
     <string name="toast_request_permission_failed">Request permission failed</string>
     <string name="toast_no_read_storage_permission">No read storage permission!</string>
+    <string name="toast_no_read_media_audio_permission">No read media audio permission!</string>
 
     <!-- SingleChoiceDialog -->
     <string name="title_single_choice">Title</string>

@@ -23,9 +23,9 @@ import snow.music.store.Music;
 
 public class MusicMultiChoiceAdapter extends RecyclerView.Adapter<MusicMultiChoiceAdapter.ViewHolder> {
     private List<Music> mMusicList;
-    private ItemClickHelper mItemClickHelper;
-    private SelectableHelper mSelectableHelper;
-    private PositionHelper<ViewHolder> mPositionHelper;
+    private final ItemClickHelper mItemClickHelper;
+    private final SelectableHelper mSelectableHelper;
+    private final PositionHelper<ViewHolder> mPositionHelper;
 
     public MusicMultiChoiceAdapter(@NonNull List<Music> musicList, @NonNull List<Integer> selectedPosition) {
         Preconditions.checkNotNull(musicList);
@@ -90,6 +90,7 @@ public class MusicMultiChoiceAdapter extends RecyclerView.Adapter<MusicMultiChoi
         return mMusicList.size();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setMusicList(List<Music> musicList) {
         mMusicList = new ArrayList<>(musicList);
         notifyDataSetChanged();

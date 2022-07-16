@@ -1,5 +1,6 @@
 package snow.music.activity.search;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
     private static final int TYPE_ITEM = 2;
 
     private List<Music> mSearchResult;
-    private ItemClickHelper mItemClickHelper;
+    private final ItemClickHelper mItemClickHelper;
 
     private String mEmptyMessage;
     private WeakReference<TextView> mEmptyViewWeakReference;
@@ -35,6 +36,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
         mEmptyViewWeakReference = new WeakReference<>(null);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setSearchResult(List<Music> searchResult) {
         mSearchResult = new ArrayList<>(searchResult);
         notifyDataSetChanged();

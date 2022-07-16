@@ -18,7 +18,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import snow.music.R;
@@ -37,7 +36,7 @@ public class SleepTimerDialog extends BottomDialog {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        FragmentActivity activity = Objects.requireNonNull(getActivity());
+        FragmentActivity activity = requireActivity();
 
         ViewModelProvider provider = new ViewModelProvider(activity);
         PlayerViewModel playerViewModel = provider.get(PlayerViewModel.class);
@@ -161,7 +160,7 @@ public class SleepTimerDialog extends BottomDialog {
         private void addClickListener() {
             btnNegative.setOnClickListener(v -> dismiss());
             btnPositive.setOnClickListener(v -> {
-                getPlayerViewModel().startSleepTimer(mMinutesItemGroup.getMinutes() * 60_000);
+                getPlayerViewModel().startSleepTimer(mMinutesItemGroup.getMinutes() * 60_000L);
                 Toast.makeText(getContext(), R.string.toast_start_sleep_timer, Toast.LENGTH_SHORT).show();
                 dismiss();
             });
@@ -172,7 +171,7 @@ public class SleepTimerDialog extends BottomDialog {
         }
 
         private static class MinutesItemGroup {
-            private Set<MinutesItem> mMinutesItems;
+            private final Set<MinutesItem> mMinutesItems;
             private int mCheckedItemId;
 
             @Nullable
@@ -227,9 +226,9 @@ public class SleepTimerDialog extends BottomDialog {
             @Nullable
             private MinutesItemGroup mGroup;
 
-            private int mItemId;
-            private int mCheckedTextColor;
-            private int mUncheckedTextColor;
+            private final int mItemId;
+            private final int mCheckedTextColor;
+            private final int mUncheckedTextColor;
 
             MinutesItem(int itemId, View itemView) {
                 mItemId = itemId;
@@ -271,9 +270,9 @@ public class SleepTimerDialog extends BottomDialog {
         }
 
         private static class FixedMinutesItem extends MinutesItem {
-            private int mMinutes;
-            private TextView tvMinutes;
-            private ImageView ivChecked;
+            private final int mMinutes;
+            private final TextView tvMinutes;
+            private final ImageView ivChecked;
 
             FixedMinutesItem(int id, View itemView, int minutes) {
                 super(id, itemView);
@@ -304,10 +303,10 @@ public class SleepTimerDialog extends BottomDialog {
         }
 
         private static class CustomMinutesItem extends MinutesItem {
-            private TextView tvCustomMinutes;
-            private TextView tvMaxMinutes;
-            private SeekBar sbCustomMinutes;
-            private ImageView ivChecked;
+            private final TextView tvCustomMinutes;
+            private final TextView tvMaxMinutes;
+            private final SeekBar sbCustomMinutes;
+            private final ImageView ivChecked;
 
             CustomMinutesItem(int id, View itemView, SharedPreferences preferences) {
                 super(id, itemView);

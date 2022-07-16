@@ -22,7 +22,6 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -220,9 +219,9 @@ public class AddToMusicListDialog extends BottomDialog {
     }
 
     private void showCreateMusicListDialog() {
-        Context context = Objects.requireNonNull(getContext()).getApplicationContext();
+        Context context = requireContext().getApplicationContext();
 
-        InputDialog dialog = new InputDialog.Builder(Objects.requireNonNull(getContext()))
+        InputDialog dialog = new InputDialog.Builder(requireContext())
                 .setTitle(R.string.title_create_music_list)
                 .setHint(R.string.hint_music_list_title)
                 .setOnInputConfirmListener(new InputValidator(context), input -> {

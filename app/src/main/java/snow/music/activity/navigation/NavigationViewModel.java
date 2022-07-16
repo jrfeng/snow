@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -38,7 +37,6 @@ import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 
 public class NavigationViewModel extends ViewModel {
-    private static final String TAG = "NavigationViewModel";
     private final MutableLiveData<Integer> mFavoriteDrawable;
     private final MutableLiveData<CharSequence> mSecondaryText;
 

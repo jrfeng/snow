@@ -1,5 +1,6 @@
 package snow.music.activity.browser.album;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,7 @@ public class AlbumBrowserAdapter extends RecyclerView.Adapter<AlbumBrowserAdapte
         mSelectableHelper = new SelectableHelper(this);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setAllAlbum(List<String> allAlbum) {
         mAllAlbum = new ArrayList<>(allAlbum);
         notifyDataSetChanged();

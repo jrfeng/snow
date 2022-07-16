@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -144,7 +143,7 @@ public class SettingActivity extends AppCompatActivity {
     }
 
     private static class DarkModeItem extends CheckGroup.CheckItem {
-        private ImageView ivChecked;
+        private final ImageView ivChecked;
 
         public DarkModeItem(int id, View itemView) {
             super(id);
