@@ -34,7 +34,7 @@ Android music player framework. Compatible with MediaSession.
 
 ## Sample App
 
-The [**app**](./app) module is a sample app —— [**Download**](https://github.com/jrfeng/snow/releases/tag/1.0.8)
+The [**app**](./app) module is a sample app —— [**Download**](https://github.com/jrfeng/snow/releases/tag/1.2)
 
 ![Sample App Screenshot](./picture/app_preview.png)
 
