@@ -1,6 +1,7 @@
 package snow.player;
 
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -11,6 +12,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -25,16 +28,19 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.media.MediaBrowserServiceCompat;
@@ -51,7 +57,6 @@ import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import channel.helper.ChannelHelper;
 import channel.helper.Dispatcher;
@@ -59,7 +64,6 @@ import channel.helper.DispatcherUtil;
 import channel.helper.pipe.CustomActionPipe;
 
 import channel.helper.pipe.SessionEventPipe;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
@@ -152,7 +156,8 @@ public class PlayerService extends MediaBrowserServiceCompat
     private SleepTimerImp mSleepTimer;
 
     private int mMaxIDLEMinutes = -1;
-    private Disposable mIDLETimerDisposable;
+    @Nullable
+    private PendingIntent mIDLEPendingIntent;
 
     private Intent mKeepAliveIntent;
     private KeepAliveConnection mKeepAliveConnection;
@@ -176,13 +181,10 @@ public class PlayerService extends MediaBrowserServiceCompat
         mKeepAliveIntent = new Intent(this, this.getClass());
         mKeepAliveConnection = new KeepAliveConnection();
         mPlayerPrepareLatch = new CountDownLatch(1);
-        mPlayerStateSynchronizer = new PlayerStateSynchronizer() {
-            @Override
-            public void syncPlayerState(String clientToken) {
-                Message message = mSyncPlayerStateHandler.obtainMessage();
-                message.obj = clientToken;
-                mSyncPlayerStateHandler.sendMessage(message);
-            }
+        mPlayerStateSynchronizer = clientToken -> {
+            Message message = mSyncPlayerStateHandler.obtainMessage();
+            message.obj = clientToken;
+            mSyncPlayerStateHandler.sendMessage(message);
         };
 
         initNotificationManager();
@@ -229,7 +231,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     @Override
     public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
-        result.sendResult(Collections.<MediaBrowserCompat.MediaItem>emptyList());
+        result.sendResult(Collections.emptyList());
     }
 
     @Override
@@ -244,7 +246,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             mNotificationManager.cancel(mNotificationView.getNotificationId());
         }
 
-        cancelIDLETimer();
+        cancelIDLEAlarm();
 
         unregisterReceiver(mCustomActionReceiver);
         mMediaSession.release();
@@ -272,12 +274,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void preparePlayer() {
-        mPlayer.initialize(new AbstractPlayer.OnInitializedListener() {
-            @Override
-            public void onInitialized() {
-                mPlayerPrepareLatch.countDown();
-            }
-        });
+        mPlayer.initialize(() -> mPlayerPrepareLatch.countDown());
     }
 
     private void dismissKeepServiceAlive() {
@@ -317,7 +314,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             @Override
             public void onPreparing() {
                 PlayerService.this.updateNotificationView();
-                PlayerService.this.cancelIDLETimer();
+                PlayerService.this.cancelIDLEAlarm();
             }
 
             @Override
@@ -328,13 +325,13 @@ public class PlayerService extends MediaBrowserServiceCompat
             @Override
             public void onPlaying(int progress, long updateTime) {
                 PlayerService.this.updateNotificationView();
-                PlayerService.this.cancelIDLETimer();
+                PlayerService.this.cancelIDLEAlarm();
             }
 
             @Override
             public void onPaused() {
                 PlayerService.this.updateNotificationView();
-                PlayerService.this.startIDLETimer();
+                PlayerService.this.startIDLEAlarm();
             }
 
             @Override
@@ -345,7 +342,7 @@ public class PlayerService extends MediaBrowserServiceCompat
             @Override
             public void onStopped() {
                 PlayerService.this.updateNotificationView();
-                PlayerService.this.startIDLETimer();
+                PlayerService.this.startIDLEAlarm();
             }
 
             @Override
@@ -418,12 +415,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void initHeadsetHookHelper() {
-        mHeadsetHookHelper = new HeadsetHookHelper(new HeadsetHookHelper.OnHeadsetHookClickListener() {
-            @Override
-            public void onHeadsetHookClicked(int clickCount) {
-                PlayerService.this.onHeadsetHookClicked(clickCount);
-            }
-        });
+        mHeadsetHookHelper = new HeadsetHookHelper(PlayerService.this::onHeadsetHookClicked);
     }
 
     private void initMediaSession() {
@@ -699,43 +691,62 @@ public class PlayerService extends MediaBrowserServiceCompat
      * <p>
      * 默认未启用该功能。
      *
-     * @param minutes 最大的空闲时间，设置为小于等于 0 时将关闭此功能（即使播放器处于空闲状态，也不会自动终止 {@link PlayerService}）。
+     * @param minutes 最大的空闲时间，设置为小于等于 0 时将关闭此功能（即使播放器处于空闲状态，也不会自动终止 {@link PlayerService}）
+     *                最大的空闲时间最长为 30 分钟，大于 30 时，将限制为 30 分钟。
      */
     public final void setMaxIDLETime(int minutes) {
-        mMaxIDLEMinutes = minutes;
+        mMaxIDLEMinutes = Math.max(30, minutes);
 
-        if (minutes <= 0) {
-            cancelIDLETimer();
+        if (minutes <= 0 && notIDLE()) {
+            cancelIDLEAlarm();
             return;
         }
 
-        startIDLETimer();
+        startIDLEAlarm();
     }
 
-    private void startIDLETimer() {
-        cancelIDLETimer();
+    private void startIDLEAlarm() {
+        cancelIDLEAlarm();
         if (mMaxIDLEMinutes <= 0 || notIDLE()) {
             return;
         }
 
-        mIDLETimerDisposable = Observable.timer(mMaxIDLEMinutes, TimeUnit.MINUTES)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Long>() {
-                    @Override
-                    public void accept(Long aLong) {
-                        shutdown();
-                    }
-                });
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        if (alarmManager == null) {
+            return;
+        }
+
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        Intent intent = buildCustomActionIntent(CUSTOM_ACTION_SHUTDOWN);
+        intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
+        mIDLEPendingIntent = PendingIntent.getBroadcast(this, 0, intent, flags);
+
+        alarmManager.set(
+                AlarmManager.ELAPSED_REALTIME,
+                SystemClock.elapsedRealtime() + (mMaxIDLEMinutes * 60L),
+                mIDLEPendingIntent
+        );
     }
 
     private boolean notIDLE() {
         return (isPreparing() || isStalled()) || (getPlaybackState() == PlaybackState.PLAYING);
     }
 
-    private void cancelIDLETimer() {
-        if (mIDLETimerDisposable != null && !mIDLETimerDisposable.isDisposed()) {
-            mIDLETimerDisposable.dispose();
+    private void cancelIDLEAlarm() {
+        if (mIDLEPendingIntent == null) {
+            return;
         }
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        if (alarmManager == null) {
+            return;
+        }
+
+        alarmManager.cancel(mIDLEPendingIntent);
     }
 
     /**
@@ -959,18 +970,12 @@ public class PlayerService extends MediaBrowserServiceCompat
             return;
         }
 
-        if (mNotificationView.checkIconExpired()) {
-            return;
-        }
-
-        MusicItem musicItem = getPlayingMusicItem();
-        if (musicItem == null) {
-            stopForegroundEx(true);
-            return;
-        }
-
         if (!isForeground()) {
             startForeground();
+            return;
+        }
+
+        if (mNotificationView.checkIconExpired()) {
             return;
         }
 
@@ -1004,6 +1009,11 @@ public class PlayerService extends MediaBrowserServiceCompat
      * 启动前台 Service。
      */
     protected final void startForeground() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            startForegroundAPI31();
+            return;
+        }
+
         if (noNotificationView()) {
             return;
         }
@@ -1032,6 +1042,45 @@ public class PlayerService extends MediaBrowserServiceCompat
                     mNotificationView.createNotification()
             );
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private void startForegroundAPI31() {
+        if (noNotificationView()) {
+            return;
+        }
+
+        if (isBackgroundRestricted()) {
+            mForeground = false;
+            updateNotification();
+            return;
+        }
+
+        mForeground = true;
+
+        if (getPlayingMusicItem() == null) {
+            startForeground(
+                    mNotificationView.getNotificationId(),
+                    mNotificationView.createPlaceHolderNotification(getString(R.string.snow_waiting_to_play)),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+            );
+            return;
+        }
+
+        if (mNotificationView.checkIconExpired()) {
+            startForeground(
+                    mNotificationView.getNotificationId(),
+                    mNotificationView.createPlaceHolderNotification(getString(R.string.snow_preparing)),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+            );
+            return;
+        }
+
+        startForeground(
+                mNotificationView.getNotificationId(),
+                mNotificationView.createNotification(),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+        );
     }
 
     private boolean isBackgroundRestricted() {
@@ -1153,12 +1202,37 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void updateNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            updateNotificationAPI31();
+            return;
+        }
+
         if (noNotificationView()) {
             return;
         }
 
         if (getPlayingMusicItem() == null) {
             stopForegroundEx(true);
+            return;
+        }
+
+        mNotificationManager.notify(
+                mNotificationView.getNotificationId(),
+                mNotificationView.createNotification()
+        );
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private void updateNotificationAPI31() {
+        if (noNotificationView()) {
+            return;
+        }
+
+        if (getPlayingMusicItem() == null) {
+            mNotificationManager.notify(
+                    mNotificationView.getNotificationId(),
+                    mNotificationView.createPlaceHolderNotification(getString(R.string.snow_waiting_to_play))
+            );
             return;
         }
 
@@ -1658,12 +1732,7 @@ public class PlayerService extends MediaBrowserServiceCompat
                         }
                     }).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Consumer<Bitmap>() {
-                        @Override
-                        public void accept(Bitmap bitmap) {
-                            setIcon(bitmap);
-                        }
-                    });
+                    .subscribe(this::setIcon);
         }
 
         private void disposeLastLoading() {
@@ -1720,7 +1789,7 @@ public class PlayerService extends MediaBrowserServiceCompat
          * @return 如果图标已完成加载，则返回 true，否则返回 false。
          */
         boolean checkIconExpired() {
-            if (isIconExpire()) {
+            if (isIconExpire() && (mIconLoaderDisposable == null || mIconLoaderDisposable.isDisposed())) {
                 reloadIcon();
             }
 
@@ -1761,12 +1830,21 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         /**
-         * 创建一个新的 Notification 对象，不能为 null。
+         * 创建一个用于占位的 Notification 对象，不能为 null。
          *
          * @return Notification 对象，不能为 null。
          */
         @NonNull
         public abstract Notification onCreateNotification();
+
+        /**
+         * 创建一个新的 Notification 对象，不能为 null。
+         *
+         * @return Notification 对象，不能为 null。
+         */
+        @NonNull
+        @RequiresApi(Build.VERSION_CODES.S)
+        public abstract Notification onCreatePlaceHolderNotification(String hint);
 
         /**
          * 返回 Notification 的 ID。
@@ -2012,6 +2090,12 @@ public class PlayerService extends MediaBrowserServiceCompat
             mExpire = false;
 
             return onCreateNotification();
+        }
+
+        @NonNull
+        @RequiresApi(Build.VERSION_CODES.S)
+        Notification createPlaceHolderNotification(String hint) {
+            return onCreatePlaceHolderNotification(hint);
         }
 
         void setPlayingMusicItem(@NonNull MusicItem musicItem) {
@@ -2323,26 +2407,11 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         private void initAllPendingIntent() {
-            mSkipToPrevious = buildCustomAction(ACTION_SKIP_TO_PREVIOUS, new CustomAction() {
-                @Override
-                public void doAction(@NonNull Player player, @Nullable Bundle extras) {
-                    player.skipToPrevious();
-                }
-            });
+            mSkipToPrevious = buildCustomAction(ACTION_SKIP_TO_PREVIOUS, (player, extras) -> player.skipToPrevious());
 
-            mPlayPause = buildCustomAction(ACTION_PLAY_PAUSE, new CustomAction() {
-                @Override
-                public void doAction(@NonNull Player player, @Nullable Bundle extras) {
-                    player.playPause();
-                }
-            });
+            mPlayPause = buildCustomAction(ACTION_PLAY_PAUSE, (player, extras) -> player.playPause());
 
-            mSkipToNext = buildCustomAction(ACTION_SKIP_TO_NEXT, new CustomAction() {
-                @Override
-                public void doAction(@NonNull Player player, @Nullable Bundle extras) {
-                    player.skipToNext();
-                }
-            });
+            mSkipToNext = buildCustomAction(ACTION_SKIP_TO_NEXT, (player, extras) -> player.skipToNext());
         }
 
         public final PendingIntent doSkipToPrevious() {
@@ -2380,6 +2449,39 @@ public class PlayerService extends MediaBrowserServiceCompat
             onBuildNotification(builder);
 
             return builder.build();
+        }
+
+        @NonNull
+        @Override
+        public Notification onCreatePlaceHolderNotification(String hint) {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), CHANNEL_ID)
+                    .setSmallIcon(getSmallIconId())
+                    .setLargeIcon(getIcon())
+                    .setContentTitle(getAppName())
+                    .setContentText(hint)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .setShowWhen(false)
+                    .setAutoCancel(false);
+
+            return builder.build();
+        }
+
+        private String getAppName() {
+            PackageManager pm = getContext().getPackageManager();
+            String appName;
+            try {
+                ApplicationInfo info = pm.getApplicationInfo(getPackageName(), 0);
+                appName = getContext().getString(info.labelRes);
+            } catch (PackageManager.NameNotFoundException e) {
+                appName = "Unknown";
+            }
+
+            if (TextUtils.isEmpty(appName)) {
+                appName = "Unknown";
+            }
+
+            return appName;
         }
 
         @Override
