@@ -1830,7 +1830,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         /**
-         * 创建一个用于占位的 Notification 对象，不能为 null。
+         * 创建一个新的 Notification 对象，不能为 null。
          *
          * @return Notification 对象，不能为 null。
          */
@@ -1838,8 +1838,16 @@ public class PlayerService extends MediaBrowserServiceCompat
         public abstract Notification onCreateNotification();
 
         /**
-         * 创建一个新的 Notification 对象，不能为 null。
+         * 创建一个用于占位的 Notification 通知。
+         * <p>
+         * 可以通过覆盖该方法来返回自定义的 Notification 占位通知。
+         * <p>
+         * 说明：由于 Android 12 禁止在后台启动前台 Service，而 PlayerService 会等待歌曲图片完成后再启动前台 Service 或者更新通知。
+         * 如果歌曲图片的加载时间过长。并且在图片加载完成前应用已被切换到后台，这种情况下就会导致 ForegroundServiceStartNotAllowedException。
+         * 为了避免该异常，当启动前台 Service 时，如果歌曲图片尚未加载完成，或者当前没有正在播放的歌曲，则会立即使用占位通知启动前台 Service，
+         * 并且在歌曲图片加载完成后将其更新为正常的通知。
          *
+         * @param hint 可选的提示信息，你可以使用该提示信息，或者使用任何自定义的提示信息。
          * @return Notification 对象，不能为 null。
          */
         @NonNull
