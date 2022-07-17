@@ -691,11 +691,10 @@ public class PlayerService extends MediaBrowserServiceCompat
      * <p>
      * 默认未启用该功能。
      *
-     * @param minutes 最大的空闲时间，设置为小于等于 0 时将关闭此功能（即使播放器处于空闲状态，也不会自动终止 {@link PlayerService}）
-     *                最大的空闲时间最长为 30 分钟，大于 30 时，将限制为 30 分钟。
+     * @param minutes 最大的空闲时间，设置为小于等于 0 时将关闭此功能（即使播放器处于空闲状态，也不会自动终止 {@link PlayerService}）。
      */
     public final void setMaxIDLETime(int minutes) {
-        mMaxIDLEMinutes = Math.max(30, minutes);
+        mMaxIDLEMinutes = minutes;
 
         if (minutes <= 0 && notIDLE()) {
             cancelIDLEAlarm();
@@ -707,6 +706,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private void startIDLEAlarm() {
         cancelIDLEAlarm();
+
         if (mMaxIDLEMinutes <= 0 || notIDLE()) {
             return;
         }
@@ -722,12 +722,11 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         Intent intent = buildCustomActionIntent(CUSTOM_ACTION_SHUTDOWN);
-        intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
         mIDLEPendingIntent = PendingIntent.getBroadcast(this, 0, intent, flags);
 
         alarmManager.set(
                 AlarmManager.ELAPSED_REALTIME,
-                SystemClock.elapsedRealtime() + (mMaxIDLEMinutes * 60L),
+                SystemClock.elapsedRealtime() + (mMaxIDLEMinutes * 60_000L),
                 mIDLEPendingIntent
         );
     }
@@ -747,6 +746,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
 
         alarmManager.cancel(mIDLEPendingIntent);
+        mIDLEPendingIntent = null;
     }
 
     /**
