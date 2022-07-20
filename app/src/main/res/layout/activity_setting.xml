@@ -24,8 +24,8 @@
                 android:contentDescription="@string/des_back"
                 android:onClick="finishSelf"
                 android:scaleType="centerInside"
-                android:tint="@color/colorIconTint"
-                app:srcCompat="@drawable/ic_back" />
+                app:srcCompat="@drawable/ic_back"
+                app:tint="@color/colorIconTint" />
 
             <TextView
                 android:layout_width="0dp"
@@ -207,6 +207,16 @@
             android:paddingBottom="16dp"
             android:text="@string/description_play_with_other_app"
             android:textColor="@color/colorSecondaryText" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="18dp"
+            android:paddingRight="18dp"
+            android:paddingBottom="16dp"
+            android:text="@string/description_read_phone_state_rationale"
+            android:textColor="@color/colorSecondaryText"
+            android:textStyle="bold" />
 
         <FrameLayout
             android:layout_width="match_parent"
