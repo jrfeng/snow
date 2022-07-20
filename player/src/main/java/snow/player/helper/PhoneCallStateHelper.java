@@ -1,10 +1,13 @@
 package snow.player.helper;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import com.google.common.base.Preconditions;
 
@@ -12,6 +15,7 @@ import com.google.common.base.Preconditions;
  * 监听手机来电状态。
  */
 public final class PhoneCallStateHelper {
+    private final Context mApplicationContext;
     private final TelephonyManager mTelephonyManager;
     private final PhoneStateListener mPhoneStateListener;
     private final OnStateChangeListener mCallStateListener;
@@ -25,6 +29,7 @@ public final class PhoneCallStateHelper {
      */
     public PhoneCallStateHelper(@NonNull Context context, @NonNull OnStateChangeListener listener) {
         Preconditions.checkNotNull(listener);
+        mApplicationContext = context.getApplicationContext();
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mCallStateListener = listener;
 
@@ -50,6 +55,10 @@ public final class PhoneCallStateHelper {
      * 是否没有任何来电。
      */
     public boolean isCallIDLE() {
+        if (noPermission()) {
+            return true;
+        }
+
         return mTelephonyManager.getCallState() == TelephonyManager.CALL_STATE_IDLE;
     }
 
@@ -57,12 +66,16 @@ public final class PhoneCallStateHelper {
      * 注册监听器。如果已经注册，则忽略本次调用。
      */
     public void registerCallStateListener() {
+        if (noPermission()) {
+            return;
+        }
+
         if (mRegistered) {
             return;
         }
 
         mRegistered = true;
-        mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+        addPhoneStartListener();
     }
 
     /**
@@ -71,8 +84,28 @@ public final class PhoneCallStateHelper {
     public void unregisterCallStateListener() {
         if (mRegistered) {
             mRegistered = false;
-            mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+
+            if (noPermission()) {
+                return;
+            }
+
+            removePhoneStateListener();
         }
+    }
+
+    private void addPhoneStartListener() {
+        mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+    }
+
+    private void removePhoneStateListener() {
+        mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+    }
+
+    private boolean noPermission() {
+        return ContextCompat.checkSelfPermission(
+                mApplicationContext,
+                Manifest.permission.READ_PHONE_STATE
+        ) != PackageManager.PERMISSION_GRANTED;
     }
 
     /**
