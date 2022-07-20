@@ -61,7 +61,7 @@
     <string name="item_dark_mode_off">Normal mode</string>
     <string name="item_play_with_other_app">Background mode</string>
     <string name="description_play_with_other_app">Music playback won\'t be paused by other apps in Background mode. You\'ll be able to pause music playback manually in the Notification shade.</string>
-    <string name="description_read_phone_state_rationale">Warning! In order to avoid that the song will not pause during the phone call after ignoring the audio focus, please grant the app the permission to read the phone status!</string>
+    <string name="description_read_phone_state_rationale">Warning! In order to avoid that the player will not automatically pause playing when the phone calls after ignoring the audio focus, please grant the app the permission to read the phone status!</string>
 
     <!-- PlaylistDialog -->
     <string name="playlist">Playlist</string>

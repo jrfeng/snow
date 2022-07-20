@@ -139,5 +139,5 @@
     <string name="item_play_with_other_app">与游戏/其他APP同时播放</string>
     <string name="description_play_with_other_app">开启之后，在其他应用播放音频、视频或者视频语言通话时，音乐不会自动暂停，将始终作为BGM保持播放，您可以在通知栏中手动暂停播放。</string>
     <string name="toast_no_read_media_audio_permission">无音频媒体访问权限！</string>
-    <string name="description_read_phone_state_rationale">警告！为了避免忽略音频焦点后歌曲不会在手机来电期间暂停，请授予应用读取手机状态权限！</string>
+    <string name="description_read_phone_state_rationale">警告！为了避免忽略音频焦点后播放器不会在手机来电期间自动暂停播放，请授予应用读取手机状态权限！</string>
 </resources>
