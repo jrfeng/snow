@@ -23,6 +23,7 @@ import snow.player.HistoryRecorder;
 import snow.player.PlayMode;
 import snow.player.PlayerService;
 import snow.player.annotation.PersistenceId;
+import snow.player.audio.MusicItem;
 import snow.player.effect.AudioEffectManager;
 import snow.player.ui.equalizer.AndroidAudioEffectManager;
 
@@ -158,11 +159,14 @@ public class AppPlayerService extends PlayerService {
             return drawable.getBitmap();
         }
 
-        private void addToggleFavorite(NotificationCompat.Builder builder) {
-            if (isExpire()) {
-                mFavoriteObserver.setMusicItem(getPlayingMusicItem());
-            }
+        @Override
+        protected void onPlayingMusicItemChanged(@NonNull MusicItem musicItem) {
+            super.onPlayingMusicItemChanged(musicItem);
 
+            mFavoriteObserver.setMusicItem(getPlayingMusicItem());
+        }
+
+        private void addToggleFavorite(NotificationCompat.Builder builder) {
             if (mFavoriteObserver.isFavorite()) {
                 builder.addAction(R.mipmap.ic_notif_favorite_true, "favorite", mToggleFavorite);
             } else {

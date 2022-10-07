@@ -3,6 +3,7 @@ package snow.music.util;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import io.reactivex.Single;
@@ -46,6 +47,10 @@ public class FavoriteObserver {
      * @param musicItem 要监听的歌曲，为 null 时不监听任何歌曲。
      */
     public synchronized void setMusicItem(@Nullable MusicItem musicItem) {
+        if (Objects.equal(musicItem, mMusicItem)) {
+            return;
+        }
+
         mMusicItem = musicItem;
         checkMusicFavoriteState();
     }
