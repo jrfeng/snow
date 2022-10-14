@@ -172,6 +172,8 @@ public class PlayerService extends MediaBrowserServiceCompat
     private Handler mSyncPlayerStateHandler;
     private CountDownLatch mPlayerPrepareLatch;
 
+    private long mIDLEShutdownTime;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -235,6 +237,13 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+
+        checkIDLEShutdownTime();
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
 
@@ -256,6 +265,16 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         if (mAudioEffectManager != null) {
             mAudioEffectManager.release();
+        }
+    }
+
+    private void checkIDLEShutdownTime() {
+        if (notIDLE() || mIDLEShutdownTime < 1) {
+            return;
+        }
+
+        if (SystemClock.elapsedRealtime() >= mIDLEShutdownTime) {
+            shutdown();
         }
     }
 
@@ -724,9 +743,11 @@ public class PlayerService extends MediaBrowserServiceCompat
         Intent intent = buildCustomActionIntent(CUSTOM_ACTION_SHUTDOWN);
         mIDLEPendingIntent = PendingIntent.getBroadcast(this, 0, intent, flags);
 
+        mIDLEShutdownTime = SystemClock.elapsedRealtime() + (mMaxIDLEMinutes * 60_000L);
+
         alarmManager.set(
                 AlarmManager.ELAPSED_REALTIME,
-                SystemClock.elapsedRealtime() + (mMaxIDLEMinutes * 60_000L),
+                mIDLEShutdownTime,
                 mIDLEPendingIntent
         );
     }
@@ -747,6 +768,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
         alarmManager.cancel(mIDLEPendingIntent);
         mIDLEPendingIntent = null;
+        mIDLEShutdownTime = 0;
     }
 
     /**
