@@ -57,7 +57,7 @@ public final class AndroidAudioEffectConfigUtil {
 
     /**
      * 设置播放器的 AudioEffect 的优先级。
-     *
+     * <p>
      * 当在 Service 端运行的音频特效重新生效时，将使用该方法更新 priority 值，以便下次启动
      * {@link snow.player.ui.equalizer.EqualizerActivity} 可以获取到正确的 priority 值。
      *
@@ -91,10 +91,10 @@ public final class AndroidAudioEffectConfigUtil {
     }
 
     /**
-     * 是否获取 AudioEffect 控制权。
-     * <p>
-     * <p>
-     * 当 {@link snow.player.ui.equalizer.EqualizerActivity} 被启动后，使用该方法获取音频特效控制权。
+     * 检查 UI 端是否获取了 AudioEffect 控制权。
+     *
+     * @return 如果 UI 端获取了 AudioEffect 控制权则返回 true，否则返回 false。
+     * @see #takeControl(Bundle)
      */
     public static boolean isTakeControl(@NonNull Bundle config) {
         Preconditions.checkNotNull(config);
@@ -105,7 +105,7 @@ public final class AndroidAudioEffectConfigUtil {
     /**
      * 获取音频特效的控制权。
      * <p>
-     * 当 {@link snow.player.ui.equalizer.EqualizerActivity} 被启动后，当 UI 端使用该方法获取音频特效控制权。
+     * 当 {@link snow.player.ui.equalizer.EqualizerActivity} 被启动后，UI 端会使用该方法获取音频特效控制权。
      * 此时在 Service 端运行的 {@link snow.player.ui.equalizer.AndroidAudioEffectManager} 将会忽略
      * 音频特效的更新，直到重新获取到控制权。
      *
