@@ -36,7 +36,7 @@ Android 音乐播放器框架，兼容 MediaSession 。
 
 ## 示例程序
 
-[**app**](./app) 模块是一个示例程序 —— [下载](https://github.com/jrfeng/snow/releases/tag/1.2)
+[**app**](./app) 模块是一个示例程序 —— [下载](https://github.com/jrfeng/snow/releases/tag/1.2.4)
 
 国内下载：[网盘下载, 提取码：7mye](https://pan.baidu.com/s/16S6sWMObuNU1VvQjlQ0qEw)
 
