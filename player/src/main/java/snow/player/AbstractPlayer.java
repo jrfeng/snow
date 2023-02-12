@@ -1790,7 +1790,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         });
     }
 
-    private void onMusicItemMoved(int fromPosition, int toPosition) {
+    private void updatePlayPosition(int fromPosition, int toPosition) {
         int playPosition = mPlayerState.getPlayPosition();
         if (notInRegion(playPosition, fromPosition, toPosition)) {
             notifyPlaylistChanged(playPosition);
@@ -1934,27 +1934,9 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         List<MusicItem> musicItems = mPlaylist.getAllMusicItem();
 
-        // 分两种情况：
-        // 1. toPosition 是列表的末尾索引
-        // 2. toPosition 不是列表的末尾索引
-        if (toPosition == getPlaylistSize() - 1) {
-            // 情况 1. toPosition 是列表的末尾索引：
-            //    步骤 1：先移除 fromPosition 处的元素
-            //    步骤 2：然后再把这个元素添加到列表末尾
-            musicItems.add(musicItems.remove(fromPosition));
-        } else {
-            // 情况 2. 当 toPosition 不是列表的末尾索引时
-            //     步骤 1：先将 fromPosition 处的元素插入到 toPosition
-            MusicItem musicItem = musicItems.get(fromPosition);
-            musicItems.add(toPosition, musicItem);
+        musicItems.add(toPosition, musicItems.remove(fromPosition));
+        updatePlayPosition(fromPosition, toPosition);
 
-            //     步骤 2：移除 fromPosition 处的旧元素
-            //            当 fromPosition 小于 toPosition 时，插入新元素会导致 fromPosition 处
-            //            元素向后移，因此，需要将 fromPosition 加 1 才是正确的要移除的元素的位置
-            musicItems.remove(fromPosition < toPosition ? fromPosition : fromPosition + 1);
-        }
-
-        onMusicItemMoved(fromPosition, toPosition);
         updatePlaylist(mPlaylist, musicItems, new Runnable() {
             @Override
             public void run() {

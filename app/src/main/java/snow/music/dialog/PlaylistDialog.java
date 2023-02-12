@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatDialog;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,12 +26,14 @@ import recyclerview.helper.ScrollToPositionHelper;
 import recyclerview.helper.SelectableHelper;
 import snow.music.R;
 import snow.music.service.AppPlayerService;
+import snow.music.util.ItemDragCallback;
 import snow.music.util.PlayerUtil;
 import snow.player.PlayerClient;
 import snow.player.audio.MusicItem;
 import snow.player.lifecycle.PlayerViewModel;
 import snow.player.lifecycle.PlaylistLiveData;
 import snow.player.playlist.Playlist;
+import snow.player.util.MovablePlaylist;
 
 public class PlaylistDialog extends BottomDialog {
     private PlayerViewModel mPlayerViewModel;
@@ -94,6 +97,7 @@ public class PlaylistDialog extends BottomDialog {
 
         rvPlaylist.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
         initPlaylistAdapter();
+        initDragHelper();
     }
 
     @SuppressLint("SetTextI18n")
@@ -132,6 +136,23 @@ public class PlaylistDialog extends BottomDialog {
         });
     }
 
+    private void initDragHelper() {
+        ItemDragCallback.OnDragCallback callback = new ItemDragCallback.OnDragCallback() {
+            @Override
+            public void onDragging(int from, int target) {
+                mPlaylistAdapter.move(from, target);
+            }
+
+            @Override
+            public void onDragComplete(int fromPosition, int toPosition) {
+                mPlayerViewModel.getPlayerClient().moveMusicItem(fromPosition, toPosition);
+            }
+        };
+
+        ItemTouchHelper helper = new ItemTouchHelper(new ItemDragCallback(callback));
+        helper.attachToRecyclerView(rvPlaylist);
+    }
+
     private void removeMusicItem(int position) {
         Context context = getContext();
         Playlist playlist = mPlaylistLiveData.getValue();
@@ -155,7 +176,7 @@ public class PlaylistDialog extends BottomDialog {
         private static final int TYPE_EMPTY_VIEW = 1;
         private static final int TYPE_ITEM_VIEW = 2;
         private static final int TYPE_EMPTY_LOADING = 3;
-        private Playlist mPlaylist;
+        private MovablePlaylist mPlaylist;
 
         private final ItemClickHelper mItemClickHelper;
         private final SelectableHelper mSelectableHelper;
@@ -165,7 +186,7 @@ public class PlaylistDialog extends BottomDialog {
 
         public PlaylistAdapter(@NonNull Playlist playlist, int playPosition) {
             Preconditions.checkNotNull(playlist);
-            mPlaylist = playlist;
+            mPlaylist = new MovablePlaylist(playlist, playPosition);
 
             mItemClickHelper = new ItemClickHelper();
             mSelectableHelper = new SelectableHelper(this);
@@ -183,14 +204,14 @@ public class PlaylistDialog extends BottomDialog {
             Preconditions.checkNotNull(playlist);
 
             if (playlist.isEmpty()) {
-                mPlaylist = playlist;
+                mPlaylist = new MovablePlaylist(playlist, playPosition);
                 notifyDataSetChanged();
                 mSelectableHelper.clearSelected();
                 return;
             }
 
             if (mPlaylist.isEmpty()) {
-                mPlaylist = playlist;
+                mPlaylist = new MovablePlaylist(playlist, playPosition);
                 notifyDataSetChanged();
                 mSelectableHelper.setSelect(playPosition, true);
                 return;
@@ -199,7 +220,7 @@ public class PlaylistDialog extends BottomDialog {
             DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new MusicItemDiffCallback(mPlaylist, playlist));
             diffResult.dispatchUpdatesTo(this);
 
-            mPlaylist = playlist;
+            mPlaylist = new MovablePlaylist(playlist, playPosition);
             mSelectableHelper.setSelect(playPosition, true);
         }
 
@@ -288,6 +309,11 @@ public class PlaylistDialog extends BottomDialog {
             return TYPE_ITEM_VIEW;
         }
 
+        public void move(int from, int target) {
+            mPlaylist.move(from, target);
+            notifyItemMoved(from, target);
+        }
+
         private int getEmptyType() {
             if (mLoading) {
                 return TYPE_EMPTY_LOADING;
@@ -371,10 +397,10 @@ public class PlaylistDialog extends BottomDialog {
         }
 
         private static class MusicItemDiffCallback extends DiffUtil.Callback {
-            private final Playlist mOldPlaylist;
+            private final MovablePlaylist mOldPlaylist;
             private final Playlist mNewPlaylist;
 
-            MusicItemDiffCallback(Playlist oldPlaylist, Playlist newPlaylist) {
+            MusicItemDiffCallback(MovablePlaylist oldPlaylist, Playlist newPlaylist) {
                 mOldPlaylist = oldPlaylist;
                 mNewPlaylist = newPlaylist;
             }
