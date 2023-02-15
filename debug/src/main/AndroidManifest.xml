@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="snow.player.debug">
 
+    <permission android:name="snow.player.appwidget.permission.UPDATE_APPWIDGET" />
+
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -9,6 +11,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="snow.player.appwidget.permission.UPDATE_APPWIDGET" />
 
     <application
         android:name="androidx.multidex.MultiDexApplication"
@@ -51,6 +54,26 @@
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".ExampleAppWidgetProvider"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/example_app_widget" />
+
+            <intent-filter>
+                <action android:name="snow.player.appwidget.action.PLAYER_STATE_CHANGED" />
+                <category android:name="snow.player.debug.MyPlayerService" />
+            </intent-filter>
+
         </receiver>
     </application>
 
