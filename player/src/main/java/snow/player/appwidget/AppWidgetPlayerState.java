@@ -37,6 +37,7 @@ import snow.player.audio.MusicItem;
  */
 public class AppWidgetPlayerState implements Parcelable {
     public static final String ACTION_PLAYER_STATE_CHANGED = "snow.player.appwidget.action.PLAYER_STATE_CHANGED";
+    public static final String PERMISSION_UPDATE_APP_WIDGET = "snow.player.appwidget.permission.UPDATE_APPWIDGET";
 
     private static final String KEY_PLAYER_STATE = "PLAYER_STATE";
     private static boolean sMMKVInitialized;
@@ -114,7 +115,8 @@ public class AppWidgetPlayerState implements Parcelable {
 
         Intent intent = new Intent(ACTION_PLAYER_STATE_CHANGED);
         intent.addCategory(playerService.getName());
-        context.sendBroadcast(intent);
+        intent.setPackage(context.getPackageName());
+        context.sendBroadcast(intent, PERMISSION_UPDATE_APP_WIDGET);
     }
 
     private static MMKV getMMKV(@NonNull Context context, @NonNull Class<? extends PlayerService> playerService) {
