@@ -1,6 +1,8 @@
 package snow.player.appwidget;
 
 import android.app.ActivityManager;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +14,8 @@ import androidx.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.tencent.mmkv.MMKV;
+
+import java.util.List;
 
 import snow.player.PlayMode;
 import snow.player.PlaybackState;
@@ -117,6 +121,30 @@ public class AppWidgetPlayerState implements Parcelable {
         intent.addCategory(playerService.getName());
         intent.setPackage(context.getPackageName());
         context.sendBroadcast(intent, PERMISSION_UPDATE_APP_WIDGET);
+    }
+
+    public static void updatePlayerState(@NonNull Context context,
+                                         @NonNull Class<? extends PlayerService> playerService,
+                                         @NonNull AppWidgetPlayerState playerState,
+                                         @NonNull List<Class<? extends AppWidgetProvider>> appWidgets) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(playerService);
+        Preconditions.checkNotNull(playerState);
+
+        MMKV mmkv = getMMKV(context, playerService);
+        mmkv.encode(KEY_PLAYER_STATE, playerState);
+
+        AppWidgetManager am = AppWidgetManager.getInstance(context);
+
+        for (Class<? extends AppWidgetProvider> appWidgetClazz : appWidgets) {
+            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+
+            ComponentName componentName = new ComponentName(context, appWidgetClazz);
+            intent.setComponent(componentName);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, am.getAppWidgetIds(componentName));
+            
+            context.sendBroadcast(intent);
+        }
     }
 
     private static MMKV getMMKV(@NonNull Context context, @NonNull Class<? extends PlayerService> playerService) {

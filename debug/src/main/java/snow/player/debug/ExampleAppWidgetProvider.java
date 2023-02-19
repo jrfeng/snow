@@ -5,21 +5,13 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.widget.RemoteViews;
 
 import snow.player.appwidget.AppWidgetPlayerState;
 import snow.player.audio.MusicItem;
 
 public class ExampleAppWidgetProvider extends AppWidgetProvider {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        super.onReceive(context, intent);
-
-        if (AppWidgetPlayerState.ACTION_PLAYER_STATE_CHANGED.equals(intent.getAction())) {
-            AppWidgetManager am = AppWidgetManager.getInstance(context);
-            onUpdate(context, am, am.getAppWidgetIds(new ComponentName(context, ExampleAppWidgetProvider.class)));
-        }
-    }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -43,7 +35,13 @@ public class ExampleAppWidgetProvider extends AppWidgetProvider {
             return;
         }
 
-        remoteViews.setTextViewText(R.id.tv_song_name, musicItem.getTitle());
+        String title = musicItem.getTitle();
+        if (TextUtils.isEmpty(title)) {
+            title = "未知歌曲名";
+        }
+
+        remoteViews.setTextViewText(R.id.tv_song_name, title);
+        remoteViews.setTextViewText(R.id.tv_playback_state, state.getPlaybackState().toString());
 
         appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
     }

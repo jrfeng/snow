@@ -129,6 +129,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     public AbstractPlayer(@NonNull Context context,
                           @NonNull PlayerConfig playerConfig,
                           @NonNull PlayerState playerState,
+                          @NonNull ServicePlayerStateHelper playerStateHelper,
                           @NonNull PlaylistManagerImp playlistManager,
                           @NonNull Class<? extends PlayerService> playerService,
                           @NonNull OnStateChangeListener listener) {
@@ -142,7 +143,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mApplicationContext = context.getApplicationContext();
         mPlayerConfig = playerConfig;
         mPlayerState = playerState;
-        mPlayerStateHelper = new ServicePlayerStateHelper(mPlayerState, mApplicationContext, playerService);
+        mPlayerStateHelper = playerStateHelper;
         mPlaylistManager = playlistManager;
         mOnStateChangeListener = listener;
 

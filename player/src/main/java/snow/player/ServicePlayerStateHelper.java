@@ -1,11 +1,14 @@
 package snow.player;
 
+import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
+
+import java.util.List;
 
 import snow.player.appwidget.AppWidgetPlayerState;
 import snow.player.audio.MusicItem;
@@ -14,15 +17,22 @@ class ServicePlayerStateHelper extends PlayerStateHelper {
     private final Context mContext;
     private final Class<? extends PlayerService> mPlayerService;
 
-    public ServicePlayerStateHelper(@NonNull PlayerState playerState,
-                                    @NonNull Context context,
-                                    @NonNull Class<? extends PlayerService> playerService) {
+    @Nullable
+    private final List<Class<? extends AppWidgetProvider>> mAppWidgets;
+
+    public ServicePlayerStateHelper(
+            @NonNull PlayerState playerState,
+            @NonNull Context context,
+            @NonNull Class<? extends PlayerService> playerService,
+            @Nullable List<Class<? extends AppWidgetProvider>> appWidgets
+    ) {
         super((playerState));
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerService);
 
         mContext = context;
         mPlayerService = playerService;
+        mAppWidgets = appWidgets;
     }
 
     private void updateAppWidgetPlayerState() {
@@ -38,6 +48,11 @@ class ServicePlayerStateHelper extends PlayerStateHelper {
                 getPlayerState().isStalled(),
                 getPlayerState().getErrorMessage()
         );
+
+        if (mAppWidgets != null) {
+            AppWidgetPlayerState.updatePlayerState(mContext, mPlayerService, playerState, mAppWidgets);
+            return;
+        }
 
         AppWidgetPlayerState.updatePlayerState(mContext, mPlayerService, playerState);
     }

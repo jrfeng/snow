@@ -1,5 +1,6 @@
 package snow.player.debug;
 
+import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.net.Uri;
 
@@ -12,6 +13,8 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.util.Util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -81,5 +84,11 @@ public class MyPlayerService extends PlayerService {
     @Override
     protected AudioEffectManager onCreateAudioEffectManager() {
         return new AndroidAudioEffectManager();
+    }
+
+    @Nullable
+    @Override
+    protected Class<? extends AppWidgetProvider> getAppWidget() {
+        return ExampleAppWidgetProvider.class;
     }
 }

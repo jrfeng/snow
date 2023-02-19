@@ -6,6 +6,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.appwidget.AppWidgetProvider;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -50,6 +51,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.FutureTarget;
 import com.google.common.base.Preconditions;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -126,6 +128,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private PlayerConfig mPlayerConfig;
     private PlayerState mPlayerState;
+    private ServicePlayerStateHelper mPlayerStateHelper;
 
     private PlaylistManagerImp mPlaylistManager;
     private PlayerImp mPlayer;
@@ -192,6 +195,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         initNotificationManager();
         initPlayerConfig();
         initPlayerState();
+        initPlayerStateHelper();
         initPlaylistManager();
         initNotificationView();
         initOnStateChangeListener();
@@ -324,6 +328,23 @@ public class PlayerService extends MediaBrowserServiceCompat
         mPlayerState = new PersistentPlayerState(this, mPersistentId);
     }
 
+    private void initPlayerStateHelper() {
+        List<Class<? extends AppWidgetProvider>> appWidgets = getAppWidgets();
+
+        if (appWidgets == null && getAppWidget() != null) {
+            Class<? extends AppWidgetProvider> clazz = getAppWidget();
+            appWidgets = new ArrayList<>();
+            appWidgets.add(clazz);
+        }
+
+        mPlayerStateHelper = new ServicePlayerStateHelper(
+                mPlayerState,
+                getApplicationContext(),
+                this.getClass(),
+                appWidgets
+        );
+    }
+
     private void initPlaylistManager() {
         mPlaylistManager = new PlaylistManagerImp(this, mPersistentId);
     }
@@ -385,6 +406,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         mPlayer = new PlayerImp(this,
                 mPlayerConfig,
                 mPlayerState,
+                mPlayerStateHelper,
                 mPlaylistManager,
                 this.getClass(),
                 mOnStateChangeListener);
@@ -454,6 +476,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         mSleepTimer = new SleepTimerImp(
                 this,
                 mPlayerState,
+                mPlayerStateHelper,
                 ChannelHelper.newEmitter(OnStateChangeListener2.class, sessionEventEmitter),
                 ChannelHelper.newEmitter(OnWaitPlayCompleteChangeListener.class, sessionEventEmitter)
         );
@@ -562,6 +585,16 @@ public class PlayerService extends MediaBrowserServiceCompat
      */
     @Nullable
     protected HistoryRecorder onCreateHistoryRecorder() {
+        return null;
+    }
+
+    @Nullable
+    protected Class<? extends AppWidgetProvider> getAppWidget() {
+        return null;
+    }
+
+    @Nullable
+    protected List<Class<? extends AppWidgetProvider>> getAppWidgets() {
         return null;
     }
 
@@ -1499,10 +1532,11 @@ public class PlayerService extends MediaBrowserServiceCompat
         public PlayerImp(@NonNull Context context,
                          @NonNull PlayerConfig playerConfig,
                          @NonNull PlayerState playlistState,
+                         @NonNull ServicePlayerStateHelper playerStateHelper,
                          @NonNull PlaylistManagerImp playlistManager,
                          @NonNull Class<? extends PlayerService> playerService,
                          @NonNull AbstractPlayer.OnStateChangeListener listener) {
-            super(context, playerConfig, playlistState, playlistManager, playerService, listener);
+            super(context, playerConfig, playlistState, playerStateHelper, playlistManager, playerService, listener);
         }
 
         @Override

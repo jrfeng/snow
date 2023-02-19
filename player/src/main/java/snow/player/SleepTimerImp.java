@@ -22,6 +22,7 @@ class SleepTimerImp implements SleepTimer {
 
     SleepTimerImp(PlayerService playerService,
                   PlayerState playerState,
+                  ServicePlayerStateHelper playerStateHelper,
                   SleepTimer.OnStateChangeListener2 onStateChangeListener2,
                   OnWaitPlayCompleteChangeListener onWaitPlayCompleteChangeListener) {
         mPlayerService = playerService;
@@ -29,7 +30,7 @@ class SleepTimerImp implements SleepTimer {
         mSleepTimerStateChangedListener = onStateChangeListener2;
         mWaitPlayCompleteChangeListener = onWaitPlayCompleteChangeListener;
 
-        mPlayerStateHelper = new ServicePlayerStateHelper(playerState, playerService, playerService.getClass());
+        mPlayerStateHelper = playerStateHelper;
     }
 
     @Override
