@@ -588,11 +588,30 @@ public class PlayerService extends MediaBrowserServiceCompat
         return null;
     }
 
+    /**
+     * 返回你的 AppWidget 的 Class 对象。
+     * <p>
+     * 在该方法中返回你的 AppWidget 的 Class 对象，以便在播放器状态改变时刷新 APpWidget。
+     * <p>
+     * 如果你的 App 有多个 AppWidget 需要刷新，请可以重载 {@link #getAppWidgets()} 方法。
+     * 如果重载了 {@link #getAppWidgets()} 方法并且返回了一个非 null 值，则该方法将不再有效。
+     *
+     * @see #getAppWidgets()
+     */
     @Nullable
     protected Class<? extends AppWidgetProvider> getAppWidget() {
         return null;
     }
 
+    /**
+     * 返回你的 AppWidget 的 Class 对象。
+     * <p>
+     * 在该方法中返回你的 AppWidget 的 Class 对象，以便在播放器状态改变时刷新 APpWidget。
+     * <p>
+     * 如果你的 App 仅有单个 AppWidget 需要刷新，建议优先重载 {@link #getAppWidget()}。
+     *
+     * @see #getAppWidget()
+     */
     @Nullable
     protected List<Class<? extends AppWidgetProvider>> getAppWidgets() {
         return null;
