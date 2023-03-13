@@ -1880,7 +1880,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         List<MusicItem> musicItems = mPlaylist.getAllMusicItem();
         int index = musicItems.indexOf(musicItem);
         if (index > -1) {
-            moveMusicItem(index, Math.min(position, getPlaylistSize() - 1));
+            if (index < mPlayerState.getPlayPosition()) {
+                moveMusicItem(index, Math.min(position - 1, getPlaylistSize() - 1));
+            } else {
+                moveMusicItem(index, Math.min(position, getPlaylistSize() - 1));
+            }
             return;
         }
 
