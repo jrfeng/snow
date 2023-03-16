@@ -3,6 +3,7 @@ package snow.player;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -120,6 +121,9 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Nullable
     private AudioEffectManager mAudioEffectManager;
+
+    @Nullable
+    private Bitmap mMusicIcon;
 
     /**
      * 创建一个 {@link AbstractPlayer} 对象。
@@ -659,6 +663,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mMediaSession.setMetadata(buildMediaMetadata());
     }
 
+    void setIcon(Bitmap icon) {
+        mMusicIcon = icon;
+        mMediaSession.setMetadata(buildMediaMetadata());
+    }
+
     private void initPlaybackStateBuilder() {
         mPlaybackStateBuilder = new PlaybackStateCompat.Builder()
                 .setActions(PlaybackStateCompat.ACTION_PLAY |
@@ -801,6 +810,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                     .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, musicItem.getAlbum())
                     .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, musicItem.getIconUri())
                     .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mPlayerState.getDuration())
+                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, mMusicIcon)
                     .build();
         }
 

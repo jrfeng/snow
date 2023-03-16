@@ -1956,6 +1956,9 @@ public class PlayerService extends MediaBrowserServiceCompat
         public final void setIcon(@NonNull Bitmap icon) {
             mIconExpired = false;
             mIcon = icon;
+
+            mPlayerService.mPlayer.setIcon(icon);
+
             onIconLoaded();
             invalidate();
         }
