@@ -52,6 +52,7 @@ import snow.player.util.AsyncResult;
  */
 abstract class AbstractPlayer implements Player, PlaylistEditor {
     private static final String TAG = "AbstractPlayer";
+    private static final String TAG_WAKE_LOCK = "snow.player:AudioPlayer";
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
 
     private final Context mApplicationContext;
@@ -102,7 +103,9 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private PlaybackStateCompat.Builder mForbidSeekPlaybackStateBuilder;
     private MediaMetadataCompat.Builder mMediaMetadataBuilder;
 
+    @Nullable
     private PowerManager.WakeLock mWakeLock;
+    @Nullable
     private WifiManager.WifiLock mWifiLock;
 
     private boolean mConfirmNextPlay;
@@ -149,7 +152,6 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
         initAllListener();
         initAllHelper();
-        initWakeLock();
 
         mNetworkHelper.subscribeNetworkState();
     }
@@ -688,39 +690,68 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mMediaMetadataBuilder = new MediaMetadataCompat.Builder();
     }
 
-    private void initWakeLock() {
+    private PowerManager.WakeLock createWakeLock() {
         PowerManager pm = (PowerManager) mApplicationContext.getSystemService(Context.POWER_SERVICE);
+
+        PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG_WAKE_LOCK);
+        wakeLock.setReferenceCounted(false);
+
+        return wakeLock;
+    }
+
+    private WifiManager.WifiLock createWifiLock() {
         WifiManager wm = (WifiManager) mApplicationContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-        String tag = "snow.player:AbstractPlayer";
+        WifiManager.WifiLock wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, TAG_WAKE_LOCK);
+        wifiLock.setReferenceCounted(false);
 
-        if (pm != null) {
-            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, tag);
-            mWakeLock.setReferenceCounted(false);
-        }
+        return wifiLock;
+    }
 
-        if (wm != null) {
-            mWifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, tag);
-            mWifiLock.setReferenceCounted(false);
-        }
+    private boolean isWakeLockHeld() {
+        return mWakeLock != null && mWakeLock.isHeld();
+    }
+
+    private boolean isWifiLockHeld() {
+        return mWifiLock != null && mWifiLock.isHeld();
     }
 
     public void setSleepTimer(SleepTimerImp sleepTimerImp) {
         mSleepTimer = sleepTimerImp;
     }
 
-    private void requireWakeLock() {
+    private void requireWakeLock(boolean releaseOld) {
         if (wakeLockPermissionDenied()) {
             Log.w(TAG, "need permission: 'android.permission.WAKE_LOCK'");
             return;
         }
 
+        if (!releaseOld && isWakeLockHeld() && isWifiLockHeld()) {
+            return;
+        }
+
+        PowerManager.WakeLock oldWakeLock = mWakeLock;
+        WifiManager.WifiLock oldWifiLock = mWifiLock;
+
+        mWakeLock = createWakeLock();
+        mWifiLock = createWifiLock();
+
         if (mWakeLock != null && !mWakeLock.isHeld()) {
-            mWakeLock.acquire(getMusicItemDuration() + 5_000);
+            // 唤醒时间：歌曲时长加 1 分钟
+            long awakeTimeMs = getMusicItemDuration() + 60_000;
+            mWakeLock.acquire(awakeTimeMs);
         }
 
         if (mWifiLock != null && !mWifiLock.isHeld()) {
             mWifiLock.acquire();
+        }
+
+        if (oldWakeLock != null && oldWakeLock.isHeld()) {
+            oldWakeLock.release();
+        }
+
+        if (oldWifiLock != null && oldWifiLock.isHeld()) {
+            oldWifiLock.release();
         }
     }
 
@@ -894,7 +925,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     }
 
     private void notifyPreparing() {
-        requireWakeLock();
+        requireWakeLock(true);
         mPlayerStateHelper.onPreparing();
 
         mOnStateChangeListener.onPreparing();
@@ -916,7 +947,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     private void notifyPlaying(boolean stalled, int progress, long updateTime) {
         mPlayerStateHelper.onPlay(stalled, progress, updateTime);
-        requireWakeLock();
+        requireWakeLock(false);
 
         if (!stalled) {
             mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
