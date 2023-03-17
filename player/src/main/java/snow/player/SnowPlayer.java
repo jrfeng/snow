@@ -1,6 +1,7 @@
 package snow.player;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -52,8 +53,8 @@ import snow.player.util.AsyncResult;
  * 该类实现了 {@link Player} 接口，并实现大部分音乐播放器功能。
  */
 class SnowPlayer implements Player, PlaylistEditor {
-    private static final String TAG = "AbstractPlayer";
-    private static final String TAG_WAKE_LOCK = "snow.player:AudioPlayer";
+    private static final String TAG = "SnowPlayer";
+    private static final String TAG_WAKE_LOCK = "snow.player:SnowPlayer";
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
 
     private final Context mApplicationContext;
@@ -685,13 +686,14 @@ class SnowPlayer implements Player, PlaylistEditor {
         mSleepTimer = sleepTimerImp;
     }
 
-    private void requireWakeLock(boolean releaseOld) {
+    @SuppressLint("WakelockTimeout")
+    private void requireWakeLock() {
         if (wakeLockPermissionDenied()) {
             Log.w(TAG, "need permission: 'android.permission.WAKE_LOCK'");
             return;
         }
 
-        if (!releaseOld && isWakeLockHeld() && isWifiLockHeld()) {
+        if (isWakeLockHeld() && isWifiLockHeld()) {
             return;
         }
 
@@ -702,9 +704,7 @@ class SnowPlayer implements Player, PlaylistEditor {
         mWifiLock = createWifiLock();
 
         if (mWakeLock != null && !mWakeLock.isHeld()) {
-            // 唤醒时间：歌曲时长加 1 分钟
-            long awakeTimeMs = getMusicItemDuration() + 60_000;
-            mWakeLock.acquire(awakeTimeMs);
+            mWakeLock.acquire();
         }
 
         if (mWifiLock != null && !mWifiLock.isHeld()) {
@@ -891,7 +891,7 @@ class SnowPlayer implements Player, PlaylistEditor {
     }
 
     private void notifyPreparing() {
-        requireWakeLock(true);
+        requireWakeLock();
         mPlayerStateHelper.onPreparing();
 
         mOnStateChangeListener.onPreparing();
@@ -913,7 +913,7 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     private void notifyPlaying(boolean stalled, int progress, long updateTime) {
         mPlayerStateHelper.onPlay(stalled, progress, updateTime);
-        requireWakeLock(false);
+        requireWakeLock();
 
         if (!stalled) {
             mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_PLAYING));
@@ -1622,6 +1622,8 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void skipToNext() {
+        Log.d(TAG, "skipToNext");
+
         if (mLoadingPlaylist) {
             mPlaylistLoadedAction = new Runnable() {
                 @Override
