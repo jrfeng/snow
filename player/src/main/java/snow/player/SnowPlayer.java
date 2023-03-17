@@ -693,30 +693,14 @@ class SnowPlayer implements Player, PlaylistEditor {
             return;
         }
 
-        if (isWakeLockHeld() && isWifiLockHeld()) {
-            return;
-        }
-
-        PowerManager.WakeLock oldWakeLock = mWakeLock;
-        WifiManager.WifiLock oldWifiLock = mWifiLock;
-
-        mWakeLock = createWakeLock();
-        mWifiLock = createWifiLock();
-
-        if (mWakeLock != null && !mWakeLock.isHeld()) {
+        if (!isWakeLockHeld()) {
+            mWakeLock = createWakeLock();
             mWakeLock.acquire();
         }
 
-        if (mWifiLock != null && !mWifiLock.isHeld()) {
+        if (!isWifiLockHeld()) {
+            mWifiLock = createWifiLock();
             mWifiLock.acquire();
-        }
-
-        if (oldWakeLock != null && oldWakeLock.isHeld()) {
-            oldWakeLock.release();
-        }
-
-        if (oldWifiLock != null && oldWifiLock.isHeld()) {
-            oldWifiLock.release();
         }
     }
 
