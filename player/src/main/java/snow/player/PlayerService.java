@@ -131,7 +131,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     private ServicePlayerStateHelper mPlayerStateHelper;
 
     private PlaylistManagerImp mPlaylistManager;
-    private PlayerImp mPlayer;
+    private SnowPlayer mPlayer;
     private CustomActionPipe mCustomActionDispatcher;
 
     private PlayerStateListener mPlayerStateListener;
@@ -169,7 +169,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     private BroadcastReceiver mCustomActionReceiver;
     private PlayerStateSynchronizer mPlayerStateSynchronizer;
 
-    private AbstractPlayer.OnStateChangeListener mOnStateChangeListener;
+    private SnowPlayer.OnStateChangeListener mOnStateChangeListener;
 
     private HandlerThread mSyncPlayerStateHandlerThread;
     private Handler mSyncPlayerStateHandler;
@@ -350,7 +350,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void initOnStateChangeListener() {
-        mOnStateChangeListener = new AbstractPlayer.OnStateChangeListener() {
+        mOnStateChangeListener = new SnowPlayer.OnStateChangeListener() {
             @Override
             public void onPreparing() {
                 PlayerService.this.updateNotificationView();
@@ -403,13 +403,45 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     private void initPlayer() {
-        mPlayer = new PlayerImp(this,
+        SnowPlayer.Factory factory = new SnowPlayer.Factory() {
+            @Override
+            public MusicPlayer createMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
+                return onCreateMusicPlayer(context, musicItem, uri);
+            }
+
+            @Override
+            public AudioManager.OnAudioFocusChangeListener createAudioFocusChangeListener() {
+                return PlayerService.this.onCreateAudioFocusChangeListener();
+            }
+        };
+
+        SnowPlayer.Callback callback = new SnowPlayer.Callback() {
+            @Override
+            public void isCached(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<Boolean> result) {
+                isCached(musicItem, soundQuality, result);
+            }
+
+            @Override
+            public void prepareMusicItem(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<MusicItem> result) {
+                onPrepareMusicItem(musicItem, soundQuality, result);
+            }
+
+            @Override
+            public void retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<Uri> result) {
+                onRetrieveMusicItemUri(musicItem, soundQuality, result);
+            }
+        };
+
+        mPlayer = new SnowPlayer(this,
                 mPlayerConfig,
                 mPlayerState,
                 mPlayerStateHelper,
                 mPlaylistManager,
                 this.getClass(),
-                mOnStateChangeListener);
+                mOnStateChangeListener,
+                factory,
+                callback
+        );
     }
 
     private void initCustomActionDispatcher() {
@@ -1546,48 +1578,6 @@ public class PlayerService extends MediaBrowserServiceCompat
         }
     }
 
-    private class PlayerImp extends AbstractPlayer {
-
-        public PlayerImp(@NonNull Context context,
-                         @NonNull PlayerConfig playerConfig,
-                         @NonNull PlayerState playlistState,
-                         @NonNull ServicePlayerStateHelper playerStateHelper,
-                         @NonNull PlaylistManagerImp playlistManager,
-                         @NonNull Class<? extends PlayerService> playerService,
-                         @NonNull AbstractPlayer.OnStateChangeListener listener) {
-            super(context, playerConfig, playlistState, playerStateHelper, playlistManager, playerService, listener);
-        }
-
-        @Override
-        protected void isCached(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<Boolean> result) {
-            PlayerService.this.isCached(musicItem, soundQuality, result);
-        }
-
-        @NonNull
-        @Override
-        protected MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri) {
-            return PlayerService.this.onCreateMusicPlayer(context, musicItem, uri);
-        }
-
-        @Override
-        protected void prepareMusicItem(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<MusicItem> result) {
-            PlayerService.this.onPrepareMusicItem(musicItem, soundQuality, result);
-        }
-
-        @Nullable
-        @Override
-        protected AudioManager.OnAudioFocusChangeListener onCreateAudioFocusChangeListener() {
-            return PlayerService.this.onCreateAudioFocusChangeListener();
-        }
-
-        @Override
-        protected void retrieveMusicItemUri(@NonNull MusicItem musicItem,
-                                            @NonNull SoundQuality soundQuality,
-                                            @NonNull AsyncResult<Uri> result) throws Exception {
-            PlayerService.this.onRetrieveMusicItemUri(musicItem, soundQuality, result);
-        }
-    }
-
     /**
      * 该类继承了 MediaSessionCompat.Callback 类，如果你需要对 MediaSession 框架的
      * 的 MediaSessionCompat.Callback 进行定制，则可以覆盖 {@link #onCreateMediaSessionCallback()} 方法，
@@ -1956,6 +1946,9 @@ public class PlayerService extends MediaBrowserServiceCompat
         public final void setIcon(@NonNull Bitmap icon) {
             mIconExpired = false;
             mIcon = icon;
+
+            mPlayerService.mPlayer.setIcon(icon);
+
             onIconLoaded();
             invalidate();
         }

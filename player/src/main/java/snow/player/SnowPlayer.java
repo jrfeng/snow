@@ -1,8 +1,10 @@
 package snow.player;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -50,8 +52,9 @@ import snow.player.util.AsyncResult;
 /**
  * 该类实现了 {@link Player} 接口，并实现大部分音乐播放器功能。
  */
-abstract class AbstractPlayer implements Player, PlaylistEditor {
-    private static final String TAG = "AbstractPlayer";
+class SnowPlayer implements Player, PlaylistEditor {
+    private static final String TAG = "SnowPlayer";
+    private static final String TAG_WAKE_LOCK = "snow.player:SnowPlayer";
     private static final int FORWARD_STEP = 15_000;     // 15 秒, 单位：毫秒 ms
 
     private final Context mApplicationContext;
@@ -102,7 +105,9 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private PlaybackStateCompat.Builder mForbidSeekPlaybackStateBuilder;
     private MediaMetadataCompat.Builder mMediaMetadataBuilder;
 
+    @Nullable
     private PowerManager.WakeLock mWakeLock;
+    @Nullable
     private WifiManager.WifiLock mWifiLock;
 
     private boolean mConfirmNextPlay;
@@ -118,21 +123,31 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     @Nullable
     private AudioEffectManager mAudioEffectManager;
 
+    @Nullable
+    private Bitmap mMusicIcon;
+
+    private final Factory mFactory;
+    private final Callback mCallback;
+
     /**
-     * 创建一个 {@link AbstractPlayer} 对象。
+     * 创建一个 {@link SnowPlayer} 对象。
      *
      * @param context         {@link Context} 对象，不能为 null
      * @param playerConfig    {@link PlayerConfig} 对象，保存了播放器的初始配置信息，不能为 null
      * @param playerState     {@link PlayerState} 对象，保存了播放器的初始状态，不能为 null
      * @param playlistManager {@link PlaylistManagerImp} 对象，用于管理播放列表，不能为 null
      */
-    public AbstractPlayer(@NonNull Context context,
-                          @NonNull PlayerConfig playerConfig,
-                          @NonNull PlayerState playerState,
-                          @NonNull ServicePlayerStateHelper playerStateHelper,
-                          @NonNull PlaylistManagerImp playlistManager,
-                          @NonNull Class<? extends PlayerService> playerService,
-                          @NonNull OnStateChangeListener listener) {
+    SnowPlayer(
+            @NonNull Context context,
+            @NonNull PlayerConfig playerConfig,
+            @NonNull PlayerState playerState,
+            @NonNull ServicePlayerStateHelper playerStateHelper,
+            @NonNull PlaylistManagerImp playlistManager,
+            @NonNull Class<? extends PlayerService> playerService,
+            @NonNull OnStateChangeListener listener,
+            @NonNull Factory factory,
+            @NonNull Callback callback
+    ) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(playerConfig);
         Preconditions.checkNotNull(playerState);
@@ -146,10 +161,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mPlayerStateHelper = playerStateHelper;
         mPlaylistManager = playlistManager;
         mOnStateChangeListener = listener;
+        mFactory = factory;
+        mCallback = callback;
 
         initAllListener();
         initAllHelper();
-        initWakeLock();
 
         mNetworkHelper.subscribeNetworkState();
     }
@@ -158,63 +174,10 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mAudioEffectManager = audioEffectManager;
     }
 
-    public void initialize(@NonNull final OnInitializedListener listener) {
+    void initialize(@NonNull final OnInitializedListener listener) {
         mOnInitializedListener = listener;
         reloadPlaylist();
     }
-
-    /**
-     * 查询具有 soundQuality 音质的 MusicItem 表示的的音乐是否已被缓存。
-     * <p>
-     * 该方法会在异步线程中被调用。
-     *
-     * @param musicItem    要查询的 MusicItem 对象
-     * @param soundQuality 音乐的音质
-     * @param result       用于接收异步任务的结果值
-     */
-    protected abstract void isCached(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<Boolean> result);
-
-    /**
-     * 该方法会在创建 MusicPlayer 对象时调用。
-     * <p>
-     * 你可以重写该方法来返回你自己的 MusicPlayer 实现。
-     */
-    @NonNull
-    protected abstract MusicPlayer onCreateMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri);
-
-    /**
-     * 准备 {@link MusicItem} 对象。
-     * <p>
-     * 该方法会在歌曲即将播放前调用，你可以在该方法中对 {@link MusicItem} 对象进行修正。
-     * 例如，从服务器获取歌曲的播放时长、播放链接，并将这些数据重新设置给 {@link MusicItem} 对象即可。
-     * <p>
-     * 该方法会在异步线程中执行，因此可以执行各种耗时操作，例如访问网络。
-     *
-     * @param musicItem    即将播放的 {@link MusicItem} 对象，不为 null。
-     * @param soundQuality 即将播放的音乐的音质
-     * @param result       用于接收修正后的 {@link MusicItem} 对象，不为 null。
-     */
-    protected abstract void prepareMusicItem(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<MusicItem> result);
-
-    /**
-     * 获取音乐的播放链接。
-     * <p>
-     * 该方法会在异步线程中执行，因此可以执行各种耗时操作，例如访问网络。
-     *
-     * @param musicItem    要播放的音乐
-     * @param soundQuality 要播放的音乐的音质
-     * @param result       用于接收异步任务的结果
-     * @throws Exception 获取音乐播放链接的过程中发生的任何异常
-     */
-    protected abstract void retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<Uri> result) throws Exception;
-
-    /**
-     * 可以通过覆盖该方法来提供一个自定义的 AudioManager.OnAudioFocusChangeListener
-     *
-     * @return 如果返回 null，则会使用默认的音频焦点监听器。
-     */
-    @Nullable
-    protected abstract AudioManager.OnAudioFocusChangeListener onCreateAudioFocusChangeListener();
 
     /**
      * 释放播放器所占用的资源。注意！调用该方法后，就不允许在使用当前 Player 对象了，否则会导致不可预见的错误。
@@ -285,8 +248,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     private Single<Uri> getMusicItemUri(@NonNull final MusicItem musicItem, @NonNull final SoundQuality soundQuality) {
         return Single.create(new SingleOnSubscribe<Uri>() {
             @Override
-            public void subscribe(@NonNull final SingleEmitter<Uri> emitter) throws Exception {
-                retrieveMusicItemUri(musicItem, soundQuality, new AsyncResult<Uri>() {
+            public void subscribe(@NonNull final SingleEmitter<Uri> emitter) {
+                mCallback.retrieveMusicItemUri(musicItem, soundQuality, new AsyncResult<Uri>() {
                     @Override
                     public void onSuccess(@NonNull Uri uri) {
                         emitter.onSuccess(uri);
@@ -322,7 +285,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         return new Consumer<Uri>() {
             @Override
             public void accept(Uri uri) {
-                mMusicPlayer = onCreateMusicPlayer(mApplicationContext, musicItem, uri);
+                mMusicPlayer = mFactory.createMusicPlayer(mApplicationContext, musicItem, uri);
                 attachListeners(mMusicPlayer);
 
                 mPreparedAction = preparedAction;
@@ -551,7 +514,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     }
 
     private void initAudioFocusHelper() {
-        AudioManager.OnAudioFocusChangeListener listener = onCreateAudioFocusChangeListener();
+        AudioManager.OnAudioFocusChangeListener listener = mFactory.createAudioFocusChangeListener();
         if (listener != null) {
             mAudioFocusHelper = new AudioFocusHelper(mApplicationContext, listener);
             return;
@@ -633,8 +596,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     /**
      * 设置 MediaSessionCompat 对象。
      * <p>
-     * 创建 {@link AbstractPlayer} 对象后，必须调用该方法设置一个 MediaSessionCompat 对象，否则
-     * {@link AbstractPlayer} 对象无法正常工作。
+     * 创建 {@link SnowPlayer} 对象后，必须调用该方法设置一个 MediaSessionCompat 对象，否则
+     * {@link SnowPlayer} 对象无法正常工作。
      *
      * @param mediaSession MediaSessionCompat 对象，不能为 null
      */
@@ -654,6 +617,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
             mMediaSession.setPlaybackState(buildPlaybackState(PlaybackStateCompat.STATE_NONE));
         }
 
+        mMediaSession.setMetadata(buildMediaMetadata());
+    }
+
+    void setIcon(Bitmap icon) {
+        mMusicIcon = icon;
         mMediaSession.setMetadata(buildMediaMetadata());
     }
 
@@ -688,38 +656,50 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         mMediaMetadataBuilder = new MediaMetadataCompat.Builder();
     }
 
-    private void initWakeLock() {
+    private PowerManager.WakeLock createWakeLock() {
         PowerManager pm = (PowerManager) mApplicationContext.getSystemService(Context.POWER_SERVICE);
+
+        PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG_WAKE_LOCK);
+        wakeLock.setReferenceCounted(false);
+
+        return wakeLock;
+    }
+
+    private WifiManager.WifiLock createWifiLock() {
         WifiManager wm = (WifiManager) mApplicationContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-        String tag = "snow.player:AbstractPlayer";
+        WifiManager.WifiLock wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, TAG_WAKE_LOCK);
+        wifiLock.setReferenceCounted(false);
 
-        if (pm != null) {
-            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, tag);
-            mWakeLock.setReferenceCounted(false);
-        }
+        return wifiLock;
+    }
 
-        if (wm != null) {
-            mWifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, tag);
-            mWifiLock.setReferenceCounted(false);
-        }
+    private boolean isWakeLockHeld() {
+        return mWakeLock != null && mWakeLock.isHeld();
+    }
+
+    private boolean isWifiLockHeld() {
+        return mWifiLock != null && mWifiLock.isHeld();
     }
 
     public void setSleepTimer(SleepTimerImp sleepTimerImp) {
         mSleepTimer = sleepTimerImp;
     }
 
+    @SuppressLint("WakelockTimeout")
     private void requireWakeLock() {
         if (wakeLockPermissionDenied()) {
             Log.w(TAG, "need permission: 'android.permission.WAKE_LOCK'");
             return;
         }
 
-        if (mWakeLock != null && !mWakeLock.isHeld()) {
-            mWakeLock.acquire(getMusicItemDuration() + 5_000);
+        if (!isWakeLockHeld()) {
+            mWakeLock = createWakeLock();
+            mWakeLock.acquire();
         }
 
-        if (mWifiLock != null && !mWifiLock.isHeld()) {
+        if (!isWifiLockHeld()) {
+            mWifiLock = createWifiLock();
             mWifiLock.acquire();
         }
     }
@@ -770,6 +750,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                     .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, musicItem.getAlbum())
                     .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, musicItem.getIconUri())
                     .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mPlayerState.getDuration())
+                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, mMusicIcon)
                     .build();
         }
 
@@ -1099,7 +1080,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         return Single.create(new SingleOnSubscribe<MusicItem>() {
             @Override
             public void subscribe(@NonNull final SingleEmitter<MusicItem> emitter) {
-                prepareMusicItem(musicItem, mPlayerConfig.getSoundQuality(), new AsyncResult<MusicItem>() {
+                mCallback.prepareMusicItem(musicItem, mPlayerConfig.getSoundQuality(), new AsyncResult<MusicItem>() {
                     @Override
                     public void onSuccess(@NonNull MusicItem item) {
                         emitter.onSuccess(item);
@@ -1449,7 +1430,7 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
                     return;
                 }
 
-                isCached(musicItem, mPlayerConfig.getSoundQuality(), new AsyncResult<Boolean>() {
+                mCallback.isCached(musicItem, mPlayerConfig.getSoundQuality(), new AsyncResult<Boolean>() {
                     @Override
                     public void onSuccess(@NonNull Boolean aBoolean) {
                         emitter.onSuccess(aBoolean);
@@ -1625,6 +1606,8 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
 
     @Override
     public void skipToNext() {
+        Log.d(TAG, "skipToNext");
+
         if (mLoadingPlaylist) {
             mPlaylistLoadedAction = new Runnable() {
                 @Override
@@ -1880,7 +1863,11 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
         List<MusicItem> musicItems = mPlaylist.getAllMusicItem();
         int index = musicItems.indexOf(musicItem);
         if (index > -1) {
-            moveMusicItem(index, Math.min(position, getPlaylistSize() - 1));
+            if (index < mPlayerState.getPlayPosition()) {
+                moveMusicItem(index, Math.min(position - 1, getPlaylistSize() - 1));
+            } else {
+                moveMusicItem(index, Math.min(position, getPlaylistSize() - 1));
+            }
             return;
         }
 
@@ -2117,12 +2104,66 @@ abstract class AbstractPlayer implements Player, PlaylistEditor {
     }
 
     /**
-     * 监听 {@link AbstractPlayer} 的初始化状态。
+     * 监听 {@link SnowPlayer} 的初始化状态。
      */
     interface OnInitializedListener {
         /**
-         * 该方法会在 {@link AbstractPlayer} 初始化完毕后调用。
+         * 该方法会在 {@link SnowPlayer} 初始化完毕后调用。
          */
         void onInitialized();
+    }
+
+    interface Factory {
+        /**
+         * 该方法会在创建 MusicPlayer 对象时调用。
+         * <p>
+         * 你可以重写该方法来返回你自己的 MusicPlayer 实现。
+         */
+        MusicPlayer createMusicPlayer(@NonNull Context context, @NonNull MusicItem musicItem, @NonNull Uri uri);
+
+        /**
+         * 可以通过覆盖该方法来提供一个自定义的 AudioManager.OnAudioFocusChangeListener
+         *
+         * @return 如果返回 null，则会使用默认的音频焦点监听器。
+         */
+        AudioManager.OnAudioFocusChangeListener createAudioFocusChangeListener();
+    }
+
+    interface Callback {
+        /**
+         * 查询具有 soundQuality 音质的 MusicItem 表示的的音乐是否已被缓存。
+         * <p>
+         * 该方法会在异步线程中被调用。
+         *
+         * @param musicItem    要查询的 MusicItem 对象
+         * @param soundQuality 音乐的音质
+         * @param result       用于接收异步任务的结果值
+         */
+        void isCached(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<Boolean> result);
+
+        /**
+         * 准备 {@link MusicItem} 对象。
+         * <p>
+         * 该方法会在歌曲即将播放前调用，你可以在该方法中对 {@link MusicItem} 对象进行修正。
+         * 例如，从服务器获取歌曲的播放时长、播放链接，并将这些数据重新设置给 {@link MusicItem} 对象即可。
+         * <p>
+         * 该方法会在异步线程中执行，因此可以执行各种耗时操作，例如访问网络。
+         *
+         * @param musicItem    即将播放的 {@link MusicItem} 对象，不为 null。
+         * @param soundQuality 即将播放的音乐的音质
+         * @param result       用于接收修正后的 {@link MusicItem} 对象，不为 null。
+         */
+        void prepareMusicItem(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<MusicItem> result);
+
+        /**
+         * 获取音乐的播放链接。
+         * <p>
+         * 该方法会在异步线程中执行，因此可以执行各种耗时操作，例如访问网络。
+         *
+         * @param musicItem    要播放的音乐
+         * @param soundQuality 要播放的音乐的音质
+         * @param result       用于接收异步任务的结果
+         */
+        void retrieveMusicItemUri(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<Uri> result);
     }
 }
