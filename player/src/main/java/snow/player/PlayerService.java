@@ -209,6 +209,10 @@ public class PlayerService extends MediaBrowserServiceCompat
         initCustomActionReceiver();
         initSyncPlayerStateHandler();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            startForegroundAPI31();
+        }
+
         preparePlayer();
         keepServiceAlive();
     }
@@ -418,7 +422,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         SnowPlayer.Callback callback = new SnowPlayer.Callback() {
             @Override
             public void isCached(@NonNull MusicItem musicItem, @NonNull SoundQuality soundQuality, @NonNull AsyncResult<Boolean> result) {
-                isCached(musicItem, soundQuality, result);
+                PlayerService.this.isCached(musicItem, soundQuality, result);
             }
 
             @Override
@@ -1073,11 +1077,6 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     private void updateNotificationViewAPI31() {
         if (noNotificationView()) {
-            return;
-        }
-
-        if (!isForeground()) {
-            startForeground();
             return;
         }
 
@@ -2530,6 +2529,10 @@ public class PlayerService extends MediaBrowserServiceCompat
         @NonNull
         @Override
         public Notification onCreatePlaceHolderNotification(String hint) {
+            androidx.media.app.NotificationCompat.MediaStyle mediaStyle =
+                    new androidx.media.app.NotificationCompat.MediaStyle()
+                            .setMediaSession(getMediaSession().getSessionToken());
+
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), CHANNEL_ID)
                     .setSmallIcon(getSmallIconId())
                     .setLargeIcon(getIcon())
@@ -2538,7 +2541,8 @@ public class PlayerService extends MediaBrowserServiceCompat
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setPriority(NotificationCompat.PRIORITY_LOW)
                     .setShowWhen(false)
-                    .setAutoCancel(false);
+                    .setAutoCancel(false)
+                    .setStyle(mediaStyle);
 
             return builder.build();
         }
