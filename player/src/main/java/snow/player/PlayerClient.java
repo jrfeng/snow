@@ -88,6 +88,8 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
 
     private final List<OnConnectStateChangeListener> mAllConnectStateChangeListener;
 
+    private final List<OnVolumeChaneListener> mAllVolumeChangeListener;
+
     private PlayerClient(Context context, Class<? extends PlayerService> playerService) {
         mApplicationContext = context.getApplicationContext();
         mPlayerService = playerService;
@@ -111,6 +113,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         mAllRepeatListener = new ArrayList<>();
         mAllSpeedChangeListener = new ArrayList<>();
         mAllConnectStateChangeListener = new ArrayList<>();
+        mAllVolumeChangeListener = new ArrayList<>();
 
         initMediaBrowser();
         initPlaylistManager();
@@ -372,6 +375,50 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
      */
     public void removeOnConnectStateChangeListener(OnConnectStateChangeListener listener) {
         mAllConnectStateChangeListener.remove(listener);
+    }
+
+    /**
+     * 添加一个音量改变监听器。
+     *
+     * @param listener 要添加的监听器，如果已添加则忽略。
+     */
+    public void addOnVolumeChangeListener(@NonNull OnVolumeChaneListener listener) {
+        Preconditions.checkNotNull(listener);
+
+        if (mAllVolumeChangeListener.contains(listener)) {
+            return;
+        }
+
+        mAllVolumeChangeListener.add(listener);
+
+        if (notConnected()) {
+            return;
+        }
+
+        listener.onVolumeChanged(mPlayerState.getVolume());
+    }
+
+    /**
+     * 添加一个音量改变监听器。
+     *
+     * @param owner    LifecycleOwner 对象。监听器会在该 LifecycleOwner 对象销毁时自动注销，避免内存泄露。
+     * @param listener 要添加的监听器，如果已添加则忽略。
+     */
+    public void addOnVolumeChangeListener(@NonNull LifecycleOwner owner,
+                                          @NonNull OnVolumeChaneListener listener) {
+        Preconditions.checkNotNull(owner);
+        Preconditions.checkNotNull(listener);
+
+        if (isDestroyed(owner)) {
+            return;
+        }
+
+        addOnVolumeChangeListener(listener);
+        owner.getLifecycle().addObserver(new DestroyObserver(() -> removeOnVolumeChangeListener(listener)));
+    }
+
+    public void removeOnVolumeChangeListener(OnVolumeChaneListener listener) {
+        mAllVolumeChangeListener.remove(listener);
     }
 
     /**
@@ -1014,6 +1061,21 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         mPlayer.setSpeed(speed);
     }
 
+    @Override
+    public void setVolume(float volume) {
+        if (notConnected()) {
+            tryAutoConnect(new Runnable() {
+                @Override
+                public void run() {
+                    setVolume(volume);
+                }
+            });
+            return;
+        }
+
+        mPlayer.setVolume(volume);
+    }
+
     private void tryAutoConnect(@Nullable Runnable connectedAction) {
         if (!mAutoConnect) {
             return;
@@ -1298,6 +1360,19 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         }
 
         return mPlayerState.isSleepTimerTimeout();
+    }
+
+    /**
+     * 获取播放器的当前音量。
+     *
+     * @return 返回播放器的当前音量。
+     */
+    public float getVolume() {
+        if (notConnected()) {
+            return 1.0F;
+        }
+
+        return mPlayerState.getVolume();
     }
 
     /**
@@ -2600,6 +2675,16 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         }
     }
 
+    private void notifyVolumeChanged(float volume) {
+        if (notConnected()) {
+            return;
+        }
+
+        for (OnVolumeChaneListener listener : mAllVolumeChangeListener) {
+            listener.onVolumeChanged(volume);
+        }
+    }
+
     // 用于管理与同步播放器状态
     private class PlayerStateListenerImpl implements PlayerStateListener,
             SleepTimer.OnStateChangeListener2,
@@ -2749,6 +2834,12 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         public void onTimeout(boolean actionComplete) {
             mPlayerStateHelper.onSleepTimerTimeout(actionComplete);
             notifySleepTimerTimeout();
+        }
+
+        @Override
+        public void onVolumeChanged(float volume) {
+            mPlayerStateHelper.onVolumeChanged(volume);
+            notifyVolumeChanged(volume);
         }
     }
 

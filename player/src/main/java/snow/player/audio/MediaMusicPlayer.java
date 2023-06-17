@@ -44,6 +44,8 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
     private boolean mInvalid;
     private boolean mLooping;
 
+    private float mVolume = 1.0F;
+
     /**
      * 创建一个 {@link MediaMusicPlayer} 对象。
      *
@@ -244,8 +246,14 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
     }
 
     @Override
-    public void setVolume(float leftVolume, float rightVolume) {
-        mMediaPlayer.setVolume(leftVolume, rightVolume);
+    public void setVolume(float volume) {
+        mVolume = volume;
+        mMediaPlayer.setVolume(volume, volume);
+    }
+
+    @Override
+    public float getVolume() {
+        return mVolume;
     }
 
     @Override

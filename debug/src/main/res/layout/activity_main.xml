@@ -116,6 +116,18 @@
 
                     <TextView
                         android:layout_column="0"
+                        android:text="Volume:" />
+
+                    <TextView
+                        android:layout_column="1"
+                        android:text="@{String.valueOf(viewModel.volume)}" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:layout_column="0"
                         android:text="TextPlayProgress:" />
 
                     <TextView
@@ -476,6 +488,24 @@
                 android:textAllCaps="false"
                 android:textOff="WaitPlayComplete: false"
                 android:textOn="WaitPlayComplete: true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:text="Volume:"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <SeekBar
+                android:id="@+id/sb_volume"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:max="100"
+                android:progress="@{(int)(viewModel.volume * 100)}" />
 
             <TextView
                 android:layout_width="wrap_content"

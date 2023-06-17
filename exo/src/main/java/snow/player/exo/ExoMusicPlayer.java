@@ -305,8 +305,13 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     }
 
     @Override
-    public void setVolume(float leftVolume, float rightVolume) {
-        mExoPlayer.setVolume(Math.max(leftVolume, rightVolume));
+    public void setVolume(float volume) {
+        mExoPlayer.setVolume(volume);
+    }
+
+    @Override
+    public float getVolume() {
+        return mExoPlayer.getVolume();
     }
 
     @Override

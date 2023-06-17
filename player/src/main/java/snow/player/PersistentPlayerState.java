@@ -21,6 +21,7 @@ class PersistentPlayerState extends PlayerState {
     private static final String KEY_SPEED = "speed";
     private static final String KEY_DURATION = "duration";
     private static final String KEY_WAIT_PLAY_COMPLETE = "wait_play_complete";
+    private static final String KEY_VOLUME = "volume";
 
     private final MMKV mMMKV;
 
@@ -38,6 +39,7 @@ class PersistentPlayerState extends PlayerState {
         super.setSpeed(mMMKV.getFloat(KEY_SPEED, 1.0F));
         super.setDuration(mMMKV.getInt(KEY_DURATION, 0));
         super.setWaitPlayComplete(mMMKV.getBoolean(KEY_WAIT_PLAY_COMPLETE, false));
+        super.setVolume(mMMKV.getFloat(KEY_VOLUME, 1.0F));
 
         if (isForbidSeek()) {
             super.setPlayProgress(0);
@@ -111,5 +113,12 @@ class PersistentPlayerState extends PlayerState {
         super.setWaitPlayComplete(waitPlayComplete);
 
         mMMKV.encode(KEY_WAIT_PLAY_COMPLETE, waitPlayComplete);
+    }
+
+    @Override
+    public void setVolume(float volume) {
+        super.setVolume(volume);
+
+        mMMKV.encode(KEY_VOLUME, volume);
     }
 }

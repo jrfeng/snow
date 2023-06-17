@@ -147,4 +147,8 @@ class PlayerStateHelper {
     public void onWaitPlayCompleteChanged(boolean waitPlayComplete) {
         mPlayerState.setWaitPlayComplete(waitPlayComplete);
     }
+
+    public void onVolumeChanged(float volume) {
+        mPlayerState.setVolume(volume);
+    }
 }

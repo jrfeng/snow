@@ -326,6 +326,7 @@ class SnowPlayer implements Player, PlaylistEditor {
                 }
 
                 mp.setLooping(isLooping());
+                mp.setVolume(mPlayerState.getVolume());
 
                 if (mPlayerConfig.isAudioEffectEnabled() && mAudioEffectManager != null) {
                     mAudioEffectManager.attachAudioEffect(mp.getAudioSessionId());
@@ -1577,6 +1578,14 @@ class SnowPlayer implements Player, PlaylistEditor {
         }
     }
 
+    private void notifyVolumeChanged(float volume) {
+        mPlayerStateHelper.onVolumeChanged(volume);
+
+        if (mPlayerStateListener != null) {
+            mPlayerStateListener.onVolumeChanged(volume);
+        }
+    }
+
     /**
      * 获取播放列表的大小。
      *
@@ -1755,6 +1764,20 @@ class SnowPlayer implements Player, PlaylistEditor {
         }
 
         notifySpeedChanged(speed, mPlayerState.getPlayProgress(), SystemClock.elapsedRealtime());
+    }
+
+    @Override
+    public void setVolume(float volume) {
+        if (volume == mPlayerState.getVolume()) {
+            return;
+        }
+
+        if (isPrepared()) {
+            assert mMusicPlayer != null;
+            mMusicPlayer.setVolume(volume);
+        }
+
+        notifyVolumeChanged(volume);
     }
 
     @Override

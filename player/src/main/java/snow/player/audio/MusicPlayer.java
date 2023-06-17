@@ -100,13 +100,17 @@ public interface MusicPlayer {
 
     /**
      * 设置音量为当前音量的百分比，范围为 [0.0 ~ 1.0] 的闭区间。
-     * <p>
-     * 如果你的播放器实现不打算支持单独分别设置左右声道的音量，则全部使用 leftVolume 参数的值即可。
      *
-     * @param leftVolume  左声道的音量百分比（范围为 [0.0 ~ 1.0] 的闭区间）
-     * @param rightVolume 右声道的音量百分比（范围为 [0.0 ~ 1.0] 的闭区间）
+     * @param volume 音量百分比（范围为 [0.0 ~ 1.0] 的闭区间）
      */
-    void setVolume(float leftVolume, float rightVolume);
+    void setVolume(float volume);
+
+    /**
+     * 获取当前音量。
+     *
+     * @return 返回当前音量的百分比，范围为 [0.0 ~ 1.0] 的闭区间。
+     */
+    float getVolume();
 
     /**
      * 设置音乐播放器的播放速度。

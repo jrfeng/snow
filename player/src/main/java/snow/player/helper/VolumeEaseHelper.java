@@ -124,12 +124,17 @@ public class VolumeEaseHelper {
 
     public void start() {
         cancel();
+
+        final int count = 20;
+        final float currentVolume = mMusicPlayer.getVolume();
+        final float step = currentVolume / count;
+
         setVolume(0.0F);
         mCallback.start();
 
-        mStartDisposable = Observable.intervalRange(1, 20, 200, 50, TimeUnit.MILLISECONDS)
+        mStartDisposable = Observable.intervalRange(1, count, 200, 50, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aLong -> setVolume(aLong * 0.05F));
+                .subscribe(aLong -> setVolume(aLong * step));
     }
 
     public void pause() {
@@ -140,16 +145,23 @@ public class VolumeEaseHelper {
             return;
         }
 
-        mPauseDisposable = Observable.intervalRange(1, 20, 0, 30, TimeUnit.MILLISECONDS)
+        final int count = 20;
+        final float currentVolume = mMusicPlayer.getVolume();
+        final float step = currentVolume / count;
+
+        mPauseDisposable = Observable.intervalRange(1, count, 0, 30, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aLong -> setVolume(1.0F - (aLong * 0.05F)), (throwable) -> {
+                .subscribe(aLong -> setVolume(currentVolume - (aLong * step)), (throwable) -> {
                     // ignore
-                }, mCallback::pause);
+                }, () -> {
+                    mCallback.pause();
+                    mMusicPlayer.setVolume(currentVolume);
+                });
     }
 
     public void quiet() {
         mQuiet = true;
-        mMusicPlayer.setVolume(0.2F, 0.2F);
+        mMusicPlayer.setVolume(mMusicPlayer.getVolume() * 0.2F);
     }
 
     public void dismissQuiet() {
@@ -170,7 +182,7 @@ public class VolumeEaseHelper {
      * Volume Ease 辅助方法。
      */
     public void setVolume(float volume) {
-        mMusicPlayer.setVolume(volume, volume);
+        mMusicPlayer.setVolume(volume);
     }
 
     public void cancel() {

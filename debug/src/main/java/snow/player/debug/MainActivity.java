@@ -15,6 +15,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +63,28 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 EqualizerActivity.start(MainActivity.this, MyPlayerService.class);
+            }
+        });
+
+        binding.sbVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                float volume = seekBar.getProgress() / 100F;
+                if (volume == mPlayerClient.getVolume()) {
+                    return;
+                }
+
+                mPlayerClient.setVolume(volume);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // ignore
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // ignore
             }
         });
 

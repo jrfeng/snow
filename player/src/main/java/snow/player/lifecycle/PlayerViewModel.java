@@ -55,6 +55,7 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<String> mErrorMessage;
     private MutableLiveData<MusicItem> mPlayingMusicItem;
     private MutableLiveData<Boolean> mPlayingNoStalled;
+    private MutableLiveData<Float> mVolume;
 
     private Player.OnPlayingMusicItemChangeListener mPlayingMusicItemChangeListener;
     private Player.OnPlaylistChangeListener mPlaylistChangeListener;
@@ -69,6 +70,7 @@ public class PlayerViewModel extends ViewModel {
     private Player.OnPrepareListener mPrepareListener;
     private PlayerClient.OnConnectStateChangeListener mConnectStateChangeListener;
     private Player.OnRepeatListener mRepeatListener;
+    private Player.OnVolumeChaneListener mVolumeChaneListener;
 
     private String mDefaultTitle;
     private String mDefaultArtist;
@@ -405,6 +407,8 @@ public class PlayerViewModel extends ViewModel {
                         mPlayerClient.getSpeed());
             }
         };
+
+        mVolumeChaneListener = volume -> mVolume.setValue(volume);
     }
 
     private void initAllProgressClock(boolean enable) {
@@ -438,6 +442,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.addOnPrepareListener(mPrepareListener);
         mPlayerClient.addOnConnectStateChangeListener(mConnectStateChangeListener);
         mPlayerClient.addOnRepeatListener(mRepeatListener);
+        mPlayerClient.addOnVolumeChangeListener(mVolumeChaneListener);
     }
 
     private void removeAllListener() {
@@ -454,6 +459,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayerClient.removeOnPrepareListener(mPrepareListener);
         mPlayerClient.removeOnConnectStateChangeListener(mConnectStateChangeListener);
         mPlayerClient.removeOnRepeatListener(mRepeatListener);
+        mPlayerClient.removeOnVolumeChangeListener(mVolumeChaneListener);
     }
 
     @Override
@@ -892,6 +898,19 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
+     * 播放器音量，范围为 [0.0, 1.0] 之间的闭区间。
+     *
+     *  @throws IllegalStateException 如果当前 {@link PlayerViewModel} 对象还没有被初始化（{@link #isInitialized()} 返回 false）。
+     */
+    public LiveData<Float> getVolume() throws IllegalStateException {
+        if (!isInitialized()) {
+            throw new IllegalStateException("PlayerViewModel not initialized yet.");
+        }
+
+        return mVolume;
+    }
+
+    /**
      * 设置播放列表。
      *
      * @param playlist 新的播放列表。
@@ -1072,6 +1091,17 @@ public class PlayerViewModel extends ViewModel {
     }
 
     /**
+     * 设置播放器音量。
+     *
+     * @param volume 要设置的播放器音量，范围为 [0.0, 1.0] 之间的闭区间。
+     */
+    public void setVolume(float volume) {
+        if (isInitialized()) {
+            mPlayerClient.setVolume(volume);
+        }
+    }
+
+    /**
      * 停止实时跟新播放进度。
      */
     public void cancelProgressClock() {
@@ -1192,6 +1222,7 @@ public class PlayerViewModel extends ViewModel {
         mPlayingMusicItem = new MutableLiveData<>(mPlayerClient.getPlayingMusicItem());
         mPlayingNoStalled = new MutableLiveData<>(mPlayerClient.isPlaying() && !mPlayerClient.isStalled());
         mWaitPlayComplete = new MutableLiveData<>(mPlayerClient.isWaitPlayComplete());
+        mVolume = new MutableLiveData<>(mPlayerClient.getVolume());
     }
 
     private int getDurationSec() {

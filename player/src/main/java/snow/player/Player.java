@@ -98,6 +98,13 @@ public interface Player {
     void setSpeed(float speed);
 
     /**
+     * 设置音量为当前音量的百分比，范围为 [0.0 ~ 1.0] 的闭区间。
+     *
+     * @param volume 音量百分比（范围为 [0.0 ~ 1.0] 的闭区间）
+     */
+    void setVolume(float volume);
+
+    /**
      * 播放器状态改变监听器。
      */
     interface OnPlaybackStateChangeListener {
@@ -280,5 +287,17 @@ public interface Player {
          */
         @SuppressWarnings("NullableProblems")
         void onRepeat(@NonNull MusicItem musicItem, long repeatTime);
+    }
+
+    /**
+     * 用于监听播放器音量变化事件。
+     */
+    interface OnVolumeChaneListener {
+        /**
+         * 当播放器的音量被发生变化时，该方法会被调用。
+         *
+         * @param volume 播放器的当前音量（返回为 [0.0, 1.0] 之前的闭区间）。
+         */
+        void onVolumeChanged(float volume);
     }
 }

@@ -42,6 +42,7 @@ class PlayerState implements Parcelable {
     private SleepTimer.TimeoutAction timeoutAction;
     private boolean sleepTimerEnd;
     private boolean sleepTimerTimeout;
+    private float volume;
 
     public PlayerState() {
         playProgress = 0;
@@ -66,6 +67,7 @@ class PlayerState implements Parcelable {
         waitPlayComplete = false;
         sleepTimerEnd = true;
         sleepTimerTimeout = false;
+        volume = 1.0F;
     }
 
     public PlayerState(PlayerState source) {
@@ -94,6 +96,7 @@ class PlayerState implements Parcelable {
         waitPlayComplete = source.waitPlayComplete;
         sleepTimerEnd = source.sleepTimerEnd;
         sleepTimerTimeout = source.sleepTimerTimeout;
+        volume = source.volume;
     }
 
     /**
@@ -537,6 +540,24 @@ class PlayerState implements Parcelable {
         this.duration = duration;
     }
 
+    /**
+     * 设置当前音量。
+     *
+     * @param volume 要设置的音量（范围为 [0.0, 1.0] 之间的闭区间）。
+     */
+    public void setVolume(float volume) {
+        this.volume = Math.min(volume, 1.0F);
+    }
+
+    /**
+     * 获取当前音量。
+     *
+     * @return 返回播放器的当前音量（返回为 [0.0, 1.0] 之间的闭区间）。
+     */
+    public float getVolume() {
+        return volume;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -565,7 +586,8 @@ class PlayerState implements Parcelable {
                 && Objects.equal(timeoutAction, other.timeoutAction)
                 && Objects.equal(waitPlayComplete, other.waitPlayComplete)
                 && Objects.equal(sleepTimerEnd, other.sleepTimerEnd)
-                && Objects.equal(sleepTimerTimeout, other.sleepTimerTimeout);
+                && Objects.equal(sleepTimerTimeout, other.sleepTimerTimeout)
+                && Objects.equal(volume, other.volume);
     }
 
     @Override
@@ -591,7 +613,8 @@ class PlayerState implements Parcelable {
                 duration,
                 waitPlayComplete,
                 sleepTimerEnd,
-                sleepTimerTimeout
+                sleepTimerTimeout,
+                volume
         );
     }
 
@@ -621,6 +644,7 @@ class PlayerState implements Parcelable {
                 ", timeoutActionComplete=" + sleepTimerEnd +
                 ", sleepTimerTimeout=" + sleepTimerTimeout +
                 ", duration=" + duration +
+                ", volume=" + volume +
                 '}';
     }
 
@@ -648,6 +672,7 @@ class PlayerState implements Parcelable {
         waitPlayComplete = in.readByte() != 0;
         sleepTimerEnd = in.readByte() != 0;
         sleepTimerTimeout = in.readByte() != 0;
+        volume = in.readFloat();
     }
 
     @Override
@@ -675,6 +700,7 @@ class PlayerState implements Parcelable {
         dest.writeByte((byte) (waitPlayComplete ? 1 : 0));
         dest.writeByte((byte) (sleepTimerEnd ? 1 : 0));
         dest.writeByte((byte) (sleepTimerTimeout ? 1 : 0));
+        dest.writeFloat(volume);
     }
 
     @Override
