@@ -202,7 +202,7 @@ public class VolumeEaseHelper {
     /**
      * 设置播放器音量。
      * <p>
-     * 注意！该方法与 {@link #setVolume(float)} 方法不一样，{@link #setVolume(float)} 方法只是 Volume Ease 辅助方法，仅用于辅助只需渐隐播放。
+     * 注意！该方法与 {@link #setVolume(float)} 方法不一样，{@link #setVolume(float)} 方法只是 Volume Ease 辅助方法，仅用于辅助实现渐隐播放。
      *
      * @param volume 要设置的播放器音量。
      */
