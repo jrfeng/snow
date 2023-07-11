@@ -1686,7 +1686,8 @@ class SnowPlayer implements Player, PlaylistEditor {
         int position = 0;
 
         switch (mPlayerState.getPlayMode()) {
-            case PLAYLIST_LOOP:   // 注意！case 穿透
+            case PLAYLIST_LOOP:     // 注意！case 穿透
+            case SINGLE_ONCE:       // 注意！case 穿透
             case LOOP:
                 position = currentPosition - 1;
                 if (position < 0) {
