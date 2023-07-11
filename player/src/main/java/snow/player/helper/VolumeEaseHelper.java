@@ -107,6 +107,7 @@ public class VolumeEaseHelper {
     private Disposable mDismissQuietDisposable;
 
     private boolean mQuiet;
+    private float mPlayerVolume = 1.0F;
 
     /**
      * 创建一个 {@link VolumeEaseHelper} 对象。
@@ -126,8 +127,7 @@ public class VolumeEaseHelper {
         cancel();
 
         final int count = 20;
-        final float currentVolume = mMusicPlayer.getVolume();
-        final float step = currentVolume / count;
+        final float step = mPlayerVolume / count;
 
         setVolume(0.0F);
         mCallback.start();
@@ -197,6 +197,17 @@ public class VolumeEaseHelper {
         if (mDismissQuietDisposable != null) {
             mDismissQuietDisposable.dispose();
         }
+    }
+
+    /**
+     * 设置播放器音量。
+     * <p>
+     * 注意！该方法与 {@link #setVolume(float)} 方法不一样，{@link #setVolume(float)} 方法只是 Volume Ease 辅助方法，仅用于辅助只需渐隐播放。
+     *
+     * @param volume 要设置的播放器音量。
+     */
+    public void setPlayerVolume(float volume) {
+        mPlayerVolume = volume;
     }
 
     /**

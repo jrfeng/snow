@@ -1,5 +1,7 @@
 package snow.player.audio;
 
+import android.util.Log;
+
 import snow.player.helper.VolumeEaseHelper;
 
 /**
@@ -72,5 +74,10 @@ public abstract class AbstractMusicPlayer implements MusicPlayer {
     @Override
     public void dismissQuiet() {
         mVolumeEaseHelper.dismissQuiet();
+    }
+
+    @Override
+    public void setVolume(float volume) {
+        mVolumeEaseHelper.setPlayerVolume(volume);
     }
 }
