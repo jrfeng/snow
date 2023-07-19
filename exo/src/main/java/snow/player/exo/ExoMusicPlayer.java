@@ -1,6 +1,6 @@
 package snow.player.exo;
 
-import static com.google.android.exoplayer2.C.WAKE_MODE_NETWORK;
+import static androidx.media3.common.C.WAKE_MODE_NETWORK;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -11,14 +11,16 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.PlaybackException;
-import com.google.android.exoplayer2.PlaybackParameters;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.MediaSourceFactory;
+import androidx.annotation.OptIn;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.exoplayer.ExoPlaybackException;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.PlaybackParameters;
+import androidx.media3.common.Player;
+import androidx.media3.exoplayer.source.MediaSource;
+import androidx.media3.exoplayer.source.MediaSourceFactory;
 
 import snow.player.audio.AbstractMusicPlayer;
 import snow.player.audio.ErrorCode;
@@ -60,6 +62,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
      * @param mediaSourceFactory MediaSourceFactory 对象，不能为 null
      * @param uri                要播放的 Uri，不能为 null
      */
+    @OptIn(markerClass = UnstableApi.class)
     @Deprecated
     public ExoMusicPlayer(@NonNull Context context, @NonNull MediaSourceFactory mediaSourceFactory, @NonNull Uri uri) {
         this(context, (MediaSource.Factory) mediaSourceFactory, uri);
@@ -72,6 +75,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
      * @param mediaSourceFactory MediaSourceFactory 对象，不能为 null
      * @param uri                要播放的 Uri，不能为 null
      */
+    @OptIn(markerClass = UnstableApi.class)
     public ExoMusicPlayer(@NonNull Context context, @NonNull MediaSource.Factory mediaSourceFactory, @NonNull Uri uri) {
         initEventListener();
         initExoPlayer(context, mediaSourceFactory);
@@ -85,6 +89,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
      * @param context Context 对象，不能为 null
      * @param uri     要播放的 Uri，不能为 null
      */
+    @OptIn(markerClass = UnstableApi.class)
     public ExoMusicPlayer(@NonNull Context context, @NonNull Uri uri) {
         this(context, MediaItem.fromUri(uri));
     }
@@ -95,6 +100,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
      * @param context   Context 对象，不能为 null
      * @param mediaItem 要播放的 MediaItem，不能为 null
      */
+    @OptIn(markerClass = UnstableApi.class)
     public ExoMusicPlayer(@NonNull Context context, @NonNull MediaItem mediaItem) {
         initEventListener();
         initExoPlayer(context, null);
@@ -146,6 +152,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
                 }
             }
 
+            @OptIn(markerClass = UnstableApi.class)
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
                 setInvalid();
@@ -187,6 +194,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
         }
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     @SuppressLint("SwitchIntDef")
     private int toErrorCode(PlaybackException error) {
         if (!(error instanceof ExoPlaybackException)) {
@@ -205,6 +213,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
         }
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     private void initExoPlayer(Context context, @Nullable MediaSource.Factory mediaSourceFactory) {
         ExoPlayer.Builder builder = new ExoPlayer.Builder(context)
                 .setWakeMode(WAKE_MODE_NETWORK)
@@ -335,6 +344,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
         mInvalid = true;
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     @Override
     public int getAudioSessionId() {
         return mExoPlayer.getAudioSessionId();

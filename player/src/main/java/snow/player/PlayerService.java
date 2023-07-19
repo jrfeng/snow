@@ -51,6 +51,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.FutureTarget;
 import com.google.common.base.Preconditions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -416,6 +417,12 @@ public class PlayerService extends MediaBrowserServiceCompat
             @Override
             public AudioManager.OnAudioFocusChangeListener createAudioFocusChangeListener() {
                 return PlayerService.this.onCreateAudioFocusChangeListener();
+            }
+
+            @Nullable
+            @Override
+            public List<PlaybackStateCompat.CustomAction> createCustomAction() {
+                return onCreateCustomActions();
             }
         };
 
@@ -1439,6 +1446,40 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     /**
+     * 创建 {@link PlaybackStateCompat.CustomAction} 自定义动作。
+     * <p>
+     * 如果你仅需创建一个自定义动作，建议覆盖 {@link #onCreateCustomAction()} 方法。如果你同时覆盖了当前方法与 {@link #onCreateCustomAction()} 方法，则
+     * {@link #onCreateCustomAction()} 将不再生效。
+     *
+     * @return 返回创建的自定义动作，入门不需要创建任何自定义动作，则返回 null。
+     * @see #onCreateCustomAction()
+     */
+    @Nullable
+    protected List<PlaybackStateCompat.CustomAction> onCreateCustomActions() {
+        PlaybackStateCompat.CustomAction customAction = onCreateCustomAction();
+        if (customAction == null) {
+            return null;
+        }
+
+        List<PlaybackStateCompat.CustomAction> customActionList = new ArrayList<>();
+        customActionList.add(customAction);
+        return customActionList;
+    }
+
+    /**
+     * 创建 {@link PlaybackStateCompat.CustomAction} 自定义动作。
+     * <p>
+     * 如果你需要创建多个自定义动作，请覆盖 {@link #onCreateCustomActions()} 方法。
+     *
+     * @return 返回创建的自定义动作，入门不需要创建任何自定义动作，则返回 null。
+     * @see #onCreateCustomActions()
+     */
+    @Nullable
+    protected PlaybackStateCompat.CustomAction onCreateCustomAction() {
+        return null;
+    }
+
+    /**
      * 准备 {@link MusicItem} 对象。
      * <p>
      * 该方法会在歌曲即将播放前调用，你可以在该方法中对 {@link MusicItem} 对象进行修改。
@@ -2368,6 +2409,7 @@ public class PlayerService extends MediaBrowserServiceCompat
                 }
             }
 
+            @SuppressWarnings("resource")
             private Bitmap loadEmbeddedPicture(MusicItem musicItem) {
                 if (notLocaleMusic(musicItem)) {
                     return null;
@@ -2386,7 +2428,11 @@ public class PlayerService extends MediaBrowserServiceCompat
                 } catch (IllegalArgumentException | ExecutionException | InterruptedException e) {
                     return null;
                 } finally {
-                    retriever.release();
+                    try {
+                        retriever.release();
+                    } catch (IOException e) {
+                        // ignore
+                    }
                 }
             }
 

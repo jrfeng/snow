@@ -2,11 +2,11 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion 33
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 32
+        targetSdkVersion 33
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -39,18 +39,16 @@ afterEvaluate {
 }
 
 dependencies {
-    def exoplayer_version = "2.17.0"
+    def media3_exoplayer = "1.1.0"
 
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation project(path: ':player')
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
-    // exoplayer-core
-    api "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
-
-    // extension-okhttp
-    api "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
+    // media3 exoplayer
+    api "androidx.media3:media3-exoplayer:$media3_exoplayer"
+    api "androidx.media3:media3-exoplayer-dash:$media3_exoplayer"
 }

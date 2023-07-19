@@ -30,13 +30,25 @@ import snow.player.ui.equalizer.AndroidAudioEffectManager;
 @PersistenceId("AppPlayerService")
 public class AppPlayerService extends PlayerService {
     private MusicStore mMusicStore;
+    private FavoriteObserver mFavoriteObserver;
 
     @Override
     public void onCreate() {
+        mFavoriteObserver = new FavoriteObserver(favorite -> {
+        });
+        mFavoriteObserver.subscribe();
+
         super.onCreate();
 
         setMaxIDLETime(5);
         mMusicStore = MusicStore.getInstance();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        mFavoriteObserver.unsubscribe();
     }
 
     @Nullable

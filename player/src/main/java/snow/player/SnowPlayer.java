@@ -650,7 +650,20 @@ class SnowPlayer implements Player, PlaylistEditor {
                         PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
                         PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM |
                         PlaybackStateCompat.ACTION_SET_REPEAT_MODE |
-                        PlaybackStateCompat.ACTION_SET_SHUFFLE_MODE);
+                        PlaybackStateCompat.ACTION_SET_SHUFFLE_MODE |
+                        PlaybackStateCompat.ACTION_SET_RATING);
+
+        applyCustomAction();
+    }
+
+    private void applyCustomAction() {
+        List<PlaybackStateCompat.CustomAction> customActions = mFactory.createCustomAction();
+        if (customActions != null && !customActions.isEmpty()) {
+            for (PlaybackStateCompat.CustomAction customAction : customActions) {
+                mPlaybackStateBuilder.addCustomAction(customAction);
+                mForbidSeekPlaybackStateBuilder.addCustomAction(customAction);
+            }
+        }
     }
 
     private void initMediaMetadataBuilder() {
@@ -2151,6 +2164,14 @@ class SnowPlayer implements Player, PlaylistEditor {
          * @return 如果返回 null，则会使用默认的音频焦点监听器。
          */
         AudioManager.OnAudioFocusChangeListener createAudioFocusChangeListener();
+
+        /**
+         * 创建 {@link PlaybackStateCompat.CustomAction} 自定义动作。
+         *
+         * @return 返回创建的自定义动作，入门不需要创建任何自定义动作，则返回 null。
+         */
+        @Nullable
+        List<PlaybackStateCompat.CustomAction> createCustomAction();
     }
 
     interface Callback {
