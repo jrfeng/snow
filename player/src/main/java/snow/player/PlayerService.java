@@ -1537,6 +1537,8 @@ public class PlayerService extends MediaBrowserServiceCompat
 
     /**
      * 该方法会在 MediaSession 接收到 custom action 时调用。
+     * <p>
+     * 如果你重写了此方法，请务必使用 {@code super.onCustomAction(action, extras)} 回调超类方法。
      *
      * @param action 自定义动作的名称
      * @param extras 自定义动作携带的额外数据
@@ -2512,6 +2514,13 @@ public class PlayerService extends MediaBrowserServiceCompat
      * 的外观进行定制。
      * <p>
      * 更多信息，请参考官方文档： <a target="_blank" href="https://developer.android.google.cn/training/notify-user/expanded#media-style">https://developer.android.google.cn/training/notify-user/expanded#media-style</a>
+     * <p>
+     * 注意！从 Android 13(API Level 33) 开始，<a target="_blank" href="https://developer.android.google.cn/about/versions/13/behavior-changes-13?hl=zh-cn#playback-controls">系统会从 PlaybackState 操作派生媒体控件</a>，如果你的应用的 targetSdkVersion 设置为了 33，则使用
+     * {@link NotificationCompat.Builder#addAction(int, CharSequence, PendingIntent)} 添加的控件将不会再显示在通知栏中。
+     * 如果你的 targetSdkVersion 大于等于 33，并且需要往通知栏中添加媒体控件，请覆盖 {@link PlayerService#onCreateCustomAction()} 方法或者
+     * {@link PlayerService#onCreateCustomActions()} 提供自定义的 {@link PlaybackStateCompat.CustomAction}，这些自定义动作会作为媒体控件显示在通知栏中。
+     * 此外，你还需要覆盖 {@link PlayerService#onCustomAction(String, Bundle)} 方法来响应自定义动作。
+     * 如果你之前已经使用 {@link PlayerService#addCustomAction(String, CustomAction)} 添加了同名的自定义动作处理器，则不再需要覆盖 {@link PlayerService#onCustomAction(String, Bundle)} 方法。
      */
     public static class MediaNotificationView extends NotificationView {
         private static final String ACTION_SKIP_TO_PREVIOUS = "__skip_to_previous";
@@ -2521,6 +2530,8 @@ public class PlayerService extends MediaBrowserServiceCompat
         private PendingIntent mSkipToPrevious;
         private PendingIntent mPlayPause;
         private PendingIntent mSkipToNext;
+
+        private PendingIntent mShutdown;
 
         @Override
         protected void onInit(Context context) {
@@ -2533,6 +2544,8 @@ public class PlayerService extends MediaBrowserServiceCompat
             mPlayPause = buildCustomAction(ACTION_PLAY_PAUSE, (player, extras) -> player.playPause());
 
             mSkipToNext = buildCustomAction(ACTION_SKIP_TO_NEXT, (player, extras) -> player.skipToNext());
+
+            mShutdown = buildCustomAction(CUSTOM_ACTION_SHUTDOWN, (player, extras) -> shutdown());
         }
 
         public final PendingIntent doSkipToPrevious() {
@@ -2552,7 +2565,8 @@ public class PlayerService extends MediaBrowserServiceCompat
         public Notification onCreateNotification() {
             androidx.media.app.NotificationCompat.MediaStyle mediaStyle =
                     new androidx.media.app.NotificationCompat.MediaStyle()
-                            .setMediaSession(getMediaSession().getSessionToken());
+                            .setMediaSession(getMediaSession().getSessionToken())
+                            .setCancelButtonIntent(mShutdown);
 
             onBuildMediaStyle(mediaStyle);
 
