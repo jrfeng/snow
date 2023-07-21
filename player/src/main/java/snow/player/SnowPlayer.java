@@ -657,7 +657,7 @@ class SnowPlayer implements Player, PlaylistEditor {
     }
 
     private void applyCustomAction() {
-        List<PlaybackStateCompat.CustomAction> customActions = mFactory.createCustomAction();
+        List<PlaybackStateCompat.CustomAction> customActions = mFactory.createMediaCustomAction();
         if (customActions != null && !customActions.isEmpty()) {
             for (PlaybackStateCompat.CustomAction customAction : customActions) {
                 mPlaybackStateBuilder.addCustomAction(customAction);
@@ -2171,7 +2171,7 @@ class SnowPlayer implements Player, PlaylistEditor {
          * @return 返回创建的自定义动作，入门不需要创建任何自定义动作，则返回 null。
          */
         @Nullable
-        List<PlaybackStateCompat.CustomAction> createCustomAction();
+        List<PlaybackStateCompat.CustomAction> createMediaCustomAction();
     }
 
     interface Callback {

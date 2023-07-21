@@ -177,6 +177,7 @@ public class PlayerService extends MediaBrowserServiceCompat
     private CountDownLatch mPlayerPrepareLatch;
 
     private long mIDLEShutdownTime;
+    private final List<PlaybackStateCompat.CustomAction> mMediaCustomActions = new ArrayList<>();
 
     @Override
     public void onCreate() {
@@ -419,10 +420,9 @@ public class PlayerService extends MediaBrowserServiceCompat
                 return PlayerService.this.onCreateAudioFocusChangeListener();
             }
 
-            @Nullable
             @Override
-            public List<PlaybackStateCompat.CustomAction> createCustomAction() {
-                return onCreateCustomActions();
+            public List<PlaybackStateCompat.CustomAction> createMediaCustomAction() {
+                return mMediaCustomActions;
             }
         };
 
@@ -1446,40 +1446,6 @@ public class PlayerService extends MediaBrowserServiceCompat
     }
 
     /**
-     * 创建 {@link PlaybackStateCompat.CustomAction} 自定义动作。
-     * <p>
-     * 如果你仅需创建一个自定义动作，建议覆盖 {@link #onCreateCustomAction()} 方法。如果你同时覆盖了当前方法与 {@link #onCreateCustomAction()} 方法，则
-     * {@link #onCreateCustomAction()} 将不再生效。
-     *
-     * @return 返回创建的自定义动作，入门不需要创建任何自定义动作，则返回 null。
-     * @see #onCreateCustomAction()
-     */
-    @Nullable
-    protected List<PlaybackStateCompat.CustomAction> onCreateCustomActions() {
-        PlaybackStateCompat.CustomAction customAction = onCreateCustomAction();
-        if (customAction == null) {
-            return null;
-        }
-
-        List<PlaybackStateCompat.CustomAction> customActionList = new ArrayList<>();
-        customActionList.add(customAction);
-        return customActionList;
-    }
-
-    /**
-     * 创建 {@link PlaybackStateCompat.CustomAction} 自定义动作。
-     * <p>
-     * 如果你需要创建多个自定义动作，请覆盖 {@link #onCreateCustomActions()} 方法。
-     *
-     * @return 返回创建的自定义动作，入门不需要创建任何自定义动作，则返回 null。
-     * @see #onCreateCustomActions()
-     */
-    @Nullable
-    protected PlaybackStateCompat.CustomAction onCreateCustomAction() {
-        return null;
-    }
-
-    /**
      * 准备 {@link MusicItem} 对象。
      * <p>
      * 该方法会在歌曲即将播放前调用，你可以在该方法中对 {@link MusicItem} 对象进行修改。
@@ -1770,6 +1736,7 @@ public class PlayerService extends MediaBrowserServiceCompat
         private boolean mReleased;
 
         private int mPendingIntentRequestCode;
+        private boolean mInitialized = false;
 
         void init(PlayerService playerService) {
             mPlayerService = playerService;
@@ -1781,6 +1748,7 @@ public class PlayerService extends MediaBrowserServiceCompat
 
             setIconSize(playerService.getResources().getDimensionPixelSize(R.dimen.snow_notif_icon_size_big));
             onInit(mPlayerService);
+            mInitialized = true;
         }
 
         @NonNull
@@ -2087,6 +2055,92 @@ public class PlayerService extends MediaBrowserServiceCompat
          * @param customAction 要执行的任务
          */
         public final void addCustomAction(@NonNull String action, @NonNull CustomAction customAction) {
+            mPlayerService.addCustomAction(action, customAction);
+        }
+
+        /**
+         * 添加媒体自定义动作。
+         * <p>
+         * 媒体自定义动作会作为媒体按钮显示在通知上。
+         * <p>
+         * 注意！必须在 {@link #onInit(Context)} 方法中注册自定义媒体动作。在其他方法中调用将导致异常。
+         * <br>
+         * <b>例：</b>
+         * <br>
+         * <pre>
+         * {@code if (Build.VERSION.SDK_INT > = Build.VERSION_CODES.TIRAMISU) {
+         *     registerMediaCustomAction(
+         *             ACTION_TOGGLE_FAVORITE,
+         *             "Favorite",
+         *             R.mipmap.ic_notif_favorite_false,
+         *             (player, extras) -> {
+         *                  // do something
+         *             }
+         *     );
+         * }
+         * }
+         * </pre>
+         *
+         * @param action       自定义动作，请保证该值的唯一性。
+         * @param name         自定义动作的名称。
+         * @param iconRes      自定义动作的图标。
+         * @param customAction 要执行的任务
+         * @see #registerMediaCustomAction(String, CharSequence, int, Bundle, CustomAction)
+         */
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+        public final void registerMediaCustomAction(
+                @NonNull String action,
+                @NonNull CharSequence name,
+                @DrawableRes int iconRes,
+                @NonNull CustomAction customAction
+        ) {
+            registerMediaCustomAction(action, name, iconRes, null, customAction);
+        }
+
+        /**
+         * 添加媒体自定义动作。
+         * <p>
+         * 从 Android 13(API Level 33) 开始，媒体自定义动作会作为媒体按钮显示在通知上。
+         * <p>
+         * 注意！必须在 {@link #onInit(Context)} 方法中注册自定义媒体动作。在其他方法中调用将导致异常。
+         * <br>
+         * <b>例：</b>
+         * <br>
+         * <pre>
+         * {@code if (Build.VERSION.SDK_INT > = Build.VERSION_CODES.TIRAMISU) {
+         *     registerMediaCustomAction(
+         *             ACTION_TOGGLE_FAVORITE,
+         *             "Favorite",
+         *             R.mipmap.ic_notif_favorite_false,
+         *             (player, extras) -> {
+         *                 // do something
+         *             }
+         *     );
+         * }
+         * }
+         * </pre>
+         *
+         * @param action       自定义动作，请保证该值的唯一性。
+         * @param name         自定义动作的名称。
+         * @param iconRes      自定义动作的图标。
+         * @param extras       为自定义媒体动作设置可选附加功能。具体请查看 <a target="_blank" href="https://developer.android.google.cn/reference/android/support/v4/media/session/PlaybackStateCompat.CustomAction.Builder?hl=en#setExtras(android.os.Bundle)">PlaybackStateCompat.CustomAction.Builder#setExtras</a>
+         * @param customAction 自定义动作触发时要执行的任务。
+         * @see #registerMediaCustomAction(String, CharSequence, int, CustomAction)
+         */
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+        public final void registerMediaCustomAction(
+                @NonNull String action,
+                @NonNull CharSequence name,
+                @DrawableRes int iconRes,
+                @Nullable Bundle extras,
+                @NonNull CustomAction customAction
+        ) {
+            PlaybackStateCompat.CustomAction mediaCustomAction = new PlaybackStateCompat.CustomAction.Builder(action, name, iconRes)
+                    .setExtras(extras)
+                    .build();
+
+            mPlayerService.mMediaCustomActions.add(mediaCustomAction);
+
             mPlayerService.addCustomAction(action, customAction);
         }
 
@@ -2517,10 +2571,8 @@ public class PlayerService extends MediaBrowserServiceCompat
      * <p>
      * 注意！从 Android 13(API Level 33) 开始，<a target="_blank" href="https://developer.android.google.cn/about/versions/13/behavior-changes-13?hl=zh-cn#playback-controls">系统会从 PlaybackState 操作派生媒体控件</a>，如果你的应用的 targetSdkVersion 设置为了 33，则使用
      * {@link NotificationCompat.Builder#addAction(int, CharSequence, PendingIntent)} 添加的控件将不会再显示在通知栏中。
-     * 如果你的 targetSdkVersion 大于等于 33，并且需要往通知栏中添加媒体控件，请覆盖 {@link PlayerService#onCreateCustomAction()} 方法或者
-     * {@link PlayerService#onCreateCustomActions()} 提供自定义的 {@link PlaybackStateCompat.CustomAction}，这些自定义动作会作为媒体控件显示在通知栏中。
-     * 此外，你还需要覆盖 {@link PlayerService#onCustomAction(String, Bundle)} 方法来响应自定义动作。
-     * 如果你之前已经使用 {@link PlayerService#addCustomAction(String, CustomAction)} 添加了同名的自定义动作处理器，则不再需要覆盖 {@link PlayerService#onCustomAction(String, Bundle)} 方法。
+     * 如果你的应用的 targetSdkVersion 大于等于 从 Android 13(API Level 33)，需要使用 {@link #registerMediaCustomAction(String, CharSequence, int, Bundle, CustomAction)} 方法
+     * 注册自定义媒体按钮（必须在 {@link #onInit(Context)} 方法中调用 {@link #registerMediaCustomAction(String, CharSequence, int, Bundle, CustomAction)} 方法）。
      */
     public static class MediaNotificationView extends NotificationView {
         private static final String ACTION_SKIP_TO_PREVIOUS = "__skip_to_previous";
