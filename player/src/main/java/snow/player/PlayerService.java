@@ -2135,6 +2135,10 @@ public class PlayerService extends MediaBrowserServiceCompat
                 @Nullable Bundle extras,
                 @NonNull CustomAction customAction
         ) {
+            if (mInitialized) {
+                throw new IllegalStateException("请在 onInit 方法中注册自定义媒体动作。");
+            }
+
             PlaybackStateCompat.CustomAction mediaCustomAction = new PlaybackStateCompat.CustomAction.Builder(action, name, iconRes)
                     .setExtras(extras)
                     .build();
