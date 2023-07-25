@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -18,6 +19,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
 import com.google.common.base.Preconditions;
@@ -653,10 +655,13 @@ class SnowPlayer implements Player, PlaylistEditor {
                         PlaybackStateCompat.ACTION_SET_SHUFFLE_MODE |
                         PlaybackStateCompat.ACTION_SET_RATING);
 
-        applyCustomAction();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            applyMediaCustomAction();
+        }
     }
 
-    private void applyCustomAction() {
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private void applyMediaCustomAction() {
         List<PlaybackStateCompat.CustomAction> customActions = mFactory.createMediaCustomAction();
         if (customActions != null && !customActions.isEmpty()) {
             for (PlaybackStateCompat.CustomAction customAction : customActions) {
@@ -2170,6 +2175,7 @@ class SnowPlayer implements Player, PlaylistEditor {
          *
          * @return 返回创建的自定义动作，入门不需要创建任何自定义动作，则返回 null。
          */
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         @Nullable
         List<PlaybackStateCompat.CustomAction> createMediaCustomAction();
     }
