@@ -108,6 +108,7 @@ public class VolumeEaseHelper {
 
     private boolean mQuiet;
     private float mPlayerVolume = 1.0F;
+    private boolean mEnabled = true;
 
     /**
      * 创建一个 {@link VolumeEaseHelper} 对象。
@@ -126,6 +127,12 @@ public class VolumeEaseHelper {
     public void start() {
         cancel();
 
+        if (!mEnabled) {
+            restoreVolume();
+            mCallback.start();
+            return;
+        }
+
         final int count = 20;
         final float step = mPlayerVolume / count;
 
@@ -137,8 +144,22 @@ public class VolumeEaseHelper {
                 .subscribe(aLong -> setVolume(aLong * step));
     }
 
+    private void restoreVolume() {
+        int volume = Math.round(mMusicPlayer.getVolume() * 10);
+        int playerVolume = Math.round(mPlayerVolume * 10);
+
+        if (volume != playerVolume) {
+            mMusicPlayer.setVolume(mPlayerVolume);
+        }
+    }
+
     public void pause() {
         cancel();
+
+        if (!mEnabled) {
+            mCallback.pause();
+            return;
+        }
 
         if (mQuiet) {
             mCallback.pause();
@@ -208,6 +229,14 @@ public class VolumeEaseHelper {
      */
     public void setPlayerVolume(float volume) {
         mPlayerVolume = volume;
+    }
+
+    public void setEnabled(boolean enabled) {
+        mEnabled = enabled;
+    }
+
+    public boolean isEnabled() {
+        return mEnabled;
     }
 
     /**

@@ -80,4 +80,12 @@ public abstract class AbstractMusicPlayer implements MusicPlayer {
     public void setVolume(float volume) {
         mVolumeEaseHelper.setPlayerVolume(volume);
     }
+
+    public void setVolumeEaseEnabled(boolean enabled) {
+        mVolumeEaseHelper.setEnabled(enabled);
+    }
+
+    public boolean isVolumeEaseEnabled() {
+        return mVolumeEaseHelper.isEnabled();
+    }
 }
