@@ -555,7 +555,12 @@ public class PlayerService extends MediaBrowserServiceCompat
         };
 
         IntentFilter filter = new IntentFilter(this.getClass().getName());
-        registerReceiver(mCustomActionReceiver, filter);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            registerReceiver(mCustomActionReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(mCustomActionReceiver, filter);
+        }
     }
 
     private void initSyncPlayerStateHandler() {
