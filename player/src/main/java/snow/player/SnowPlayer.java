@@ -1201,8 +1201,11 @@ class SnowPlayer implements Player, PlaylistEditor {
         mMediaSession.setActive(true);
         if (isPrepared()) {
             assert mMusicPlayer != null;
-            mMusicPlayer.setSpeed(mPlayerState.getSpeed());
+
             mMusicPlayer.start();
+            mMusicPlayer.setSpeed(mPlayerState.getSpeed());
+            mMusicPlayer.setVolume(mPlayerState.getVolume());
+
             notifyPlaying(mMusicPlayer.isStalled(), mMusicPlayer.getProgress(), SystemClock.elapsedRealtime());
             return;
         }

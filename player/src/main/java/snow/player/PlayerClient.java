@@ -2337,6 +2337,7 @@ public class PlayerClient implements Player, PlayerManager, PlaylistManager, Pla
         notifyPlaylistChanged();
         notifyPlayModeChanged();
         notifySpeedChanged();
+        notifyVolumeChanged(mPlayerState.getVolume());
         notifyPlayingMusicItemChanged();
         notifyPrepareStateChanged();
         notifyAudioSessionChanged();

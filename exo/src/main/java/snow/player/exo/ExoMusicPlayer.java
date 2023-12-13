@@ -22,13 +22,13 @@ import androidx.media3.common.Player;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.source.MediaSourceFactory;
 
-import snow.player.audio.AbstractMusicPlayer;
 import snow.player.audio.ErrorCode;
+import snow.player.audio.MusicPlayer;
 
 /**
  * 封装了一个 SimpleExoPlayer
  */
-public class ExoMusicPlayer extends AbstractMusicPlayer {
+public class ExoMusicPlayer implements MusicPlayer {
     private static final String TAG = "ExoMusicPlayer";
 
     private ExoPlayer mExoPlayer;
@@ -54,6 +54,8 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
 
     private boolean mPreparing;
     private boolean mPlayerReady;
+
+    private float mVolume = 1.0F;
 
     /**
      * 创建一个 {@link ExoMusicPlayer} 对象。
@@ -294,18 +296,35 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     }
 
     @Override
-    public void startEx() {
+    public void start() {
         mExoPlayer.setPlayWhenReady(true);
     }
 
     @Override
-    public void pauseEx() {
+    public void pause() {
         mExoPlayer.setPlayWhenReady(false);
     }
 
     @Override
-    public void stopEx() {
+    public void stop() {
         mExoPlayer.stop();
+    }
+
+    @Override
+    public void quiet() {
+        float volume = mVolume * 0.5F;
+        mExoPlayer.setVolume(volume);
+    }
+
+    @Override
+    public void dismissQuiet() {
+        mExoPlayer.setVolume(mVolume);
+    }
+
+    @Override
+    public void release() {
+        setInvalid();
+        mExoPlayer.release();
     }
 
     @Override
@@ -315,6 +334,7 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
 
     @Override
     public void setVolume(float volume) {
+        mVolume = volume;
         mExoPlayer.setVolume(volume);
     }
 
@@ -327,12 +347,6 @@ public class ExoMusicPlayer extends AbstractMusicPlayer {
     public void setSpeed(float speed) {
         PlaybackParameters parameters = new PlaybackParameters(speed);
         mExoPlayer.setPlaybackParameters(parameters);
-    }
-
-    @Override
-    public void releaseEx() {
-        setInvalid();
-        mExoPlayer.release();
     }
 
     @Override

@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  * 封装了一个 MediaPlayer。
  */
-public class MediaMusicPlayer extends AbstractMusicPlayer {
+public class MediaMusicPlayer implements MusicPlayer {
     private static final String TAG = "MediaMusicPlayer";
 
     private final Context mContext;
@@ -197,6 +197,10 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
 
     @Override
     public void setLooping(boolean looping) {
+        if (isInvalid()) {
+            return;
+        }
+
         mLooping = looping;
     }
 
@@ -226,27 +230,74 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
     }
 
     @Override
-    public void startEx() {
+    public void start() {
+        if (isInvalid()) {
+            return;
+        }
+
         mMediaPlayer.start();
     }
 
     @Override
-    public void pauseEx() {
+    public void pause() {
+        if (isInvalid()) {
+            return;
+        }
+
         mMediaPlayer.pause();
     }
 
     @Override
-    public void stopEx() {
+    public void stop() {
+        if (isInvalid()) {
+            return;
+        }
+
         mMediaPlayer.stop();
     }
 
     @Override
+    public void quiet() {
+        if (isInvalid()) {
+            return;
+        }
+
+        float volume = mVolume * 0.5F;
+        mMediaPlayer.setVolume(volume, volume);
+    }
+
+    @Override
+    public void dismissQuiet() {
+        if (isInvalid()) {
+            return;
+        }
+
+        mMediaPlayer.setVolume(mVolume, mVolume);
+    }
+
+    @Override
+    public void release() {
+        setInvalid();
+        if (mMediaPlayer != null) {
+            mMediaPlayer.release();
+        }
+    }
+
+    @Override
     public void seekTo(int pos) {
+        if (isInvalid()) {
+            return;
+        }
+
         mMediaPlayer.seekTo(pos);
     }
 
     @Override
     public void setVolume(float volume) {
+        if (isInvalid()) {
+            return;
+        }
+
         mVolume = volume;
         mMediaPlayer.setVolume(volume, volume);
     }
@@ -258,6 +309,10 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
 
     @Override
     public void setSpeed(float speed) {
+        if (isInvalid()) {
+            return;
+        }
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return;
         }
@@ -265,15 +320,6 @@ public class MediaMusicPlayer extends AbstractMusicPlayer {
         PlaybackParams playbackParams = mMediaPlayer.getPlaybackParams();
         playbackParams.setSpeed(speed);
         mMediaPlayer.setPlaybackParams(playbackParams);
-    }
-
-    @Override
-    public void releaseEx() {
-        setInvalid();
-        if (mMediaPlayer != null) {
-            mMediaPlayer.release();
-            mMediaPlayer = null;
-        }
     }
 
     @Override
