@@ -82,13 +82,10 @@ class SnowPlayer implements Player, PlaylistEditor {
     @Nullable
     private MusicPlayer mMusicPlayer;
 
-    private boolean mLoadingPlaylist;
-
     private boolean mPlayOnPrepared;
     private boolean mPlayOnSeekComplete;
     private Runnable mPreparedAction;
     private Runnable mSeekCompleteAction;
-    private Runnable mPlaylistLoadedAction;
 
     private final PlaylistManagerImp mPlaylistManager;
     private Playlist mPlaylist;
@@ -178,7 +175,7 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     void initialize(@NonNull final OnInitializedListener listener) {
         mOnInitializedListener = listener;
-        reloadPlaylist();
+        loadPlaylist();
     }
 
     /**
@@ -202,7 +199,6 @@ class SnowPlayer implements Player, PlaylistEditor {
 
         mPreparedAction = null;
         mSeekCompleteAction = null;
-        mPlaylistLoadedAction = null;
     }
 
     /**
@@ -298,7 +294,7 @@ class SnowPlayer implements Player, PlaylistEditor {
                         mMusicPlayer.prepare();
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.w(TAG, e);
                     notifyError(ErrorCode.DATA_LOAD_FAILED, ErrorCode.getErrorMessage(mApplicationContext, ErrorCode.DATA_LOAD_FAILED));
                 }
             }
@@ -309,7 +305,7 @@ class SnowPlayer implements Player, PlaylistEditor {
         return new Consumer<Throwable>() {
             @Override
             public void accept(Throwable throwable) {
-                throwable.printStackTrace();
+                Log.w(TAG, throwable);
                 notifyError(ErrorCode.GET_URL_FAILED, ErrorCode.getErrorMessage(mApplicationContext, ErrorCode.GET_URL_FAILED));
             }
         };
@@ -1180,6 +1176,11 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void play() {
+        if (!mInitialized) {
+            Log.i(TAG, "play: player not initialized");
+            return;
+        }
+
         if (getMusicItem() == null || isMusicPlayerPlaying()) {
             return;
         }
@@ -1215,6 +1216,11 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void pause() {
+        if (!mInitialized) {
+            Log.i(TAG, "pause: player not initialized");
+            return;
+        }
+
         mResumePlay = false;
 
         if (isPreparing()) {
@@ -1236,6 +1242,11 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void stop() {
+        if (!mInitialized) {
+            Log.i(TAG, "stop: player not initialized");
+            return;
+        }
+
         if (getPlaybackState() == PlaybackState.STOPPED) {
             return;
         }
@@ -1251,6 +1262,11 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void playPause() {
+        if (!mInitialized) {
+            Log.i(TAG, "playPause: player not initialized");
+            return;
+        }
+
         if (isPreparing() && mPlayOnPrepared) {
             pause();
             return;
@@ -1294,11 +1310,21 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void seekTo(final int progress) {
+        if (!mInitialized) {
+            Log.i(TAG, "seekTo: player not initialized");
+            return;
+        }
+
         seekTo(progress, null);
     }
 
     @Override
     public void fastForward() {
+        if (!mInitialized) {
+            Log.i(TAG, "fastForward: player not initialized");
+            return;
+        }
+
         if (mPlayerState.isForbidSeek()) {
             return;
         }
@@ -1320,6 +1346,11 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void rewind() {
+        if (!mInitialized) {
+            Log.i(TAG, "rewind: player not initialized");
+            return;
+        }
+
         if (mPlayerState.isForbidSeek()) {
             return;
         }
@@ -1460,7 +1491,7 @@ class SnowPlayer implements Player, PlaylistEditor {
 
                     @Override
                     public void onError(@NonNull Throwable throwable) {
-                        throwable.printStackTrace();
+                        Log.w(TAG, throwable);
                         emitter.onSuccess(false);
                     }
 
@@ -1499,8 +1530,7 @@ class SnowPlayer implements Player, PlaylistEditor {
         };
     }
 
-    private void reloadPlaylist() {
-        mLoadingPlaylist = true;
+    private void loadPlaylist() {
         mPlaylistManager.getPlaylist(new PlaylistManager.Callback() {
             @Override
             public void onFinished(@NonNull final Playlist playlist) {
@@ -1511,16 +1541,10 @@ class SnowPlayer implements Player, PlaylistEditor {
                 correctPlayPosition(playlist);
 
                 mPlaylist = playlist;
-                mLoadingPlaylist = false;
 
                 if (!mInitialized) {
                     mInitialized = true;
                     notifyInitialized();
-                }
-
-                if (mPlaylistLoadedAction != null) {
-                    mPlaylistLoadedAction.run();
-                    mPlaylistLoadedAction = null;
                 }
             }
         });
@@ -1650,15 +1674,8 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void skipToNext() {
-        Log.d(TAG, "skipToNext");
-
-        if (mLoadingPlaylist) {
-            mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    skipToNext();
-                }
-            };
+        if (!mInitialized) {
+            Log.i(TAG, "skipToNext: player not initialized");
             return;
         }
 
@@ -1674,6 +1691,11 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void skipToPosition(int position) {
+        if (!mInitialized) {
+            Log.i(TAG, "skipToPosition: player not initialized");
+            return;
+        }
+
         if (position == mPlayerState.getPlayPosition()) {
             return;
         }
@@ -1697,13 +1719,8 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void skipToPrevious() {
-        if (mLoadingPlaylist) {
-            mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    skipToPrevious();
-                }
-            };
+        if (!mInitialized) {
+            Log.i(TAG, "skipToPrevious: player not initialized");
             return;
         }
 
@@ -1739,13 +1756,8 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void playPause(final int position) {
-        if (mLoadingPlaylist) {
-            mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    playPause(position);
-                }
-            };
+        if (!mInitialized) {
+            Log.i(TAG, "playPause: player not initialized");
             return;
         }
 
@@ -1765,6 +1777,11 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void setPlayMode(@NonNull PlayMode playMode) {
+        if (!mInitialized) {
+            Log.i(TAG, "setPlayMode: player not initialized");
+            return;
+        }
+
         Preconditions.checkNotNull(playMode);
         if (playMode == mPlayerState.getPlayMode()) {
             return;
@@ -1780,6 +1797,11 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void setSpeed(float speed) {
+        if (!mInitialized) {
+            Log.i(TAG, "setSpeed: player not initialized");
+            return;
+        }
+
         if (speed < 0.1F) {
             speed = 0.1F;
         }
@@ -1804,6 +1826,11 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void setVolume(float volume) {
+        if (!mInitialized) {
+            Log.i(TAG, "setVolume: player not initialized");
+            return;
+        }
+
         if (volume == mPlayerState.getVolume()) {
             return;
         }
@@ -1818,6 +1845,11 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void setPlaylist(Playlist playlist, final int position, final boolean play) {
+        if (!mInitialized) {
+            Log.i(TAG, "setPlaylist: player not initialized");
+            return;
+        }
+
         if (position < 0 || position >= playlist.size()) {
             notifyError(ErrorCode.PLAY_POSITION_OUT_OF_BOUNDS, ErrorCode.getErrorMessage(mApplicationContext, ErrorCode.PLAY_POSITION_OUT_OF_BOUNDS));
             return;
@@ -1905,17 +1937,12 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void insertMusicItem(final int position, @NonNull final MusicItem musicItem) {
-        if (!mPlaylistManager.isPlaylistEditable()) {
+        if (!mInitialized) {
+            Log.i(TAG, "insertMusicItem: player not initialized");
             return;
         }
 
-        if (mLoadingPlaylist) {
-            mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    insertMusicItem(position, musicItem);
-                }
-            };
+        if (!mPlaylistManager.isPlaylistEditable()) {
             return;
         }
 
@@ -1943,6 +1970,11 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void appendMusicItem(@NonNull MusicItem musicItem) {
+        if (!mInitialized) {
+            Log.i(TAG, "appendMusicItem: player not initialized");
+            return;
+        }
+
         if (!mPlaylistManager.isPlaylistEditable()) {
             return;
         }
@@ -1952,21 +1984,16 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void moveMusicItem(final int fromPosition, final int toPosition) {
+        if (!mInitialized) {
+            Log.i(TAG, "moveMusicItem: player not initialized");
+            return;
+        }
+
         if (!mPlaylistManager.isPlaylistEditable()) {
             return;
         }
 
         if (fromPosition == toPosition) {
-            return;
-        }
-
-        if (mLoadingPlaylist) {
-            mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    moveMusicItem(fromPosition, toPosition);
-                }
-            };
             return;
         }
 
@@ -1994,17 +2021,12 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void removeMusicItem(@NonNull final MusicItem musicItem) {
-        if (!mPlaylistManager.isPlaylistEditable()) {
+        if (!mInitialized) {
+            Log.i(TAG, "removeMusicItem: player not initialized");
             return;
         }
 
-        if (mLoadingPlaylist) {
-            mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    removeMusicItem(musicItem);
-                }
-            };
+        if (!mPlaylistManager.isPlaylistEditable()) {
             return;
         }
 
@@ -2041,17 +2063,12 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void removeMusicItem(final int position) {
-        if (!mPlaylistManager.isPlaylistEditable()) {
+        if (!mInitialized) {
+            Log.i(TAG, "removeMusicItem: player not initialized");
             return;
         }
 
-        if (mLoadingPlaylist) {
-            mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    removeMusicItem(position);
-                }
-            };
+        if (!mPlaylistManager.isPlaylistEditable()) {
             return;
         }
 
@@ -2064,21 +2081,16 @@ class SnowPlayer implements Player, PlaylistEditor {
 
     @Override
     public void setNextPlay(@NonNull final MusicItem musicItem) {
+        if (!mInitialized) {
+            Log.i(TAG, "setNextPlay: player not initialized");
+            return;
+        }
+
         if (!mPlaylistManager.isPlaylistEditable()) {
             return;
         }
 
         if (musicItem.equals(getMusicItem())) {
-            return;
-        }
-
-        if (mLoadingPlaylist) {
-            mPlaylistLoadedAction = new Runnable() {
-                @Override
-                public void run() {
-                    setNextPlay(musicItem);
-                }
-            };
             return;
         }
 
