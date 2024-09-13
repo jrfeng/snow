@@ -1508,6 +1508,8 @@ class SnowPlayer implements Player, PlaylistEditor {
                     return;
                 }
 
+                correctPlayPosition(playlist);
+
                 mPlaylist = playlist;
                 mLoadingPlaylist = false;
 
@@ -1522,6 +1524,18 @@ class SnowPlayer implements Player, PlaylistEditor {
                 }
             }
         });
+    }
+
+    /**
+     * 修正播放位置。
+     * <p>
+     * 当播放位置超出 Playlist 的索引范围时将播放位置设置为 0，以避免 IndexOutOfBoundsException 异常。
+     */
+    private void correctPlayPosition(Playlist playlist) {
+        int position = mPlayerState.getPlayPosition();
+        if (position < 0 || position >= playlist.size()) {
+            mPlayerState.setPlayPosition(0);
+        }
     }
 
     private void notifyInitialized() {
