@@ -63,7 +63,7 @@
             android:background="@drawable/bg_button_48dp"
             android:contentDescription="@string/des_skip_to_previous"
             android:scaleType="centerInside"
-            android:tint="@color/colorIconTint"
+            app:tint="@color/colorIconTint"
             app:srcCompat="@drawable/ic_option_menu" />
 
         <Space

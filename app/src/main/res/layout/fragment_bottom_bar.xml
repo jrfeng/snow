@@ -39,7 +39,7 @@
                 android:layout_width="@dimen/player_bottom_bar_icon_size"
                 android:layout_height="@dimen/player_bottom_bar_icon_size"
                 android:contentDescription="@string/des_album_icon"
-                android:onClick="@{bottomBarViewModel.startPlayerActivity}"
+                android:onClick="@{bottomBarViewModel::startPlayerActivity}"
                 android:src="@mipmap/ic_bottom_bar_default_icon" />
 
             <Space
@@ -83,7 +83,7 @@
                 android:contentDescription="@string/des_play_pause"
                 android:onClick="@{() -> bottomBarViewModel.playPause()}"
                 android:scaleType="centerInside"
-                android:tint="@color/colorIconTint"
+                app:tint="@color/colorIconTint"
                 app:srcCompat="@{bottomBarViewModel.playPauseDrawableRes}"
                 tools:src="@drawable/ic_bottom_bar_play" />
 
@@ -94,7 +94,7 @@
                 android:background="@drawable/bg_button_48dp"
                 android:contentDescription="@string/des_play_pause"
                 android:scaleType="centerInside"
-                android:tint="@color/colorIconTint"
+                app:tint="@color/colorIconTint"
                 app:srcCompat="@drawable/ic_playlist" />
 
         </LinearLayout>

@@ -24,7 +24,7 @@
                 android:contentDescription="@string/des_back"
                 android:onClick="finishSelf"
                 android:scaleType="centerInside"
-                android:tint="@color/colorIconTint"
+                app:tint="@color/colorIconTint"
                 app:srcCompat="@drawable/ic_back" />
 
             <TextView
@@ -41,7 +41,7 @@
                 android:contentDescription="@string/des_scan_local_music"
                 android:onClick="showCreateMusicListDialog"
                 android:scaleType="centerInside"
-                android:tint="@color/colorIconTint"
+                app:tint="@color/colorIconTint"
                 app:srcCompat="@drawable/ic_add_music_list" />
 
             <Space

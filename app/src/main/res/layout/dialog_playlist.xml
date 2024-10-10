@@ -34,7 +34,7 @@
                 android:background="@drawable/bg_button_48dp"
                 android:contentDescription="@string/des_locate_playing_music"
                 android:scaleType="centerInside"
-                android:tint="@color/colorIconTint"
+                app:tint="@color/colorIconTint"
                 app:srcCompat="@drawable/ic_locate" />
 
             <Space

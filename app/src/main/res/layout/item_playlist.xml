@@ -64,7 +64,7 @@
         android:background="@drawable/bg_button_48dp"
         android:contentDescription="@string/des_remove_music"
         android:scaleType="centerInside"
-        android:tint="@color/colorPlaylistItemRemoveIconTint"
+        app:tint="@color/colorPlaylistItemRemoveIconTint"
         app:srcCompat="@drawable/ic_delete" />
 
     <Space

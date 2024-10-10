@@ -36,7 +36,7 @@
                 android:contentDescription="@string/des_back"
                 android:onClick="finishSelf"
                 android:scaleType="centerInside"
-                android:tint="@color/colorIconTint"
+                app:tint="@color/colorIconTint"
                 app:srcCompat="@drawable/ic_back" />
 
             <LinearLayout
@@ -133,7 +133,7 @@
                     android:contentDescription="@string/des_play_mode"
                     android:onClick="@{() -> playerStateViewModel.switchPlayMode()}"
                     android:scaleType="centerInside"
-                    android:tint="@color/colorIconTint"
+                    app:tint="@color/colorIconTint"
                     app:srcCompat="@{playerStateViewModel.playModeDrawable}"
                     tools:srcCompat="@drawable/ic_play_mode_playlist_loop" />
 
@@ -153,7 +153,7 @@
                     android:contentDescription="@string/des_play_mode"
                     android:onClick="@{() -> playerStateViewModel.toggleKeepScreenOn()}"
                     android:scaleType="centerInside"
-                    android:tint="@color/colorIconTint"
+                    app:tint="@color/colorIconTint"
                     app:srcCompat="@{playerStateViewModel.keepScreenOnDrawable}"
                     tools:srcCompat="@drawable/ic_keep_screen_on_false" />
 
@@ -173,7 +173,7 @@
                     android:contentDescription="@string/des_sleep_timer"
                     android:onClick="showSleepTimer"
                     android:scaleType="centerInside"
-                    android:tint="@color/colorIconTint"
+                    app:tint="@color/colorIconTint"
                     app:srcCompat="@drawable/ic_sleep_timer" />
 
                 <TextView
@@ -203,7 +203,7 @@
                     android:contentDescription="@string/des_equalizer"
                     android:onClick="@{playerStateViewModel::startEqualizerActivity}"
                     android:scaleType="centerInside"
-                    android:tint="@color/colorIconTint"
+                    app:tint="@color/colorIconTint"
                     app:srcCompat="@drawable/ic_equalizer" />
 
             </FrameLayout>
@@ -222,7 +222,7 @@
                     android:contentDescription="@string/des_option_menu"
                     android:onClick="showOptionMenu"
                     android:scaleType="centerInside"
-                    android:tint="@color/colorIconTint"
+                    app:tint="@color/colorIconTint"
                     app:srcCompat="@drawable/ic_player_option_menu" />
 
             </FrameLayout>
@@ -316,7 +316,7 @@
                     android:contentDescription="@string/des_skip_to_previous"
                     android:onClick="@{() -> playerViewModel.skipToPrevious()}"
                     android:scaleType="centerInside"
-                    android:tint="@color/colorIconTint"
+                    app:tint="@color/colorIconTint"
                     app:srcCompat="@drawable/ic_skip_to_previous" />
 
             </FrameLayout>
@@ -354,7 +354,7 @@
                     android:contentDescription="@string/des_skip_to_next"
                     android:onClick="@{() -> playerViewModel.skipToNext()}"
                     android:scaleType="centerInside"
-                    android:tint="@color/colorIconTint"
+                    app:tint="@color/colorIconTint"
                     app:srcCompat="@drawable/ic_skip_to_next" />
 
             </FrameLayout>
@@ -372,7 +372,7 @@
                     android:contentDescription="@string/des_show_playlist"
                     android:onClick="showPlaylist"
                     android:scaleType="centerInside"
-                    android:tint="@color/colorIconTint"
+                    app:tint="@color/colorIconTint"
                     app:srcCompat="@drawable/ic_playlist" />
 
             </FrameLayout>
