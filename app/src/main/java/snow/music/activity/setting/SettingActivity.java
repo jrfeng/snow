@@ -10,13 +10,16 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.Objects;
 
+import snow.music.BuildConfig;
 import snow.music.R;
 import snow.music.dialog.MessageDialog;
 import snow.music.service.AppPlayerService;
@@ -37,6 +40,7 @@ public class SettingActivity extends AppCompatActivity {
     private View itemFollowSystem;
     private View itemDarkModeOff;
     private View itemDarkModeOn;
+    private TextView tvVersion;
 
     private View itemPlayWithOtherApp;
     private SwitchCompat swPlayWithOtherApp;
@@ -74,6 +78,7 @@ public class SettingActivity extends AppCompatActivity {
         itemFollowSystem = findViewById(R.id.itemFollowSystem);
         itemDarkModeOff = findViewById(R.id.itemDarkModeOff);
         itemDarkModeOn = findViewById(R.id.itemDarkModeOn);
+        tvVersion = findViewById(R.id.tvVersion);
 
         itemPlayWithOtherApp = findViewById(R.id.itemPlayWithOtherApp);
         swPlayWithOtherApp = findViewById(R.id.swPlayWithOtherApp);
@@ -107,6 +112,8 @@ public class SettingActivity extends AppCompatActivity {
 
         Boolean value = mSettingViewModel.getPlayWithOtherApp().getValue();
         swPlayWithOtherApp.setChecked(Objects.requireNonNull(value));
+
+        tvVersion.setText(BuildConfig.VERSION_NAME);
     }
 
     private void addClickListener() {
