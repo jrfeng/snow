@@ -1,14 +1,16 @@
 plugins {
-    id("com.android.application")
+    alias(libs.plugins.android.application)
     id("io.objectbox")
 }
 
 android {
+    namespace = "snow.music"
+
     compileSdk = 34
 
     defaultConfig {
         applicationId = "snow.music"
-        minSdk = 16
+        minSdk = 21
         targetSdk = 34
         versionCode = 5
         versionName = "1.2.8"
@@ -21,7 +23,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
 
         debug {
@@ -42,44 +47,44 @@ android {
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("com.android.support:multidex:1.0.3")
+    implementation(libs.appcompat)
+    implementation(libs.constraintlayout)
+    implementation(libs.multidex)
 
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("io.objectbox:objectbox-linux:${project.extra["objectboxVersion"]}")
-    testImplementation("io.objectbox:objectbox-macos:${project.extra["objectboxVersion"]}")
-    testImplementation("io.objectbox:objectbox-windows:${project.extra["objectboxVersion"]}")
+    testImplementation(libs.junit)
+    testImplementation(libs.objectbox.test.linux)
+    testImplementation(libs.objectbox.test.macos)
+    testImplementation(libs.objectbox.test.windows)
 
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(project(path = ":player"))
     implementation(project(path = ":ui"))
 
     // media-helper
-    implementation("com.github.jrfeng:media-helper:${project.extra["mediaHelperVersion"]}")
+    implementation(libs.mediaHelper)
 
     // Guava
-    implementation("com.google.guava:guava:${project.extra["guavaVersion"]}")
+    implementation(libs.guava)
 
     // RxJava2
-    implementation("io.reactivex.rxjava2:rxjava:${project.extra["rxjavaVersion"]}")
-    implementation("io.reactivex.rxjava2:rxandroid:${project.extra["rxandroidVersion"]}")
+    implementation(libs.rxjava)
+    implementation(libs.rxandroid)
 
     // MMKV
-    implementation("com.tencent:mmkv-static:${project.extra["mmkvVersion"]}")
+    implementation(libs.mmkv)
 
     // RecyclerView
-    implementation("androidx.recyclerview:recyclerview:1.3.0")
+    implementation(libs.recyclerview)
 
     // Glide
-    implementation("com.github.bumptech.glide:glide:${project.extra["glideVersion"]}")
-    annotationProcessor("com.github.bumptech.glide:compiler:${project.extra["glideVersion"]}")
+    implementation(libs.glide)
+    annotationProcessor(libs.glide.compiler)
 
     // rv-helper
-    implementation("com.github.jrfeng:rv-helper:1.2.2")
+    implementation(libs.rvhelper)
 
     // pinyin-comparator
-    implementation("com.github.jrfeng:pinyin-comparator:1.0.3")
+    implementation(libs.pinyinComparator)
 }

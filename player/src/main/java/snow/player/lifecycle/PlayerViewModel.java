@@ -6,7 +6,6 @@ import android.widget.SeekBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -715,12 +714,7 @@ public class PlayerViewModel extends ViewModel {
             throw new IllegalStateException("PlayerViewModel not initialized yet.");
         }
 
-        return Transformations.map(mPlaybackState, new Function<PlaybackState, Boolean>() {
-            @Override
-            public Boolean apply(PlaybackState input) {
-                return input == PlaybackState.ERROR;
-            }
-        });
+        return Transformations.map(mPlaybackState, playbackState -> playbackState == PlaybackState.ERROR);
     }
 
     /**
@@ -774,12 +768,7 @@ public class PlayerViewModel extends ViewModel {
             throw new IllegalStateException("PlayerViewModel not initialized yet.");
         }
 
-        return Transformations.map(mDuration, new Function<Integer, String>() {
-            @Override
-            public String apply(Integer input) {
-                return ProgressClock.asText(input);
-            }
-        });
+        return Transformations.map(mDuration, ProgressClock::asText);
     }
 
     /**
@@ -793,12 +782,7 @@ public class PlayerViewModel extends ViewModel {
             throw new IllegalStateException("PlayerViewModel not initialized yet.");
         }
 
-        return Transformations.map(mPlayProgress, new Function<Integer, String>() {
-            @Override
-            public String apply(Integer input) {
-                return ProgressClock.asText(input);
-            }
-        });
+        return Transformations.map(mPlayProgress, ProgressClock::asText);
     }
 
     /**
@@ -838,12 +822,7 @@ public class PlayerViewModel extends ViewModel {
             throw new IllegalStateException("PlayerViewModel not initialized yet.");
         }
 
-        return Transformations.map(mSleepTimerTime, new Function<Integer, String>() {
-            @Override
-            public String apply(Integer input) {
-                return ProgressClock.asText(input);
-            }
-        });
+        return Transformations.map(mSleepTimerTime, ProgressClock::asText);
     }
 
     /**
@@ -889,12 +868,7 @@ public class PlayerViewModel extends ViewModel {
             throw new IllegalStateException("PlayerViewModel not initialized yet.");
         }
 
-        return Transformations.map(mSleepTimerProgress, new Function<Integer, String>() {
-            @Override
-            public String apply(Integer input) {
-                return ProgressClock.asText(input);
-            }
-        });
+        return Transformations.map(mSleepTimerProgress, ProgressClock::asText);
     }
 
     /**

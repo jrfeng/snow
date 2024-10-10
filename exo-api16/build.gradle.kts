@@ -1,8 +1,11 @@
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.android.library)
+    id("maven-publish")
 }
 
 android {
+    namespace = "snow.player.exo.api16"
+
     compileSdk = 32
 
     defaultConfig {
@@ -15,29 +18,54 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
 }
 
 dependencies {
-    val exoplayer_version = "2.16.1"
+    implementation(libs.appcompat)
+    implementation(libs.material)
 
-    implementation("androidx.appcompat:appcompat:1.4.1")
-    implementation("com.google.android.material:material:1.5.0")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    testImplementation(libs.junit)
+
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(project(path = ":player"))
 
     // exoplayer-core
-    api("com.google.android.exoplayer:exoplayer-core:$exoplayer_version")
+    api(libs.exoplayer.core.legacy)
 
     // extension-okhttp
-    api("com.google.android.exoplayer:extension-okhttp:$exoplayer_version")
+    api(libs.exoplayer.extension.okhttp.legacy)
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            create<MavenPublication>("maven") {
+                groupId = project.extra["publishGroupId"] as String
+                artifactId = "exo-api16"
+                version = project.extra["publishVersion"] as String
+
+                from(components["release"])
+            }
+        }
+    }
 }

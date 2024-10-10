@@ -1,8 +1,11 @@
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.android.library)
+    id("maven-publish")
 }
 
 android {
+    namespace = "snow.player.ui"
+
     compileSdk = 32
 
     defaultConfig {
@@ -17,35 +20,65 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
     dataBinding {
         enable = true
     }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
 }
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    implementation("androidx.appcompat:appcompat:1.4.1")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
+    implementation(libs.appcompat)
+    implementation(libs.constraintlayout)
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    testImplementation(libs.junit)
 
-    implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
-    implementation("androidx.lifecycle:lifecycle-runtime:2.4.1")
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+
+    implementation(libs.lifecycle.extensions)
+    implementation(libs.lifecycle.runtime)
 
     api(project(path = ":player"))
 
     // MPAndroidChart
-    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation(libs.mpAndroidChart)
 
     // android-verticalseekbar
-    implementation("com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:1.0.0")
+    implementation(libs.verticalseekbar)
 
     // Croller
-    implementation("com.github.Lundez:Croller:1.0.3")
+    implementation(libs.croller)
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            create<MavenPublication>("maven") {
+                groupId = project.extra["publishGroupId"] as String
+                artifactId = "exo"
+                version = project.extra["publishVersion"] as String
+
+                from(components["release"])
+            }
+        }
+    }
 }

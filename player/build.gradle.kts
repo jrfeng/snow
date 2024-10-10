@@ -1,8 +1,11 @@
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.android.library)
+    id("maven-publish")
 }
 
 android {
+    namespace = "snow.player"
+
     compileSdk = 34
 
     defaultConfig {
@@ -15,42 +18,73 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
         }
     }
 }
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    implementation(libs.appcompat)
+
+    testImplementation(libs.junit)
+
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 
     // media
-    api("androidx.media:media:1.6.0")
+    api(libs.androidx.media)
 
     // ViewModel and LiveData
-    api("androidx.lifecycle:lifecycle-extensions:2.2.0")
+    api(libs.lifecycle.extensions)
 
     // Guava
-    implementation("com.google.guava:guava:${project.extra["guavaVersion"]}")
+    implementation(libs.guava)
 
     // MMKV
-    implementation("com.tencent:mmkv-static:${project.extra["mmkvVersion"]}")
+    implementation(libs.mmkv)
 
     // RxJava
-    implementation("io.reactivex.rxjava2:rxjava:${project.extra["rxjavaVersion"]}")
-    implementation("io.reactivex.rxjava2:rxandroid:${project.extra["rxandroidVersion"]}")
+    implementation(libs.rxjava)
+    implementation(libs.rxandroid)
 
     // Glide
-    implementation("com.github.bumptech.glide:glide:${project.extra["glideVersion"]}")
+    implementation(libs.glide)
 
     // channel-helper
-    implementation("com.github.jrfeng.channel-helper:helper:1.2.8")
-    implementation("com.github.jrfeng.channel-helper:pipe:1.2.8")
-    annotationProcessor("com.github.jrfeng.channel-helper:processor:1.2.8")
+    implementation(libs.channel.helper)
+    implementation(libs.channel.helper.pip)
+    annotationProcessor(libs.channel.helper.processor)
 
     // media-helper
-    implementation("com.github.jrfeng:media-helper:${project.extra["mediaHelperVersion"]}")
+    implementation(libs.mediaHelper)
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            create<MavenPublication>("maven") {
+                groupId = project.extra["publishGroupId"] as String
+                artifactId = "exo"
+                version = project.extra["publishVersion"] as String
+
+                from(components["release"])
+            }
+        }
+    }
 }

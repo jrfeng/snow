@@ -1,13 +1,15 @@
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.android.library)
+    id("maven-publish")
 }
 
 android {
+    namespace = "snow.player.exo"
+
     compileSdk = 34
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 34
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -16,7 +18,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
@@ -24,19 +29,42 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
 }
 
 dependencies {
-    val media3_exoplayer = "1.1.0"
-
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    implementation("androidx.appcompat:appcompat:1.6.1")
+
+    implementation(libs.appcompat)
+
     implementation(project(path = ":player"))
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    testImplementation(libs.junit)
+
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 
     // media3 exoplayer
-    api("androidx.media3:media3-exoplayer:$media3_exoplayer")
-    api("androidx.media3:media3-exoplayer-dash:$media3_exoplayer")
+    api(libs.media3.exoplayer)
+    api(libs.media3.exoplayer.dash)
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            create<MavenPublication>("maven") {
+                groupId = project.extra["publishGroupId"] as String
+                artifactId = "exo"
+                version = project.extra["publishVersion"] as String
+
+                from(components["release"])
+            }
+        }
+    }
 }

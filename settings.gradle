@@ -1,7 +1,0 @@
-include ':debug'
-include ':ui'
-include ':exo'
-rootProject.name='snow'
-include ':app'
-include ':player'
-include ':exo-api16'
