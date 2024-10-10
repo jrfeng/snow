@@ -1,1 +1,3 @@
 -keep class * extends androidx.fragment.app.Fragment { *; }
+-dontwarn org.ahocorasick.trie.Emit
+-dontwarn org.ahocorasick.trie.Trie
