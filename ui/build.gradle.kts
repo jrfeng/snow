@@ -6,7 +6,7 @@ plugins {
 android {
     namespace = "snow.player.ui"
 
-    compileSdk = 32
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 16
