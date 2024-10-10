@@ -13,6 +13,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
         android:orientation="vertical"
         tools:context="snow.music.activity.search.SearchActivity">
 
@@ -33,8 +34,8 @@
                     android:contentDescription="@string/des_back"
                     android:onClick="finishSelf"
                     android:scaleType="centerInside"
-                    app:tint="@color/colorIconTint"
-                    app:srcCompat="@drawable/ic_back" />
+                    app:srcCompat="@drawable/ic_back"
+                    app:tint="@color/colorIconTint" />
 
                 <FrameLayout
                     android:id="@+id/searchBar"
@@ -74,8 +75,8 @@
                         android:contentDescription="@string/des_clear_input"
                         android:onClick="@{() -> searchViewModel.clearInput()}"
                         android:scaleType="centerInside"
-                        app:tint="@color/colorIconTint"
-                        app:srcCompat="@drawable/ic_clear_input" />
+                        app:srcCompat="@drawable/ic_clear_input"
+                        app:tint="@color/colorIconTint" />
 
                 </FrameLayout>
 

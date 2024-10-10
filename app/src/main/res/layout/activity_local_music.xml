@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:orientation="vertical"
     tools:context="snow.music.activity.localmusic.LocalMusicActivity">
 
@@ -24,8 +25,8 @@
                 android:contentDescription="@string/des_back"
                 android:onClick="finishSelf"
                 android:scaleType="centerInside"
-                app:tint="@color/colorIconTint"
-                app:srcCompat="@drawable/ic_back" />
+                app:srcCompat="@drawable/ic_back"
+                app:tint="@color/colorIconTint" />
 
             <TextView
                 android:layout_width="0dp"
@@ -42,8 +43,8 @@
                 android:contentDescription="@string/des_search"
                 android:onClick="onOptionMenuClicked"
                 android:scaleType="centerInside"
-                app:tint="@color/colorIconTint"
-                app:srcCompat="@drawable/ic_action_search" />
+                app:srcCompat="@drawable/ic_action_search"
+                app:tint="@color/colorIconTint" />
 
             <ImageButton
                 android:id="@+id/btnSort"
@@ -53,8 +54,8 @@
                 android:contentDescription="@string/des_sort_music_list"
                 android:onClick="onOptionMenuClicked"
                 android:scaleType="centerInside"
-                app:tint="@color/colorIconTint"
-                app:srcCompat="@drawable/ic_action_sort" />
+                app:srcCompat="@drawable/ic_action_sort"
+                app:tint="@color/colorIconTint" />
 
             <ImageButton
                 android:id="@+id/btnScan"
@@ -64,8 +65,8 @@
                 android:contentDescription="@string/des_scan_local_music"
                 android:onClick="onOptionMenuClicked"
                 android:scaleType="centerInside"
-                app:tint="@color/colorIconTint"
-                app:srcCompat="@drawable/ic_action_scan" />
+                app:srcCompat="@drawable/ic_action_scan"
+                app:tint="@color/colorIconTint" />
 
             <Space
                 android:layout_width="8dp"
