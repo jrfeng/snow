@@ -1,6 +1,5 @@
 plugins {
     id("com.android.library")
-    id("maven-publish")
 }
 
 android {
@@ -23,7 +22,7 @@ android {
     }
 
     dataBinding {
-        isEnabled = true
+        enable = true
     }
 }
 
