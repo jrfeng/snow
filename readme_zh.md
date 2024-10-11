@@ -47,7 +47,7 @@ Android 音乐播放器框架，兼容 MediaSession 。
 ```txt
 MIT License
 
-Copyright (c) 2020 jrfeng
+Copyright (c) 2024 jrfeng
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
