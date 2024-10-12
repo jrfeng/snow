@@ -30,11 +30,11 @@ crollerVersion = "1.0.3"
 
 [libraries]
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompatVersion" }
-constraintlayout = {group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayoutVersion"}
-androidx-media = {group = "androidx.media", name = "media", version.ref = "mediaVersion"}
-lifecycle-extensions = {group = "androidx.lifecycle", name = "lifecycle-extensions", version.ref = "lifecycleExtensionsVersion"}
-lifecycle-runtime = {group = "androidx.lifecycle", name = "lifecycle-runtime", version.ref = "lifecycleRuntimeVersion"}
-multidex = {group = "com.android.support", name = "multidex", version.ref = "multidexVersion"}
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayoutVersion" }
+androidx-media = { group = "androidx.media", name = "media", version.ref = "mediaVersion" }
+lifecycle-extensions = { group = "androidx.lifecycle", name = "lifecycle-extensions", version.ref = "lifecycleExtensionsVersion" }
+lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime", version.ref = "lifecycleRuntimeVersion" }
+multidex = { group = "com.android.support", name = "multidex", version.ref = "multidexVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -49,21 +49,21 @@ mediaHelper = { group = "com.github.jrfeng", name = "media-helper", version.ref 
 mmkv = { group = "com.tencent", name = "mmkv-static", version.ref = "mmkvVersion" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glideVersion" }
 glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glideVersion" }
-recyclerview = {group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerviewVersion"}
-rvhelper = {group = "com.github.jrfeng", name = "rv-helper", version.ref = "rvhelperVersion"}
-pinyinComparator = {group = "com.github.jrfeng", name = "pinyin-comparator", version.ref = "pinyinComparatorVersion"}
-permissionx = {group = "com.guolindev.permissionx", name = "permissionx", version.ref = "permissionxVersion"}
-media3-exoplayer = {group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3ExoPlayer"}
-media3-exoplayer-dash = {group = "androidx.media3", name = "media3-exoplayer-dash", version.ref = "media3ExoPlayer"}
-exoplayer-core-legacy = {group = "com.google.android.exoplayer", name = "exoplayer-core", version.ref = "exoplayerLegacyVersion"}
-exoplayer-extension-okhttp-legacy = {group = "com.google.android.exoplayer", name = "extension-okhttp", version.ref = "exoplayerLegacyVersion"}
-material = {group = "com.google.android.material", name = "material", version.ref = "materialVersion"}
-channel-helper = {group = "com.github.jrfeng.channel-helper", name = "helper", version.ref = "channelHelperVersion"}
-channel-helper-pip = {group = "com.github.jrfeng.channel-helper", name = "pipe", version.ref = "channelHelperVersion"}
-channel-helper-processor = {group = "com.github.jrfeng.channel-helper", name = "processor", version.ref = "channelHelperVersion"}
-mpAndroidChart = {group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpAndroidChartVersion"}
-verticalseekbar = {group = "com.h6ah4i.android.widget.verticalseekbar", name = "verticalseekbar", version.ref = "verticalseekbarVersion"}
-croller = {group = "com.github.Lundez", name = "Croller", version.ref = "crollerVersion"}
+recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerviewVersion" }
+rvhelper = { group = "com.github.jrfeng", name = "rv-helper", version.ref = "rvhelperVersion" }
+pinyinComparator = { group = "com.github.jrfeng", name = "pinyin-comparator", version.ref = "pinyinComparatorVersion" }
+permissionx = { group = "com.guolindev.permissionx", name = "permissionx", version.ref = "permissionxVersion" }
+media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3ExoPlayer" }
+media3-exoplayer-dash = { group = "androidx.media3", name = "media3-exoplayer-dash", version.ref = "media3ExoPlayer" }
+exoplayer-core-legacy = { group = "com.google.android.exoplayer", name = "exoplayer-core", version.ref = "exoplayerLegacyVersion" }
+exoplayer-extension-okhttp-legacy = { group = "com.google.android.exoplayer", name = "extension-okhttp", version.ref = "exoplayerLegacyVersion" }
+material = { group = "com.google.android.material", name = "material", version.ref = "materialVersion" }
+channel-helper = { group = "com.github.jrfeng.channel-helper", name = "helper", version.ref = "channelHelperVersion" }
+channel-helper-pip = { group = "com.github.jrfeng.channel-helper", name = "pipe", version.ref = "channelHelperVersion" }
+channel-helper-processor = { group = "com.github.jrfeng.channel-helper", name = "processor", version.ref = "channelHelperVersion" }
+mpAndroidChart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpAndroidChartVersion" }
+verticalseekbar = { group = "com.h6ah4i.android.widget.verticalseekbar", name = "verticalseekbar", version.ref = "verticalseekbarVersion" }
+croller = { group = "com.github.Lundez", name = "Croller", version.ref = "crollerVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
