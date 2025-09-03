@@ -6,12 +6,12 @@ plugins {
 android {
     namespace = "snow.music"
 
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "snow.music"
         minSdk = 21
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 6
         versionName = "1.2.14"
         multiDexEnabled = true

@@ -6,7 +6,7 @@ plugins {
 android {
     namespace = "snow.player.exo.api16"
 
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 16
