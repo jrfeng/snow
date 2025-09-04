@@ -12,7 +12,7 @@ buildscript {
 
 allprojects {
     extra["publishGroupId"] = "com.github.jrfeng.snow"
-    extra["publishVersion"] = "1.2.14"
+    extra["publishVersion"] = "1.2.15"
 }
 
 plugins {
