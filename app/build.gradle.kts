@@ -12,8 +12,8 @@ android {
         applicationId = "snow.music"
         minSdk = 21
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.2.15"
+        versionCode = 8
+        versionName = "1.2.16"
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
 
